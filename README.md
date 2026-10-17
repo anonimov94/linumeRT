@@ -30,6 +30,17 @@ Gdy limit konta jest wyczerpany, uruchomienie nic nie robi, a następne po odnow
 Kontrakt: [`CLAUDE.md`](CLAUDE.md) · decyzje: [`docs/DECYZJE.md`](docs/DECYZJE.md) ·
 wytyczne IP: [`docs/prawne/WYTYCZNE_IP.md`](docs/prawne/WYTYCZNE_IP.md) · postęp: [`prompts/DONE.md`](prompts/DONE.md).
 
+## Szybki start
+Wymagania: Python ≥ 3.11 i `make`. Sprawdzone: Linux.
+```bash
+python3 -m venv .venv && . .venv/bin/activate
+make install      # pakiet linumert + zależności dev (pytest, ruff)
+make lint         # ruff
+make test         # pytest (bez LinuxCNC)
+```
+`make test-c` i `make test-linuxcnc` są pustymi krokami do sesji 011 i 003. W systemowym Pythonie Debiana
+dodaj `PIP_FLAGS=--break-system-packages`.
+
 ## Licencja
-Własny kod: GPL-2.0-or-later. Części pochodzące z LinuxCNC/QtDragon: GPL-2.0. Całość jest rozpowszechniana na GPL-2.0.
+GPL-2.0-or-later dla własnego kodu (pełny tekst GPL-2.0 w pliku [`LICENSE`](LICENSE), zależności w [`docs/LICENCJE.md`](docs/LICENCJE.md)). Własny kod: GPL-2.0-or-later. Części pochodzące z LinuxCNC/QtDragon: GPL-2.0. Całość jest rozpowszechniana na GPL-2.0.
 Licencja z katalogu nadrzędnego (`PythonProjects/LICENSE`) nie dotyczy tego projektu.
