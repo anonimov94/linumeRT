@@ -36,9 +36,9 @@ tego projektu** i nie wolno jej tu stosować — jest niezgodna z GPL.
 
 ## 3. Struktura repozytorium
 ```
-core/linumert/        # rdzeń: alarms/ tools/ programs/ generators/ machine/ plugins/ cnc/ diag/
+core/linumert/         # rdzeń: alarms/ tools/ programs/ generators/ machine/ plugins/ cnc/ diag/
 simulation/            # ścieżka, czas, materiał, kolizje (proces osobny)
-screens/linumert/     # ekran QtVCP (kopia QtDragon + nasze zmiany)
+screens/linumert/      # ekran QtVCP (kopia QtDragon + nasze zmiany)
 plant/core/            # C: dynamika osi, napęd CiA402, I/O, kinematyka, magazyn
 plant/library/drives/  # szablony napędów wirtualnych (kopiowalne)
 config/machines/       # przykładowe machine.yaml (wspólne dla Plant i LinuxCNC)
@@ -63,16 +63,16 @@ tests/ docs/ docs/prawne/ prompts/ community/
   bez alokacji, bez blokującego I/O (UDP tylko nieblokująco, jak hm2_eth), bez logowania na dysk.
 - Symulacja: osobny proces, `nice` ≥ 10. Widok 3D: maks. 30 FPS.
 
-## 6. Bezpieczeństwo
-- Ekran nie jest funkcją bezpieczeństwa. E-STOP i STO to obwód sprzętowy; ekran tylko pokazuje stan.
-- Wtyczki generują wyłącznie tekst G-code.
-- Generator konfiguracji odmawia konfiguracji sprzętowej bez wejścia E-STOP.
-
 ## 5a. Wymagania formalne
 - Pliki `docs/wymagania/*.md` zawierają wymagania z identyfikatorami (REQ-VD, REQ-VM, REQ-QA). Są obowiązujące i mają pierwszeństwo przed promptem sesji.
 - Każdy test realizujący wymaganie ma znacznik `# REQ-XX-NN` (Python/C) albo `requirements: [REQ-XX-NN]` (scenariusz YAML).
 - `tools/check_requirements.py` (od sesji 024) musi przechodzić; sesja, która usuwa pokrycie wymagania, jest niezakończona.
 - Wirtualny napęd to zawsze instancja szablonu z `plant/library/drives/`; wirtualna obrabiarka powstaje wyłącznie z `machine.yaml` (jedno źródło prawdy).
+
+## 6. Bezpieczeństwo
+- Ekran nie jest funkcją bezpieczeństwa. E-STOP i STO to obwód sprzętowy; ekran tylko pokazuje stan.
+- Wtyczki generują wyłącznie tekst G-code.
+- Generator konfiguracji odmawia konfiguracji sprzętowej bez wejścia E-STOP.
 
 ## 6a. Nazwa i wygląd
 - Nazwa zawsze **linumeRT** (dokładnie ta pisownia). W kodzie: pakiet i identyfikatory `linumert`, sygnały HAL `linumert.*`.

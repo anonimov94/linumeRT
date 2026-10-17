@@ -20,7 +20,7 @@ Utworzyć szkielet monorepo zgodny z CLAUDE.md §3.
 ## Zakres pracy
 1. `pyproject.toml`: pakiet `linumert` z `core/`, Python ≥ 3.11; zależności: numpy, pyyaml; dev: pytest, ruff. Pakiety `simulation`, `plant/server` jako osobne pakiety w tym samym repo.
 2. Katalogi z §3 z `README.md` w każdym (1–3 zdania, co tam trafi).
-3. `Makefile`: install, lint, test, test-c (no-op do sesji 010), test-linuxcnc (no-op do sesji 003).
+3. `Makefile`: install, lint, test, test-c (no-op do sesji 011), test-linuxcnc (no-op do sesji 003).
 4. `.github/workflows/ci.yml`: Python 3.11, `make install lint test`.
 5. `LICENSE`: pełny tekst GPL-2.0, nagłówek w README „GPL-2.0-or-later dla własnego kodu”; `docs/LICENCJE.md` (tabela zależności); `.gitignore` (Python, `*.qcow2`, `*.img`, `*.vdi`, `*.TGZ`, `/state`).
 6. Sprawdź, że w repo nie ma pliku z licencją „Paid Reuse” i dodaj test, który to pilnuje.
