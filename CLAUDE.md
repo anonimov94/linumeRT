@@ -103,6 +103,14 @@ tests/ docs/ docs/prawne/ prompts/ community/
   `~/linuxcnc/nc_files/user_macros/`. W kodzie zawsze z ustawień, nie na sztywno.
 
 ## 10. Jak pracuje agent w jednej sesji
+
+Aktualizacja właściciela z 2026-10-17: projekt rozwijają naprzemiennie Claude i Codex.
+Każdy agent czyta `docs/WSPOLPRACA_MODELI.md` oraz otwarte PR przed rozpoczęciem pracy.
+Nowe zmiany trafiają przez pull request i przegląd drugiego modelu; poniższe historyczne
+polecenia automatycznego scalania zastępuje ten proces (również w promptach sesji).
+Autor oznacza commit i PR polem `Model-Author: Codex` albo `Model-Author: Claude`.
+Nie deklaruj przeglądu drugiego modelu bez jego rzeczywistej oceny konkretnego commita.
+
 1. Przeczytaj ten plik, `docs/DECYZJE.md`, ostatnie 3 wpisy `docs/DZIENNIK.md`, prompt sesji.
 2. Wykonuj zakres sesji w krokach. **Po każdym ukończonym kroku commit i push na gałąź
    `wip/sesja-NNN`** — limit konta może przerwać sesję w każdej chwili, a kolejna sesja wznowi pracę.
