@@ -48,3 +48,5 @@ Format: decyzja · uzasadnienie · status (PRZYJĘTA / PROPOZYCJA / ODRZUCONA / 
 - 2026-10-17 · sesja 002 · Plik graficzny lub font bez wiersza w `docs/PROVENANCE.md` oraz obraz poza `docs/design/`, `screens/`, `fonts/`, `plant/server/` łamie test strażnika IP · wymusza rejestr pochodzenia z CLAUDE.md §7 · PROPOZYCJA
 
 - 2026-10-17 · D24 · Na polecenie właściciela Claude i Codex rozwijają projekt naprzemiennie przez PR, z jawnym oznaczeniem modelu i przeglądem drugiego modelu przed scaleniem. Zastępuje automatyczne scalanie z §10 i promptów sesji. Istniejące gałęzie sesji 001/002 są już zawarte w main. Autor: model językowy Codex. · PRZYJĘTA
+
+- 2026-10-17 · D25 · Właściciel polecił kontynuować bez czekania na Claude do odwołania. Codex implementuje, kontroluje diff, uruchamia testy i scala przez PR; późniejszy przegląd Claude nie blokuje pracy. Commit i push po każdym ukończonym kroku. Zastępuje warunek niezależnego przeglądu przed merge z D24. Model-Author: Codex. · PRZYJĘTA

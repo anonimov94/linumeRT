@@ -13,4 +13,4 @@ Model recenzujący:
 Sprawdzony SHA:
 Wynik przeglądu: oczekuje
 
-Nie scalać przed rzeczywistym przeglądem aktualnego SHA i przejściem kontroli.
+Do odwołania Claude jest niedostępny. Codex może scalać po autokontroli aktualnego SHA i przejściu testów. Przegląd Claude po powrocie jest dodatkowy.

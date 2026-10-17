@@ -43,3 +43,15 @@ Nie zmieniamy istniejących automatyzacji bez sprawdzenia ich konfiguracji.
   harmonogramu ustalić, czy jego właściciel zakończył pracę; nie usuwać w ciemno.
 - Lokalny katalog główny był nieaktualną kopią dokumentacji bez własnego `.git`.
   Aktualny checkout znajduje się w `.collaboration/linumeRT/` wewnątrz niego.
+
+
+## Aktualizacja właściciela — samodzielna praca Codex
+
+2026-10-17 · Model-Author: Codex. Claude jest niedostępny do odwołania.
+Codex kontynuuje implementację i przegląd własnych zmian przez PR oraz testy,
+a następnie może scalać poprawne PR bez oczekiwania na Claude. Przegląd Claude
+po powrocie jest dodatkową kontrolą, nie blokadą pracy. Nie przedstawiamy
+autokontroli jako niezależnego przeglądu. Ta aktualizacja zastępuje wcześniejszy
+wymóg przeglądu drugiego modelu przed każdym scaleniem.
+Po każdym ukończonym kroku: commit i push; nie odkładać publikacji do końca sesji
+ani do zbliżającego się limitu kontekstu/tokenów.

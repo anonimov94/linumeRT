@@ -26,3 +26,9 @@ Najnowsze wpisy na dole. Każda sesja dopisuje: zrobione · decyzje · do sprawd
 - Decyzje: D24, naprzemienny przegląd Claude/Codex.
 - Do sprawdzenia: Claude powinien przejrzeć PR po odzyskaniu dostępności; rozpocząć sesję 003 w środowisku Linux.
 - Długi: sesja 003 nieukończona; historyczny prompts/LOCK pozostawiony do wyjaśnienia.
+
+## Przejęcie pracy — 2026-10-17
+- Model-Author: Codex. Decyzja właściciela D25: praca samodzielna do odwołania, push po każdym kroku.
+- Weryfikacja PR #1: 45 testów przeszło w WSL, CI zielone (lint i testy).
+- Podgląd: uruchomiono TigerVNC na localhost:5908 i Viewer; konfiguracja pulpitu X11 w WSLg wymaga jeszcze końcowej weryfikacji.
+- Następna praca: sesja 003, LinuxCNC.
