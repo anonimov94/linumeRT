@@ -61,3 +61,5 @@ graficznego/fontu w repozytorium. Nowy zasób = nowy wiersz w tym samym commicie
 | JetBrains Mono | font | JetBrains s.r.o. | gdy dodane | https://github.com/JetBrains/JetBrainsMono | OFL-1.1 | liczby, G-code | (jeszcze niedodany: `fonts/`) |
 
 Wiersze fontów dostają ścieżki i pliki `OFL.txt` w `licenses/` przy ich dodaniu (sesja 027).
+
+| Paczka testowa i VNC | kod i dokumentacja | model językowy Codex na zlecenie właściciela | 2026-10-17 | własna implementacja | GPL-2.0-or-later | lokalne testy obu modeli i podgląd Ubuntu | `tools/agent_tests/`, `tools/vm/start-vnc.sh`, `tests/test_agent_runner.py`, `docs/PODGLAD_UBUNTU.md` |
