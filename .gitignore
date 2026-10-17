@@ -8,3 +8,11 @@ dist/
 *.vdi
 *.TGZ
 /state/
+
+# Python / narzedzia
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+build/
+.coverage
+htmlcov/

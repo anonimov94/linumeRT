@@ -1,0 +1,65 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "linumert"
+version = "0.0.1"
+description = "linumeRT - otwarty ekran operatora i narzedzia dla LinuxCNC (maszyny CNC DIY)"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "GPL-2.0-or-later" }
+classifiers = [
+    "License :: OSI Approved :: GNU General Public License v2 or later (GPLv2+)",
+    "Programming Language :: Python :: 3.11",
+]
+dependencies = [
+    "numpy",
+    "pyyaml",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "ruff",
+]
+
+# Trzy pakiety w jednym repozytorium (patrz docs/DECYZJE.md, wpis sesji 001):
+#   linumert        - rdzen, niezalezny od UI            (core/linumert)
+#   linumert_sim    - symulacja, osobny proces           (simulation/linumert_sim)
+#   linumert_plant  - serwer Plant (LRT-NET, panel web)  (plant/server/linumert_plant)
+[tool.setuptools]
+packages = [
+    "linumert",
+    "linumert.alarms",
+    "linumert.tools",
+    "linumert.programs",
+    "linumert.generators",
+    "linumert.machine",
+    "linumert.plugins",
+    "linumert.cnc",
+    "linumert.diag",
+    "linumert_sim",
+    "linumert_plant",
+]
+
+[tool.setuptools.package-dir]
+linumert = "core/linumert"
+linumert_sim = "simulation/linumert_sim"
+linumert_plant = "plant/server/linumert_plant"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["core", "simulation", "plant/server"]
+markers = [
+    "linuxcnc: test wymaga dzialajacego LinuxCNC (sesja 003); domyslnie pomijany",
+]
+addopts = "-m 'not linuxcnc'"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+extend-exclude = ["screens/linumert"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP"]
