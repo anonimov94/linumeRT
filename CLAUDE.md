@@ -103,6 +103,14 @@ tests/ docs/ docs/prawne/ prompts/ community/
   `~/linuxcnc/nc_files/user_macros/`. W kodzie zawsze z ustawień, nie na sztywno.
 
 ## 10. Jak pracuje agent w jednej sesji
+
+Aktualizacja właściciela z 2026-10-17: projekt rozwijają naprzemiennie Claude i Codex.
+Każdy agent czyta `docs/WSPOLPRACA_MODELI.md` oraz otwarte PR przed rozpoczęciem pracy.
+Nowe zmiany trafiają przez pull request i przegląd drugiego modelu; poniższe historyczne
+polecenia automatycznego scalania zastępuje ten proces (również w promptach sesji).
+Autor oznacza commit i PR polem `Model-Author: Codex` albo `Model-Author: Claude`.
+Nie deklaruj przeglądu drugiego modelu bez jego rzeczywistej oceny konkretnego commita.
+
 1. Przeczytaj ten plik, `docs/DECYZJE.md`, ostatnie 3 wpisy `docs/DZIENNIK.md`, prompt sesji.
 2. Wykonuj zakres sesji w krokach. **Po każdym ukończonym kroku commit i push na gałąź
    `wip/sesja-NNN`** — limit konta może przerwać sesję w każdej chwili, a kolejna sesja wznowi pracę.
@@ -114,3 +122,15 @@ tests/ docs/ docs/prawne/ prompts/ community/
 ## 11. Definition of Done
 Testy przechodzą · błędy obsłużone jawnie · brak blokowania RT · dokumentacja zaktualizowana ·
 nowe zależności i zasoby w LICENCJE.md / PROVENANCE.md · wpis w DZIENNIK.md.
+
+
+## Aktualizacja właściciela — samodzielna praca Codex
+
+2026-10-17 · Model-Author: Codex. Claude jest niedostępny do odwołania.
+Codex kontynuuje implementację i przegląd własnych zmian przez PR oraz testy,
+a następnie może scalać poprawne PR bez oczekiwania na Claude. Przegląd Claude
+po powrocie jest dodatkową kontrolą, nie blokadą pracy. Nie przedstawiamy
+autokontroli jako niezależnego przeglądu. Ta aktualizacja zastępuje wcześniejszy
+wymóg przeglądu drugiego modelu przed każdym scaleniem.
+Po każdym ukończonym kroku: commit i push; nie odkładać publikacji do końca sesji
+ani do zbliżającego się limitu kontekstu/tokenów.
