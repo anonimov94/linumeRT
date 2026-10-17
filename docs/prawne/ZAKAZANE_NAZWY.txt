@@ -1,0 +1,14 @@
+# Nazwy producentow sterowan - lista dla tests/test_ip_guard.py
+# Nazwy z tej listy nie moga wystepowac w kodzie, UI, konfiguracji ani dokumentacji uzytkownika.
+siemens
+sinumerik
+heidenhain
+fanuc
+mazatrol
+mazak
+mitsubishi
+fagor
+hurco
+winmax
+haas
+okuma

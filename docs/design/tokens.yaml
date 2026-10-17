@@ -1,0 +1,35 @@
+kolory:
+  bg: '#0a0c0f'
+  bg2: '#0f1317'
+  panel: '#12171d'
+  raise: '#182029'
+  line: '#26303a'
+  line2: '#34404c'
+  fg: '#e8eef4'
+  fg2: '#9aa7b4'
+  fg3: '#66727e'
+  teal: '#2dd4bf'
+  teal2: '#5eead4'
+  tealbg: '#0e2c29'
+  amber: '#fbbf24'
+  amberbg: '#2a2110'
+  ok: '#4ade80'
+  okbg: '#11301d'
+  err: '#f87171'
+  errbg: '#341416'
+  info: '#7dd3fc'
+  infobg: '#132634'
+fonty:
+  interfejs: IBM Plex Sans (OFL-1.1)
+  liczby: JetBrains Mono (OFL-1.1)
+rozmiary:
+  min_tekst_px: 12
+  dro_px: 28
+  cel_dotykowy_px: 44
+  odstep_px: 8
+  promien_kart_px: 14
+  promien_przyciskow_px: 12
+ikony:
+  siatka_px: 24
+  obrys: 1.75
+  styl: liniowe, zaokrąglone końce

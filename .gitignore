@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+.venv/
+node_modules/
+dist/
+*.qcow2
+*.img
+*.vdi
+*.TGZ
+/state/
