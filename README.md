@@ -44,3 +44,7 @@ dodaj `PIP_FLAGS=--break-system-packages`.
 ## Licencja
 GPL-2.0-or-later dla własnego kodu (pełny tekst GPL-2.0 w pliku [`LICENSE`](LICENSE), zależności w [`docs/LICENCJE.md`](docs/LICENCJE.md)). Własny kod: GPL-2.0-or-later. Części pochodzące z LinuxCNC/QtDragon: GPL-2.0. Całość jest rozpowszechniana na GPL-2.0.
 Licencja z katalogu nadrzędnego (`PythonProjects/LICENSE`) nie dotyczy tego projektu.
+
+## Wspólna paczka testowa i VNC
+
+Instrukcja: [tools/agent_tests](tools/agent_tests/README.md). Windows: `tools/agent_tests/Start-Tests.ps1 -Model Manual` otwiera Ubuntu przez VNC oraz terminal testów. Codex i Claude używają tej samej paczki z własnym oznaczeniem modelu.

@@ -29,3 +29,7 @@ tego projektu (D14).
 
 Zgodność PyQt5 (GPL-3.0) z dystrybucją na GPL-2.0 jest do sprawdzenia w sesji 005 i 080; do tego czasu
 wpis ma status „do potwierdzenia”.
+
+## Narzędzia lokalnego pulpitu testowego (bez dołączania binariów)
+
+Model-Author: Codex. Skrypty używają zainstalowanych w Ubuntu TigerVNC, XFCE, X11, D-Bus i util-linux. Nie kopiujemy ich kodu ani binariów do repozytorium. Właściwe licencje pakietów znajdują się w `/usr/share/doc/<pakiet>/copyright`; przy ewentualnej dystrybucji obrazu wymagany osobny przegląd. Runner używa stdlib Pythona oraz istniejących zależności dev: pytest i ruff.
