@@ -25,7 +25,8 @@ MAX_POINTS = 600
 CSS = f"""
 body{{margin:0;background:{C['bg']};color:{C['fg']};font:14px/1.45 "IBM Plex Sans",system-ui,
 sans-serif}} main{{max-width:1100px;margin:0 auto;padding:24px 16px}}
-h1{{font-size:22px;margin:0 0 4px}} h2{{font-size:13px;letter-spacing:.08em;text-transform:uppercase;
+h1{{font-size:22px;margin:0 0 4px}}
+h2{{font-size:13px;letter-spacing:.08em;text-transform:uppercase;
 color:{C['fg2']};margin:24px 0 8px}} .sub{{color:{C['fg2']}}}
 .card{{background:{C['panel']};border:1px solid {C['line']};border-radius:14px;padding:16px;
 margin:12px 0}} table{{border-collapse:collapse;width:100%}}

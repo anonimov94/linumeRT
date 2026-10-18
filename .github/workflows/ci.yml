@@ -15,3 +15,18 @@ jobs:
           python-version: "3.11"
       - run: make install lint test
       - run: make test-c
+
+  # Scenariusze Plant z atrapą mastera na wszystkich config/machines/*.yaml (REQ-QA-02, sesja 024).
+  plant-matrix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: make install plant-matrix
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: raporty-scenariuszy
+          path: build/raporty/

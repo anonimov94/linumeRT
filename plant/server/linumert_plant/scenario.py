@@ -88,7 +88,10 @@ def load_scenario(path: Path | str, machine: Path | None = None) -> Scenario:
              "program", "master", "steps", "expect", "linuxcnc"}
     errors += [f"nieznane pole {k}" for k in sorted(set(data) - known)]
     base = path.parent
-    rel = (lambda v: None if v in (None, "") else (base / str(v)).resolve())
+
+    def rel(value: Any) -> Path | None:
+        return None if value in (None, "") else (base / str(value)).resolve()
+
     timing = data.get("timing") or {}
     scen = Scenario(name=str(data.get("name") or path.stem), path=path,
                     machine=machine or rel(data.get("machine")) or Path(),
@@ -531,7 +534,7 @@ class MockRun:
                 results = homer.home_all()
             else:
                 results = {k: homer.home_axis(k) for k in letters}
-        for letter, res in results.items():
+        for res in results.values():
             for d, r in res.drives.items():
                 if d in self.zero:
                     self.zero[d] = r.zero_counts
