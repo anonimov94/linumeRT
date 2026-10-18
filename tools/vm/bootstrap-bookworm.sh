@@ -11,6 +11,13 @@ rootfs=$(mktemp -d /var/tmp/linumert-bookworm.XXXXXXXX)
 # debootstrap verifies Debian Release signatures with the archive keyring.
 debootstrap --variant=minbase bookworm "$rootfs" https://deb.debian.org/debian
 chmod 755 "$rootfs"
+cat > "$rootfs/etc/wsl.conf" <<'EOF'
+[automount]
+options = "uid=1000,gid=1000"
+
+[user]
+default = codex
+EOF
 mkdir -p "$(dirname "$output")"
 tar --numeric-owner -C "$rootfs" -cpf "$output" .
 echo "Rootfs exported to $output; bootstrap directory retained: $rootfs"
