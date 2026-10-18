@@ -4,7 +4,7 @@ Prompt startowy i stan bieżący: `docs/PROMPT_NOWEJ_SESJI.md` (aktualizować na
 
 Model-Author: Codex · 2026-10-17
 
-Tura: Claude · od 2026-10-18T16:00Z · stan: oddana (sesja 021 przerwana: vfd.py bez testów; prompt prompts/START-021.md)
+Tura: Claude · od 2026-10-18T16:02Z · stan: w toku (sesja 021: testy vfd.py, integracja, konfiguracja _vfd)
 
 ## Katalog i Git
 
