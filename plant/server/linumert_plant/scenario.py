@@ -31,9 +31,9 @@ from .lrtnet import FLAG_ESTOP_OPEN, FLAG_FAULT
 
 ROOT = Path(__file__).resolve().parents[3]
 ACTIONS = ("enable", "home", "move", "mdi", "program", "wait", "fault", "clear", "set_param",
-           "fault_reset", "spindle")
+           "fault_reset", "spindle", "edit_machine", "reload")
 CRITERIA = ("max_following_error", "lost_steps", "alarm", "no_alarm", "position",
-            "drive_state", "event", "oracle", "completed", "frames")
+            "drive_state", "event", "oracle", "completed", "frames", "machine", "reloaded")
 # 603Fh → alarm katalogu (drive.h: LRT_DRIVE_FAULT_LIST)
 ERROR_ALARMS = {0xFF00: "E-4200", 0x8611: "E-4201", 0x2350: "E-4202", 0x2310: "E-4203",
                 0x4310: "E-4204", 0x3200: "E-4205", 0x7305: "E-4206", 0xFF01: "E-4207",
@@ -227,6 +227,8 @@ class ScenarioResult:
     telemetry: dict[str, Any] = field(default_factory=dict)
     log: list[str] = field(default_factory=list)
     versions: dict[str, str] = field(default_factory=dict)
+    machine_data: dict[str, Any] = field(default_factory=dict)  # machine.yaml na końcu przebiegu
+    reloads: int = 0
 
     @property
     def passed(self) -> bool:
@@ -304,6 +306,19 @@ def evaluate(result: ScenarioResult) -> None:
             res.criteria.append(Criterion("program ukończony" if want else "program przerwany",
                                           res.completed == want,
                                           "ukończony" if res.completed else "przerwany"))
+        elif kind == "machine":
+            from .panel.editor import get_path
+
+            try:
+                got = get_path(res.machine_data, arg["path"])
+            except (KeyError, IndexError, ValueError, TypeError):
+                got = None
+            res.criteria.append(Criterion(f"machine.yaml {arg['path']} = {arg['value']}",
+                                          got == arg["value"], str(got)))
+        elif kind == "reloaded":
+            want = int(arg.get("count", arg.get("value", 1)))
+            res.criteria.append(Criterion(f"przeładowania modelu = {want}", res.reloads == want,
+                                          str(res.reloads)))
         elif kind == "frames":
             lost = res.stats.get("lost", 0)
             ok = lost <= int(arg.get("lost_max", 0))
@@ -349,11 +364,23 @@ class MockRun:
         from .server import PlantConfig, PlantServer
 
         self.scen = scen
-        mcfg, drives = load_machine_drives(scen.machine)
+        self.workdir = None
+        machine_path = scen.machine
+        if any(s.action in ("edit_machine", "reload") for s in scen.steps):
+            import shutil
+            import tempfile
+
+            # edycja na kopii: plik scenariusza i maszyny w repozytorium się nie zmienia
+            self.workdir = Path(tempfile.mkdtemp(prefix="lrt_edit_"))
+            machine_path = self.workdir / scen.machine.name
+            shutil.copy(scen.machine, machine_path)
+        self.machine_path = machine_path
+        mcfg, drives = load_machine_drives(machine_path)
         self.cfg = mcfg
         machine = PlantMachine(build_model(mcfg, drives, seed=scen.seed))
         self.server = PlantServer(machine, PlantConfig(seed=scen.seed, substeps=scen.substeps,
-                                                       cycle_ns=scen.cycle_ns),
+                                                       cycle_ns=scen.cycle_ns,
+                                                       machine=machine_path),
                                   drive_params={n: i.params for n, i in drives.items()})
         self.server.telemetry = Telemetry(self.server.drives, window_s=scen.duration + 2.0,
                                           period_s=0.005)
@@ -522,6 +549,30 @@ class MockRun:
             self.master.spindle_cmd = float(p.get("rpm", 0))
         elif a == "wait":
             self.waiting = step
+        elif a == "edit_machine":
+            self._edit(p.get("set") or {}, str(p.get("comment", "")))
+        elif a == "reload":
+            from .panel.editor import MachineEditor
+
+            MachineEditor(srv, self.workdir / "state").reload()
+            self.result.reloads += 1
+            model = srv.machine.model
+            self.cfg = model.config
+            self.axes = {ax.letter: ax for ax in self.cfg.axes}
+            self.scale = model.counts_per_unit
+
+    def _edit(self, changes: dict[str, Any], comment: str) -> None:
+        """Zapis machine.yaml przez edytor panelu (walidacja REQ-VM-11, historia wersji)."""
+        from .panel.editor import EditorError, MachineEditor, set_path
+
+        editor = MachineEditor(self.server, self.workdir / "state")
+        data = editor.load()
+        for path, value in changes.items():
+            set_path(data, path, value)
+        try:
+            editor.save(data, comment)
+        except EditorError as exc:
+            raise ValueError("edycja odrzucona: " + "; ".join(exc.errors)) from None
 
     def run_program(self) -> None:
         if self.scen.program is None:
@@ -646,6 +697,7 @@ class MockRun:
                      "dropped": srv.fault_state.dropped, "digest": srv.digest,
                      "time_s": round(self.t + self.dt, 4)}
         res.oracle = srv.oracle.report()
+        res.machine_data = yaml.safe_load(self.machine_path.read_text(encoding="utf-8")) or {}
         evaluate(res)
         return res
 
