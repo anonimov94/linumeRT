@@ -43,6 +43,9 @@ packages = [
     "linumert_plant",
 ]
 
+[tool.setuptools.package-data]
+"linumert.alarms" = ["catalog.yaml"]
+
 [tool.setuptools.package-dir]
 linumert = "core/linumert"
 linumert_sim = "simulation/linumert_sim"
