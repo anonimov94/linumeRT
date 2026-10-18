@@ -1,7 +1,7 @@
 # Prompt startowy: sesja 022, panel Plant i pulpit MPG (równolegle z 024 i 025)
 
-Model-Author: Claude · 2026-10-18. Najpierw [`START-PODZIAL.md`](START-PODZIAL.md) (zasady, worktree, testy),
-potem pełny zakres w [`sesja-022.md`](sesja-022.md), z jedną zmianą: **punkt 3 (przyciski awarii)
+Model-Author: Claude · 2026-10-18. Najpierw [`START-PODZIAL.md`](../START-PODZIAL.md) (zasady, worktree, testy),
+potem pełny zakres w [`sesja-022.md`](../sesja-022.md), z jedną zmianą: **punkt 3 (przyciski awarii)
 przechodzi do sesji 023**, bo API awarii (`linumert_plant/faults.py`) powstaje równolegle w sesji 024.
 
 ## Zakres w tej sesji

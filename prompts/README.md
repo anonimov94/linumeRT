@@ -41,7 +41,7 @@ wymagały ekranu ani LinuxCNC. Bieżący stan i następny krok: [`docs/NASTEPNA_
 | [019](sesja-019.md) | M1 | Ograniczenia programowe, strefy zakazane i wyrocznia testowa | zrobiona |
 | [020](sesja-020.md) | M1 | Magazyn narzędzi, pozycje wymiany i kolizje w Plant | zrobiona |
 | [021](sesja-021.md) | M1 | Plant: wrzeciono VFD przez Modbus | zrobiona |
-| [022](sesja-022.md) | M1 | Plant: panel sterowania i pulpit MPG | **następna** (równolegle, [START-022](START-022.md)) |
+| [022](sesja-022.md) | M1 | Plant: panel sterowania i pulpit MPG | zrobiona |
 | [023](sesja-023.md) | M1 | Edytor wirtualnej obrabiarki w panelu Plant | po 022 i 024 ([START-023](START-023.md)) |
 | [024](sesja-024.md) | M1 | Plant: scenariusze i raport prototypu | **następna** (równolegle, [START-024](START-024.md)) |
 | [025](sesja-025.md) | M1 | Skrypty maszyn wirtualnych (VirtualBox) | **następna** (równolegle, [START-025](START-025.md)) |
