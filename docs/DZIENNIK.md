@@ -296,7 +296,7 @@ Uzupełnienie: README plant/core (liczby testów 29/59/20, bazowanie, parametry 
 
 ## 024 — Plant: scenariusze i raport prototypu (PR #38) · 2026-10-18 · Claude (Opus 5.5)
 - Zrobione (START-024): `faults.py` (8 awarii z włączeniem i zdjęciem, REST w panelu), format scenariusza i atrapa mastera (`scenario.py`, G0/G1, kroki czasowe i `at_line`), backend LinuxCNC (`scenario_linuxcnc.py`), raport HTML/SVG (`report.py`, `docs/raporty/prototypy/`), `tools/run_scenario.py` (`--matrix`, `--ssh`), 9 scenariuszy (6 startowych + `link_loss`, `heavy_table_live`, `matrix_smoke`), `tools/check_requirements.py` w `make test`, job CI `plant-matrix`, fuzz machine.yaml.
-- Testy (WSL Ubuntu 24.04, świeży klon): ruff czysty, pytest, testy C, `-m linuxcnc` (4 scenariusze `master: both` z LinuxCNC RIP) — wyniki w PR #38; check_requirements: 22 wymagania, błędów 0.
+- Testy (WSL Ubuntu 24.04, świeży klon): ruff czysty, pytest, testy C, pytest 564 OK, testy C 29/59/20, `-m linuxcnc` 66/66 (w tym 4 scenariusze `master: both` z LinuxCNC RIP); check_requirements: 22 wymagania, błędów 0.
 - Znalezisko: w `config/plant/linumert_plant_xyz/linumert_plant.hal` fault napędu w łańcuchu E-STOP blokował reset po STO (zakleszczenie) — usunięty z łańcucha (plik spoza zakresu, opis w PR i DECYZJE).
 - Do sprawdzenia ręcznie: `python tools/run_scenario.py` i `docs/raporty/prototypy/index.html`; z LinuxCNC: `--master linuxcnc first_motion`.
 - Długi: bazowanie Z w LinuxCNC pod WSL czasem kończy się błędem nadążania (brak RT) — skrypt ponawia raz; backend LinuxCNC tylko dla mill_servo_table; awaria `delay` działa w pętli UDP (nie w atrapie). Autokontrola, bez niezależnego przeglądu. NIEZWERYFIKOWANE NA SPRZĘCIE.
