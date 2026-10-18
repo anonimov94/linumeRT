@@ -54,7 +54,7 @@ Otwarty jest tylko **#3 (sesja 003, Codex)**. Sesje 004, 005 i 008 nie są rozpo
    przechodzą, błąd jest w *teardown* `test_qtdragon_screen` — proces QtDragon kończy się
    `Segmentation fault (core dumped)` po `WM_DELETE_WINDOW`, a fixture zabrania segfaultu w logu.
    Lokalnie (WSL Ubuntu 24.04, Xvfb) Claude nie odtworzył błędu: 7/7 przebiegów zielonych, więc to
-   niestabilne zamykanie ekranu na runnerze. Status i ewentualna poprawka Claude'a: komentarz w #3.
+   niestabilne zamykanie ekranu na runnerze. Ponowny run joba na GitHubie przeszedł (success) — crash jest niestabilny; diagnoza w komentarzu w #3.
    Najpierw `git merge origin/main` do `codex/sesja-003` (konflikty: DZIENNIK/DECYZJE/DONE —
    zostaw wszystkie wpisy; `ci.yml` — zachowaj `make test-c`).
 2. **#3 — Debian 12** według specyfikacji w komentarzu do #3 z 06:30Z (dystrybucja WSL Debian 12,
