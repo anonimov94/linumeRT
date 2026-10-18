@@ -30,7 +30,16 @@ import time
 import urllib.request
 from pathlib import Path
 
-from .scenario import ROOT, Criterion, Scenario, ScenarioError, ScenarioResult, evaluate, versions
+from .scenario import (
+    ERROR_ALARMS,
+    ROOT,
+    Criterion,
+    Scenario,
+    ScenarioError,
+    ScenarioResult,
+    evaluate,
+    versions,
+)
 
 CONFIG = ROOT / "config" / "plant" / "linumert_plant_xyz"
 DEFAULT_PORT = 47820
@@ -40,6 +49,7 @@ JOINTS = {"X": [0], "Y": [1, 2], "Z": [3]}  # linumert_plant_xyz: drv_x, drv_y1,
 
 DRIVER = r'''
 import json, sys, time
+import hal
 import linuxcnc
 plan = json.loads(sys.argv[1])
 c, s, e = linuxcnc.command(), linuxcnc.stat(), linuxcnc.error_channel()
@@ -70,8 +80,14 @@ def machine_on():
 out["machine_on"] = machine_on()
 c.mode(linuxcnc.MODE_MANUAL); c.wait_complete()
 c.teleop_enable(0); c.wait_complete()
-c.home(-1)
-out["homed"] = wait(lambda: all(s.homed[:4]), 180)
+for attempt in range(2):  # WSL bez RT: pojedynczy błąd nadążania przy bazowaniu — ponów raz
+    c.home(-1)
+    out["homed"] = wait(lambda: all(s.homed[:4]), 120)
+    if out["homed"]:
+        break
+    out["machine_on"] = machine_on()
+    c.mode(linuxcnc.MODE_MANUAL); c.wait_complete()
+    c.teleop_enable(0); c.wait_complete()
 c.teleop_enable(1); c.wait_complete()
 time.sleep(0.5); poll()
 out["start"] = [round(v, 4) for v in s.actual_position[:3]]
@@ -82,15 +98,28 @@ steps = sorted(plan["steps"], key=lambda st: st["at"])
 program = {"running": False, "aborted": False, "done": False, "started": False}
 last_line = 0
 estop_seen = False
+out["states"] = []
+state = None
 ferr = [0.0] * 4
 while now() < plan["duration"]:
     poll()
+    if (s.task_state, s.interp_state) != state:
+        state = (s.task_state, s.interp_state)
+        out["states"].append([round(now(), 3), s.task_state, s.interp_state])
     for j in range(4):
         ferr[j] = max(ferr[j], abs(s.joint[j]["ferror_current"]))
     if s.motion_line != last_line and program["running"]:
         last_line = s.motion_line
         out["line_max"] = max(out["line_max"], last_line)
         print("LINE", last_line, flush=True)
+    for j in range(4):  # 603Fh napędu z lrt_net → alarm katalogu (jak ekran operatora)
+        try:
+            code = int(hal.get_value("lrt-net.0.axis.%d.error-code" % j))
+        except Exception:
+            code = 0
+        alarm = plan["error_alarms"].get(str(code))
+        if alarm:
+            out["alarms"].setdefault(alarm, round(now(), 3))
     if s.task_state == linuxcnc.STATE_ESTOP and not estop_seen and out["machine_on"]:
         estop_seen = True
         out["alarms"].setdefault("E-1100", round(now(), 3))
@@ -166,7 +195,7 @@ class _Plant:
         self.proc = subprocess.Popen(
             [sys.executable, "-m", "linumert_plant", "serve", "--plant",
              str(CONFIG / "plant.yaml"), "--lockstep", "--port", str(port), "--seed",
-             str(scen.seed), "--panel", "0", "--report", str(report), "--state-dir",
+             str(scen.linuxcnc.get("seed", 5)), "--panel", "0", "--report", str(report), "--state-dir",
              str(report.parent / "state")], env=env, stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT, text=True)
         self.lines: list[str] = []
@@ -240,6 +269,7 @@ def run_linuxcnc(scen: Scenario, port: int | None = None) -> ScenarioResult:
     host_steps = sorted([s for s in scen.steps if s.action in HOST_ACTIONS],
                         key=lambda s: (s.at_line is not None, s.at or 0.0, s.at_line or 0))
     plan = {"duration": scen.duration, "steps": driver_steps,
+            "error_alarms": {str(k): v for k, v in ERROR_ALARMS.items()},
             "program": str(scen.program) if scen.program else ""}
     with tempfile.TemporaryDirectory(prefix="lrt_scen_") as tmp:
         work = Path(tmp)
@@ -328,6 +358,11 @@ def _collect(res: ScenarioResult, out: dict, plant: dict, tele: dict) -> None:
             res.drive_states[k] = res.drive_states.get(ds[0], "")
     res.lost_steps = {k: 0 for k in letters}  # serwa z mill_servo_table
     res.alarms = dict(out.get("alarms") or {})
+    names = {1: "ESTOP", 2: "ESTOP_RESET", 3: "OFF", 4: "ON"}
+    for t, task, interp in out.get("states", []):
+        res.log.append(f"{t:7.3f} s  LinuxCNC: task {names.get(task, task)}, interp {interp}")
+    for t, ok in out.get("resets", []):
+        res.log.append(f"{t:7.3f} s  LinuxCNC: reset → {'ON' if ok else 'nie włączono'}")
     for t, text in out.get("errors", []):
         code = "E-4200" if "amplifier fault" in text.lower() else "E-1000"
         res.alarms.setdefault(code, t)
@@ -342,3 +377,4 @@ def _collect(res: ScenarioResult, out: dict, plant: dict, tele: dict) -> None:
     res.stats = {"frames": plant.get("frames", 0), "lost": plant.get("lost", 0),
                  "late": plant.get("late", 0), "digest": plant.get("digest", "")}
     res.telemetry = tele
+    res.log.sort(key=lambda line: float(line.split()[0]))
