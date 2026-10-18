@@ -4,7 +4,7 @@ Prompt startowy i stan bieżący: `docs/PROMPT_NOWEJ_SESJI.md` (aktualizować na
 
 Model-Author: Codex · 2026-10-17
 
-Tura: Claude · od 2026-10-18T10:55Z · stan: oddana (sesja 016 → PR #17); #13–#17 scalił właściciel 2026-10-18 11:08–11:15Z BEZ przeglądu Codexa; otwarte #3 i #18
+Tura: Claude · od 2026-10-18T14:17Z · stan: oddana (PR #22, #23 strategie bazowania; do przeglądu Codexa)
 
 ## Katalog i Git
 
@@ -96,4 +96,13 @@ Otwarte: **#3 (sesja 003, Codex)** i **#18** (Claude: walidacja pól ramki LRT-N
      `python plant/server/test_master.py --axes 4 --distance 50000` (oczekiwane: utracone 0, spóźnione 0).
    - Proszę o próbę `--realtime` z masterem na drugim hoście/VM (jitter, watchdog) — wynik w „Dla Claude:”.
 
+- (Claude, sesja laptop) Pkt 0 częściowo: autokontrola Claude #13–#17 w komentarzach PR — to nie zastępuje Twojego przeglądu. Kierunek indeksu `switch_index` (zawracanie) jest właściwy według właściciela: jazda za krańcówkę = uszkodzenie. Nowe pole `homing.latch: approach|release` (PR `claude/bazowanie-strategie`); w sesji 018 dobierz znak HOME_LATCH_VEL do strategii (release = znak przeciwny do SEARCH).
+
 Następna sesja Claude: 017 (`prompts/START-017.md`, komponent HAL lrt_net) — od `wip/sesja-016`.
+
+## Stan zatrzymania (Model-Author: Claude, sesja laptop)
+- 2026-10-18T14:07Z A zrobione: Debian 12.15 (rootfs linuxcontainers, unshare -r + chroot; podman/docker brak na laptopie), `make lint test test-c test-san` na `6105649`: ruff czysty, pytest 436 OK (48 odznaczonych), testy C 29/59/20 OK, ASan/UBSan 29/59/20 bez usterek. Następny: B (przegląd wsteczny #13–#17).
+- 2026-10-18T14:11Z B zrobione (autokontrola #13–#17, komentarze w PR; #17 lockstep: utracone 0, spóźnione 0); C pominięte (brak RIP). debian-container.sh działa bez podmana (rootfs w ~/.cache/linumert/debian12). Sesja oddana, LOCK zwolniony.
+- 2026-10-18T14:17Z Strategie bazowania: `homing.latch` approach/release, PR #23 (bbb1e46), pytest 439 OK na Debianie 12. Sesja oddana, LOCK zwolniony.
+- 2026-10-18T14:23Z Podman (6.1.3, crun) na laptopie; `make lint test test-c test-san` na `ab9a9ab`: ruff czysty, pytest 439 OK, C 29/59/20 OK, ASan/UBSan czysto. Następny: LinuxCNC z GUI w kontenerze (prośba właściciela).
+- 2026-10-18T14:34Z `tools/dev/linuxcnc-gui.sh`: LinuxCNC 2.9.10 (linuxcnc.org, bookworm) + QtDragon sim w podmanie, okno na pulpicie laptopa (Xwayland). Działa. To pakiety, nie RIP z #3 — budowa nadal u Codexa. Blokada `linuxcnc` (lock.py) trzymana, dopóki GUI otwarte.

@@ -122,6 +122,40 @@ def test_home_switch(plant):  # REQ-VM-07 (a): krańcówka/czujnik, zjazd i doja
     assert max(physical) - min(physical) < 0.008
 
 
+def test_home_switch_release(plant):  # REQ-VM-07 (a): wolny zjazd, baza na zwolnieniu styku NC
+    data = _data("mill_servo_table")
+    _axis(data, "X")["homing"] = {"method": "switch", "direction": -1, "search_speed": 40,
+                                  "latch_speed": 1, "latch": "release", "order": 1}
+    physical = []
+    for seed in (1, 2):
+        machine, master = _started(plant, data, seed)
+        master.home_axis("X")
+        assert master.position("X") == pytest.approx(0.0, abs=0.01)
+        # Krańcówka X min 0,5 mm, histereza 0,2 mm: styk NC zamyka się znowu przy 0,7 mm;
+        # stół stoi tam, gdzie styk się zwolnił (1 mm/s: okres mastera i drgania styku ~2 µm).
+        assert machine.joint_position("X") == pytest.approx(0.7, abs=0.005)
+        master.move("X", 100.0, 50.0)
+        physical.append(machine.joint_position("X") - 100.0)
+    assert max(physical) - min(physical) < 0.008  # powtarzalność bazy
+
+
+def test_home_switch_index_release(plant):  # REQ-VM-07 (b): indeks szukany od krańcówki
+    data = _data("mill_servo_table")
+    _axis(data, "X")["homing"]["latch"] = "release"
+    machine, master = _started(plant, data, 4)
+    master.home_axis("X")
+    master.move("X", 50.0, 50.0)
+    assert machine.joint_position("X") - 50.0 == pytest.approx(10.0, abs=0.02)
+
+
+def test_latch_release_only_for_switch_methods():
+    from linumert.machine.schema import Homing
+
+    with pytest.raises(ValueError, match="latch: release"):
+        Homing(method="hardstop", latch="release", reduced_torque_pct=20, detect="torque",
+               detect_threshold=100, detect_time_ms=20)
+
+
 def test_home_switch_index(plant):  # REQ-VM-07 (b): czujnik + impuls indeksu
     data = _data("mill_servo_table")  # X: switch_index w przykładzie
     physical = []

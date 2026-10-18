@@ -8,9 +8,14 @@ napędu w impulsach (6064h), moment (6077h), słowo stanu i licznik indeksu. Nie
 położenia osi. Skala impulsy/jednostkę (`MachineModel.counts_per_unit`) odpowiada SCALE z INI.
 
 Sekwencje (`homing.method` z machine.yaml):
-  switch        szukanie czujnika z search_speed, zjazd, ponowny dojazd z latch_speed do
-                zadziałania = baza (jak HOME_SEARCH_VEL i HOME_LATCH_VEL z tym samym znakiem);
-  switch_index  jak switch, potem dalej z latch_speed do impulsu indeksu (HOME_USE_INDEX);
+  switch        szukanie czujnika z search_speed, potem strategia `homing.latch`:
+                approach — zjazd z latch_speed, ponowny dojazd z latch_speed do zadziałania
+                = baza (HOME_SEARCH_VEL i HOME_LATCH_VEL z tym samym znakiem);
+                release — wolny zjazd z latch_speed, baza na zwolnieniu styku (dla NC:
+                zbocze narastające, obwód znów zamknięty; HOME_LATCH_VEL ze znakiem przeciwnym);
+  switch_index  jak switch, potem z latch_speed od czujnika (kierunek zjazdu) do impulsu
+                indeksu (HOME_USE_INDEX). Po zadziałaniu czujnika master zawsze zawraca:
+                jazda dalej za krańcówkę groziłaby uderzeniem w zderzak.
   hardstop      jak switch, ale „czujnik” to zderzak wykryty przez moment albo błąd nadążania
                 (`HardstopDetector`, ta sama logika co hal/lrt_hardstop_home.comp) przy
                 zredukowanym limicie momentu 6072h; po bazie limit wraca do wartości z napędu;
@@ -188,7 +193,14 @@ class _Homer:
                 self.cmd = self.m.position_actual(self.drive) / self.scale  # bez docisku
                 self.vel = 0.0
         elif self.phase == "backoff" and not sensor and self.vel * self.dir < 0:
-            self.phase, self.goal = "latch", self.dir * self.latch
+            if self.axis.homing.latch == "approach":
+                self.phase, self.goal = "latch", self.dir * self.latch
+            elif self.axis.homing.method == "switch_index":
+                self.phase = "index"  # dalej w kierunku zjazdu, od czujnika
+                self.index_seen = self.m.index_count(self.drive)
+            else:
+                self._set_home()  # zwolnienie styku = baza
+                return
         elif self.phase == "latch" and sensor:
             if self.axis.homing.method == "switch_index":
                 self.phase, self.goal = "index", -self.dir * self.latch
