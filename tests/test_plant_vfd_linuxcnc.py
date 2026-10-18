@@ -13,13 +13,19 @@ from __future__ import annotations
 import json
 import os
 import shutil
-import subprocess
 import time
 from pathlib import Path
 
 import pytest
 import yaml
-from rip_support import installed_modules, plant_server, rip_root, rip_run
+from rip_support import (
+    installed_modules,
+    plant_server,
+    rip_root,
+    rip_run,
+    start_linuxcnc,
+    stop_linuxcnc,
+)
 
 pytestmark = pytest.mark.linuxcnc
 
@@ -104,9 +110,7 @@ def session(tmp_path_factory):
     with installed_modules(root, work, ("lrt_net", "lrt_cia402")), \
             plant_server(plant_yaml, PORT, "--report", str(report)):
         env = {**os.environ, "PATH": f"{cfg}:{os.environ.get('PATH', '')}"}
-        cnc = subprocess.Popen(["bash", "-c", f"source '{root}/scripts/rip-environment' "
-                                f">/dev/null && exec linuxcnc '{ini}'"], cwd=cfg, env=env,
-                               stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+        cnc = start_linuxcnc(root, ini, env)
         try:
             ready = False
             for _ in range(60):
@@ -121,11 +125,7 @@ def session(tmp_path_factory):
             time.sleep(1.0)
             run = rip_run(root, f"python3 {work / 'driver.py'}", cfg, timeout=180, env=env)
         finally:
-            cnc.terminate()
-            try:
-                cnc.wait(timeout=60)
-            except subprocess.TimeoutExpired:
-                cnc.kill()
+            stop_linuxcnc(cnc, root, cfg)
     line = next((x for x in run.stdout.splitlines() if x.startswith("RESULT ")), None)
     assert line, run.stdout + run.stderr
     res = json.loads(line[len("RESULT "):])
