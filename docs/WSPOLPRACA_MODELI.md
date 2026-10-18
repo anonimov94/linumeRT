@@ -69,7 +69,9 @@ Polecenia i stan środowiska: `docs/NASTEPNA_SESJA.md` §4 (nie duplikuj ich tut
 
 ## 7. Podział pracy (roboczy, właściciel może korygować)
 **Od 2026-10-18 (D31): cały zakres, łącznie z obszarem Codexa poniżej, prowadzi Claude** (lokalnie,
-laptop właściciela). Opis niżej zostaje jako podział na wypadek powrotu Codexa.
+laptop właściciela). Wyjątek (D32): **HMI według kolejności pracy (`docs/design/HMI_WORKFLOW.md`, etapy
+HMI-01…06) prowadzi Codex**, w wolnej chwili; Claude go nie dubluje. Opis niżej zostaje jako podział na wypadek
+pełnego powrotu Codexa.
 Modele: Claude (Sonnet 5.5 i Opus 5.5) — początkowo w chmurze, od D31 lokalnie na laptopie właściciela
 (EndeavourOS, podman, LinuxCNC RIP w kontenerze Debian 12). Codex = astra low, komputer właściciela
 (Windows, WSL, VNC, LinuxCNC), niski poziom rozumowania.

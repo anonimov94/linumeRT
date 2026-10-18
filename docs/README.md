@@ -20,6 +20,7 @@ sprzecznościach: `CLAUDE.md` → `DECYZJE.md` → `wymagania/` → specyfikacje
 | [`HAL_KONTRAKT.md`](HAL_KONTRAKT.md) | kontrakt sygnałów HAL `linumert.*` (D05): osie, wrzeciono, I/O; piny komponentów `lrt_net` i `lrt_cia402` |
 | [`RDZEN.md`](RDZEN.md) | rdzeń Pythona: model stanu maszyny, czytnik `linuxcnc.stat`, atrapa |
 | [`GCODE_LEKSER.md`](GCODE_LEKSER.md) | lekser i kontrola G-code LinuxCNC (kody P-51xx) |
+| [`design/HMI_WORKFLOW.md`](design/HMI_WORKFLOW.md) | **docelowy kierunek ekranu operatora (D32)**: ekrany według kolejności pracy, nawigacja, etapy HMI-01…06 |
 | [`SLOWNIK.md`](SLOWNIK.md) | nazewnictwo projektu i słowa zakazane |
 
 ## Wymagania
@@ -47,7 +48,7 @@ sprzecznościach: `CLAUDE.md` → `DECYZJE.md` → `wymagania/` → specyfikacje
 | Dokument | Zakres |
 |---|---|
 | [`WSPOLPRACA_MODELI.md`](WSPOLPRACA_MODELI.md) | jedyne źródło zasad współpracy Claude i Codex: tury, blokady, małe kroki, scalanie |
-| [`DECYZJE.md`](DECYZJE.md) | decyzje: architektura (D01–D23), proces (D24–D31), decyzje techniczne sesji |
+| [`DECYZJE.md`](DECYZJE.md) | decyzje: architektura (D01–D23), proces i kierunek (D24–D32), decyzje techniczne sesji |
 | [`DZIENNIK.md`](DZIENNIK.md) | dziennik pracy: spis sesji według numeru i wpisy chronologicznie |
 | [`../prompts/README.md`](../prompts/README.md) | plan 84 sesji ze stanem; [`DONE.md`](../prompts/DONE.md) — wykonane |
 | [`roadmap/index.html`](roadmap/index.html) | interaktywna mapa planu (kamienie M0–M6) |

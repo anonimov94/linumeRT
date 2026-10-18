@@ -12,6 +12,9 @@ przerwaną) sesję.
 | `LOCK` | blokada tury: `<model> · sesja NNN · <UTC> · <opis>`; pusty = wolne |
 | [`archiwum/`](archiwum/README.md) | wykorzystane prompty startowe `START-NNN.md` (historia) |
 
+Sesje ekranu (M2, 027–038) realizują docelowe HMI według kolejności pracy (D32,
+[`docs/design/HMI_WORKFLOW.md`](../docs/design/HMI_WORKFLOW.md)); etapy HMI-01…06 prowadzi Codex.
+
 Kolejność wykonania odbiega od numeracji: sesje rdzenia 032, 039 i 044 zrobiono wcześniej, bo nie
 wymagały ekranu ani LinuxCNC. Bieżący stan i następny krok: [`docs/NASTEPNA_SESJA.md`](../docs/NASTEPNA_SESJA.md).
 

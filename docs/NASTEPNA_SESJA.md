@@ -32,10 +32,10 @@ gałąź bazuje na poprzedniej:
 | #30 | `wip/sesja-020` → `wip/sesja-019` | sesja 020 | otwarty |
 | #32 | `wip/sesja-021` → `wip/sesja-020` | sesja 021 | otwarty |
 | #33 | `claude/dokumentacja` → `wip/sesja-021` | ten porządek dokumentacji | otwarty |
-| #31 | `feature/hmi-workflow-tabs` → `wip/sesja-020` | HMI według workflow CNC (nie Claude z tej sesji) | otwarty, poza tym zestawieniem |
+| #31 | `feature/hmi-workflow-tabs` → `wip/sesja-020` | projekt HMI według kolejności pracy (`docs/design/HMI_WORKFLOW.md`) | otwarty; dokument jest też w #33 z poprawioną pisownią nazwy, więc #31 można zamknąć jako zawarty w #33 |
 
 **Plan integracji do `main`** (merge commit na PR, bez przepisywania historii; każdy PR po kolei z bazą
-przestawioną na `main`): #19 → #18 → #23 → #24 → #25 → #27 → #28 → #29 → #30 → #32 → #33.
+przestawioną na `main`): #19 → #18 → #23 → #24 → #25 → #27 → #28 → #29 → #30 → #32 → #33 (#31 zawarty w #33).
 Próba lokalna (2026-10-18) pokazała, że konflikty są tylko tu:
 - dokumenty statusowe (DZIENNIK, DONE, PROVENANCE, DECYZJE, NASTEPNA_SESJA, WSPOLPRACA_MODELI): po #33 obowiązuje
   wersja z #33, bo ma już wpisy z `main` (sesja 003, D20, D27, D28);
@@ -52,7 +52,9 @@ review”), więc scala właściciel albo Claude po jawnym zezwoleniu w ustawien
 1. **Integracja stosu do `main`** (sekcja 2), potem usunięcie scalonych gałęzi `wip/*` i `claude/*`.
 2. Sesje według [`prompts/README.md`](../prompts/README.md): **008** (bufor i bramka G0), potem 022 (panel Plant
    i pulpit MPG), 023 (edytor wirtualnej obrabiarki), 024 (scenariusze, raport, `tools/check_requirements.py`).
-3. Propozycja do decyzji: ramka LRT-NET v2 (zatrzask indeksu enkodera, 6072h), opis w DECYZJE (sesja 017).
+3. **HMI według kolejności pracy (D32)**: docelowy kierunek ekranu; etapy HMI-01…06 prowadzi Codex (§6).
+   Sesje ekranu z planu (M2, 027–038) muszą być z nim zgodne.
+4. Propozycja do decyzji: ramka LRT-NET v2 (zatrzask indeksu enkodera, 6072h), opis w DECYZJE (sesja 017).
 
 ## 4. Środowisko
 
@@ -82,7 +84,14 @@ review”), więc scala właściciel albo Claude po jawnym zezwoleniu w ustawien
 
 ## 6. Dla Codex:
 
-(brak zleceń; od D31 cały zakres prowadzi Claude)
+**HMI według kolejności pracy (D32), w wolnej chwili.** Specyfikacja: `docs/design/HMI_WORKFLOW.md`.
+- Kolejność: HMI-01 (inwentaryzacja widgetów `screens/linumert/linumert.ui`, kontrakt sygnałów, zrzut bazowy) →
+  HMI-02 (pasek stanu, nawigacja, Start, Bazowanie, Ręczne) → HMI-03 … HMI-06; każdy etap = osobny PR do `main`.
+- Zasady: `linumert_upstream_handler.py` bez zmian; logika w `linumert_handler.py` i osobnych modułach;
+  zmiana zakładki nie wykonuje ruchu ani zmiany trybu; wygląd z `docs/design/tokens.yaml` (CLAUDE.md §6a).
+- Odbiór: testy QtVCP pod Xvfb i z LinuxCNC RIP z Plant (`tools/dev/plant-gui.sh`, `HEADLESS=1`), zrzuty
+  wszystkich widoków w `docs/raporty/`, 1280×768, obsługa klawiaturą; wpis w DZIENNIK.
+- Środowisko: §4 (laptop z podmanem albo WSL); blokada `python tools/lock.py acquire linuxcnc --model Codex`.
 
 ## 7. Dla Claude:
 

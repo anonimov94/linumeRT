@@ -22,7 +22,15 @@ napędy, krańcówki, sondę, falownik i magazyn narzędzi.
 | Wirtualna obrabiarka Plant | dynamika osi w C, napędy CiA 402 i krokowce, biblioteka napędów, kinematyka, krańcówki, zderzaki, bazowanie, magazyn narzędzi, kolizje, wrzeciono z falownikiem | `plant/`, [`docs/PLANT.md`](docs/PLANT.md) |
 | LinuxCNC ↔ Plant | komponenty HAL `lrt_net` / `lrt_cia402`; bazowanie z losowego startu, ruch G1, wyrocznia soft limits i stref, wrzeciono przez `hy_vfd` | `hal/`, `config/plant/` |
 | Rdzeń (Python) | model stanu maszyny, katalog alarmów PL/EN, `machine.yaml`, baza narzędzi, format `.lnx` i kompilator do `.ngc`, lekser G-code | `core/linumert/` |
+| HMI według kolejności pracy (D32) | projekt gotowy, implementacja HMI-01…06 | [`docs/design/HMI_WORKFLOW.md`](docs/design/HMI_WORKFLOW.md) |
 | Własny wygląd ekranu, programy dialogowe, symulacja materiału, generator konfiguracji | zaplanowane (kamienie M2–M6) | [`prompts/README.md`](prompts/README.md) |
+
+## Kierunek rozwoju
+
+Docelowy ekran operatora to HMI zorganizowane według kolejności pracy przy maszynie: Start → Bazowanie →
+Zero detalu → Narzędzia → Program → Symulacja → Produkcja, a obok Ręczne/MDI, Diagnostyka i Ustawienia,
+ze stałym paskiem stanu, DRO i alarmami (decyzja D32, [`docs/design/HMI_WORKFLOW.md`](docs/design/HMI_WORKFLOW.md)).
+Powstaje etapami HMI-01…HMI-06 na bazie obecnego ekranu QtDragon, bez zmiany sterowania LinuxCNC.
 
 ## Architektura
 ```

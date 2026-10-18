@@ -5,7 +5,7 @@ Format: decyzja · uzasadnienie · status (PRZYJĘTA / PROPOZYCJA / ODRZUCONA / 
 
 Spis: [wersja 2 (D01–D23)](#wersja-2--2026-10-17-qtdragon-wirtualna-maszyna-wytyczne-ip) ·
 [do dyskusji](#do-dyskusji-nie-blokują-pracy) · [zastąpione z wersji 1](#zastąpione-z-wersji-1-2026-10-17-rano) ·
-[decyzje właściciela o procesie (D24–D31)](#decyzje-właściciela-o-procesie-d24d31) ·
+[decyzje właściciela o procesie i kierunku (D24–D32)](#decyzje-właściciela-o-procesie-i-kierunku-d24d32) ·
 [decyzje techniczne sesji](#decyzje-techniczne-sesji-według-numeru-sesji).
 
 ## Wersja 2 — 2026-10-17 (QtDragon, wirtualna maszyna, wytyczne IP)
@@ -45,7 +45,7 @@ Spis: [wersja 2 (D01–D23)](#wersja-2--2026-10-17-qtdragon-wirtualna-maszyna-wy
 - v1 D10 three.js → zastąpione przez D10 v2.
 - v1 D17 3 sesje w tygodniu → zastąpione przez D17 v2.
 
-## Decyzje właściciela o procesie (D24–D31)
+## Decyzje właściciela o procesie i kierunku (D24–D32)
 
 Współpraca modeli, scalanie, środowisko. Obowiązujące zasady w skrócie: [`WSPOLPRACA_MODELI.md`](WSPOLPRACA_MODELI.md).
 
@@ -57,6 +57,7 @@ Współpraca modeli, scalanie, środowisko. Obowiązujące zasady w skrócie: [`
 - 2026-10-18 · D29 · Właściciel polecił Claude rozstrzygnąć zaległe niespójności dokumentów. §10 pkt 3 `CLAUDE.md` („scal do `main`”) zastąpiony odesłaniem do `docs/WSPOLPRACA_MODELI.md` §5 (PR, przegląd drugiego modelu albo autokontrola z adnotacją), zgodnie z akapitem na początku §10 i D25/D26; numeracja D27–D28 zarezerwowana dla PR #3.
 - 2026-10-18 · D30 · Właściciel: praca równoległa Claude i Codexa zdarza się rzadko, ale Codex ma dostęp do LinuxCNC, więc wprowadzono blokady zasobów: `tools/lock.py` (pliki `state/locks/<zasób>.lock`, O_EXCL, TTL 2 h, przejęcie przerwanej), zasoby `linuxcnc` i `wsl-build`; zasady w `docs/WSPOLPRACA_MODELI.md` §2a. Blokady nie zastępują tur (§1) ani `prompts/LOCK`.
 - 2026-10-18 · D31 · Właściciel: Claude przejmuje zakres Codexa (budowa i testy LinuxCNC, konfiguracje INI/HAL, ekran QtDragon, CI, sesje 003–005, przeglądy wsteczne) i nie czeka na Codexa. Claude pracuje lokalnie na laptopie właściciela (EndeavourOS, podman, Debian 12 w kontenerze: `tools/dev/debian-container.sh`, `tools/dev/linuxcnc-gui.sh`). Scalanie według §5 wariant (b): autokontrola z adnotacją, bez niezależnego przeglądu. Gałąź `codex/sesja-003` i PR #3 zostają nietknięte; z pracy Codexa korzystamy z zachowaniem autorstwa (`Model-Author: Codex` w historii). Gdy Codex wróci, właściciel ustala nowy podział.
+- 2026-10-18 · D32 · Właściciel: docelowym kierunkiem ekranu operatora jest HMI według kolejności pracy operatora (`docs/design/HMI_WORKFLOW.md`, z PR #31): globalny pasek stanu, nawigacja Start / Przygotowanie / Program / Produkcja / Ręczne / Diagnostyka, ekrany 0–10, etapy HMI-01…HMI-06 z kryteriami odbioru. Realizuje Codex w wolnej chwili; sesje ekranu z planu (M2, 027–038) mają być z nim zgodne. Nie zmienia D02 (baza QtDragon, handler-patch, `linumert_upstream_handler.py` bez zmian) ani CLAUDE.md §6a: dokument opisuje układ informacji i przepływ pracy, a wygląd wynika z `tokens.yaml`, ikon i makiet; sprzeczność z makietami zgłaszać jako PROPOZYCJA · kierunek rozwoju produktu końcowego · PRZYJĘTA
 
 ## Decyzje techniczne sesji (według numeru sesji)
 

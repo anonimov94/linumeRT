@@ -266,3 +266,7 @@ Uzupełnienie: README plant/core (liczby testów 29/59/20, bazowanie, parametry 
 ## Organizacja — Porządek dokumentacji (PR #33) · 2026-10-18 · Claude (D31)
 - Zrobione: DZIENNIK z jednolitymi nagłówkami (numer, PR, data, model) i spisem sesji według numeru; wpisy sesji 003 z `main` wstawione chronologicznie; treść wpisów bez zmian. DONE posortowane według numeru, z PR i modelem. DECYZJE: D20 w tabeli ze statusem z `main`, osobno decyzje właściciela (D24–D31) i decyzje sesji (według numeru), uzupełnione D27, D28 i wyjątek sesji 003. NASTEPNA_SESJA tylko ze stanem bieżącym (stara wersja w `docs/archiwum/`), PROMPT_NOWEJ_SESJI jako stały prompt bez stanu, prompty `START-*` w `prompts/archiwum/`, status sesji w `prompts/README.md`. Nowe README: główne (co działa, szybki start), `docs/` (spis wszystkich dokumentów), `tools/`, `config/plant/`.
 - Integracja stosu PR do `main` niewykonana: mechanizm uprawnień zablokował scalanie bez przeglądu; plan i znane konflikty w NASTEPNA_SESJA §2.
+
+## Organizacja — HMI jako kierunek rozwoju (D32, PR #31 → #33) · 2026-10-18 · Claude (D31)
+- Na polecenie właściciela: `docs/design/HMI_WORKFLOW.md` z PR #31 dołączony do dokumentacji (pisownia nazwy wg CLAUDE.md §6a), decyzja D32, zlecenie HMI-01…06 dla Codexa w NASTEPNA_SESJA §6, odnośniki w README, `docs/README.md`, `design/README.md`, `prompts/README.md`, WSPOLPRACA §7, PROVENANCE.
+- Ponowna próba integracji stosu do `main` zablokowana przez mechanizm uprawnień narzędzia; `main` bez zmian.
