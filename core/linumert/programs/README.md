@@ -10,3 +10,5 @@ Format programów dialogowych `.lnx`, kompilator `.lnx → .ngc`, przygotówka. 
 
 Generatory: `linumert.generators` (`BaseMacroGenerator`, rejestr wersji). Testy: `tests/test_lnx.py`
 (golden `tests/golden/lnx_program.ngc`), `tests/test_ngc_linuxcnc.py` (interpreter `rs274` z LinuxCNC 2.9).
+`lexer.py` to lekser G-code LinuxCNC 2.9 (sesja 044, kody P-5101…P-5111), a `linuxcnc_check.py` kontroluje
+program interpreterem `rs274` (test z markerem `linuxcnc`). Opis: `docs/GCODE_LEKSER.md`.

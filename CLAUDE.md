@@ -114,7 +114,8 @@ Nie deklaruj przeglądu drugiego modelu bez jego rzeczywistej oceny konkretnego 
 1. Przeczytaj ten plik, `docs/DECYZJE.md`, ostatnie 3 wpisy `docs/DZIENNIK.md`, prompt sesji.
 2. Wykonuj zakres sesji w krokach. **Po każdym ukończonym kroku commit i push na gałąź
    `wip/sesja-NNN`** — limit konta może przerwać sesję w każdej chwili, a kolejna sesja wznowi pracę.
-3. Na końcu `make lint test` (i testy C/ekranu, jeśli dotyczy); gdy zielone — scal do `main`.
+3. Na końcu `make lint test` (i testy C/ekranu, jeśli dotyczy); gdy zielone — oznacz PR jako gotowy i scal
+   do `main` według `docs/WSPOLPRACA_MODELI.md` §5 (przegląd drugiego modelu albo autokontrola z adnotacją, D25/D26/D29).
 4. Wpis do `docs/DZIENNIK.md` i `prompts/DONE.md`, commit `sesja NNN: ...`.
 5. Dylemat architektoniczny → wybierz rozwiązanie zgodne z ogólną praktyką inżynierską, zapisz w
    `docs/DECYZJE.md` jako PROPOZYCJA i idź dalej.

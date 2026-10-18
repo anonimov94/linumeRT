@@ -15,7 +15,7 @@ Blokada sesji Codexa nie blokuje rozłącznych sesji Claude. Nie przełączać
 gałęzi ani zmieniać plików w cudzym checkoutcie. Ta aktualizacja zastępuje
 zakaz równoległości i globalną blokadę w §1–2; pozostałe zasady pozostają.
 
-## 1. Tury (historyczne zasady pracy w jednym checkoutcie)
+## 1. Tury (na zmianę; wyjątek równoległy: §2a)
 - Na górze `docs/NASTEPNA_SESJA.md` jest stała linia:
   `Tura: Claude|Codex · od <UTC> · stan: w toku|oddana`.
 - Start: przeczytaj tę linię, `prompts/LOCK` i otwarte PR. Tura drugiego modelu „w toku"
@@ -29,6 +29,15 @@ zakaz równoległości i globalną blokadę w §1–2; pozostałe zasady pozosta
 Jedna linia: `<model> · sesja NNN · <UTC> · <opis>`. Brak pliku lub pusty = wolne.
 Zakładasz na starcie, zwalniasz przy oddaniu (osobny commit `lock: zwolniony`).
 Cudzego świeżego locka nie ruszaj; przerwany (>2 h bez pushu) przejmij wpisem w dzienniku.
+
+## 2a. Blokady zasobów (rzadka praca równoległa, D30)
+Tury (§1) wystarczają, gdy modele pracują na zmianę. Gdy właściciel wyjątkowo uruchomi oba naraz,
+współdzielone zasoby chroni `tools/lock.py` (blokada w `state/locks/`, atomowa, TTL 2 h):
+- zasoby: `linuxcnc` (instancja LinuxCNC/RIP, port VNC i DISPLAY), `wsl-build` (wspólny katalog budowy);
+- przed użyciem: `python tools/lock.py acquire <zasób> --model Claude|Codex --note "..."`;
+  zajęte (kod 1) = nie czekaj w pętli, zrób inny krok albo zapisz to w „Stan zatrzymania";
+- po użyciu: `release`; przerwaną blokadę (>TTL) wolno przejąć, zapisz to w dzienniku;
+- pliki w repo (kod, dokumenty) chronią osobne gałęzie i checkouty (D28), nie blokady.
 
 ## 3. Małe kroki i częsty push
 - Krok = jedna spójna zmiana, zwykle ≤ 5 plików lub ≈ 200 linii. Po każdym kroku:

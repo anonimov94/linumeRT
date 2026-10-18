@@ -72,13 +72,13 @@ Najnowsze wpisy na dole. Każda sesja dopisuje: zrobione · decyzje · do sprawd
 - Do sprawdzenia ręcznie: sensowność parametrów przykładowych i kolejności pól ramki przed sesją 016/017 (komponent HAL w C).
 - Długi: model nieweryfikowany na sprzęcie; liczby w przykładach są typowe, nie pomiarowe.
 
-## Sesja 010 — schemat i walidacja machine.yaml — 2026-10-18
+## 010 — schemat i walidacja machine.yaml — 2026-10-18
 - Model-Author: Claude.
 - Zrobione: `core/linumert/machine/schema.py` (Pydantic v2, błędy po polsku ze ścieżką pola, `load_machine`), `validate.py` (24 reguły spójności, zbiera wszystkie błędy), 5 przykładów w `config/machines/`, `tests/test_machine_config.py` (42 testy, w tym 36 negatywnych REQ-VM-11 i REQ-VM-01).
 - Zależność: pydantic (MIT) w pyproject i LICENCJE.md.
 - Założenia (PROPOZYCJA): kolejność bazowania — X/Y nie przed Z; krańcówka nie dalej niż soft limit, ogranicznik za krańcówką; portal (wiele napędów) wymaga `gantry_square` i `gantry_max_skew`.
 - Nie zweryfikowano: szablony napędów (`stepper_open_loop`, `servo_cia402`, `vfd_modbus`) powstaną w sesji napędów Plant; do tego czasu `validate_machine` nie sprawdza ich istnienia (parametr `drive_templates`).
-## Sesja 011 — Plant: rdzeń dynamiki osi (C) — 2026-10-18
+## 011 — Plant: rdzeń dynamiki osi (C) — 2026-10-18
 - Model-Author: Claude (Sonnet 5.5).
 - Zrobione: `plant/core/axis.h/.c` (oś liniowa/obrotowa sterowana momentem: bezwładność odbita, krzywa moment–prędkość, tarcie lepkie/Coulomba/statyczne, grawitacja, luz i sztywność w modelu dwuczłonowym, zderzaki sztywne i sprężyste ze zdarzeniami, podkroki wg sztywności, jawne kody błędów po polsku, przywracanie stanu przy NaN); `plant/core/Makefile` (C11, `-Wall -Wextra -Wpedantic -Werror`); `tests/lrt_test.h` (framework) i `tests/test_axis.c` (23 testy, błąd względem wzorów analitycznych ≤ 1 %); `tests/test_plant_core.py` (uruchamia testy C z pytest, pilnuje braku alokacji i I/O); krok `make test-c` w `ci.yml`.
 - Weryfikacja: `make -C plant/core test` 23/23; `ruff` czysty; `pytest` 51 przeszło (z `PYTHONPATH=core`); dodatkowo ręcznie: build z `-fsanitize=address,undefined` bez błędów, `clang -Wconversion -Wshadow` bez ostrzeżeń.
@@ -167,3 +167,18 @@ Najnowsze wpisy na dole. Każda sesja dopisuje: zrobione · decyzje · do sprawd
 - Debian 12 (podman): budowa RIP OK (a33293f), testy linuxcnc 49 passed + QtDragon pod Xvfb 3/3, pytest 432 passed.
 - Przyczyna czerwonego CI: brak gita przed checkoutem w `debian:bookworm` (nie segfault); poprawka w `linuxcnc.yml`.
 - Gałąź `claude/sesja-003` (nowy PR zamiast #3; `codex/sesja-003` nietknięta). Push wymagał zakresu `workflow` tokenu gh.
+## Porządek dokumentacji statusowej — 2026-10-18 (Model-Author: Claude)
+
+Audyt NASTEPNA_SESJA.md, PROMPT_NOWEJ_SESJI.md, README.md i DONE.md względem GitHuba. Rozbieżności: dokumenty
+mówiły, że #13–#17 czekają na przegląd Codexa, a właściciel scalił je 11:08–11:15Z; „następna sesja Claude: 016”
+mimo zakończonej 016; README twierdził, że `make test-c` jest pusty. #18 (walidacja ramki LRT-NET) nie miał wpisu.
+Poprawiono teksty; przegląd wsteczny #13–#17 pozostaje do wykonania.
+
+Uzupełnienie audytu: MACIERZ.md — 11 wymagań (REQ-VD-01…05, REQ-VM-01…05, REQ-VM-11) ma testy z tagami REQ w main, status zmieniony z „planowane” na „zaimplementowane” (jak REQ-VM-07; „zielone” po przeglądzie niezależnym). PROVENANCE: dopisano sesje 016, 032, 039, 044.
+
+Uzupełnienie: README plant/core (liczby testów 29/59/20, bazowanie, parametry w locie) oraz README pakietów cnc, machine, programs zgodne z modułami.
+
+## Blokady zasobów (D30) — 2026-10-18 (Model-Author: Claude)
+
+- Zrobione: `tools/lock.py` (acquire/release/status, O_EXCL, TTL 2 h, przejęcie przerwanej), 4 testy, zasady w WSPOLPRACA_MODELI §2a, D30, PROVENANCE.
+- Zasoby: `linuxcnc`, `wsl-build`. Nie zastępuje tur ani prompts/LOCK. Do przeglądu przez Codexa (używa LinuxCNC).
