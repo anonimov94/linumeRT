@@ -123,14 +123,6 @@ Nie deklaruj przeglądu drugiego modelu bez jego rzeczywistej oceny konkretnego 
 Testy przechodzą · błędy obsłużone jawnie · brak blokowania RT · dokumentacja zaktualizowana ·
 nowe zależności i zasoby w LICENCJE.md / PROVENANCE.md · wpis w DZIENNIK.md.
 
-
-## Aktualizacja właściciela — samodzielna praca Codex
-
-2026-10-17 · Model-Author: Codex. Claude jest niedostępny do odwołania.
-Codex kontynuuje implementację i przegląd własnych zmian przez PR oraz testy,
-a następnie może scalać poprawne PR bez oczekiwania na Claude. Przegląd Claude
-po powrocie jest dodatkową kontrolą, nie blokadą pracy. Nie przedstawiamy
-autokontroli jako niezależnego przeglądu. Ta aktualizacja zastępuje wcześniejszy
-wymóg przeglądu drugiego modelu przed każdym scaleniem.
-Po każdym ukończonym kroku: commit i push; nie odkładać publikacji do końca sesji
-ani do zbliżającego się limitu kontekstu/tokenów.
+## 12. Współpraca modeli
+Jedyne źródło zasad (tury, LOCK, małe kroki, oszczędność tokenów, etapy i scalanie, podział pracy):
+`docs/WSPOLPRACA_MODELI.md`. Sprzeczne zapisy w innych plikach i promptach tracą moc.
