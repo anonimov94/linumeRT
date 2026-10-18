@@ -45,3 +45,11 @@ Najnowsze wpisy na dole. Każda sesja dopisuje: zrobione · decyzje · do sprawd
 - Model-Author: Codex. Przejęto historyczną blokadę sesji 001 Claude zgodnie z poleceniem właściciela; PR #2 scalony, checkout czysty.
 - Budowa i testy LinuxCNC w WSL; pulpit VNC uruchomiony ponownie na porcie 5911.
 
+
+## 003 — Spike: LinuxCNC 2.9 w środowisku agenta (2026-10-18, do dokończenia)
+- Model-Author: Codex.
+- Zrobione: budowa RIP/uspace upstream a33293f46575c809e082e0806e79ab996f982513; skrypt apt/build/cache; pełna kompilacja po make clean 50 s; import, headless sim, bazowanie XYZ, ruch MDI i pozycja końcowa, QtDragon/Xvfb i zrzut; integracja wspólnego runnera; workflow PR/ręczny/tygodniowy; raport, licencje i provenance.
+- Testy lokalne: PASS, 47 bazowych + 2 integracyjne, lint i diff OK. Raport state/test-runs/20261018T060319.515034Z-Codex/report.json. Testy pokazywane w VNC localhost:5911.
+- Decyzje: D20 przyjęta dla testów funkcjonalnych non-realtime. Bez zmian kodu upstream i bez make setuid. Tymczasowa preferencja QtDragon wyłącza dialog zamknięcia, test weryfikuje brak awarii przy wyjściu.
+- Do sprawdzenia: najnowsze CI LinuxCNC PR #3 (trwa przy zatrzymaniu), autokontrola końcowego diffu i merge po zielonych kontrolach. CI Python przeszło. NIEZWERYFIKOWANE NA SPRZĘCIE.
+- Długi: użytkownik polecił kończyć i wypchnąć postęp; PR pozostaje draft, bez merge i bez wpisu 003 do DONE. Najpierw zamknąć 003, potem sesja 004. Szczegóły w docs/NASTEPNA_SESJA.md.

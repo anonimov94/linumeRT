@@ -20,4 +20,4 @@ test-c:
 	else echo "test-c: brak plant/core/Makefile (rdzen C powstaje w sesji 011) - pomijam"; fi
 
 test-linuxcnc:
-	PYTHON=$(PYTHON) xvfb-run -a -s '-screen 0 1440x900x24' bash tools/ci/test-linuxcnc.sh
+	PYTHON=$(PYTHON) xvfb-run -a -s '-screen 0 1440x1100x24' bash tools/ci/test-linuxcnc.sh

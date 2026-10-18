@@ -1,49 +1,74 @@
-# Przekazanie do następnej sesji
+# Przekazanie po sesji 003
 
-Model-Author: Codex · 2026-10-17
+Model-Author: Codex · 2026-10-18
 
-## Katalog i Git
+## Repozytorium i zasady
 
-Repo: https://github.com/anonimov94/linumeRT
-Aktualny checkout Windows:
-`C:/Users/pc/Documents/PythonProjects/linumeRT/.collaboration/linumeRT`
+Repo: https://github.com/anonimov94/linumeRT — PR sesji 003: #3.
+Przed pracą sprawdź jego stan, pobierz main i sprawdź czystość checkoutu.
+Windows: `C:/Users/pc/Documents/PythonProjects/linumeRT/.collaboration/linumeRT`.
 WSL: `/mnt/c/Users/pc/Documents/PythonProjects/linumeRT/.collaboration/linumeRT`.
-Katalog nadrzędny jest starszą kopią dokumentacji bez własnego repo; nie pracuj w nim.
+Katalog nadrzędny zawiera starszą kopię dokumentacji; nie pracuj w nim.
 
-PR #1: zasady współpracy, scalony. PR #2: paczka testowa z VNC, sprawdź aktualny
-stan przed rozpoczęciem. Dawne gałęzie sesji 001 i 002 są już zawarte w main.
+Claude niedostępny do odwołania. Codex pracuje samodzielnie: PR, jawna
+autokontrola i testy, merge po sukcesie. Po każdym ukończonym kroku commit
+i push, zawsze `Model-Author: Codex`. Nie nazywaj autokontroli niezależnym review.
 
-## Zasady użytkownika
+## Działające środowisko
 
-Claude jest niedostępny do odwołania. Codex kontynuuje samodzielnie przez PR,
-autokontrolę i testy; nie czeka na Claude. Oznaczaj autorstwo modelu w commitach,
-PR i dzienniku. Po każdym ukończonym kroku commit i push, bez czekania na koniec
-sesji lub limit tokenów. Po ukończonym etapie przekaż prompt następnej sesji.
+LinuxCNC gałąź 2.9, SHA `a33293f46575c809e082e0806e79ab996f982513`, RIP/uspace
+w `/home/pc/.cache/linuxcnc-2.9`. D20 przyjęta. Pełna budowa po make clean: 50 s.
+Raport: `docs/raporty/SPIKE_LINUXCNC.md`; zrzut: `spike_qtdragon.png` obok niego.
+Kod upstream niezmieniony. Ubuntu 24.04 WSL2 to środowisko dev non-realtime;
+docelowy system nadal Debian 12. NIEZWERYFIKOWANE NA SPRZĘCIE.
 
-## Gotowa paczka testowa
+```bash
+bash tools/ci/build-linuxcnc.sh
+.venv/bin/python tools/agent_tests/run.py --model Codex --linuxcnc
+make test-linuxcnc PYTHON=.venv/bin/python
+```
 
-`tools/agent_tests/README.md`: runner, launcher Windows i VNC.
-Pełna próba Windows -> WSL -> VNC -> terminal -> raport: PASS, 47 testów, czysty lint.
-Venv `.venv` z pytest/ruff istnieje w Ubuntu-24.04; python3-venv doinstalowany.
-Uruchomienie: `tools/agent_tests/Start-Tests.ps1 -Model Codex -DisplayNumber 11`.
-Jeśli ta sesja nadal działa, użyj istniejącego pulpitu zamiast uruchamiać drugi na
-tym samym porcie. Podczas przekazania aktywny podgląd paczki używał portu 5911,
-DISPLAY=:11 i XAUTHORITY=/tmp/linumert-vnc.atrgdu3j/Xauthority.
-Te dane dotyczą bieżącego uruchomienia; po restarcie odczytaj wartości z nowego startu.
-Starszy ręczny podgląd mógł pozostać na porcie 5909. Nie zabijaj obcych sesji.
-Lokalne raporty `state/test-runs/` są ignorowane przez Git.
+Venv używa systemowych pakietów GUI. Jeśli brak zależności:
+`bash tools/ci/build-linuxcnc.sh --install-deps` (apt wymaga administratora).
+WSL nie ma sudo bez hasła; zależności instalowano przez `wsl -u root`.
+Nie uruchamiaj builda ani GUI jako root. Nie wykonano `make setuid`.
 
-## Następne zadanie — sesja 003
+Testy: import, bazowanie trzech osi, ruch MDI i położenie końcowe, gotowość
+QtDragon oraz poprawne zamknięcie okna. API statusu upstream nie toleruje
+zbyt wczesnego pierwszego poll; fixture czeka na udany osobny proces próbny.
+Testowa preferencja shutdown_check=False omija dialog potwierdzenia zamknięcia.
 
-Przeczytaj AGENTS.md, CLAUDE.md, DECYZJE, trzy ostatnie wpisy DZIENNIK oraz
-`prompts/sesja-003.md`. Zrealizuj spike LinuxCNC 2.9 zgodnie z promptem:
-skrypt budowania RIP/uspace, test importu i konfiguracji sim, próba QtDragon
-pod Xvfb z raportem, workflow ręczny/tygodniowy i decyzja D20 na podstawie
-rzeczywistych wyników. Pokazuj postęp w terminalu VNC użytkownika.
+Workflow `linuxcnc.yml`: PR narzędzi integracyjnych, ręczny, tygodniowy;
+cache budowy i artefakty dowodowe. JSON/logi lokalne: `state/test-runs/`.
 
-LinuxCNC nie został jeszcze zbudowany ani uruchomiony w tej sesji.
-Nie wpisuj 003 do DONE przed spełnieniem kryteriów. Ubuntu WSL jest środowiskiem
-deweloperskim; docelowy system projektu nadal Debian 12 + LinuxCNC 2.9.
-Historyczny prompts/LOCK wskazuje sesję Claude 001; właściciel potwierdził,
-że Claude nie pracuje. Przejmij blokadę jawnie do swojej sesji, zachowując ślad
-w dzienniku. Nie instaluj ani nie uruchamiaj sterowania rzeczywistą maszyną.
+## VNC
+
+W tej sesji uruchomiono wspólny launcher na localhost:5911, DISPLAY=:11,
+XAUTHORITY=/tmp/linumert-vnc.rSYjwuGM/Xauthority. To dane bieżącego procesu,
+nie konfiguracja trwała. Sprawdź procesy przed uruchomieniem kolejnego pulpitu.
+Po restarcie użyj `tools/agent_tests/Start-Tests.ps1 -Model Codex -DisplayNumber 11`.
+Pokazuj także testy integracyjne w terminalu VNC. Nie zabijaj obcych sesji.
+
+## Następne zadanie — sesja 004
+
+Przeczytaj AGENTS.md, CLAUDE.md, DECYZJE, trzy ostatnie wpisy DZIENNIK i
+`prompts/sesja-004.md`. Zbuduj własną konfigurację `config/sim/linumert_xyz/`
+na bazie przykładów QtDragon: XYZ w mm, kontrakt D05, narzędzia i programy
+testowe, dokumentacja HAL i WSL. Rejestruj pochodzenie upstream i licencje.
+Wykorzystaj istniejący RIP i wspólny runner; sesja 003 nie tworzy docelowej
+konfiguracji ani Plant. Uporządkuj ścieżki PROGRAM_PREFIX/NGCGUI, które
+w przykładzie upstream dają ostrzeżenia. Opcjonalny podgląd PDF nie jest testowany.
+
+Historyczną blokadę Claude 001 przejęto jawnie w dzienniku sesji 003.
+Przed następną pracą sprawdź `prompts/LOCK`; nie uruchamiaj równoległych LinuxCNC.
+
+## Stan zatrzymania na prośbę właściciela
+
+Praca zatrzymana 2026-10-18. Sesja 003 NIE jest jeszcze wpisana do DONE.
+Najpierw dokończ sesję 003: sprawdź aktualne kontrole PR #3, wykonaj autokontrolę
+końcowego diffu, scal dopiero po sukcesie, dopisz DONE i zwolnij blokadę.
+Dopiero potem przejdź do sesji 004 opisanej wyżej.
+Ostatni lokalny runner: PASS, 47 testów bazowych + 2 integracyjne, lint i diff OK.
+Raport: `state/test-runs/20261018T060319.515034Z-Codex/report.json`.
+Pełna przebudowa po make clean: 50 s. CI Python zielone; CI LinuxCNC nadal
+trwało przy zatrzymaniu. PR pozostaje draft, bez merge. Pulpit VNC pozostawiony.

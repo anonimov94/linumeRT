@@ -28,7 +28,7 @@ python3 -m venv --system-site-packages .venv
 ```
 
 Osobno: `make test-linuxcnc PYTHON=.venv/bin/python`. Ten cel ładuje
-`scripts/rip-environment`, uruchamia Xvfb 1440×900 i testy z markerem linuxcnc.
+`scripts/rip-environment`, uruchamia Xvfb 1440×1100 i testy z markerem linuxcnc.
 Brak budowy kończy się błędem. Skrypt budowy ponownie używa zgodnego cache;
 nie aktualizuje samodzielnie istniejącego checkoutu. Zmiana rewizji upstream
 wymaga jawnego fetch/checkout lub nowego katalogu `LINUXCNC_DIR`.
@@ -53,6 +53,8 @@ wymaga jawnego fetch/checkout lub nowego katalogu `LINUXCNC_DIR`.
 1. `debian/configure no-docs` ostrzega o nierozpoznanej wersji Ubuntu 24.04.
    Listę zależności oparto na wygenerowanym `debian/control` i doprecyzowano
    przez rzeczywistą kompilację. Brak `a2x` wymagał AsciiDoc, DocBook i xsltproc.
+   Czysty runner CI ujawnił dodatkowo brak `docbook-xml` (DTD) przy instalacji
+   bez rekomendacji; dodano go jawnie wraz z `libxml2-utils`.
 2. Wywołanie `linuxcnc.stat().poll()` zanim powstanie pamięć narzędzi ustawia
    w upstream trwały dla procesu stan błędu `mmap_available`. Gotowość sprawdza
    osobny krótki proces; właściwy klient powstaje dopiero po sukcesie próby.
@@ -62,7 +64,8 @@ wymaga jawnego fetch/checkout lub nowego katalogu `LINUXCNC_DIR`.
    (brak python3-poppler-qt5) oraz ścieżek NGCGUI/PROGRAM_PREFIX. Nie blokują
    ekranu; konfiguracja sesji 004 powinna ustawić własne poprawne ścieżki.
 5. Zatrzymywanie całej grupy sygnałem SIGTERM powodowało awarię Qt podczas
-   zamykania. Test zamyka okno komunikatem WM_DELETE_WINDOW i kontroluje log.
+   zamykania. Test zamyka okno komunikatem WM_DELETE_WINDOW, wyłącza dialog
+   potwierdzenia tylko w tymczasowym qtdragon.pref i kontroluje log.
 6. Zdarzały się przekroczenia okresu pętli symulacji pod WSL. To środowisko
    funkcjonalnych testów non-realtime, nie pomiar opóźnień docelowego jądra RT.
 
@@ -72,3 +75,12 @@ wymaga jawnego fetch/checkout lub nowego katalogu `LINUXCNC_DIR`.
 dla PR zmieniających narzędzia integracyjne. Cache uwzględnia SHA upstream,
 wersję systemu, architekturę i skrypt budowania. Instalacja zależności jest
 wykonywana również przy trafieniu cache. Każdy przebieg ponawia testy.
+
+## Pomiar i końcowy stan lokalny
+
+Pełna kompilacja po `make clean`: **50 s** (autogen + configure + make -j12,
+bez apt i klonowania). Wcześniejsza przebudowa przyrostowa: 14 s.
+Końcowy runner lokalny: PASS — 47 testów bazowych i 2 integracyjne, lint/diff OK.
+Raport: `state/test-runs/20261018T060319.515034Z-Codex/report.json`.
+Na polecenie właściciela zakończono pracę przed ukończeniem CI LinuxCNC.
+CI Python przeszło; PR #3 pozostaje otwarty. Sesja 003 nie jest jeszcze w DONE.
