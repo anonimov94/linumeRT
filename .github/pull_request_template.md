@@ -13,4 +13,5 @@ Model recenzujący:
 Sprawdzony SHA:
 Wynik przeglądu: oczekuje
 
-Do odwołania Claude jest niedostępny. Codex może scalać po autokontroli aktualnego SHA i przejściu testów. Przegląd Claude po powrocie jest dodatkowy.
+Scalamy na koniec etapu (`docs/WSPOLPRACA_MODELI.md` §5): zielone kontrole, DoD, brak niedokończonego kodu.
+Przegląd drugiego modelu, jeśli dostępny; inaczej (D25) napisz tu: „autokontrola, bez niezależnego przeglądu".
