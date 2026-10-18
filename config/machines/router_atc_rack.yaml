@@ -52,8 +52,9 @@ toolchanger:
   pitch_mm: 60
   approach_z: -20
   retract_z: -5
-  cover: {actuation_ms: 800}
-  clamp: {time_ms: 300}
+  cover: {actuation_ms: 800, sensor_open: cover_opened, sensor_closed: cover_closed}
+  clamp: {time_ms: 300, sensor: tool_clamped}
+  outputs: {clamp_release: tool_release, cover_open: cover_open}
 spindle: {drive: drv_spindle, max_rpm: 24000, min_rpm: 6000}
 positions:
   manual_change: [300, 450, -5]
@@ -62,7 +63,10 @@ positions:
 collision_bodies:
   - {name: wrzeciono, shape: cylinder, attached_to: spindle, size: [80, 150], position: [0, 0, 75]}
   - {name: stol, shape: box, attached_to: table, size: [700, 1000, 40], position: [300, 450, -150]}
+  # regał 6 gniazd (x 20…320, y 20) poniżej wysokości gniazda approach_z = -20 (sesja 020)
+  - {name: magazyn, shape: box, attached_to: magazine, size: [380, 60, 60], position: [170, 20, -60]}
 io:
-  inputs: {estop: 0, lim_x_min: 1, lim_x_max: 2, lim_y_min: 3, lim_y_max: 4, lim_z_max: 5, toolsetter: 6}
-  outputs: {spindle_on: 0, coolant: 1}
+  inputs: {estop: 0, lim_x_min: 1, lim_x_max: 2, lim_y_min: 3, lim_y_max: 4, lim_z_max: 5, toolsetter: 6,
+           tool_clamped: 7, cover_opened: 8, cover_closed: 9}
+  outputs: {spindle_on: 0, coolant: 1, tool_release: 2, cover_open: 3}
   estop: {input: estop, contact: NC}
