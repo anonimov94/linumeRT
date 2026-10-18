@@ -307,6 +307,32 @@
   params: [segment, gap]
   pl: "Nieciągłość ścieżki w segmencie {segment} (przerwa {gap} mm)."
   en: "Path discontinuity at segment {segment} (gap {gap} mm)."
+# ---- Program dialogowy .lnx (sesja 039) -----------------------------------
+- code: P-5011
+  clear: ack
+  params: [step, name, version]
+  pl: "Krok {step}: brak generatora {name} w wersji {version}."
+  en: "Step {step}: generator {name} version {version} is not available."
+- code: P-5012
+  clear: ack
+  params: [detail]
+  pl: "Niepoprawny plik programu dialogowego (.lnx): {detail}."
+  en: "Invalid dialog program file (.lnx): {detail}."
+- code: P-5013
+  clear: ack
+  params: [step, word]
+  pl: "Krok {step}: generator wytworzył niedozwolony kod {word}."
+  en: "Step {step}: the generator produced the disallowed code {word}."
+- code: P-5014
+  clear: ack
+  params: [step, field]
+  pl: "Krok {step}: brak wymaganego pola {field}."
+  en: "Step {step}: required field {field} is missing."
+- code: P-5015
+  clear: ack
+  params: [step, field, expected]
+  pl: "Krok {step}: pole {field} ma niepoprawną wartość (oczekiwano: {expected})."
+  en: "Step {step}: field {field} has an invalid value (expected: {expected})."
 # ---- Baza narzędzi (sesja 032) ---------------------------------------------
 - code: P-5201
   clear: ack

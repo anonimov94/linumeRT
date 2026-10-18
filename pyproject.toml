@@ -46,6 +46,7 @@ packages = [
 
 [tool.setuptools.package-data]
 "linumert.alarms" = ["catalog.yaml"]
+"linumert.programs" = ["lnx_schema.json"]
 
 [tool.setuptools.package-dir]
 linumert = "core/linumert"
