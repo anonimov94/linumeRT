@@ -1,7 +1,7 @@
 # Prompt startowy: sesja 023, edytor wirtualnej obrabiarki i awarie w panelu (po 022 i 024)
 
 Model-Author: Claude · 2026-10-18. Najpierw [`START-PODZIAL.md`](START-PODZIAL.md) (zasady, worktree, testy),
-potem pełny zakres w [`sesja-023.md`](sesja-023.md).
+potem pełny zakres w [`sesja-023.md`](../sesja-023.md).
 
 ## Warunek startu
 Sesje 022 (panel) i 024 (`faults.py`, runner scenariuszy) są w `prompts/DONE.md` na `main`. Jeśli nie:

@@ -37,6 +37,7 @@ sesji: proces, scalenia, przeglądy). Treść: zrobione · testy · decyzje · d
 | [020](#020--magazyn-narzędzi-pozycje-wymiany-i-kolizje-w-plant-pr-30--2026-10-18--claude-d31) | Magazyn narzędzi, pozycje wymiany i kolizje w Plant | #30 | Claude (D31) |
 | [021](#021--plant-wrzeciono-vfd-przez-modbus-pr-32--2026-10-18--claude-d31) | Plant: wrzeciono VFD przez Modbus | #32 | Claude (D31) |
 | [022](#022--plant-panel-sterowania-i-pulpit-mpg-pr-37--2026-10-18--claude-opus-55) | Plant: panel sterowania i pulpit MPG | #37 | Claude (Opus 5.5) |
+| [023](#023--edytor-wirtualnej-obrabiarki-w-panelu-plant-pr-39--2026-10-18--claude-opus-55) | Edytor wirtualnej obrabiarki w panelu Plant | #39 | Claude (Opus 5.5) |
 | [024](#024--plant-scenariusze-i-raport-prototypu-pr-38--2026-10-18--claude-opus-55) | Plant: scenariusze i raport prototypu | #38 | Claude (Opus 5.5) |
 | [032](#032--baza-narzędzi-z-typami-część-rdzenia-pr-16--2026-10-18--claude-opus-55) | Baza narzędzi z typami, część rdzenia | #16 | Claude (Opus 5.5) |
 | [039](#039--format-lnx-i-basemacrogenerator-pr-14--2026-10-18--claude-opus-55) | Format .lnx i BaseMacroGenerator | #14 | Claude (Opus 5.5) |
@@ -300,3 +301,10 @@ Uzupełnienie: README plant/core (liczby testów 29/59/20, bazowanie, parametry 
 - Znalezisko: w `config/plant/linumert_plant_xyz/linumert_plant.hal` fault napędu w łańcuchu E-STOP blokował reset po STO (zakleszczenie) — usunięty z łańcucha (plik spoza zakresu, opis w PR i DECYZJE).
 - Do sprawdzenia ręcznie: `python tools/run_scenario.py` i `docs/raporty/prototypy/index.html`; z LinuxCNC: `--master linuxcnc first_motion`.
 - Długi: bazowanie Z w LinuxCNC pod WSL czasem kończy się błędem nadążania (brak RT) — skrypt ponawia raz; backend LinuxCNC tylko dla mill_servo_table; testy scenariuszy z LinuxCNC pomijane na GitHub Actions (w kontenerze zostają procesy rtapi_app, kaskada błędów) — do zbadania; awaria `delay` działa w pętli UDP (nie w atrapie). Autokontrola, bez niezależnego przeglądu. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## 023 — Edytor wirtualnej obrabiarki w panelu Plant (PR #39) · 2026-10-18 · Claude (Opus 5.5)
+- Zrobione (START-023): zakładki panelu Napędy, Maszyna, Awarie; `panel/editor.py` (drzewo, walidacja REQ-VM-11, zapis wersji z historią, przeładowanie modelu bez restartu przy wyłączonych napędach — `PlantServer.reload_machine`, scena 3D, klonowanie szablonów i instancji, różnice z `based_on`); widok **3D z modelu** zamiast samego rzutu 2D (polecenie właściciela); akcje scenariusza `edit_machine`/`reload`, scenariusz `edit_reload`; zakładka Awarie z API `faults.py`.
+- Testy (WSL Ubuntu 24.04, świeży klon): ruff czysty, pytest i `-m linuxcnc` — wyniki w PR #39; check_requirements 0 błędów (REQ-VM-12 pokryte).
+- Zamknięcie podziału D33: 022, 023, 024 scalone; 025 (skrypty VM) nadal otwarta.
+- Do sprawdzenia ręcznie: `python -m linumert_plant panel --plant config/plant/plant.example.yaml` → zakładki Maszyna (obrót 3D, przesuwanie magazynu, „Zapisz wersję”, „Przeładuj model” przy wyłączonych napędach) i Napędy („Kopiuj”).
+- Długi: formularz edytuje istniejące pola (dodawanie stref/brył przez plik); przeciąganie elementów myszą w 3D zastąpione przyciskami X/Y/Z; zakładka Scenariusze z makiety jeszcze nie istnieje (CLI `tools/run_scenario.py`). Autokontrola, bez niezależnego przeglądu. NIEZWERYFIKOWANE NA SPRZĘCIE.

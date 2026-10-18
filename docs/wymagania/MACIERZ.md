@@ -24,7 +24,7 @@ Tabela jest zgodna z wymaganiami (pilnuje tego `tests/test_plant_spec.py`).
 | REQ-VM-09 | 020 | `manual_change_position`, `toolsetter_measure` (`tests/test_atc.py`) | zaimplementowane |
 | REQ-VM-10 | 020 | `crash_head_magazine` (`tests/test_atc.py`) | zaimplementowane |
 | REQ-VM-11 | 010, 023 | `test_machine_validation_*` (≥ 15 przypadków) | zaimplementowane |
-| REQ-VM-12 | 023 | `test_editor_api`, scenariusz `edit_reload` | planowane |
+| REQ-VM-12 | 023 | `tests/test_editor_api.py`, scenariusz `edit_reload` | zaimplementowane |
 | REQ-QA-01 | 024 | `tools/check_requirements.py` w `make test`, `tests/test_requirements.py` | zaimplementowane |
 | REQ-QA-02 | 024, 082 | job `plant-matrix` (`run_scenario.py --matrix`), `test_matrix_smoke_on_every_machine` | zaimplementowane |
 | REQ-QA-03 | 016, 024 | 016: `test_fuzz_only_frame_errors`, `test_rejects_bad_frames`, `test_corrupt_frames_*`, `test_model_exception_gives_safe_state`, `test_watchdog_*`, `test_missing_template_refuses_start`, `test_bad_plant_yaml`; 024: `test_fuzz_machine_yaml`, `tests/test_scenario_faults.py`, scenariusze `link_loss`, `drive_fault_mid_program`, `estop_mid_program` (z LinuxCNC: `tests/test_scenario_linuxcnc.py`) | zaimplementowane |

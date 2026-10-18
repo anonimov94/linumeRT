@@ -1,6 +1,6 @@
 # Prompt startowy: sesja 025, maszyny wirtualne VM-A i VM-B (równolegle z 022 i 024)
 
-Model-Author: Claude · 2026-10-18. Najpierw [`START-PODZIAL.md`](START-PODZIAL.md) (zasady, worktree, testy),
+Model-Author: Claude · 2026-10-18. Najpierw [`START-PODZIAL.md`](archiwum/START-PODZIAL.md) (zasady, worktree, testy),
 potem pełny zakres w [`sesja-025.md`](sesja-025.md).
 
 ## Zakres w tej sesji

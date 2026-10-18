@@ -6,7 +6,7 @@ Narzędzia deweloperskie, CI i koordynacji pracy. Polecenia środowiska krok po 
 | Ścieżka | Do czego |
 |---|---|
 | `dev/debian-container.sh` | dowolne polecenie w kontenerze Debian 12 (podman/docker albo rootfs) z repo jako `/work`; wyniki testów liczą się tylko z Debiana 12 (D27), np. `tools/dev/debian-container.sh make lint test test-c test-san` |
-| `dev/wsl-test.sh` | testy zatwierdzonego HEAD gałęzi w WSL (Windows): świeży klon i venv w `~/linumert-test/<gałąź>`, `--linuxcnc` z blokadą `linuxcnc`; równoległe sesje (D33, `prompts/START-PODZIAL.md`) |
+| `dev/wsl-test.sh` | testy zatwierdzonego HEAD gałęzi w WSL (Windows): świeży klon i venv w `~/linumert-test/<gałąź>`, `--linuxcnc` z blokadą `linuxcnc`; równoległe sesje (D33, `prompts/archiwum/START-PODZIAL.md`) |
 | `dev/plant-gui.sh` | LinuxCNC (RIP) + serwer Plant + ekran linumert w kontenerze, okno na pulpicie; `VFD=1` = wariant z hy_vfd; `HEADLESS=1 … CMD` = polecenie w gotowym środowisku |
 | `dev/linuxcnc-gui.sh` | LinuxCNC 2.9 z pakietów linuxcnc.org (symulator `config/sim`) z oknem na pulpicie |
 | `dev/zrzut_ekranu.py` | zrzut ekranu linumeRT pod Xvfb (raporty kamieni) |
