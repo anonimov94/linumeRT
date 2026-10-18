@@ -177,3 +177,4 @@ Uzupełnienie: README plant/core (liczby testów 29/59/20, bazowanie, parametry 
 - B: autokontrola (nie niezależny przegląd) #13–#17, komentarze w PR. Usterek w drive.c/machine.c nie znalazłem. #17 lockstep: utracone 0, spóźnione 0.
   Uwagi do sesji 018: kierunek szukania indeksu w `switch_index` i prędkość zjazdu w homing_master.py vs homemod.
 - C: pominięte, brak LinuxCNC RIP (budowa w #3, zakres Codexa). PR #22.
+- Uzupełnienie (właściciel): po krańcówce maszyna wolno zjeżdża, baza na zwolnieniu styku NC; jazda dalej = uszkodzenie. Dodano `homing.latch: approach|release` (PR #23), korekta uwagi 1 w #13. Docker niepotrzebny (tryb rootfs).
