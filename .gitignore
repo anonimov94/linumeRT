@@ -16,3 +16,4 @@ dist/
 build/
 .coverage
 htmlcov/
+build-san/

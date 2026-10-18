@@ -3,7 +3,7 @@ PYTHON ?= python3
 # W CI i w venv zostaw puste; w systemowym Pythonie Debiana: PIP_FLAGS=--break-system-packages
 PIP_FLAGS ?=
 
-.PHONY: install lint test test-c test-linuxcnc
+.PHONY: install lint test test-c test-san test-linuxcnc
 
 install:
 	$(PYTHON) -m pip install $(PIP_FLAGS) -e ".[dev]"
@@ -18,6 +18,10 @@ test:
 test-c:
 	@if [ -f plant/core/Makefile ]; then $(MAKE) -C plant/core test; \
 	else echo "test-c: brak plant/core/Makefile - pomijam"; fi
+
+# Te same testy C z ASan/UBSan (osobny katalog plant/core/build-san).
+test-san:
+	$(MAKE) -C plant/core test-san
 
 # No-op do sesji 003 (LinuxCNC w srodowisku agenta).
 test-linuxcnc:

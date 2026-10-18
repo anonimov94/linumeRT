@@ -165,3 +165,7 @@ Uzupełnienie: README plant/core (liczby testów 29/59/20, bazowanie, parametry 
 
 - Zrobione: `tools/lock.py` (acquire/release/status, O_EXCL, TTL 2 h, przejęcie przerwanej), 4 testy, zasady w WSPOLPRACA_MODELI §2a, D30, PROVENANCE.
 - Zasoby: `linuxcnc`, `wsl-build`. Nie zastępuje tur ani prompts/LOCK. Do przeglądu przez Codexa (używa LinuxCNC).
+
+## Przygotowanie sesji laptopowej — 2026-10-18 (Model-Author: Claude)
+
+- `make test-san` (ASan/UBSan, plant/core/build-san): 29+59+20 testów bez usterek w chmurze; `tools/dev/debian-container.sh` (Debian 12, D27); prompt: `prompts/START-LAPTOP.md`.

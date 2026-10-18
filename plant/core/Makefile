@@ -5,11 +5,14 @@
 #   make test   - buduje i uruchamia testy (build/test_axis, build/test_drive)
 #   make tools  - buduje build/lrt_check_params (walidacja szablonow napedow)
 #   make shared - buduje build/libplant_core.so (wiazanie ctypes, sesja 014)
+#   make test-san - testy z ASan/UBSan w osobnym katalogu build-san (wymaga libasan/libubsan)
 #   make clean
 CC ?= cc
 CFLAGS ?= -O2
 CFLAGS += -std=c11 -Wall -Wextra -Wpedantic -Werror
 LDLIBS += -lm
+CFLAGS += $(SAN)
+LDLIBS += $(SAN)
 
 BUILD := build
 SRC := live.c axis.c drive.c machine.c
@@ -18,7 +21,7 @@ PIC_OBJ := $(SRC:%.c=$(BUILD)/pic/%.o)
 TESTS := $(BUILD)/test_axis $(BUILD)/test_drive $(BUILD)/test_machine
 TOOLS := $(BUILD)/lrt_check_params
 
-.PHONY: all test tools shared clean
+.PHONY: all test test-san tools shared clean
 
 all: $(BUILD)/libplant_core.a
 
@@ -61,5 +64,9 @@ $(BUILD)/test_machine: tests/test_machine.c tests/lrt_test.h live.h axis.h drive
 test: $(TESTS)
 	@set -e; for t in $(TESTS); do ./$$t; done
 
+# Te same testy z sanitizerami; osobny katalog, by nie mieszac obiektow z build/.
+test-san:
+	$(MAKE) BUILD=build-san SAN="-g -fsanitize=address,undefined -fno-sanitize-recover=all -fno-omit-frame-pointer" test
+
 clean:
-	rm -rf $(BUILD)
+	rm -rf $(BUILD) build-san
