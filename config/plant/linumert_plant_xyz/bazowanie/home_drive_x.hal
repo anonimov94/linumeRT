@@ -1,0 +1,8 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+# linumeRT · bazowanie osi X w napędzie (metoda drive, tryb 6 CiA 402, sesja 015) z Plant.
+# Metoda 6098h ustawiona w napędzie Plant (machine.yaml homing.cia402_method). Start: zbocze
+# linumert.j0.home-start (np. przycisk halui albo `halcmd sets linumert.j0.home-start 1`).
+# Model-Author: Claude · sesja 018. NIEZWERYFIKOWANE NA SPRZĘCIE.
+net linumert.j0.home-start  => lrt-cia402.0.home-start
+net linumert.j0.homed       lrt-cia402.0.homed
+net linumert.j0.home-error  lrt-cia402.0.homing-error
