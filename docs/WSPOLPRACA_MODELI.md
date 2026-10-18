@@ -2,10 +2,10 @@
 
 Model-Author: Claude · 2026-10-18. **Jedyne źródło zasad współpracy.** `AGENTS.md` i
 `CLAUDE.md` tylko tu odsyłają; sprzeczne zapisy gdzie indziej tracą moc. Zmiana zasad =
-osobny commit + wpis w `docs/DECYZJE.md`. Powód wersji 2: limity tokenów często przerywają
+osobny commit + wpis w `docs/DECYZJE.md` (sekcja decyzji właściciela). Powód wersji 2: limity tokenów często przerywają
 sesje, więc pracujemy małymi krokami, z częstym pushem i jawnym przekazaniem tury.
 
-## 1. Tury (na zmianę; wyjątek równoległy: §2a)
+## 1. Tury (na zmianę; wyjątek równoległy: §2a, D28)
 - Na górze `docs/NASTEPNA_SESJA.md` jest stała linia:
   `Tura: Claude|Codex · od <UTC> · stan: w toku|oddana`.
 - Start: przeczytaj tę linię, `prompts/LOCK` i otwarte PR. Tura drugiego modelu „w toku"
@@ -65,13 +65,14 @@ współdzielone zasoby chroni `tools/lock.py` (blokada w `state/locks/`, atomowa
   sobie cudzej pracy. Nie nazywaj autokontroli niezależnym przeglądem.
 
 ## 6. Środowisko testowe
-Polecenia i stan środowiska: `docs/NASTEPNA_SESJA.md` (nie duplikuj ich tutaj).
+Polecenia i stan środowiska: `docs/NASTEPNA_SESJA.md` §4 (nie duplikuj ich tutaj).
 
 ## 7. Podział pracy (roboczy, właściciel może korygować)
 **Od 2026-10-18 (D31): cały zakres, łącznie z obszarem Codexa poniżej, prowadzi Claude** (lokalnie,
 laptop właściciela). Opis niżej zostaje jako podział na wypadek powrotu Codexa.
-Modele: Claude = Sonnet 5.5, działa w chmurze, bez dostępu do WSL właściciela. Codex = astra
-low, działa na komputerze właściciela (Windows, WSL, VNC, LinuxCNC), niski poziom rozumowania.
+Modele: Claude (Sonnet 5.5 i Opus 5.5) — początkowo w chmurze, od D31 lokalnie na laptopie właściciela
+(EndeavourOS, podman, LinuxCNC RIP w kontenerze Debian 12). Codex = astra low, komputer właściciela
+(Windows, WSL, VNC, LinuxCNC), niski poziom rozumowania.
 Obszaru drugiego modelu nie ruszamy bez wpisu w `NASTEPNA_SESJA.md`. Różnice uzupełniamy:
 - **Claude:** projekt i specyfikacje (architektura, kontrakty, model Plant, protokół LRT-NET),
   logika wielokrokowa i generatory cykli, refaktory przekrojowe, wymagania REQ i macierz
