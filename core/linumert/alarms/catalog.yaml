@@ -203,6 +203,11 @@
   params: [axis]
   pl: "Bazowanie napędu osi {axis} nie powiodło się."
   en: "Homing of the drive on axis {axis} failed."
+- code: E-4211
+  clear: reset
+  params: [axis]
+  pl: "Enkoder absolutny osi {axis} stracił licznik obrotów (bateria). Zbazuj oś ponownie."
+  en: "The absolute encoder of axis {axis} lost its turn count (battery). Home the axis again."
 
 # ---- Symulacja: kolizje, ostrzeżenia, dane (NARZEDZIA_I_KOLIZJE.md §3) ------
 - code: K-301
@@ -328,3 +333,34 @@
   params: [step, field, expected]
   pl: "Krok {step}: pole {field} ma niepoprawną wartość (oczekiwano: {expected})."
   en: "Step {step}: field {field} has an invalid value (expected: {expected})."
+# ---- Baza narzędzi (sesja 032) ---------------------------------------------
+- code: P-5201
+  clear: ack
+  params: [tool, field, expected]
+  pl: "Narzędzie T{tool}: pole {field} ma niepoprawną wartość (oczekiwano: {expected})."
+  en: "Tool T{tool}: field {field} has an invalid value (expected: {expected})."
+- code: P-5202
+  clear: ack
+  params: [tool]
+  pl: "Narzędzie T{tool} już istnieje w bazie."
+  en: "Tool T{tool} already exists in the database."
+- code: P-5203
+  clear: ack
+  params: [pocket, tool]
+  pl: "Gniazdo P{pocket} jest już zajęte przez narzędzie T{tool}."
+  en: "Pocket P{pocket} is already used by tool T{tool}."
+- code: P-5204
+  clear: ack
+  params: [line, detail]
+  pl: "Tabela narzędzi, linia {line}: {detail}."
+  en: "Tool table, line {line}: {detail}."
+- code: P-5205
+  clear: ack
+  params: [tool, type]
+  pl: "Narzędzie T{tool}: nieznany typ {type}."
+  en: "Tool T{tool}: unknown type {type}."
+- code: P-5206
+  clear: ack
+  params: [tool]
+  pl: "Narzędzia T{tool} nie ma w bazie."
+  en: "Tool T{tool} is not in the database."

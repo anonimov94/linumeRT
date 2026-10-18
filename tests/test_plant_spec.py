@@ -43,7 +43,8 @@ def test_matrix_rows_match_requirements_table():
     rows = re.findall(r"^\| (REQ-[A-Z]+-\d+) \| (.+?) \| (.+?) \| (\w+) \|$",
                       MATRIX.read_text(encoding="utf-8"), flags=re.M)
     assert [row[0] for row in rows] == requirement_ids()
-    assert all(row[3] == "planowane" for row in rows)
+    # Statusy z nagłówka macierzy; sesje realizujące wymaganie przesuwają je dalej.
+    assert all(row[3] in {"planowane", "zaimplementowane", "zielone"} for row in rows)
 
 
 def test_yaml_examples_in_spec_parse():
