@@ -39,5 +39,7 @@ Atrapa jest modelem do testów logiki rdzenia, nie wzorcem zachowania LinuxCNC.
 
 ## Weryfikacja
 Wszystko poza czytnikiem sprawdzają testy `tests/test_cnc_fake.py`. Czytnik jest testowany na
-sztucznym module (`tests/test_cnc_reader.py`). **NIEZWERYFIKOWANE NA PRAWDZIWYM LINUXCNC:**
-test integracyjny czytnika na RIP w WSL jest zadaniem Codexa (marker `linuxcnc`).
+sztucznym module (`tests/test_cnc_reader.py`) oraz na LinuxCNC 2.9 RIP z konfiguracją
+`config/sim/linumert_xyz` (`tests/test_reader_linuxcnc.py`, marker `linuxcnc`, sesja 008): stan E-STOP,
+bazowanie, MDI w G55, pozycje w układzie maszyny, limity `[AXIS_*]`, kody G/M i wrzeciono `spindle[0]`.
+Nie sprawdzono: `limit_hit` na krańcówce, `tool_offset` po M6, kinematyki inne niż trivkins.

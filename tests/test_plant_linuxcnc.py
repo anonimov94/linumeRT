@@ -14,12 +14,18 @@ import json
 import os
 import re
 import shutil
-import subprocess
 import time
 from pathlib import Path
 
 import pytest
-from rip_support import installed_modules, plant_server, rip_root, rip_run
+from rip_support import (
+    installed_modules,
+    plant_server,
+    rip_root,
+    rip_run,
+    start_linuxcnc,
+    stop_linuxcnc,
+)
 
 pytestmark = pytest.mark.linuxcnc
 
@@ -119,9 +125,7 @@ def session(tmp_path_factory):
     with installed_modules(root, tmp_path, ("lrt_net", "lrt_cia402")), \
             plant_server(plant_yaml, PORT, "--seed", "5", "--report", str(report)):
         env = {**os.environ, "PATH": f"{ini.parent}:{os.environ.get('PATH', '')}"}
-        cnc = subprocess.Popen(["bash", "-c", f"source '{root}/scripts/rip-environment' "
-                                f">/dev/null && exec linuxcnc '{ini}'"], cwd=ini.parent, env=env,
-                               stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+        cnc = start_linuxcnc(root, ini, env)
         try:
             ready = False
             for _ in range(60):  # LinuxCNC gotowy, gdy halcmd widzi połączenie lrt-net
@@ -140,11 +144,7 @@ def session(tmp_path_factory):
                           "halcmd getp lrt-net.0.plant-lost; halcmd getp lrt-net.0.bad-frames",
                           ini.parent, env=env).stdout.split()
         finally:
-            cnc.terminate()
-            try:
-                cnc.wait(timeout=60)
-            except subprocess.TimeoutExpired:
-                cnc.kill()
+            stop_linuxcnc(cnc, root, ini.parent)
     line = next((x for x in run.stdout.splitlines() if x.startswith("RESULT ")), None)
     assert line, run.stdout + run.stderr
     res = json.loads(line[len("RESULT "):])

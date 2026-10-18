@@ -15,6 +15,7 @@ import time
 from pathlib import Path
 
 import pytest
+from rip_support import cleanup_linuxcnc, stop_linuxcnc
 
 REPO = Path(__file__).resolve().parents[1]
 CFG = REPO / "config" / "sim" / "linumert_xyz"
@@ -103,6 +104,7 @@ def test_headless_run_20s(tmp_path):
     """LinuxCNC z konfiguracją bez ekranu (zastępczy DISPLAY): 20 s pracy, sygnały kontraktu."""
     if shutil.which("linuxcnc") is None:
         pytest.skip("brak LinuxCNC")
+    cleanup_linuxcnc(cwd=tmp_path)  # resztki poprzedniego testu blokują start
     work = tmp_path / "linumert_xyz"
     shutil.copytree(CFG, work)
     ini = work / "linumert_xyz.ini"
@@ -115,7 +117,8 @@ def test_headless_run_20s(tmp_path):
     (work / "linumert_bez_ekranu").chmod(0o755)
     env = {**os.environ, "PATH": f"{work}:{os.environ.get('PATH', '/usr/bin:/bin')}"}
     proc = subprocess.Popen(["linuxcnc", str(ini)], cwd=work, env=env,
-                            stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+                            stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True,
+                            start_new_session=True)
     try:
         time.sleep(20)
         assert proc.poll() is None, proc.stdout.read()
@@ -127,9 +130,4 @@ def test_headless_run_20s(tmp_path):
                 continue  # postgui (ekran)
             assert s in sig
     finally:
-        proc.terminate()
-        try:
-            proc.wait(timeout=30)
-        except subprocess.TimeoutExpired:
-            proc.kill()
-        subprocess.run(["halrun", "-U"], env=env, capture_output=True)
+        stop_linuxcnc(proc, cwd=work)

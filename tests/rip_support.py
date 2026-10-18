@@ -9,6 +9,7 @@ from __future__ import annotations
 import contextlib
 import os
 import shutil
+import signal
 import socket
 import subprocess
 import sys
@@ -34,6 +35,69 @@ def rip_run(root: Path, command: str, cwd: Path, timeout: float = 120,
     return subprocess.run(["bash", "-c", f"source '{root}/scripts/rip-environment' >/dev/null "
                            f"&& {command}"], cwd=cwd, capture_output=True, text=True,
                           timeout=timeout, check=False, env=env)
+
+
+# Procesy LinuxCNC/HAL, które po przerwanym zamknięciu blokują kolejny start (sesja 008).
+LEFTOVERS = ("linuxcnc", "linuxcncsvr", "milltask", "io", "iov2", "halui", "hy_vfd", "rtapi_app")
+LOCK_FILE = Path("/tmp/linuxcnc.lock")
+
+
+def _source(root: Path | None) -> str:
+    return f"source '{root}/scripts/rip-environment' >/dev/null; " if root else ""
+
+
+def leftovers() -> list[str]:
+    """Procesy LinuxCNC/HAL bieżącego użytkownika, które jeszcze żyją (`nazwa:pid`)."""
+    found = subprocess.run(["pgrep", "-u", str(os.getuid()), "-l", "-x", "|".join(LEFTOVERS)],
+                           capture_output=True, text=True, check=False).stdout
+    return [":".join(line.split()[::-1]) for line in found.splitlines() if line.strip()]
+
+
+def cleanup_linuxcnc(root: Path | None = None, cwd: Path | None = None) -> None:
+    """Sprzątanie po LinuxCNC: `halrun -U`, zabicie pozostałych procesów, plik blokady.
+
+    Bezpieczne do wywołania zawsze; gdy nic nie zostało, nie robi nic.
+    """
+    if not leftovers() and not LOCK_FILE.exists():
+        return
+    names = "|".join(LEFTOVERS)
+    subprocess.run(["bash", "-c", f"{_source(root)}halrun -U >/dev/null 2>&1; "
+                    f"pkill -KILL -u $(id -u) -x '{names}'; true"],
+                   cwd=cwd, capture_output=True, text=True, timeout=60, check=False)
+    deadline = time.monotonic() + 10
+    while leftovers() and time.monotonic() < deadline:
+        time.sleep(0.1)
+    LOCK_FILE.unlink(missing_ok=True)
+    left = leftovers()
+    assert not left, f"po sprzątaniu LinuxCNC zostały procesy: {left}"
+
+
+def start_linuxcnc(root: Path, ini: Path, env: dict | None = None) -> subprocess.Popen:
+    """`linuxcnc <ini>` z RIP we własnej grupie procesów (zatrzymanie: `stop_linuxcnc`)."""
+    cleanup_linuxcnc(root, ini.parent)  # resztki poprzedniego testu blokują start
+    return subprocess.Popen(["bash", "-c", f"{_source(root)}exec linuxcnc '{ini}'"],
+                            cwd=ini.parent, env=env, stdout=subprocess.PIPE,
+                            stderr=subprocess.STDOUT, text=True, start_new_session=True)
+
+
+def stop_linuxcnc(proc: subprocess.Popen, root: Path | None = None, cwd: Path | None = None,
+                  timeout: float = 60) -> None:
+    """Zamyka LinuxCNC uruchomiony w osobnej grupie procesów i sprząta resztki.
+
+    SIGTERM idzie do całej grupy: sam skrypt `linuxcnc` czeka na proces ekranu (zastępczy
+    `sleep`) i do jego końca nie obsłuży sygnału, więc samo `terminate()` kończyło się po
+    limicie czasu `kill()` bez `Cleanup` i zostawiało `linuxcncsvr`/`milltask`/`rtapi_app`.
+    """
+    if proc.poll() is None:
+        with contextlib.suppress(ProcessLookupError):
+            os.killpg(proc.pid, signal.SIGTERM)
+        try:
+            proc.wait(timeout=timeout)
+        except subprocess.TimeoutExpired:
+            with contextlib.suppress(ProcessLookupError):
+                os.killpg(proc.pid, signal.SIGKILL)
+            proc.wait(timeout=10)
+    cleanup_linuxcnc(root, cwd)
 
 
 @contextlib.contextmanager

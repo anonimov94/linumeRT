@@ -22,6 +22,7 @@ sesji: proces, scalenia, przeglądy). Treść: zrobione · testy · decyzje · d
 | [005](#005--kopia-bazowa-ekranu-qtdragon-pr-25--2026-10-18--claude-d31) | Kopia bazowa ekranu QtDragon | #25 | Claude (D31) |
 | [006](#006--rdzeń-model-stanu-maszyny-i-atrapa-pr-5--2026-10-18--claude-sonnet-55) | Rdzeń: model stanu maszyny i atrapa | #5 | Claude (Sonnet 5.5) |
 | [007](#007--katalog-alarmów-i-manager-pr-6--2026-10-18--claude-sonnet-55) | Katalog alarmów i manager | #6 | Claude (Sonnet 5.5) |
+| [008](#008--bufor-i-bramka-g0-pr-35--2026-10-18--claude-opus-55) | Bufor i bramka G0 | #35 | Claude (Opus 5.5) |
 | [009](#009--specyfikacja-wirtualnej-maszyny-plant-pr-7--2026-10-18--claude-sonnet-55) | Specyfikacja wirtualnej maszyny Plant | #7 | Claude (Sonnet 5.5) |
 | [010](#010--schemat-i-walidacja-machineyaml-pr-8--2026-10-18--claude) | Schemat i walidacja machine.yaml | #8 | Claude |
 | [011](#011--plant-rdzeń-dynamiki-osi-c-pr-9--2026-10-18--claude-sonnet-55) | Plant: rdzeń dynamiki osi (C) | #9 | Claude (Sonnet 5.5) |
@@ -276,3 +277,10 @@ Uzupełnienie: README plant/core (liczby testów 29/59/20, bazowanie, parametry 
 - Konflikty: dokumenty statusowe (wersja z #33; PROVENANCE z obu stron), `Makefile` (`test-san` i `test-linuxcnc`), `tests/test_ip_guard.py` (`docs/raporty/` dozwolone, wyjątek sesji 003 zbędny); usunięty `nextPROMPT.md`.
 - Testy na zintegrowanym drzewie (Debian 12): ruff czysty, pytest 499 OK, testy C i ASan/UBSan bez błędów; testy z LinuxCNC RIP: wynik w commicie scalenia #33.
 
+## 008 — Bufor i bramka G0 (PR #35) · 2026-10-18 · Claude (Opus 5.5)
+- Krok 0 (`prompts/archiwum/START-008.md`): 4 testy LinuxCNC padały w pełnym przebiegu, bo `terminate()` trafiał tylko w skrypt `linuxcnc` (bash czeka na zastępczy ekran `sleep 3600`), po `kill()` bez `Cleanup` zostawały `linuxcncsvr`, `sleep` i `/tmp/linuxcnc.lock`; potwierdzone na `ps`. Poprawka w `tests/rip_support.py`: `start_linuxcnc`/`stop_linuxcnc` (grupa procesów), `cleanup_linuxcnc` (`halrun -U`, resztki po nazwie, blokada); autouse w `conftest.py` po każdym teście `linuxcnc`.
+- Sesja 008: zaległość 006, czyli czytnik `LinuxCNCReader` sprawdzony na RIP (`tests/test_reader_linuxcnc.py`: stan, bazowanie, G55, pozycje, limity INI, kody G/M, wrzeciono); `docs/raporty/G0.md` (checklista użytkownika: WSL lub VM-A, ekran linumert, Plant); README: architektura w 10 linijkach.
+- Testy (Windows 11 + WSL Ubuntu 24.04, RIP 2.9, świeży klon w systemie plików WSL): ruff czysty, pytest 499 OK, testy C 29/59/20, `-m linuxcnc` 61/61 trzy razy pod rząd, bez resztek procesów. Raz `test_sim_import_home_and_mdi` (Codex) padł na przekroczeniu czasu IO (pętla task 5 s), potem zielony 3×.
+- Pozostałe zaległości 001–007 bez zmian i z właścicielem: tłumaczenia Qt (007, sesje ekranu), słowa zakazane w SLOWNIK (002, przegląd właściciela), PyQt5 GPL-3 (080). CI na `main` zielone.
+- Do sprawdzenia ręcznie: `docs/raporty/G0.md` (bramka G0), wynik w tabeli §5.
+- Długi: brak testu na Debianie 12 w podmanie w tej sesji; checkout na dysku Windows (`core.symlinks=false`) psuje dowiązanie ekranu, opisane w G0.md. Autokontrola, bez niezależnego przeglądu. NIEZWERYFIKOWANE NA SPRZĘCIE.
