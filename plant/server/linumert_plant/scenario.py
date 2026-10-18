@@ -217,6 +217,7 @@ class ScenarioResult:
     events: list[str] = field(default_factory=list)
     positions: dict[str, float] = field(default_factory=dict)
     axis_drives: dict[str, list[str]] = field(default_factory=dict)
+    start_positions: dict[str, float] = field(default_factory=dict)  # przy pierwszym ruchu
     ferr_max: dict[str, float] = field(default_factory=dict)  # oś → maks. |błąd| [mm]
     lost_steps: dict[str, int] = field(default_factory=dict)
     completed: bool = False
@@ -276,9 +277,12 @@ def evaluate(result: ScenarioResult) -> None:
                                           not extra, ", ".join(extra) or "brak"))
         elif kind == "position":
             got = res.positions.get(axis)
+            relative = bool(arg.get("relative"))
+            if relative and got is not None:  # względem pozycji przy pierwszym ruchu
+                got -= res.start_positions.get(axis, 0.0)
             ok = got is not None and abs(got - float(arg["value"])) <= float(arg.get("tol", 0.01))
-            res.criteria.append(Criterion(f"pozycja {axis} = {arg['value']} ± "
-                                          f"{arg.get('tol', 0.01)}", ok,
+            res.criteria.append(Criterion(f"pozycja {axis} {'względna ' if relative else ''}= "
+                                          f"{arg['value']} ± {arg.get('tol', 0.01)}", ok,
                                           f"{got if got is None else round(got, 4)}"))
         elif kind == "drive_state":
             target = str(arg.get("drive") or axis)
@@ -483,6 +487,9 @@ class MockRun:
     def _do(self, step: Step) -> None:
         p = step.params
         a = step.action
+        if a in ("move", "mdi", "program") and not self.result.start_positions:
+            self.result.start_positions = {k: round(self.position(k), 4)
+                                           for k, d in self.joint_drives.items() if d}
         self.result.log.append(f"{self.t:7.3f} s  {a} {p if p else ''}".rstrip())
         srv = self.server
         if a == "enable":

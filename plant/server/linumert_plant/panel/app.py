@@ -27,6 +27,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from ..drive_template import PARAM_BY_PATH, TemplateError
+from ..faults import FaultError
 from ..server import PlantServer
 from . import presets as preset_store
 from .record import NAME_RE as RECORD_NAME_RE
@@ -222,6 +223,29 @@ def create_app(server: PlantServer, state_dir: Path | str = Path("state")) -> Fa
         except preset_store.PresetError as exc:
             raise _bad(exc) from None
         return {"name": name, "file": path.name}
+
+    # ---- awarie (sesja 024: API dla runnera scenariuszy; zakładka panelu: sesja 023) ------
+    @app.get("/api/faults")
+    def faults() -> dict:
+        with server._lock:
+            drives = {d: server.machine.drive_state(d) for d in server.drives}
+        return {"catalog": server.faults.catalog(), "active": server.faults.active(),
+                "drives": drives, "dropped": server.fault_state.dropped}
+
+    @app.post("/api/faults/{kind}")
+    def fault_inject(kind: str, params: dict[str, Any] | None = None) -> dict:
+        try:
+            return server.faults.inject(kind, **(params or {}))
+        except (FaultError, TemplateError, KeyError, ValueError) as exc:
+            raise _bad(exc) from None
+
+    @app.post("/api/faults/{kind}/clear")
+    def fault_clear(kind: str, params: dict[str, Any] | None = None) -> dict:
+        try:
+            server.faults.clear(kind, **(params or {}))
+        except (FaultError, TemplateError, KeyError, ValueError) as exc:
+            raise _bad(exc) from None
+        return {"active": server.faults.active()}
 
     # ---- wirtualny pulpit -------------------------------------------------------------
     def desk():

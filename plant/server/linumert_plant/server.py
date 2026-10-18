@@ -387,6 +387,9 @@ class PlantServer:
                 "watchdog_tripped": self.watchdog_tripped, "model_failed": self.model_failed,
                 "digest": self.digest, "oracle": self.oracle.report(),
                 "events": [asdict(e) for e in self.events[:500]],
+                "machine_events": sorted(self.machine.events()),
+                "drive_states": {d: self.machine.drive_state(d) for d in self.drives},
+                "faults_active": self.faults.active(),
                 "spindle_tool": self.atc.spindle_tool, "slots": list(self.atc.slots),
                 "spindle": {"rpm": round(self.spindle.rpm, 1), "fault": self.spindle.fault}}
 
