@@ -13,6 +13,7 @@ tego projektu (D14).
 |---|---|---|---|---|
 | numpy | obliczenia numeryczne (rdzeń, symulacja) | BSD-3-Clause | tak | sesja 001 |
 | PyYAML (`pyyaml`) | `machine.yaml`, katalog alarmów, tokeny | MIT | tak | sesja 001 |
+| pydantic | schemat i walidacja `machine.yaml` (wymagane v2) | MIT | tak | sesja 010 |
 | pytest (dev) | testy | MIT | tak (tylko narzędzie dev) | sesja 001 |
 | ruff (dev) | lint | MIT | tak (tylko narzędzie dev) | sesja 001 |
 
