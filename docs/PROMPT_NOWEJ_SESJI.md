@@ -12,14 +12,13 @@ modelem. Pracujecie na zmianę, nigdy równolegle. Użytkownik jest użytkowniki
 3. Linia `Tura:` w NASTEPNA_SESJA.md: nie wchodź w turę drugiego modelu młodszą niż 2 h od ostatniego pusha.
 
 ## Stan (2026-10-18, po sesji 013)
-- Otwarte, niezależne względem main: #4 (protokół v2, scala Codex jako pierwszy), #5 (006), #6 (007,
-  katalog alarmów), #7 (009), #8 (010, machine.yaml), #9 (011, rdzeń osi), #10 (012, napęd CiA 402; zależy
-  od #9) i PR sesji 013 (`wip/sesja-013`, biblioteka napędów; zależy od #10 i #9). Kolejność scalania:
-  #4, #5–#9, #10, potem PR 013. #3 (LinuxCNC CI) u Codexa.
-- Sesja 013 dała: 7 szablonów YAML (`plant/library/drives/`), moduł `linumert_plant.drive_template` /
-  `drive_library`, CLI `python -m linumert_plant drive ...`, API live w rdzeniu C (`lrt_axis_set_live`).
-  Sesja 014 (kinematyka, przejazdy, zderzaki, krańcówki) buduje na `machine.yaml` (#8) i
-  `drive_library.resolve_instances()`; prompt: `prompts/START-014.md`.
+- W main: #1, #2, #4, #5. Otwarte: #3 (LinuxCNC CI, Codex), #6 (007, katalog alarmów), #7 (009), #8 (010,
+  machine.yaml), #9 (011, rdzeń osi), #10 (012, napęd CiA 402; zależy od #9) i PR sesji 013
+  (`wip/sesja-013`, biblioteka napędów; zawiera #8 i #10/#9). Kolejność scalania: #6–#9, #10, potem PR 013.
+- Sesja 013 dała: 7 szablonów YAML (`plant/library/drives/`), `linumert_plant.drive_template` /
+  `drive_library` / `machine_drives` (instancje `drives:` z `machine.yaml`), CLI `python -m plant drive ...`
+  (list, show, validate, clone, schema, instances), API live w C (`lrt_axis_set_live`, `lrt_drive_set_live`,
+  dziennik `live.h`). Sesja 014 (kinematyka, przejazdy, zderzaki, krańcówki): `prompts/START-014.md`.
 - Po scaleniach możliwe konflikty na końcu DZIENNIK.md, DECYZJE.md, PROVENANCE.md i prompts/DONE.md: zostaw
   wszystkie wpisy; `docs/PROMPT_NOWEJ_SESJI.md` — weź wersję z najnowszego PR; `ci.yml` — zachowaj
   `make test-c`.

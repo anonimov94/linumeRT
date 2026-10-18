@@ -4,7 +4,7 @@ Prompt startowy i stan bieżący: `docs/PROMPT_NOWEJ_SESJI.md` (aktualizować na
 
 Model-Author: Codex · 2026-10-17
 
-Tura: Claude · od 2026-10-18 · stan: w toku (sesja 013, dokończenie)
+Tura: Claude · od 2026-10-18 · stan: oddana (sesja 013 w PR z `wip/sesja-013`; kolejność przeglądu: #6–#9, #10, potem 013)
 
 ## Katalog i Git
 
@@ -68,15 +68,12 @@ w dzienniku. Nie instaluj ani nie uruchamiaj sterowania rzeczywistą maszyną.
 
 ## Zlecenia po sesji 013 (Model-Author: Claude → Codex)
 
-1. **Wprowadź sesję 013 do git:** utwórz `wip/sesja-013` z `origin/wip/sesja-012` (albo z `main`, jeśli #10
-   jest scalony), rozpakuj paczkę `linumert-sesja-013.zip` w korzeniu repo (ścieżki względne od korzenia),
-   `git status`, `make lint test test-c`, commit `sesja 013: biblioteka napędów wirtualnych`
-   z `Model-Author: Claude`, push i PR z bazą `main` (w opisie: zależność od #10 i #9).
-2. **Po scaleniu #6:** `pytest tests/test_plant_core.py -rs` — test spójności tablicy awarii z katalogiem
-   alarmów ma przejść bez pominięcia.
-3. **Po scaleniu #8:** podłącz `drive_library.resolve_instances()` do ładowarki `machine.yaml` (sekcja
-   `drives:`) i sprawdź, czy przykładowe maszyny z sesji 010 używają id szablonów z biblioteki.
-4. **Przegląd niezależny:** wartości 7 szablonów (przykładowe), reguły między polami w
-   `drive_template._cross_checks`, rdzeń C `lrt_axis_set_live` (axis.c) i narzędzie `plant/core/tools/check_params.c`.
-5. Następna sesja Claude: 014 (`prompts/START-014.md`).
-
+1. **Przegląd PR sesji 013** (gałąź `wip/sesja-013`, SHA w opisie PR). PR zawiera scalone `wip/sesja-010`
+   (#8) oraz commity #9/#10 — scalaj po nich albo razem z nimi. Uwaga: dotyka kodu #8
+   (`core/linumert/machine/schema.py`: `id` jako alias `name`; przykładowe maszyny używają szablonów
+   biblioteki; jedna nazwa szablonu w `tests/test_machine_config.py`).
+2. **Przejrzyj niezależnie:** wartości 7 szablonów (przykładowe), `drive_template._cross_checks`,
+   `machine_drives.py` (zgodność linear/rotary), `lrt_drive_set_live` i `live.c`, fizyczny test C
+   `test_drive_live_heavier_load_lowers_max_acceleration`.
+3. **Po scaleniu #6:** `pytest tests/test_plant_core.py -rs` — test spójności tablicy awarii ma przejść bez skipu.
+4. Następna sesja Claude: 014 (`prompts/START-014.md`).

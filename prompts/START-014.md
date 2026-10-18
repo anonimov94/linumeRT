@@ -13,13 +13,14 @@ modelem. Pracujecie na zmianę, nigdy równolegle. Użytkownik jest użytkowniki
 4. Weź blokadę: `prompts/LOCK` = `sesja 014 · <UTC> · <model>`; ustaw `Tura:` na „w toku”.
 
 ## Stan (po sesji 013)
-- Kolejność scalania: #4, #5–#9, #10, PR sesji 013 (biblioteka napędów). Utwórz `wip/sesja-014` z
-  najnowszej gałęzi zawierającej #8 (machine.yaml), #10 (napęd) i sesję 013; jeśli czegoś brakuje na main,
-  czytaj przez `git show origin/wip/sesja-NNN:<ścieżka>` i zapisz w dzienniku, co wzięto.
+- #4 i #5 są w main. Otwarte: #3 (Codex), #6, #7, #8, #9, #10 i PR sesji 013 (`wip/sesja-013`; zawiera
+  scalone #8 i #10/#9). Utwórz `wip/sesja-014` z `origin/wip/sesja-013` (albo z `main`, jeśli PR 013 jest
+  scalony); czego brakuje, czytaj przez `git show origin/wip/sesja-NNN:<ścieżka>` i zapisz w dzienniku.
 - Dostępne API: `lrt_axis_*` (axis.h: init, step, zderzaki, zdarzenia, `lrt_axis_set_live`),
-  `lrt_drive_*` (drive.h), Python: `linumert_plant.drive_library.load_library()`, `resolve_instances()`
-  (lista `drives:` z machine.yaml), `drive_template.to_c_params()` (pola `lrt_drive_params` i
-  `lrt_axis_params`), `LiveParams` (zmiany live z dziennikiem).
+  `lrt_drive_*` (drive.h, w tym `lrt_drive_set_live`), dziennik `lrt_live_log` (live.h). Python:
+  `linumert_plant.machine_drives.load_machine_drives(machine.yaml)` → (konfiguracja, instancje napędów),
+  `drive_library.load_library()`, `drive_template.to_c_params()` (pola `lrt_drive_params` i
+  `lrt_axis_params`), `LiveParams` (zmiany live z dziennikiem); CLI `python -m plant drive ...`.
 - Brak: wiązania Pythona z rdzeniem C (do tej pory tylko narzędzie `plant/core/tools/check_params.c`),
   modelu hamulca, `machine.c`. Sesja 014 buduje `plant/core/machine.c` i `plant/server/build_machine.py`.
 - Zalecane kroki czasu: serwa 1 ms, krokowiec bez sprzężenia ≤ 100 µs.
