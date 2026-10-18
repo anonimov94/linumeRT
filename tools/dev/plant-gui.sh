@@ -10,7 +10,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/../.."
 RIPHOME=$HOME/.cache/linumert/rip-home
-[ -x "$RIPHOME/.cache/linuxcnc-2.9/bin/linuxcnc" ] || {
+[ -f "$RIPHOME/.cache/linuxcnc-2.9/scripts/rip-environment" ] || {
   echo "brak RIP: zbuduj obraz i LinuxCNC (docs/PLANT_START.md)" >&2; exit 2; }
 CFG=config/plant/linumert_plant_xyz
 X=()
