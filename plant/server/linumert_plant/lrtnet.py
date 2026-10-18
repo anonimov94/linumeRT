@@ -10,6 +10,7 @@ przez serwer, proces działa dalej (REQ-QA-03).
 
 from __future__ import annotations
 
+import math
 import struct
 import zlib
 from dataclasses import dataclass
@@ -36,7 +37,8 @@ FLAG_ESTOP_OPEN = 0x02  # plant: pętla E-STOP otwarta
 
 
 class FrameError(ValueError):
-    """Ramka odrzucona: zły magic, wersja, typ, długość, liczba osi albo CRC."""
+    """Ramka odrzucona: zły magic, wersja, typ, długość, liczba osi, CRC albo pole
+    (niezerowe `reserved`/`pad`, `spindle_*` NaN lub nieskończone)."""
 
 
 def command_size(n_axes: int) -> int:
@@ -107,6 +109,8 @@ def _open(frame: bytes, kind: int, size_of) -> tuple[tuple, int]:
         raise FrameError(f"nieobsługiwana wersja {version}")
     if ftype != kind:
         raise FrameError(f"zły typ ramki {ftype}")
+    if head[7] != 0:
+        raise FrameError(f"niezerowe pole reserved 0x{head[7]:04X}")
     if not 1 <= n_axes <= MAX_AXES:
         raise FrameError(f"liczba osi {n_axes} poza 1–{MAX_AXES}")
     if len(frame) != size_of(n_axes):
@@ -134,10 +138,14 @@ def decode_command(frame: bytes) -> Command:
     axes = []
     off = HEADER.size
     for _ in range(n):
-        cw, mode, _pad, target = CMD_AXIS.unpack_from(frame, off)
+        cw, mode, pad, target = CMD_AXIS.unpack_from(frame, off)
+        if pad != 0:
+            raise FrameError(f"niezerowe pole pad osi {len(axes)}")
         axes.append(AxisCommand(cw, mode, target))
         off += CMD_AXIS.size
     dout, spindle = CMD_TAIL.unpack_from(frame, off)
+    if not math.isfinite(spindle):
+        raise FrameError(f"spindle_cmd nieskończone lub NaN ({spindle})")
     return Command(seq=head[3], time_ns=head[4], axes=axes, digital_out=dout,
                    spindle_cmd=spindle, flags=head[6])
 
@@ -163,10 +171,14 @@ def decode_reply(frame: bytes) -> Reply:
     axes = []
     off = HEADER.size
     for _ in range(n):
-        sw, mode, _pad, pos, ferr, torque, err = REPLY_AXIS.unpack_from(frame, off)
+        sw, mode, pad, pos, ferr, torque, err = REPLY_AXIS.unpack_from(frame, off)
+        if pad != 0:
+            raise FrameError(f"niezerowe pole pad osi {len(axes)}")
         axes.append(AxisReply(sw, mode, pos, ferr, torque, err))
         off += REPLY_AXIS.size
     din, spindle, lost, late, jitter = REPLY_TAIL.unpack_from(frame, off)
+    if not math.isfinite(spindle):
+        raise FrameError(f"spindle_actual nieskończone lub NaN ({spindle})")
     return Reply(seq=head[3], time_ns=head[4], axes=axes, digital_in=din, spindle_actual=spindle,
                  frames_lost=lost, frames_late=late, jitter_us=jitter, flags=head[6])
 
