@@ -14,10 +14,10 @@ lint:
 test:
 	$(PYTHON) -m pytest
 
-# No-op do sesji 011 (rdzen dynamiki Plant w C).
+# Testy rdzenia dynamiki Plant w C (od sesji 011).
 test-c:
 	@if [ -f plant/core/Makefile ]; then $(MAKE) -C plant/core test; \
-	else echo "test-c: brak plant/core/Makefile (rdzen C powstaje w sesji 011) - pomijam"; fi
+	else echo "test-c: brak plant/core/Makefile - pomijam"; fi
 
 # No-op do sesji 003 (LinuxCNC w srodowisku agenta).
 test-linuxcnc:
