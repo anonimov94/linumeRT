@@ -46,6 +46,9 @@ drives:
   - {id: drv_z, template: servo_750w, overrides: {mechanics: {load: 40.0}}}
   - {id: drv_spindle, template: spindle_vfd_22kw}
 spindle: {drive: drv_spindle, max_rpm: 8000, min_rpm: 100}
+# Strefa zakazana: magazyn narzędzi w rogu stołu (wyrocznia Plant, REQ-VM-06, sesja 019)
+forbidden_zones:
+  - {name: magazyn_narzedzi, min: [520, 820, -200], max: [600, 900, 0]}
 positions:
   manual_change: [300, 450, -5]
   safe_z: -5

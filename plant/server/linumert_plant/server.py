@@ -43,6 +43,7 @@ from .lrtnet import (
     encode_reply,
     seq_delta,
 )
+from .oracle import Oracle
 from .trace import TraceWriter
 
 log = logging.getLogger("linumert_plant.server")
@@ -74,6 +75,7 @@ class PlantConfig:
     state_file: Path | None = None
     trace_path: Path | None = None
     trace_format: str = "csv"
+    oracle_arm_bit: int | None = 31  # bit digital_out uzbrajający wyrocznię (None = zawsze)
 
     def check(self) -> None:
         errors = []
@@ -87,6 +89,8 @@ class PlantConfig:
             errors.append(f"timing.substeps: {self.substeps} poza 1–100")
         if not 1 <= self.watchdog_ms <= 10_000:
             errors.append(f"timing.watchdog_ms: {self.watchdog_ms} poza 1–10000")
+        if self.oracle_arm_bit is not None and not 0 <= self.oracle_arm_bit <= 31:
+            errors.append(f"oracle.arm_bit: {self.oracle_arm_bit} poza 0–31 (null = zawsze)")
         if self.trace_format not in ("csv", "jsonl"):
             errors.append(f"trace.format: {self.trace_format!r} — dozwolone csv, jsonl")
         if errors:
@@ -116,6 +120,7 @@ def load_plant_config(path: Path | str) -> PlantConfig:
         return None if value in (None, "") else (base / str(value))
 
     net, timing, trace = section("network"), section("timing"), section("trace")
+    oracle = section("oracle")
     try:
         cfg = PlantConfig(
             machine=rel(data.get("machine")), listen=str(net.get("listen", "127.0.0.1")),
@@ -124,7 +129,9 @@ def load_plant_config(path: Path | str) -> PlantConfig:
             watchdog_ms=float(timing.get("watchdog_ms", 50)),
             mode=str(data.get("mode", "lockstep")), seed=int(data.get("seed", 1)),
             state_file=rel(data.get("state_file")),
-            trace_path=rel(trace.get("path")), trace_format=str(trace.get("format", "csv")))
+            trace_path=rel(trace.get("path")), trace_format=str(trace.get("format", "csv")),
+            oracle_arm_bit=(None if oracle.get("arm_bit", 31) is None
+                            else int(oracle.get("arm_bit", 31))))
     except (TypeError, ValueError) as exc:
         raise PlantConfigError(f"{path}: zły typ wartości ({exc})") from None
     cfg.check()
@@ -173,6 +180,7 @@ class PlantServer:
         self._mode = {d: None for d in self.drives}
         self.mode_rejects = 0
         self._target = {d: 0 for d in self.drives}
+        self.oracle = Oracle.for_machine(machine, self.drives, self.cfg.oracle_arm_bit)
         self._estop = self._estop_input()
         self._lock = threading.Lock()
         self._stop = threading.Event()
@@ -238,6 +246,14 @@ class PlantServer:
                    "wymagany restart Plant")
 
     # ---- protokół ----------------------------------------------------------------------
+    def report(self) -> dict:
+        """Raport przebiegu (statystyki LRT-NET i wyrocznia REQ-VM-06) do pliku JSON."""
+        s = self.stats
+        return {"machine": self.machine.model.name, "frames": s.received,
+                "rejected": s.rejected, "lost": s.lost, "late": s.late, "steps": s.steps,
+                "watchdog_tripped": self.watchdog_tripped, "model_failed": self.model_failed,
+                "digest": self.digest, "oracle": self.oracle.report()}
+
     def handle(self, frame: bytes, now_ns: int | None = None) -> bytes | None:
         """Jedna ramka master→plant. Zwraca odpowiedź albo None (ramka odrzucona)."""
         with self._lock:
@@ -282,6 +298,10 @@ class PlantServer:
                     sub = self.cfg.substeps
                     self.machine.step(dt_ns / 1e9 / sub, sub)
                     self.stats.steps += 1
+                    for v in self.oracle.check(self.machine, cmd, self.drives):
+                        if self.oracle.total <= 20:
+                            self._note(f"ORACLE_VIOLATION {v.kind} {v.name}: {v.detail} "
+                                       f"(ramka {v.seq})")
                 except Exception as exc:  # noqa: BLE001 - REQ-QA-03: proces nie może upaść
                     self.safe_state(f"{type(exc).__name__}: {exc}")
         reply = encode_reply(self._reply(cmd.seq, cmd.time_ns))

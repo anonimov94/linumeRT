@@ -3,7 +3,7 @@
 # Wejścia Plant (machine.yaml io.inputs) = stan elektryczny: 1 = obwód zamknięty.
 #   din-00 estop (NC)  din-01 lim_x_min (NC)  din-02 lim_x_max (NC)  din-03 lim_y_min (NC)
 #   din-04 lim_y_max (NC)  din-05 lim_z_max (NC)  din-06 toolsetter  din-07 probe (NO)
-# Wyjścia: dout-00 spindle_on, dout-01 coolant.
+# Wyjścia: dout-00 spindle_on, dout-01 coolant, dout-31 = wszystkie osie zbazowane (wyrocznia).
 # Model-Author: Claude · sesja 018. NIEZWERYFIKOWANE NA SPRZĘCIE.
 
 loadrt [KINS]KINEMATICS
@@ -116,6 +116,9 @@ net linumert.spindle.index     spindle.0.index-enable <=> sim_spindle.index-enab
 net linumert.spindle.at-speed  => spindle.0.at-speed
 sets linumert.spindle.at-speed 1
 net linumert.spindle.rpm-cmd   spindle.0.speed-out => lrt-net.0.spindle-speed-cmd
+
+# ---- wyrocznia Plant (REQ-VM-06): uzbrojona po bazowaniu wszystkich osi (plant.yaml oracle.arm_bit)
+net linumert.homed           motion.is-all-homed => lrt-net.0.dout-31
 
 # ---- narzędzia i chłodzenie -------------------------------------------------------------------
 net linumert.io.tool-prepare   iocontrol.0.tool-prepare => iocontrol.0.tool-prepared
