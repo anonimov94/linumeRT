@@ -14,3 +14,4 @@ jobs:
         with:
           python-version: "3.11"
       - run: make install lint test
+      - run: make test-c

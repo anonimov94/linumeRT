@@ -15,6 +15,7 @@ classifiers = [
 ]
 dependencies = [
     "numpy",
+    "pydantic",
     "pyyaml",
 ]
 
@@ -42,6 +43,9 @@ packages = [
     "linumert_sim",
     "linumert_plant",
 ]
+
+[tool.setuptools.package-data]
+"linumert.alarms" = ["catalog.yaml"]
 
 [tool.setuptools.package-dir]
 linumert = "core/linumert"
