@@ -160,3 +160,8 @@ Poprawiono teksty; przegląd wsteczny #13–#17 pozostaje do wykonania.
 Uzupełnienie audytu: MACIERZ.md — 11 wymagań (REQ-VD-01…05, REQ-VM-01…05, REQ-VM-11) ma testy z tagami REQ w main, status zmieniony z „planowane” na „zaimplementowane” (jak REQ-VM-07; „zielone” po przeglądzie niezależnym). PROVENANCE: dopisano sesje 016, 032, 039, 044.
 
 Uzupełnienie: README plant/core (liczby testów 29/59/20, bazowanie, parametry w locie) oraz README pakietów cnc, machine, programs zgodne z modułami.
+
+## Blokady zasobów (D30) — 2026-10-18 (Model-Author: Claude)
+
+- Zrobione: `tools/lock.py` (acquire/release/status, O_EXCL, TTL 2 h, przejęcie przerwanej), 4 testy, zasady w WSPOLPRACA_MODELI §2a, D30, PROVENANCE.
+- Zasoby: `linuxcnc`, `wsl-build`. Nie zastępuje tur ani prompts/LOCK. Do przeglądu przez Codexa (używa LinuxCNC).
