@@ -300,6 +300,8 @@ const char *lrt_drive_strerror(int status)
         return "wartosc poza zakresem obiektu";
     case LRT_DRIVE_ERR_UNSUPPORTED:
         return "wartosc nieobslugiwana przez model napedu";
+    case LRT_DRIVE_ERR_LIVE:
+        return "nieznany parametr zmieniany w locie albo wartosc poza zakresem";
     default:
         return "nieznany kod bledu";
     }
@@ -1152,6 +1154,52 @@ int lrt_drive_step(lrt_drive *d, const lrt_drive_feedback *fb, double dt, double
     update_overload(d, tau, dt);
     update_reports(d, tau);
     d->prev_controlword = d->controlword;
+    d->time += dt;
     *torque_cmd = tau;
+    return LRT_DRIVE_OK;
+}
+
+/* ---------- parametry zmieniane w locie (REQ-VD-04) ---------- */
+
+int lrt_drive_get_live(const lrt_drive *d, int param, double *value)
+{
+    if (d == NULL || value == NULL) {
+        return LRT_DRIVE_ERR_NULL;
+    }
+    switch (param) {
+    case LRT_LIVE_TORQUE_LIMIT:
+        *value = (double)d->torque_limit_permille;
+        return LRT_DRIVE_OK;
+    case LRT_LIVE_INERTIA_EST:
+        *value = d->p.inertia_est;
+        return LRT_DRIVE_OK;
+    default:
+        return LRT_DRIVE_ERR_LIVE;
+    }
+}
+
+int lrt_drive_set_live(lrt_drive *d, int param, double value, lrt_live_log *log)
+{
+    double old_value;
+
+    if (d == NULL) {
+        return LRT_DRIVE_ERR_NULL;
+    }
+    if (!isfinite(value) || lrt_drive_get_live(d, param, &old_value) != LRT_DRIVE_OK) {
+        return LRT_DRIVE_ERR_LIVE;
+    }
+    if (param == LRT_LIVE_TORQUE_LIMIT) {
+        if (value < 0.0 || value > (double)max_torque_permille(&d->p) ||
+            value != floor(value)) {
+            return LRT_DRIVE_ERR_LIVE;
+        }
+        d->torque_limit_permille = (uint16_t)value;
+    } else {
+        if (value < 0.0 || value > 1.0e3) {
+            return LRT_DRIVE_ERR_LIVE;
+        }
+        d->p.inertia_est = value;
+    }
+    lrt_live_log_append(log, d->time, param, old_value, value);
     return LRT_DRIVE_OK;
 }

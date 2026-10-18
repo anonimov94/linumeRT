@@ -19,6 +19,8 @@
 #ifndef LRT_PLANT_AXIS_H
 #define LRT_PLANT_AXIS_H
 
+#include "live.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -136,36 +138,9 @@ typedef struct {
     double supply_scale;   /* napiecie zasilania wzgledem znamionowego (mnoznik krzywej momentu) */
 } lrt_axis;
 
-/* Parametry zmieniane w trakcie pracy (REQ-VD-04: masa, J, tarcie, luz, napiecie).
- * Limit momentu (6072h) zmienia sie przez lrt_drive_od_write(). */
-typedef enum {
-    LRT_LIVE_LOAD = 0,           /* masa [kg] albo moment bezwladnosci [kg*m^2], >= 0 */
-    LRT_LIVE_J_MOTOR,            /* wirnik [kg*m^2], >= 0 */
-    LRT_LIVE_J_SCREW,            /* sruba/sprzeglo [kg*m^2], >= 0 */
-    LRT_LIVE_FRICTION_COULOMB,   /* [N*m], 0 <= wartosc <= friction_static */
-    LRT_LIVE_FRICTION_STATIC,    /* [N*m], >= friction_coulomb */
-    LRT_LIVE_FRICTION_VISCOUS,   /* [N*m*s/rad], >= 0 */
-    LRT_LIVE_BACKLASH,           /* luz [m] albo [rad]; nie zmienia trybu sztywny/dwuczlonowy */
-    LRT_LIVE_SUPPLY_SCALE,       /* napiecie zasilania / znamionowe, 0.05..2 */
-    LRT_LIVE_COUNT
-} lrt_live_param;
-
-#define LRT_LIVE_LOG_SIZE 64
-
-/* Wpis dziennika zmian: czas modelu, parametr, wartosc przed i po. */
-typedef struct {
-    double t;
-    int param;
-    double old_value;
-    double new_value;
-} lrt_live_entry;
-
-/* Dziennik zmian: bufor kolowy o stalym rozmiarze (bez alokacji); najstarsze wpisy
- * sa nadpisywane, licznik `total` liczy wszystkie zapisane zmiany. */
-typedef struct {
-    lrt_live_entry entries[LRT_LIVE_LOG_SIZE];
-    unsigned total;
-} lrt_live_log;
+/* Parametry zmieniane w trakcie pracy (REQ-VD-04): lrt_live_param i dziennik w live.h.
+ * Os obsluguje LRT_LIVE_LOAD..LRT_LIVE_SUPPLY_SCALE; limit momentu i estymata J regulatora
+ * zmieniaja sie przez lrt_drive_set_live(). */
 
 /* Wypelnia parametry wartosciami domyslnymi (liniowa os 5 mm/obr, plaska krzywa 1 N*m
  * do 300 rad/s, brak tarcia, luzu, grawitacji i zderzakow; damping_ratio = 0.7). */
@@ -204,13 +179,7 @@ int lrt_axis_step(lrt_axis *a, double torque_cmd, double dt);
  * kod walidacji parametrow osi (np. LRT_AXIS_ERR_FRICTION). */
 int lrt_axis_set_live(lrt_axis *a, int param, double value, lrt_live_log *log);
 int lrt_axis_get_live(const lrt_axis *a, int param, double *value);
-const char *lrt_live_param_name(int param); /* np. "load"; NULL dla nieznanego */
 
-void lrt_live_log_init(lrt_live_log *log);
-unsigned lrt_live_log_size(const lrt_live_log *log);    /* liczba dostepnych wpisow */
-unsigned lrt_live_log_dropped(const lrt_live_log *log); /* nadpisane (utracone) wpisy */
-/* Wpis o numerze i (0 = najstarszy dostepny). Zwraca 0 albo -1, gdy i poza zakresem. */
-int lrt_live_log_get(const lrt_live_log *log, unsigned i, lrt_live_entry *out);
 
 /* Zdarzenia: odczyt i zerowanie flag oraz impact_speed. */
 unsigned lrt_axis_events(const lrt_axis *a);

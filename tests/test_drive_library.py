@@ -525,14 +525,13 @@ def test_live_params_c_mapping(servo: dict) -> None:
     assert live.c_command("mechanics.load", 120.0) == ("LRT_LIVE_LOAD", 120.0)
     target, value = live.c_command("electrical.supply_voltage", 115.0)
     assert target == "LRT_LIVE_SUPPLY_SCALE" and value == pytest.approx(0.5)
-    assert live.c_command("limits.torque_limit_permille", 800) == ("OD:6072h", 800.0)
+    assert live.c_command("limits.torque_limit_permille", 800) == ("LRT_LIVE_TORQUE_LIMIT", 800.0)
     assert set(LIVE_TO_C) == set(LIVE_CAPABLE)
-    header = (CORE / "axis.h").read_text(encoding="utf-8")
+    header = (CORE / "live.h").read_text(encoding="utf-8")
     for target in LIVE_TO_C.values():
-        if target.startswith("LRT_LIVE_"):
-            assert re.search(rf"\b{target}\b", header), target
+        assert re.search(rf"\b{target}\b", header), target
     drive_c = (CORE / "drive.c").read_text(encoding="utf-8")
-    assert "0x6072" in drive_c or "0x6072u" in drive_c
+    assert "case LRT_LIVE_TORQUE_LIMIT" in drive_c
 
 
 def test_live_to_c_resolves_two_body_for_live_backlash(library: dict[str, dict]) -> None:

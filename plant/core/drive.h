@@ -32,6 +32,8 @@
 
 #include <stdint.h>
 
+#include "live.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -59,7 +61,8 @@ typedef enum {
     LRT_DRIVE_ERR_NO_OBJECT = -10, /* obiekt/podindeks nie istnieje */
     LRT_DRIVE_ERR_READ_ONLY = -11, /* zapis do obiektu tylko do odczytu */
     LRT_DRIVE_ERR_RANGE = -12,     /* wartosc poza zakresem obiektu */
-    LRT_DRIVE_ERR_UNSUPPORTED = -13 /* poprawna wartosc, ale model jej nie obsluguje */
+    LRT_DRIVE_ERR_UNSUPPORTED = -13, /* poprawna wartosc, ale model jej nie obsluguje */
+    LRT_DRIVE_ERR_LIVE = -14       /* nieznany parametr live, NaN/inf albo wartosc poza zakresem */
 } lrt_drive_status;
 
 /* Stany maszyny CiA 402. */
@@ -250,6 +253,7 @@ typedef struct {
     double torque_cmd;            /* ostatni moment zadany [N*m] */
     int torque_limited;           /* moment ograniczony w ostatnim kroku */
     long slip_events;             /* licznik poslizgow krokowca (okresy) */
+    double time;                  /* czas od lrt_drive_init() [s]; rosnie po udanym kroku */
 } lrt_drive;
 
 enum {
@@ -309,6 +313,15 @@ long lrt_drive_slip_events(const lrt_drive *d);
  * lrt_drive_clear_fault_cause(), a reset awarii jest odrzucany. sticky = 0: jednorazowa. */
 int lrt_drive_inject_fault(lrt_drive *d, int fault, int sticky);
 void lrt_drive_clear_fault_cause(lrt_drive *d, int fault);
+
+/* Zmiana parametru napedu w locie (REQ-VD-04, sesja 013): LRT_LIVE_TORQUE_LIMIT (6072h,
+ * promile znamionowego, 0..limit wynikajacy z momentu szczytowego) albo LRT_LIVE_INERTIA_EST
+ * (estymata J dla FF przyspieszenia, np. po zmianie masy osi). Stan regulatora jest zachowany.
+ * Kazda udana zmiana trafia do dziennika `log` (moze byc NULL) z czasem modelu napedu.
+ * Przy bledzie nic nie zmienia i nie dopisuje. Zwraca LRT_DRIVE_OK, LRT_DRIVE_ERR_NULL albo
+ * LRT_DRIVE_ERR_LIVE. Parametry osi (masa, J, tarcie, luz, napiecie): lrt_axis_set_live(). */
+int lrt_drive_set_live(lrt_drive *d, int param, double value, lrt_live_log *log);
+int lrt_drive_get_live(const lrt_drive *d, int param, double *value);
 
 #ifdef __cplusplus
 }

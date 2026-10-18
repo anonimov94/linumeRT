@@ -165,7 +165,8 @@ PARAM_BY_PATH = {p.path: p for p in PARAMS}
 LIVE_CAPABLE = tuple(p.path for p in PARAMS if p.live)
 STEPPER_PARAMS = tuple(p.path for p in PARAMS if p.section == "stepper")
 
-# Odwzorowanie parametrów live na rdzeń C (lrt_live_param albo obiekt CiA 402).
+# Odwzorowanie parametrów live na rdzeń C (lrt_live_param z plant/core/live.h): parametry osi
+# idą do lrt_axis_set_live(), limit momentu do lrt_drive_set_live() (6072h, z dziennikiem).
 LIVE_TO_C: dict[str, str] = {
     "motor.rotor_inertia": "LRT_LIVE_J_MOTOR",
     "mechanics.load": "LRT_LIVE_LOAD",
@@ -175,7 +176,7 @@ LIVE_TO_C: dict[str, str] = {
     "mechanics.friction_viscous": "LRT_LIVE_FRICTION_VISCOUS",
     "mechanics.backlash": "LRT_LIVE_BACKLASH",
     "electrical.supply_voltage": "LRT_LIVE_SUPPLY_SCALE",
-    "limits.torque_limit_permille": "OD:6072h",
+    "limits.torque_limit_permille": "LRT_LIVE_TORQUE_LIMIT",
 }
 
 
@@ -626,7 +627,7 @@ class LiveParams:
         return record
 
     def c_command(self, path: str, value: Any) -> tuple[str, float]:
-        """Polecenie dla rdzenia C: ("LRT_LIVE_LOAD", 120.0) albo ("OD:6072h", 800.0)."""
+        """Polecenie dla rdzenia C: ("LRT_LIVE_LOAD", 120.0), ("LRT_LIVE_TORQUE_LIMIT", 800.0)."""
         target = LIVE_TO_C[path]
         if target == "LRT_LIVE_SUPPLY_SCALE":
             return target, float(value) / self.params["electrical"]["nominal_voltage"]

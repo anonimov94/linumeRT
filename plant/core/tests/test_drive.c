@@ -1639,6 +1639,135 @@ static void test_accessors_tolerate_null(void)
     lrt_drive_clear_fault_cause(NULL, 1);
 }
 
+/* ------------------------------------------------------------------------- */
+/* Parametry live napedu (REQ-VD-04, sesja 013)                               */
+/* ------------------------------------------------------------------------- */
+
+/* REQ-VD-04: limit momentu w locie dziala od nastepnego kroku i trafia do dziennika z czasem;
+ * bledne zmiany sa odrzucane bez zmiany stanu i bez wpisu. */
+static void test_drive_live_torque_limit_logged_with_time(void)
+{
+    rig r;
+    lrt_axis_params ap = servo_axis();
+    lrt_drive_params dp = servo_drive(1e-4);
+    lrt_live_log log;
+    lrt_live_entry e;
+    int64_t od = 0;
+    double v = 0.0;
+    double limit = 0.4 * dp.rated_torque;
+    const double bad[] = {NAN, INFINITY, -1.0, 400.5, 1.0e9};
+    unsigned i;
+
+    lrt_live_log_init(&log);
+    rig_init(&r, &ap, &dp, 1e-4);
+    rig_enable(&r);
+    rig_run(&r, 0.01);
+    LRT_CHECK_ABS(r.dr.time, r.t, 1e-12);
+    LRT_CHECK(lrt_drive_set_live(&r.dr, LRT_LIVE_TORQUE_LIMIT, 400.0, &log) == LRT_DRIVE_OK);
+    LRT_CHECK(lrt_drive_od_read(&r.dr, 0x6072u, 0, &od) == LRT_DRIVE_OK && od == 400);
+    LRT_CHECK(lrt_drive_get_live(&r.dr, LRT_LIVE_TORQUE_LIMIT, &v) == LRT_DRIVE_OK);
+    LRT_CHECK_ABS(v, 400.0, 0.0);
+    LRT_CHECK(lrt_live_log_size(&log) == 1u && lrt_live_log_get(&log, 0u, &e) == 0);
+    LRT_CHECK(e.param == LRT_LIVE_TORQUE_LIMIT);
+    LRT_CHECK_ABS(e.t, r.t, 1e-12);
+    LRT_CHECK_ABS(e.old_value, (double)dp.torque_limit_permille, 0.0);
+    LRT_CHECK_ABS(e.new_value, 400.0, 0.0);
+
+    lrt_drive_set_target_position(&r.dr, rig_rotor_counts(&r) + 65536);
+    r.tau_max = 0.0;
+    for (i = 0; i < 2000u; i++) {
+        rig_step(&r);
+        LRT_CHECK(fabs(r.tau) <= limit + 1e-12);
+    }
+    LRT_CHECK(r.tau_max > 0.99 * limit);
+
+    for (i = 0; i < sizeof(bad) / sizeof(bad[0]); i++) {
+        LRT_CHECK(lrt_drive_set_live(&r.dr, LRT_LIVE_TORQUE_LIMIT, bad[i], &log) ==
+                  LRT_DRIVE_ERR_LIVE);
+    }
+    LRT_CHECK(lrt_drive_set_live(&r.dr, LRT_LIVE_INERTIA_EST, -1.0, &log) == LRT_DRIVE_ERR_LIVE);
+    LRT_CHECK(lrt_drive_set_live(&r.dr, LRT_LIVE_LOAD, 1.0, &log) == LRT_DRIVE_ERR_LIVE);
+    LRT_CHECK(lrt_drive_set_live(&r.dr, LRT_LIVE_COUNT, 1.0, &log) == LRT_DRIVE_ERR_LIVE);
+    LRT_CHECK(lrt_drive_set_live(&r.dr, -1, 1.0, &log) == LRT_DRIVE_ERR_LIVE);
+    LRT_CHECK(lrt_drive_set_live(NULL, LRT_LIVE_TORQUE_LIMIT, 1.0, &log) == LRT_DRIVE_ERR_NULL);
+    LRT_CHECK(lrt_drive_get_live(&r.dr, LRT_LIVE_TORQUE_LIMIT, NULL) == LRT_DRIVE_ERR_NULL);
+    LRT_CHECK(lrt_drive_od_read(&r.dr, 0x6072u, 0, &od) == LRT_DRIVE_OK && od == 400);
+    LRT_CHECK(lrt_live_log_size(&log) == 1u);
+    LRT_CHECK(lrt_drive_set_live(&r.dr, LRT_LIVE_INERTIA_EST, 2.0e-5, NULL) == LRT_DRIVE_OK);
+    LRT_CHECK_ABS(r.dr.p.inertia_est, 2.0e-5, 0.0);
+    LRT_CHECK(lrt_axis_set_live(&r.ax, LRT_LIVE_TORQUE_LIMIT, 1.0, &log) == LRT_AXIS_ERR_LIVE_ID);
+    LRT_CHECK(strcmp(lrt_live_param_name(LRT_LIVE_TORQUE_LIMIT), "torque_limit") == 0);
+    LRT_CHECK(strcmp(lrt_live_param_name(LRT_LIVE_INERTIA_EST), "inertia_est") == 0);
+    LRT_CHECK(strcmp(lrt_drive_strerror(LRT_DRIVE_ERR_LIVE), "nieznany kod bledu") != 0);
+}
+
+/* Ruch z nasyconym momentem: zwraca najwieksze przyspieszenie walu [rad/s^2] w oknie `window`. */
+static double saturated_move_max_accel(rig *r, double window)
+{
+    long n = (long)floor(window / r->dt + 0.5);
+    double a_max = 0.0;
+    double w_prev = r->ax.w_m;
+    long i;
+
+    lrt_drive_set_target_position(&r->dr, rig_rotor_counts(r) + 50 * 131072);
+    for (i = 0; i < n; i++) {
+        rig_step(r);
+        if (fabs(r->ax.w_m - w_prev) / r->dt > a_max) {
+            a_max = fabs(r->ax.w_m - w_prev) / r->dt;
+        }
+        w_prev = r->ax.w_m;
+    }
+    lrt_drive_set_target_position(&r->dr, rig_rotor_counts(r)); /* stop */
+    rig_run(r, 0.5);
+    return a_max;
+}
+
+/* REQ-VD-04 + test fizyczny: wieksza bezwladnosc ustawiona w locie => mniejsze maks.
+ * przyspieszenie, a = T_lim / J (T_lim z 6072h); wspolny dziennik osi i napedu z czasem. */
+static void test_drive_live_heavier_load_lowers_max_acceleration(void)
+{
+    rig r;
+    lrt_axis_params ap = servo_axis();
+    lrt_drive_params dp = servo_drive(1e-4);
+    lrt_live_log log;
+    lrt_live_entry e[3];
+    double t_lim = 0.5 * dp.rated_torque;
+    double j1 = SERVO_J;
+    double j2 = 4.0 * SERVO_J;
+    double a1;
+    double a2;
+    unsigned i;
+
+    lrt_live_log_init(&log);
+    rig_init(&r, &ap, &dp, 1e-4);
+    rig_enable(&r);
+    rig_run(&r, 0.01);
+    LRT_CHECK(lrt_drive_set_live(&r.dr, LRT_LIVE_TORQUE_LIMIT, 500.0, &log) == LRT_DRIVE_OK);
+    a1 = saturated_move_max_accel(&r, 0.004);
+    LRT_CHECK(fabs(r.ax.w_m) < 1.0);
+
+    LRT_CHECK(lrt_axis_set_live(&r.ax, LRT_LIVE_LOAD, j2 - j1, &log) == LRT_AXIS_OK);
+    LRT_CHECK(lrt_drive_set_live(&r.dr, LRT_LIVE_INERTIA_EST, j2, &log) == LRT_DRIVE_OK);
+    rig_feedback(&r);
+    a2 = saturated_move_max_accel(&r, 0.004);
+
+    LRT_CHECK_REL(a1, t_lim / j1, 0.01);
+    LRT_CHECK_REL(a2, t_lim / j2, 0.01);
+    LRT_CHECK(a2 < a1);
+    LRT_CHECK_REL(a1 / a2, j2 / j1, 0.02);
+
+    LRT_CHECK(lrt_live_log_size(&log) == 3u);
+    for (i = 0; i < 3u; i++) {
+        LRT_CHECK(lrt_live_log_get(&log, i, &e[i]) == 0);
+    }
+    LRT_CHECK(e[0].param == LRT_LIVE_TORQUE_LIMIT && e[1].param == LRT_LIVE_LOAD &&
+              e[2].param == LRT_LIVE_INERTIA_EST);
+    LRT_CHECK(e[0].t < e[1].t);
+    LRT_CHECK_ABS(e[1].t, e[2].t, 1e-12); /* os i naped licza ten sam czas modelu */
+    LRT_CHECK_ABS(e[1].old_value, 0.0, 0.0);
+    LRT_CHECK_ABS(e[2].new_value, j2, 0.0);
+}
+
 int main(void)
 {
     LRT_RUN(test_params_default_valid_for_all_types);
@@ -1690,5 +1819,7 @@ int main(void)
     LRT_RUN(test_step_rejects_bad_input_and_keeps_state);
     LRT_RUN(test_simulation_is_deterministic);
     LRT_RUN(test_accessors_tolerate_null);
+    LRT_RUN(test_drive_live_torque_limit_logged_with_time);
+    LRT_RUN(test_drive_live_heavier_load_lowers_max_acceleration);
     return lrt_summary();
 }

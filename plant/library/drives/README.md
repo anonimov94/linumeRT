@@ -53,12 +53,15 @@ z pętlą zamkniętą. Sekcji `real:` (mapowanie na lcec/stepgen, REQ-VD-06) na 
 Lista ścieżek parametrów zmienianych w trakcie pracy (dozwolone: `motor.rotor_inertia`, `mechanics.load`,
 `mechanics.j_screw`, `mechanics.friction_*`, `mechanics.backlash`, `limits.torque_limit_permille`,
 `electrical.supply_voltage`). Pozostałe parametry wymagają przeładowania modelu. Zmiany: `LiveParams.set()`
-(walidacja zakresów, dziennik `[czas, ścieżka, było, jest]`) → rdzeń C: `lrt_axis_set_live()` (+ dziennik w
-buforze kołowym `lrt_live_log`), limit momentu przez `lrt_drive_od_write(6072h)`.
+(walidacja zakresów, dziennik `[czas, ścieżka, było, jest]`) → rdzeń C (`plant/core/live.h`):
+`lrt_axis_set_live()` dla masy, J, tarcia, luzu i napięcia, `lrt_drive_set_live()` dla limitu momentu
+(6072h) i estymaty J regulatora (`LRT_LIVE_INERTIA_EST`, nie jest polem szablonu). Oba wpisują zmianę do
+wspólnego dziennika `lrt_live_log` (bufor kołowy, bez alokacji) z czasem modelu.
 Luz zmieniany w locie wymaga modelu dwuczłonowego od startu (rdzeń odrzuca przełączenie sztywny ↔ luz):
 `to_c_params()` ustawia wtedy `stiffness` = 1000 N·m/rad, jeśli `contact_stiffness` = 0.
 Regulatory (`kv`, `ti`, `kp_pos`) są jawne i dobrane dla bezwładności z szablonu; po dużej zmianie `load`
-w locie trzeba je dostroić (`lrt_drive_tune_servo`) albo zaakceptować mniejsze pasmo/tłumienie.
+w locie trzeba je dostroić (`lrt_drive_tune_servo`) albo zaakceptować mniejsze pasmo/tłumienie;
+estymatę J dla FF przyspieszenia można przestawić w locie przez `lrt_drive_set_live(LRT_LIVE_INERTIA_EST)`.
 
 ## Instancje i kopiowanie
 - Instancja w `machine.yaml`: `drives: [{id: X1, template: servo_400w, overrides: {mechanics: {load: 150}}}]`;

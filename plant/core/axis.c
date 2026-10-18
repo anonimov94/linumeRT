@@ -473,15 +473,6 @@ int lrt_axis_step(lrt_axis *a, double torque_cmd, double dt)
 
 /* ---------- parametry zmieniane w locie (REQ-VD-04) ---------- */
 
-static const char *const live_names[LRT_LIVE_COUNT] = {
-    "load", "j_motor", "j_screw", "friction_coulomb", "friction_static", "friction_viscous",
-    "backlash", "supply_scale"};
-
-const char *lrt_live_param_name(int param)
-{
-    return (param >= 0 && param < LRT_LIVE_COUNT) ? live_names[param] : NULL;
-}
-
 int lrt_axis_get_live(const lrt_axis *a, int param, double *value)
 {
     if (a == NULL || value == NULL) {
@@ -527,7 +518,7 @@ int lrt_axis_set_live(lrt_axis *a, int param, double value, lrt_live_log *log)
     if (a == NULL) {
         return LRT_AXIS_ERR_NULL;
     }
-    if (param < 0 || param >= LRT_LIVE_COUNT || bad(value)) {
+    if (param < 0 || param > LRT_LIVE_SUPPLY_SCALE || bad(value)) {
         return LRT_AXIS_ERR_LIVE_ID;
     }
     (void)lrt_axis_get_live(a, param, &old_value);
@@ -575,46 +566,6 @@ int lrt_axis_set_live(lrt_axis *a, int param, double value, lrt_live_log *log)
     } else {
         a->supply_scale = value;
     }
-    if (log != NULL) {
-        lrt_live_entry *e = &log->entries[log->total % LRT_LIVE_LOG_SIZE];
-
-        e->t = a->time;
-        e->param = param;
-        e->old_value = old_value;
-        e->new_value = value;
-        log->total++;
-    }
+    lrt_live_log_append(log, a->time, param, old_value, value);
     return LRT_AXIS_OK;
-}
-
-void lrt_live_log_init(lrt_live_log *log)
-{
-    if (log != NULL) {
-        memset(log, 0, sizeof(*log));
-    }
-}
-
-unsigned lrt_live_log_size(const lrt_live_log *log)
-{
-    if (log == NULL) {
-        return 0u;
-    }
-    return (log->total < LRT_LIVE_LOG_SIZE) ? log->total : (unsigned)LRT_LIVE_LOG_SIZE;
-}
-
-unsigned lrt_live_log_dropped(const lrt_live_log *log)
-{
-    if (log == NULL || log->total <= LRT_LIVE_LOG_SIZE) {
-        return 0u;
-    }
-    return log->total - (unsigned)LRT_LIVE_LOG_SIZE;
-}
-
-int lrt_live_log_get(const lrt_live_log *log, unsigned i, lrt_live_entry *out)
-{
-    if (log == NULL || out == NULL || i >= lrt_live_log_size(log)) {
-        return -1;
-    }
-    *out = log->entries[(lrt_live_log_dropped(log) + i) % LRT_LIVE_LOG_SIZE];
-    return 0;
 }
