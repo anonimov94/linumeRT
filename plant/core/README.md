@@ -37,6 +37,36 @@ lrt_axis_step(&a, torque_cmd, 1e-3);  /* a.pos, a.vel, a.events */
 Nie ma jeszcze: hamulca, napędu CiA 402 (sesja 012), kinematyki wielu osi (014), bazowania (015).
 Model sprawdzony wyłącznie wzorami analitycznymi: **NIEZWERYFIKOWANE NA SPRZĘCIE**.
 
+## Napęd (`drive.h`, `drive.c`) — sesja 012
+
+Wirtualny napęd między masterem a osią: maszyna stanów CiA 402 (6040h/6041h), tryb CSP, krokowiec
+bez sprzężenia i z pętlą zamkniętą. Kolejność kroku: pomiar → wykrycie awarii → maszyna stanów →
+moment → I2t → raporty. Do osi trafia `torque_cmd`; z osi napęd bierze `lrt_drive_feedback`
+(`theta_m`, `omega_m`, `torque_avail`, `j_total`).
+
+```c
+lrt_drive d; lrt_drive_params p;
+lrt_drive_params_default(&p, LRT_DRIVE_SERVO_CSP);
+lrt_drive_tune_servo(&p, j_total, bandwidth_rad_s, dt);
+lrt_drive_init(&d, &p);
+lrt_drive_set_controlword(&d, 0x06); /* ...0x07, 0x0F */
+lrt_drive_set_target_position(&d, target_counts);
+lrt_drive_step(&d, &fb, dt, &torque_cmd);
+```
+
+- Serwo CSP: P położenia + PI prędkości (warunkowa całka), FF prędkości i przyspieszenia, limit
+  momentu `min(6072h, torque_avail)`, okno błędu nadążania 6065h/6066h (E-4201), I2t (ostrzeżenie 80 %,
+  kasowanie awarii dopiero poniżej 50 %), kwantyzacja enkodera i deterministyczny szum.
+- Krokowiec bez sprzężenia: moment `A·sin(δ_e)` + ograniczone tłumienie; poślizg liczony w okresach
+  elektrycznych (4 pełne kroki), `lost_steps` > 0 = wirnik za polem; master widzi pozycję zadaną, bez awarii.
+- Krokowiec z pętlą zamkniętą: pętla CSP z limitem z krzywej i awarią przy błędzie nadążania.
+- Awarie: tablica `LRT_DRIVE_FAULT_LIST` (603Fh + alarm E-4200…E-4208 z katalogu alarmów), wstrzykiwanie
+  `lrt_drive_inject_fault` (trwałe do `clear_fault_cause`).
+- Tryb bazowania (6) zwraca `LRT_DRIVE_ERR_UNSUPPORTED` — sesja 015; hamulec niemodelowany.
+
+49 testów w `tests/test_drive.c` (wzory analityczne: błąd ustalony, kąt obciążenia, czas I2t, bariera
+potencjału). **NIEZWERYFIKOWANE NA SPRZĘCIE.**
+
 ## Testy
 
 `tests/lrt_test.h` to minimalny framework (wynik w stylu TAP). 23 testy w `tests/test_axis.c`

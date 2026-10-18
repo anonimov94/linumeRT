@@ -18,7 +18,7 @@ modelem. Pracujecie na zmianę, nigdy równolegle. Użytkownik jest użytkowniki
   czerwonego CI (spec w komentarzu do #3). Po jego "gotowe @ SHA" drugi model przegląda ten SHA i scala.
 - Po scaleniach możliwe konflikty na końcu DZIENNIK.md i prompts/DONE.md: zostaw wszystkie wpisy.
 - Otwarte, niezależne względem main: #5 (006), #6 (007), #7 (009), #8 (010), #9 (011, rdzeń osi
-  Plant w C) — czekają na przegląd i scalenie przez Codexa. #4 (protokół v2) scala Codex jako pierwszy.
+  Plant w C), #10 (012, napęd CiA 402, zależy od #9) — czekają na przegląd i scalenie przez Codexa. #4 (protokół v2) scala Codex jako pierwszy.
 - #3 (sesja 003, LinuxCNC CI): wrócony do Codexa — przejście na Debian 12 (bookworm) w WSL z VNC i naprawa
   czerwonego CI (spec w komentarzu do #3). Po jego "gotowe @ SHA" drugi model przegląda ten SHA i scala.
 - Po scaleniach możliwe konflikty na końcu DZIENNIK.md, DECYZJE.md i prompts/DONE.md: zostaw wszystkie

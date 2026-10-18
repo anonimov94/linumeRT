@@ -72,3 +72,35 @@ def test_make_test_c_target_runs_core_tests() -> None:
     )
     assert result.returncode == 0, result.stdout + result.stderr
     assert "# testy:" in result.stdout
+
+
+# ---- Napęd (drive.h): awarie ↔ katalog alarmów (sesja 012) -------------------------------
+
+DRIVE_FAULT_ROW = re.compile(
+    r'X\(\s*([A-Z_]+)\s*,\s*(\d+)\s*,\s*(0x[0-9A-Fa-f]+)\s*,\s*"(E-42\d\d)"\s*\)'
+)
+
+
+def _drive_fault_rows() -> list[tuple[str, int, int, str]]:
+    text = (CORE / "drive.h").read_text(encoding="utf-8")
+    return [
+        (name, int(num), int(cia, 16), alarm)
+        for name, num, cia, alarm in DRIVE_FAULT_ROW.findall(text)
+    ]
+
+
+def test_drive_fault_table_is_consistent() -> None:
+    rows = _drive_fault_rows()
+    assert len(rows) >= 9, rows
+    assert [r[1] for r in rows] == list(range(1, len(rows) + 1))  # numery ciągłe od 1
+    assert len({r[2] for r in rows}) == len(rows), "powtórzony kod 603Fh"
+    assert len({r[3] for r in rows}) == len(rows), "powtórzony alarm"
+
+
+def test_every_drive_fault_has_alarm_in_catalog() -> None:  # kryterium sesji 012
+    catalog = ROOT / "core" / "linumert" / "alarms" / "catalog.yaml"
+    if not catalog.exists():
+        pytest.skip("katalog alarmów dochodzi w PR sesji 007; test działa po scaleniu")
+    codes = set(re.findall(r"^- code: (E-42\d\d)\s*$", catalog.read_text("utf-8"), flags=re.M))
+    for name, _num, _cia, alarm in _drive_fault_rows():
+        assert alarm in codes, f"awaria {name}: brak {alarm} w catalog.yaml"
