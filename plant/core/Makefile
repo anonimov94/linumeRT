@@ -11,9 +11,9 @@ CFLAGS += -std=c11 -Wall -Wextra -Wpedantic -Werror
 LDLIBS += -lm
 
 BUILD := build
-SRC := live.c axis.c drive.c
+SRC := live.c axis.c drive.c machine.c
 OBJ := $(SRC:%.c=$(BUILD)/%.o)
-TESTS := $(BUILD)/test_axis $(BUILD)/test_drive
+TESTS := $(BUILD)/test_axis $(BUILD)/test_drive $(BUILD)/test_machine
 TOOLS := $(BUILD)/lrt_check_params
 
 .PHONY: all test tools clean
@@ -29,7 +29,7 @@ $(BUILD)/lrt_check_params: tools/check_params.c live.h axis.h drive.h $(BUILD)/l
 $(BUILD):
 	mkdir -p $(BUILD)
 
-$(BUILD)/%.o: %.c live.h axis.h drive.h | $(BUILD)
+$(BUILD)/%.o: %.c live.h axis.h drive.h machine.h | $(BUILD)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(BUILD)/libplant_core.a: $(OBJ)
@@ -40,6 +40,9 @@ $(BUILD)/test_axis: tests/test_axis.c tests/lrt_test.h live.h axis.h $(BUILD)/li
 
 $(BUILD)/test_drive: tests/test_drive.c tests/lrt_test.h live.h axis.h drive.h $(BUILD)/libplant_core.a
 	$(CC) $(CFLAGS) tests/test_drive.c $(BUILD)/libplant_core.a $(LDLIBS) -o $@
+
+$(BUILD)/test_machine: tests/test_machine.c tests/lrt_test.h live.h axis.h drive.h machine.h $(BUILD)/libplant_core.a
+	$(CC) $(CFLAGS) tests/test_machine.c $(BUILD)/libplant_core.a $(LDLIBS) -o $@
 
 test: $(TESTS)
 	@set -e; for t in $(TESTS); do ./$$t; done
