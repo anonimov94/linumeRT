@@ -68,6 +68,8 @@ współdzielone zasoby chroni `tools/lock.py` (blokada w `state/locks/`, atomowa
 Polecenia i stan środowiska: `docs/NASTEPNA_SESJA.md` (nie duplikuj ich tutaj).
 
 ## 7. Podział pracy (roboczy, właściciel może korygować)
+**Od 2026-10-18 (D31): cały zakres, łącznie z obszarem Codexa poniżej, prowadzi Claude** (lokalnie,
+laptop właściciela). Opis niżej zostaje jako podział na wypadek powrotu Codexa.
 Modele: Claude = Sonnet 5.5, działa w chmurze, bez dostępu do WSL właściciela. Codex = astra
 low, działa na komputerze właściciela (Windows, WSL, VNC, LinuxCNC), niski poziom rozumowania.
 Obszaru drugiego modelu nie ruszamy bez wpisu w `NASTEPNA_SESJA.md`. Różnice uzupełniamy:
