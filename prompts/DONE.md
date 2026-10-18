@@ -23,3 +23,4 @@ Format: `NNN | RRRR-MM-DD | opis`. Agent dopisuje linię po udanej sesji. Zaplan
 018 | 2026-10-18 | config/plant/linumert_plant_xyz: LinuxCNC ↔ Plant, bazowanie na krańcówkach, e2e test, plant-gui.sh; Claude (D31)
 019 | 2026-10-18 | wyrocznia Plant REQ-VM-06: soft limits i strefy zakazane, scenariusze softlimit/forbidden_zone z LinuxCNC; Claude (D31)
 020 | 2026-10-18 | Plant: magazyn narzędzi (regał/karuzela/parasol), zacisk, osłona, czujnik długości, kolizje CRASH; Claude (D31)
+021 | 2026-10-18 | Plant: wrzeciono VFD — model, hy_vfd (pty), Modbus TCP, usterki; wariant LinuxCNC _vfd z prawdziwym hy_vfd (M3/M4/M5); Claude (D31)

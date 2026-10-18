@@ -33,10 +33,13 @@ Ekran: `linumert` (kopia QtDragon). Połączenie: komponenty HAL `lrt_net` + `lr
 
 ## Testy
 - Bez LinuxCNC: `pytest tests/test_plant_config.py tests/test_lrt_net_proto.py`.
-- Z LinuxCNC RIP: `pytest -o addopts= -m linuxcnc tests/test_hal_lrt_net.py tests/test_plant_linuxcnc.py`
-  (bazowanie z losowego startu, G1, błąd nadążania z Plant; ok. 75 s).
+- Z LinuxCNC RIP: `pytest -o addopts= -m linuxcnc tests/test_hal_lrt_net.py tests/test_plant_linuxcnc.py
+  tests/test_plant_vfd_linuxcnc.py` (bazowanie z losowego startu, G1, błąd nadążania z Plant; wrzeciono
+  przez prawdziwy hy_vfd: M3/M4/M5; razem ok. 3 min).
+- Wariant z falownikiem na pulpicie: `VFD=1 tools/dev/plant-gui.sh` (`linumert_plant_xyz_vfd.ini`,
+  `plant_vfd.yaml`).
 
 ## Ograniczenia (LRT-NET v1)
-Bez indeksu enkodera (`HOME_USE_INDEX`), bez limitu momentu 6072h w ramce, wrzeciono symulowane
-lokalnie w HAL (Plant: sesja 021). Warianty bazowania: `config/plant/linumert_plant_xyz/bazowanie/`.
+Bez indeksu enkodera (`HOME_USE_INDEX`), bez limitu momentu 6072h w ramce, wrzeciono: w wariancie
+domyślnym `sim_spindle` w HAL, w wariancie `_vfd` falownik Plant przez hy_vfd (docs/PLANT.md §5a). Warianty bazowania: `config/plant/linumert_plant_xyz/bazowanie/`.
 NIEZWERYFIKOWANE NA SPRZĘCIE.
