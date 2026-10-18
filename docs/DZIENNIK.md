@@ -200,3 +200,8 @@ Uzupełnienie: README plant/core (liczby testów 29/59/20, bazowanie, parametry 
 - Zrobione: `config/plant/linumert_plant_xyz/` (mill_servo_table XYYZ, krańcówki NC z Plant, portal Y synchronicznie, E-STOP przez estop_latch, sonda, ekran linumert), `plant.yaml`, warianty bazowania (`bazowanie/`), `tools/dev/plant-gui.sh`, `docs/PLANT_START.md`, zrzut `docs/raporty/G0/ekran_plant.png`.
 - Testy: zgodność INI z machine.yaml (5), end-to-end w LinuxCNC RIP: bazowanie z losowego startu, G1 ±5 µm, bez strat ramek (~75 s).
 - Długi: switch_index i 6072h przez LRT-NET (ramka v2); warianty hardstop/drive bez testu e2e.
+
+## 019 — Ograniczenia programowe, strefy zakazane i wyrocznia testowa (Model-Author: Claude, D31)
+- Zrobione: `linumert_plant/oracle.py` (soft limits z 607Ah, strefy z kinematyki prostej, zdarzenia na zboczu, raport JSON), integracja w serwerze (`oracle.arm_bit`, `serve --report`), HAL `motion.is-all-homed` → `dout-31`, strefa `magazyn_narzedzi` w mill_servo_table.
+- Scenariusze (LinuxCNC RIP + Plant): `softlimit_oracle` — G0 X700 odrzucone przez LinuxCNC, wyrocznia bez naruszeń; `forbidden_zone_oracle` — wjazd w magazyn wykryty raz z pozycją. Testy jednostkowe geometrii i logiki (6).
+- Decyzje: strefy względem stołu (= G53), uzbrojenie po bazowaniu (DECYZJE sesja 019).

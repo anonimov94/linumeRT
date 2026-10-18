@@ -11,6 +11,7 @@ się czytelnym komunikatem i kodem 1 — Plant nie startuje, więc napędy pozos
 from __future__ import annotations
 
 import argparse
+import json
 import logging
 import signal
 import sys
@@ -36,6 +37,8 @@ def add_parser(sub) -> None:
     serve.add_argument("--seed", type=int, default=None)
     serve.add_argument("--trace", type=Path, default=None, help="plik śladu (.csv albo .jsonl)")
     serve.add_argument("--frames", type=int, default=None, help="zakończ po N ramkach")
+    serve.add_argument("--report", type=Path, default=None,
+                       help="raport JSON na zakończenie (statystyki, wyrocznia REQ-VM-06)")
     serve.add_argument("--dir", type=Path, default=None, help="katalog biblioteki napędów")
 
 
@@ -108,4 +111,11 @@ def run_serve(args: argparse.Namespace) -> int:
     s = server.stats
     print(f"Plant: ramki {s.received}, odrzucone {s.rejected}, utracone {s.lost}, "
           f"spóźnione {s.late}; ślad SHA-256 {server.digest}", flush=True)
+    o = server.oracle
+    print(f"Plant: wyrocznia {'PASS' if o.passed else 'FAIL'} (naruszenia {o.total}, "
+          f"sprawdzone ramki {o.checked})", flush=True)
+    if args.report is not None:
+        args.report.parent.mkdir(parents=True, exist_ok=True)
+        args.report.write_text(json.dumps(server.report(), ensure_ascii=False, indent=2) + "\n",
+                               encoding="utf-8")
     return 0
