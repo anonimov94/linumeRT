@@ -125,3 +125,11 @@ Najnowsze wpisy na dole. Każda sesja dopisuje: zrobione · decyzje · do sprawd
 - Decyzje: PROPOZYCJA sesji 016 w `docs/DECYZJE.md`.
 - Do sprawdzenia ręcznie: tryb `--realtime` między dwiema VM (sieć lrtnet) — jitter i watchdog przy prawdziwym zegarze.
 - Długi: wrzeciono przez LRT-NET (0 do sesji 021); zatrzask indeksu enkodera (sesja 017); `plant_restart_midrun` i `link_loss` jako scenariusze (024); panel web.
+
+## 032 — Baza narzędzi z typami (część rdzenia) — 2026-10-18
+- Model-Author: Claude (Opus 5.5). Gałąź `wip/sesja-032` od `main` (niezależna od PR #13–#15 i od Codexa). Zakres: punkty 1 i 3 promptu; punkt 2 (ekran) czeka na sesję 005.
+- Zrobione: `tools/types.py` (10 typów, walidacja i reguły między polami), `tools/tbl.py` (tool.tbl bez strat, błędy linii, mm ↔ cale), `tools/db.py` (`ToolDB`: migracje, historia z zegarem, unikalne T/P, eksport/import tool.tbl atomowo, import zachowujący typ, CSV), alarmy P-5201…P-5206, `tests/test_tools_db.py` (41 + 1 z LinuxCNC).
+- Weryfikacja (WSL Ubuntu 24.04, venv Python 3.12): `ruff` czysty; `pytest` 289 przeszło; test `linuxcnc`: tool.tbl z bazy wczytany przez rs274 LinuxCNC 2.9, `G43 H1/H2` daje długości z bazy na maszynie metrycznej i calowej.
+- Decyzje: jedna PROPOZYCJA w `docs/DECYZJE.md` (sesja 032).
+- Do sprawdzenia ręcznie: nazwy typów i pól po polsku w ekranie (sesja 037: tłumaczenia).
+- Długi: zakładka narzędzi w ekranie, dialog edycji typu, synchronizacja z widokiem tool offset QtVCP i przeładowanie tabeli w LinuxCNC (po 005); oprawka tylko jako tekst (bez geometrii, sesja 058); trwałość: pola `life_min`/`used_min` bez liczenia czasu pracy (W-2110 w sesji ekranu/AUTO).
