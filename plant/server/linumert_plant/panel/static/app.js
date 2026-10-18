@@ -11,7 +11,7 @@ async function api(path, body) {
     { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) };
   const res = await fetch(path, opt);
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.detail || `HTTP ${res.status}`);
+  if (!res.ok) throw new Error(data.detail?.errors ? data.detail.errors.join("; ") : (data.detail || `HTTP ${res.status}`));
   return data;
 }
 

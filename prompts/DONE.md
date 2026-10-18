@@ -2,10 +2,10 @@
 
 Format linii: `NNN | RRRR-MM-DD | opis; PR; model`. Linie są posortowane według numeru sesji. Agent dopisuje
 linię dopiero po spełnieniu kryteriów akceptacji sesji i wstawia ją we właściwe miejsce. Harmonogram bierze
-najniższy numer, którego tu nie ma (teraz: **023**). Szczegóły każdej sesji: [`docs/DZIENNIK.md`](../docs/DZIENNIK.md),
+najniższy numer, którego tu nie ma (teraz: **025**). Szczegóły każdej sesji: [`docs/DZIENNIK.md`](../docs/DZIENNIK.md),
 stan scalania PR: [`docs/NASTEPNA_SESJA.md`](../docs/NASTEPNA_SESJA.md).
 
-Wykonane: 26 z 84 (001–022, 024, 032, 039, 044).
+Wykonane: 27 z 84 (001–024, 032, 039, 044).
 
 001 | 2026-10-17 | Szkielet monorepo: pyproject, katalogi z README, Makefile, CI, LICENSE (GPL-2), LICENCJE, PROVENANCE, testy licencji/IP/układu; Claude
 002 | 2026-10-17 | Proces IP, słownik, rejestr pochodzenia (52 wpisy), lista przed wydaniem, rozszerzony strażnik IP; Claude
@@ -29,6 +29,7 @@ Wykonane: 26 z 84 (001–022, 024, 032, 039, 044).
 020 | 2026-10-18 | Plant: magazyn narzędzi (regał/karuzela/parasol), zacisk, osłona, czujnik długości, kolizje CRASH; REQ-VM-08…10; PR #30; Claude (D31)
 021 | 2026-10-18 | Plant: wrzeciono VFD — model, hy_vfd (pty), Modbus TCP, usterki; wariant LinuxCNC _vfd z prawdziwym hy_vfd (M3/M4/M5); PR #32; Claude (D31)
 022 | 2026-10-18 | Plant: panel web (FastAPI/WS, uPlot) — telemetria 10 s, parametry live i presety, CSV, wirtualny pulpit MPG jako bity LRT-NET; PR #37; Claude (Opus 5.5)
+023 | 2026-10-18 | Plant: edytor maszyny (drzewo, walidacja, wersje, przeładowanie bez restartu), widok 3D z modelu, zakładki Napędy i Awarie, scenariusz edit_reload; PR #39; Claude (Opus 5.5)
 024 | 2026-10-18 | Plant: awarie (faults.py), scenariusze z atrapą mastera i z LinuxCNC, raport HTML/SVG, run_scenario, check_requirements w make test, job plant-matrix; PR #38; Claude (Opus 5.5)
 032 | 2026-10-18 | Baza narzędzi (rdzeń): 10 typów z walidacją, SQLite z migracjami i historią, tool.tbl bez strat (sprawdzone w rs274 LinuxCNC 2.9), CSV; ekran w sesji ekranu; PR #16; Claude
 039 | 2026-10-18 | Format .lnx (Pydantic + lnx_schema.json), ;@STOCK, BaseMacroGenerator, deterministyczny kompilator .lnx → .ngc (golden, rs274), alarmy P-5011…P-5015; PR #14; Claude

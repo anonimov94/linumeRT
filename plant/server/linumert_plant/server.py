@@ -536,6 +536,30 @@ class PlantServer:
                        m.joint_velocity(self._letters[d]), m.lost_steps(d))
         self.telemetry.put(t, tuple(values))
 
+    def reload_machine(self, machine: PlantMachine, drive_params: dict[str, dict]) -> None:
+        """Nowy model maszyny bez restartu Plant (edytor panelu, sesja 023, REQ-VM-12).
+
+        Wywołujący sprawdza, że napędy są wyłączone. Liczba i nazwy napędów LRT-NET muszą
+        zostać (ramki mastera mają stałą liczbę osi); statystyki, ślad i ustawienia zostają,
+        a modele zależne od maszyny (wyrocznia, magazyn, kolizje, wrzeciono, live) powstają
+        od nowa. Aktywne awarie są zdejmowane.
+        """
+        fresh = PlantServer(machine, self.cfg, spindle_template=_spindle_template(
+            machine.model.config), drive_params=drive_params)
+        if fresh.drives != self.drives:
+            raise PlantConfigError(f"zmieniona lista napędów LRT-NET ({', '.join(fresh.drives)} "
+                                   f"zamiast {', '.join(self.drives)}) — wymagany restart Plant")
+        self.faults.clear_all()
+        with self._lock:
+            for name in ("machine", "oracle", "atc", "toolsetter", "collisions", "_tool_len",
+                         "spindle", "live", "live_base", "scale", "_letters", "_estop",
+                         "_extra_inputs"):
+                setattr(self, name, getattr(fresh, name))
+            self._mode = {d: None for d in self.drives}
+            self._target = {d: 0 for d in self.drives}
+            self.events.clear()
+            self._note(f"model przeładowany: {machine.model.name}")
+
     def live_values(self) -> dict[str, dict[str, float]]:
         """Bieżące wartości parametrów live każdego napędu osi."""
         with self._lock:

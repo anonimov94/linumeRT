@@ -28,8 +28,9 @@ from pydantic import BaseModel
 
 from ..drive_template import PARAM_BY_PATH, TemplateError
 from ..faults import FaultError
-from ..server import PlantServer
+from ..server import PlantConfigError, PlantServer
 from . import presets as preset_store
+from .editor import EditorError, MachineEditor
 from .record import NAME_RE as RECORD_NAME_RE
 from .record import Recorder
 from .telemetry import FIELDS, UNITS
@@ -63,6 +64,17 @@ class Button(BaseModel):
 
 class Key(BaseModel):
     on: bool
+
+
+class MachineBody(BaseModel):
+    data: dict[str, Any]
+    comment: str | None = None
+
+
+class CloneBody(BaseModel):
+    source: str
+    new_id: str
+    name: str | None = None
 
 
 class RecordStart(BaseModel):
@@ -246,6 +258,64 @@ def create_app(server: PlantServer, state_dir: Path | str = Path("state")) -> Fa
         except (FaultError, TemplateError, KeyError, ValueError) as exc:
             raise _bad(exc) from None
         return {"active": server.faults.active()}
+
+    # ---- edytor maszyny i napędów (sesja 023, REQ-VM-12) ----------------------------------
+    editor = MachineEditor(server, Path(state_dir))
+    app.state.editor = editor
+
+    def ed(fn, *args):
+        try:
+            return fn(*args)
+        except EditorError as exc:
+            raise HTTPException(400, {"errors": exc.errors}) from None
+        except (TemplateError, PlantConfigError, KeyError, ValueError, OSError) as exc:
+            raise _bad(exc) from None
+
+    @app.get("/api/machine")
+    def machine_get() -> dict:
+        data = ed(editor.load)
+        return {"name": server.machine.model.name, "file": editor.path.name, "data": data,
+                "tree": editor.tree(data), "errors": editor.validate(data)}
+
+    @app.post("/api/machine/validate")
+    def machine_validate(body: MachineBody) -> dict:
+        return {"errors": editor.validate(body.data), "tree": editor.tree(body.data)}
+
+    @app.post("/api/machine/save")
+    def machine_save(body: MachineBody) -> dict:
+        return ed(editor.save, body.data, body.comment or "")
+
+    @app.post("/api/machine/reload")
+    def machine_reload() -> dict:
+        return ed(editor.reload)
+
+    @app.get("/api/machine/history")
+    def machine_history() -> list[dict]:
+        return ed(editor.history)
+
+    @app.get("/api/machine/history/{file}")
+    def machine_version(file: str) -> dict:
+        return {"file": file, "text": ed(editor.version, file)}
+
+    @app.get("/api/machine/scene")
+    def machine_scene() -> dict:
+        return ed(editor.scene)
+
+    @app.get("/api/drives/templates")
+    def drive_templates() -> list[dict]:
+        return ed(editor.templates)
+
+    @app.get("/api/drives/templates/{tid}")
+    def drive_template(tid: str) -> dict:
+        return {"template": ed(editor.template, tid), "diff": ed(editor.diff, tid)}
+
+    @app.get("/api/drives/instances")
+    def drive_instances() -> list[dict]:
+        return ed(editor.instances)
+
+    @app.post("/api/drives/clone")
+    def drive_clone(body: CloneBody) -> dict:
+        return ed(editor.clone, body.source, body.new_id, body.name)
 
     # ---- wirtualny pulpit -------------------------------------------------------------
     def desk():

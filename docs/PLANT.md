@@ -382,7 +382,22 @@ desk:
   pulse_ms: 100
 ```
 Połączenie pinów pulpitu z `halui`/`encoder` w konfiguracji LinuxCNC: sesja 029 (Tryby, JOG i pulpit MPG).
-Wstrzykiwanie awarii z panelu: sesja 023. NIEZWERYFIKOWANE NA SPRZĘCIE.
+Zakładki panelu (sesja 023): **Praca** (powyżej), **Napędy**, **Maszyna**, **Awarie** (§7b).
+
+- **Maszyna (REQ-VM-12):** drzewo maszyny (kinematyka, osie, napędy, magazyn, pozycje, strefy, bryły),
+  formularz pól wybranego węzła z `machine.yaml`, walidacja REQ-VM-11 na bieżąco (`POST
+  /api/machine/validate`), zapis wersji (`/api/machine/save`: plik maszyny + historia
+  `<state>/machines/<nazwa>/historia/NNNN_<czas>.yaml`, wersja 0 = plik wyjściowy), przeładowanie
+  modelu bez restartu Plant (`/api/machine/reload`: tylko przy wyłączonych napędach i tej samej
+  liście napędów LRT-NET). Widok **3D z modelu** (`/api/machine/scene`, własny rzut perspektywiczny
+  na canvas, ≤ 30 FPS): zakres mechaniczny, ograniczenia programowe, krańcówki i zderzaki, strefy
+  zakazane, bryły kolizyjne, gniazda magazynu, pozycja wymiany, czujnik długości, bieżący koniec
+  narzędzia; przesuwanie magazynu i pozycji wymiany przyciskami X/Y/Z (podgląd przed zapisem).
+- **Napędy (REQ-VD-03):** biblioteka szablonów, parametry i krzywa moment–prędkość, różnice
+  względem `based_on`, instancje w maszynie z nadpisaniami; „Kopiuj” (szablon) i „Zapisz jako
+  szablon” (instancja) zapisują nowy szablon w bibliotece (`POST /api/drives/clone`).
+- Scenariusze: akcje `edit_machine` (`set: {ścieżka: wartość}`) i `reload`, kryteria `machine`
+  i `reloaded` (scenariusz `edit_reload`, na kopii maszyny). NIEZWERYFIKOWANE NA SPRZĘCIE.
 
 ## 8. Odporność i determinizm (REQ-QA-03, REQ-QA-04)
 | Sytuacja | Zachowanie |

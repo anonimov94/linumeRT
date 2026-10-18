@@ -15,12 +15,18 @@
   <img class="mark" src="/static/znak.svg" alt="">
   <span class="brand">linume<b>RT</b></span>
   <span class="badge">PLANT</span>
+  <nav class="tabs" role="tablist">
+    <button class="tab on" data-tab="praca">Praca</button>
+    <button class="tab" data-tab="napedy">Napędy</button>
+    <button class="tab" data-tab="maszyna">Maszyna</button>
+    <button class="tab" data-tab="awarie">Awarie</button>
+  </nav>
   <span id="machine" class="sub">—</span>
   <span class="grow"></span>
   <span id="link" class="pill"><i class="dot"></i><span id="link-text">łączenie…</span></span>
 </header>
 
-<main class="grid">
+<main class="grid view" id="view-praca">
   <section class="card" id="live-card">
     <h2><i class="ic" style="--ic:url(/static/ikony/plant.svg)"></i>Parametry osi <span id="live-axis">—</span> · na żywo</h2>
     <div class="seg" id="live-drives"></div>
@@ -76,7 +82,35 @@
     <p class="note">Wstrzykiwanie awarii: sesja 023. Panel jest narzędziem testowym Plant, nie ekranem operatora.</p>
   </section>
 </main>
+<main class="grid3 view" id="view-maszyna" hidden>
+  <section class="card"><h2 id="m-file">Maszyna</h2><div id="m-tree" class="tree"></div></section>
+  <section class="card"><h2>Widok 3D · mm <span class="grow"></span>
+      <span class="note">przeciągnij: obrót · kółko: zoom · klik: wybór elementu</span></h2>
+    <canvas id="m-3d" class="view3d"></canvas>
+    <div class="legend" id="m-legend"></div></section>
+  <section class="card"><h2 id="m-form-title">Właściwości</h2><div id="m-form" class="form"></div>
+    <div id="m-move" class="move" hidden></div>
+    <div id="m-valid" class="valid"></div>
+    <div id="m-history" class="files"></div></section>
+</main>
+
+<main class="grid3 view" id="view-napedy" hidden>
+  <section class="card"><h2>Biblioteka szablonów <span class="grow"></span><span id="d-count" class="note"></span></h2>
+    <div id="d-list" class="list"></div></section>
+  <section class="card"><h2 id="d-title">Szablon</h2><div id="d-detail" class="form"></div>
+    <div id="d-curve"></div><div id="d-diff"></div></section>
+  <section class="card"><h2>Instancje w maszynie</h2><div id="d-inst" class="list"></div></section>
+</main>
+
+<main class="grid2 view" id="view-awarie" hidden>
+  <section class="card"><h2>Wstrzyknij awarię</h2><div id="f-catalog" class="faults"></div></section>
+  <section class="card"><h2>Aktywne awarie i stan napędów</h2><div id="f-active" class="list"></div>
+    <div id="f-drives" class="mono note"></div><div class="err" id="f-err" role="alert"></div></section>
+</main>
+
+<footer class="actions" id="actions"></footer>
 <script src="/static/vendor/uPlot.iife.min.js"></script>
 <script src="/static/app.js"></script>
+<script src="/static/editor.js"></script>
 </body>
 </html>
