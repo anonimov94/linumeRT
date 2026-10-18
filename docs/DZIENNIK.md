@@ -116,3 +116,12 @@ Najnowsze wpisy na dole. Każda sesja dopisuje: zrobione · decyzje · do sprawd
 - Decyzje: jedna PROPOZYCJA w `docs/DECYZJE.md` (przetworniki, bateria, komponent zderzakowy, HOME_ABSOLUTE_ENCODER, numery metod trybu 6, start losowy, gantry).
 - Do sprawdzenia ręcznie / przez drugi model: numeracja metod 6098h wobec normy i prawdziwych napędów; parametry INI dla zderzaka z homemod (sesja 018, scenariusze `home_*` z LinuxCNC); dokładności w testach uwzględniają luz śrub z szablonów (10–20 µm) i drgania styków 1 ms — NIEZWERYFIKOWANE NA SPRZĘCIE.
 - Długi: `test_hal_comps.py` kopiuje moduł do `rtlib` RIP na czas testu (rtapi_app nie ładuje ścieżek); master ma indeks z licznika Plant (LRT-NET bez pola zatrzasku indeksu — do decyzji w sesji 016/017); schemat `homing.cia402_method` przyjmuje 1–35 (bez -1/-2 i 37); brak wejścia indeksu w machine.yaml.
+
+## 016 — Plant: serwer LRT-NET — 2026-10-18
+- Model-Author: Claude (Opus 5.5). Gałąź `wip/sesja-016` od `wip/sesja-015` (#13 nie scalony), PR #17. Scalenie własnych #13–#16 przez Claude zablokowane w tej sesji — czekają na przegląd Codexa.
+- Zrobione: `lrtnet.py` (kodek v1), `server.py` (`PlantServer.handle`/`serve`, lockstep/realtime, watchdog E-4003 jako awaria napędu `COMM_WATCHDOG` 8130h w rdzeniu C, statystyki lost/late/jitter, stan bezpieczny po wyjątku modelu, SHA-256 śladu), `trace.py` (CSV/JSONL w wątku), `serve.py` + `python -m linumert_plant serve`, `plant/server/test_master.py` (CiA 402, trapez), `config/plant/plant.example.yaml`.
+- Testy: `tests/test_lrtnet.py` (14), `tests/test_plant_server.py` (26): 10 000 ramek UDP lockstep bez strat (~2,3 s), watchdog lockstep i realtime, REQ-QA-03, REQ-QA-04, proces CLI.
+- Weryfikacja (WSL Ubuntu 24.04, venv 3.12): ruff czysty; pytest 300 OK; `make test-c` OK (29/59/20).
+- Decyzje: PROPOZYCJA sesji 016 w `docs/DECYZJE.md`.
+- Do sprawdzenia ręcznie: tryb `--realtime` między dwiema VM (sieć lrtnet) — jitter i watchdog przy prawdziwym zegarze.
+- Długi: wrzeciono przez LRT-NET (0 do sesji 021); zatrzask indeksu enkodera (sesja 017); `plant_restart_midrun` i `link_loss` jako scenariusze (024); panel web.

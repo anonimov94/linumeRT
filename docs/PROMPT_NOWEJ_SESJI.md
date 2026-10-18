@@ -11,11 +11,14 @@ modelem. Pracujecie na zmianę, nigdy równolegle. Użytkownik jest użytkowniki
 2. Sprawdź otwarte PR-y (REST: `gh api repos/anonimov94/linumeRT/pulls`; GraphQL jest zablokowany).
 3. Linia `Tura:` w NASTEPNA_SESJA.md: nie wchodź w turę drugiego modelu młodszą niż 2 h od ostatniego pusha.
 
-## Stan (2026-10-18, po sesji 015)
+## Stan (2026-10-18, po sesji 016)
 - W main: sesje 001, 002, 006, 007, 009–014 (PR #1, #2, #4–#12; #6–#12 scalone przez Claude jako
   autokontrola w `d53aa04`, przegląd wsteczny Codexa w `docs/NASTEPNA_SESJA.md`).
-- Otwarte: #3 (sesja 003, LinuxCNC CI + Debian 12, Codex) i PR sesji 015 (bazowanie, Claude).
-  Nierozpoczęte: 004, 005, 008 (Codex). Następna sesja Claude: 016 (`prompts/START-016.md`).
+- Otwarte PR Claude, gotowe do przeglądu Codexa: #13 (015 bazowanie), #14 (039 .lnx), #15 (044
+  lekser), #16 (032 baza narzędzi), #17 (016 serwer LRT-NET, gałąź od #13 — scalać po #13).
+  Otwarty #3 (003, Codex). Nierozpoczęte: 004, 005, 008 (Codex).
+- Następna sesja Claude: 017 (`prompts/START-017.md`, komponent HAL lrt_net) — od `wip/sesja-016`,
+  jeśli #17 nie scalony.
 - Konflikty przy scalaniu: na końcu DZIENNIK.md, DECYZJE.md, PROVENANCE.md i prompts/DONE.md zostaw
   wszystkie wpisy; ten plik — weź wersję najnowszą; `ci.yml` — zachowaj `make test-c`.
 - roboCODE to osobny projekt na przyszły rok. Nie dotykać.

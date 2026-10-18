@@ -73,6 +73,23 @@ potem `digital_in` u32, `spindle_actual` f32, statystyki (`frames_lost` u32, `fr
    (alarm E-4003), wyjścia w stan bezpieczny; wznowienie ramek nie kasuje faultu (wymaga fault reset).
 5. `jitter_us` = odchylenie odstępu odbioru ramek od `cycle_ns` (średnia ruchoma 100 ramek).
 
+**Realizacja (sesja 016, `plant/server/linumert_plant/server.py`, `lrtnet.py`):**
+- Bloki osi = napędy z `drives:` w kolejności pliku bez napędu wrzeciona (gantry = dwa bloki, jak
+  dwa jointy LinuxCNC); inna liczba osi w ramce = ramka odrzucona. `mode` zmienia 6060h tylko przy
+  zmianie; `target_pos` trafia do 607Ah wyłącznie w CSP (8); `mode_display` = 6061h;
+  `following_error` = ostatnie 607Ah − 6064h (poza CSP 0); `torque_pct` = 6077h.
+- Krok modelu: `dt` z reguły 3 dzielone na `timing.substeps` podkroków rdzenia C.
+- Zegar odbioru: lockstep = `time_ns` ramki, realtime = zegar monotoniczny hosta. Watchdog działa
+  w obu trybach (lockstep: luka `time_ns` między ramkami > `watchdog_ms`; realtime: także bez ramek,
+  sprawdzany w pętli co `watchdog_ms/4`). Awaria napędu `COMM_WATCHDOG` = 603Fh **8130h**, alarm
+  **E-4003**; wyjścia cyfrowe zerowe, dopóki master nie wyśle fault reset i żaden napęd nie jest w fault.
+- Ramka powtórzona albo starsza dostaje odpowiedź (stan bieżący) bez kroku modelu.
+- Wyjątek w modelu: napędy wyłączone (6040h = 0), wyjścia zerowe, dalej tylko odpowiedzi ze słowem
+  stanu FAULT i 603Fh = FF00h (E-4200) do restartu Plant.
+- `spindle_cmd` / `spindle_actual`: w v1 nieużywane (0); wrzeciono VFD przez Modbus w sesji 021.
+- Ślad: SHA-256 wszystkich wysłanych odpowiedzi (`PlantServer.digest`, wypisywany po zakończeniu),
+  zapis przebiegu do CSV/JSON Lines w osobnym wątku (`trace.py`, kolejka bez blokowania pętli).
+
 ## 4. Model osi (REQ-VD-01, REQ-VD-04)
 Oznaczenia: J_m, J_s [kg·m²] wirnik i śruba; m [kg] masa osi; p [m/obr] skok śruby;
 η sprawność; r przełożenie (oś obrotowa: J_obc/r² zamiast m·(p/2π)²).
@@ -220,7 +237,7 @@ timing: {cycle_ns: 1000000, substeps: 10, watchdog_ms: 50}
 mode: lockstep            # lockstep | realtime
 seed: 1
 state_file: state/plant_state.json
-trace: {dir: state/traces, format: jsonl}
+trace: {path: state/traces/plant.jsonl, format: jsonl}   # csv | jsonl (sesja 016)
 ```
 
 Scenariusz `scenarios/*.yaml` to oś czasu zdarzeń i oczekiwań; pole `requirements`

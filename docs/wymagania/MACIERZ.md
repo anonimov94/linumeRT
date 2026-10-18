@@ -27,5 +27,5 @@ Tabela jest zgodna z wymaganiami (pilnuje tego `tests/test_plant_spec.py`).
 | REQ-VM-12 | 023 | `test_editor_api`, scenariusz `edit_reload` | planowane |
 | REQ-QA-01 | 024 | samo narzędzie w CI | planowane |
 | REQ-QA-02 | 024, 082 | job `plant-matrix` | planowane |
-| REQ-QA-03 | 016, 024 | `test_fuzz_machine_yaml`, `plant_restart_midrun`, `link_loss` | planowane |
-| REQ-QA-04 | 016, 024 | `test_determinism` | planowane |
+| REQ-QA-03 | 016, 024 | 016: `test_fuzz_only_frame_errors`, `test_rejects_bad_frames`, `test_corrupt_frames_*`, `test_model_exception_gives_safe_state`, `test_watchdog_*`, `test_missing_template_refuses_start`, `test_bad_plant_yaml`; 024: `test_fuzz_machine_yaml`, `plant_restart_midrun`, `link_loss` | zaimplementowane |
+| REQ-QA-04 | 016, 024 | `test_determinism` (016: SHA-256 odpowiedzi serwera); scenariusze: 024 | zaimplementowane |
