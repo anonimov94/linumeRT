@@ -134,7 +134,7 @@ def test_images_and_fonts_only_with_provenance():
                                    "plant/server/")):
                 misplaced.append(rel)
     assert not missing, f"zasoby bez wpisu w docs/PROVENANCE.md: {missing}"
-    assert not misplaced, f"obrazy/fonty poza docs/design, docs/raporty, screens, fonts: {misplaced}"
+    assert not misplaced, f"obrazy/fonty w niedozwolonym miejscu: {misplaced}"
 
 
 def test_provenance_covers_every_design_file():

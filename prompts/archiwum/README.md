@@ -1,0 +1,17 @@
+# Archiwum promptów startowych
+
+Prompty `START-NNN.md` przygotowane dla konkretnych sesji (kontynuacja przerwanej pracy, zlecenia
+jednorazowe). Są zrealizowane i zostają jako historia; nie używaj ich do startu nowej sesji.
+
+| Plik | Dotyczy | Wynik |
+|---|---|---|
+| [START-012.md](START-012.md) | sesja 012 (napędy CiA 402) | PR #10 |
+| [START-013.md](START-013.md) | sesja 013 (biblioteka napędów) | PR #11 |
+| [START-014.md](START-014.md) | sesja 014 (maszyna Plant) | PR #12 |
+| [START-015.md](START-015.md) | sesja 015 (bazowanie) | PR #13 |
+| [START-016.md](START-016.md) | sesja 016 (serwer LRT-NET) | PR #17 |
+| [START-017.md](START-017.md) | sesja 017 (komponent HAL lrt_net) | PR #27 |
+| [START-LAPTOP.md](START-LAPTOP.md) | sesja laptopowa: Debian 12, przegląd #13–#17 | PR #21, #22 |
+| [START-021.md](START-021.md) | kontynuacja sesji 021 (wrzeciono VFD) | PR #32 |
+
+Aktualny prompt startowy: [`docs/PROMPT_NOWEJ_SESJI.md`](../../docs/PROMPT_NOWEJ_SESJI.md).

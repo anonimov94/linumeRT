@@ -1,51 +1,38 @@
-# Prompt startowy nowej sesji (Claude lub Codex)
+# Prompt startowy sesji (Claude lub Codex)
 
-**Aktualny punkt wejścia: [../nextPROMPT.md](../nextPROMPT.md).** Właściciel
-dopuścił niezależną pracę równoległą w osobnych checkoutach; starsze zakazy
-równoległości poniżej nie obowiązują w tym przypadku.
+Model-Author: Claude · 2026-10-18. Stały tekst: **nie zawiera stanu** (stan jest w
+[`NASTEPNA_SESJA.md`](NASTEPNA_SESJA.md)). Zmieniaj go tylko wtedy, gdy zmieniają się zasady.
 
-Model-Author: Claude · 2026-10-18. Wklej na początku sesji; aktualizuj stan na jej końcu.
+Wklej na początku sesji:
 
-Pracujesz nad linumeRT (repo anonimov94/linumeRT, LinuxCNC 2.9 + QtDragon, Debian 12) razem z drugim
-modelem. Pracujecie na zmianę, nigdy równolegle. Użytkownik jest użytkownikiem końcowym i ocenia po efektach.
+> Kontynuuj projekt linumeRT (repo `anonimov94/linumeRT`; LinuxCNC 2.9 + ekran na bazie QtDragon,
+> Debian 12, wirtualna obrabiarka Plant). Przeczytaj `docs/PROMPT_NOWEJ_SESJI.md` i postępuj według niego.
 
-## Start
-1. Przeczytaj CLAUDE.md, docs/WSPOLPRACA_MODELI.md, docs/DECYZJE.md, 3 ostatnie wpisy docs/DZIENNIK.md,
-   docs/NASTEPNA_SESJA.md i prompts/LOCK.
-2. Sprawdź otwarte PR-y (REST: `gh api repos/anonimov94/linumeRT/pulls`; GraphQL jest zablokowany).
-3. Linia `Tura:` w NASTEPNA_SESJA.md: nie wchodź w turę drugiego modelu młodszą niż 2 h od ostatniego pusha.
+## 1. Start (kolejno, oszczędnie)
+1. `CLAUDE.md` (kontrakt; ma pierwszeństwo przed promptem sesji) i `docs/WSPOLPRACA_MODELI.md` (zasady pracy).
+2. `docs/NASTEPNA_SESJA.md`: linia `Tura:`, stan PR, następna praca, środowisko, otwarte sprawy.
+3. `prompts/LOCK` i otwarte PR (`gh pr list`). Nie wchodź w świeżą turę drugiego modelu (≤ 2 h od pushu).
+4. `docs/DECYZJE.md` (część dotycząca zakresu sesji) i ostatnie trzy wpisy `docs/DZIENNIK.md`.
+5. Prompt sesji `prompts/sesja-NNN.md`, gdzie NNN to najniższy numer nieobecny w `prompts/DONE.md`,
+   chyba że `NASTEPNA_SESJA.md` §3 wskazuje inaczej. Jeśli istnieje gałąź `wip/sesja-NNN`, kontynuuj ją.
+6. Zajmij turę: `prompts/LOCK` = `<model> · sesja NNN · <UTC> · <opis>`, linia `Tura:` = w toku; commit, push.
 
-## Stan (2026-10-18, po sesji 016)
-- W main: sesje 001, 002, 006, 007, 009–016, 032, 039, 044 (PR #1, #2, #4–#17; #6–#12 #6–#12 scalone przez Claude jako
-  autokontrola w `d53aa04`, przegląd wsteczny Codexa w `docs/NASTEPNA_SESJA.md`).
-- #13–#17 (015, 039, 044, 032, 016) scalone w main przez właściciela 11:08–11:15Z bez przeglądu Codexa
-  (przegląd wsteczny w NASTEPNA_SESJA.md). Otwarte: #3 (003, Codex), #18 (walidacja ramki LRT-NET). Nierozpoczęte: 004, 005, 008 (Codex).
-- Następna sesja Claude: 017 (`prompts/START-017.md`, komponent HAL lrt_net) — od `wip/sesja-016`,
-  (#17 jest już w main — zacznij od aktualnego main).
-- Konflikty przy scalaniu: na końcu DZIENNIK.md, DECYZJE.md, PROVENANCE.md i prompts/DONE.md zostaw
-  wszystkie wpisy; ten plik — weź wersję najnowszą; `ci.yml` — zachowaj `make test-c`.
-- roboCODE to osobny projekt na przyszły rok. Nie dotykać.
+## 2. Praca
+- Małe kroki; po każdym: lint i testy → commit (`Model-Author: Claude|Codex`) → push → linia w
+  „Stan zatrzymania” w `NASTEPNA_SESJA.md`. Draft PR po pierwszym kroku.
+- Definition of Done (`CLAUDE.md` §11): testy, jawne błędy, brak blokowania RT, dokumentacja,
+  `docs/LICENCJE.md` / `docs/PROVENANCE.md`, wymagania REQ w `docs/wymagania/MACIERZ.md`.
+- LinuxCNC: blokada zasobu `python tools/lock.py acquire linuxcnc --model <model> --note "..."` (D30).
+- Rzeczy dotyczące prawdziwego sprzętu oznaczaj `NIEZWERYFIKOWANE NA SPRZĘCIE`. Autokontroli nie nazywaj
+  niezależnym przeglądem.
 
-## Zakres
-- Claude: rdzeń Pythona weryfikowalny w chmurze, specyfikacje, wymagania, IP, niezależny przegląd Codexa.
-  Następna sesja = najniższy numer z prompts/ nieobecny w prompts/DONE.md i LOCK, z pominięciem
-  sesji Codexa (003–005, 008); dla Claude teraz 017.
-- Codex: wszystko w WSL/Windows/VNC (budowa LinuxCNC, HAL/INI, skrypty, CI, testy integracyjne).
-  Zlecenia dla niego: krótkie, jednoznaczne specyfikacje w komentarzu do PR lub w NASTEPNA_SESJA.md.
+## 3. Zamknięcie sesji (obowiązkowe)
+1. `make lint test` (oraz `test-c`, testy `-m linuxcnc`, jeśli dotyczy) zielone; wszystko wypchnięte; PR gotowy.
+2. Wpis w `docs/DZIENNIK.md` (format w nagłówku pliku, na końcu) i linia w `prompts/DONE.md` (we właściwym
+   miejscu według numeru); decyzje w `docs/DECYZJE.md` (sekcja sesji, według numeru).
+3. `docs/NASTEPNA_SESJA.md`: §1–§5 zaktualizowane, „Stan zatrzymania” wyczyszczony do bieżącej tury,
+   `Tura:` = oddana; `prompts/LOCK` pusty; blokady zasobów zwolnione.
+4. Użytkownikowi: co powstało, link do PR, co sprawdzić ręcznie, jeden następny krok.
 
-## Zasady
-- CLAUDE.md wygrywa z promptem sesji. Definition of Done: testy, jawne błędy, brak blokowania RT,
-  dokumentacja, LICENCJE/PROVENANCE, wpis w DZIENNIK.md i prompts/DONE.md.
-- Małe kroki; po każdym commit i push na wip/sesja-NNN. Oszczędzaj tokeny.
-- Własnych PR-ów nie scalasz — scala drugi model po sprawdzeniu (wyjątek D25: autokontrola z adnotacją).
-  Nie przedstawiaj autokontroli jako niezależnego przeglądu.
-- Oznaczaj `Model-Author: Claude|Codex` w commitach, PR i dzienniku. Prawdziwy sprzęt/LinuxCNC:
-  `NIEZWERYFIKOWANE NA SPRZĘCIE`.
-- ruff (line-length 100, B905: `zip(..., strict=True)`), pytest z `PYTHONPATH=core`.
-
-## ZAWSZE KOŃCZ PRACĘ (obowiązkowe zamknięcie sesji)
-1. Wszystko scommitowane i wypchnięte; PR otwarty; testy i lint zielone.
-2. Wpis w DZIENNIK.md i prompts/DONE.md.
-3. Zaktualizuj sekcję "Stan" powyżej i linię `Tura:` w NASTEPNA_SESJA.md (stan: oddana), zwolnij LOCK.
-4. Zostaw drugiemu modelowi konkretne zlecenia (co sprawdzić, co scalić, co zrobić dalej).
-5. Użytkownikowi podaj: co powstało, link do PR i jeden następny krok.
+Sesję przerwaną w połowie opisz dodatkowo w `prompts/START-NNN.md` (kroki do zrobienia); po jej ukończeniu
+przenieś plik do `prompts/archiwum/`.

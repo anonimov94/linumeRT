@@ -12,3 +12,7 @@ Zasady: nazwa zawsze **linumeRT**; tło ciemne, akcent turkusowy, bursztyn dla u
 IBM Plex Sans (interfejs) i JetBrains Mono (liczby, G-code). Cele dotykowe ≥ 44 px. Kolor nigdy nie jest
 jedynym nośnikiem informacji. Kompozycja ekranu: lewa szyna obszarów, górny pasek trybu i stanu,
 dolny pasek dużych akcji. Pochodzenie: projekt własny linumeRT (wpisy w docs/PROVENANCE.md tworzy sesja 002).
+
+**Kierunek ekranu operatora (D32):** [`HMI_WORKFLOW.md`](HMI_WORKFLOW.md) — architektura ekranów według kolejności
+pracy (Start → Bazowanie → Zero detalu → Narzędzia → Program → Symulacja → Produkcja, Ręczne, Diagnostyka,
+Ustawienia) i etapy HMI-01…HMI-06. Wygląd tych ekranów nadal wynika z `tokens.yaml`, ikon i makiet.
