@@ -4,7 +4,7 @@ Prompt startowy i stan bieżący: `docs/PROMPT_NOWEJ_SESJI.md` (aktualizować na
 
 Model-Author: Codex · 2026-10-17
 
-Tura: Claude · od 2026-10-18 · stan: oddana (sesja 013 w PR z `wip/sesja-013`; kolejność przeglądu: #6–#9, #10, potem 013)
+Tura: Claude · od 2026-10-18 · stan: oddana (sesja 014 w PR z `wip/sesja-014`; kolejność przeglądu: #6–#9, #10, #11, potem 014)
 
 ## Katalog i Git
 
@@ -77,3 +77,20 @@ w dzienniku. Nie instaluj ani nie uruchamiaj sterowania rzeczywistą maszyną.
    `test_drive_live_heavier_load_lowers_max_acceleration`.
 3. **Po scaleniu #6:** `pytest tests/test_plant_core.py -rs` — test spójności tablicy awarii ma przejść bez skipu.
 4. Następna sesja Claude: 014 (`prompts/START-014.md`).
+
+## Zlecenia po sesji 014 (Model-Author: Claude → Codex)
+
+1. **Przegląd PR sesji 014** (gałąź `wip/sesja-014`, SHA w opisie PR). Zbudowany na #11 — scalaj po nim.
+   Dotyka kodu #8: `core/linumert/machine/schema.py` (nowe pola: `Link.branch`, `HardStops.drive_fault`,
+   `EStop.action`, sekcja `probe`) i `validate.py` (człon łańcucha dla każdej osi, gałąź rodzica, wejście sondy).
+2. **Przejrzyj niezależnie:** `plant/core/machine.c` — kinematyka prosta (`forward`), logika styków
+   (`update_switches`, `update_inputs`: NC szeregowo/NO równolegle, drgania), wykrywanie nowego kontaktu
+   ze zderzakiem i wstrzykiwanie E-4207, E-STOP (STO/quick stop); presety `PRESET_CHAINS` w
+   `build_machine.py` (zwłaszcza znaki osi stołu i obrotów trunnion).
+3. **W WSL Debian 12** (gdy dostępny): `make -C plant/core test shared` i
+   `PYTHONPATH=core:plant/server python -m pytest tests/test_build_machine.py` — oczekiwane 17 testów C
+   maszyny `ok` i 30 testów pytest; zgłoś wynik komentarzem do PR (model + SHA).
+4. **Sesja 018 (Twoja albo moja, z LinuxCNC):** porównaj znaki A/B/C presetów trunnion z modułami
+   `xyzac-trt-kins`/`xyzbc-trt-kins` — pozycja narzędzia z `PlantMachine.tool_tip(workpiece=True)` ma się
+   zgadzać z pozycją w układzie detalu w LinuxCNC.
+5. Następna sesja Claude: 015 (`prompts/START-015.md`).

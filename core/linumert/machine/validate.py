@@ -52,9 +52,21 @@ def r_chain_links(cfg: MachineConfig, _t: set[str] | None) -> Iterable[str]:
     ids = [link.id for link in chain]
     for name in _dupes(ids):
         yield f"kinematics.chain: powtorzony identyfikator czlonu {name}"
+    by_id = {link.id: link for link in chain}
     for index, link in enumerate(chain):
         if link.parent is not None and link.parent not in ids:
             yield f"kinematics.chain[{index}].parent: nieznany czlon {link.parent}"
+        parent = by_id.get(link.parent) if link.parent is not None else None
+        if parent is not None and parent.branch != link.branch:
+            yield (f"kinematics.chain[{index}].branch: czlon {link.id} musi byc w tej samej "
+                   f"galezi co rodzic {parent.id} ({parent.branch})")
+    for index, axis in enumerate(cfg.axes):
+        link = by_id.get(axis.letter)
+        if link is None:
+            yield f"axes[{index}]: brak czlonu o id {axis.letter} w kinematics.chain"
+        elif (link.kind == "rotary") != axis.rotary:
+            yield (f"kinematics.chain: czlon {axis.letter} ma rodzaj {link.kind}, a os "
+                   f"{axis.letter} jest {'obrotowa' if axis.rotary else 'liniowa'}")
 
 
 def r_travel_order(cfg: MachineConfig, _t: set[str] | None) -> Iterable[str]:
@@ -204,6 +216,8 @@ def r_inputs_exist(cfg: MachineConfig, _t: set[str] | None) -> Iterable[str]:
     setter = cfg.positions.tool_setter
     if setter is not None:
         yield from need("positions.tool_setter.input", setter.input)
+    if cfg.probe is not None:
+        yield from need("probe.input", cfg.probe.input)
     for name, pin in cfg.toolchanger.sensors.items():
         yield from need(f"toolchanger.sensors.{name}", pin)
 

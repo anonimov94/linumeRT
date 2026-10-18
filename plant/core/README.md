@@ -76,3 +76,27 @@ F = m·a, wpływ masy, bezwładność odbita (liniowa i obrotowa), krzywa moment
 kierunku), zderzaki sztywne i sprężyste (maks. penetracja z bilansu energii), niezależność od
 kroku, walidacja parametrów. `tests/test_plant_core.py` uruchamia je z pytest i pilnuje braku
 `malloc`/I/O w rdzeniu.
+
+## Maszyna (`machine.h`, sesja 014)
+
+`lrt_machine` składa napędy (`lrt_drive` + `lrt_axis` na każdy silnik) w obrabiarkę (REQ-VM-02…05):
+
+- **Osie maszyny** z jednym albo dwoma napędami; gantry: pozycja = średnia stron, rozjazd
+  `drive0 − drive1`, zdarzenie `GANTRY_SKEW` po przekroczeniu `max_skew`.
+- **Łańcuch kinematyczny**: człony liniowe/obrotowe (wektor osi, przesunięcie, rodzic), gałąź narzędzia
+  i gałąź detalu; kinematyka prosta daje koniec narzędzia w układzie maszyny i detalu
+  (`lrt_machine_tool_tip`, `lrt_machine_forward`).
+- **Twarde zderzaki** (sprężyna + tłumik z `stop_k`, `stop_c` w jednostkach fizycznych; współczynnik
+  tłumienia liczony z masy odbitej osi): zdarzenie `CRASH_HARDSTOP` przy nowym kontakcie, prędkość
+  uderzenia, opcjonalnie awaria napędu HW_LIMIT (E-4207).
+- **Krańcówki i czujniki bazowe**: pozycja, histereza, NC/NO, drgania styku (losowe z ziarnem,
+  przez `bounce` sekund), wspólne wejście (NC szeregowo = AND, NO równolegle = OR; mieszanie NC/NO
+  na jednym wejściu jest błędem konfiguracji). Zdarzenia `LIMIT_TRIP`, `HOME_SENSOR`.
+- **Impuls indeksu** raz na obrót silnika (licznik i położenie zatrzaśnięte), **pętla E-STOP**
+  (STO = trwała awaria STO wszystkich napędów, albo quick stop przez bit 6040h), **sonda**
+  (prostopadłościan przygotówki albo płytka), **wejścia/wyjścia** 32-bitowe jak w LRT-NET v1.
+
+Konfiguracja przez klucze `nazwa wartość` (`lrt_machine_cfg_set`, lista w nagłówku `machine.h`), więc
+wiązanie Pythona nie odwzorowuje struktur C. `make shared` buduje `build/libplant_core.so` dla
+`linumert_plant.core_binding` (ctypes). 17 testów w `tests/test_machine.c`.
+**NIEZWERYFIKOWANE NA SPRZĘCIE.**

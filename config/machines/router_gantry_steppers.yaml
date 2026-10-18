@@ -53,7 +53,12 @@ positions:
 collision_bodies:
   - {name: wrzeciono, shape: cylinder, attached_to: spindle, size: [80, 150], position: [0, 0, 75]}
   - {name: stol, shape: box, attached_to: table, size: [700, 1000, 40], position: [300, 450, -150]}
+# Płytka do pomiaru wysokości detalu (sesja 014): kontakt poniżej Z = -100 w obrysie XY
+probe:
+  input: probe
+  tip_length: 20
+  target: {type: plate, min: [100, 100, -110], max: [160, 160, -100]}
 io:
-  inputs: {estop: 0, lim_x_min: 1, lim_x_max: 2, lim_y_min: 3, lim_y_max: 4, lim_z_max: 5, toolsetter: 6}
+  inputs: {estop: 0, lim_x_min: 1, lim_x_max: 2, lim_y_min: 3, lim_y_max: 4, lim_z_max: 5, toolsetter: 6, probe: 7}
   outputs: {spindle_on: 0, coolant: 1}
   estop: {input: estop, contact: NC}

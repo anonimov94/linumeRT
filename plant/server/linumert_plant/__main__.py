@@ -1,7 +1,8 @@
-"""Wiersz poleceń Plant: `python -m linumert_plant drive <polecenie>`.
+"""Wiersz poleceń Plant: `python -m linumert_plant drive|machine <polecenie>`.
 
-Polecenia: list, show, validate, clone, schema, instances. Z katalogu głównego repozytorium
-to samo działa jako `python -m plant drive ...` (plant/__main__.py).
+Polecenia napędów: list, show, validate, clone, schema, instances. Maszyna (sesja 014):
+`machine build <machine.yaml> [--keys] [--run]` — model z machine.yaml, z --run próba w rdzeniu C.
+Z katalogu głównego repozytorium to samo działa jako `python -m plant ...` (plant/__main__.py).
 
 Model-Author: Claude · sesja 013 (REQ-VD-03). Kody wyjścia: 0 = OK, 1 = błąd danych, 2 = użycie.
 """
@@ -50,7 +51,59 @@ def _build_parser() -> argparse.ArgumentParser:
     cmds.add_parser("schema", help="wypisz JSON Schema szablonu")
     inst = cmds.add_parser("instances", help="rozwiąż napędy z machine.yaml (szablon + overrides)")
     inst.add_argument("machine", type=Path)
+    machine = sub.add_parser("machine", help="wirtualna obrabiarka z machine.yaml")
+    mcmds = machine.add_subparsers(dest="command", required=True)
+    build = mcmds.add_parser("build", help="zbuduj model maszyny z machine.yaml")
+    build.add_argument("machine", type=Path)
+    build.add_argument("--keys", action="store_true", help="wypisz klucze konfiguracji rdzenia C")
+    build.add_argument("--run", action="store_true",
+                       help="uruchom model w rdzeniu C (wymaga kompilatora, Linux/WSL)")
+    build.add_argument("--dir", type=Path, default=None, help="katalog biblioteki napędów")
     return parser
+
+
+def _print_errors(exc: MachineConfigError) -> None:
+    print("Błąd:\n" + "\n".join(f"  {e}" for e in exc.errors), file=sys.stderr)
+
+
+def _run_machine(args: argparse.Namespace) -> int:
+    from .build_machine import build_machine
+
+    try:
+        model = build_machine(args.machine, args.dir)
+    except MachineConfigError as exc:
+        _print_errors(exc)
+        return 1
+    if args.keys:
+        print(model.to_text(), end="")
+        return 0
+    kin = model.kinematics
+    print(f"Maszyna {model.name}: {len(model.joints)} osi, {len(model.drives)} napędów, "
+          f"{len(model.links)} członów łańcucha")
+    if kin:
+        print(f"Kinematyka LinuxCNC: {kin['module']} coordinates={kin['coordinates']} "
+              f"kinstype={kin['kinstype']}")
+    for letter in model.joints:
+        print(f"  {letter}: {', '.join(model.joint_drives[letter])}")
+    if model.spindle:
+        print(f"  wrzeciono: {model.spindle}")
+    pins = sorted(model.inputs.items(), key=lambda item: item[1])
+    print("Wejścia: " + ", ".join(f"{name}={pin}" for name, pin in pins))
+    if args.run:
+        from .core_binding import PlantCoreUnavailable, PlantMachine
+
+        try:
+            plant = PlantMachine(model)
+        except PlantCoreUnavailable as exc:
+            print(f"Rdzeń C niedostępny: {exc}", file=sys.stderr)
+            return 1
+        except MachineConfigError as exc:
+            _print_errors(exc)
+            return 1
+        tip = ", ".join(f"{v:.3f}" for v in plant.tool_tip(workpiece=True))
+        print(f"Rdzeń C: OK; koniec narzędzia w układzie detalu [mm]: ({tip}); "
+              f"wejścia 0x{plant.inputs:08x}")
+    return 0
 
 
 def _find_machine_entry(machine: Path, source: str) -> dict:
@@ -70,6 +123,8 @@ def _find_machine_entry(machine: Path, source: str) -> dict:
 
 
 def _run(args: argparse.Namespace) -> int:
+    if args.group == "machine":
+        return _run_machine(args)
     if args.command == "list":
         for tpl in load_library(args.dir).values():
             print(f"{tpl['id']:28} {tpl['type']:14} v{tpl['version']}  {tpl['name']}")
