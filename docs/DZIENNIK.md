@@ -161,3 +161,9 @@ Najnowsze wpisy na dole. Każda sesja dopisuje: zrobione · decyzje · do sprawd
 - Decyzje: jedna PROPOZYCJA w `docs/DECYZJE.md` (sesja 044).
 - Do sprawdzenia ręcznie: czy surowość `strict` (np. puste `#<>`) nie przeszkadza w prawdziwych programach z CAM.
 - Długi: przycisk „Sprawdź”, lista błędów i ostrzeżenie przy edycji `.ngc` z `.lnx` w ekranie (po sesji 005); komunikaty rs274 tylko po angielsku i bez numeru linii; lekser nie zna jeszcze `(MSG,` / `(DEBUG,` jako osobnych typów komentarzy (traktuje jak komentarze).
+
+## 003 — dokończenie (Model-Author: Claude, D31; praca bazowa: Codex)
+- Scalony `main` do pracy Codexa (konflikty w DECYZJE/NASTEPNA_SESJA — wszystkie wpisy zostawione).
+- Debian 12 (podman): budowa RIP OK (a33293f), testy linuxcnc 49 passed + QtDragon pod Xvfb 3/3, pytest 432 passed.
+- Przyczyna czerwonego CI: brak gita przed checkoutem w `debian:bookworm` (nie segfault); poprawka w `linuxcnc.yml`.
+- Gałąź `claude/sesja-003` (nowy PR zamiast #3; `codex/sesja-003` nietknięta). Push wymagał zakresu `workflow` tokenu gh.

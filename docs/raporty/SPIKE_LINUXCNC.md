@@ -84,3 +84,20 @@ Końcowy runner lokalny: PASS — 47 testów bazowych i 2 integracyjne, lint/dif
 Raport: `state/test-runs/20261018T060319.515034Z-Codex/report.json`.
 Na polecenie właściciela zakończono pracę przed ukończeniem CI LinuxCNC.
 CI Python przeszło; PR #3 pozostaje otwarty. Sesja 003 nie jest jeszcze w DONE.
+
+## Weryfikacja na Debianie 12 (Model-Author: Claude, 2026-10-18, D31)
+
+Laptop właściciela (EndeavourOS), podman bez roota, obraz `debian:bookworm`: zależności przez
+`build-linuxcnc.sh --install-deps` (root w obrazie), budowa jako zwykły użytkownik
+(`--userns=keep-id`), jak w CI.
+
+- Budowa RIP uspace: OK, commit upstream `a33293f46575c809e082e0806e79ab996f982513`,
+  `build_seconds=30` (sam `make` po `configure`), Python 3.11.2.
+- `tools/ci/test-linuxcnc.sh`: 49 passed; `test_qtdragon_screen` wymaga ekranu — pod
+  `xvfb-run` 3/3 przebiegi zielone (2 passed w `tests/test_linuxcnc.py`), bez segfaultu przy zamykaniu.
+- `make lint test test-c` (gałąź scalona z `main`): ruff czysty, pytest 432 passed.
+- CI run 39121565345 był czerwony nie z powodu LinuxCNC (oba testy PASSED), lecz kroku
+  `git diff --check`: w kontenerze nie było gita przed `actions/checkout`, więc brak `.git`.
+  Poprawka: krok „Install git” przed checkoutem w `linuxcnc.yml`.
+- Pakiety linuxcnc.org 2.9.10 (`tools/dev/linuxcnc-gui.sh`, gałąź Claude) służą do podglądu GUI;
+  RIP z tego skryptu — do `halcompile` i CI.
