@@ -23,6 +23,11 @@
  *   joint.J.use_stops / stop_k / stop_c sztywnosc [N/m|N*m/rad] i tlumienie [N*s/m|N*m*s/rad]
  *   joint.J.stop_fault                  1 = wjazd w zderzak daje awarie napedu HW_LIMIT
  *   joint.J.initial                     polozenie startowe [m|rad]
+ *   joint.J.initial_random / initial_min / initial_max
+ *                                       1 = start losowy w [min, max] z ziarna machine.seed
+ *   drive.N.din_neg_limit / din_pos_limit / din_home
+ *                                       styk switch.S na wejsciu napedu (tryb 6), -1 = brak
+ *   drive.N.encoder / home_offset / hardstop_time_s   patrz lrt_drive_params (sesja 015)
  *   link.L.kind / joint / parent        czlon: 0 liniowy, 1 obrotowy; os maszyny (-1 = staly);
  *                                       rodzic (-1 = rama maszyny, musi miec mniejszy indeks)
  *   link.L.ax ay az / ox oy oz          wektor osi i przesuniecie wzgledem rodzica [m]
@@ -30,7 +35,10 @@
  *   switch.S.joint / role / side        os, 0 krancowka / 1 czujnik bazowy, -1 aktywny ponizej
  *                                       polozenia, +1 powyzej
  *   switch.S.position / hysteresis      [m|rad]
- *   switch.S.nc / input / bounce        1 = styk NC; bit wejscia 0..31; czas drgan styku [s]
+ *   switch.S.nc / input / bounce        1 = styk NC; bit wejscia 0..31 (-1 = tylko naped);
+ *                                       czas drgan styku [s]
+ *   switch.S.drive                      -1 = polozenie osi, N = polozenie napedu N tej osi
+ *                                       (osobne czujniki stron gantry)
  *   estop.input / estop.nc / estop.action    action: 0 = STO (awaria STO), 1 = quick stop
  *   probe.type                          0 brak, 1 prostopadloscian (przygotowka), 2 plytka
  *   probe.input / probe.nc / probe.tip_length
@@ -105,6 +113,9 @@ typedef struct {
     lrt_axis_params mech;
     int index_input;    /* -1 = brak */
     double index_width; /* [rad] szerokosc impulsu indeksu na obrot silnika */
+    /* Styki podlaczone do wejsc napedu (bazowanie w napedzie, tryb 6): indeks krancowki albo
+     * czujnika (switch.S), -1 = brak. */
+    int din_neg_limit, din_pos_limit, din_home;
 } lrt_machine_drive_cfg;
 
 typedef struct {
@@ -117,6 +128,9 @@ typedef struct {
     double stop_k, stop_c;
     int stop_fault;
     double initial;
+    /* Pozycja startowa losowa (ziarno machine.seed) w [initial_min, initial_max] (REQ-VM-07). */
+    int initial_random;
+    double initial_min, initial_max;
 } lrt_machine_joint_cfg;
 
 typedef struct {
@@ -137,8 +151,9 @@ typedef struct {
     double position;
     double hysteresis;
     int nc;
-    int input;
+    int input;     /* bit wejscia mastera; -1 = styk tylko na wejsciu napedu */
     double bounce; /* [s] */
+    int drive;     /* -1: polozenie osi; >= 0: polozenie jednego napedu (gantry, sesja 015) */
 } lrt_machine_switch_cfg;
 
 typedef struct {

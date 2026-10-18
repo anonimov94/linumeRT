@@ -2,6 +2,17 @@
 
 Serwer Plant (pakiet linumert_plant): protokol LRT-NET, scenariusze, panel web (FastAPI + uPlot).
 
+## Serwer LRT-NET (sesja 016)
+
+- `linumert_plant.lrtnet` — ramki LRT-NET v1 (docs/PLANT.md §3): `encode_*`/`decode_*`, `FrameError`.
+- `linumert_plant.server.PlantServer` — `handle(ramka) → odpowiedź` (bez gniazd; testy i scenariusze),
+  `serve(sock)` (UDP), watchdog E-4003, statystyki, stan bezpieczny, `digest` (SHA-256 śladu).
+- `linumert_plant.trace.TraceWriter` — zapis przebiegu (CSV/JSON Lines) w osobnym wątku.
+- `python -m linumert_plant serve [machine.yaml] [--plant plant.yaml] [--lockstep|--realtime]
+  [--port N] [--trace plik.csv] [--frames N]`; przykład: `config/plant/plant.example.yaml`.
+- `plant/server/test_master.py` — master testowy udający LinuxCNC (CiA 402, profil trapezowy):
+  `python plant/server/test_master.py --axes 4 --distance 50000` (z serwerem na localhost).
+
 ## Wirtualna obrabiarka z machine.yaml (sesja 014)
 
 - `linumert_plant.build_machine` — `build_machine(machine.yaml)` → `MachineModel`: klucze rdzenia C

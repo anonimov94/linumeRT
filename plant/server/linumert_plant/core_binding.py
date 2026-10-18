@@ -8,6 +8,9 @@ nie ma kopii układu struktur C — tylko bufory o rozmiarze zwracanym przez bib
 Jednostki API tej klasy są jednostkami `machine.yaml` (mm, stopnie, s); przeliczenie na SI
 robi `MachineModel.unit()`.
 
+Sesja 015: funkcje mastera dla bazowania (tryb 6, słowo stanu, pozycja w impulsach) i stan
+enkodera absolutnego (plik stanu: `plant_state.py`).
+
 Biblioteka powstaje przez `make -C plant/core shared` (Linux; w Windows przez WSL).
 """
 
@@ -40,6 +43,11 @@ EVENTS = {
 DRIVE_STATES = ("NOT_READY", "SWITCH_ON_DISABLED", "READY_TO_SWITCH_ON", "SWITCHED_ON",
                 "OPERATION_ENABLED", "QUICK_STOP_ACTIVE", "FAULT_REACTION_ACTIVE", "FAULT")
 CW_SHUTDOWN, CW_SWITCH_ON, CW_ENABLE = 0x0006, 0x0007, 0x000F
+CW_HOMING_START, CW_FAULT_RESET = 0x0010, 0x0080
+SW_TARGET_REACHED, SW_HOMING_ATTAINED, SW_HOMING_ERROR = 0x0400, 0x1000, 0x2000
+SW_INTERNAL_LIMIT = 0x0800
+MODE_HOMING, MODE_CSP = 6, 8
+HOMING_PHASES = ("IDLE", "SEARCH", "BACKOFF", "INDEX", "PUSH", "STOP", "DONE", "ERROR")
 ERR_DRIVE, ERR_MECH, ERR_JOINT, ERR_LINK, ERR_SWITCH, ERR_IO, ERR_STEP = (
     -5, -6, -7, -8, -9, -10, -13)
 
@@ -76,6 +84,7 @@ def _signatures(lib: ctypes.CDLL) -> ctypes.CDLL:
         "lrt_machine_set_joint_target": ([vp, i, d], i),
         "lrt_machine_counts_for": ([vp, i, d], ctypes.c_int32),
         "lrt_machine_set_outputs": ([vp, u32], None),
+        "lrt_machine_outputs": ([vp], u32),
         "lrt_machine_set_estop": ([vp, i], None),
         "lrt_machine_set_tool_length": ([vp, d], i),
         "lrt_machine_set_joint_position": ([vp, i, d], i),
@@ -100,6 +109,17 @@ def _signatures(lib: ctypes.CDLL) -> ctypes.CDLL:
         "lrt_drive_error_code": ([vp], ctypes.c_uint16),
         "lrt_drive_position_actual": ([vp], ctypes.c_int32),
         "lrt_drive_inject_fault": ([vp, i, i], i),
+        "lrt_drive_statusword": ([vp], ctypes.c_uint16),
+        "lrt_drive_torque_actual": ([vp], ctypes.c_int16),
+        "lrt_drive_od_write": ([vp, ctypes.c_uint16, ctypes.c_uint8, ctypes.c_int64], i),
+        "lrt_drive_od_read": ([vp, ctypes.c_uint16, ctypes.c_uint8,
+                               ctypes.POINTER(ctypes.c_int64)], i),
+        "lrt_drive_homing_state": ([vp], i),
+        "lrt_drive_position_offset": ([vp], ctypes.c_int32),
+        "lrt_drive_set_absolute": ([vp, ctypes.c_int32, i], i),
+        "lrt_drive_get_absolute": ([vp, ctypes.POINTER(ctypes.c_int32), ctypes.POINTER(i)], i),
+        "lrt_drive_set_battery": ([vp, i], i),
+        "lrt_drive_lost_steps": ([vp], i),
         "lrt_drive_strerror": ([i], c),
         "lrt_axis_strerror": ([i], c),
     }
@@ -243,6 +263,71 @@ class PlantMachine:
                     states = {d: self.drive_state(d) for d in self.model.drives}
                     raise RuntimeError(f"napędy nie osiągnęły {wanted}: {states}")
 
+    # ---- napęd jak widzi go master (impulsy, obiekty CiA 402) -----------------------
+    def _ptr(self, drive: str) -> int:
+        return self.lib.lrt_machine_drive(self._m, self._d(drive))
+
+    def statusword(self, drive: str) -> int:
+        return self.lib.lrt_drive_statusword(self._ptr(drive))
+
+    def position_actual(self, drive: str) -> int:
+        """6064h [impulsy] — jedyna pozycja, którą zna master."""
+        return self.lib.lrt_drive_position_actual(self._ptr(drive))
+
+    def torque_actual(self, drive: str) -> int:
+        """6077h [promile momentu znamionowego]."""
+        return self.lib.lrt_drive_torque_actual(self._ptr(drive))
+
+    def set_target(self, drive: str, counts: int) -> None:
+        """607Ah [impulsy] (CSP)."""
+        self._check(self.lib.lrt_machine_set_target(self._m, self._d(drive), int(counts)))
+
+    def od_write(self, drive: str, index: int, value: int, sub: int = 0) -> None:
+        rc = self.lib.lrt_drive_od_write(self._ptr(drive), index, sub, int(value))
+        if rc != 0:
+            raise ValueError(f"{drive}: zapis {index:04X}h:{sub} = {value}: "
+                             f"{self.lib.lrt_drive_strerror(rc).decode()}")
+
+    def od_read(self, drive: str, index: int, sub: int = 0) -> int:
+        value = ctypes.c_int64()
+        rc = self.lib.lrt_drive_od_read(self._ptr(drive), index, sub, ctypes.byref(value))
+        if rc != 0:
+            raise ValueError(f"{drive}: odczyt {index:04X}h:{sub}: "
+                             f"{self.lib.lrt_drive_strerror(rc).decode()}")
+        return value.value
+
+    def set_mode(self, drive: str, mode: int) -> None:
+        """6060h: MODE_CSP albo MODE_HOMING."""
+        self.od_write(drive, 0x6060, mode)
+
+    def lost_steps(self, drive: str) -> int:
+        """Krokowiec bez sprzężenia: zgubione pełne kroki od włączenia."""
+        return self.lib.lrt_drive_lost_steps(self._ptr(drive))
+
+    def homing_state(self, drive: str) -> str:
+        return HOMING_PHASES[self.lib.lrt_drive_homing_state(self._ptr(drive))]
+
+    # ---- enkoder absolutny (REQ-VM-07 d) --------------------------------------------
+    def absolute_state(self, drive: str) -> tuple[int, bool] | None:
+        """(przesunięcie, ważne) enkodera absolutnego albo None dla innego przetwornika."""
+        offset, valid = ctypes.c_int32(), ctypes.c_int()
+        rc = self.lib.lrt_drive_get_absolute(self._ptr(drive), ctypes.byref(offset),
+                                             ctypes.byref(valid))
+        return (offset.value, bool(valid.value)) if rc == 0 else None
+
+    def restore_absolute(self, drive: str, offset: int, valid: bool) -> None:
+        """Przed pierwszym krokiem: pozycja enkodera absolutnego z pliku stanu."""
+        rc = self.lib.lrt_drive_set_absolute(self._ptr(drive), int(offset), int(valid))
+        if rc != 0:
+            raise ValueError(f"{drive}: {self.lib.lrt_drive_strerror(rc).decode()} "
+                             "(enkoder absolutny przywraca się przed pierwszym krokiem)")
+
+    def set_battery(self, drive: str, ok: bool) -> None:
+        """Bateria enkodera absolutnego (False = pozycja przepadnie po wyłączeniu)."""
+        rc = self.lib.lrt_drive_set_battery(self._ptr(drive), int(ok))
+        if rc != 0:
+            raise ValueError(f"{drive}: napęd nie ma enkodera absolutnego")
+
     def set_joint_target(self, letter: str, value: float) -> None:
         si = value * self.model.unit(letter)
         self._check(self.lib.lrt_machine_set_joint_target(self._m, self._j(letter), si))
@@ -265,6 +350,14 @@ class PlantMachine:
         si = value * self.model.unit(letter)
         self._check(self.lib.lrt_machine_set_drive_position(self._m, self._d(drive), si))
 
+    def set_outputs(self, mask: int) -> None:
+        """Wyjścia cyfrowe sterowania (`io.outputs`, 32 bity) — z ramki LRT-NET."""
+        self.lib.lrt_machine_set_outputs(self._m, mask & 0xFFFFFFFF)
+
+    @property
+    def outputs(self) -> int:
+        return self.lib.lrt_machine_outputs(self._m)
+
     def set_estop(self, pressed: bool) -> None:
         self.lib.lrt_machine_set_estop(self._m, int(pressed))
 
@@ -275,6 +368,16 @@ class PlantMachine:
     def joint_position(self, letter: str) -> float:
         si = self.lib.lrt_machine_joint_position(self._m, self._j(letter))
         return si / self.model.unit(letter)
+
+    def drive_position(self, drive: str) -> float:
+        """Rzeczywiste położenie strony osi napędzanej przez `drive` [jedn. machine.yaml]."""
+        letter = next(a for a, ds in self.model.joint_drives.items() if drive in ds)
+        si = self.lib.lrt_machine_drive_position(self._m, self._d(drive))
+        return si / self.model.unit(letter)
+
+    def index_count(self, drive: str) -> int:
+        """Licznik impulsów indeksu silnika (zatrzask indeksu w enkoderze)."""
+        return self.lib.lrt_machine_index_count(self._m, self._d(drive))
 
     def joint_skew(self, letter: str) -> float:
         return self.lib.lrt_machine_joint_skew(self._m, self._j(letter)) / self.model.unit(letter)
