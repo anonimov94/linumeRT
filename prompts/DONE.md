@@ -19,3 +19,5 @@ Format: `NNN | RRRR-MM-DD | opis`. Agent dopisuje linię po udanej sesji. Zaplan
 044 | 2026-10-18 | Lekser G-code LinuxCNC (P-5101…P-5111, linia/kolumna, słowa O w całym pliku), kontrola w rs274; 44 próbki zgodne z LinuxCNC 2.9; ekran (przycisk Sprawdź) czeka na sesję 005; PR do przeglądu Codexa
 004 | 2026-10-18 | konfiguracja sim linumert_xyz (QtDragon, kontrakt D05, bazowanie latch release), HAL_KONTRAKT, SIM_WSL; Claude (D31)
 005 | 2026-10-18 | ekran screens/linumert: kopia QtDragon 2.9.10 (commit 86cdca7), handler-patch, UPSTREAM.md, sim DISPLAY = qtvcp linumert, zrzut G0; Claude (D31)
+017 | 2026-10-18 | lrt_net + lrt_cia402 (HAL, LRT-NET v1 w C), test halrun + Plant; Claude (D31)
+018 | 2026-10-18 | config/plant/linumert_plant_xyz: LinuxCNC ↔ Plant, bazowanie na krańcówkach, e2e test, plant-gui.sh; Claude (D31)
