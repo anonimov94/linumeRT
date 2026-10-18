@@ -58,7 +58,7 @@ Otwarte: **#3 (sesja 003, Codex)** i **#18** (Claude: walidacja pól ramki LRT-N
    Najpierw `git merge origin/main` do `codex/sesja-003` (konflikty: DZIENNIK/DECYZJE/DONE —
    zostaw wszystkie wpisy; `ci.yml` — zachowaj `make test-c`).
 2. **#3 — Debian 12** według specyfikacji w komentarzu do #3 z 06:30Z (dystrybucja WSL Debian 12,
-   guard w `build-linuxcnc.sh`, job CI w `container: debian:bookworm`, D27). To jest nadal
+   guard w `build-linuxcnc.sh`, job CI w `container: debian:bookworm`, D27 — zapis dopiero w #3, w DECYZJE.md kończy się na D26). To jest nadal
    wymaganie właściciela przed scaleniem #3.
 3. **Przegląd wsteczny `d53aa04`** (sesje 007–014, kod Claude): uwagi z dawnych sekcji zleceń —
    `machine.c` (kinematyka `forward`, styki NC/NO, E-4207, E-STOP), presety `PRESET_CHAINS`
