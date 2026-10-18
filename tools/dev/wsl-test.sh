@@ -34,7 +34,7 @@ if [ "${1:-}" = "--linuxcnc" ]; then
         echo "blokada linuxcnc zajęta: $("$PY" tools/lock.py status)" >&2
         exit 75
     fi
-    trap '"$PY" tools/lock.py release linuxcnc >/dev/null' EXIT
+    trap '"$PY" tools/lock.py release linuxcnc --model "${MODEL:-Claude}" >/dev/null' EXIT
     echo "== linuxcnc"
     make -s -C plant/core shared || status=1
     make -s test-linuxcnc PYTHON="$PY" >"$work/linuxcnc.log" 2>&1 || status=1
