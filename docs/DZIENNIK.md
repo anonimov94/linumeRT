@@ -156,3 +156,5 @@ Audyt NASTEPNA_SESJA.md, PROMPT_NOWEJ_SESJI.md, README.md i DONE.md względem Gi
 mówiły, że #13–#17 czekają na przegląd Codexa, a właściciel scalił je 11:08–11:15Z; „następna sesja Claude: 016”
 mimo zakończonej 016; README twierdził, że `make test-c` jest pusty. #18 (walidacja ramki LRT-NET) nie miał wpisu.
 Poprawiono teksty; przegląd wsteczny #13–#17 pozostaje do wykonania.
+
+Uzupełnienie audytu: MACIERZ.md — 11 wymagań (REQ-VD-01…05, REQ-VM-01…05, REQ-VM-11) ma testy z tagami REQ w main, status zmieniony z „planowane” na „zaimplementowane” (jak REQ-VM-07; „zielone” po przeglądzie niezależnym). PROVENANCE: dopisano sesje 016, 032, 039, 044.
