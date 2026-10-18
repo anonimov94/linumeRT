@@ -34,7 +34,7 @@ if (lrt_axis_init(&a, &p) != LRT_AXIS_OK) { /* lrt_axis_strerror(rc) */ }
 lrt_axis_step(&a, torque_cmd, 1e-3);  /* a.pos, a.vel, a.events */
 ```
 
-Nie ma jeszcze: hamulca, napędu CiA 402 (sesja 012), kinematyki wielu osi (014), bazowania (015).
+Nie ma hamulca. Napęd CiA 402 (sesja 012), kinematyka wielu osi (014) i bazowanie (015) opisano niżej.
 Model sprawdzony wyłącznie wzorami analitycznymi: **NIEZWERYFIKOWANE NA SPRZĘCIE**.
 
 ## Napęd (`drive.h`, `drive.c`) — sesja 012
@@ -62,14 +62,14 @@ lrt_drive_step(&d, &fb, dt, &torque_cmd);
 - Krokowiec z pętlą zamkniętą: pętla CSP z limitem z krzywej i awarią przy błędzie nadążania.
 - Awarie: tablica `LRT_DRIVE_FAULT_LIST` (603Fh + alarm E-4200…E-4208 z katalogu alarmów), wstrzykiwanie
   `lrt_drive_inject_fault` (trwałe do `clear_fault_cause`).
-- Tryb bazowania (6) zwraca `LRT_DRIVE_ERR_UNSUPPORTED` — sesja 015; hamulec niemodelowany.
+- Tryb bazowania (6): od sesji 015 obsługiwany (metody 1, 2, 3, 5, 17, 18, 19, 21, 33–35, 37, -1, -2), enkoder przyrostowy lub absolutny z baterią (awaria E-4211); hamulec niemodelowany.
 
-49 testów w `tests/test_drive.c` (wzory analityczne: błąd ustalony, kąt obciążenia, czas I2t, bariera
+59 testów w `tests/test_drive.c` (wzory analityczne: błąd ustalony, kąt obciążenia, czas I2t, bariera
 potencjału). **NIEZWERYFIKOWANE NA SPRZĘCIE.**
 
 ## Testy
 
-`tests/lrt_test.h` to minimalny framework (wynik w stylu TAP). 23 testy w `tests/test_axis.c`
+`tests/lrt_test.h` to minimalny framework (wynik w stylu TAP). 29 testów w `tests/test_axis.c`
 porównują wyniki z rozwiązaniami analitycznymi (tolerancja ≤ 1 %): przyspieszenie stałym momentem,
 F = m·a, wpływ masy, bezwładność odbita (liniowa i obrotowa), krzywa momentu, tarcie lepkie
 (wykładnicze), Coulomba i statyczne (odrywanie, czas wybiegu), grawitacja, luz (droga przy zmianie
@@ -98,5 +98,11 @@ kroku, walidacja parametrów. `tests/test_plant_core.py` uruchamia je z pytest i
 
 Konfiguracja przez klucze `nazwa wartość` (`lrt_machine_cfg_set`, lista w nagłówku `machine.h`), więc
 wiązanie Pythona nie odwzorowuje struktur C. `make shared` buduje `build/libplant_core.so` dla
-`linumert_plant.core_binding` (ctypes). 17 testów w `tests/test_machine.c`.
+`linumert_plant.core_binding` (ctypes). 20 testów w `tests/test_machine.c` (w tym bazowanie, sesja 015).
 **NIEZWERYFIKOWANE NA SPRZĘCIE.**
+
+## Parametry w locie (`live.h`, `live.c`) — sesja 013
+
+Wspólne dla osi i napędu (REQ-VD-04): `lrt_axis_set_live()` i odpowiednik napędu zmieniają masę, J, tarcie,
+luz, napięcie i limit momentu w trakcie pracy. Zmiany trafiają do dziennika, czyli bufora kołowego o stałym
+rozmiarze, bez alokacji i bez I/O, więc można go wołać z pętli czasu rzeczywistego.
