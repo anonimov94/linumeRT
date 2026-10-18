@@ -203,6 +203,11 @@
   params: [axis]
   pl: "Bazowanie napędu osi {axis} nie powiodło się."
   en: "Homing of the drive on axis {axis} failed."
+- code: E-4211
+  clear: reset
+  params: [axis]
+  pl: "Enkoder absolutny osi {axis} stracił licznik obrotów (bateria). Zbazuj oś ponownie."
+  en: "The absolute encoder of axis {axis} lost its turn count (battery). Home the axis again."
 
 # ---- Symulacja: kolizje, ostrzeżenia, dane (NARZEDZIA_I_KOLIZJE.md §3) ------
 - code: K-301

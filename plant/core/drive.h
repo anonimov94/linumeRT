@@ -118,7 +118,8 @@ typedef enum {
     X(DC_BUS, 6, 0x3200, "E-4205")                                                           \
     X(ENCODER_LOST, 7, 0x7305, "E-4206")                                                     \
     X(HW_LIMIT, 8, 0xFF01, "E-4207")                                                         \
-    X(STO, 9, 0xFF02, "E-4208")
+    X(STO, 9, 0xFF02, "E-4208")                                                              \
+    X(ENCODER_BATTERY, 10, 0xFF03, "E-4211")
 
 typedef enum {
     LRT_DRIVE_FAULT_NONE = 0,
@@ -168,12 +169,63 @@ typedef struct {
     double stepper_damping_ratio;/* wzgledne tlumienie wirnika wzgledem pola (0..2); moment
                                     tlumienia ograniczony do 20 % amplitudy */
 
-    /* Obiekty bazowania (tylko przechowywane; sekwencje: sesja 015) */
+    /* Bazowanie w napedzie (tryb 6, sesja 015) */
     int8_t homing_method;          /* 6098h */
     uint32_t homing_speed_switch;  /* 6099h:1 [impulsy/s] */
     uint32_t homing_speed_zero;    /* 6099h:2 [impulsy/s] */
     uint32_t homing_accel;         /* 609Ah [impulsy/s^2] */
+    int32_t home_offset;           /* 607Ch [impulsy]: pozycja raportowana w punkcie bazy */
+    double hardstop_time_s;        /* metody -1/-2: czas nasycenia momentu = zderzak [s] */
+
+    /* Przetwornik polozenia (sesja 015, REQ-VM-07) */
+    int encoder;                   /* lrt_drive_encoder */
 } lrt_drive_params;
+
+/* Rodzaj przetwornika polozenia (pole `encoder`).
+ *  IDEAL       - pozycja raportowana = kat walu w impulsach (model bez bazowania, sesje 011-014);
+ *  INCREMENTAL - enkoder przyrostowy: po wlaczeniu (pierwszy pomiar) pozycja raportowana = 0,
+ *                polozenie walu nieznane do bazowania;
+ *  ABSOLUTE    - enkoder absolutny wieloobrotowy z bateria: pozycja = kat walu - przesuniecie
+ *                zapamietane miedzy uruchomieniami (lrt_drive_set_absolute). Utrata baterii przy
+ *                wylaczonym zasilaniu kasuje licznik obrotow: zostaje pozycja w jednym obrocie i
+ *                awaria ENCODER_BATTERY (E-4211) do ponownego ustawienia bazy.
+ * Krokowiec bez sprzezenia nie ma enkodera: pozycja raportowana = pozycja zadana (pole). */
+typedef enum {
+    LRT_ENC_IDEAL = 0,
+    LRT_ENC_INCREMENTAL = 1,
+    LRT_ENC_ABSOLUTE = 2
+} lrt_drive_encoder;
+
+/* Wejscia cyfrowe napedu (lrt_drive_set_inputs): stan logiczny "aktywny" (po NC/NO). Impuls
+ * indeksu enkodera dostarcza maszyna (zbocze w danym kroku). */
+#define LRT_DIN_NEG_LIMIT 0x0001u
+#define LRT_DIN_POS_LIMIT 0x0002u
+#define LRT_DIN_HOME 0x0004u
+#define LRT_DIN_INDEX 0x0008u
+
+/* Slowo sterujace w trybie 6: bit 4 = start bazowania (zbocze), bit 8 = zatrzymanie.
+ * Slowo stanu w trybie 6: bit 10 = cel osiagniety (stoi), bit 12 = baza ustalona,
+ * bit 13 = blad bazowania (w CSP te bity maja inne znaczenie, patrz wyzej). */
+#define LRT_CW_HOMING_START 0x0010u
+#define LRT_CW_HALT 0x0100u
+#define LRT_SW_TARGET_REACHED 0x0400u
+#define LRT_SW_HOMING_ATTAINED 0x1000u
+#define LRT_SW_HOMING_ERROR 0x2000u
+
+#define LRT_MODE_HOMING 6
+#define LRT_MODE_CSP 8
+
+/* Fazy bazowania w napedzie. */
+typedef enum {
+    LRT_HM_IDLE = 0,
+    LRT_HM_SEARCH,  /* szukanie sygnalu wyzwalajacego z predkoscia 6099h:1 */
+    LRT_HM_BACKOFF, /* zjazd z sygnalu z predkoscia 6099h:2 do zbocza */
+    LRT_HM_INDEX,   /* szukanie impulsu indeksu z predkoscia 6099h:2 */
+    LRT_HM_PUSH,    /* metody -1/-2: dojazd do zderzaka z ograniczonym momentem */
+    LRT_HM_STOP,    /* hamowanie po ustaleniu bazy albo bledzie */
+    LRT_HM_DONE,
+    LRT_HM_ERROR
+} lrt_drive_homing_phase;
 
 /* Sprzezenie zwrotne podawane co krok przez orkiestrator (z lrt_axis). */
 typedef struct {
@@ -210,6 +262,25 @@ typedef struct {
     uint32_t homing_speed_switch;
     uint32_t homing_speed_zero;
     uint32_t homing_accel;
+    int32_t home_offset;          /* 607Ch */
+
+    /* Przetwornik i bazowanie (sesja 015) */
+    int32_t pos_offset;           /* kat walu [impulsy] - pozycja raportowana */
+    int offset_known;             /* przesuniecie ustalone (pierwszy pomiar albo absolut) */
+    int abs_restored;             /* ABSOLUTE: lrt_drive_set_absolute() przed pierwszym pomiarem */
+    int abs_restore_valid;        /* ... z poprawnym licznikiem obrotow */
+    int abs_valid;                /* ABSOLUTE: przesuniecie warte zapamietania */
+    int abs_lost;                 /* ABSOLUTE: licznik obrotow utracony, awaria E-4211 czeka */
+    int battery_ok;               /* ABSOLUTE: 0 = bateria rozladowana (strata po wylaczeniu) */
+    unsigned inputs;              /* LRT_DIN_* */
+    unsigned prev_inputs;
+    int hm_phase;                 /* lrt_drive_homing_phase */
+    int hm_attained;              /* baza ustalona od ostatniego startu bazowania */
+    double hm_target;             /* pozycja zadana bazowania [impulsy, ramka raportowana] */
+    double hm_vel;                /* predkosc zadana bazowania [impulsy/s] */
+    double hm_vel_goal;
+    int hm_dir;                   /* kierunek fazy SEARCH (-1/+1) */
+    double hm_push_timer;         /* metody -1/-2: czas nasycenia momentu [s] */
 
     /* Stan maszyny i awarie */
     lrt_drive_state state;
@@ -286,7 +357,7 @@ void lrt_drive_set_controlword(lrt_drive *d, uint16_t controlword);
 void lrt_drive_set_target_position(lrt_drive *d, int32_t counts);
 
 /* Obiekty CiA 402 przez "SDO": 603Fh 6040h 6041h 605Ah 605Eh 6060h 6061h 6064h 6065h 6066h
- * 606Ch 6072h 6077h 607Ah 6085h 6098h 6099h:0-2 609Ah 60B1h 60B2h. Zwraca LRT_DRIVE_OK albo
+ * 606Ch 6072h 6077h 607Ah 607Ch 6085h 6098h 6099h:0-2 609Ah 60B1h 60B2h. Zwraca LRT_DRIVE_OK albo
  * LRT_DRIVE_ERR_NO_OBJECT / _READ_ONLY / _RANGE / _UNSUPPORTED (nic nie zmienia przy bledzie). */
 int lrt_drive_od_read(const lrt_drive *d, uint16_t index, uint8_t sub, int64_t *value);
 int lrt_drive_od_write(lrt_drive *d, uint16_t index, uint8_t sub, int64_t value);
@@ -322,6 +393,24 @@ void lrt_drive_clear_fault_cause(lrt_drive *d, int fault);
  * LRT_DRIVE_ERR_LIVE. Parametry osi (masa, J, tarcie, luz, napiecie): lrt_axis_set_live(). */
 int lrt_drive_set_live(lrt_drive *d, int param, double value, lrt_live_log *log);
 int lrt_drive_get_live(const lrt_drive *d, int param, double *value);
+
+/* --- przetwornik i bazowanie (sesja 015, REQ-VM-07) ------------------------------------ */
+/* Wejscia cyfrowe napedu (LRT_DIN_*), ustawiane przez maszyne przed kazdym krokiem. */
+void lrt_drive_set_inputs(lrt_drive *d, unsigned inputs);
+/* Kat walu [impulsy] minus pozycja raportowana; do przeliczen polozenia mechanicznego na
+ * impulsy mastera (lrt_machine_counts_for). */
+int32_t lrt_drive_position_offset(const lrt_drive *d);
+/* ABSOLUTE: przywraca zapamietane przesuniecie przed pierwszym krokiem (stan z pliku).
+ * valid = 0: licznik obrotow utracony (bateria) - po wlaczeniu zostaje pozycja w jednym
+ * obrocie i trwala awaria ENCODER_BATTERY do ustalenia bazy (tryb 6, np. metoda 35/37).
+ * Zwraca LRT_DRIVE_ERR_UNSUPPORTED dla innego przetwornika albo po pierwszym pomiarze. */
+int lrt_drive_set_absolute(lrt_drive *d, int32_t offset, int valid);
+/* ABSOLUTE: przesuniecie do zapisania w pliku stanu i czy jest wazne (bateria i baza). */
+int lrt_drive_get_absolute(const lrt_drive *d, int32_t *offset, int *valid);
+/* ABSOLUTE: stan baterii (0 = rozladowana; pozycja przepadnie po nastepnym wlaczeniu). */
+int lrt_drive_set_battery(lrt_drive *d, int ok);
+/* Faza bazowania w napedzie (lrt_drive_homing_phase). */
+int lrt_drive_homing_state(const lrt_drive *d);
 
 #ifdef __cplusplus
 }

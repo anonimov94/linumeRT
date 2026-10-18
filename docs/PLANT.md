@@ -172,6 +172,26 @@ trzyma ręcznie utrzymywanej kopii parametrów. Schemat i walidacja: sesja 010.
   nadążania; próg, czas, zredukowany moment), (d) enkoder absolutny (awaria baterii = utrata
   pozycji), (e) bazowanie w napędzie CiA 402 (tryb 6, metoda z szablonu). Parametry: kierunek,
   prędkości szukania i powrotu, offset, kolejność osi, wyrównanie gantry na dwóch czujnikach.
+
+  *Realizacja w Plant (sesja 015).* Start: `joint.J.initial_random` z ziarna `machine.seed`
+  w soft limits (`build_model(start="random")`, domyślnie) albo plik stanu
+  (`linumert_plant/plant_state.py`: położenie każdego napędu — także rozjazd gantry — i stan
+  enkodera absolutnego; zapis atomowy). Przetwornik napędu (`lrt_drive_params.encoder`):
+  przyrostowy (serwa, serwa krokowe; po włączeniu 6064h = 0), absolutny z baterią (metoda
+  `absolute`; przesunięcie z pliku stanu, utrata baterii po wyłączeniu → pozycja w jednym
+  obrocie i E-4211 do ponownego ustawienia bazy), brak (krokowiec bez sprzężenia: 6064h =
+  pozycja zadana). (a, b) czujniki i indeks z sesji 014 działają fizycznie: histereza, NC/NO,
+  drgania styku, indeks raz na obrót silnika. (c) zderzak: po stronie LinuxCNC komponent
+  `hal/lrt_hardstop_home.comp` robi z |moment| albo |błąd nadążania| ≥ próg przez czas
+  syntetyczny `home-sw-in` i w czasie bazowania wystawia zredukowany 6072h; w napędzie metody
+  producenta -1/-2. (d) `HOME_ABSOLUTE_ENCODER` w LinuxCNC 2.9: 0 = brak, 1 = absolutny z ruchem
+  końcowym do HOME, 2 = absolutny bez ruchu (sprawdzone w dokumentacji 2.9 z budowy RIP).
+  (e) tryb 6 w `drive.c`: metody 1, 2, 3, 5, 17, 18, 19, 21, 33, 34, 35, 37, -1, -2 (opis
+  w `drive.c`), bity 10/12/13, 607Ch, styki na wejściach napędu (`drive.N.din_*`). Gantry:
+  kopia czujnika bazy na każdym napędzie (`switch.S.drive`), druga strona na wejściu
+  `<nazwa>_2`. Atrapa mastera w stylu LinuxCNC: `linumert_plant/homing_master.py`; testy:
+  `tests/test_homing.py`, `plant/core/tests/test_drive.c`, `test_machine.c`,
+  `tests/test_hal_comps.py` (halrun). Scenariusze z prawdziwym LinuxCNC: sesja 018.
 - **Magazyn narzędzi (REQ-VM-08):** typ (ręczny, regał liniowy, karuzela, parasolowy), liczba
   gniazd, pozycja i orientacja bazy w układzie maszyny, pozycje gniazd (wyliczane lub lista),
   wysokości podejścia i odjazdu, osłona (siłownik z czasem), czujniki (obecność, osłona,

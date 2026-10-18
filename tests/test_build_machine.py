@@ -141,10 +141,13 @@ def test_chain_branch_and_axes_are_validated():  # REQ-VM-02
 @pytest.mark.parametrize("path", EXAMPLES, ids=lambda p: p.stem)
 def test_examples_build_in_plant(plant, path):  # REQ-VM-01, REQ-VM-02, REQ-VM-03
     machine = plant(build_machine(path))
+    centered = plant(build_machine(path, start="center"))
     cfg = machine.model.config
     for axis in cfg.axes:
-        middle = 0.5 * (axis.soft_limits[0] + axis.soft_limits[1])
-        _close(machine.joint_position(axis.letter), middle)
+        # Od sesji 015 start po włączeniu jest losowy w soft limits (REQ-VM-07).
+        lo, hi = axis.soft_limits
+        assert lo <= machine.joint_position(axis.letter) <= hi
+        _close(centered.joint_position(axis.letter), 0.5 * (lo + hi))
     assert machine.input(cfg.io.estop.input)  # NC: pętla zamknięta
     assert machine.events() == set()
     machine.step(STEPPER_DT, 10)
