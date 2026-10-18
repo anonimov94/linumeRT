@@ -22,3 +22,4 @@ Format: `NNN | RRRR-MM-DD | opis`. Agent dopisuje linię po udanej sesji. Zaplan
 005 | 2026-10-18 | ekran screens/linumert: kopia QtDragon 2.9.10 (commit 86cdca7), handler-patch, UPSTREAM.md, sim DISPLAY = qtvcp linumert, zrzut G0; Claude (D31)
 017 | 2026-10-18 | lrt_net + lrt_cia402 (HAL, LRT-NET v1 w C), test halrun + Plant; Claude (D31)
 018 | 2026-10-18 | config/plant/linumert_plant_xyz: LinuxCNC ↔ Plant, bazowanie na krańcówkach, e2e test, plant-gui.sh; Claude (D31)
+019 | 2026-10-18 | wyrocznia Plant REQ-VM-06: soft limits i strefy zakazane, scenariusze softlimit/forbidden_zone z LinuxCNC; Claude (D31)

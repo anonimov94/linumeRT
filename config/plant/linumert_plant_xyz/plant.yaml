@@ -6,3 +6,4 @@ network: {listen: 127.0.0.1, port: 47700}
 timing: {cycle_ns: 1000000, substeps: 1, watchdog_ms: 50}
 mode: lockstep
 seed: 1
+oracle: {arm_bit: 31}     # wyrocznia REQ-VM-06 aktywna, gdy LinuxCNC ustawi dout-31 (is-all-homed)

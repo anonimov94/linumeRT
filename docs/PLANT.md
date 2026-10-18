@@ -91,6 +91,12 @@ potem `digital_in` u32, `spindle_actual` f32, statystyki (`frames_lost` u32, `fr
 - Ślad: SHA-256 wszystkich wysłanych odpowiedzi (`PlantServer.digest`, wypisywany po zakończeniu),
   zapis przebiegu do CSV/JSON Lines w osobnym wątku (`trace.py`, kolejka bez blokowania pętli).
 
+**Wyrocznia REQ-VM-06 (sesja 019, `plant/server/linumert_plant/oracle.py`):** po każdym kroku
+pozycja zadana każdego napędu (607Ah → położenie fizyczne) względem `soft_limits` i koniec
+narzędzia (względem stołu = G53) względem `forbidden_zones`; zdarzenie ORACLE_VIOLATION przy
+wejściu w naruszenie; aktywna po bicie `oracle.arm_bit` w `digital_out` (LinuxCNC: is-all-homed);
+raport `serve --report plik.json` (`oracle.result` PASS/FAIL).
+
 ## 4. Model osi (REQ-VD-01, REQ-VD-04)
 Oznaczenia: J_m, J_s [kg·m²] wirnik i śruba; m [kg] masa osi; p [m/obr] skok śruby;
 η sprawność; r przełożenie (oś obrotowa: J_obc/r² zamiast m·(p/2π)²).
