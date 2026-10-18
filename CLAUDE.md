@@ -124,5 +124,5 @@ Testy przechodzą · błędy obsłużone jawnie · brak blokowania RT · dokumen
 nowe zależności i zasoby w LICENCJE.md / PROVENANCE.md · wpis w DZIENNIK.md.
 
 ## 12. Współpraca modeli
-Jedyne źródło zasad (tury, LOCK, małe kroki, oszczędność tokenów, przegląd i scalanie):
+Jedyne źródło zasad (tury, LOCK, małe kroki, oszczędność tokenów, etapy i scalanie, podział pracy):
 `docs/WSPOLPRACA_MODELI.md`. Sprzeczne zapisy w innych plikach i promptach tracą moc.

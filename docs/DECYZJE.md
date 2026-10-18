@@ -50,3 +50,4 @@ Format: decyzja · uzasadnienie · status (PRZYJĘTA / PROPOZYCJA / ODRZUCONA / 
 - 2026-10-17 · D24 · Na polecenie właściciela Claude i Codex rozwijają projekt naprzemiennie przez PR, z jawnym oznaczeniem modelu i przeglądem drugiego modelu przed scaleniem. Zastępuje automatyczne scalanie z §10 i promptów sesji. Istniejące gałęzie sesji 001/002 są już zawarte w main. Autor: model językowy Codex. · PRZYJĘTA
 
 - 2026-10-17 · D25 · Właściciel polecił kontynuować bez czekania na Claude do odwołania. Codex implementuje, kontroluje diff, uruchamia testy i scala przez PR; późniejszy przegląd Claude nie blokuje pracy. Commit i push po każdym ukończonym kroku. Zastępuje warunek niezależnego przeglądu przed merge z D24. Model-Author: Codex. · PRZYJĘTA
+- 2026-10-18 · D26 · Właściciel: oba modele scalają PR do `main` na koniec etapu; `main` bez niedokończonego kodu; PR nie wiszą; podział pracy wg `docs/WSPOLPRACA_MODELI.md` §5 i §7 (Claude: Sonnet 5.5, Codex: astra low).

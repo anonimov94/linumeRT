@@ -9,4 +9,4 @@ Skrót (szczegóły w `WSPOLPRACA_MODELI.md`):
 - Małe kroki: po każdym commit i push; draft PR od pierwszego kroku; limit tokenów może przerwać w każdej chwili.
 - Oszczędzaj tokeny: czytaj zakresy i `diff --stat`, nie całe pliki; bez subagentów.
 - `Model-Author:` w każdym commicie i PR; autokontrola to nie niezależny przegląd.
-- Scala model niebędący autorem; wyjątek D25 (drugi model niedostępny) z adnotacją w PR.
+- Scalają oboje na koniec etapu; `main` bez niedokończonego kodu; PR nie wiszą. Podział pracy: §7.

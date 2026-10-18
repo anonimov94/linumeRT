@@ -37,16 +37,38 @@ Cudzego świeżego locka nie ruszaj; przerwany (>2 h bez pushu) przejmij wpisem 
 - Pisz zwięźle: wpis w dzienniku ≤ 10 linii, raporty w plikach, w czacie 3–5 zdań.
 - Zadanie, które nie mieści się w jednym kroku, podziel i zapisz podział w `NASTEPNA_SESJA.md`.
 
-## 5. Autorstwo, przegląd, scalanie
+## 5. Etapy, przegląd i scalanie (D26)
+- Etap = jedna sesja z planu (NNN) albo jej wyraźnie wydzielona część, spełniająca kryteria
+  akceptacji i Definition of Done (`CLAUDE.md` §11). `main` zawiera wyłącznie ukończone
+  etapy: zielone testy, dokumentacja, wpis w dzienniku, brak niedokończonego kodu.
+- Praca w toku żyje na gałęzi i w draft PR (§3). Na koniec etapu PR przestaje być draftem
+  i jest scalany. PR nie wisi: najpóźniej w następnej turze drugi model albo go scala, albo
+  wypisuje konkretne usterki, a autor poprawia i scala. PR bez ruchu przez 2 tury dzielimy
+  na mniejsze albo zamykamy z notatką w `NASTEPNA_SESJA.md`.
+- Scalać mogą oboje modele (decyzja właściciela 2026-10-18), po zielonych kontrolach,
+  merge commit, bez przepisywania historii `main`.
+- Przebieg: autor kończy etap i oznacza PR jako gotowy. (a) Drugi model dostępny: przegląd
+  komentarzem (model, SHA, wynik), potem scala albo zwraca. (b) Niedostępny lub limit (D25):
+  autor scala po autokontroli i pisze w PR „autokontrola, bez niezależnego przeglądu";
+  drugi model robi przegląd wsteczny po powrocie (SHA scalenia).
+- Zmiany wyłącznie w `docs/` autor scala od razu, z adnotacją w PR.
 - Commity, PR i dziennik: `Model-Author: Claude` albo `Model-Author: Codex`. Nie przypisuj
   sobie cudzej pracy. Nie nazywaj autokontroli niezależnym przeglądem.
-- Zasada: PR scala model, który nie jest jego autorem, po przeglądzie (komentarz: model,
-  SHA, wynik) i zielonych kontrolach.
-- Wyjątek (D25): gdy drugi model jest niedostępny lub jego tura przerwana, autor może
-  scalić po zielonych kontrolach i autokontroli. W PR napisz „autokontrola, bez
-  niezależnego przeglądu"; drugi model robi przegląd wsteczny po powrocie (SHA scalenia).
-- Zmiany wyłącznie w `docs/` mogą być scalane od razu przez autora, z adnotacją w PR.
-- Merge commit (jak dotąd); nie przepisuj historii `main`.
 
 ## 6. Środowisko testowe
 Polecenia i stan środowiska: `docs/NASTEPNA_SESJA.md` (nie duplikuj ich tutaj).
+
+## 7. Podział pracy (roboczy, właściciel może korygować)
+Modele: Claude = Sonnet 5.5, działa w chmurze, bez dostępu do WSL właściciela. Codex = astra
+low, działa na komputerze właściciela (Windows, WSL, VNC, LinuxCNC), niski poziom rozumowania.
+Obszaru drugiego modelu nie ruszamy bez wpisu w `NASTEPNA_SESJA.md`. Różnice uzupełniamy:
+- **Claude:** projekt i specyfikacje (architektura, kontrakty, model Plant, protokół LRT-NET),
+  logika wielokrokowa i generatory cykli, refaktory przekrojowe, wymagania REQ i macierz
+  pokrycia, decyzje, IP i licencje, rozbijanie sesji na kroki, niezależny przegląd PR Codex.
+- **Codex:** wszystko, co trzeba uruchomić w WSL/Windows/VNC: budowa i testy LinuxCNC,
+  konfiguracje HAL/INI, skrypty PowerShell/bash, workflow CI, testy integracyjne i zrzuty,
+  mechaniczna implementacja według gotowej specyfikacji, poprawki po wynikach testów.
+- **Claude → Codex:** w „Dla Codex:" krótka, jednoznaczna specyfikacja: pliki, kryteria
+  akceptacji, polecenie testu. **Codex → Claude:** w „Dla Claude:" ogon wyników/logów,
+  pytania projektowe, co zablokowało.
+- Spór o kompetencje rozstrzyga właściciel; do tego czasu obszar ma autor pierwszego commita w nim.

@@ -13,5 +13,5 @@ Model recenzujący:
 Sprawdzony SHA:
 Wynik przeglądu: oczekuje
 
-Scala model niebędący autorem po przeglądzie i zielonych kontrolach (`docs/WSPOLPRACA_MODELI.md` §5).
-Wyjątek D25: drugi model niedostępny — autor scala po autokontroli i pisze tu: „autokontrola, bez niezależnego przeglądu".
+Scalamy na koniec etapu (`docs/WSPOLPRACA_MODELI.md` §5): zielone kontrole, DoD, brak niedokończonego kodu.
+Przegląd drugiego modelu, jeśli dostępny; inaczej (D25) napisz tu: „autokontrola, bez niezależnego przeglądu".
