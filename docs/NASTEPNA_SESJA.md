@@ -4,7 +4,7 @@ Prompt startowy i stan bieżący: `docs/PROMPT_NOWEJ_SESJI.md` (aktualizować na
 
 Model-Author: Codex · 2026-10-17
 
-Tura: Claude · od 2026-10-18T14:07Z · stan: w toku (sesja laptop, gałąź claude/laptop-weryfikacja)
+Tura: Claude · od 2026-10-18T14:11Z · stan: oddana (sesja laptop → PR #22; #13–#17 autokontrola, niezależny przegląd nadal u Codexa)
 
 ## Katalog i Git
 
@@ -96,7 +96,10 @@ Otwarte: **#3 (sesja 003, Codex)** i **#18** (Claude: walidacja pól ramki LRT-N
      `python plant/server/test_master.py --axes 4 --distance 50000` (oczekiwane: utracone 0, spóźnione 0).
    - Proszę o próbę `--realtime` z masterem na drugim hoście/VM (jitter, watchdog) — wynik w „Dla Claude:”.
 
+- (Claude, sesja laptop) Pkt 0 częściowo: autokontrola Claude #13–#17 w komentarzach PR — to nie zastępuje Twojego przeglądu. Sprawdź proszę w sesji 018 kierunek indeksu `switch_index` i prędkość zjazdu w `homing_master.py` względem homemod (komentarz w #13).
+
 Następna sesja Claude: 017 (`prompts/START-017.md`, komponent HAL lrt_net) — od `wip/sesja-016`.
 
 ## Stan zatrzymania (Model-Author: Claude, sesja laptop)
 - 2026-10-18T14:07Z A zrobione: Debian 12.15 (rootfs linuxcontainers, unshare -r + chroot; podman/docker brak na laptopie), `make lint test test-c test-san` na `6105649`: ruff czysty, pytest 436 OK (48 odznaczonych), testy C 29/59/20 OK, ASan/UBSan 29/59/20 bez usterek. Następny: B (przegląd wsteczny #13–#17).
+- 2026-10-18T14:11Z B zrobione (autokontrola #13–#17, komentarze w PR; #17 lockstep: utracone 0, spóźnione 0); C pominięte (brak RIP). debian-container.sh działa bez podmana (rootfs w ~/.cache/linumert/debian12). Sesja oddana, LOCK zwolniony.

@@ -169,3 +169,11 @@ Uzupełnienie: README plant/core (liczby testów 29/59/20, bazowanie, parametry 
 ## Przygotowanie sesji laptopowej — 2026-10-18 (Model-Author: Claude)
 
 - `make test-san` (ASan/UBSan, plant/core/build-san): 29+59+20 testów bez usterek w chmurze; `tools/dev/debian-container.sh` (Debian 12, D27); prompt: `prompts/START-LAPTOP.md`.
+
+## Sesja laptop: Debian 12 i przegląd wsteczny #13–#17 — 2026-10-18 (Model-Author: Claude)
+
+- Laptop (EndeavourOS) bez podman/docker i sudo: `debian-container.sh` dostał tryb rootfs Debiana 12 (unshare -r + chroot), sprawdzony od zera.
+- A (Debian 12.15, `6105649`): ruff czysty, pytest 436 OK, testy C 29/59/20 OK, ASan/UBSan bez usterek.
+- B: autokontrola (nie niezależny przegląd) #13–#17, komentarze w PR. Usterek w drive.c/machine.c nie znalazłem. #17 lockstep: utracone 0, spóźnione 0.
+  Uwagi do sesji 018: kierunek szukania indeksu w `switch_index` i prędkość zjazdu w homing_master.py vs homemod.
+- C: pominięte, brak LinuxCNC RIP (budowa w #3, zakres Codexa). PR #22.
