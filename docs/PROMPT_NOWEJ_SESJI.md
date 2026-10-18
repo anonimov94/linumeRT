@@ -11,10 +11,11 @@ modelem. Pracujecie na zmianę, nigdy równolegle. Użytkownik jest użytkowniki
 2. Sprawdź otwarte PR-y (REST: `gh api repos/anonimov94/linumeRT/pulls`; GraphQL jest zablokowany).
 3. Linia `Tura:` w NASTEPNA_SESJA.md: nie wchodź w turę drugiego modelu młodszą niż 2 h od ostatniego pusha.
 
-## Stan (2026-10-18, po scaleniu #6–#12)
-- W main: sesje 001, 002, 006, 007, 009–014 (PR #1, #2, #4–#12). #6–#12 scalone przez Claude jako
-  autokontrola w `d53aa04`; Codex robi przegląd wsteczny (zlecenia w `docs/NASTEPNA_SESJA.md`).
-- Otwarty: #3 (sesja 003, LinuxCNC CI + Debian 12, Codex). Nierozpoczęte: 004, 005, 008.
+## Stan (2026-10-18, po sesji 015)
+- W main: sesje 001, 002, 006, 007, 009–014 (PR #1, #2, #4–#12; #6–#12 scalone przez Claude jako
+  autokontrola w `d53aa04`, przegląd wsteczny Codexa w `docs/NASTEPNA_SESJA.md`).
+- Otwarte: #3 (sesja 003, LinuxCNC CI + Debian 12, Codex) i PR sesji 015 (bazowanie, Claude).
+  Nierozpoczęte: 004, 005, 008 (Codex). Następna sesja Claude: 016 (`prompts/START-016.md`).
 - Konflikty przy scalaniu: na końcu DZIENNIK.md, DECYZJE.md, PROVENANCE.md i prompts/DONE.md zostaw
   wszystkie wpisy; ten plik — weź wersję najnowszą; `ci.yml` — zachowaj `make test-c`.
 - roboCODE to osobny projekt na przyszły rok. Nie dotykać.
@@ -22,7 +23,7 @@ modelem. Pracujecie na zmianę, nigdy równolegle. Użytkownik jest użytkowniki
 ## Zakres
 - Claude: rdzeń Pythona weryfikowalny w chmurze, specyfikacje, wymagania, IP, niezależny przegląd Codexa.
   Następna sesja = najniższy numer z prompts/ nieobecny w prompts/DONE.md i LOCK, z pominięciem
-  sesji Codexa (003–005, 008); dla Claude teraz 015.
+  sesji Codexa (003–005, 008); dla Claude teraz 016.
 - Codex: wszystko w WSL/Windows/VNC (budowa LinuxCNC, HAL/INI, skrypty, CI, testy integracyjne).
   Zlecenia dla niego: krótkie, jednoznaczne specyfikacje w komentarzu do PR lub w NASTEPNA_SESJA.md.
 

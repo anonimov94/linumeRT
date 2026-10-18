@@ -19,7 +19,7 @@ Tabela jest zgodna z wymaganiami (pilnuje tego `tests/test_plant_spec.py`).
 | REQ-VM-04 | 014 | `hardstop_crash` | planowane |
 | REQ-VM-05 | 014 | `limit_switch_trip`, `shared_limit_input` | planowane |
 | REQ-VM-06 | 019 | `softlimit_oracle`, `forbidden_zone_oracle` | planowane |
-| REQ-VM-07 | 015, 018 | `home_switch`, `home_switch_index`, `home_hardstop`, `home_absolute`, `home_drive_internal`, `home_gantry_square` | planowane |
+| REQ-VM-07 | 015, 018 | `home_switch`, `home_switch_index`, `home_hardstop`, `home_absolute`, `home_drive_internal`, `home_gantry_square` | zaimplementowane |
 | REQ-VM-08 | 020 | `atc_rack_geometry`, `atc_carousel_index`, `atc_cover_timing` | planowane |
 | REQ-VM-09 | 020 | `manual_change_position`, `toolsetter_measure` | planowane |
 | REQ-VM-10 | 020 | `crash_head_magazine` | planowane |
