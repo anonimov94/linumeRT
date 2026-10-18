@@ -171,6 +171,7 @@ class PlantServer:
         self._last_time: int | None = None  # time_ns ostatniej ramki z krokiem
         self._last_rx: int | None = None  # zegar odbioru (lockstep: time_ns, realtime: host)
         self._mode = {d: None for d in self.drives}
+        self.mode_rejects = 0
         self._target = {d: 0 for d in self.drives}
         self._estop = self._estop_input()
         self._lock = threading.Lock()
@@ -290,9 +291,17 @@ class PlantServer:
     def _apply(self, cmd) -> None:
         m = self.machine
         for drive, axis in zip(self.drives, cmd.axes, strict=True):
-            if axis.mode != self._mode[drive]:
-                m.set_mode(drive, axis.mode)
-                self._mode[drive] = axis.mode
+            if axis.mode != self._mode[drive] and axis.mode != 0:
+                # 0 = „brak trybu” (np. pierwszy cykl mastera): bez zmiany. Tryb nieobsługiwany
+                # przez model napędu jest odrzucany jak zapis do 6060h w napędzie: zostaje
+                # poprzedni, bez wyłączania Plant (REQ-QA-03).
+                try:
+                    m.set_mode(drive, axis.mode)
+                    self._mode[drive] = axis.mode
+                except ValueError as exc:
+                    self.mode_rejects += 1
+                    if self.mode_rejects == 1:
+                        self._note(f"6060h odrzucony ({exc}); naped zostaje w poprzednim trybie")
             if axis.mode == MODE_CSP:
                 m.set_target(drive, axis.target_pos)
                 self._target[drive] = axis.target_pos
