@@ -10,6 +10,7 @@ apt-get install -y --no-install-recommends debootstrap debian-archive-keyring ca
 rootfs=$(mktemp -d /var/tmp/linumert-bookworm.XXXXXXXX)
 # debootstrap verifies Debian Release signatures with the archive keyring.
 debootstrap --variant=minbase bookworm "$rootfs" https://deb.debian.org/debian
+chmod 755 "$rootfs"
 mkdir -p "$(dirname "$output")"
 tar --numeric-owner -C "$rootfs" -cpf "$output" .
 echo "Rootfs exported to $output; bootstrap directory retained: $rootfs"
