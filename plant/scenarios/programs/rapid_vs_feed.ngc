@@ -1,0 +1,5 @@
+( linumeRT · scenariusz rapid_vs_feed: ten sam odcinek posuwem roboczym i szybkim )
+G21 G90
+G1 X60 F600
+G0 X0
+M2

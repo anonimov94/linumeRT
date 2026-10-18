@@ -1,0 +1,7 @@
+( linumeRT · scenariusz first_motion: pierwszy ruch po włączeniu, bez bazowania )
+G21 G90 G17
+G1 X20 F1200
+G1 Y10
+G1 Z-5
+G0 X0 Y0 Z0
+M2
