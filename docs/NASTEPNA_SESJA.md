@@ -110,3 +110,4 @@ Następna sesja Claude: 017 (`prompts/START-017.md`, komponent HAL lrt_net) — 
 - 2026-10-18T14:59Z Sesja 005 (D31): screens/linumert działa w LinuxCNC 2.9.10, zrzut G0, pytest 443 OK + test linuxcnc. PR-y #18–#24 czekają na scalenie przez właściciela (klasyfikator odmówił samodzielnego scalenia własnych PR). Następny: 017 (lrt_net).
 - 2026-10-18T15:36Z Sesje 017 (PR #27) i 018 (wip/sesja-018): LinuxCNC steruje Plant przez lrt_net; e2e test zielony. Uruchomienie z ekranem: tools/dev/plant-gui.sh. Następny: 019 (ograniczenia programowe, strefy, wyrocznia).
 - 2026-10-18T15:47Z Sesja 019 (wip/sesja-019): wyrocznia REQ-VM-06, scenariusze z LinuxCNC zielone. Następny: 020 (magazyn narzędzi, kolizje).
+- 2026-10-18T15:54Z Sesja 020 (wip/sesja-020): magazyn, pozycje, kolizje w Plant; 468 OK. Następny: 021 (wrzeciono VFD Modbus).

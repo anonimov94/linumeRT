@@ -227,6 +227,11 @@ class ToolChanger(Strict):
     sensors: dict[str, str] = {}
     clamp: Clamp | None = None
     air_blast_output: str | None = None
+    # sesja 019/020: wyjścia sterujące (rola -> nazwa z io.outputs): clamp_release (zwolnienie
+    # narzędzia), cover_open (osłona), carousel_step (krok karuzeli), umbrella_in (wahadło)
+    outputs: dict[Literal["clamp_release", "cover_open", "carousel_step", "umbrella_in"], str] = {}
+    index_ms: float = Field(default=500.0, gt=0)  # krok karuzeli / ruch wahadła
+    tolerance_mm: float = Field(default=0.5, gt=0)  # dopuszczalne niewspółosiowe gniazdo-wrzeciono
 
 
 class ToolSetter(Strict):

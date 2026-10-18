@@ -220,6 +220,19 @@ def r_inputs_exist(cfg: MachineConfig, _t: set[str] | None) -> Iterable[str]:
         yield from need("probe.input", cfg.probe.input)
     for name, pin in cfg.toolchanger.sensors.items():
         yield from need(f"toolchanger.sensors.{name}", pin)
+    tc = cfg.toolchanger
+    if tc.clamp is not None:
+        yield from need("toolchanger.clamp.sensor", tc.clamp.sensor)
+    if tc.cover is not None:
+        yield from need("toolchanger.cover.sensor_open", tc.cover.sensor_open)
+        yield from need("toolchanger.cover.sensor_closed", tc.cover.sensor_closed)
+    outputs = set(cfg.io.outputs)
+    for role, name in tc.outputs.items():
+        if name not in outputs:
+            yield f"toolchanger.outputs.{role}: wyjscie {name} nie jest zdefiniowane w io.outputs"
+    if tc.air_blast_output is not None and tc.air_blast_output not in outputs:
+        yield (f"toolchanger.air_blast_output: wyjscie {tc.air_blast_output} nie jest "
+               "zdefiniowane w io.outputs")
 
 
 def r_io_pins_unique(cfg: MachineConfig, _t: set[str] | None) -> Iterable[str]:

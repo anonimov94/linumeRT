@@ -222,3 +222,8 @@ Uzupełnienie: README plant/core (liczby testów 29/59/20, bazowanie, parametry 
 - Zrobione: `linumert_plant/oracle.py` (soft limits z 607Ah, strefy z kinematyki prostej, zdarzenia na zboczu, raport JSON), integracja w serwerze (`oracle.arm_bit`, `serve --report`), HAL `motion.is-all-homed` → `dout-31`, strefa `magazyn_narzedzi` w mill_servo_table.
 - Scenariusze (LinuxCNC RIP + Plant): `softlimit_oracle` — G0 X700 odrzucone przez LinuxCNC, wyrocznia bez naruszeń; `forbidden_zone_oracle` — wjazd w magazyn wykryty raz z pozycją. Testy jednostkowe geometrii i logiki (6).
 - Decyzje: strefy względem stołu (= G53), uzbrojenie po bazowaniu (DECYZJE sesja 019).
+
+## 020 — Magazyn narzędzi, pozycje wymiany i kolizje w Plant (Model-Author: Claude, D31)
+- Zrobione: `linumert_plant/atc.py` (regał, karuzela, parasolowy, ręczny; zacisk z czasem i czujnikiem, osłona, indeks karuzeli; TOOL_PLACED/PICKED/DROP, CLAMP_FAULT, POCKET_OCCUPIED, COVER_CRASH, MANUAL_CHANGE_POSITION; czujnik długości), `collisions.py` (CRASH z parą brył), integracja w serwerze (wejścia w ramce, długość narzędzia w modelu C, raport), schemat `toolchanger.outputs`/`index_ms`/`tolerance_mm` z walidacją, router_atc_rack z wyjściami, czujnikami i bryłą magazynu.
+- Testy (9): atc_rack_geometry, atc_carousel_index, atc_cover_timing, manual_change_position, toolsetter_measure, crash_head_magazine, fizyka wymiany, błąd zacisku/osłony, I/O magazynu przez LRT-NET (atrapa mastera).
+- Długi: makra M6 w LinuxCNC (066), konfiguracja LinuxCNC dla routera z ATC.

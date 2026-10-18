@@ -24,12 +24,14 @@ import socket
 import threading
 import time
 from collections import deque
-from dataclasses import dataclass, field
+from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any
 
 import yaml
 
+from .atc import ToolChangerModel, ToolSetterModel, ToolSpec
+from .collisions import CollisionModel
 from .core_binding import CW_FAULT_RESET, MODE_CSP, PlantMachine
 from .lrtnet import (
     FLAG_ESTOP_OPEN,
@@ -76,6 +78,7 @@ class PlantConfig:
     trace_path: Path | None = None
     trace_format: str = "csv"
     oracle_arm_bit: int | None = 31  # bit digital_out uzbrajający wyrocznię (None = zawsze)
+    tools: dict[int, ToolSpec] = field(default_factory=dict)  # wysięg i średnica narzędzi
 
     def check(self) -> None:
         errors = []
@@ -121,6 +124,7 @@ def load_plant_config(path: Path | str) -> PlantConfig:
 
     net, timing, trace = section("network"), section("timing"), section("trace")
     oracle = section("oracle")
+    tools_raw = section("tools")
     try:
         cfg = PlantConfig(
             machine=rel(data.get("machine")), listen=str(net.get("listen", "127.0.0.1")),
@@ -131,7 +135,10 @@ def load_plant_config(path: Path | str) -> PlantConfig:
             state_file=rel(data.get("state_file")),
             trace_path=rel(trace.get("path")), trace_format=str(trace.get("format", "csv")),
             oracle_arm_bit=(None if oracle.get("arm_bit", 31) is None
-                            else int(oracle.get("arm_bit", 31))))
+                            else int(oracle.get("arm_bit", 31))),
+            tools={int(k): ToolSpec(float((v or {}).get("length", 50.0)),
+                                    float((v or {}).get("diameter", 6.0)))
+                   for k, v in tools_raw.items()})
     except (TypeError, ValueError) as exc:
         raise PlantConfigError(f"{path}: zły typ wartości ({exc})") from None
     cfg.check()
@@ -181,6 +188,14 @@ class PlantServer:
         self.mode_rejects = 0
         self._target = {d: 0 for d in self.drives}
         self.oracle = Oracle.for_machine(machine, self.drives, self.cfg.oracle_arm_bit)
+        mcfg = model.config
+        self.atc = ToolChangerModel.from_config(mcfg, self.cfg.tools)
+        self.toolsetter = ToolSetterModel.from_config(mcfg)
+        self.collisions = CollisionModel.from_config(mcfg)
+        # długość narzędzia w modelu C (koniec narzędzia z kinematyki): sonda albo narzędzie z ATC
+        self._tool_len = mcfg.probe.tip_length if mcfg.probe is not None else 0.0
+        self._extra_inputs = (0, 0)
+        self.events: list = []
         self._estop = self._estop_input()
         self._lock = threading.Lock()
         self._stop = threading.Event()
@@ -246,13 +261,57 @@ class PlantServer:
                    "wymagany restart Plant")
 
     # ---- protokół ----------------------------------------------------------------------
+    def nose(self) -> tuple[float, float, float]:
+        """Nos wrzeciona w G53 (koniec narzędzia względem stołu + bieżąca długość narzędzia)."""
+        x, y, z = self.machine.tool_tip(workpiece=True)
+        return (x, y, z + self._tool_len)
+
+    def _sync_tool_length(self) -> None:
+        if self.atc.type == "manual" and not self.atc.events:
+            return  # bez ATC i bez ręcznej wymiany: długość z sondy (sesja 014)
+        spec = self.atc.tool_spec()
+        length = spec.length if spec is not None else 0.0
+        if length != self._tool_len:
+            self.machine.set_tool_length(length)
+            self._tool_len = length
+
+    def _step_discrete(self, dt: float, outputs: int) -> None:
+        """Magazyn, czujnik długości, kolizje (REQ-VM-08…10) po kroku modelu C."""
+        nose = self.nose()
+        fresh = list(self.atc.step(dt, nose, outputs))
+        self._sync_tool_length()
+        fresh += self.collisions.check(dt, nose, self.atc.tool_spec(),
+                                       exchange_aligned=self.atc.aligned(nose) is not None)
+        mask, value = self.atc.inputs()
+        if self.toolsetter is not None:
+            tip = self.machine.tool_tip(workpiece=True)
+            m2, v2 = self.toolsetter.inputs(tip)
+            mask, value = mask | m2, (value & ~m2) | v2
+        self._extra_inputs = (mask, value)
+        for ev in fresh:
+            self.events.append(ev)
+            if len(self.events) <= 50:
+                self._note(f"{ev.kind}: {getattr(ev, 'detail', '') or getattr(ev, 'pair', '')} "
+                           f"przy {ev.position}")
+
+    def manual_tool_change(self, tool: int | None) -> None:
+        """Operator zmienia narzędzie ręcznie (REQ-VM-09); poza pozycją wymiany → zdarzenie."""
+        with self._lock:
+            ev = self.atc.manual_change(tool, self.nose())
+            self._sync_tool_length()
+            if ev is not None:
+                self.events.append(ev)
+                self._note(f"{ev.kind}: {ev.detail} przy {ev.position}")
+
     def report(self) -> dict:
         """Raport przebiegu (statystyki LRT-NET i wyrocznia REQ-VM-06) do pliku JSON."""
         s = self.stats
         return {"machine": self.machine.model.name, "frames": s.received,
                 "rejected": s.rejected, "lost": s.lost, "late": s.late, "steps": s.steps,
                 "watchdog_tripped": self.watchdog_tripped, "model_failed": self.model_failed,
-                "digest": self.digest, "oracle": self.oracle.report()}
+                "digest": self.digest, "oracle": self.oracle.report(),
+                "events": [asdict(e) for e in self.events[:500]],
+                "spindle_tool": self.atc.spindle_tool, "slots": list(self.atc.slots)}
 
     def handle(self, frame: bytes, now_ns: int | None = None) -> bytes | None:
         """Jedna ramka master→plant. Zwraca odpowiedź albo None (ramka odrzucona)."""
@@ -302,6 +361,7 @@ class PlantServer:
                         if self.oracle.total <= 20:
                             self._note(f"ORACLE_VIOLATION {v.kind} {v.name}: {v.detail} "
                                        f"(ramka {v.seq})")
+                    self._step_discrete(dt_ns / 1e9, cmd.digital_out)
                 except Exception as exc:  # noqa: BLE001 - REQ-QA-03: proces nie może upaść
                     self.safe_state(f"{type(exc).__name__}: {exc}")
         reply = encode_reply(self._reply(cmd.seq, cmd.time_ns))
@@ -352,7 +412,8 @@ class PlantServer:
         if self.watchdog_tripped and self._reset_seen and not fault:
             self.watchdog_tripped = False
             self._note("E-4003 skasowany: napędy po fault reset, wyjścia zwolnione")
-        inputs = m.inputs
+        mask, value = self._extra_inputs  # magazyn, czujnik długości (sesja 020)
+        inputs = (m.inputs & ~mask) | value
         flags = FLAG_FAULT if fault else 0
         if self._estop is not None:
             bit, nc = self._estop
