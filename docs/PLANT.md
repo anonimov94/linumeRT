@@ -283,28 +283,71 @@ state_file: state/plant_state.json
 trace: {path: state/traces/plant.jsonl, format: jsonl}   # csv | jsonl (sesja 016)
 ```
 
-Scenariusz `scenarios/*.yaml` to oś czasu zdarzeń i oczekiwań; pole `requirements`
-łączy go z REQ (REQ-QA-01).
+Scenariusz `plant/scenarios/*.yaml` (sesja 024, `linumert_plant/scenario.py`) to maszyna,
+opcjonalny program `.ngc`, oś czasu kroków i kryteria; pole `requirements` łączy go z REQ
+(REQ-QA-01, `tools/check_requirements.py`). Uruchomienie: `python tools/run_scenario.py [nazwa...]
+[--master mock|linuxcnc] [--matrix] [--ssh user@vm]`; raport HTML ze statycznymi wykresami SVG
+w `docs/raporty/prototypy/`.
 
 ```yaml
-# scenarios/home_hardstop.yaml (przykład)
-name: home_hardstop
-requirements: [REQ-VM-07]
-machine: config/machines/router_gantry_steppers.yaml
-seed: 7
-timeline:
-  - {at: 0.0, action: power_on}
-  - {at: 0.5, action: command_home, axes: [X, Y, Z]}
-  - {at: 20.0, action: set_param, path: "drives.x.params.friction_viscous", value: 0.002}
+name: drive_fault_mid_program
+requirements: [REQ-QA-03]
+machine: ../../config/machines/mill_servo_table.yaml   # względem pliku scenariusza
+program: programs/long_feed.ngc
+master: both            # mock (atrapa mastera, CI) | linuxcnc | both (oba)
+duration: 3.0           # [s]; timing: {substeps, cycle_ns}; seed; linuxcnc: {seed, port}
+steps:
+  - {at: 0.0, action: enable}
+  - {at: 0.05, action: program}
+  - {at_line: 4, action: fault, fault: drive_fault, drive: drv_x}   # po rozpoczęciu linii 4
+  - {at: 2.0, action: clear, fault: drive_fault, drive: drv_x}
+  - {at: 2.1, action: fault_reset}
 expect:
-  - {event: HOMED, axis: X, within_s: 15}
-  - {event: CRASH_HARDSTOP, count: 0}
-  - {position: {axis: X, value: 0.0, tolerance: 0.02, at: 18.0}}
+  - alarm: {code: E-4200}
+  - completed: false
+  - drive_state: {drive: drv_x, is: OPERATION_ENABLED}
 ```
 
-Zdarzenia: `CRASH_HARDSTOP`, `CRASH`, `LIMIT_TRIP`, `ORACLE_SOFTLIMIT`, `ORACLE_FORBIDDEN_ZONE`,
-`DRIVE_FAULT`, `LOST_STEPS`, `LINK_LOSS`, `WATCHDOG`, `HOMED`. Ślad: jeden JSON na linię
-(czas wirtualny, zdarzenie, oś, wartości), pełny stan co N ramek.
+Akcje: `enable`, `home` (`axes`), `move` (`X: 10, feed` [mm/min], `rapid`, `accel` [mm/s²] ponad
+limity osi), `mdi` (`command`), `program`, `wait` (`seconds` albo `until: {idle | alarm |
+drive_state}`, `timeout`), `fault`/`clear` (§7b), `set_param` (`drive, path, value`, REQ-VD-04),
+`fault_reset`, `spindle` (`rpm`). Kryteria: `max_following_error {axis, mm}`, `lost_steps {axis,
+min|max}`, `alarm {code, within_s}`, `no_alarm {allowed}`, `position {axis, value, tol, relative}`
+(`relative`: względem pozycji przy pierwszym ruchu), `drive_state`, `event {name, present}`,
+`oracle`, `completed`, `frames {lost_max}`. Błąd kroku (np. zdjęcie nieaktywnej awarii) = FAIL.
+
+- **Atrapa mastera** (`mock`, CI): LRT-NET bez gniazd, lockstep, deterministyczna (REQ-QA-04);
+  ruch skoordynowany G0/G1 (G90/G91, F, M3/M4/M5, M2/M30), łuki i cykle → błąd scenariusza;
+  awaria napędu albo E-STOP przerywa ruch jak w LinuxCNC; bazowanie: `homing_master.py`.
+  Alarmy z 603Fh odpowiedzi (`E-42xx`, `E-4003`) i flagi ESTOP_OPEN (`E-1100`).
+- **LinuxCNC** (`linuxcnc`, testy `-m linuxcnc`): RIP + `config/plant/linumert_plant_xyz` (tylko
+  maszyna mill_servo_table), Plant `serve --panel 0`, sterowanie przez `linuxcnc.command`, awarie
+  przez REST panelu; alarmy z kanału błędów, stanu task i pinów `lrt-net.0.axis.N.error-code`.
+  Błąd nadążania LinuxCNC zawiera opóźnienie jednego cyklu servo (progi kryteriów z zapasem).
+- **Macierz** (REQ-QA-02): `--matrix` = `matrix_smoke` na każdej `config/machines/*.yaml`
+  (job CI `plant-matrix`, `make plant-matrix`); fuzz machine.yaml: `test_fuzz_machine_yaml`.
+
+Zdarzenia (pole `event`): `CRASH_HARDSTOP`, `LIMIT_TRIP`, `GANTRY_SKEW`, `ESTOP`, `PROBE`,
+`DRIVE_FAULT`, `HOME_SENSOR` (model C) oraz zdarzenia magazynu i kolizji (`CRASH`, `COVER_CRASH`…).
+
+## 7b. Awarie (sesja 024, `linumert_plant/faults.py`)
+Jedno API dla scenariuszy, testów i panelu (REST `GET /api/faults`, `POST /api/faults/{rodzaj}`,
+`POST /api/faults/{rodzaj}/clear`); każda awaria ma włączenie i zdjęcie.
+
+| Rodzaj | Parametry | Skutek |
+|---|---|---|
+| `estop` | — | pętla E-STOP otwarta w modelu (reakcja `io.estop.action`, flaga ESTOP_OPEN) |
+| `drive_fault` | `drive`, `code` (GENERIC…STO) | awaria napędu, trwała do zdjęcia; potem fault reset mastera |
+| `frame_loss` | `percent` | Plant nie odpowiada na część ramek (ziarno z plant.yaml); 100 % = zerwane łącze, E-4003 |
+| `delay` | `ms` | opóźnione odpowiedzi w pętli UDP |
+| `limit` | `input` | krańcówka zadziałała (stan wg `contact`) |
+| `axis_jam` | `axis` | tarcie statyczne i Coulomba napędów osi na maksimum (live); zdjęcie przywraca |
+| `vfd_loss` | — | falownik milczy (sekcja `vfd`) albo awaria wrzeciona (bez niej) |
+| `atc_sensor` | `input`, `closed` | czujnik magazynu zablokowany w stanie `closed` |
+
+Sesja 024 zmieniła też `config/plant/linumert_plant_xyz/linumert_plant.hal`: fault napędu nie
+wchodzi już do łańcucha E-STOP (blokował reset po STO — zakleszczenie), obsługuje go
+`joint.N.amp-fault-in`.
 
 ## 7a. Panel web i wirtualny pulpit (sesja 022)
 Panel to narzędzie testowe Plant (nie HMI operatora): `python -m linumert_plant panel --plant plant.yaml`
