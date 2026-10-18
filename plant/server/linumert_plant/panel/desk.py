@@ -71,7 +71,7 @@ class DeskConfig:
         return out
 
     def problems(self, used: dict[str, int] | None = None) -> list[str]:
-        """Błędy mapowania; `used` = wejścia maszyny (io.inputs), z którymi bity nie mogą kolidować."""
+        """Błędy mapowania; `used` = wejścia maszyny (io.inputs), bez kolizji bitów."""
         errors = []
         bits = self.bits()
         for name, b in bits.items():

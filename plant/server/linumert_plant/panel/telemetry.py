@@ -57,7 +57,7 @@ class Telemetry:
         return first, data
 
     def columns(self, index: int | None = None) -> dict:
-        """Próbki kolumnami (JSON dla panelu): t i pola osi, `next` = indeks do kolejnego odczytu."""
+        """Próbki kolumnami (JSON panelu): t i pola osi; `next` = indeks kolejnego odczytu."""
         first, data = self.since(index)
         n = len(FIELDS)
         out = {"first": first, "next": first + len(data), "t": [round(s[0], 6) for s in data],

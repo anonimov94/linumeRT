@@ -37,6 +37,7 @@ import yaml
 from .atc import ToolChangerModel, ToolSetterModel, ToolSpec
 from .collisions import CollisionModel
 from .core_binding import CW_FAULT_RESET, MODE_CSP, PlantMachine
+from .drive_template import LiveParams
 from .lrtnet import (
     FLAG_ESTOP_OPEN,
     FLAG_FAULT,
@@ -49,7 +50,6 @@ from .lrtnet import (
     encode_reply,
     seq_delta,
 )
-from .drive_template import LiveParams
 from .oracle import Oracle
 from .panel.desk import Desk, DeskConfig
 from .panel.telemetry import Telemetry

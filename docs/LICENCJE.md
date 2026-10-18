@@ -16,6 +16,14 @@ tego projektu (D14).
 | pydantic | schemat i walidacja `machine.yaml` (wymagane v2) | MIT | tak | sesja 010 |
 | pytest (dev) | testy | MIT | tak (tylko narzędzie dev) | sesja 001 |
 | ruff (dev) | lint | MIT | tak (tylko narzędzie dev) | sesja 001 |
+| FastAPI (`fastapi>=0.100`, grupa `panel`) | panel web Plant (REST, WebSocket); wciąga Starlette (BSD-3-Clause) | MIT | tak | sesja 022 |
+| Uvicorn (`uvicorn>=0.23`, grupa `panel`) | serwer HTTP panelu Plant | BSD-3-Clause | tak | sesja 022 |
+| websockets (`websockets>=11`, grupa `panel`) | WebSocket w Uvicorn (telemetria panelu) | BSD-3-Clause | tak | sesja 022 |
+| httpx (dev) | testy API panelu (klient HTTP, TestClient) | BSD-3-Clause | tak (tylko narzędzie dev) | sesja 022 |
+| `linumert[panel]` (dev) | grupa dev obejmuje zależności panelu, żeby testy panelu działały w CI | — | — | sesja 022 |
+
+uPlot 1.6.31 (Leon Sorokin, MIT) — biblioteka wykresów JavaScript panelu Plant, dołączona jako plik
+w `plant/server/linumert_plant/panel/static/vendor/` (bez zmian, z `uPlot.LICENSE`); wpis w `PROVENANCE.md`.
 
 Modbus RTU/TCP w Plant (sesja 021): własna implementacja w `plant/server/linumert_plant/vfd.py`
 (stdlib: `socket`, `os.openpty`), bez bibliotek zewnętrznych (np. pymodbus). Ramki hy_vfd odtworzone
@@ -29,7 +37,6 @@ z opisu protokołu i zachowania `hy_comm.c` (LinuxCNC 2.9, GPL-2.0), bez kopiowa
 | QtDragon / QtVCP | baza ekranu (kopia w `screens/linumert/`) | GPL-2.0-or-later | 005 |
 | PyQt5 (przez `qtpy`) | GUI | GPL-3.0 / komercyjna (Riverbank) | 005 — do potwierdzenia zgodności przy dystrybucji |
 | pyqtgraph | widok 3D symulacji | MIT | 057 |
-| FastAPI, uPlot | panel web Plant | MIT / MIT | 022 |
 | IgH EtherCAT Master, linuxcnc-ethercat | EtherCAT | GPL-2.0 | 063 |
 
 Zgodność PyQt5 (GPL-3.0) z dystrybucją na GPL-2.0 jest do sprawdzenia w sesji 005 i 080; do tego czasu

@@ -35,6 +35,9 @@ def _bits(value: int, *bits: int) -> tuple[int, ...]:
 def test_panel_without_fastapi_gives_clear_error(monkeypatch) -> None:
     monkeypatch.setitem(sys.modules, "fastapi", None)
     monkeypatch.delitem(sys.modules, "linumert_plant.panel.app", raising=False)
+    import linumert_plant.panel as panel_pkg
+
+    monkeypatch.delattr(panel_pkg, "app", raising=False)
     import linumert_plant.server  # noqa: F401 - serwer działa bez panelu
 
     with pytest.raises(PanelUnavailable, match=r"pip install -e \"\.\[panel\]\""):
