@@ -19,7 +19,7 @@ Ręczna obsługa i pulpit sprzętowy.
 
 ## Zakres pracy
 1. Przyciski trybów JOG / MDI / AUTO, przyrosty 0.001–1 mm, ciągły, prędkość JOG, bazowanie wszystkich/pojedynczo — na bazie akcji QtVCP (`ACTION`).
-2. Koncepcja fizycznego pulpitu: `docs/design/makiety/07_pulpit_operatora.png`. Pulpit przez HAL: piny w INI `[LINUMERIK]` dla MPG (licznik impulsów), wyboru osi, kroku, Start/Stop posuwu, klucza poziomu dostępu; komponent `hal/lrt_pendant.comp` lub gotowe komponenty LinuxCNC (`ilowpass`, `mux`) — wybierz i opisz.
+2. Koncepcja fizycznego pulpitu: `docs/design/makiety/07_pulpit_operatora.png`. Pulpit przez HAL: piny w INI `[LINUMERT]` dla MPG (licznik impulsów), wyboru osi, kroku, Start/Stop posuwu, klucza poziomu dostępu; komponent `hal/lrt_pendant.comp` lub gotowe komponenty LinuxCNC (`ilowpass`, `mux`) — wybierz i opisz.
 3. Wirtualny pulpit z panelu Plant (sesja 022) podłączony przez LRT-NET.
 4. Scenariusz Plant `pendant_jog`: MPG obraca o 100 impulsów → oś przesuwa się o oczekiwaną drogę.
 
