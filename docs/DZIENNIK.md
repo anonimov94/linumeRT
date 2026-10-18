@@ -304,7 +304,7 @@ Uzupełnienie: README plant/core (liczby testów 29/59/20, bazowanie, parametry 
 
 ## 023 — Edytor wirtualnej obrabiarki w panelu Plant (PR #39) · 2026-10-18 · Claude (Opus 5.5)
 - Zrobione (START-023): zakładki panelu Napędy, Maszyna, Awarie; `panel/editor.py` (drzewo, walidacja REQ-VM-11, zapis wersji z historią, przeładowanie modelu bez restartu przy wyłączonych napędach — `PlantServer.reload_machine`, scena 3D, klonowanie szablonów i instancji, różnice z `based_on`); widok **3D z modelu** zamiast samego rzutu 2D (polecenie właściciela); akcje scenariusza `edit_machine`/`reload`, scenariusz `edit_reload`; zakładka Awarie z API `faults.py`.
-- Testy (WSL Ubuntu 24.04, świeży klon): ruff czysty, pytest i `-m linuxcnc` — wyniki w PR #39; check_requirements 0 błędów (REQ-VM-12 pokryte).
+- Testy (WSL Ubuntu 24.04, świeży klon): ruff czysty, pytest 571 OK, testy C 29/59/20, `-m linuxcnc` 65/66 — `test_forbidden_zone_oracle` (019) raz niestabilny w WSL, powtórzony 2× zielony; check_requirements 0 błędów (REQ-VM-12 pokryte).
 - Zamknięcie podziału D33: 022, 023, 024 scalone; 025 (skrypty VM) nadal otwarta.
 - Do sprawdzenia ręcznie: `python -m linumert_plant panel --plant config/plant/plant.example.yaml` → zakładki Maszyna (obrót 3D, przesuwanie magazynu, „Zapisz wersję”, „Przeładuj model” przy wyłączonych napędach) i Napędy („Kopiuj”).
 - Długi: formularz edytuje istniejące pola (dodawanie stref/brył przez plik); przeciąganie elementów myszą w 3D zastąpione przyciskami X/Y/Z; zakładka Scenariusze z makiety jeszcze nie istnieje (CLI `tools/run_scenario.py`). Autokontrola, bez niezależnego przeglądu. NIEZWERYFIKOWANE NA SPRZĘCIE.
