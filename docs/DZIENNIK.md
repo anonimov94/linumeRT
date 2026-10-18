@@ -108,3 +108,11 @@ Najnowsze wpisy na dole. Każda sesja dopisuje: zrobione · decyzje · do sprawd
 - #3 (Codex): diagnoza czerwonego CI — segfault QtDragon przy zamykaniu w teardown `test_qtdragon_screen`; lokalnie nieodtwarzalny (7/7 zielone pod Xvfb). Ponowny run CI: success (crash niestabilny); kodu #3 nie zmieniano, diagnoza w komentarzu w #3.
 - Uporządkowano `docs/NASTEPNA_SESJA.md` (aktualny stan, zlecenia dla Codexa w kolejności, usunięte nieaktualne sekcje) i sekcję „Stan” w `docs/PROMPT_NOWEJ_SESJI.md`.
 - Do sprawdzenia: przegląd wsteczny `d53aa04` przez Codexa.
+
+## 044 — Lekser G-code i walidacja w edytorze — 2026-10-18
+- Model-Author: Claude (Opus 5.5). Gałąź `wip/sesja-044` od `main` (niezależna od PR #13/#14 i od Codexa). Zakres: część rdzenia (punkty 1–2); punkt 3 (ekran) czeka na sesję 005.
+- Zrobione: `programs/lexer.py` (słowa, komentarze, N, `/`, `%`, parametry i przypisania, wyrażenia z operatorami i funkcjami, słowa O z parowaniem bloków, błędy P-5101…P-5111 z linią i kolumną), `programs/linuxcnc_check.py` (kontrola w `rs274` LinuxCNC, limit czasu), alarmy P-5101…P-5111, `docs/GCODE_LEKSER.md`, 44 próbki `tests/data/gcode_samples.yaml`, `tests/test_lexer.py`.
+- Weryfikacja (WSL Ubuntu 24.04, venv Python 3.12): `ruff` czysty; `pytest` 299 przeszło; `pytest -o addopts= -m linuxcnc tests/test_lexer.py` 44 OK — werdykty leksera zgodne z rs274 LinuxCNC 2.9 dla wszystkich próbek (z podziałem same/strict/semantic).
+- Decyzje: jedna PROPOZYCJA w `docs/DECYZJE.md` (sesja 044).
+- Do sprawdzenia ręcznie: czy surowość `strict` (np. puste `#<>`) nie przeszkadza w prawdziwych programach z CAM.
+- Długi: przycisk „Sprawdź”, lista błędów i ostrzeżenie przy edycji `.ngc` z `.lnx` w ekranie (po sesji 005); komunikaty rs274 tylko po angielsku i bez numeru linii; lekser nie zna jeszcze `(MSG,` / `(DEBUG,` jako osobnych typów komentarzy (traktuje jak komentarze).

@@ -302,3 +302,59 @@
   params: [segment, gap]
   pl: "Nieciągłość ścieżki w segmencie {segment} (przerwa {gap} mm)."
   en: "Path discontinuity at segment {segment} (gap {gap} mm)."
+# ---- Lekser G-code (sesja 044) ---------------------------------------------
+- code: P-5101
+  clear: ack
+  params: [line, col]
+  pl: "Linia {line}, kolumna {col}: niezamknięty komentarz."
+  en: "Line {line}, column {col}: unclosed comment."
+- code: P-5102
+  clear: ack
+  params: [line, col]
+  pl: "Linia {line}, kolumna {col}: komentarz w komentarzu."
+  en: "Line {line}, column {col}: nested comment."
+- code: P-5103
+  clear: ack
+  params: [line, col, letter]
+  pl: "Linia {line}, kolumna {col}: nieznane słowo zaczynające się od {letter}."
+  en: "Line {line}, column {col}: unknown word starting with {letter}."
+- code: P-5104
+  clear: ack
+  params: [line, col, letter]
+  pl: "Linia {line}, kolumna {col}: brak wartości po {letter}."
+  en: "Line {line}, column {col}: missing value after {letter}."
+- code: P-5105
+  clear: ack
+  params: [line, col, text]
+  pl: "Linia {line}, kolumna {col}: niepoprawna liczba {text}."
+  en: "Line {line}, column {col}: invalid number {text}."
+- code: P-5106
+  clear: ack
+  params: [line, col]
+  pl: "Linia {line}, kolumna {col}: nawias kwadratowy bez pary."
+  en: "Line {line}, column {col}: unmatched square bracket."
+- code: P-5107
+  clear: ack
+  params: [line, col, name]
+  pl: "Linia {line}, kolumna {col}: nieznana funkcja albo operator {name}."
+  en: "Line {line}, column {col}: unknown function or operator {name}."
+- code: P-5108
+  clear: ack
+  params: [line, col, text]
+  pl: "Linia {line}, kolumna {col}: niepoprawny parametr {text}."
+  en: "Line {line}, column {col}: invalid parameter {text}."
+- code: P-5109
+  clear: ack
+  params: [line, col, detail]
+  pl: "Linia {line}, kolumna {col}: błąd słowa O ({detail})."
+  en: "Line {line}, column {col}: O-word error ({detail})."
+- code: P-5110
+  clear: ack
+  params: [line, col, detail]
+  pl: "Linia {line}, kolumna {col}: niepoprawne wyrażenie ({detail})."
+  en: "Line {line}, column {col}: invalid expression ({detail})."
+- code: P-5111
+  clear: ack
+  params: [line, col]
+  pl: "Linia {line}, kolumna {col}: numer linii N może stać tylko na początku linii."
+  en: "Line {line}, column {col}: a line number N may only start the line."
