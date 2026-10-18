@@ -46,4 +46,5 @@ ENV PATH=/opt/venv/bin:$PATH PYTHONPATH=/work/core
 WORKDIR /work
 DOCKER
 fi
-exec "$RT" run --rm -it -v "$PWD:/work:Z" -w /work "$IMG" "$@"
+TTY=(); [ -t 0 ] && [ -t 1 ] && TTY=(-t)
+exec "$RT" run --rm -i "${TTY[@]}" -v "$PWD:/work:Z" -w /work "$IMG" "$@"
