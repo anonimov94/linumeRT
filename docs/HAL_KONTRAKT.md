@@ -89,7 +89,7 @@ net lrt.j0.md   lrt-net.0.axis.0.mode-display => lrt-cia402.0.mode-display
 | `axis.N.pos-fb` / `.counts` | float / s32 | out | 6064h w jednostkach osi / w impulsach |
 | `axis.N.ferror` | float | out | błąd nadążania napędu [jedn. osi] |
 | `axis.N.torque` / `.error-code` | float / u32 | out | 6077h [‰] / 603Fh |
-| `din-00…31` / `dout-00…31` | bit | out / in | wejścia / wyjścia cyfrowe Plant (`machine.yaml io`) |
+| `din-00…31` / `dout-00…31` | bit | out / in | wejścia (stan elektryczny: 1 = obwód zamknięty, NC w spoczynku = 1; odwrócenie w HAL) / wyjścia cyfrowe Plant (`machine.yaml io`) |
 | `spindle-speed-cmd` / `-fb` | float | in / out | wrzeciono [obr/min] (v1: Plant nie modeluje, sesja 021) |
 | `drive-fault`, `estop-open` | bit | out | flagi odpowiedzi Plant |
 | `connected` | bit | out | odpowiedź w ostatnich `timeout-cycles` (20) cyklach |

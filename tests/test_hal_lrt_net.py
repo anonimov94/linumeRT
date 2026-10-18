@@ -9,20 +9,14 @@ RIP tylko na czas testu. Nie uruchamiaj równolegle z innym LinuxCNC ani serwere
 
 from __future__ import annotations
 
-import os
-import shutil
-import socket
-import subprocess
-import sys
-import time
 from pathlib import Path
 
 import pytest
+from rip_support import installed_modules, plant_server, rip_root, rip_run
 
 pytestmark = pytest.mark.linuxcnc
 
 ROOT = Path(__file__).resolve().parents[1]
-HAL = ROOT / "hal"
 MACHINE = ROOT / "config" / "machines" / "mill_servo_table.yaml"
 AXES = 4  # napędy mill_servo_table bez wrzeciona
 PORT = 47791
@@ -74,65 +68,19 @@ def _script(enable: bool = True) -> str:
 
 @pytest.fixture
 def rip():
-    root = Path(os.environ.get("LINUXCNC_DIR", Path.home() / ".cache" / "linuxcnc-2.9"))
-    if not (root / "scripts" / "rip-environment").exists():
-        pytest.skip(f"brak LinuxCNC RIP w {root}")
-    return root
-
-
-def _rip(root: Path, command: str, cwd: Path, timeout: float = 120) -> subprocess.CompletedProcess:
-    return subprocess.run(["bash", "-c", f"source '{root}/scripts/rip-environment' >/dev/null "
-                           f"&& {command}"], cwd=cwd, capture_output=True, text=True,
-                          timeout=timeout, check=False)
+    return rip_root()
 
 
 @pytest.fixture
 def modules(rip, tmp_path):
-    """Kompiluje lrt_net i lrt_cia402, kopiuje do rtlib na czas testu."""
-    for name in ("lrt_net.comp", "lrt_net_proto.h", "lrt_cia402.comp"):
-        shutil.copy(HAL / name, tmp_path)
-    installed = []
-    try:
-        for comp in ("lrt_net", "lrt_cia402"):
-            built = _rip(rip, f"halcompile --compile {comp}.comp", tmp_path)
-            assert built.returncode == 0, built.stdout + built.stderr
-            assert "warning" not in built.stderr.lower(), built.stderr
-            target = rip / "rtlib" / f"{comp}.so"
-            assert not target.exists(), f"{target} już istnieje — nie nadpisuję cudzego modułu"
-            shutil.copy(tmp_path / f"{comp}.so", target)
-            installed.append(target)
+    with installed_modules(rip, tmp_path, ("lrt_net", "lrt_cia402")):
         yield tmp_path
-    finally:
-        for target in installed:
-            target.unlink(missing_ok=True)
-        _rip(rip, "halrun -U", tmp_path)
 
 
 @pytest.fixture
-def plant_server():
-    env = {**os.environ, "PYTHONPATH": os.pathsep.join(
-        [str(ROOT / "core"), str(ROOT / "plant" / "server"), os.environ.get("PYTHONPATH", "")])}
-    proc = subprocess.Popen([sys.executable, "-m", "linumert_plant", "serve", str(MACHINE),
-                             "--lockstep", "--port", str(PORT)], env=env,
-                            stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
-    deadline = time.monotonic() + 15
-    while time.monotonic() < deadline:  # gotowość: port UDP zajęty
-        probe = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        try:
-            probe.bind(("127.0.0.1", PORT))
-        except OSError:
-            break
-        finally:
-            probe.close()
-        if proc.poll() is not None:
-            pytest.fail(proc.stdout.read())
-        time.sleep(0.1)
-    yield proc
-    proc.terminate()
-    try:
-        proc.wait(timeout=10)
-    except subprocess.TimeoutExpired:
-        proc.kill()
+def plant():
+    with plant_server(MACHINE, PORT) as proc:
+        yield proc
 
 
 def _values(out: str) -> list[str]:
@@ -141,9 +89,9 @@ def _values(out: str) -> list[str]:
             or line.strip().lstrip("-").replace(".", "", 1).isdigit()]
 
 
-def test_lrt_net_enables_drives_and_moves_axis(rip, modules, plant_server):  # REQ-VM-02
+def test_lrt_net_enables_drives_and_moves_axis(rip, modules, plant):  # REQ-VM-02
     (modules / "test.hal").write_text(_script(), encoding="utf-8")
-    run = _rip(rip, "halrun -f test.hal", modules)
+    run = rip_run(rip, "halrun -f test.hal", modules)
     vals = _values(run.stdout)
     assert len(vals) == 1 + AXES + 5, run.stdout + run.stderr
     connected, enabled = vals[0], vals[1:1 + AXES]
@@ -157,5 +105,5 @@ def test_lrt_net_enables_drives_and_moves_axis(rip, modules, plant_server):  # R
 
 def test_lrt_net_without_plant_is_disconnected(rip, modules):
     (modules / "test.hal").write_text(_script(enable=False), encoding="utf-8")
-    run = _rip(rip, "halrun -f test.hal", modules)
+    run = rip_run(rip, "halrun -f test.hal", modules)
     assert _values(run.stdout) == ["FALSE"], run.stdout + run.stderr
