@@ -1,5 +1,7 @@
 # Przekazanie do następnej sesji
 
+Prompt startowy i stan bieżący: `docs/PROMPT_NOWEJ_SESJI.md` (aktualizować na końcu każdej sesji).
+
 Model-Author: Codex · 2026-10-17
 
 ## Katalog i Git
