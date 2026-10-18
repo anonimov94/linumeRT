@@ -48,7 +48,7 @@ def _hal_text() -> str:
 
 def test_ini_ranges_and_display():
     cp = _ini()
-    assert cp["DISPLAY"]["DISPLAY"] == "qtvcp qtdragon"
+    assert cp["DISPLAY"]["DISPLAY"] == "qtvcp linumert"
     assert cp["KINS"]["KINEMATICS"].startswith("trivkins")
     assert int(cp["KINS"]["JOINTS"]) == 3
     ranges = {"X": (0.0, 600.0), "Y": (0.0, 400.0), "Z": (-120.0, 0.0)}
@@ -107,7 +107,7 @@ def test_headless_run_20s(tmp_path):
     shutil.copytree(CFG, work)
     ini = work / "linumert_xyz.ini"
     text = ini.read_text(encoding="utf-8")
-    text = text.replace("DISPLAY = qtvcp qtdragon", "DISPLAY = linumert_bez_ekranu")
+    text = text.replace("DISPLAY = qtvcp linumert", "DISPLAY = linumert_bez_ekranu")
     text = re.sub(r"^POSTGUI_HALFILE.*$", "", text, flags=re.M)
     text = text.replace("PROGRAM_PREFIX = ../nc_files", f"PROGRAM_PREFIX = {NC}")
     ini.write_text(text, encoding="utf-8")

@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
-# linumeRT · po starcie ekranu: ręczna zmiana narzędzia (okno QtDragon) i podnoszenie Z przy pauzie.
+# linumeRT · po starcie ekranu (piny komponentu ekranu `linumert.*`): ręczna zmiana narzędzia (okno QtDragon) i podnoszenie Z przy pauzie.
 # Na podstawie qtdragon_postgui.hal z LinuxCNC 2.9 (GPL-2); zmiany: nazwy sygnałów linumert.*,
 # bez pętli prędkości wrzeciona (robi to sim_spindle w linumert_sim.hal).
 # Model-Author: Claude · sesja 004.
@@ -8,9 +8,9 @@ net linumert.io.tool-change     hal_manualtoolchange.change  <= iocontrol.0.tool
 net linumert.io.tool-changed    hal_manualtoolchange.changed => iocontrol.0.tool-changed
 net linumert.io.tool-number     hal_manualtoolchange.number  <= iocontrol.0.tool-prep-number
 
-net linumert.spindle.inhibit    qtdragon.spindle-inhibit => spindle.0.inhibit
-net linumert.z.eoffset-clear    qtdragon.eoffset-clear => axis.z.eoffset-clear
-net linumert.z.eoffset-counts   qtdragon.eoffset-spindle-count => axis.z.eoffset-counts
-net linumert.z.eoffset          qtdragon.eoffset-value <= axis.z.eoffset
+net linumert.spindle.inhibit    linumert.spindle-inhibit => spindle.0.inhibit
+net linumert.z.eoffset-clear    linumert.eoffset-clear => axis.z.eoffset-clear
+net linumert.z.eoffset-counts   linumert.eoffset-spindle-count => axis.z.eoffset-counts
+net linumert.z.eoffset          linumert.eoffset-value <= axis.z.eoffset
 setp axis.z.eoffset-enable 1
 setp axis.z.eoffset-scale 1.0
