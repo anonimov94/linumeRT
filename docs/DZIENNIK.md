@@ -178,3 +178,9 @@ Uzupełnienie: README plant/core (liczby testów 29/59/20, bazowanie, parametry 
   Uwagi do sesji 018: kierunek szukania indeksu w `switch_index` i prędkość zjazdu w homing_master.py vs homemod.
 - C: pominięte, brak LinuxCNC RIP (budowa w #3, zakres Codexa). PR #22.
 - Uzupełnienie (właściciel): po krańcówce maszyna wolno zjeżdża, baza na zwolnieniu styku NC; jazda dalej = uszkodzenie. Dodano `homing.latch: approach|release` (PR #23), korekta uwagi 1 w #13. Docker niepotrzebny (tryb rootfs).
+
+## 004 — Konfiguracja sim 3 osie z QtDragon (Model-Author: Claude, D31: zakres przejęty od Codexa)
+- Zrobione: `config/sim/linumert_xyz/` (INI, `linumert_sim.hal`, `linumert_postgui.hal`, tool.tbl 5 narzędzi), 3 programy w `config/sim/nc_files/`, `docs/HAL_KONTRAKT.md`, `docs/SIM_WSL.md`, `tests/test_sim_config.py` (4 testy + 1 z markerem linuxcnc: 20 s bez ekranu).
+- Sprawdzone w LinuxCNC 2.9.10 (podman, QtDragon na pulpicie): start bez błędów, bazowanie XYZ OK, programy przez rs274 OK, test linuxcnc zielony.
+- Decyzje: bazowanie X/Y/Z na krańcówkach ze strategią release (HOME_LATCH_VEL przeciwny znak, 1 mm/s), napęd w HAL jako osobny blok `sim_jN` (podmieniany przez lrt_net/step-dir/EtherCAT).
+- Do sprawdzenia ręcznie: okno zmiany narzędzia po M6, wygląd ekranu (nadal QtDragon — sesja 005).

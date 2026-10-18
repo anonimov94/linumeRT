@@ -17,3 +17,4 @@ Format: `NNN | RRRR-MM-DD | opis`. Agent dopisuje linię po udanej sesji. Zaplan
 032 | 2026-10-18 | Baza narzędzi (rdzeń): 10 typów z walidacją, SQLite z migracjami i historią, tool.tbl bez strat i w jednostkach maszyny (sprawdzone w rs274 LinuxCNC 2.9), CSV; ekran czeka na sesję 005; PR do przeglądu Codexa
 039 | 2026-10-18 | Format .lnx (Pydantic + lnx_schema.json), ;@STOCK, BaseMacroGenerator i rejestr wersji, deterministyczny kompilator .lnx → .ngc (golden, rs274 LinuxCNC 2.9), alarmy P-5011…P-5015; PR do przeglądu Codexa
 044 | 2026-10-18 | Lekser G-code LinuxCNC (P-5101…P-5111, linia/kolumna, słowa O w całym pliku), kontrola w rs274; 44 próbki zgodne z LinuxCNC 2.9; ekran (przycisk Sprawdź) czeka na sesję 005; PR do przeglądu Codexa
+004 | 2026-10-18 | konfiguracja sim linumert_xyz (QtDragon, kontrakt D05, bazowanie latch release), HAL_KONTRAKT, SIM_WSL; Claude (D31)
