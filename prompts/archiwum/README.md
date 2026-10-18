@@ -15,5 +15,6 @@ jednorazowe). Są zrealizowane i zostają jako historia; nie używaj ich do star
 | [START-021.md](START-021.md) | kontynuacja sesji 021 (wrzeciono VFD) | PR #32 |
 | [START-008.md](START-008.md) | 4 testy LinuxCNC (sprzątanie), potem sesja 008 (bramka G0) | PR #35 |
 | [START-022.md](START-022.md) | sesja 022 równolegle z 024 i 025 (D33): panel Plant i pulpit MPG | PR #37 |
+| [START-024.md](START-024.md) | sesja 024 (D33): awarie, scenariusze, raport, check_requirements | PR #38 |
 
 Aktualny prompt startowy: [`docs/PROMPT_NOWEJ_SESJI.md`](../../docs/PROMPT_NOWEJ_SESJI.md).

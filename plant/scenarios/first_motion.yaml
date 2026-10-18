@@ -1,0 +1,17 @@
+# linumeRT · scenariusz Plant (sesja 024, docs/PLANT.md §7). Model-Author: Claude.
+name: first_motion
+description: "Włączenie napędów i pierwszy ruch X, Y, Z z programu; powrót do zera bez błędów."
+requirements: [REQ-VM-01, REQ-QA-04]
+machine: ../../config/machines/mill_servo_table.yaml
+program: programs/first_motion.ngc
+master: both
+duration: 4.0
+steps:
+  - {at: 0.0, action: enable}
+  - {at: 0.05, action: program}
+expect:
+  - completed: true
+  - no_alarm: true
+  - max_following_error: {axis: X, mm: 0.2}   # LinuxCNC liczy z opóźnieniem jednego cyklu servo
+  - position: {axis: X, value: 0.0, tol: 0.01, relative: true}
+  - position: {axis: Z, value: 0.0, tol: 0.01, relative: true}

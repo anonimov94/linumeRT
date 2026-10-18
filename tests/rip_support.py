@@ -50,7 +50,18 @@ def leftovers() -> list[str]:
     """Procesy LinuxCNC/HAL bieżącego użytkownika, które jeszcze żyją (`nazwa:pid`)."""
     found = subprocess.run(["pgrep", "-u", str(os.getuid()), "-l", "-x", "|".join(LEFTOVERS)],
                            capture_output=True, text=True, check=False).stdout
-    return [":".join(line.split()[::-1]) for line in found.splitlines() if line.strip()]
+    return [":".join(line.split()[::-1]) for line in found.splitlines()
+            if line.strip() and not _zombie(line.split()[0])]
+
+
+def _zombie(pid: str) -> bool:
+    """Proces zakończony, czekający na odebranie przez rodzica (stan Z). W kontenerze CI bez
+    procesu init zombie nie znikają, a nic już nie blokują (sesja 024)."""
+    try:
+        stat = Path(f"/proc/{pid}/stat").read_text()
+    except OSError:
+        return True  # już nie istnieje
+    return stat.rsplit(")", 1)[-1].split()[0] == "Z"
 
 
 def cleanup_linuxcnc(root: Path | None = None, cwd: Path | None = None) -> None:

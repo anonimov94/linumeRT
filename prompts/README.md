@@ -43,7 +43,7 @@ wymagały ekranu ani LinuxCNC. Bieżący stan i następny krok: [`docs/NASTEPNA_
 | [021](sesja-021.md) | M1 | Plant: wrzeciono VFD przez Modbus | zrobiona |
 | [022](sesja-022.md) | M1 | Plant: panel sterowania i pulpit MPG | zrobiona |
 | [023](sesja-023.md) | M1 | Edytor wirtualnej obrabiarki w panelu Plant | po 022 i 024 ([START-023](START-023.md)) |
-| [024](sesja-024.md) | M1 | Plant: scenariusze i raport prototypu | **następna** (równolegle, [START-024](START-024.md)) |
+| [024](sesja-024.md) | M1 | Plant: scenariusze i raport prototypu | zrobiona |
 | [025](sesja-025.md) | M1 | Skrypty maszyn wirtualnych (VirtualBox) | **następna** (równolegle, [START-025](START-025.md)) |
 | [026](sesja-026.md) | M1 | Bufor i bramka G1 (prototyp P0) |  |
 | [027](sesja-027.md) | M2 | Własny system projektowy ekranu |  |

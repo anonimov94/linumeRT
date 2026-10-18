@@ -37,6 +37,7 @@ sesji: proces, scalenia, przeglądy). Treść: zrobione · testy · decyzje · d
 | [020](#020--magazyn-narzędzi-pozycje-wymiany-i-kolizje-w-plant-pr-30--2026-10-18--claude-d31) | Magazyn narzędzi, pozycje wymiany i kolizje w Plant | #30 | Claude (D31) |
 | [021](#021--plant-wrzeciono-vfd-przez-modbus-pr-32--2026-10-18--claude-d31) | Plant: wrzeciono VFD przez Modbus | #32 | Claude (D31) |
 | [022](#022--plant-panel-sterowania-i-pulpit-mpg-pr-37--2026-10-18--claude-opus-55) | Plant: panel sterowania i pulpit MPG | #37 | Claude (Opus 5.5) |
+| [024](#024--plant-scenariusze-i-raport-prototypu-pr-38--2026-10-18--claude-opus-55) | Plant: scenariusze i raport prototypu | #38 | Claude (Opus 5.5) |
 | [032](#032--baza-narzędzi-z-typami-część-rdzenia-pr-16--2026-10-18--claude-opus-55) | Baza narzędzi z typami, część rdzenia | #16 | Claude (Opus 5.5) |
 | [039](#039--format-lnx-i-basemacrogenerator-pr-14--2026-10-18--claude-opus-55) | Format .lnx i BaseMacroGenerator | #14 | Claude (Opus 5.5) |
 | [044](#044--lekser-g-code-i-walidacja-w-edytorze-pr-15--2026-10-18--claude-opus-55) | Lekser G-code i walidacja w edytorze | #15 | Claude (Opus 5.5) |
@@ -292,3 +293,10 @@ Uzupełnienie: README plant/core (liczby testów 29/59/20, bazowanie, parametry 
 - Decyzje: DECYZJE, sesja 022. Pliki spoza zakresu: `core_binding.py` (opakowania), `__main__.py` (polecenie panel), `tools/dev/wsl-test.sh` (worktree z Git for Windows).
 - Do sprawdzenia ręcznie: `python -m linumert_plant panel --plant config/plant/plant.example.yaml` → http://127.0.0.1:8080/ (wygląd wobec makiety 06, suwaki, MPG, CSV).
 - Długi: piny pulpitu niepodłączone w HAL LinuxCNC (sesja 029); fonty IBM Plex/JetBrains Mono niedołączone (zapas systemowy); bardzo małe J z suwaka może rozkołysać serwo (to fizyka modelu, nie błąd). Autokontrola, bez niezależnego przeglądu. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## 024 — Plant: scenariusze i raport prototypu (PR #38) · 2026-10-18 · Claude (Opus 5.5)
+- Zrobione (START-024): `faults.py` (8 awarii z włączeniem i zdjęciem, REST w panelu), format scenariusza i atrapa mastera (`scenario.py`, G0/G1, kroki czasowe i `at_line`), backend LinuxCNC (`scenario_linuxcnc.py`), raport HTML/SVG (`report.py`, `docs/raporty/prototypy/`), `tools/run_scenario.py` (`--matrix`, `--ssh`), 9 scenariuszy (6 startowych + `link_loss`, `heavy_table_live`, `matrix_smoke`), `tools/check_requirements.py` w `make test`, job CI `plant-matrix`, fuzz machine.yaml.
+- Testy (WSL Ubuntu 24.04, świeży klon): ruff czysty, pytest, testy C, pytest 564 OK, testy C 29/59/20, `-m linuxcnc` 66/66 (w tym 4 scenariusze `master: both` z LinuxCNC RIP); check_requirements: 22 wymagania, błędów 0.
+- Znalezisko: w `config/plant/linumert_plant_xyz/linumert_plant.hal` fault napędu w łańcuchu E-STOP blokował reset po STO (zakleszczenie) — usunięty z łańcucha (plik spoza zakresu, opis w PR i DECYZJE).
+- Do sprawdzenia ręcznie: `python tools/run_scenario.py` i `docs/raporty/prototypy/index.html`; z LinuxCNC: `--master linuxcnc first_motion`.
+- Długi: bazowanie Z w LinuxCNC pod WSL czasem kończy się błędem nadążania (brak RT) — skrypt ponawia raz; backend LinuxCNC tylko dla mill_servo_table; testy scenariuszy z LinuxCNC pomijane na GitHub Actions (w kontenerze zostają procesy rtapi_app, kaskada błędów) — do zbadania; awaria `delay` działa w pętli UDP (nie w atrapie). Autokontrola, bez niezależnego przeglądu. NIEZWERYFIKOWANE NA SPRZĘCIE.

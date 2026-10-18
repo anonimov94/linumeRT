@@ -1,7 +1,7 @@
 # Prompt startowy: sesja 024, scenariusze, raport, check_requirements (równolegle z 022 i 025)
 
-Model-Author: Claude · 2026-10-18. Najpierw [`START-PODZIAL.md`](START-PODZIAL.md) (zasady, worktree, testy),
-potem pełny zakres w [`sesja-024.md`](sesja-024.md). Dodatkowo ta sesja tworzy **API awarii**, z którego
+Model-Author: Claude · 2026-10-18. Najpierw [`START-PODZIAL.md`](../START-PODZIAL.md) (zasady, worktree, testy),
+potem pełny zakres w [`sesja-024.md`](../sesja-024.md). Dodatkowo ta sesja tworzy **API awarii**, z którego
 skorzysta panel w sesji 023.
 
 ## Zakres w tej sesji

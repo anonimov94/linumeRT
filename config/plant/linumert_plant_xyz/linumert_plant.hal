@@ -10,8 +10,8 @@ loadrt [KINS]KINEMATICS
 loadrt [EMCMOT]EMCMOT servo_period_nsec=[EMCMOT]SERVO_PERIOD num_joints=[KINS]JOINTS
 loadrt lrt_net personality=[PLANT]AXES ip=[PLANT]IP port=[PLANT]PORT
 loadrt lrt_cia402 count=4
-loadrt not names=nc_x_min,nc_x_max,nc_y_min,nc_y_max,nc_z_max,amp_ok
-loadrt and2 names=estop_chain,estop_chain2
+loadrt not names=nc_x_min,nc_x_max,nc_y_min,nc_y_max,nc_z_max
+loadrt and2 names=estop_chain
 loadrt estop_latch names=estop_latch
 
 addf motion-command-handler servo-thread
@@ -26,9 +26,7 @@ addf nc_x_max servo-thread
 addf nc_y_min servo-thread
 addf nc_y_max servo-thread
 addf nc_z_max servo-thread
-addf amp_ok servo-thread
 addf estop_chain servo-thread
-addf estop_chain2 servo-thread
 addf estop_latch servo-thread
 
 # ---- napędy (Plant przez LRT-NET) ---------------------------------------------------------
@@ -89,14 +87,15 @@ net linumert.j3.home-sw   nc_z_max.out => joint.3.pos-lim-sw-in joint.3.home-sw-
 net linumert.io.probe        lrt-net.0.din-07 => motion.probe-input
 net linumert.io.toolsetter   lrt-net.0.din-06
 
-# ---- E-STOP: obwód NC z Plant + łączność + brak faultu napędów --------------------------------
+# ---- E-STOP: obwód NC z Plant + łączność --------------------------------------------------------
 # estop_latch: ok-in i brak fault-in pozwalają na reset (F1 w ekranie = user-request-enable).
+# Sesja 024: fault napędu nie wchodzi do łańcucha E-STOP (wcześniej przez not amp_ok): napęd w
+# FAULT (np. STO po E-STOP) blokował reset, a bez włączenia lrt_cia402 nie kasuje faultu —
+# zakleszczenie. Fault napędu obsługuje joint.N.amp-fault-in (maszyna OFF, komunikat LinuxCNC).
 net linumert.io.estop-button lrt-net.0.din-00 => estop_chain.in0
 net lrt.connected            lrt-net.0.connected => estop_chain.in1
-net lrt.chain1               estop_chain.out => estop_chain2.in0
-net lrt.drive-fault          lrt-net.0.drive-fault => amp_ok.in
-net lrt.amp-ok               amp_ok.out => estop_chain2.in1
-net lrt.estop-ok-in          estop_chain2.out => estop_latch.ok-in
+net lrt.estop-ok-in          estop_chain.out => estop_latch.ok-in
+net lrt.drive-fault          lrt-net.0.drive-fault
 net lrt.estop-reset          iocontrol.0.user-request-enable => estop_latch.reset
 net linumert.io.estop-ok     estop_latch.ok-out => iocontrol.0.emc-enable-in
 # fault napędu po włączeniu kasuje lrt_cia402; nie blokuje resetu (fault-in = 0)

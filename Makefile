@@ -3,7 +3,7 @@ PYTHON ?= python3
 # W CI i w venv zostaw puste; w systemowym Pythonie Debiana: PIP_FLAGS=--break-system-packages
 PIP_FLAGS ?=
 
-.PHONY: install lint test test-c test-san test-linuxcnc
+.PHONY: install lint test test-c test-san test-linuxcnc plant-matrix
 
 install:
 	$(PYTHON) -m pip install $(PIP_FLAGS) -e ".[dev]"
@@ -11,8 +11,16 @@ install:
 lint:
 	$(PYTHON) -m ruff check .
 
+# Testy i pokrycie wymagań REQ (sesja 024, REQ-QA-01).
 test:
 	$(PYTHON) -m pytest
+	$(PYTHON) tools/check_requirements.py
+
+# Scenariusze Plant na 5 maszynach z config/machines (sesja 024, REQ-QA-02; job CI plant-matrix).
+plant-matrix:
+	$(MAKE) -C plant/core shared
+	$(PYTHON) tools/run_scenario.py --matrix --out build/raporty/matrix
+	$(PYTHON) tools/run_scenario.py --out build/raporty/scenariusze
 
 # Testy rdzenia dynamiki Plant w C (od sesji 011).
 test-c:
