@@ -109,6 +109,23 @@ Najnowsze wpisy na dole. Każda sesja dopisuje: zrobione · decyzje · do sprawd
 - Uporządkowano `docs/NASTEPNA_SESJA.md` (aktualny stan, zlecenia dla Codexa w kolejności, usunięte nieaktualne sekcje) i sekcję „Stan” w `docs/PROMPT_NOWEJ_SESJI.md`.
 - Do sprawdzenia: przegląd wsteczny `d53aa04` przez Codexa.
 
+## 015 — Bazowanie po rozruchu: krańcówka, indeks, twardy zderzak, absolut, napęd — 2026-10-18
+- Model-Author: Claude (Opus 5.5). Gałąź `wip/sesja-015` od `main` po scaleniu #6–#12.
+- Zrobione: (1) `drive.c/.h`: przetwornik przyrostowy/absolutny (`encoder`, `pos_offset`, `lrt_drive_set_absolute/get_absolute/set_battery`), awaria ENCODER_BATTERY → E-4211 (nowy alarm w katalogu), tryb 6 (metody 1, 2, 3, 5, 17, 18, 19, 21, 33, 34, 35, 37, -1, -2; bity 10/12/13; 607Ch; wejścia `lrt_drive_set_inputs`); krokowiec: całe okresy pole–wirnik w `pos_offset`; (2) `machine.c/.h`: start losowy z ziarna (`joint.J.initial_random/min/max`), styki na wejściach napędu (`drive.N.din_*`), czujnik jednej strony gantry (`switch.S.drive`), styk tylko na napędzie (`input = -1`), `counts_for` z przesunięciem enkodera; (3) Python: `build_machine` (start, enkodery, metoda drive → 6098h/6099h/607Ch w impulsach, gantry_square → kopie czujnika i wejście `<nazwa>_2`, `counts_per_unit`), `core_binding` (tryb, słowo stanu, 6064h/6077h, OD, absolut, bateria, `drive_position`, `index_count`, `lost_steps`), `plant_state.py` (plik stanu), `homing_master.py` (atrapa mastera w stylu LinuxCNC: switch, switch_index, hardstop, absolute, drive, gantry, kolejność osi, ruch trapezowy); (4) `hal/lrt_hardstop_home.comp` — skompilowany halcompile i sprawdzony w halrun LinuxCNC 2.9 (uspace) w WSL; (5) testy: C +8 napęd, +3 maszyna; pytest `tests/test_homing.py` (13: wszystkie scenariusze REQ-VM-07 + start, plik stanu) i `tests/test_hal_comps.py` (marker linuxcnc).
+- Weryfikacja (WSL Ubuntu 24.04, gcc, venv Python 3.12): `ruff` czysty; `pytest` 261 przeszło (`-m 'not linuxcnc'`); `make test-c` 29 osi + 59 napędu + 20 maszyny; `pytest -m linuxcnc tests/test_hal_comps.py` 1 OK z RIP 2.9.
+- Decyzje: jedna PROPOZYCJA w `docs/DECYZJE.md` (przetworniki, bateria, komponent zderzakowy, HOME_ABSOLUTE_ENCODER, numery metod trybu 6, start losowy, gantry).
+- Do sprawdzenia ręcznie / przez drugi model: numeracja metod 6098h wobec normy i prawdziwych napędów; parametry INI dla zderzaka z homemod (sesja 018, scenariusze `home_*` z LinuxCNC); dokładności w testach uwzględniają luz śrub z szablonów (10–20 µm) i drgania styków 1 ms — NIEZWERYFIKOWANE NA SPRZĘCIE.
+- Długi: `test_hal_comps.py` kopiuje moduł do `rtlib` RIP na czas testu (rtapi_app nie ładuje ścieżek); master ma indeks z licznika Plant (LRT-NET bez pola zatrzasku indeksu — do decyzji w sesji 016/017); schemat `homing.cia402_method` przyjmuje 1–35 (bez -1/-2 i 37); brak wejścia indeksu w machine.yaml.
+
+## 016 — Plant: serwer LRT-NET — 2026-10-18
+- Model-Author: Claude (Opus 5.5). Gałąź `wip/sesja-016` od `wip/sesja-015` (#13 nie scalony), PR #17. Scalenie własnych #13–#16 przez Claude zablokowane w tej sesji — czekają na przegląd Codexa.
+- Zrobione: `lrtnet.py` (kodek v1), `server.py` (`PlantServer.handle`/`serve`, lockstep/realtime, watchdog E-4003 jako awaria napędu `COMM_WATCHDOG` 8130h w rdzeniu C, statystyki lost/late/jitter, stan bezpieczny po wyjątku modelu, SHA-256 śladu), `trace.py` (CSV/JSONL w wątku), `serve.py` + `python -m linumert_plant serve`, `plant/server/test_master.py` (CiA 402, trapez), `config/plant/plant.example.yaml`.
+- Testy: `tests/test_lrtnet.py` (14), `tests/test_plant_server.py` (26): 10 000 ramek UDP lockstep bez strat (~2,3 s), watchdog lockstep i realtime, REQ-QA-03, REQ-QA-04, proces CLI.
+- Weryfikacja (WSL Ubuntu 24.04, venv 3.12): ruff czysty; pytest 300 OK; `make test-c` OK (29/59/20).
+- Decyzje: PROPOZYCJA sesji 016 w `docs/DECYZJE.md`.
+- Do sprawdzenia ręcznie: tryb `--realtime` między dwiema VM (sieć lrtnet) — jitter i watchdog przy prawdziwym zegarze.
+- Długi: wrzeciono przez LRT-NET (0 do sesji 021); zatrzask indeksu enkodera (sesja 017); `plant_restart_midrun` i `link_loss` jako scenariusze (024); panel web.
+
 ## 032 — Baza narzędzi z typami (część rdzenia) — 2026-10-18
 - Model-Author: Claude (Opus 5.5). Gałąź `wip/sesja-032` od `main` (niezależna od PR #13–#15 i od Codexa). Zakres: punkty 1 i 3 promptu; punkt 2 (ekran) czeka na sesję 005.
 - Zrobione: `tools/types.py` (10 typów, walidacja i reguły między polami), `tools/tbl.py` (tool.tbl bez strat, błędy linii, mm ↔ cale), `tools/db.py` (`ToolDB`: migracje, historia z zegarem, unikalne T/P, eksport/import tool.tbl atomowo, import zachowujący typ, CSV), alarmy P-5201…P-5206, `tests/test_tools_db.py` (41 + 1 z LinuxCNC).

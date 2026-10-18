@@ -3,9 +3,10 @@
  * linumeRT - testy maszyny Plant (machine.c): kinematyka, gantry, zderzaki, krancowki, I/O.
  * Model-Author: Claude · sesja 014
  * Wymagania: REQ-VM-02 (kinematyka), REQ-VM-03 (osie, gantry), REQ-VM-04 (zderzaki),
- * REQ-VM-05 (krancowki). Testy z maszynami z machine.yaml: tests/test_build_machine.py.
+ * REQ-VM-05 (krancowki), REQ-VM-07 (start i bazowanie, sesja 015). Testy z maszynami z machine.yaml: tests/test_build_machine.py.
  */
 #include <math.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "../machine.h"
@@ -652,6 +653,127 @@ static void test_step_rejects_bad_dt_and_is_deterministic(void)
     LRT_CHECK(lrt_machine_size() == sizeof(lrt_machine));
 }
 
+/* ---- bazowanie po rozruchu (REQ-VM-07, sesja 015) ------------------------------------ */
+
+static void test_random_start_is_seeded_and_in_range(void) /* REQ-VM-07 */
+{
+    lrt_machine_cfg c;
+    double first;
+    double other;
+
+    cfg_xyz(&c);
+    set(&c, "joint.0.initial_random", 1);
+    set(&c, "joint.0.initial_min", 0.1);
+    set(&c, "joint.0.initial_max", 0.5);
+    set(&c, "machine.seed", 7);
+    LRT_CHECK(init_ok(&c));
+    first = lrt_machine_joint_position(&M, 0);
+    LRT_CHECK(first >= 0.1 && first <= 0.5);
+    LRT_CHECK(init_ok(&c));
+    LRT_CHECK(lrt_machine_joint_position(&M, 0) == first); /* to samo ziarno = ten sam start */
+    set(&c, "machine.seed", 8);
+    LRT_CHECK(init_ok(&c));
+    other = lrt_machine_joint_position(&M, 0);
+    LRT_CHECK(other >= 0.1 && other <= 0.5 && other != first);
+    LRT_CHECK_ABS(lrt_machine_joint_position(&M, 1), 0.0, 1e-12); /* bez losowania: initial */
+
+    set(&c, "joint.0.initial_min", 0.6);
+    LRT_CHECK(lrt_machine_init(&M, &c) == LRT_MACHINE_ERR_JOINT);
+    cfg_xyz(&c);
+    set(&c, "drive.0.din_home", 3); /* styk nie istnieje */
+    LRT_CHECK(lrt_machine_init(&M, &c) == LRT_MACHINE_ERR_SWITCH);
+    cfg_xyz(&c);
+    set(&c, "switch.0.joint", 0);
+    set(&c, "switch.0.drive", 1); /* naped innej osi */
+    LRT_CHECK(lrt_machine_init(&M, &c) == LRT_MACHINE_ERR_SWITCH);
+}
+
+static void test_incremental_encoder_counts_for_follows_offset(void) /* REQ-VM-07 */
+{
+    lrt_machine_cfg c;
+    int i;
+
+    cfg_xyz(&c);
+    set(&c, "drive.0.encoder", LRT_ENC_INCREMENTAL);
+    set(&c, "joint.0.initial", 0.2);
+    LRT_CHECK(init_ok(&c));
+    enable_all();
+    /* Po wlaczeniu naped raportuje 0, choc os stoi na 0,2 m. */
+    LRT_CHECK(abs(lrt_drive_position_actual(lrt_machine_drive(&M, 0))) <= 2);
+    LRT_CHECK(abs(lrt_machine_counts_for(&M, 0, 0.2)) <= 2); /* uwzglednia przesuniecie */
+    for (i = 1; i <= 500; i++) {
+        lrt_machine_set_joint_target(&M, 0, 0.2 + 0.01 * i / 500.0);
+        step_n(1);
+    }
+    step_n(300);
+    LRT_CHECK_ABS(lrt_machine_joint_position(&M, 0), 0.21, 2e-6);
+}
+
+static void test_gantry_square_with_drive_homing_on_two_sensors(void) /* REQ-VM-07 */
+{
+    lrt_machine_cfg c;
+    int side[2] = {1, 3};
+    int k;
+    int i;
+    int32_t reported_target = 2000;
+
+    cfg_xyz(&c);
+    set(&c, "drive.3.type", 0);
+    set(&c, "joint.1.drive1", 3);
+    set(&c, "joint.1.max_skew", 0.002);
+    for (k = 0; k < 2; k++) {
+        /* Czujnik bazowy kazdej strony, aktywny ponizej 10 mm (strona ujemna). */
+        setf(&c, "switch.%d.joint", k, 1);
+        setf(&c, "switch.%d.role", k, LRT_SWITCH_HOME);
+        setf(&c, "switch.%d.side", k, -1);
+        setf(&c, "switch.%d.position", k, 0.010);
+        setf(&c, "switch.%d.hysteresis", k, 0.0001);
+        setf(&c, "switch.%d.nc", k, 0);
+        setf(&c, "switch.%d.drive", k, side[k]);
+        setf(&c, "drive.%d.din_home", side[k], k);
+        setf(&c, "drive.%d.homing_method", side[k], 21);
+    }
+    set(&c, "switch.0.input", 4);  /* strona 1: tez na wejsciu mastera */
+    set(&c, "switch.1.input", -1); /* strona 2: tylko wejscie napedu */
+    LRT_CHECK(init_ok(&c));
+    lrt_machine_set_drive_position(&M, 1, 0.050);
+    lrt_machine_set_drive_position(&M, 3, 0.0512); /* belka skrzywiona o 1,2 mm */
+    LRT_CHECK_ABS(lrt_machine_joint_skew(&M, 1), -0.0012, 1e-9);
+    for (k = 0; k < 2; k++) {
+        LRT_CHECK(lrt_drive_od_write(lrt_machine_drive(&M, side[k]), 0x6060u, 0,
+                                     LRT_MODE_HOMING) == LRT_DRIVE_OK);
+    }
+    enable_all();
+    for (k = 0; k < 2; k++) {
+        lrt_machine_set_controlword(&M, side[k],
+                                    LRT_CW_CMD_ENABLE_OPERATION | LRT_CW_HOMING_START);
+    }
+    for (i = 0; i < 30000; i++) {
+        step_n(1);
+        if (lrt_drive_homing_state(lrt_machine_drive(&M, 1)) == LRT_HM_DONE &&
+            lrt_drive_homing_state(lrt_machine_drive(&M, 3)) == LRT_HM_DONE) {
+            break;
+        }
+    }
+    for (k = 0; k < 2; k++) {
+        lrt_drive *d = lrt_machine_drive(&M, side[k]);
+        LRT_CHECK(lrt_drive_homing_state(d) == LRT_HM_DONE);
+        LRT_CHECK((lrt_drive_statusword(d) & LRT_SW_HOMING_ATTAINED) != 0u);
+        /* Master: CSP i jazda obu stron do tej samej pozycji raportowanej. */
+        LRT_CHECK(lrt_drive_od_write(d, 0x6060u, 0, LRT_MODE_CSP) == LRT_DRIVE_OK);
+        lrt_machine_set_target(&M, side[k], lrt_drive_position_actual(d));
+    }
+    step_n(200);
+    for (k = 0; k < 2; k++) {
+        lrt_machine_set_target(&M, side[k], reported_target);
+    }
+    step_n(1000);
+    /* Obie strony w tej samej odleglosci od swoich czujnikow: belka wyrownana. */
+    LRT_CHECK(fabs(lrt_machine_joint_skew(&M, 1)) < 2e-5);
+    LRT_CHECK(lrt_drive_get_state(lrt_machine_drive(&M, 1)) == LRT_DRIVE_OPERATION_ENABLED);
+    LRT_CHECK(lrt_drive_get_state(lrt_machine_drive(&M, 3)) == LRT_DRIVE_OPERATION_ENABLED);
+}
+
 int main(void)
 {
     LRT_RUN(test_cfg_rejects_bad_keys_and_values);
@@ -671,5 +793,8 @@ int main(void)
     LRT_RUN(test_estop_sto_and_quick_stop);
     LRT_RUN(test_probe_box_and_plate);
     LRT_RUN(test_step_rejects_bad_dt_and_is_deterministic);
+    LRT_RUN(test_random_start_is_seeded_and_in_range);
+    LRT_RUN(test_incremental_encoder_counts_for_follows_offset);
+    LRT_RUN(test_gantry_square_with_drive_homing_on_two_sensors);
     return lrt_summary();
 }
