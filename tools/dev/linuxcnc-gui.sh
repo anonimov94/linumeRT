@@ -10,7 +10,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/../.."
 RT=$(command -v podman || { echo "brak podman (sudo pacman -S --needed podman)" >&2; exit 2; })
-IMG=linumert-cnc:bookworm-3
+IMG=linumert-cnc:bookworm-4
 if ! "$RT" image inspect "$IMG" >/dev/null 2>&1; then
   "$RT" build -t "$IMG" -f - . <<'DOCKER'
 FROM debian:bookworm
@@ -28,7 +28,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates
 # Symulator bez RT: rtapi_app bez setuid, wszystkie procesy jako uid gospodarza (keep-id);
 # setuid root w przestrzeni użytkownika rozdziela właścicieli pamięci HAL (shmget EACCES).
 RUN chmod u-s /usr/bin/rtapi_app
-RUN apt-get update && apt-get install -y --no-install-recommends python3-pytest \
+RUN apt-get update && apt-get install -y --no-install-recommends python3-pytest xvfb xauth \
  && rm -rf /var/lib/apt/lists/*
 DOCKER
 fi

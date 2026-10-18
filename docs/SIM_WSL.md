@@ -9,7 +9,7 @@ Z −120..0 mm, `sim_spindle`, bazowanie na symulowanych krańcówkach, kontrakt
 ```
 tools/dev/linuxcnc-gui.sh linuxcnc /work/config/sim/linumert_xyz/linumert_xyz.ini
 ```
-Pierwsze uruchomienie buduje obraz `linumert-cnc:bookworm-3` (Debian 12, pakiety linuxcnc.org
+Pierwsze uruchomienie buduje obraz `linumert-cnc:bookworm-4` (Debian 12, pakiety linuxcnc.org
 2.9-uspace). Okno trafia na pulpit gospodarza przez X11/Xwayland. Bez argumentów skrypt
 uruchamia przykładowy QtDragon z LinuxCNC.
 
