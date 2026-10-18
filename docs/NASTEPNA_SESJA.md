@@ -27,11 +27,12 @@ Sesja 008: PR #35 (autokontrola, bez niezależnego przeglądu). Otwarte: #34 (Co
 
 ## 3. Następna praca
 
-Brak promptu `START-*`: następna sesja startuje według [`PROMPT_NOWEJ_SESJI.md`](PROMPT_NOWEJ_SESJI.md).
+Podział na 4 sesje (D33): [`prompts/START-PODZIAL.md`](../prompts/START-PODZIAL.md). Równolegle 022
+([`START-022`](../prompts/START-022.md)), 024 ([`START-024`](../prompts/START-024.md)) i 025
+([`START-025`](../prompts/START-025.md)); po scaleniu 022 i 024: 023 ([`START-023`](../prompts/START-023.md)).
 
 0. Właściciel: checklista bramki G0, [`docs/raporty/G0.md`](raporty/G0.md).
-1. Sesje według [`prompts/README.md`](../prompts/README.md): **022** (panel Plant
-   i pulpit MPG), 023 (edytor wirtualnej obrabiarki), 024 (scenariusze, raport, `tools/check_requirements.py`).
+1. Po podziale: sesje według [`prompts/README.md`](../prompts/README.md) (026 i dalej).
 2. **HMI według kolejności pracy (D32)**: docelowy kierunek ekranu; etapy HMI-01…06 prowadzi Codex (§6).
    Sesje ekranu z planu (M2, 027–038) muszą być z nim zgodne.
 3. Propozycja do decyzji: ramka LRT-NET v2 (zatrzask indeksu enkodera, 6072h), opis w DECYZJE (sesja 017).
