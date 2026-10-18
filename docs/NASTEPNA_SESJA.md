@@ -4,7 +4,7 @@ Prompt startowy i stan bieżący: `docs/PROMPT_NOWEJ_SESJI.md` (aktualizować na
 
 Model-Author: Codex · 2026-10-17
 
-Tura: Claude · od 2026-10-18T10:55Z · stan: oddana (sesja 016 → PR #17; #13–#17 czekają na przegląd Codexa)
+Tura: Claude · od 2026-10-18T10:55Z · stan: oddana (sesja 016 → PR #17); #13–#17 scalił właściciel 2026-10-18 11:08–11:15Z BEZ przeglądu Codexa; otwarte #3 i #18
 
 ## Katalog i Git
 
@@ -39,14 +39,14 @@ Lokalne raporty `state/test-runs/` są ignorowane przez Git.
 
 ## Stan main — 2026-10-18 (Model-Author: Claude)
 
-W `main` są sesje 001, 002, 006, 007, 009, 010, 011, 012, 013, 014 (PR #1, #2, #4–#12).
+W `main` są sesje 001, 002, 006, 007, 009–016, 032, 039, 044 (PR #1, #2, #4–#17). PR #13–#17 scalił właściciel (GitHub, 2026-10-18 11:08–11:15Z) bez niezależnego przeglądu — przegląd wsteczny nadal należy do Codexa.
 #6–#12 scalił Claude w `d53aa04` jako **autokontrolę, bez niezależnego przeglądu** (Codex był
 niedostępny; D26 wariant b). Kontrole na stanie scalonym (WSL Ubuntu 24.04): ruff czysty,
 pytest 248 OK bez pominięć (test tablicy awarii z katalogiem alarmów już nie jest pomijany),
 `make test-c` OK (osie, napęd, maszyna). Konflikty były tylko w plikach dziennikowych.
 Gałęzie `wip/sesja-007…014` są w main — można je usunąć po przeglądzie wstecznym.
 
-Otwarty jest tylko **#3 (sesja 003, Codex)**. Sesje 004, 005 i 008 nie są rozpoczęte.
+Otwarte: **#3 (sesja 003, Codex)** i **#18** (Claude: walidacja pól ramki LRT-NET, brak sesji w DONE). Sesje 004, 005 i 008 nie są rozpoczęte.
 
 ## Zlecenia dla Codexa (kolejność)
 
@@ -71,7 +71,6 @@ Otwarty jest tylko **#3 (sesja 003, Codex)**. Sesje 004, 005 i 008 nie są rozpo
 5. **Sesja 018** (z LinuxCNC): porównaj znaki A/B/C presetów trunnion z `xyzac-trt-kins` /
    `xyzbc-trt-kins` (`PlantMachine.tool_tip(workpiece=True)` vs układ detalu w LinuxCNC).
 
-Następna sesja Claude: 016 (`prompts/START-016.md`, serwer LRT-NET).
 
 ## Zlecenia po sesji 015 (Model-Author: Claude → Codex)
 
@@ -88,7 +87,7 @@ Następna sesja Claude: 016 (`prompts/START-016.md`, serwer LRT-NET).
    `hal/README.md` i wpisu sesji 015 w `docs/DECYZJE.md` (HOME_ABSOLUTE_ENCODER 1/2).
 
 ## Dla Codex: (2026-10-18, Claude po sesji 016)
-0. **Przegląd i scalenie PR Claude** w kolejności #13 → #17 (#17 jest na gałęzi #13), potem #14, #15,
+0. **Przegląd wsteczny PR Claude** (już scalone przez właściciela; dawniej: przegląd i scalenie) w kolejności #13 → #17 (#17 jest na gałęzi #13), potem #14, #15,
    #16 (niezależne od siebie). Każdy: CI zielone, autor Claude; komentarz z modelem, SHA i wynikiem,
    potem merge commit albo lista usterek. Konflikty tylko w DZIENNIK/DECYZJE/DONE/PROMPT_NOWEJ_SESJI —
    zostaw wszystkie wpisy, DONE posortuj.

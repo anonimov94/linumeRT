@@ -38,7 +38,7 @@ make install      # pakiet linumert + zależności dev (pytest, ruff)
 make lint         # ruff
 make test         # pytest (bez LinuxCNC)
 ```
-`make test-c` i `make test-linuxcnc` są pustymi krokami do sesji 011 i 003. W systemowym Pythonie Debiana
+`make test-c` buduje i testuje rdzeń Plant (od sesji 011); `make test-linuxcnc` pozostaje pustym krokiem do scalenia sesji 003. W systemowym Pythonie Debiana
 dodaj `PIP_FLAGS=--break-system-packages`.
 
 ## Licencja
