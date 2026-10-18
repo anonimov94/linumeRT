@@ -35,7 +35,8 @@ static const lrt_field drive_fields[] = {
     DF(quick_stop_decel, 'u'),      DF(quick_stop_option, 's'),   DF(fault_reaction_option, 's'),
     DF(standstill_speed, 'd'),      DF(boot_time_s, 'd'),         DF(full_steps_per_rev, 'i'),
     DF(stepper_damping_ratio, 'd'), DF(homing_method, 'c'),       DF(homing_speed_switch, 'u'),
-    DF(homing_speed_zero, 'u'),     DF(homing_accel, 'u'),
+    DF(homing_speed_zero, 'u'),     DF(homing_accel, 'u'),        DF(home_offset, 'i'),
+    DF(hardstop_time_s, 'd'),       DF(encoder, 'i'),
 };
 
 static const lrt_field mech_fields[] = {

@@ -1116,7 +1116,10 @@ static void test_od_mode_and_options(void)
     lrt_drive_params_default(&p, LRT_DRIVE_SERVO_CSP);
     LRT_CHECK(lrt_drive_init(&d, &p) == LRT_DRIVE_OK);
     LRT_CHECK(lrt_drive_od_write(&d, 0x6060u, 0, 8) == LRT_DRIVE_OK);
-    LRT_CHECK(lrt_drive_od_write(&d, 0x6060u, 0, 6) == LRT_DRIVE_ERR_UNSUPPORTED); /* sesja 015 */
+    LRT_CHECK(lrt_drive_od_write(&d, 0x6060u, 0, 6) == LRT_DRIVE_OK); /* bazowanie, sesja 015 */
+    LRT_CHECK(lrt_drive_od_read(&d, 0x6061u, 0, &v) == LRT_DRIVE_OK && v == 6);
+    LRT_CHECK(lrt_drive_od_write(&d, 0x6060u, 0, 8) == LRT_DRIVE_OK);
+    LRT_CHECK(lrt_drive_od_write(&d, 0x6060u, 0, 7) == LRT_DRIVE_ERR_UNSUPPORTED);
     LRT_CHECK(lrt_drive_od_write(&d, 0x6060u, 0, 300) == LRT_DRIVE_ERR_RANGE);
     LRT_CHECK(lrt_drive_od_read(&d, 0x6061u, 0, &v) == LRT_DRIVE_OK && v == 8);
     LRT_CHECK(lrt_drive_od_read(&d, 0x6060u, 0, &v) == LRT_DRIVE_OK && v == 8);
@@ -1768,6 +1771,397 @@ static void test_drive_live_heavier_load_lowers_max_acceleration(void)
     LRT_CHECK_ABS(e[2].new_value, j2, 0.0);
 }
 
+/* ------------------------------------------------------------------------- */
+/* Przetwornik i bazowanie w napedzie (sesja 015)                             */
+/* ------------------------------------------------------------------------- */
+
+/* Otoczenie walu: krancowki, czujnik bazowy (aktywny powyzej home_at) i impuls indeksu raz
+ * na obrot (zbocze przy przejsciu przez wielokrotnosc 2*pi). Katy walu [rad]. */
+typedef struct {
+    int use_neg, use_pos, use_home;
+    double neg_at, pos_at, home_at;
+    int home_below; /* 1: czujnik aktywny ponizej home_at (szukanie w kierunku ujemnym) */
+    long rev;
+} hm_env;
+
+static unsigned hm_inputs(hm_env *e, const rig *r)
+{
+    double th = r->ax.th_m;
+    long rev = (long)floor(th / (2.0 * PI));
+    unsigned in = 0u;
+
+    if (e->use_neg && th <= e->neg_at) {
+        in |= LRT_DIN_NEG_LIMIT;
+    }
+    if (e->use_pos && th >= e->pos_at) {
+        in |= LRT_DIN_POS_LIMIT;
+    }
+    if (e->use_home && (e->home_below ? th <= e->home_at : th >= e->home_at)) {
+        in |= LRT_DIN_HOME;
+    }
+    if (rev != e->rev) {
+        in |= LRT_DIN_INDEX;
+        e->rev = rev;
+    }
+    return in;
+}
+
+static void hm_step(rig *r, hm_env *e)
+{
+    lrt_drive_set_inputs(&r->dr, hm_inputs(e, r));
+    rig_step(r);
+}
+
+/* Wlaczenie w trybie 6 od biezacej pozycji raportowanej (enkoder dowolnego rodzaju). */
+static void hm_enable(rig *r, hm_env *e)
+{
+    e->rev = (long)floor(r->ax.th_m / (2.0 * PI));
+    LRT_CHECK(lrt_drive_od_write(&r->dr, 0x6060u, 0, LRT_MODE_HOMING) == LRT_DRIVE_OK);
+    hm_step(r, e);
+    lrt_drive_set_target_position(&r->dr, lrt_drive_position_actual(&r->dr));
+    lrt_drive_set_controlword(&r->dr, LRT_CW_CMD_SHUTDOWN);
+    hm_step(r, e);
+    lrt_drive_set_controlword(&r->dr, LRT_CW_CMD_SWITCH_ON);
+    hm_step(r, e);
+    lrt_drive_set_controlword(&r->dr, LRT_CW_CMD_ENABLE_OPERATION);
+    hm_step(r, e);
+}
+
+/* Start bazowania (bit 4) i praca do konca; zwraca faze koncowa. */
+static int hm_run(rig *r, hm_env *e, double tmax)
+{
+    long n = (long)(tmax / r->dt);
+    long i;
+    int ph = LRT_HM_IDLE;
+
+    lrt_drive_set_controlword(&r->dr, LRT_CW_CMD_ENABLE_OPERATION | LRT_CW_HOMING_START);
+    for (i = 0; i < n; i++) {
+        hm_step(r, e);
+        ph = lrt_drive_homing_state(&r->dr);
+        if (ph == LRT_HM_DONE || ph == LRT_HM_ERROR) {
+            break;
+        }
+    }
+    return ph;
+}
+
+/* Pozycja raportowana, ktora odpowiadalaby katowi walu th (po bazowaniu). */
+static double hm_reported_at(const rig *r, double th)
+{
+    return th * r->dr.counts_per_rad - (double)lrt_drive_position_offset(&r->dr);
+}
+
+static lrt_drive_params hm_servo(double dt)
+{
+    lrt_drive_params p = servo_drive(dt);
+
+    p.following_window = 20000u; /* ok. 1 rad: kontrola nadazania wlaczona */
+    p.following_window_ms = 10u;
+    return p;
+}
+
+static void test_encoder_incremental_starts_at_zero_absolute_keeps_offset(void)
+{
+    /* REQ-VM-07: po wlaczeniu polozenie nieznane (przyrostowy), absolutny pamieta pozycje */
+    rig r;
+    lrt_axis_params ap = servo_axis();
+    lrt_drive_params dp = hm_servo(1e-4);
+    int32_t off = 0;
+    int valid = 0;
+
+    dp.encoder = LRT_ENC_INCREMENTAL;
+    rig_init(&r, &ap, &dp, 1e-4);
+    lrt_axis_reset(&r.ax, 5.3);
+    rig_feedback(&r);
+    rig_step(&r);
+    LRT_CHECK(lrt_drive_position_actual(&r.dr) == 0);
+    LRT_CHECK_ABS(lrt_drive_position_offset(&r.dr), 5.3 * r.dr.counts_per_rad, 1.0);
+    LRT_CHECK(lrt_drive_set_absolute(&r.dr, 0, 1) == LRT_DRIVE_ERR_UNSUPPORTED);
+
+    dp.encoder = LRT_ENC_ABSOLUTE;
+    rig_init(&r, &ap, &dp, 1e-4);
+    lrt_axis_reset(&r.ax, 5.3);
+    rig_feedback(&r);
+    LRT_CHECK(lrt_drive_set_absolute(&r.dr, 12345, 1) == LRT_DRIVE_OK);
+    rig_step(&r);
+    LRT_CHECK_ABS(lrt_drive_position_actual(&r.dr), 5.3 * r.dr.counts_per_rad - 12345.0, 1.0);
+    LRT_CHECK(lrt_drive_get_absolute(&r.dr, &off, &valid) == LRT_DRIVE_OK);
+    LRT_CHECK(off == 12345 && valid == 1);
+    LRT_CHECK(lrt_drive_set_absolute(&r.dr, 0, 1) == LRT_DRIVE_ERR_UNSUPPORTED); /* po pomiarze */
+    LRT_CHECK(lrt_drive_set_battery(&r.dr, 0) == LRT_DRIVE_OK);
+    LRT_CHECK(lrt_drive_get_absolute(&r.dr, &off, &valid) == LRT_DRIVE_OK && valid == 0);
+    /* Bateria nie zmienia pozycji w czasie pracy (enkoder zasilany z napedu). */
+    LRT_CHECK_ABS(lrt_drive_position_actual(&r.dr), 5.3 * r.dr.counts_per_rad - 12345.0, 1.0);
+
+    dp.type = LRT_DRIVE_STEPPER_OPEN; /* krokowiec bez sprzezenia nie ma enkodera */
+    LRT_CHECK(lrt_drive_params_check(&dp) == LRT_DRIVE_ERR_RESOLUTION);
+    dp = hm_servo(1e-4);
+    dp.encoder = 3;
+    LRT_CHECK(lrt_drive_params_check(&dp) == LRT_DRIVE_ERR_RESOLUTION);
+    dp.encoder = LRT_ENC_IDEAL;
+    dp.hardstop_time_s = -1.0;
+    LRT_CHECK(lrt_drive_params_check(&dp) == LRT_DRIVE_ERR_LIMITS);
+}
+
+static void test_encoder_battery_loss_keeps_single_turn_and_needs_homing(void)
+{
+    /* REQ-VM-07 (d): awaria baterii = utrata licznika obrotow, E-4211, nowa baza */
+    rig r;
+    hm_env e;
+    lrt_axis_params ap = servo_axis();
+    lrt_drive_params dp = hm_servo(1e-4);
+    double th0 = 3.7 * 2.0 * PI;
+    double cpr = 131072.0;
+    int32_t off = 0;
+    int valid = 1;
+    int32_t pos;
+
+    memset(&e, 0, sizeof(e));
+    dp.encoder = LRT_ENC_ABSOLUTE;
+    dp.homing_method = 35;
+    rig_init(&r, &ap, &dp, 1e-4);
+    lrt_axis_reset(&r.ax, th0);
+    rig_feedback(&r);
+    LRT_CHECK(lrt_drive_set_absolute(&r.dr, 777, 0) == LRT_DRIVE_OK);
+    hm_enable(&r, &e);
+    pos = lrt_drive_position_actual(&r.dr);
+    LRT_CHECK(rig_state(&r) == LRT_DRIVE_FAULT);
+    LRT_CHECK(pos >= 0 && pos < (int32_t)cpr);          /* zostal jeden obrot */
+    LRT_CHECK_ABS(pos, 0.7 * cpr, 2.0);
+    LRT_CHECK(rig_state(&r) == LRT_DRIVE_FAULT);        /* awaria przy pierwszym wlaczeniu */
+    LRT_CHECK(lrt_drive_error_code(&r.dr) == 0xFF03u);
+    LRT_CHECK(strcmp(lrt_drive_fault_alarm(LRT_DRIVE_FAULT_ENCODER_BATTERY), "E-4211") == 0);
+    LRT_CHECK(lrt_drive_get_absolute(&r.dr, &off, &valid) == LRT_DRIVE_OK && valid == 0);
+
+    /* Reset awarii jest mozliwy (jednorazowa), ale pozycja dalej niewazna do bazowania. */
+    lrt_drive_set_controlword(&r.dr, LRT_CW_FAULT_RESET);
+    hm_step(&r, &e);
+    LRT_CHECK(rig_state(&r) == LRT_DRIVE_SWITCH_ON_DISABLED);
+    hm_enable(&r, &e);
+    LRT_CHECK(rig_state(&r) == LRT_DRIVE_OPERATION_ENABLED);
+    LRT_CHECK(lrt_drive_od_write(&r.dr, 0x607Cu, 0, 5000) == LRT_DRIVE_OK);
+    LRT_CHECK(hm_run(&r, &e, 0.01) == LRT_HM_DONE);
+    LRT_CHECK((lrt_drive_statusword(&r.dr) & LRT_SW_HOMING_ATTAINED) != 0u);
+    LRT_CHECK_ABS(lrt_drive_position_actual(&r.dr), 5000.0, 3.0);
+    LRT_CHECK(lrt_drive_get_absolute(&r.dr, &off, &valid) == LRT_DRIVE_OK && valid == 1);
+    LRT_CHECK_ABS((double)off, th0 * r.dr.counts_per_rad - 5000.0, 3.0);
+}
+
+/* Bazowanie metoda `method` od kata th0; zwraca faze koncowa. */
+static int hm_home_from(rig *r, hm_env *e, lrt_drive_params dp, int method, double th0)
+{
+    lrt_axis_params ap = servo_axis();
+
+    dp.homing_method = (int8_t)method;
+    rig_init(r, &ap, &dp, 1e-4);
+    lrt_axis_reset(&r->ax, th0);
+    rig_feedback(r);
+    hm_enable(r, e);
+    LRT_CHECK(rig_state(r) == LRT_DRIVE_OPERATION_ENABLED);
+    return hm_run(r, e, 10.0);
+}
+
+static void test_homing_limit_switch_method_17_is_repeatable(void)
+{
+    /* REQ-VM-07 (a): krancowka ujemna, zjazd do zbocza; baza = zbocze niezaleznie od startu */
+    static const double starts[3] = {3.0, 9.5, -1.0};
+    rig r;
+    hm_env e;
+    lrt_drive_params dp = hm_servo(1e-4);
+    int i;
+
+    dp.home_offset = 1000;
+    for (i = 0; i < 3; i++) {
+        memset(&e, 0, sizeof(e));
+        e.use_neg = 1;
+        e.neg_at = -2.0;
+        LRT_CHECK(hm_home_from(&r, &e, dp, 17, starts[i]) == LRT_HM_DONE);
+        LRT_CHECK((lrt_drive_statusword(&r.dr) &
+                   (LRT_SW_HOMING_ATTAINED | LRT_SW_TARGET_REACHED | LRT_SW_HOMING_ERROR)) ==
+                  (LRT_SW_HOMING_ATTAINED | LRT_SW_TARGET_REACHED));
+        /* Zbocze krancowki (wal -2 rad) ma pozycje 607Ch = 1000; tolerancja: droga 1 kroku
+         * z predkoscia 6099h:2 (ok. 3 impulsy) i kwantyzacja. */
+        LRT_CHECK_ABS(hm_reported_at(&r, -2.0), 1000.0, 8.0);
+        LRT_CHECK(r.ax.th_m > -2.0); /* zatrzymanie poza krancowka */
+        LRT_CHECK(rig_state(&r) == LRT_DRIVE_OPERATION_ENABLED);
+    }
+}
+
+static void test_homing_limit_and_index_method_1(void)
+{
+    /* REQ-VM-07 (b): krancowka + impuls indeksu: baza na pierwszym indeksie za zboczem */
+    rig r;
+    hm_env e;
+    lrt_drive_params dp = hm_servo(1e-4);
+
+    memset(&e, 0, sizeof(e));
+    e.use_neg = 1;
+    e.neg_at = -2.0;
+    LRT_CHECK(hm_home_from(&r, &e, dp, 1, 4.0) == LRT_HM_DONE);
+    /* Pierwszy indeks w kierunku dodatnim od -2 rad to kat 0. */
+    LRT_CHECK_ABS(hm_reported_at(&r, 0.0), 0.0, 8.0);
+    LRT_CHECK(r.ax.th_m > 0.0);
+}
+
+static void test_homing_home_switch_and_index_only_methods(void)
+{
+    /* REQ-VM-07 (a, b): czujnik bazowy (21, 5) i sam indeks (34) */
+    rig r;
+    hm_env e;
+    lrt_drive_params dp = hm_servo(1e-4);
+
+    memset(&e, 0, sizeof(e));
+    e.use_home = 1;
+    e.home_at = 1.0;
+    e.home_below = 1; /* czujnik po stronie ujemnej: aktywny ponizej 1 rad */
+    LRT_CHECK(hm_home_from(&r, &e, dp, 21, 4.0) == LRT_HM_DONE); /* szukanie w dol od 4 rad */
+    LRT_CHECK_ABS(hm_reported_at(&r, 1.0), 0.0, 8.0);
+
+    memset(&e, 0, sizeof(e));
+    e.use_home = 1;
+    e.home_at = 1.0;
+    e.home_below = 1;
+    LRT_CHECK(hm_home_from(&r, &e, dp, 5, 4.0) == LRT_HM_DONE); /* zbocze 1 rad, indeks 2*pi */
+    LRT_CHECK_ABS(hm_reported_at(&r, 2.0 * PI), 0.0, 8.0);
+
+    memset(&e, 0, sizeof(e));
+    e.use_home = 1;
+    e.home_at = 1.0; /* czujnik po stronie dodatniej, szukanie w gore od -3 rad */
+    LRT_CHECK(hm_home_from(&r, &e, dp, 19, -3.0) == LRT_HM_DONE);
+    LRT_CHECK_ABS(hm_reported_at(&r, 1.0), 0.0, 8.0);
+    LRT_CHECK(r.ax.th_m < 1.0);
+
+    memset(&e, 0, sizeof(e));
+    LRT_CHECK(hm_home_from(&r, &e, dp, 34, 0.5) == LRT_HM_DONE); /* indeks w gore: 2*pi */
+    LRT_CHECK_ABS(hm_reported_at(&r, 2.0 * PI), 0.0, 8.0);
+}
+
+static void test_homing_errors_unsupported_limit_first_and_abort(void)
+{
+    /* REQ-VM-07 (e): blad bazowania jako bit 13, bez awarii napedu */
+    rig r;
+    hm_env e;
+    lrt_drive_params dp = hm_servo(1e-4);
+    long i;
+
+    memset(&e, 0, sizeof(e));
+    LRT_CHECK(hm_home_from(&r, &e, dp, 7, 0.0) == LRT_HM_ERROR); /* nieobslugiwana */
+    LRT_CHECK((lrt_drive_statusword(&r.dr) & LRT_SW_HOMING_ERROR) != 0u);
+    LRT_CHECK(rig_state(&r) == LRT_DRIVE_OPERATION_ENABLED);
+
+    memset(&e, 0, sizeof(e));
+    e.use_home = 1;
+    e.home_at = 20.0; /* czujnik za krancowka */
+    e.use_pos = 1;
+    e.pos_at = 6.0;
+    LRT_CHECK(hm_home_from(&r, &e, dp, 19, 0.0) == LRT_HM_ERROR);
+    for (i = 0; i < 2000; i++) {
+        hm_step(&r, &e);
+    }
+    LRT_CHECK(fabs(r.ax.w_m) < 0.05); /* blad = zatrzymanie */
+
+    /* Przerwanie: zdjecie bitu 4 w czasie szukania. */
+    memset(&e, 0, sizeof(e));
+    e.use_neg = 1;
+    e.neg_at = -50.0;
+    dp.homing_method = 17;
+    {
+        lrt_axis_params ap = servo_axis();
+        rig_init(&r, &ap, &dp, 1e-4);
+    }
+    hm_enable(&r, &e);
+    lrt_drive_set_controlword(&r.dr, LRT_CW_CMD_ENABLE_OPERATION | LRT_CW_HOMING_START);
+    for (i = 0; i < 1000; i++) {
+        hm_step(&r, &e);
+    }
+    LRT_CHECK(lrt_drive_homing_state(&r.dr) == LRT_HM_SEARCH);
+    lrt_drive_set_controlword(&r.dr, LRT_CW_CMD_ENABLE_OPERATION);
+    hm_step(&r, &e);
+    LRT_CHECK(lrt_drive_homing_state(&r.dr) == LRT_HM_ERROR);
+    LRT_CHECK((lrt_drive_statusword(&r.dr) & LRT_SW_HOMING_ATTAINED) == 0u);
+}
+
+static void test_homing_hardstop_in_drive_with_reduced_torque(void)
+{
+    /* REQ-VM-07 (c, e): zderzak bez czujnika, limit 6072h, baza w miejscu styku */
+    rig r;
+    hm_env e;
+    lrt_axis_params ap = servo_axis();
+    lrt_drive_params dp = hm_servo(1e-4);
+    long i;
+
+    memset(&e, 0, sizeof(e));
+    ap.use_stops = 1;
+    ap.stop_min = -2.0;
+    ap.stop_max = 100.0;
+    ap.stop_stiffness = 2000.0; /* N*m/rad */
+    ap.stop_damping_ratio = 0.5;
+    dp.homing_method = -1;
+    dp.torque_limit_permille = 300u;   /* zredukowany moment: 0,38 N*m */
+    dp.hardstop_time_s = 0.05;
+    rig_init(&r, &ap, &dp, 1e-4);
+    lrt_axis_reset(&r.ax, 1.0);
+    rig_feedback(&r);
+    hm_enable(&r, &e);
+    LRT_CHECK(hm_run(&r, &e, 10.0) == LRT_HM_DONE);
+    LRT_CHECK(rig_state(&r) == LRT_DRIVE_OPERATION_ENABLED); /* bez awarii nadazania */
+    /* Wgniecenie zderzaka przy 0,38 N*m i 2000 N*m/rad: ok. 0,2 mrad. */
+    LRT_CHECK_ABS(hm_reported_at(&r, -2.0), 0.0, 0.002 * r.dr.counts_per_rad);
+    for (i = 0; i < 2000; i++) {
+        hm_step(&r, &e);
+    }
+    LRT_CHECK(fabs(r.tau) < 0.2); /* po bazie bez docisku do zderzaka */
+
+    /* Krokowiec bez sprzezenia nie wykryje zderzaka: blad bazowania. */
+    ap = stepper_axis();
+    dp = stepper_drive();
+    dp.homing_method = -1;
+    rig_init(&r, &ap, &dp, 1e-4);
+    memset(&e, 0, sizeof(e));
+    hm_enable(&r, &e);
+    LRT_CHECK(hm_run(&r, &e, 0.01) == LRT_HM_ERROR);
+}
+
+static void test_homing_stepper_open_on_limit_switch_and_back_to_csp(void)
+{
+    /* REQ-VM-07 (a, e): krokowiec bazuje na krancowce; potem CSP od pozycji raportowanej */
+    rig r;
+    hm_env e;
+    lrt_axis_params ap = stepper_axis();
+    lrt_drive_params dp = stepper_drive();
+    int32_t p0;
+    long i;
+
+    memset(&e, 0, sizeof(e));
+    e.use_neg = 1;
+    e.neg_at = -1.0;
+    dp.homing_method = 17;
+    rig_init(&r, &ap, &dp, 1e-4);
+    lrt_axis_reset(&r.ax, 2.0);
+    rig_feedback(&r);
+    hm_enable(&r, &e);
+    LRT_CHECK(hm_run(&r, &e, 10.0) == LRT_HM_DONE);
+    LRT_CHECK(lrt_drive_lost_steps(&r.dr) == 0);
+    /* Pozycja raportowana przy wale -1 rad = 0 (krok 1,96 mrad przy 3200 imp/obr). */
+    LRT_CHECK_ABS(hm_reported_at(&r, -1.0), 0.0, 4.0);
+    LRT_CHECK_ABS(r.ax.th_m * r.dr.counts_per_rad - (double)lrt_drive_position_offset(&r.dr),
+                  (double)lrt_drive_position_actual(&r.dr), 4.0);
+
+    /* Master przechodzi do CSP i jedzie o +1600 impulsow (pol obrotu). */
+    LRT_CHECK(lrt_drive_od_write(&r.dr, 0x6060u, 0, LRT_MODE_CSP) == LRT_DRIVE_OK);
+    p0 = lrt_drive_position_actual(&r.dr);
+    lrt_drive_set_controlword(&r.dr, LRT_CW_CMD_ENABLE_OPERATION);
+    for (i = 0; i <= 5000; i++) {
+        lrt_drive_set_target_position(&r.dr, p0 + (int32_t)(1600 * i / 5000));
+        hm_step(&r, &e);
+    }
+    for (i = 0; i < 3000; i++) {
+        hm_step(&r, &e);
+    }
+    LRT_CHECK_ABS(r.ax.th_m, -1.0 + (double)(p0 + 1600) / r.dr.counts_per_rad, 0.01);
+    LRT_CHECK(lrt_drive_lost_steps(&r.dr) == 0);
+}
+
 int main(void)
 {
     LRT_RUN(test_params_default_valid_for_all_types);
@@ -1821,5 +2215,13 @@ int main(void)
     LRT_RUN(test_accessors_tolerate_null);
     LRT_RUN(test_drive_live_torque_limit_logged_with_time);
     LRT_RUN(test_drive_live_heavier_load_lowers_max_acceleration);
+    LRT_RUN(test_encoder_incremental_starts_at_zero_absolute_keeps_offset);
+    LRT_RUN(test_encoder_battery_loss_keeps_single_turn_and_needs_homing);
+    LRT_RUN(test_homing_limit_switch_method_17_is_repeatable);
+    LRT_RUN(test_homing_limit_and_index_method_1);
+    LRT_RUN(test_homing_home_switch_and_index_only_methods);
+    LRT_RUN(test_homing_errors_unsupported_limit_first_and_abort);
+    LRT_RUN(test_homing_hardstop_in_drive_with_reduced_torque);
+    LRT_RUN(test_homing_stepper_open_on_limit_switch_and_back_to_csp);
     return lrt_summary();
 }
