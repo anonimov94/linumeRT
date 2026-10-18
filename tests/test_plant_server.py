@@ -126,6 +126,23 @@ def test_outputs_and_inputs_pass_through(core) -> None:
     assert master.last.digital_in == server.machine.inputs
 
 
+def test_mode_zero_and_unsupported_mode_do_not_stop_plant(core) -> None:  # REQ-QA-03
+    """Pierwszy cykl mastera HAL może nieść 6060h = 0; tryb spoza modelu jest odrzucany."""
+    server = _server(core)
+    master = _local(server)
+    for axis in master.axes:
+        axis.mode = 0
+    master.exchange()
+    master.axes[0].mode = 3  # profil prędkości: nieobsługiwany przez model napędu
+    master.exchange()
+    assert not server.model_failed
+    assert server.mode_rejects >= 1
+    for axis in master.axes:
+        axis.mode = 8
+    master.enable()
+    assert master.states() == ["OPERATION_ENABLED"] * len(server.drives)
+
+
 # ---- watchdog (docs/PLANT.md §3 reguła 4) ----------------------------------------------------
 
 def test_watchdog_lockstep_faults_all_drives_until_reset(core) -> None:  # REQ-QA-03
