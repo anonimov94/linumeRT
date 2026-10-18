@@ -3,6 +3,7 @@
 #
 #   make        - buduje build/libplant_core.a
 #   make test   - buduje i uruchamia testy (build/test_axis, build/test_drive)
+#   make tools  - buduje build/lrt_check_params (walidacja szablonow napedow)
 #   make clean
 CC ?= cc
 CFLAGS ?= -O2
@@ -13,10 +14,17 @@ BUILD := build
 SRC := axis.c drive.c
 OBJ := $(SRC:%.c=$(BUILD)/%.o)
 TESTS := $(BUILD)/test_axis $(BUILD)/test_drive
+TOOLS := $(BUILD)/lrt_check_params
 
-.PHONY: all test clean
+.PHONY: all test tools clean
 
 all: $(BUILD)/libplant_core.a
+
+# Narzedzie do sprawdzania szablonow napedow walidatorami C (uzywa stdio, poza rdzeniem RT).
+tools: $(TOOLS)
+
+$(BUILD)/lrt_check_params: tools/check_params.c axis.h drive.h $(BUILD)/libplant_core.a
+	$(CC) $(CFLAGS) tools/check_params.c $(BUILD)/libplant_core.a $(LDLIBS) -o $@
 
 $(BUILD):
 	mkdir -p $(BUILD)

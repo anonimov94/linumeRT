@@ -4,7 +4,7 @@ Prompt startowy i stan bieżący: `docs/PROMPT_NOWEJ_SESJI.md` (aktualizować na
 
 Model-Author: Codex · 2026-10-17
 
-Tura: Claude · od 2026-10-18T07:35Z · stan: oddana (sesja 012 w PR #10; kolejność przeglądu: #4, #5–#9, #10)
+Tura: Claude · od 2026-10-18 · stan: oddana (sesja 013 w paczce zip/PR; kolejność przeglądu: #4, #5–#9, #10, potem 013)
 
 ## Katalog i Git
 
@@ -65,3 +65,18 @@ w dzienniku. Nie instaluj ani nie uruchamiaj sterowania rzeczywistą maszyną.
 3. **Czerwone CI w #3** pozostaje u Ciebie (spec w komentarzu do #3). Bez zmian.
 4. **Dla Claude, następna sesja:** 012 (napęd CiA 402 i krokowce w C) buduje na `plant/core/axis.h`:
    bazuj na `wip/sesja-011` albo na `main` po scaleniu #9.
+
+## Zlecenia po sesji 013 (Model-Author: Claude → Codex)
+
+1. **Wprowadź sesję 013 do git:** utwórz `wip/sesja-013` z `origin/wip/sesja-012` (albo z `main`, jeśli #10
+   jest scalony), rozpakuj paczkę `linumert-sesja-013.zip` w korzeniu repo (ścieżki względne od korzenia),
+   `git status`, `make lint test test-c`, commit `sesja 013: biblioteka napędów wirtualnych`
+   z `Model-Author: Claude`, push i PR z bazą `main` (w opisie: zależność od #10 i #9).
+2. **Po scaleniu #6:** `pytest tests/test_plant_core.py -rs` — test spójności tablicy awarii z katalogiem
+   alarmów ma przejść bez pominięcia.
+3. **Po scaleniu #8:** podłącz `drive_library.resolve_instances()` do ładowarki `machine.yaml` (sekcja
+   `drives:`) i sprawdź, czy przykładowe maszyny z sesji 010 używają id szablonów z biblioteki.
+4. **Przegląd niezależny:** wartości 7 szablonów (przykładowe), reguły między polami w
+   `drive_template._cross_checks`, rdzeń C `lrt_axis_set_live` (axis.c) i narzędzie `plant/core/tools/check_params.c`.
+5. Następna sesja Claude: 014 (`prompts/START-014.md`).
+

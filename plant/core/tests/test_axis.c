@@ -620,6 +620,167 @@ static void test_reset_clears_state(void)
     LRT_CHECK(lrt_axis_events(&a) == 0);
 }
 
+/* ------------------------------------------------------------------------- */
+/* Parametry zmieniane w locie (REQ-VD-04)                                    */
+/* ------------------------------------------------------------------------- */
+
+/* REQ-VD-04: wieksza masa w locie => mniejsze przyspieszenie zgodnie z a = T/J; stan zachowany. */
+static void test_live_load_change_follows_inertia_formula(void)
+{
+    lrt_axis_params p = base_params();
+    lrt_axis a;
+    lrt_live_log log;
+    double j1;
+    double j2;
+    double w0;
+    double th0;
+
+    lrt_live_log_init(&log);
+    init_ok(&a, &p);
+    j1 = lrt_axis_j_total(&a);
+    run_steps(&a, 0.3, 1e-4, 50);
+    LRT_CHECK_REL(a.w_m, 0.3 / j1 * 0.005, 0.01);
+    w0 = a.w_m;
+    th0 = a.th_m;
+    LRT_CHECK(lrt_axis_set_live(&a, LRT_LIVE_LOAD, 200.0, &log) == LRT_AXIS_OK);
+    j2 = lrt_axis_j_total(&a);
+    LRT_CHECK(j2 > j1);
+    LRT_CHECK_ABS(a.w_m, w0, 0.0); /* predkosc i polozenie bez skoku */
+    LRT_CHECK_ABS(a.th_m, th0, 0.0);
+    run_steps(&a, 0.3, 1e-4, 50);
+    LRT_CHECK_REL(a.w_m - w0, 0.3 / j2 * 0.005, 0.01);
+    LRT_CHECK(j2 / j1 > 2.0);
+}
+
+/* REQ-VD-04: dziennik zapisuje czas modelu, wartosc przed i po; bledy nie trafiaja do dziennika. */
+static void test_live_log_records_time_and_values(void)
+{
+    lrt_axis_params p = base_params();
+    lrt_axis a;
+    lrt_live_log log;
+    lrt_live_entry e;
+    double v;
+
+    lrt_live_log_init(&log);
+    init_ok(&a, &p);
+    run_steps(&a, 0.1, 1e-3, 20);
+    LRT_CHECK(lrt_axis_set_live(&a, LRT_LIVE_FRICTION_VISCOUS, 0.002, &log) == LRT_AXIS_OK);
+    run_steps(&a, 0.1, 1e-3, 30);
+    LRT_CHECK(lrt_axis_set_live(&a, LRT_LIVE_SUPPLY_SCALE, 0.5, &log) == LRT_AXIS_OK);
+    LRT_CHECK(lrt_axis_set_live(&a, LRT_LIVE_LOAD, -1.0, &log) == LRT_AXIS_ERR_INERTIA);
+    LRT_CHECK(lrt_axis_set_live(&a, 99, 1.0, &log) == LRT_AXIS_ERR_LIVE_ID);
+    LRT_CHECK(lrt_live_log_size(&log) == 2u);
+    LRT_CHECK(lrt_live_log_get(&log, 0, &e) == 0);
+    LRT_CHECK(e.param == LRT_LIVE_FRICTION_VISCOUS);
+    LRT_CHECK_ABS(e.t, 0.020, 1e-9);
+    LRT_CHECK_ABS(e.old_value, 0.0, 0.0);
+    LRT_CHECK_ABS(e.new_value, 0.002, 0.0);
+    LRT_CHECK(lrt_live_log_get(&log, 1, &e) == 0);
+    LRT_CHECK(e.param == LRT_LIVE_SUPPLY_SCALE);
+    LRT_CHECK_ABS(e.t, 0.050, 1e-9);
+    LRT_CHECK_ABS(e.old_value, 1.0, 0.0);
+    LRT_CHECK(lrt_live_log_get(&log, 2, &e) == -1);
+    LRT_CHECK(lrt_axis_get_live(&a, LRT_LIVE_SUPPLY_SCALE, &v) == LRT_AXIS_OK);
+    LRT_CHECK_ABS(v, 0.5, 0.0);
+    LRT_CHECK(strcmp(lrt_live_param_name(LRT_LIVE_BACKLASH), "backlash") == 0);
+    LRT_CHECK(lrt_live_param_name(LRT_LIVE_COUNT) == NULL);
+}
+
+/* REQ-VD-04: bufor kolowy dziennika nadpisuje najstarsze wpisy i liczy utracone. */
+static void test_live_log_ring_overwrites_oldest(void)
+{
+    lrt_axis_params p = base_params();
+    lrt_axis a;
+    lrt_live_log log;
+    lrt_live_entry e;
+    int i;
+
+    lrt_live_log_init(&log);
+    init_ok(&a, &p);
+    for (i = 1; i <= LRT_LIVE_LOG_SIZE + 6; i++) {
+        LRT_CHECK(lrt_axis_set_live(&a, LRT_LIVE_LOAD, (double)i, &log) == LRT_AXIS_OK);
+    }
+    LRT_CHECK(lrt_live_log_size(&log) == (unsigned)LRT_LIVE_LOG_SIZE);
+    LRT_CHECK(lrt_live_log_dropped(&log) == 6u);
+    LRT_CHECK(lrt_live_log_get(&log, 0, &e) == 0);
+    LRT_CHECK_ABS(e.new_value, 7.0, 0.0);
+    LRT_CHECK(lrt_live_log_get(&log, LRT_LIVE_LOG_SIZE - 1, &e) == 0);
+    LRT_CHECK_ABS(e.new_value, (double)(LRT_LIVE_LOG_SIZE + 6), 0.0);
+}
+
+/* REQ-VD-04: napiecie zasilania skaluje moment dostepny; tarcie w locie zmienia hamowanie. */
+static void test_live_supply_and_friction(void)
+{
+    lrt_axis_params p = base_params();
+    lrt_axis a;
+    double full;
+
+    init_ok(&a, &p);
+    full = lrt_axis_torque_limit(&a, 100.0);
+    LRT_CHECK(lrt_axis_set_live(&a, LRT_LIVE_SUPPLY_SCALE, 0.6, NULL) == LRT_AXIS_OK);
+    LRT_CHECK_REL(lrt_axis_torque_limit(&a, 100.0), 0.6 * full, 1e-12);
+    LRT_CHECK(lrt_axis_set_live(&a, LRT_LIVE_SUPPLY_SCALE, 2.5, NULL) == LRT_AXIS_ERR_LIVE_ID);
+    LRT_CHECK(lrt_axis_set_live(&a, LRT_LIVE_SUPPLY_SCALE, 0.0, NULL) == LRT_AXIS_ERR_LIVE_ID);
+
+    /* tarcie Coulomba: wybieg z predkosci w0 trwa t = J*w0/tau_c */
+    init_ok(&a, &p);
+    run_steps(&a, 0.3, 1e-4, 50);
+    {
+        double w0 = a.w_m;
+        double j = lrt_axis_j_total(&a);
+        int n = 0;
+
+        LRT_CHECK(lrt_axis_set_live(&a, LRT_LIVE_FRICTION_STATIC, 0.05, NULL) == LRT_AXIS_OK);
+        LRT_CHECK(lrt_axis_set_live(&a, LRT_LIVE_FRICTION_COULOMB, 0.05, NULL) == LRT_AXIS_OK);
+        while (a.w_m > 1e-9 && n < 100000) {
+            run_steps(&a, 0.0, 1e-4, 1);
+            n++;
+        }
+        LRT_CHECK_REL((double)n * 1e-4, j * w0 / 0.05, 0.02);
+    }
+}
+
+/* REQ-VD-04: bledne wartosci i zmiany trybu luzu sa odrzucane bez zmiany stanu. */
+static void test_live_rejects_invalid_without_change(void)
+{
+    lrt_axis_params p = base_params();
+    lrt_axis a;
+    lrt_axis before;
+
+    init_ok(&a, &p);
+    run_steps(&a, 0.2, 1e-3, 5);
+    before = a;
+    LRT_CHECK(lrt_axis_set_live(&a, LRT_LIVE_LOAD, NAN, NULL) == LRT_AXIS_ERR_LIVE_ID);
+    LRT_CHECK(lrt_axis_set_live(&a, LRT_LIVE_J_MOTOR, INFINITY, NULL) == LRT_AXIS_ERR_LIVE_ID);
+    LRT_CHECK(lrt_axis_set_live(&a, LRT_LIVE_FRICTION_COULOMB, 0.5, NULL) ==
+              LRT_AXIS_ERR_FRICTION); /* static = 0 < coulomb */
+    LRT_CHECK(lrt_axis_set_live(&a, LRT_LIVE_BACKLASH, -0.001, NULL) == LRT_AXIS_ERR_BACKLASH);
+    LRT_CHECK(lrt_axis_set_live(&a, LRT_LIVE_BACKLASH, 0.0005, NULL) == LRT_AXIS_ERR_LIVE_MODE);
+    LRT_CHECK(lrt_axis_set_live(NULL, LRT_LIVE_LOAD, 1.0, NULL) == LRT_AXIS_ERR_NULL);
+    LRT_CHECK(memcmp(&a, &before, sizeof(a)) == 0);
+}
+
+/* REQ-VD-04: luz zmieniany w locie w modelu dwuczlonowym (stiffness > 0 od poczatku). */
+static void test_live_backlash_in_two_body_model(void)
+{
+    lrt_axis_params p = base_params();
+    lrt_axis a;
+    double travel;
+
+    p.stiffness = 1.0e4;
+    init_ok(&a, &p);
+    LRT_CHECK(lrt_axis_set_live(&a, LRT_LIVE_BACKLASH, 0.0004, NULL) == LRT_AXIS_OK);
+    LRT_CHECK_ABS(a.gap_half, 0.5 * 0.0004 / p.ratio, 1e-12);
+    LRT_CHECK(lrt_axis_set_live(&a, LRT_LIVE_BACKLASH, 0.0, NULL) == LRT_AXIS_OK);
+    LRT_CHECK_ABS(a.gap_half, 0.0, 0.0);
+    LRT_CHECK(lrt_axis_set_live(&a, LRT_LIVE_BACKLASH, 0.0004, NULL) == LRT_AXIS_OK);
+    /* silnik rusza w kierunku dodatnim: wal przebywa luz zanim obciazenie ruszy */
+    run_steps(&a, 0.05, 1e-4, 200);
+    travel = a.th_m - a.th_l;
+    LRT_CHECK(travel > 0.0);
+    LRT_CHECK(travel <= a.gap_half * 2.0 + 1e-3);
+}
+
 int main(void)
 {
     LRT_RUN(test_const_torque_matches_analytic);
@@ -645,5 +806,11 @@ int main(void)
     LRT_RUN(test_step_rejects_bad_input_without_state_change);
     LRT_RUN(test_substeps_capped_flag);
     LRT_RUN(test_reset_clears_state);
+    LRT_RUN(test_live_load_change_follows_inertia_formula);
+    LRT_RUN(test_live_log_records_time_and_values);
+    LRT_RUN(test_live_log_ring_overwrites_oldest);
+    LRT_RUN(test_live_supply_and_friction);
+    LRT_RUN(test_live_rejects_invalid_without_change);
+    LRT_RUN(test_live_backlash_in_two_body_model);
     return lrt_summary();
 }

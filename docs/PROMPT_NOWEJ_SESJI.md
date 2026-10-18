@@ -11,14 +11,18 @@ modelem. Pracujecie na zmianę, nigdy równolegle. Użytkownik jest użytkowniki
 2. Sprawdź otwarte PR-y (REST: `gh api repos/anonimov94/linumeRT/pulls`; GraphQL jest zablokowany).
 3. Linia `Tura:` w NASTEPNA_SESJA.md: nie wchodź w turę drugiego modelu młodszą niż 2 h od ostatniego pusha.
 
-## Stan (2026-10-18)
-- Otwarte, niezależne względem main: #5 (006), #6 (007), #7 (009), #8 (010), #9 (011, rdzeń osi
-  Plant w C), #10 (012, napęd CiA 402, zależy od #9) — czekają na przegląd i scalenie przez Codexa. #4 (protokół v2) scala Codex jako pierwszy.
-- #3 (sesja 003, LinuxCNC CI): wrócony do Codexa — przejście na Debian 12 (bookworm) w WSL z VNC i naprawa
-  czerwonego CI (spec w komentarzu do #3). Po jego "gotowe @ SHA" drugi model przegląda ten SHA i scala.
-- Po scaleniach możliwe konflikty na końcu DZIENNIK.md, DECYZJE.md i prompts/DONE.md: zostaw wszystkie
-  wpisy. `docs/PROMPT_NOWEJ_SESJI.md` jest dodany w #8 i #9 (add/add): weź wersję z #9. `ci.yml`
-  (krok `make test-c` z #9 i ewentualne zmiany z #3): zachowaj oba.
+## Stan (2026-10-18, po sesji 013)
+- Otwarte, niezależne względem main: #4 (protokół v2, scala Codex jako pierwszy), #5 (006), #6 (007,
+  katalog alarmów), #7 (009), #8 (010, machine.yaml), #9 (011, rdzeń osi), #10 (012, napęd CiA 402; zależy
+  od #9) i PR sesji 013 (`wip/sesja-013`, biblioteka napędów; zależy od #10 i #9). Kolejność scalania:
+  #4, #5–#9, #10, potem PR 013. #3 (LinuxCNC CI) u Codexa.
+- Sesja 013 dała: 7 szablonów YAML (`plant/library/drives/`), moduł `linumert_plant.drive_template` /
+  `drive_library`, CLI `python -m linumert_plant drive ...`, API live w rdzeniu C (`lrt_axis_set_live`).
+  Sesja 014 (kinematyka, przejazdy, zderzaki, krańcówki) buduje na `machine.yaml` (#8) i
+  `drive_library.resolve_instances()`; prompt: `prompts/START-014.md`.
+- Po scaleniach możliwe konflikty na końcu DZIENNIK.md, DECYZJE.md, PROVENANCE.md i prompts/DONE.md: zostaw
+  wszystkie wpisy; `docs/PROMPT_NOWEJ_SESJI.md` — weź wersję z najnowszego PR; `ci.yml` — zachowaj
+  `make test-c`.
 - roboCODE to osobny projekt na przyszły rok. Nie dotykać.
 
 ## Zakres
