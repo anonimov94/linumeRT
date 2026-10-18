@@ -153,7 +153,11 @@ class SpindleModel:
         sign = math.copysign(1.0, self.omega) if self.omega != 0.0 else 0.0
         resist = self.friction_viscous * self.omega + sign * (self.friction_coulomb
                                                               + self.load_torque)
+        before = self.omega
         self.omega += (drive - resist) / self.inertia * dt
+        # opór bierny (tarcie, obciążenie) zatrzymuje wał, ale nie odwraca kierunku
+        if before * self.omega < 0 and abs(drive) <= self.friction_coulomb + self.load_torque:
+            self.omega = 0.0
         if self.fault != FAULT_NONE and abs(self.omega) < 0.5:
             self.omega = 0.0
         self.torque = drive
@@ -210,14 +214,20 @@ class HyVfdProtocol:
             st |= ST_BRAKING
         return st
 
+    @property
+    def rpm_per_hz(self) -> float:
+        """Jak hy_vfd: obroty silnika z PD144 (obr/min przy 50 Hz)."""
+        return self.params.get(144, 0) / 50.0
+
     def _apply_speed(self) -> None:
-        rpm = self.set_freq / 100.0 / self.sp.max_freq_hz * self.sp.max_rpm
+        rpm = self.set_freq / 100.0 * self.rpm_per_hz
         run = self.cmd_state in (CMD_RUN_FWD, CMD_RUN_REV)
         self.sp.set_speed(-rpm if self.cmd_state == CMD_RUN_REV else rpm, run)
 
     def status(self, code: int) -> int:
         sp = self.sp
-        values = {0: self.set_freq, 1: round(sp.out_freq_hz * 100), 2: round(sp.current * 10),
+        out_f = abs(sp.rpm) / self.rpm_per_hz if self.rpm_per_hz else 0.0
+        values = {0: self.set_freq, 1: round(out_f * 100), 2: round(sp.current * 10),
                   3: round(abs(sp.rpm)), 4: 540, 5: 380 if sp.running else 0, 6: 0, 7: 35}
         return values.get(code, 0) & 0xFFFF
 
@@ -373,6 +383,21 @@ class HyVfdPty:
         os.close(self._slave_fd)
 
 
+def _recv_exact(conn: socket.socket, n: int) -> bytes | None:
+    data = b""
+    while len(data) < n:
+        try:
+            chunk = conn.recv(n - len(data))
+        except TimeoutError:
+            continue
+        except OSError:
+            return None
+        if not chunk:
+            return None
+        data += chunk
+    return data
+
+
 class ModbusTcpServer:
     """Prosty serwer Modbus TCP (jedno połączenie naraz wystarcza dla mb2hal)."""
 
@@ -410,7 +435,9 @@ class ModbusTcpServer:
                     if len(head) < 7:
                         break
                     tid, proto, length, unit = struct.unpack(">HHHB", head)
-                    pdu = conn.recv(length - 1)
+                    pdu = _recv_exact(conn, length - 1)
+                    if pdu is None:
+                        break
                     with self.lock:
                         if self.faults.comm_lost or proto != 0:
                             continue

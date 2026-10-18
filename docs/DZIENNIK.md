@@ -214,3 +214,7 @@ Uzupełnienie: README plant/core (liczby testów 29/59/20, bazowanie, parametry 
 ## 021 — Wrzeciono VFD (w toku, Model-Author: Claude, D31)
 - Zrobione: `plant/server/linumert_plant/vfd.py` (model wrzeciona, protokół hy_vfd, Modbus TCP, pty, usterki); lint czysty, pytest 468 OK.
 - Przerwane na prośbę właściciela; kontynuacja i lista kroków: `prompts/START-021.md`.
+- 2026-10-18 (kontynuacja, krok 1): `tests/test_vfd.py` — 18 testów bez LinuxCNC (REQ-VD-01): CRC (wektor Modbus), długości ramek zgodne z `compute_response_length` w hy_comm.c (LinuxCNC 2.9), PD005/PD144, praca/stop/wstecz, rampa 0→max w `ramp_up_s`, at-speed 2 %, przeciążenie I²t → FAULT_OVERLOAD, błąd falownika = wybieg, Modbus PDU 3/4/6/16 z wyjątkami 01/02/03, Modbus TCP na localhost, transport przez pty, utrata komunikacji.
+- Poprawki w `vfd.py` wykryte testami i lekturą hy_vfd.c: przeliczanie Hz ↔ obr/min z PD144 (jak hy_vfd, także po `hy_vfd -S`), dokładny odczyt PDU w serwerze TCP, opór bierny nie odwraca kierunku wału (wcześniej wał przy wybiegu z obciążeniem drgał wokół −12 obr/min).
+- Wynik: `make lint test` na Debianie 12 (podman): ruff czysty, pytest 486 OK (54 odznaczonych). Autokontrola Claude, bez niezależnego przeglądu. NIEZWERYFIKOWANE NA SPRZĘCIE.
+- Następne: krok 2 (integracja w `server.py` i `serve.py`), 3 (konfiguracja LinuxCNC `_vfd` z hy_vfd), 4 (LICENCJE, PROVENANCE, DECYZJE, MACIERZ, DONE, PR).
