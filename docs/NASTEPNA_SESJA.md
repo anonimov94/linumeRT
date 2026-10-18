@@ -105,3 +105,4 @@ Następna sesja Claude: 017 (`prompts/START-017.md`, komponent HAL lrt_net) — 
 - 2026-10-18T14:11Z B zrobione (autokontrola #13–#17, komentarze w PR; #17 lockstep: utracone 0, spóźnione 0); C pominięte (brak RIP). debian-container.sh działa bez podmana (rootfs w ~/.cache/linumert/debian12). Sesja oddana, LOCK zwolniony.
 - 2026-10-18T14:17Z Strategie bazowania: `homing.latch` approach/release, PR #23 (bbb1e46), pytest 439 OK na Debianie 12. Sesja oddana, LOCK zwolniony.
 - 2026-10-18T14:23Z Podman (6.1.3, crun) na laptopie; `make lint test test-c test-san` na `ab9a9ab`: ruff czysty, pytest 439 OK, C 29/59/20 OK, ASan/UBSan czysto. Następny: LinuxCNC z GUI w kontenerze (prośba właściciela).
+- 2026-10-18T14:34Z `tools/dev/linuxcnc-gui.sh`: LinuxCNC 2.9.10 (linuxcnc.org, bookworm) + QtDragon sim w podmanie, okno na pulpicie laptopa (Xwayland). Działa. To pakiety, nie RIP z #3 — budowa nadal u Codexa. Blokada `linuxcnc` (lock.py) trzymana, dopóki GUI otwarte.
