@@ -100,7 +100,7 @@ out["zone_pos"] = [round(v, 3) for v in s.actual_position[:3]]
 out["zone_task"] = [s.task_state, s.task_mode, s.interp_state]
 c.mdi("G53 G0 X100 Y200"); c.wait_complete(60)
 wait(lambda: s.interp_state == linuxcnc.INTERP_IDLE, 60)
-s.poll()
+time.sleep(0.5); s.poll()
 out["zone_pos_back"] = [round(v, 3) for v in s.actual_position[:3]]
 out["zone_errors"] = list(out["errors"])
 print("RESULT " + json.dumps(out))
