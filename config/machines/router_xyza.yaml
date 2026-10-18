@@ -48,12 +48,12 @@ axes:
     max_acceleration: 720
     homing: {method: switch, direction: 1, search_speed: 30, latch_speed: 3, order: 2}
 drives:
-  - {name: drv_x, template: stepper_open_loop}
-  - {name: drv_y1, template: stepper_open_loop}
-  - {name: drv_y2, template: stepper_open_loop}
-  - {name: drv_z, template: stepper_open_loop}
-  - {name: drv_a, template: stepper_open_loop}
-  - {name: drv_spindle, template: vfd_modbus}
+  - {id: drv_x, template: stepper_nema23_3nm}
+  - {id: drv_y1, template: stepper_nema23_3nm}
+  - {id: drv_y2, template: stepper_nema23_3nm}
+  - {id: drv_z, template: stepper_nema23_3nm}
+  - {id: drv_a, template: rotary_table_worm_1_90}
+  - {id: drv_spindle, template: spindle_vfd_22kw}
 spindle: {drive: drv_spindle, max_rpm: 24000, min_rpm: 6000}
 positions:
   manual_change: [300, 450, -5]

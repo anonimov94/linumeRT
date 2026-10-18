@@ -19,6 +19,8 @@
 #ifndef LRT_PLANT_AXIS_H
 #define LRT_PLANT_AXIS_H
 
+#include "live.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -45,7 +47,9 @@ typedef enum {
     LRT_AXIS_ERR_STIFFNESS = -7, /* sztywnosc/tlumienie ujemne */
     LRT_AXIS_ERR_STOPS = -8,     /* stop_min >= stop_max */
     LRT_AXIS_ERR_DT = -9,        /* dt <= 0 albo nieskonczone */
-    LRT_AXIS_ERR_NUMERIC = -10   /* NaN/inf w stanie lub momencie zadanym */
+    LRT_AXIS_ERR_NUMERIC = -10,  /* NaN/inf w stanie lub momencie zadanym */
+    LRT_AXIS_ERR_LIVE_ID = -11,  /* nieznany parametr zmieniany w locie albo wartosc poza zakresem */
+    LRT_AXIS_ERR_LIVE_MODE = -12 /* zmiana wlaczylaby/wylaczyla model luzu - wymaga przeladowania */
 } lrt_axis_status;
 
 /* Flagi zdarzen (zatrzaskiwane do lrt_axis_clear_events()). */
@@ -128,7 +132,15 @@ typedef struct {
     int stop_contact;      /* -1/0/+1: kontakt ze zderzakiem dolnym/brak/gornym (wewnetrzne) */
     unsigned events;       /* LRT_AXIS_EV_* (zatrzask) */
     double impact_speed;   /* najwieksza predkosc uderzenia w zderzak od ostatniego clear [jedn./s] */
+
+    /* Czas modelu i parametry zmieniane w locie (REQ-VD-04) */
+    double time;           /* czas od lrt_axis_init() [s]; rosnie tylko po udanym kroku */
+    double supply_scale;   /* napiecie zasilania wzgledem znamionowego (mnoznik krzywej momentu) */
 } lrt_axis;
+
+/* Parametry zmieniane w trakcie pracy (REQ-VD-04): lrt_live_param i dziennik w live.h.
+ * Os obsluguje LRT_LIVE_LOAD..LRT_LIVE_SUPPLY_SCALE; limit momentu i estymata J regulatora
+ * zmieniaja sie przez lrt_drive_set_live(). */
 
 /* Wypelnia parametry wartosciami domyslnymi (liniowa os 5 mm/obr, plaska krzywa 1 N*m
  * do 300 rad/s, brak tarcia, luzu, grawitacji i zderzakow; damping_ratio = 0.7). */
@@ -158,6 +170,16 @@ double lrt_axis_j_total(const lrt_axis *a);
 /* Jeden krok czasu dt [s] z podkrokami; torque_cmd w N*m na wale silnika.
  * Zwraca LRT_AXIS_OK albo kod bledu (stan nie jest zmieniany przy bledzie). */
 int lrt_axis_step(lrt_axis *a, double torque_cmd, double dt);
+
+/* Zmiana parametru w locie (REQ-VD-04). Stan dynamiki (polozenie, predkosc) jest zachowany,
+ * wielkosci pochodne sa liczone od nowa. `log` moze byc NULL. Przy bledzie nic nie zmienia
+ * i nie dopisuje do dziennika. Zwraca LRT_AXIS_OK, LRT_AXIS_ERR_LIVE_ID (nieznany parametr,
+ * NaN/inf, wartosc poza zakresem), LRT_AXIS_ERR_LIVE_MODE (luz: zmiana z/na zero w modelu
+ * sztywnym - ustaw stiffness > 0, zeby model dwuczlonowy byl aktywny od poczatku) albo
+ * kod walidacji parametrow osi (np. LRT_AXIS_ERR_FRICTION). */
+int lrt_axis_set_live(lrt_axis *a, int param, double value, lrt_live_log *log);
+int lrt_axis_get_live(const lrt_axis *a, int param, double *value);
+
 
 /* Zdarzenia: odczyt i zerowanie flag oraz impact_speed. */
 unsigned lrt_axis_events(const lrt_axis *a);

@@ -219,7 +219,7 @@ def test_negative_speed_rejected():  # REQ-VM-11
 def test_unknown_template_when_library_given():  # REQ-VM-11
     cfg = parse_machine(copy.deepcopy(BASE))
     errors = validate_machine(cfg, drive_templates={"servo_cia402"})
-    assert any("brak szablonu stepper_open_loop" in e for e in errors)
+    assert any("brak szablonu stepper_nema23_3nm" in e for e in errors)
 
 
 def test_errors_collected_together():  # REQ-VM-11

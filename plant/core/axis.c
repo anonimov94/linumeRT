@@ -134,6 +134,10 @@ const char *lrt_axis_strerror(int status)
         return "krok czasu musi byc dodatni i skonczony";
     case LRT_AXIS_ERR_NUMERIC:
         return "wartosc nieskonczona lub NaN (stan przywrocony)";
+    case LRT_AXIS_ERR_LIVE_ID:
+        return "nieznany parametr zmieniany w locie albo wartosc poza zakresem";
+    case LRT_AXIS_ERR_LIVE_MODE:
+        return "zmiana wymaga przeladowania modelu (luz w modelu sztywnym)";
     default:
         return "nieznany kod bledu";
     }
@@ -141,22 +145,13 @@ const char *lrt_axis_strerror(int status)
 
 /* ---------- inicjalizacja ---------- */
 
-int lrt_axis_init(lrt_axis *a, const lrt_axis_params *p)
+/* Wielkosci pochodne z parametrow (wspolne dla init i zmian w locie). */
+static void derive(lrt_axis *a)
 {
-    int rc;
+    const lrt_axis_params *p = &a->p;
     double j_eq;
     double j_stop;
     double wn2;
-
-    if (a == NULL) {
-        return LRT_AXIS_ERR_NULL;
-    }
-    rc = lrt_axis_params_check(p);
-    if (rc != LRT_AXIS_OK) {
-        return rc;
-    }
-    memset(a, 0, sizeof(*a));
-    a->p = *p;
 
     a->j_m = p->j_motor + p->j_screw;
     a->j_l = p->load * p->ratio * p->ratio;
@@ -165,6 +160,10 @@ int lrt_axis_init(lrt_axis *a, const lrt_axis_params *p)
     a->gap_half = 0.5 * p->backlash / p->ratio;
 
     wn2 = 0.0;
+    a->k_contact = 0.0;
+    a->c_contact = 0.0;
+    a->k_stop = 0.0;
+    a->c_stop = 0.0;
     if (a->two_body) {
         a->k_contact = (p->stiffness > 0.0) ? p->stiffness : LRT_AXIS_DEFAULT_CONTACT_STIFFNESS;
         j_eq = a->j_m * a->j_l / (a->j_m + a->j_l);
@@ -178,7 +177,23 @@ int lrt_axis_init(lrt_axis *a, const lrt_axis_params *p)
         wn2 += a->k_stop / j_stop;
     }
     a->dt_sub_max = (wn2 > 0.0) ? LRT_STABILITY_FRACTION / sqrt(wn2) : LRT_NO_LIMIT_DT;
+}
 
+int lrt_axis_init(lrt_axis *a, const lrt_axis_params *p)
+{
+    int rc;
+
+    if (a == NULL) {
+        return LRT_AXIS_ERR_NULL;
+    }
+    rc = lrt_axis_params_check(p);
+    if (rc != LRT_AXIS_OK) {
+        return rc;
+    }
+    memset(a, 0, sizeof(*a));
+    a->p = *p;
+    a->supply_scale = 1.0;
+    derive(a);
     lrt_axis_reset(a, 0.0);
     return LRT_AXIS_OK;
 }
@@ -215,12 +230,12 @@ double lrt_axis_torque_limit(const lrt_axis *a, double omega)
     c = a->p.curve;
     n = a->p.n_curve;
     if (w <= c[0].omega) {
-        return c[0].torque;
+        return c[0].torque * a->supply_scale;
     }
     for (i = 1; i < n; i++) {
         if (w <= c[i].omega) {
             double f = (w - c[i - 1].omega) / (c[i].omega - c[i - 1].omega);
-            return c[i - 1].torque + f * (c[i].torque - c[i - 1].torque);
+            return (c[i - 1].torque + f * (c[i].torque - c[i - 1].torque)) * a->supply_scale;
         }
     }
     return 0.0;
@@ -452,5 +467,105 @@ int lrt_axis_step(lrt_axis *a, double torque_cmd, double dt)
         *a = saved;
         return LRT_AXIS_ERR_NUMERIC;
     }
+    a->time += dt;
+    return LRT_AXIS_OK;
+}
+
+/* ---------- parametry zmieniane w locie (REQ-VD-04) ---------- */
+
+int lrt_axis_get_live(const lrt_axis *a, int param, double *value)
+{
+    if (a == NULL || value == NULL) {
+        return LRT_AXIS_ERR_NULL;
+    }
+    switch (param) {
+    case LRT_LIVE_LOAD:
+        *value = a->p.load;
+        break;
+    case LRT_LIVE_J_MOTOR:
+        *value = a->p.j_motor;
+        break;
+    case LRT_LIVE_J_SCREW:
+        *value = a->p.j_screw;
+        break;
+    case LRT_LIVE_FRICTION_COULOMB:
+        *value = a->p.friction_coulomb;
+        break;
+    case LRT_LIVE_FRICTION_STATIC:
+        *value = a->p.friction_static;
+        break;
+    case LRT_LIVE_FRICTION_VISCOUS:
+        *value = a->p.friction_viscous;
+        break;
+    case LRT_LIVE_BACKLASH:
+        *value = a->p.backlash;
+        break;
+    case LRT_LIVE_SUPPLY_SCALE:
+        *value = a->supply_scale;
+        break;
+    default:
+        return LRT_AXIS_ERR_LIVE_ID;
+    }
+    return LRT_AXIS_OK;
+}
+
+int lrt_axis_set_live(lrt_axis *a, int param, double value, lrt_live_log *log)
+{
+    lrt_axis_params q;
+    double old_value;
+    int rc;
+
+    if (a == NULL) {
+        return LRT_AXIS_ERR_NULL;
+    }
+    if (param < 0 || param > LRT_LIVE_SUPPLY_SCALE || bad(value)) {
+        return LRT_AXIS_ERR_LIVE_ID;
+    }
+    (void)lrt_axis_get_live(a, param, &old_value);
+    q = a->p;
+    switch (param) {
+    case LRT_LIVE_LOAD:
+        q.load = value;
+        break;
+    case LRT_LIVE_J_MOTOR:
+        q.j_motor = value;
+        break;
+    case LRT_LIVE_J_SCREW:
+        q.j_screw = value;
+        break;
+    case LRT_LIVE_FRICTION_COULOMB:
+        q.friction_coulomb = value;
+        break;
+    case LRT_LIVE_FRICTION_STATIC:
+        q.friction_static = value;
+        break;
+    case LRT_LIVE_FRICTION_VISCOUS:
+        q.friction_viscous = value;
+        break;
+    case LRT_LIVE_BACKLASH:
+        q.backlash = value;
+        break;
+    case LRT_LIVE_SUPPLY_SCALE:
+        if (value < 0.05 || value > 2.0) {
+            return LRT_AXIS_ERR_LIVE_ID;
+        }
+        break;
+    default:
+        return LRT_AXIS_ERR_LIVE_ID;
+    }
+    if (param != LRT_LIVE_SUPPLY_SCALE) {
+        rc = lrt_axis_params_check(&q);
+        if (rc != LRT_AXIS_OK) {
+            return rc;
+        }
+        if (((q.backlash > 0.0 || q.stiffness > 0.0) ? 1 : 0) != a->two_body) {
+            return LRT_AXIS_ERR_LIVE_MODE;
+        }
+        a->p = q;
+        derive(a);
+    } else {
+        a->supply_scale = value;
+    }
+    lrt_live_log_append(log, a->time, param, old_value, value);
     return LRT_AXIS_OK;
 }

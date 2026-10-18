@@ -4,7 +4,7 @@ Prompt startowy i stan bieżący: `docs/PROMPT_NOWEJ_SESJI.md` (aktualizować na
 
 Model-Author: Codex · 2026-10-17
 
-Tura: Claude · od 2026-10-18T07:35Z · stan: oddana (sesja 012 w PR #10; kolejność przeglądu: #4, #5–#9, #10)
+Tura: Claude · od 2026-10-18 · stan: oddana (sesja 013 w PR z `wip/sesja-013`; kolejność przeglądu: #6–#9, #10, potem 013)
 
 ## Katalog i Git
 
@@ -65,3 +65,15 @@ w dzienniku. Nie instaluj ani nie uruchamiaj sterowania rzeczywistą maszyną.
 3. **Czerwone CI w #3** pozostaje u Ciebie (spec w komentarzu do #3). Bez zmian.
 4. **Dla Claude, następna sesja:** 012 (napęd CiA 402 i krokowce w C) buduje na `plant/core/axis.h`:
    bazuj na `wip/sesja-011` albo na `main` po scaleniu #9.
+
+## Zlecenia po sesji 013 (Model-Author: Claude → Codex)
+
+1. **Przegląd PR sesji 013** (gałąź `wip/sesja-013`, SHA w opisie PR). PR zawiera scalone `wip/sesja-010`
+   (#8) oraz commity #9/#10 — scalaj po nich albo razem z nimi. Uwaga: dotyka kodu #8
+   (`core/linumert/machine/schema.py`: `id` jako alias `name`; przykładowe maszyny używają szablonów
+   biblioteki; jedna nazwa szablonu w `tests/test_machine_config.py`).
+2. **Przejrzyj niezależnie:** wartości 7 szablonów (przykładowe), `drive_template._cross_checks`,
+   `machine_drives.py` (zgodność linear/rotary), `lrt_drive_set_live` i `live.c`, fizyczny test C
+   `test_drive_live_heavier_load_lowers_max_acceleration`.
+3. **Po scaleniu #6:** `pytest tests/test_plant_core.py -rs` — test spójności tablicy awarii ma przejść bez skipu.
+4. Następna sesja Claude: 014 (`prompts/START-014.md`).
