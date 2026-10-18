@@ -1,0 +1,23 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+# linumeRT · wrzeciono przez falownik RS485 (hy_vfd, Modbus RTU poza RT) — wariant _vfd (sesja 021).
+# W Plant falownik emuluje plant/server/linumert_plant/vfd.py na pseudoterminalu [VFD]DEVICE
+# (plant_vfd.yaml vfd.device); na maszynie [VFD]DEVICE = port RS485, np. /dev/ttyUSB0.
+# -S/-F: obroty i częstotliwość maksymalne silnika (hy_vfd zapisuje PD144 i PD005).
+# Model-Author: Claude · sesja 021. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+loadusr -Wn vfd hy_vfd -n vfd -d [VFD]DEVICE -r [VFD]BAUD -p [VFD]PARITY -t [VFD]SLAVE -S [VFD]MAX_RPM -F [VFD]MAX_FREQ
+loadrt scale names=spindle_rpm2rps
+addf spindle_rpm2rps servo-thread
+setp spindle_rpm2rps.gain 0.016666667
+
+net linumert.spindle.enable     motion.motion-enabled => vfd.enable
+net linumert.spindle.on         spindle.0.on => vfd.spindle-on lrt-net.0.dout-00
+net linumert.spindle.cw         spindle.0.forward => vfd.spindle-forward
+net linumert.spindle.ccw        spindle.0.reverse => vfd.spindle-reverse
+net linumert.spindle.rpm-cmd    spindle.0.speed-out-abs => vfd.speed-command
+net linumert.spindle.rpm-fb     vfd.spindle-speed-fb => spindle_rpm2rps.in
+net linumert.spindle.speed-fb   spindle_rpm2rps.out => spindle.0.speed-in
+net linumert.spindle.at-speed   vfd.spindle-at-speed => spindle.0.at-speed
+net linumert.spindle.vfd-ok     vfd.hycomm-ok
+# obroty wału z Plant (diagnostyka; na maszynie bez odpowiednika)
+net linumert.spindle.plant-rpm  lrt-net.0.spindle-speed-fb

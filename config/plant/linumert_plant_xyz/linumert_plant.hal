@@ -13,8 +13,6 @@ loadrt lrt_cia402 count=4
 loadrt not names=nc_x_min,nc_x_max,nc_y_min,nc_y_max,nc_z_max,amp_ok
 loadrt and2 names=estop_chain,estop_chain2
 loadrt estop_latch names=estop_latch
-loadrt sim_spindle names=sim_spindle
-loadrt ddt names=spindle_rps
 
 addf motion-command-handler servo-thread
 addf motion-controller servo-thread
@@ -32,8 +30,6 @@ addf amp_ok servo-thread
 addf estop_chain servo-thread
 addf estop_chain2 servo-thread
 addf estop_latch servo-thread
-addf sim_spindle servo-thread
-addf spindle_rps servo-thread
 
 # ---- napędy (Plant przez LRT-NET) ---------------------------------------------------------
 setp lrt-net.0.axis.0.scale [JOINT_0]SCALE
@@ -105,17 +101,7 @@ net lrt.estop-reset          iocontrol.0.user-request-enable => estop_latch.rese
 net linumert.io.estop-ok     estop_latch.ok-out => iocontrol.0.emc-enable-in
 # fault napędu po włączeniu kasuje lrt_cia402; nie blokuje resetu (fault-in = 0)
 
-# ---- wrzeciono (LRT-NET v1: Plant nie modeluje wrzeciona; lokalna symulacja, wyjście do Plant) ----
-net linumert.spindle.on        spindle.0.on => lrt-net.0.dout-00
-net linumert.spindle.cw        spindle.0.forward
-net linumert.spindle.ccw       spindle.0.reverse
-net linumert.spindle.speed-cmd spindle.0.speed-out-rps => sim_spindle.velocity-cmd
-net linumert.spindle.revs      sim_spindle.position-fb => spindle.0.revs spindle_rps.in
-net linumert.spindle.speed-fb  spindle_rps.out => spindle.0.speed-in
-net linumert.spindle.index     spindle.0.index-enable <=> sim_spindle.index-enable
-net linumert.spindle.at-speed  => spindle.0.at-speed
-sets linumert.spindle.at-speed 1
-net linumert.spindle.rpm-cmd   spindle.0.speed-out => lrt-net.0.spindle-speed-cmd
+# ---- wrzeciono: osobny plik w [HAL]HALFILE (spindle_sim.hal albo spindle_vfd.hal, sesja 021)
 
 # ---- wyrocznia Plant (REQ-VM-06): uzbrojona po bazowaniu wszystkich osi (plant.yaml oracle.arm_bit)
 net linumert.homed           motion.is-all-homed => lrt-net.0.dout-31

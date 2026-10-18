@@ -1,0 +1,19 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+# linumeRT · wrzeciono symulowane lokalnie (sim_spindle); Plant dostaje spindle_cmd przez LRT-NET.
+# Wariant domyślny linumert_plant_xyz.ini. Model-Author: Claude · sesja 018 (wydzielone w 021).
+
+loadrt sim_spindle names=sim_spindle
+loadrt ddt names=spindle_rps
+addf sim_spindle servo-thread
+addf spindle_rps servo-thread
+
+net linumert.spindle.on        spindle.0.on => lrt-net.0.dout-00
+net linumert.spindle.cw        spindle.0.forward
+net linumert.spindle.ccw       spindle.0.reverse
+net linumert.spindle.speed-cmd spindle.0.speed-out-rps => sim_spindle.velocity-cmd
+net linumert.spindle.revs      sim_spindle.position-fb => spindle.0.revs spindle_rps.in
+net linumert.spindle.speed-fb  spindle_rps.out => spindle.0.speed-in
+net linumert.spindle.index     spindle.0.index-enable <=> sim_spindle.index-enable
+net linumert.spindle.at-speed  => spindle.0.at-speed
+sets linumert.spindle.at-speed 1
+net linumert.spindle.rpm-cmd   spindle.0.speed-out => lrt-net.0.spindle-speed-cmd
