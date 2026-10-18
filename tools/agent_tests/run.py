@@ -73,14 +73,18 @@ def run_checks(repo, model, output, commands):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--model", choices=["Codex", "Claude", "Manual"], required=True)
+    parser.add_argument("--linuxcnc", action="store_true", help="Also run RIP sim and QtDragon")
     args = parser.parse_args()
     stamp = datetime.now(UTC).strftime("%Y%m%dT%H%M%S.%fZ")
     output = REPO / "state" / "test-runs" / f"{stamp}-{args.model}"
-    return run_checks(REPO, args.model, output, [
+    commands = [
         ("diff", ["git", "diff", "--check"]),
         ("lint", [sys.executable, "-m", "ruff", "check", "."]),
         ("pytest", [sys.executable, "-m", "pytest", "-v"]),
-    ])
+    ]
+    if args.linuxcnc:
+        commands.append(("linuxcnc", ["make", "test-linuxcnc", f"PYTHON={sys.executable}"]))
+    return run_checks(REPO, args.model, output, commands)
 
 
 if __name__ == "__main__":

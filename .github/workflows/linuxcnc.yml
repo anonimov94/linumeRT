@@ -1,0 +1,40 @@
+name: LinuxCNC RIP smoke
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '23 4 * * 1'
+permissions:
+  contents: read
+jobs:
+  linuxcnc:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install build and GUI dependencies
+        run: bash tools/ci/build-linuxcnc.sh --install-deps
+      - name: Resolve upstream revision
+        id: upstream
+        run: echo "sha=$(git ls-remote https://github.com/LinuxCNC/linuxcnc.git refs/heads/2.9 | cut -f1)" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/linuxcnc-2.9
+          key: linuxcnc-${{ runner.os }}-${{ runner.arch }}-24.04-${{ steps.upstream.outputs.sha }}-${{ hashFiles('tools/ci/build-linuxcnc.sh') }}
+      - name: Build RIP uspace
+        run: bash tools/ci/build-linuxcnc.sh
+      - name: Create test environment
+        run: |
+          python3 -m venv --system-site-packages .venv
+          .venv/bin/python -m pip install -e '.[dev]'
+      - name: Shared runner with real LinuxCNC
+        env:
+          LINUXCNC_SCREENSHOT: ${{ github.workspace }}/state/spike_qtdragon.png
+        run: .venv/bin/python tools/agent_tests/run.py --model Codex --linuxcnc
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: linuxcnc-evidence
+          path: |
+            state/test-runs/
+            state/spike_qtdragon.png
+            /tmp/pytest-of-runner/

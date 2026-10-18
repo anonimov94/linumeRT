@@ -63,4 +63,5 @@ graficznego/fontu w repozytorium. Nowy zasób = nowy wiersz w tym samym commicie
 Wiersze fontów dostają ścieżki i pliki `OFL.txt` w `licenses/` przy ich dodaniu (sesja 027).
 
 | Paczka testowa i VNC | kod i dokumentacja | model językowy Codex na zlecenie właściciela | 2026-10-17 | własna implementacja | GPL-2.0-or-later | lokalne testy obu modeli i podgląd Ubuntu | `tools/agent_tests/`, `tools/vm/start-vnc.sh`, `tests/test_agent_runner.py`, `docs/PODGLAD_UBUNTU.md` |
-`n| LinuxCNC 2.9 RIP | zależność deweloperska | LinuxCNC contributors | 2026-10-18 | https://github.com/LinuxCNC/linuxcnc/tree/a33293f46575c809e082e0806e79ab996f982513 | GPL-2.0-or-later, nagłówki upstream | budowa i testy sim; kod poza repo | `tools/ci/build-linuxcnc.sh` |
+| LinuxCNC 2.9 RIP | zależność deweloperska | LinuxCNC contributors | 2026-10-18 | https://github.com/LinuxCNC/linuxcnc/tree/a33293f46575c809e082e0806e79ab996f982513 | GPL-2.0-or-later, nagłówki upstream | budowa i testy sim; kod poza repo | `tools/ci/build-linuxcnc.sh` |
+| QtDragon spike | zrzut testowy upstream | LinuxCNC contributors; zapis Codex | 2026-10-18 | QtDragon z powyższego commita, uruchomiony pod Xvfb | GPL-2.0-or-later, zasoby upstream | dowód testu, nie projekt wyglądu linumeRT | `docs/raporty/spike_qtdragon.png` |
