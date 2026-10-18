@@ -207,3 +207,13 @@ Uzupełnienie: README plant/core (liczby testów 29/59/20, bazowanie, parametry 
 - Decyzje: style alternatywne QtDragon nieskopiowane; grafiki QtDragon zostają do czasu własnego zestawu z docs/design; test IP dopuszcza zrzuty w `docs/raporty/`.
 - Do sprawdzenia ręcznie: ekran na pulpicie (tytuł linumeRT), wygląd nadal QtDragon.
 - Długi: własny wygląd (tokens.yaml) i nazewnictwo w UI — kolejne sesje ekranu.
+
+## 017 — Komponent HAL lrt_net (Model-Author: Claude, D31)
+- Zrobione: `hal/lrt_net.comp` (master LRT-NET v1, UDP nieblokująco), `hal/lrt_cia402.comp` (włączanie, fault z zwłoką, bazowanie w napędzie, zredukowany moment), `hal/lrt_net_proto.h` (protokół w C, test zgodności z lrtnet.py bez LinuxCNC), test halrun + Plant (4 napędy, ruch X ±0,01 mm, 3/3).
+- Decyzje: własny lrt_cia402 (porównanie z cia402 lcec i hal-cia402), indeks i 6072h w ramce v2, tryb 0 ignorowany w lrt_net i Plant.
+- Do sprawdzenia ręcznie: nic (testy automatyczne w RIP).
+
+## 018 — Konfiguracja LinuxCNC dla Plant (Model-Author: Claude, D31)
+- Zrobione: `config/plant/linumert_plant_xyz/` (mill_servo_table XYYZ, krańcówki NC z Plant, portal Y synchronicznie, E-STOP przez estop_latch, sonda, ekran linumert), `plant.yaml`, warianty bazowania (`bazowanie/`), `tools/dev/plant-gui.sh`, `docs/PLANT_START.md`, zrzut `docs/raporty/G0/ekran_plant.png`.
+- Testy: zgodność INI z machine.yaml (5), end-to-end w LinuxCNC RIP: bazowanie z losowego startu, G1 ±5 µm, bez strat ramek (~75 s).
+- Długi: switch_index i 6072h przez LRT-NET (ramka v2); warianty hardstop/drive bez testu e2e.

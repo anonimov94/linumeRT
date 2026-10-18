@@ -27,7 +27,7 @@ pin out float axis.#.torque[8 : personality] "moment 6077h [promile znamionowego
 pin out u32   axis.#.error-code[8 : personality] "kod bledu 603Fh";
 
 pin in  bit   dout-##[32] "wyjscia cyfrowe do Plant";
-pin out bit   din-##[32] "wejscia cyfrowe z Plant (stan logiczny styku)";
+pin out bit   din-##[32] "wejscia cyfrowe z Plant: stan elektryczny (1 = obwod zamkniety; NC w spoczynku = 1)";
 pin in  float spindle-speed-cmd "wrzeciono zadane [obr/min] (LRT-NET v1: nieuzywane przez Plant)";
 pin out float spindle-speed-fb "wrzeciono rzeczywiste [obr/min]";
 
