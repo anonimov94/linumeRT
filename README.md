@@ -43,6 +43,18 @@ VM-A / komputer maszyny                         VM-B (Plant)
 Na prawdziwej maszynie lrt_net zastępuje lcec (EtherCAT) lub stepgen — sygnały HAL bez zmian.
 ```
 
+W 10 linijkach:
+1. **LinuxCNC 2.9** jest jedynym interpreterem G-code i planerem ruchu; linumeRT go nie zastępuje.
+2. **HAL** łączy LinuxCNC z napędami; kontrakt sygnałów `linumert.*` opisuje [`docs/HAL_KONTRAKT.md`](docs/HAL_KONTRAKT.md).
+3. W czasie rzeczywistym działają tylko komponenty `hal/*.comp`: bez alokacji i bez blokującego I/O.
+4. **Ekran** `screens/linumert/` to kopia QtDragon (QtVCP); własna logika w handlerze i osobnych modułach.
+5. Ekran czyta stan przez `linuxcnc.stat` i wydaje polecenia przez `linuxcnc.command`, tak jak QtDragon.
+6. **Rdzeń** `core/linumert/` (Python, bez UI): alarmy, narzędzia, `.lnx`, generatory, `machine.yaml`.
+7. Rdzeń generuje wyłącznie tekst G-code i dane; ekran i narzędzia go importują.
+8. **Plant** (`plant/`) to wirtualna obrabiarka: dynamika i napędy w C, serwer i wyrocznia w Pythonie.
+9. LinuxCNC rozmawia z Plant przez **LRT-NET** (UDP, 1 kHz) i falownik przez RS485/pty (`hy_vfd`).
+10. Jedna maszyna = jeden `machine.yaml`: z niego Plant buduje obrabiarkę, a test pilnuje zgodności INI LinuxCNC.
+
 ## Szybki start
 
 Rdzeń i Plant bez LinuxCNC (Python ≥ 3.11, `make`, kompilator C):

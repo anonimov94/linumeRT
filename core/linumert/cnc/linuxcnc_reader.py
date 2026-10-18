@@ -7,8 +7,8 @@ Modul ``linuxcnc`` jest importowany leniwie, przy pierwszym ``read()``; sam impo
 pliku (i calego pakietu ``linumert``) go nie wymaga. Modul i obiekty ``stat`` /
 ``error_channel`` mozna wstrzyknac, co pozwala testowac mapowanie bez LinuxCNC.
 
-NIEZWERYFIKOWANE NA PRAWDZIWYM LINUXCNC: mapowanie oparte na dokumentacji API
-python ``linuxcnc`` 2.9. Do potwierdzenia testem integracyjnym na RIP (sesja integracyjna).
+Mapowanie sprawdzone na LinuxCNC 2.9 RIP (sesja 008, ``tests/test_reader_linuxcnc.py``:
+stan, tryb, bazowanie, pozycje, limity z INI, ``gcodes``/``mcodes``, G55, ``spindle[0]``).
 Zalozenie: kinematyka tożsamościowa (trivkins), czyli i-ta zbazowana os to i-ty staw.
 """
 
