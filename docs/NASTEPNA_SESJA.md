@@ -31,6 +31,8 @@ można usunąć.
 
 ## 3. Następna praca
 
+Prompt startowy następnej sesji: [`prompts/START-008.md`](../prompts/START-008.md).
+
 0. **Najpierw:** pełny przebieg `pytest -m linuxcnc` w jednym kontenerze RIP: 55 OK, 4 nie przechodzą —
    `tests/test_plant_vfd_linuxcnc.py` (3) i `tests/test_sim_config.py::test_headless_run_20s`. Osobno przechodziły
    (sesja 021); podejrzenie: proces `linuxcncsvr` po `tests/test_plant_linuxcnc.py` zostaje i blokuje kolejny start
