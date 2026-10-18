@@ -1,0 +1,304 @@
+# Katalog alarmów linumeRT — jedyne źródło kodów i tekstów (PL/EN, teksty własne).
+# Model-Author: Claude · sesja 007 · SPDX-License-Identifier: GPL-2.0-or-later
+#
+# Pola wpisu:
+#   code    W-xxxx ostrzeżenie, E-xxxx błąd, K-3xx zdarzenie symulacji, P-5xxx błąd programu/ścieżki
+#   clear   jak alarm znika: auto (źródło woła clear), ack (znika po potwierdzeniu),
+#           reset (znika po resecie maszyny)
+#   params  nazwy parametrów tekstu; muszą się zgadzać z {nazwami} w pl i en
+# Znaczenia kodów poza tabelą w docs/wymagania/NARZEDZIA_I_KOLIZJE.md §3 to PROPOZYCJA
+# (patrz docs/DZIENNIK.md, wpis 007); późniejsze sesje doprecyzowują je tutaj.
+
+# ---- Ostrzeżenia ---------------------------------------------------------
+- code: W-2104
+  clear: ack
+  params: [axis]
+  pl: "Oś {axis} nie jest zbazowana."
+  en: "Axis {axis} is not homed."
+- code: W-2105
+  clear: auto
+  params: [axis, distance]
+  pl: "Oś {axis} zbliża się do limitu programowego (zostało {distance} mm)."
+  en: "Axis {axis} is approaching its soft limit ({distance} mm left)."
+- code: W-2110
+  clear: ack
+  params: [tool]
+  pl: "Narzędzie T{tool} przekroczyło zadaną trwałość."
+  en: "Tool T{tool} has exceeded its configured life."
+- code: W-2120
+  clear: auto
+  params: []
+  pl: "Override posuwu wynosi 0 % przy uruchomionym programie."
+  en: "Feed override is 0 % while a program is running."
+- code: W-2130
+  clear: ack
+  params: [tool]
+  pl: "Ręczna zmiana narzędzia T{tool} została przerwana; program zatrzymano."
+  en: "Manual change of tool T{tool} was cancelled; the program was stopped."
+
+# ---- Błędy LinuxCNC i maszyny --------------------------------------------
+- code: E-1000
+  clear: reset
+  params: [message]
+  pl: "Komunikat LinuxCNC: {message}"
+  en: "LinuxCNC message: {message}"
+- code: E-1001
+  clear: auto
+  params: [detail]
+  pl: "Brak łączności z LinuxCNC ({detail})."
+  en: "No connection to LinuxCNC ({detail})."
+- code: E-1100
+  clear: reset
+  params: []
+  pl: "Stan awaryjny (E-stop) jest aktywny."
+  en: "Emergency stop (E-stop) is active."
+- code: E-1200
+  clear: reset
+  params: [axis]
+  pl: "Oś {axis} wjechała na twardy ogranicznik (krańcówkę)."
+  en: "Axis {axis} has hit its hard limit switch."
+
+# ---- EtherCAT i LRT-NET --------------------------------------------------
+- code: E-4000
+  clear: reset
+  params: [detail]
+  pl: "Magistrala napędów jest niedostępna ({detail})."
+  en: "The drive bus is unavailable ({detail})."
+- code: E-4001
+  clear: reset
+  params: [device]
+  pl: "Utracono komunikację z urządzeniem {device}."
+  en: "Communication with device {device} was lost."
+- code: E-4002
+  clear: reset
+  params: [device, state]
+  pl: "Urządzenie {device} nieoczekiwanie zmieniło stan na {state}."
+  en: "Device {device} unexpectedly changed state to {state}."
+- code: E-4003
+  clear: reset
+  params: [ms]
+  pl: "Brak ramek magistrali przez {ms} ms; napędy przechodzą w stan błędu."
+  en: "No bus frames for {ms} ms; drives are going into fault."
+- code: E-4004
+  clear: reset
+  params: [expected, found]
+  pl: "Niezgodna topologia: oczekiwano {expected} urządzeń, wykryto {found}."
+  en: "Topology mismatch: expected {expected} devices, found {found}."
+- code: E-4005
+  clear: reset
+  params: [device]
+  pl: "Błąd mapowania danych procesowych urządzenia {device}."
+  en: "Process data mapping error on device {device}."
+- code: E-4006
+  clear: auto
+  params: [jitter_us, limit_us]
+  pl: "Jitter cyklu {jitter_us} µs przekracza limit {limit_us} µs."
+  en: "Cycle jitter of {jitter_us} µs exceeds the {limit_us} µs limit."
+- code: E-4007
+  clear: auto
+  params: [lost, window]
+  pl: "Utracone ramki: {lost} w ostatnich {window} cyklach."
+  en: "Lost frames: {lost} in the last {window} cycles."
+- code: E-4008
+  clear: auto
+  params: [late, window]
+  pl: "Spóźnione ramki: {late} w ostatnich {window} cyklach."
+  en: "Late frames: {late} in the last {window} cycles."
+- code: E-4009
+  clear: reset
+  params: [detail]
+  pl: "Błąd konfiguracji sieci napędów: {detail}."
+  en: "Drive network configuration error: {detail}."
+- code: E-4010
+  clear: reset
+  params: [device]
+  pl: "Nieznane urządzenie {device} w konfiguracji maszyny."
+  en: "Unknown device {device} in the machine configuration."
+
+# ---- Falownik wrzeciona (RS485) ------------------------------------------
+- code: E-4100
+  clear: reset
+  params: [timeout_ms]
+  pl: "Falownik wrzeciona nie odpowiada od {timeout_ms} ms."
+  en: "The spindle drive has not responded for {timeout_ms} ms."
+- code: E-4101
+  clear: auto
+  params: [count]
+  pl: "Błędy sumy kontrolnej w komunikacji z falownikiem ({count})."
+  en: "Checksum errors in communication with the spindle drive ({count})."
+- code: E-4102
+  clear: reset
+  params: [fault_code]
+  pl: "Falownik zgłosił błąd o kodzie {fault_code}."
+  en: "The spindle drive reported fault code {fault_code}."
+- code: E-4103
+  clear: auto
+  params: [commanded, actual]
+  pl: "Prędkość wrzeciona poza tolerancją: zadano {commanded}, jest {actual} obr/min."
+  en: "Spindle speed out of tolerance: commanded {commanded}, actual {actual} rpm."
+- code: E-4104
+  clear: reset
+  params: []
+  pl: "Falownik wrzeciona zgłosił przeciążenie."
+  en: "The spindle drive reported an overload."
+- code: E-4105
+  clear: reset
+  params: [detail]
+  pl: "Niedozwolone ustawienie falownika wrzeciona: {detail}."
+  en: "Invalid spindle drive setting: {detail}."
+
+# ---- Napędy osi (CiA 402) ------------------------------------------------
+- code: E-4200
+  clear: reset
+  params: [axis, error_code]
+  pl: "Napęd osi {axis} zgłosił błąd (kod {error_code})."
+  en: "The drive of axis {axis} reported a fault (code {error_code})."
+- code: E-4201
+  clear: reset
+  params: [axis, error, limit]
+  pl: "Błąd nadążania osi {axis}: {error} przekracza limit {limit}."
+  en: "Following error on axis {axis}: {error} exceeds the limit of {limit}."
+- code: E-4202
+  clear: reset
+  params: [axis]
+  pl: "Przeciążenie napędu osi {axis}."
+  en: "Overload on the drive of axis {axis}."
+- code: E-4203
+  clear: reset
+  params: [axis]
+  pl: "Przekroczony prąd napędu osi {axis}."
+  en: "Overcurrent on the drive of axis {axis}."
+- code: E-4204
+  clear: reset
+  params: [axis, temperature]
+  pl: "Zbyt wysoka temperatura napędu osi {axis} ({temperature} °C)."
+  en: "Drive of axis {axis} is too hot ({temperature} °C)."
+- code: E-4205
+  clear: reset
+  params: [axis, voltage]
+  pl: "Napięcie obwodu pośredniczącego napędu osi {axis} poza zakresem ({voltage} V)."
+  en: "DC bus voltage of axis {axis} is out of range ({voltage} V)."
+- code: E-4206
+  clear: reset
+  params: [axis]
+  pl: "Utrata sygnału enkodera osi {axis}."
+  en: "Encoder signal lost on axis {axis}."
+- code: E-4207
+  clear: reset
+  params: [axis]
+  pl: "Napęd osi {axis} zgłosił aktywny ogranicznik sprzętowy."
+  en: "The drive of axis {axis} reports an active hardware limit."
+- code: E-4208
+  clear: reset
+  params: [axis]
+  pl: "Aktywne bezpieczne wyłączenie momentu (STO) w napędzie osi {axis}."
+  en: "Safe torque off (STO) is active on the drive of axis {axis}."
+- code: E-4209
+  clear: reset
+  params: [axis, ms]
+  pl: "Napęd osi {axis} nie włączył się w ciągu {ms} ms."
+  en: "The drive of axis {axis} did not enable within {ms} ms."
+- code: E-4210
+  clear: reset
+  params: [axis]
+  pl: "Bazowanie napędu osi {axis} nie powiodło się."
+  en: "Homing of the drive on axis {axis} failed."
+
+# ---- Symulacja: kolizje, ostrzeżenia, dane (NARZEDZIA_I_KOLIZJE.md §3) ------
+- code: K-301
+  clear: ack
+  params: [line, tool]
+  pl: "Linia {line}: ruch roboczy usuwa materiał przy zatrzymanym wrzecionie (narzędzie T{tool})."
+  en: "Line {line}: a cutting move removes material with the spindle stopped (tool T{tool})."
+- code: K-302
+  clear: ack
+  params: [line, tool]
+  pl: "Linia {line}: ruch szybki usuwa materiał (narzędzie T{tool})."
+  en: "Line {line}: a rapid move removes material (tool T{tool})."
+- code: K-303
+  clear: ack
+  params: [line, part]
+  pl: "Linia {line}: część nietnąca ({part}) wchodzi w materiał."
+  en: "Line {line}: a non-cutting part ({part}) enters the material."
+- code: K-304
+  clear: ack
+  params: [line, tool]
+  pl: "Linia {line}: narzędzie lub oprawka T{tool} koliduje z mocowaniem."
+  en: "Line {line}: tool or holder T{tool} collides with the workholding."
+- code: K-305
+  clear: ack
+  params: [line, element]
+  pl: "Linia {line}: element ruchomy maszyny ({element}) koliduje z innym elementem."
+  en: "Line {line}: a moving machine element ({element}) collides with another element."
+- code: K-310
+  clear: ack
+  params: [line, axis]
+  pl: "Linia {line}: przekroczenie limitu programowego osi {axis}."
+  en: "Line {line}: soft limit of axis {axis} exceeded."
+- code: K-311
+  clear: ack
+  params: [line, distance]
+  pl: "Linia {line}: bliski kontakt, odstęp {distance} mm."
+  en: "Line {line}: near contact, clearance {distance} mm."
+- code: K-320
+  clear: ack
+  params: [tool]
+  pl: "Narzędzie T{tool} nie ma geometrii; użyto walca zastępczego."
+  en: "Tool T{tool} has no geometry; a substitute cylinder is used."
+- code: K-321
+  clear: ack
+  params: []
+  pl: "Brak definicji przygotówki; zdefiniuj ją przed symulacją."
+  en: "No stock definition; define the stock before simulating."
+
+# ---- Programowanie i ścieżka ---------------------------------------------
+- code: P-5001
+  clear: ack
+  params: [line, word]
+  pl: "Linia {line}: nieobsługiwany kod {word}."
+  en: "Line {line}: unsupported code {word}."
+- code: P-5002
+  clear: ack
+  params: [line, word]
+  pl: "Linia {line}: brak wymaganego parametru {word}."
+  en: "Line {line}: required parameter {word} is missing."
+- code: P-5003
+  clear: ack
+  params: [name, value, limit]
+  pl: "Wartość {name} = {value} jest poza dozwolonym zakresem ({limit})."
+  en: "Value {name} = {value} is outside the allowed range ({limit})."
+- code: P-5004
+  clear: ack
+  params: [radius, segment]
+  pl: "Promień narzędzia {radius} mm jest za duży dla konturu (segment {segment})."
+  en: "Tool radius {radius} mm is too large for the contour (segment {segment})."
+- code: P-5005
+  clear: ack
+  params: [segment]
+  pl: "Brak miejsca na dojazd lub odjazd styczny (segment {segment})."
+  en: "No room for a tangential lead-in or lead-out (segment {segment})."
+- code: P-5006
+  clear: ack
+  params: [segment, difference]
+  pl: "Łuk w segmencie {segment} jest niespójny (różnica promieni {difference} mm)."
+  en: "The arc in segment {segment} is inconsistent (radius difference {difference} mm)."
+- code: P-5007
+  clear: ack
+  params: [tool, what]
+  pl: "Narzędzie T{tool} nie spełnia wymagań operacji: {what}."
+  en: "Tool T{tool} does not meet the operation requirements: {what}."
+- code: P-5008
+  clear: ack
+  params: [depth, limit]
+  pl: "Głębokość {depth} mm przekracza dozwoloną ({limit} mm)."
+  en: "Depth {depth} mm exceeds the allowed {limit} mm."
+- code: P-5009
+  clear: ack
+  params: [name]
+  pl: "Kontur {name} nie jest zamknięty."
+  en: "Contour {name} is not closed."
+- code: P-5010
+  clear: ack
+  params: [segment, gap]
+  pl: "Nieciągłość ścieżki w segmencie {segment} (przerwa {gap} mm)."
+  en: "Path discontinuity at segment {segment} (gap {gap} mm)."
