@@ -52,8 +52,10 @@ import json, sys, time
 import hal
 import linuxcnc
 plan = json.loads(sys.argv[1])
+_comp = hal.component("lrt_scenariusz")  # hal.get_value wymaga komponentu
+_comp.ready()
 c, s, e = linuxcnc.command(), linuxcnc.stat(), linuxcnc.error_channel()
-out = {"errors": [], "alarms": {}, "line_max": 0}
+out = {"errors": [], "setup_errors": [], "alarms": {}, "line_max": 0}
 T0 = None
 def now():
     return 0.0 if T0 is None else time.time() - T0
@@ -63,7 +65,7 @@ def poll():
         msg = e.poll()
         if not msg:
             break
-        out["errors"].append([round(now(), 3), msg[1]])
+        out["errors" if T0 is not None else "setup_errors"].append([round(now(), 3), msg[1]])
 def wait(cond, timeout):
     t = time.time()
     while time.time() - t < timeout:
@@ -82,7 +84,7 @@ c.mode(linuxcnc.MODE_MANUAL); c.wait_complete()
 c.teleop_enable(0); c.wait_complete()
 for attempt in range(2):  # WSL bez RT: pojedynczy błąd nadążania przy bazowaniu — ponów raz
     c.home(-1)
-    out["homed"] = wait(lambda: all(s.homed[:4]), 120)
+    out["homed"] = wait(lambda: all(s.homed[:4]), 60)
     if out["homed"]:
         break
     out["machine_on"] = machine_on()
@@ -115,8 +117,11 @@ while now() < plan["duration"]:
     for j in range(4):  # 603Fh napędu z lrt_net → alarm katalogu (jak ekran operatora)
         try:
             code = int(hal.get_value("lrt-net.0.axis.%d.error-code" % j))
-        except Exception:
+        except Exception as exc:
+            out.setdefault("hal_error", str(exc))
             code = 0
+        if code:
+            out.setdefault("codes", {})[str(j)] = code
         alarm = plan["error_alarms"].get(str(code))
         if alarm:
             out["alarms"].setdefault(alarm, round(now(), 3))
@@ -315,6 +320,7 @@ def run_linuxcnc(scen: Scenario, port: int | None = None) -> ScenarioResult:
                         result_line = line[len("RESULT "):]
                 driver.wait(timeout=60)
                 tele = plant.call("/api/telemetry")
+                live_states = plant.call("/api/faults")["drives"]  # przed zamknięciem LinuxCNC
             finally:
                 if driver is not None and driver.poll() is None:
                     driver.kill()
@@ -327,6 +333,13 @@ def run_linuxcnc(scen: Scenario, port: int | None = None) -> ScenarioResult:
     for left in pending:
         res.criteria.append(Criterion(f"krok {left.action} wykonany", False,
                                       "nie wykonano przed końcem scenariusza"))
+    plant_report["drive_states"] = live_states
+    for _t, text in out.get("setup_errors", []):  # bazowanie przed T0: nie są alarmami
+        res.log.append(f"{0:7.3f} s  LinuxCNC (przed T0): {text}")
+    if out.get("codes"):
+        res.log.append(f"{0:7.3f} s  603Fh z HAL: {out['codes']}")
+    if out.get("hal_error"):
+        res.log.append(f"{0:7.3f} s  odczyt HAL: {out['hal_error']}")
     _collect(res, out, plant_report, tele)
     if not out.get("machine_on") or not out.get("homed"):
         res.criteria.append(Criterion("LinuxCNC włączony i zbazowany", False,

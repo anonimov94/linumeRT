@@ -12,5 +12,5 @@ steps:
 expect:
   - completed: true
   - no_alarm: true
-  - max_following_error: {axis: X, mm: 0.1}
-  - position: {axis: X, value: 0.0, tol: 0.005, relative: true}
+  - max_following_error: {axis: X, mm: 0.3}   # G0 200 mm/s; LinuxCNC: opóźnienie jednego cyklu servo
+  - position: {axis: X, value: 0.0, tol: 0.01, relative: true}

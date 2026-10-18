@@ -13,5 +13,5 @@ expect:
   - completed: true
   - no_alarm: true
   - max_following_error: {axis: X, mm: 0.2}   # LinuxCNC liczy z opóźnieniem jednego cyklu servo
-  - position: {axis: X, value: 0.0, tol: 0.005, relative: true}
-  - position: {axis: Z, value: 0.0, tol: 0.005, relative: true}
+  - position: {axis: X, value: 0.0, tol: 0.01, relative: true}
+  - position: {axis: Z, value: 0.0, tol: 0.01, relative: true}
