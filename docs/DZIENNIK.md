@@ -108,3 +108,11 @@ Najnowsze wpisy na dole. Każda sesja dopisuje: zrobione · decyzje · do sprawd
 - #3 (Codex): diagnoza czerwonego CI — segfault QtDragon przy zamykaniu w teardown `test_qtdragon_screen`; lokalnie nieodtwarzalny (7/7 zielone pod Xvfb). Ponowny run CI: success (crash niestabilny); kodu #3 nie zmieniano, diagnoza w komentarzu w #3.
 - Uporządkowano `docs/NASTEPNA_SESJA.md` (aktualny stan, zlecenia dla Codexa w kolejności, usunięte nieaktualne sekcje) i sekcję „Stan” w `docs/PROMPT_NOWEJ_SESJI.md`.
 - Do sprawdzenia: przegląd wsteczny `d53aa04` przez Codexa.
+
+## 039 — Format .lnx i BaseMacroGenerator — 2026-10-18
+- Model-Author: Claude (Opus 5.5). Gałąź `wip/sesja-039` od `main` (niezależna od PR #13 i od Codexa).
+- Zrobione: `programs/lnx.py` (model `.lnx`, błędy ze ścieżką pola, zapis atomowy, `lnx_schema.json` z modelu), `programs/stock.py` (przygotówka BOX/CYL, `;@STOCK` bezstratnie), `generators/base.py` (`BaseMacroGenerator`, `Field`, `Issue`, `fmt`, nakładki `is_valid`/`generate_ngc`), `generators/registry.py` (wersje), `programs/compiler.py` (deterministyczny `.ngc`, błąd blokuje zapis, kontrola wyjścia P-5013); alarmy P-5011…P-5015; testy `tests/test_lnx.py` (40) z plikiem golden i `tests/test_ngc_linuxcnc.py` (rs274 z LinuxCNC 2.9).
+- Weryfikacja (WSL Ubuntu 24.04, venv Python 3.12): `ruff` czysty; `pytest` 288 przeszło; `pytest -m linuxcnc tests/test_ngc_linuxcnc.py` 2 OK (plik golden przechodzi przez interpreter LinuxCNC do PROGRAM_END, test negatywny wykrywa błąd).
+- Decyzje: jedna PROPOZYCJA w `docs/DECYZJE.md` (sesja 039).
+- Do sprawdzenia ręcznie: nazwy pól i treść komentarzy w `.ngc` (bez polskich znaków w komentarzach kompilatora; komentarze kroków z polskimi znakami LinuxCNC przyjmuje).
+- Długi: generatory wbudowane (040–043) i rejestracja w `DEFAULT_REGISTRY`; `preview_2d` tylko w interfejsie bazowym (podglądy: 046); jednostki „inch” przyjmowane, ale bez przeliczania pól generatorów; edytor programów w ekranie (045, 047).
