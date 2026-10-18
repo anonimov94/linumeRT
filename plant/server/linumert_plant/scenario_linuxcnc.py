@@ -129,7 +129,8 @@ while now() < plan["duration"]:
         estop_seen = True
         out["alarms"].setdefault("E-1100", round(now(), 3))
     if program["running"]:
-        if s.task_state != linuxcnc.STATE_ON or out["errors"] and out["errors"][-1][0] >= program["t"]:
+        late_error = out["errors"] and out["errors"][-1][0] >= program["t"]
+        if s.task_state != linuxcnc.STATE_ON or late_error:
             program["aborted"] = True
         if s.interp_state == linuxcnc.INTERP_IDLE and now() - program["t"] > 0.3:
             program["running"] = False
@@ -200,7 +201,8 @@ class _Plant:
         self.proc = subprocess.Popen(
             [sys.executable, "-m", "linumert_plant", "serve", "--plant",
              str(CONFIG / "plant.yaml"), "--lockstep", "--port", str(port), "--seed",
-             str(scen.linuxcnc.get("seed", 5)), "--panel", "0", "--report", str(report), "--state-dir",
+             str(scen.linuxcnc.get("seed", 5)), "--panel", "0", "--report", str(report),
+             "--state-dir",
              str(report.parent / "state")], env=env, stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT, text=True)
         self.lines: list[str] = []
