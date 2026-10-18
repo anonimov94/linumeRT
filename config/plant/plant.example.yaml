@@ -19,7 +19,7 @@ panel: {telemetry_ms: 5}
 desk:
   mpg_a: 20
   mpg_b: 21
-  axis: {X: 22, Y: 23, Z: 24, A: 31}
+  axis: {X: 22, Y: 23, Z: 24}
   step: {1: 25, 10: 26, 100: 27}
   cycle_start: 28
   feed_hold: 29

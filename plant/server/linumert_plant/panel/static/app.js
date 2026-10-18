@@ -289,7 +289,10 @@ function turn(detents) {
     if (n) { acc -= n * DETENT_DEG; turn(n); }
   };
   el.onpointerup = el.onpointercancel = () => { last = null; acc = 0; };
-  el.onwheel = (e) => { e.preventDefault(); turn(e.deltaY < 0 ? 1 : -1); };
+  el.onwheel = (e) => {  // tylko z fokusem: przewijanie strony nie może dawać impulsów MPG
+    if (document.activeElement !== el) return;
+    e.preventDefault(); turn(e.deltaY < 0 ? 1 : -1);
+  };
   el.onkeydown = (e) => {
     if (e.key === "ArrowRight" || e.key === "ArrowUp") turn(1);
     if (e.key === "ArrowLeft" || e.key === "ArrowDown") turn(-1);
