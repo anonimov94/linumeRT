@@ -6,7 +6,7 @@ set -euo pipefail
 # RIP/uspace only. Dependencies derived from upstream debian/configure no-docs
 # and debian/control (2.9, a33293f46575c809e082e0806e79ab996f982513).
 packages=(git build-essential autoconf automake libtool pkg-config gettext intltool
-    asciidoc-base xsltproc docbook-xsl
+    asciidoc-base xsltproc docbook-xsl docbook-xml libxml2-utils
     libudev-dev libboost-python-dev libepoxy-dev libgl-dev libglu1-mesa-dev
     libgtk2.0-dev libgtk-3-dev libmodbus-dev libgpiod-dev libeditreadline-dev
     libtirpc-dev libusb-1.0-0-dev libxmu-dev python3-dev python3-tk python3-xlib

@@ -17,6 +17,17 @@ import pytest
 pytestmark = pytest.mark.linuxcnc
 
 
+def qtdragon_window():
+    from Xlib.display import Display
+
+    connection = Display()
+    for window in connection.screen().root.query_tree().children:
+        if "qtdragon" in (window.get_wm_name() or "").lower():
+            return connection, window
+    connection.close()
+    return None
+
+
 def wait_for(predicate, process, timeout=30):
     deadline = time.monotonic() + timeout
     while time.monotonic() < deadline:
@@ -51,7 +62,7 @@ def simulation(tmp_path):
             ["linuxcnc", "-r", str(ini)], cwd=ini.parent,
             stdout=log, stderr=subprocess.STDOUT, start_new_session=True,
         )
-        processes.append((process, log))
+        processes.append((process, log, headless))
         def ready():
             # Upstream caches a failed first tool mmap for the process lifetime.
             # Probe in a separate process until both NML and tool data are ready.
@@ -68,7 +79,23 @@ def simulation(tmp_path):
         return process, status
 
     yield start
-    for process, log in processes:
+    for process, log, headless in processes:
+        if not headless and process.poll() is None:
+            window_info = qtdragon_window()
+            if window_info:
+                from Xlib.protocol.event import ClientMessage
+
+                connection, window = window_info
+                window.send_event(ClientMessage(
+                    window=window.id, client_type=connection.intern_atom("WM_PROTOCOLS"),
+                    data=(32, [connection.intern_atom("WM_DELETE_WINDOW"), 0, 0, 0, 0]),
+                ))
+                connection.sync()
+                connection.close()
+                try:
+                    process.wait(timeout=10)
+                except subprocess.TimeoutExpired:
+                    pass
         if process.poll() is None:
             os.killpg(process.pid, signal.SIGTERM)
             try:
@@ -77,7 +104,9 @@ def simulation(tmp_path):
                 os.killpg(process.pid, signal.SIGKILL)
                 process.wait(timeout=5)
         log.close()
-        print((tmp_path / "linuxcnc.log").read_text())
+        log_text = (tmp_path / "linuxcnc.log").read_text()
+        print(log_text)
+        assert "Segmentation fault" not in log_text, "LinuxCNC crashed during shutdown"
 
 
 def test_sim_import_home_and_mdi(simulation):
@@ -121,7 +150,10 @@ def test_qtdragon_screen(simulation, tmp_path):
             ["halcmd", "show", "pin", "qtdragon.*"], capture_output=True, text=True,
             check=True, timeout=5,
         )
-        return "qtdragon" in result.stdout
+        window_info = qtdragon_window()
+        if window_info:
+            window_info[0].close()
+        return "qtdragon" in result.stdout and window_info is not None
 
     wait_for(screen_ready, process, timeout=60)
     time.sleep(8)
