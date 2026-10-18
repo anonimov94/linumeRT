@@ -32,6 +32,11 @@ napędów = zmiana tylko bloku „napędy” w pliku HAL. Wzorzec: `config/sim/l
 | `linumert.spindle.at-speed` | bit | → | `spindle.0.at-speed` | prędkość osiągnięta |
 | `linumert.spindle.inhibit` | bit | → | `spindle.0.inhibit` | blokada (ekran: pauza z podniesieniem Z) |
 
+Wariant z falownikiem (`spindle_vfd.hal`, hy_vfd): `linumert.spindle.rpm-cmd` (`spindle.0.speed-out-abs`
+→ `vfd.speed-command`, obr/min), `linumert.spindle.rpm-fb` (`vfd.spindle-speed-fb`, obr/min, przeliczane na
+obr/s do `speed-in`), `linumert.spindle.enable` (`motion.motion-enabled` → `vfd.enable`), `linumert.spindle.vfd-ok`
+(`vfd.hycomm-ok`). Bez `revs` i `index` (hy_vfd nie ma enkodera wrzeciona).
+
 ## Wejścia i wyjścia
 
 | Sygnał | Typ | Kierunek | Pin LinuxCNC | Znaczenie |
@@ -90,7 +95,7 @@ net lrt.j0.md   lrt-net.0.axis.0.mode-display => lrt-cia402.0.mode-display
 | `axis.N.ferror` | float | out | błąd nadążania napędu [jedn. osi] |
 | `axis.N.torque` / `.error-code` | float / u32 | out | 6077h [‰] / 603Fh |
 | `din-00…31` / `dout-00…31` | bit | out / in | wejścia (stan elektryczny: 1 = obwód zamknięty, NC w spoczynku = 1; odwrócenie w HAL) / wyjścia cyfrowe Plant (`machine.yaml io`) |
-| `spindle-speed-cmd` / `-fb` | float | in / out | wrzeciono [obr/min] (v1: Plant nie modeluje, sesja 021) |
+| `spindle-speed-cmd` / `-fb` | float | in / out | wrzeciono [obr/min]; Plant modeluje wał (bez falownika steruje nim `-cmd`), docs/PLANT.md §5a |
 | `drive-fault`, `estop-open` | bit | out | flagi odpowiedzi Plant |
 | `connected` | bit | out | odpowiedź w ostatnich `timeout-cycles` (20) cyklach |
 | `sent`, `received`, `missed`, `bad-frames`, `send-errors` | u32 | out | liczniki mastera (`reset-stats`: zbocze zeruje też Plant) |

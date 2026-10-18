@@ -4,7 +4,7 @@ Prompt startowy i stan bieżący: `docs/PROMPT_NOWEJ_SESJI.md` (aktualizować na
 
 Model-Author: Codex · 2026-10-17
 
-Tura: Claude · od 2026-10-18T14:59Z · stan: oddana (D31: sesje 004 → PR #24, 005 → PR #25; stos #18–#25 czeka na scalenie przez właściciela)
+Tura: Claude · od 2026-10-18T16:02Z · stan: w toku (sesja 021: testy vfd.py, integracja, konfiguracja _vfd)
 
 ## Katalog i Git
 
@@ -111,3 +111,4 @@ Następna sesja Claude: 017 (`prompts/START-017.md`, komponent HAL lrt_net) — 
 - 2026-10-18T15:36Z Sesje 017 (PR #27) i 018 (wip/sesja-018): LinuxCNC steruje Plant przez lrt_net; e2e test zielony. Uruchomienie z ekranem: tools/dev/plant-gui.sh. Następny: 019 (ograniczenia programowe, strefy, wyrocznia).
 - 2026-10-18T15:47Z Sesja 019 (wip/sesja-019): wyrocznia REQ-VM-06, scenariusze z LinuxCNC zielone. Następny: 020 (magazyn narzędzi, kolizje).
 - 2026-10-18T15:54Z Sesja 020 (wip/sesja-020): magazyn, pozycje, kolizje w Plant; 468 OK. Następny: 021 (wrzeciono VFD Modbus).
+- 2026-10-18T16:00Z Sesja 021 przerwana na prośbę właściciela: vfd.py (model, hy_vfd, Modbus TCP) bez testów i integracji. Kontynuacja: prompts/START-021.md. Autozapis zatrzymany, blokady zwolnione.

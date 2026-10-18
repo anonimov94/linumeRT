@@ -17,6 +17,10 @@ tego projektu (D14).
 | pytest (dev) | testy | MIT | tak (tylko narzędzie dev) | sesja 001 |
 | ruff (dev) | lint | MIT | tak (tylko narzędzie dev) | sesja 001 |
 
+Modbus RTU/TCP w Plant (sesja 021): własna implementacja w `plant/server/linumert_plant/vfd.py`
+(stdlib: `socket`, `os.openpty`), bez bibliotek zewnętrznych (np. pymodbus). Ramki hy_vfd odtworzone
+z opisu protokołu i zachowania `hy_comm.c` (LinuxCNC 2.9, GPL-2.0), bez kopiowania kodu.
+
 ## Zależności planowane (jeszcze nie dodane)
 
 | Zależność | Rola | Licencja | Sesja |

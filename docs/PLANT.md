@@ -87,7 +87,9 @@ potem `digital_in` u32, `spindle_actual` f32, statystyki (`frames_lost` u32, `fr
 - Ramka powtórzona albo starsza dostaje odpowiedź (stan bieżący) bez kroku modelu.
 - Wyjątek w modelu: napędy wyłączone (6040h = 0), wyjścia zerowe, dalej tylko odpowiedzi ze słowem
   stanu FAULT i 603Fh = FF00h (E-4200) do restartu Plant.
-- `spindle_cmd` / `spindle_actual`: w v1 nieużywane (0); wrzeciono VFD przez Modbus w sesji 021.
+- `spindle_cmd` / `spindle_actual` [obr/min, znak = kierunek]: bez sekcji `vfd` w plant.yaml
+  wrzeciono zadaje `spindle_cmd`; z sekcją `vfd` steruje falownik (§5a), a `spindle_cmd` jest
+  pomijane. `spindle_actual` to zawsze obroty wału modelu.
 - Ślad: SHA-256 wszystkich wysłanych odpowiedzi (`PlantServer.digest`, wypisywany po zakończeniu),
   zapis przebiegu do CSV/JSON Lines w osobnym wątku (`trace.py`, kolejka bez blokowania pętli).
 
@@ -124,7 +126,7 @@ wrzeciono VFD.
 | Serwo krokowe | zamknięta pętla z enkoderem | alarm po przekroczeniu błędu nadążania |
 | Krokowiec open-loop | generator kroków z różnicy `target_pos`; moment z krzywej prąd/prędkość | moment obciążenia > moment wyjściowy → **gubienie kroków bez alarmu** |
 | Oś obrotowa z przekładnią | j.w. + przełożenie `r`, luz przekładni, J odbita | zależnie od napędu bazowego |
-| Wrzeciono VFD | rampy, krzywa momentu, rejestry Modbus (sesja 021) | kody E-4100…E-4105 |
+| Wrzeciono VFD | rampa falownika, krzywa momentu, I²t, hy_vfd (RTU) i Modbus TCP (§5a) | utrata komunikacji, błąd falownika (wybieg), przeciążenie |
 
 **Maszyna stanów CiA 402:** Switch on disabled → Ready to switch on → Switched on →
 Operation enabled; Fault, Quick stop active; kasowanie faultu zboczem bitu 7 `controlword`.
@@ -170,6 +172,40 @@ serwo krokowe (≈2,2 N·m), serwo 400 W, serwo 750 W, stół obrotowy ze ślima
 wrzeciono 2,2 kW z falownikiem; bez nazw producentów.
 **Sprzęt (REQ-VD-06):** sekcja `real:` w tym samym formacie szablonu przenosi konfigurację
 z Plant na lcec/stepgen (sesja 061).
+
+## 5a. Wrzeciono z falownikiem (sesja 021)
+Kod: `plant/server/linumert_plant/vfd.py`, testy `tests/test_vfd.py`, `tests/test_plant_vfd_linuxcnc.py`.
+
+- **Model** (`SpindleModel`): bezwładność, krzywa moment–prędkość, tarcie i I²t z instancji szablonu
+  napędu wrzeciona (`spindle.drive` w machine.yaml); rampa falownika `spindle.ramp_up_s` /
+  `ramp_down_s` (0 → `max_rpm`); obciążenie `load_torque` [N·m] w locie; at-speed ±2 %.
+- **hy_vfd (Modbus RTU w odmianie Huanyang)**: ramki 0x01–0x05 z CRC Modbus, długości zgodne z
+  `hy_comm.c` LinuxCNC 2.9; parametry PD004/005/011/141–144; Hz ↔ obr/min z PD144 (jak hy_vfd).
+  Transport: pseudoterminal z dowiązaniem `vfd.device` (`hy_vfd -d <device>`); między VM:
+  `socat` pty ↔ TCP.
+- **Modbus TCP (mb2hal)**: funkcje 3, 4, 6, 16, wyjątki 01/02/03; rejestry z `vfd.modbus_map`:
+
+| Rejestr | Domyślny adres | Znaczenie |
+|---|---|---|
+| `command` | 0 | bit0 praca, bit1 wstecz, bit2 kasowanie błędu |
+| `speed_cmd` | 1 | prędkość zadana [obr/min] |
+| `speed_actual` | 2 | prędkość rzeczywista [obr/min] |
+| `status` | 3 | bit0 obraca się, bit1 at-speed, bit2 wstecz, bit3 błąd |
+| `current_x10` | 4 | prąd [0,1 A] |
+| `load_pct` | 5 | moment [% znamionowego] |
+| `fault_code` | 6 | 0 brak, 1 błąd falownika, 2 przeciążenie |
+
+- **Usterki** (wstrzykiwanie w serwerze) i alarmy, które powinna zgłosić strona LinuxCNC:
+
+| Usterka | Jak wstrzyknąć | Skutek w Plant | Alarm (katalog) |
+|---|---|---|---|
+| Utrata komunikacji | `server.vfd_faults.comm_lost = True` | falownik milczy (pty i TCP) | E-4100 |
+| Błąd falownika | `server.spindle.fault = FAULT_DRIVE` | wyjście wyłączone, wybieg | E-4102 |
+| Przeciążenie | `server.spindle.load_torque = 2.0` | I²t → `FAULT_OVERLOAD`, wybieg | E-4104 |
+
+- **Uwaga o hy_vfd:** komponent porównuje obroty bez znaku, więc przy nawrocie M3 → M4 bez
+  zatrzymania `spindle-at-speed` jest chwilowo prawdziwe, gdy wrzeciono hamując przechodzi przez
+  |S|. Program powinien wstawić M5 i odczekać przed zmianą kierunku. NIEZWERYFIKOWANE NA SPRZĘCIE.
 
 ## 6. Maszyna: `machine.yaml` (REQ-VM-01 … REQ-VM-12)
 Jedno źródło prawdy dla Plant i generatora konfiguracji LinuxCNC (REQ-VM-01); Plant nie

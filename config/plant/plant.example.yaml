@@ -8,3 +8,8 @@ mode: lockstep            # lockstep (testy, CI, deterministyczny) | realtime (V
 seed: 1
 state_file: ../../state/plant_state.json
 trace: {path: ../../state/traces/plant.csv, format: csv}   # csv | jsonl
+# Falownik wrzeciona (sesja 021). Bez tej sekcji wrzeciono zadaje spindle_cmd z LRT-NET.
+# device: dowiązanie pty dla `hy_vfd -d <device>`; modbus_port: Modbus TCP dla mb2hal.
+# Rejestry Modbus (domyślne): command 0, speed_cmd 1, speed_actual 2, status 3,
+# current_x10 4, load_pct 5, fault_code 6 (opis: plant/server/linumert_plant/vfd.py).
+# vfd: {device: /tmp/linumert-hy_vfd, modbus_listen: 127.0.0.1, modbus_port: 1502, slave: 1}

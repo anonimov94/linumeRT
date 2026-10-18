@@ -88,6 +88,7 @@ class Master:
         self.axes = [AxisCommand(controlword=0, mode=MODE_CSP, target_pos=0)
                      for _ in range(n_axes)]
         self.digital_out = 0
+        self.spindle_cmd = 0.0  # [obr/min], znak = kierunek
         self.timeouts = 0
         self.last: Reply | None = None
         self.transport = transport
@@ -103,7 +104,8 @@ class Master:
     def exchange(self, flags: int = 0, advance_ns: int | None = None) -> Reply:
         """Wysyła jedną ramkę i czeka na odpowiedź z tym samym `seq`."""
         cmd = Command(seq=self.seq, time_ns=self.time_ns, axes=self.axes,
-                      digital_out=self.digital_out, flags=flags)
+                      digital_out=self.digital_out, spindle_cmd=self.spindle_cmd,
+                      flags=flags)
         frame = encode_command(cmd)
         if self.transport is not None:
             data = self.transport(frame)

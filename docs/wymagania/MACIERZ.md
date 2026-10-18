@@ -7,7 +7,7 @@ Tabela jest zgodna z wymaganiami (pilnuje tego `tests/test_plant_spec.py`).
 
 | REQ | Sesja | Test (scenariusz / test jednostkowy) | Status |
 |---|---|---|---|
-| REQ-VD-01 | 013 | `test_drive_template_schema`, `test_drive_template_physics` | zaimplementowane |
+| REQ-VD-01 | 013, 021 | `test_drive_template_schema`, `test_drive_template_physics`; wrzeciono VFD: `tests/test_vfd.py`, `tests/test_plant_vfd_linuxcnc.py` | zaimplementowane |
 | REQ-VD-02 | 013 | `test_drive_instance_overrides` | zaimplementowane |
 | REQ-VD-03 | 013, 023 | `test_drive_clone_independent`, scenariusz `drive_clone_tuning` | zaimplementowane |
 | REQ-VD-04 | 013, 022 | `test_live_params`, scenariusz `heavy_table_live` | zaimplementowane |
