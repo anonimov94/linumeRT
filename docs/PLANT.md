@@ -64,7 +64,8 @@ potem `digital_in` u32, `spindle_actual` f32, statystyki (`frames_lost` u32, `fr
 
 **Reguły:**
 1. Ramka z błędnym `magic`, `version`, `type`, długością lub CRC jest odrzucana i liczona;
-   proces nie zawiesza się (REQ-QA-03).
+   proces nie zawiesza się (REQ-QA-03). Tak samo ramka z poprawnym CRC, ale niezerowym
+   `reserved` lub `pad` albo z `spindle_cmd`/`spindle_actual` równym NaN lub ±∞.
 2. `seq` porównujemy z uwzględnieniem zawinięcia u32: nowszy → krok modelu; luka → `frames_lost += luka`;
    starszy lub powtórzony → `frames_late += 1`, bez kroku.
 3. Krok modelu `dt = time_ns − poprzednie time_ns`, ograniczony do [0,1 ms; 10 ms];

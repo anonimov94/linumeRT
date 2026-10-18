@@ -5,6 +5,7 @@ Model-Author: Claude
 
 from __future__ import annotations
 
+import math
 import random
 import struct
 import zlib
@@ -70,6 +71,40 @@ def test_reply_roundtrip_and_clamping() -> None:
 def test_rejects_bad_frames(mutate, reason) -> None:  # REQ-QA-03
     with pytest.raises(FrameError):
         decode_command(mutate(encode_command(_cmd())))
+
+
+def _resealed(frame: bytes, fmt: str, offset: int, value) -> bytes:
+    """Wpisuje pole i przelicza CRC — ramka przechodzi CRC, odrzuca ją dopiero walidacja pól."""
+    body = bytearray(frame[:-4])
+    struct.pack_into(fmt, body, offset, value)
+    return bytes(body) + struct.pack("<I", zlib.crc32(bytes(body)))
+
+
+# Offsety z docs/PLANT.md §3: reserved @18, pad osi @20+3, spindle za blokami osi + digital u32.
+@pytest.mark.parametrize("fmt, offset, value, reason", [
+    ("<H", 18, 1, "reserved"),
+    ("<B", 20 + 3, 1, "pad"),
+    ("<B", 20 + 8 + 3, 1, "pad osi 1"),
+    ("<f", 20 + 2 * 8 + 4, math.nan, "spindle_cmd"),
+    ("<f", 20 + 2 * 8 + 4, math.inf, "spindle_cmd"),
+    ("<f", 20 + 2 * 8 + 4, -math.inf, "spindle_cmd"),
+])
+def test_command_rejects_invalid_fields(fmt, offset, value, reason) -> None:  # REQ-QA-03
+    frame = _resealed(encode_command(_cmd(2)), fmt, offset, value)
+    with pytest.raises(FrameError, match=reason):
+        decode_command(frame)
+
+
+@pytest.mark.parametrize("fmt, offset, value, reason", [
+    ("<H", 18, 1, "reserved"),
+    ("<B", 20 + 3, 1, "pad"),
+    ("<f", 20 + 16 + 4, math.nan, "spindle_actual"),
+    ("<f", 20 + 16 + 4, math.inf, "spindle_actual"),
+])
+def test_reply_rejects_invalid_fields(fmt, offset, value, reason) -> None:  # REQ-QA-03
+    frame = _resealed(encode_reply(Reply(1, 2, [AxisReply()])), fmt, offset, value)
+    with pytest.raises(FrameError, match=reason):
+        decode_reply(frame)
 
 
 def test_rejects_axis_count_out_of_range() -> None:  # REQ-QA-03
