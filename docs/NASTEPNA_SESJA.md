@@ -22,13 +22,13 @@ Model-Author: Claude · 2026-10-18
 ## 2. Gałęzie i PR (stan 2026-10-18)
 
 `main` zawiera wszystkie ukończone sesje: 001–021, 032, 039, 044, porządek dokumentacji i kierunek HMI (D32).
-Sesja 008: PR #35 (autokontrola, bez niezależnego przeglądu). Sesja 022 (panel Plant, pulpit MPG): PR #37, gałąź `wip/sesja-022` (autokontrola, bez niezależnego przeglądu). Otwarte: #34 (Codex, HMI-01, draft);
+Sesja 008: PR #35 (autokontrola, bez niezależnego przeglądu). Sesja 022 (panel Plant, pulpit MPG): PR #37, gałąź `wip/sesja-022` (autokontrola, bez niezależnego przeglądu). Sesja 024 (scenariusze, awarie, raport): PR #38, gałąź `wip/sesja-024` (autokontrola). Otwarte: #34 (Codex, HMI-01, draft);
 #31 do zamknięcia (zawarty w #33). Scalone gałęzie `wip/*` i `claude/*` można usunąć.
 
 ## 3. Następna praca
 
 Podział na 4 sesje (D33): [`prompts/START-PODZIAL.md`](../prompts/START-PODZIAL.md). Równolegle 022
-([`START-022`](../prompts/archiwum/START-022.md)), 024 ([`START-024`](../prompts/START-024.md)) i 025
+([`START-022`](../prompts/archiwum/START-022.md)), 024 ([`START-024`](../prompts/archiwum/START-024.md)) i 025
 ([`START-025`](../prompts/START-025.md)); po scaleniu 022 i 024: 023 ([`START-023`](../prompts/START-023.md)).
 
 0. Właściciel: checklista bramki G0, [`docs/raporty/G0.md`](raporty/G0.md).
