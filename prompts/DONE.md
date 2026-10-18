@@ -8,3 +8,4 @@ Format: `NNN | RRRR-MM-DD | opis`. Agent dopisuje linię po udanej sesji. Zaplan
 007 | 2026-10-18 | Katalog alarmów (56 kodów PL/EN) z walidacją, AlarmManager, 23 testy; tłumaczenia Qt (.ts, i18n.sh) odłożone do sesji ekranu
 009 | 2026-10-18 | Specyfikacja Plant (docs/PLANT.md), protokół LRT-NET v1, macierz 22 REQ, testy spójności
 010 | 2026-10-18 | Schemat machine.yaml (Pydantic v2), 24 reguły spójności, 5 przykładowych maszyn, 42 testy
+011 | 2026-10-18 | Plant: rdzeń dynamiki osi w C (bezwładność, krzywa momentu, tarcie, grawitacja, luz, zderzaki), 23 testy C, make test-c w CI; PR #9 czeka na przegląd Codexa; prompt kolejnej sesji: prompts/START-012.md

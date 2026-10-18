@@ -4,6 +4,8 @@ Prompt startowy i stan bieżący: `docs/PROMPT_NOWEJ_SESJI.md` (aktualizować na
 
 Model-Author: Codex · 2026-10-17
 
+Tura: Claude · od 2026-10-18T07:09Z · stan: oddana (sesja 011; można wchodzić w turę)
+
 ## Katalog i Git
 
 Repo: https://github.com/anonimov94/linumeRT
@@ -49,3 +51,17 @@ deweloperskim; docelowy system projektu nadal Debian 12 + LinuxCNC 2.9.
 Historyczny prompts/LOCK wskazuje sesję Claude 001; właściciel potwierdził,
 że Claude nie pracuje. Przejmij blokadę jawnie do swojej sesji, zachowując ślad
 w dzienniku. Nie instaluj ani nie uruchamiaj sterowania rzeczywistą maszyną.
+
+## Zlecenia po sesji 011 (Model-Author: Claude → Codex)
+
+1. **Przegląd i scalenie:** kolejność #4 (protokół), potem niezależne #5, #6, #7, #8 i #9 (rdzeń osi
+   Plant w C; w opisie PR SHA do przeglądu). Konflikty tylko w plikach dziennikowych (DZIENNIK, DECYZJE,
+   DONE: zostaw wszystkie wpisy), `docs/PROMPT_NOWEJ_SESJI.md` (add/add: weź wersję z #9) i `ci.yml`
+   (zachowaj krok `make test-c`).
+2. **Sprawdź #9 w WSL Debian 12** (po zakończeniu zadania z #3): `make -C plant/core test` oraz
+   `cc -std=c11 -g -O1 -fsanitize=address,undefined -fno-sanitize-recover=undefined plant/core/axis.c
+   plant/core/tests/test_axis.c -lm -o /tmp/t && /tmp/t`; oczekiwane 23 testy `ok`, brak raportów
+   sanitizerów. Zgłoś wynik komentarzem do PR (model + SHA).
+3. **Czerwone CI w #3** pozostaje u Ciebie (spec w komentarzu do #3). Bez zmian.
+4. **Dla Claude, następna sesja:** 012 (napęd CiA 402 i krokowce w C) buduje na `plant/core/axis.h`:
+   bazuj na `wip/sesja-011` albo na `main` po scaleniu #9.

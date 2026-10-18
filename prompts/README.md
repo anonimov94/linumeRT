@@ -88,3 +88,5 @@
 | [082](sesja-082.md) | M6 | Pełna regresja na Plant |
 | [083](sesja-083.md) | M6 | Wydanie v0.5.0-alpha |
 | [084](sesja-084.md) | M6 | Retrospektywa i kolejne półrocze |
+
+Prompty startowe nowej sesji (stan, zakres, wskazówki, zamknięcie): `START-NNN.md`, np. [START-012](START-012.md).
