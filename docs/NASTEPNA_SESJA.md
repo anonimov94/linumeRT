@@ -4,7 +4,7 @@ Prompt startowy i stan bieżący: `docs/PROMPT_NOWEJ_SESJI.md` (aktualizować na
 
 Model-Author: Codex · 2026-10-17
 
-Tura: Claude · od 2026-10-18T14:17Z · stan: oddana (PR #22, #23 strategie bazowania; do przeglądu Codexa)
+Tura: Claude · od 2026-10-18T14:59Z · stan: oddana (D31: sesje 004 → PR #24, 005 → PR #25; stos #18–#25 czeka na scalenie przez właściciela)
 
 ## Katalog i Git
 
@@ -106,3 +106,5 @@ Następna sesja Claude: 017 (`prompts/START-017.md`, komponent HAL lrt_net) — 
 - 2026-10-18T14:17Z Strategie bazowania: `homing.latch` approach/release, PR #23 (bbb1e46), pytest 439 OK na Debianie 12. Sesja oddana, LOCK zwolniony.
 - 2026-10-18T14:23Z Podman (6.1.3, crun) na laptopie; `make lint test test-c test-san` na `ab9a9ab`: ruff czysty, pytest 439 OK, C 29/59/20 OK, ASan/UBSan czysto. Następny: LinuxCNC z GUI w kontenerze (prośba właściciela).
 - 2026-10-18T14:34Z `tools/dev/linuxcnc-gui.sh`: LinuxCNC 2.9.10 (linuxcnc.org, bookworm) + QtDragon sim w podmanie, okno na pulpicie laptopa (Xwayland). Działa. To pakiety, nie RIP z #3 — budowa nadal u Codexa. Blokada `linuxcnc` (lock.py) trzymana, dopóki GUI otwarte.
+- 2026-10-18T14:47Z Sesja 004 (D31): config/sim/linumert_xyz działa w LinuxCNC 2.9.10 z QtDragon, bazowanie OK, pytest 443 OK + test linuxcnc. Następny: 005 (ekran linumert).
+- 2026-10-18T14:59Z Sesja 005 (D31): screens/linumert działa w LinuxCNC 2.9.10, zrzut G0, pytest 443 OK + test linuxcnc. PR-y #18–#24 czekają na scalenie przez właściciela (klasyfikator odmówił samodzielnego scalenia własnych PR). Następny: 017 (lrt_net).

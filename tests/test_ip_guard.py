@@ -121,7 +121,7 @@ def test_no_references_to_earlier_materials():
 
 
 def test_images_and_fonts_only_with_provenance():
-    """Kazdy plik graficzny/font w repo ma wpis w PROVENANCE.md; obrazy tylko w docs/design/."""
+    """Grafiki/fonty mają wpis w PROVENANCE.md; obrazy w docs/design, docs/raporty, screens."""
     text = PROVENANCE.read_text(encoding="utf-8")
     missing, misplaced = [], []
     for path, rel in _files():
@@ -130,13 +130,11 @@ def test_images_and_fonts_only_with_provenance():
         if path.suffix.lower() in BINARY_ASSET_SUFFIXES:
             if f"`{rel}`" not in text:
                 missing.append(rel)
-            # Session 003 explicitly requires this registered upstream test screenshot.
-            if rel == "docs/raporty/spike_qtdragon.png":
-                continue
-            if not rel.startswith(("docs/design/", "screens/", "fonts/", "plant/server/")):
+            if not rel.startswith(("docs/design/", "docs/raporty/", "screens/", "fonts/",
+                                   "plant/server/")):
                 misplaced.append(rel)
     assert not missing, f"zasoby bez wpisu w docs/PROVENANCE.md: {missing}"
-    assert not misplaced, f"obrazy/fonty poza docs/design, screens, fonts: {misplaced}"
+    assert not misplaced, f"obrazy/fonty poza docs/design, docs/raporty, screens, fonts: {misplaced}"
 
 
 def test_provenance_covers_every_design_file():

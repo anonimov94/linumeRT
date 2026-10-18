@@ -195,3 +195,15 @@ Uzupełnienie: README plant/core (liczby testów 29/59/20, bazowanie, parametry 
   Uwagi do sesji 018: kierunek szukania indeksu w `switch_index` i prędkość zjazdu w homing_master.py vs homemod.
 - C: pominięte, brak LinuxCNC RIP (budowa w #3, zakres Codexa). PR #22.
 - Uzupełnienie (właściciel): po krańcówce maszyna wolno zjeżdża, baza na zwolnieniu styku NC; jazda dalej = uszkodzenie. Dodano `homing.latch: approach|release` (PR #23), korekta uwagi 1 w #13. Docker niepotrzebny (tryb rootfs).
+
+## 004 — Konfiguracja sim 3 osie z QtDragon (Model-Author: Claude, D31: zakres przejęty od Codexa)
+- Zrobione: `config/sim/linumert_xyz/` (INI, `linumert_sim.hal`, `linumert_postgui.hal`, tool.tbl 5 narzędzi), 3 programy w `config/sim/nc_files/`, `docs/HAL_KONTRAKT.md`, `docs/SIM_WSL.md`, `tests/test_sim_config.py` (4 testy + 1 z markerem linuxcnc: 20 s bez ekranu).
+- Sprawdzone w LinuxCNC 2.9.10 (podman, QtDragon na pulpicie): start bez błędów, bazowanie XYZ OK, programy przez rs274 OK, test linuxcnc zielony.
+- Decyzje: bazowanie X/Y/Z na krańcówkach ze strategią release (HOME_LATCH_VEL przeciwny znak, 1 mm/s), napęd w HAL jako osobny blok `sim_jN` (podmieniany przez lrt_net/step-dir/EtherCAT).
+- Do sprawdzenia ręcznie: okno zmiany narzędzia po M6, wygląd ekranu (nadal QtDragon — sesja 005).
+
+## 005 — Kopia bazowa ekranu QtDragon (Model-Author: Claude, D31)
+- Zrobione: `screens/linumert/` z QtDragon 2.9.10 (commit 86cdca7): `linumert.ui/.qrc/.qss`, niezmieniony `linumert_upstream_handler.py` + własny `linumert_handler.py` (klasa pochodna), `UPSTREAM.md` z procedurą aktualizacji; sim `DISPLAY = qtvcp linumert` przez dowiązanie `qtvcp/screens/linumert`; zrzut `docs/raporty/G0/ekran_bazowy.png` (`tools/dev/zrzut_ekranu.py`, Xvfb).
+- Decyzje: style alternatywne QtDragon nieskopiowane; grafiki QtDragon zostają do czasu własnego zestawu z docs/design; test IP dopuszcza zrzuty w `docs/raporty/`.
+- Do sprawdzenia ręcznie: ekran na pulpicie (tytuł linumeRT), wygląd nadal QtDragon.
+- Długi: własny wygląd (tokens.yaml) i nazewnictwo w UI — kolejne sesje ekranu.

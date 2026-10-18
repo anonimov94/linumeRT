@@ -18,3 +18,5 @@ Format: `NNN | RRRR-MM-DD | opis`. Agent dopisuje linię po udanej sesji. Zaplan
 039 | 2026-10-18 | Format .lnx (Pydantic + lnx_schema.json), ;@STOCK, BaseMacroGenerator i rejestr wersji, deterministyczny kompilator .lnx → .ngc (golden, rs274 LinuxCNC 2.9), alarmy P-5011…P-5015; PR do przeglądu Codexa
 044 | 2026-10-18 | Lekser G-code LinuxCNC (P-5101…P-5111, linia/kolumna, słowa O w całym pliku), kontrola w rs274; 44 próbki zgodne z LinuxCNC 2.9; ekran (przycisk Sprawdź) czeka na sesję 005; PR do przeglądu Codexa
 003 | 2026-10-18 | LinuxCNC 2.9 RIP uspace (Codex), dokończenie: Debian 12, poprawka CI (Claude, D31)
+004 | 2026-10-18 | konfiguracja sim linumert_xyz (QtDragon, kontrakt D05, bazowanie latch release), HAL_KONTRAKT, SIM_WSL; Claude (D31)
+005 | 2026-10-18 | ekran screens/linumert: kopia QtDragon 2.9.10 (commit 86cdca7), handler-patch, UPSTREAM.md, sim DISPLAY = qtvcp linumert, zrzut G0; Claude (D31)

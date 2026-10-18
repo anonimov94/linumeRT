@@ -1,0 +1,5 @@
+T1 P1 Z40.000 D6.000 ;frez walcowy 6 mm, 2 ostrza
+T2 P2 Z45.000 D10.000 ;frez walcowy 10 mm, 3 ostrza
+T3 P3 Z55.000 D5.000 ;wiertlo 5 mm
+T4 P4 Z35.000 D3.000 ;nawiertak 90 st. 3 mm
+T5 P5 Z50.000 D50.000 ;glowica planujaca 50 mm

@@ -1,0 +1,76 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+# linumeRT · symulator 3 osi: kontrakt sygnałów D05 (docs/HAL_KONTRAKT.md).
+# Struktura na podstawie hallib/core_sim.hal i simulated_home.hal z LinuxCNC 2.9 (GPL-2);
+# zmiany: nazwy sygnałów linumert.*, napęd jako osobny blok (sim_jN), sim_spindle, krańcówki
+# bazowania przy końcach osi. Plant/step-dir/EtherCAT podmieniają wyłącznie blok „napędy”.
+# Model-Author: Claude · sesja 004.
+
+loadrt [KINS]KINEMATICS
+loadrt [EMCMOT]EMCMOT servo_period_nsec=[EMCMOT]SERVO_PERIOD num_joints=[KINS]JOINTS
+# napędy symulowane: idealne nadążanie (wyjście = wejście)
+loadrt scale names=sim_j0,sim_j1,sim_j2
+loadrt sim_spindle names=sim_spindle
+loadrt ddt names=spindle_rps
+loadrt comp names=home_x,home_y,home_z
+
+addf motion-command-handler servo-thread
+addf motion-controller servo-thread
+addf sim_j0 servo-thread
+addf sim_j1 servo-thread
+addf sim_j2 servo-thread
+addf sim_spindle servo-thread
+addf spindle_rps servo-thread
+addf home_x servo-thread
+addf home_y servo-thread
+addf home_z servo-thread
+
+# ---- napędy (sim) -------------------------------------------------------------------------
+setp sim_j0.gain 1.0
+setp sim_j1.gain 1.0
+setp sim_j2.gain 1.0
+net linumert.j0.pos-cmd   joint.0.motor-pos-cmd => sim_j0.in
+net linumert.j0.pos-fb    sim_j0.out => joint.0.motor-pos-fb
+net linumert.j1.pos-cmd   joint.1.motor-pos-cmd => sim_j1.in
+net linumert.j1.pos-fb    sim_j1.out => joint.1.motor-pos-fb
+net linumert.j2.pos-cmd   joint.2.motor-pos-cmd => sim_j2.in
+net linumert.j2.pos-fb    sim_j2.out => joint.2.motor-pos-fb
+
+# ---- osie: zezwolenie, awaria, krańcówka bazowania -------------------------------------------
+net linumert.j0.enable    joint.0.amp-enable-out
+net linumert.j1.enable    joint.1.amp-enable-out
+net linumert.j2.enable    joint.2.amp-enable-out
+net linumert.j0.fault     => joint.0.amp-fault-in
+net linumert.j1.fault     => joint.1.amp-fault-in
+net linumert.j2.fault     => joint.2.amp-fault-in
+
+# Krańcówki (comp: out = in1 > in0): X/Y aktywne poniżej 1 mm, Z powyżej -1 mm.
+setp home_x.hyst 0.02
+setp home_y.hyst 0.02
+setp home_z.hyst 0.02
+setp home_x.in1 1.0
+setp home_y.in1 1.0
+setp home_z.in0 -1.0
+net linumert.j0.pos-fb    => home_x.in0
+net linumert.j1.pos-fb    => home_y.in0
+net linumert.j2.pos-fb    => home_z.in1
+net linumert.j0.home-sw   home_x.out => joint.0.home-sw-in
+net linumert.j1.home-sw   home_y.out => joint.1.home-sw-in
+net linumert.j2.home-sw   home_z.out => joint.2.home-sw-in
+
+# ---- wrzeciono ---------------------------------------------------------------------------
+net linumert.spindle.on        spindle.0.on
+net linumert.spindle.cw        spindle.0.forward
+net linumert.spindle.ccw       spindle.0.reverse
+net linumert.spindle.speed-cmd spindle.0.speed-out-rps => sim_spindle.velocity-cmd
+net linumert.spindle.revs      sim_spindle.position-fb => spindle.0.revs spindle_rps.in
+net linumert.spindle.speed-fb  spindle_rps.out => spindle.0.speed-in
+net linumert.spindle.index     spindle.0.index-enable <=> sim_spindle.index-enable
+net linumert.spindle.at-speed  => spindle.0.at-speed
+sets linumert.spindle.at-speed 1
+
+# ---- wejścia/wyjścia ---------------------------------------------------------------------
+# E-STOP: w symulacji obwód zamyka zezwolenie z LinuxCNC; na maszynie sygnał z obwodu sprzętowego.
+net linumert.io.estop-ok       iocontrol.0.user-enable-out => iocontrol.0.emc-enable-in
+net linumert.io.tool-prepare   iocontrol.0.tool-prepare => iocontrol.0.tool-prepared
+net linumert.io.coolant-flood  iocontrol.0.coolant-flood
+net linumert.io.coolant-mist   iocontrol.0.coolant-mist

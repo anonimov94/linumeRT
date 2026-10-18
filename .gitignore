@@ -17,3 +17,13 @@ build/
 .coverage
 htmlcov/
 build-san/
+
+# symulator LinuxCNC (pliki robocze)
+config/sim/linumert_xyz/*.var
+config/sim/linumert_xyz/*.var.bak
+config/sim/linumert_xyz/*.pref
+config/sim/linumert_xyz/*.log
+config/sim/linumert_xyz/mdi_history.dat
+config/sim/linumert_xyz/qtvcp/screens/qtdragon/
+screens/linumert/resources.py
+.cache/
