@@ -30,7 +30,7 @@ from typing import Any
 
 import yaml
 
-from .core_binding import MODE_CSP, PlantMachine
+from .core_binding import CW_FAULT_RESET, MODE_CSP, PlantMachine
 from .lrtnet import (
     FLAG_ESTOP_OPEN,
     FLAG_FAULT,
@@ -164,6 +164,7 @@ class PlantServer:
         self.stats = Stats()
         self.messages: deque[str] = deque(maxlen=200)
         self.watchdog_tripped = False
+        self._reset_seen = False
         self.model_failed = False
         self._digest = hashlib.sha256()
         self._last_seq: int | None = None
@@ -202,6 +203,7 @@ class PlantServer:
         if self.watchdog_tripped:
             return
         self.watchdog_tripped = True
+        self._reset_seen = False
         for drive in self.drives:
             self.machine.inject_fault(drive, FAULT_COMM_WATCHDOG, sticky=False)
         self.machine.set_outputs(0)
@@ -295,14 +297,10 @@ class PlantServer:
                 m.set_target(drive, axis.target_pos)
                 self._target[drive] = axis.target_pos
             m.set_controlword(drive, axis.controlword)
-        m.set_outputs(0 if self.watchdog_tripped and not self._all_reset() else cmd.digital_out)
-
-    def _all_reset(self) -> bool:
-        """Po watchdogu wyjścia zostają bezpieczne, aż żaden napęd nie jest w fault."""
-        if any(self.machine.statusword(d) & SW_FAULT for d in self.drives):
-            return False
-        self.watchdog_tripped = False
-        return True
+            if axis.controlword & CW_FAULT_RESET:
+                self._reset_seen = True
+        # Po watchdogu wyjścia zostają bezpieczne do fault resetu (zwolnienie w `_reply`).
+        m.set_outputs(0 if self.watchdog_tripped else cmd.digital_out)
 
     def _reply(self, seq: int, time_ns: int) -> Reply:
         m = self.machine
@@ -322,6 +320,9 @@ class PlantServer:
                                   actual_pos=actual, following_error=ferr,
                                   torque_pct=m.torque_actual(drive),
                                   error_code=m.drive_error_code(drive)))
+        if self.watchdog_tripped and self._reset_seen and not fault:
+            self.watchdog_tripped = False
+            self._note("E-4003 skasowany: napędy po fault reset, wyjścia zwolnione")
         inputs = m.inputs
         flags = FLAG_FAULT if fault else 0
         if self._estop is not None:
