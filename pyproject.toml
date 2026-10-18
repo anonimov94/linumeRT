@@ -20,9 +20,17 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+# Panel web Plant (sesja 022); bez tej grupy Plant działa, a panel zgłasza brak zależności.
+panel = [
+    "fastapi>=0.100",
+    "uvicorn>=0.23",
+    "websockets>=11",
+]
 dev = [
     "pytest",
     "ruff",
+    "httpx",
+    "linumert[panel]",
 ]
 
 # Trzy pakiety w jednym repozytorium (patrz docs/DECYZJE.md, wpis sesji 001):
@@ -42,11 +50,14 @@ packages = [
     "linumert.diag",
     "linumert_sim",
     "linumert_plant",
+    "linumert_plant.panel",
 ]
 
 [tool.setuptools.package-data]
 "linumert.alarms" = ["catalog.yaml"]
 "linumert.programs" = ["lnx_schema.json"]
+"linumert_plant.panel" = ["static/*.html", "static/*.js", "static/*.css", "static/*.svg",
+                          "static/vendor/*", "static/ikony/*"]
 
 [tool.setuptools.package-dir]
 linumert = "core/linumert"

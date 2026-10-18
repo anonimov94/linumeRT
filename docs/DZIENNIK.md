@@ -36,6 +36,7 @@ sesji: proces, scalenia, przeglądy). Treść: zrobione · testy · decyzje · d
 | [019](#019--ograniczenia-programowe-strefy-zakazane-i-wyrocznia-testowa-pr-29--2026-10-18--claude-d31) | Ograniczenia programowe, strefy zakazane i wyrocznia testowa | #29 | Claude (D31) |
 | [020](#020--magazyn-narzędzi-pozycje-wymiany-i-kolizje-w-plant-pr-30--2026-10-18--claude-d31) | Magazyn narzędzi, pozycje wymiany i kolizje w Plant | #30 | Claude (D31) |
 | [021](#021--plant-wrzeciono-vfd-przez-modbus-pr-32--2026-10-18--claude-d31) | Plant: wrzeciono VFD przez Modbus | #32 | Claude (D31) |
+| [022](#022--plant-panel-sterowania-i-pulpit-mpg-pr-37--2026-10-18--claude-opus-55) | Plant: panel sterowania i pulpit MPG | #37 | Claude (Opus 5.5) |
 | [032](#032--baza-narzędzi-z-typami-część-rdzenia-pr-16--2026-10-18--claude-opus-55) | Baza narzędzi z typami, część rdzenia | #16 | Claude (Opus 5.5) |
 | [039](#039--format-lnx-i-basemacrogenerator-pr-14--2026-10-18--claude-opus-55) | Format .lnx i BaseMacroGenerator | #14 | Claude (Opus 5.5) |
 | [044](#044--lekser-g-code-i-walidacja-w-edytorze-pr-15--2026-10-18--claude-opus-55) | Lekser G-code i walidacja w edytorze | #15 | Claude (Opus 5.5) |
@@ -284,3 +285,10 @@ Uzupełnienie: README plant/core (liczby testów 29/59/20, bazowanie, parametry 
 - Pozostałe zaległości 001–007 bez zmian i z właścicielem: tłumaczenia Qt (007, sesje ekranu), słowa zakazane w SLOWNIK (002, przegląd właściciela), PyQt5 GPL-3 (080). CI na `main` zielone.
 - Do sprawdzenia ręcznie: `docs/raporty/G0.md` (bramka G0), wynik w tabeli §5.
 - Długi: brak testu na Debianie 12 w podmanie w tej sesji; checkout na dysku Windows (`core.symlinks=false`) psuje dowiązanie ekranu, opisane w G0.md. Autokontrola, bez niezależnego przeglądu. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## 022 — Plant: panel sterowania i pulpit MPG (PR #37) · 2026-10-18 · Claude (Opus 5.5)
+- Zrobione (START-022, bez przycisków awarii → 023): podpakiet `linumert_plant/panel/` (FastAPI + WebSocket ≤ 20 Hz, uPlot 1.6.31), `python -m linumert_plant panel` i `serve --panel PORT`; telemetria w buforze pierścieniowym (5 ms, okno 10 s); suwaki parametrów live → `lrt_machine_set_live` z dziennikiem; presety wbudowane i zapisane; nagrywanie CSV; wirtualny pulpit (MPG w kwadraturze A/B, oś, krok, Start/Stop posuwu, kluczyk) jako bity `digital_in` z sekcji `desk:` plant.yaml (docs/PLANT.md §7a).
+- Testy (WSL Ubuntu 24.04, świeży klon): ruff czysty, pytest 518 OK (19 nowych: `tests/test_panel.py`, `tests/test_panel_parts.py`), testy C 29/59/20, `-m linuxcnc` 61/61. Masa ×10 z panelu: przyspieszenie maks. spada z ok. 1540 do ok. 860 mm/s².
+- Decyzje: DECYZJE, sesja 022. Pliki spoza zakresu: `core_binding.py` (opakowania), `__main__.py` (polecenie panel), `tools/dev/wsl-test.sh` (worktree z Git for Windows).
+- Do sprawdzenia ręcznie: `python -m linumert_plant panel --plant config/plant/plant.example.yaml` → http://127.0.0.1:8080/ (wygląd wobec makiety 06, suwaki, MPG, CSV).
+- Długi: piny pulpitu niepodłączone w HAL LinuxCNC (sesja 029); fonty IBM Plex/JetBrains Mono niedołączone (zapas systemowy); bardzo małe J z suwaka może rozkołysać serwo (to fizyka modelu, nie błąd). Autokontrola, bez niezależnego przeglądu. NIEZWERYFIKOWANE NA SPRZĘCIE.

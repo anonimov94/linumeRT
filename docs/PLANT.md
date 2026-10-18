@@ -306,6 +306,41 @@ Zdarzenia: `CRASH_HARDSTOP`, `CRASH`, `LIMIT_TRIP`, `ORACLE_SOFTLIMIT`, `ORACLE_
 `DRIVE_FAULT`, `LOST_STEPS`, `LINK_LOSS`, `WATCHDOG`, `HOMED`. Ślad: jeden JSON na linię
 (czas wirtualny, zdarzenie, oś, wartości), pełny stan co N ramek.
 
+## 7a. Panel web i wirtualny pulpit (sesja 022)
+Panel to narzędzie testowe Plant (nie HMI operatora): `python -m linumert_plant panel --plant plant.yaml`
+(port `network.panel_port`, domyślnie 8080) albo `serve ... --panel PORT` (0 = dowolny wolny).
+Zależności w grupie `panel` (`pip install -e ".[panel]"`: fastapi, uvicorn, websockets); bez nich Plant
+działa, a start z panelem kończy się komunikatem i kodem 1. Adres panelu: `network.panel_listen`
+(domyślnie 127.0.0.1; dla VM-B `0.0.0.0`). Presety i nagrania: `--state-dir` (domyślnie `state/`).
+
+- **Telemetria:** co `panel.telemetry_ms` czasu modelu (domyślnie 5 ms) pętla ramek dopisuje próbkę
+  do bufora pierścieniowego (okno 10 s): pozycja zadana i rzeczywista, błąd nadążania [mm|°, z 6064h],
+  moment 6077h [‰], prędkość osi, zgubione kroki. Panel czyta kopię; WebSocket `/ws` ≤ 20 Hz.
+- **Parametry live (REQ-VD-04):** suwaki dla ścieżek `live:` szablonu napędu; `POST /api/live`
+  waliduje zakresy szablonu, zapisuje do rdzenia C (`lrt_machine_set_live`) i dziennika z czasem modelu.
+  Presety: wbudowane (mnożniki wartości startowych: `lekki`, `ciezki_stol`, `zuzyty_silnik`, `startowy`)
+  i zapisane (`state/presets/<nazwa>.json`); wczytanie presetu: wszystkie zmiany albo żadna.
+- **Nagrywanie:** `POST /api/record/start|stop` zapisuje próbki do `state/records/*.csv`
+  (kolumny `t`, `<napęd>.<pole>`); zapis w wątku panelu, utracone próbki liczone (`dropped`).
+- **Wirtualny pulpit:** sekcja `desk:` w plant.yaml mapuje sygnały na bity `digital_in` ramki v1
+  (piny `lrt_net.0.din-NN`); 1 = styk zamknięty. Bity nie mogą kolidować z `io.inputs` z machine.yaml
+  (Plant wtedy nie startuje). Bez sekcji `desk:` pulpit jest wyłączony.
+
+```yaml
+desk:
+  mpg_a: 20            # MPG: kwadratura A/B, jedno zbocze na ramkę (≤ 250 pozycji/s przy 1 kHz)
+  mpg_b: 21
+  edges_per_detent: 4  # zbocza na pozycję koła (1, 2, 4); LinuxCNC: encoder, counter-mode 0
+  axis: {X: 22, Y: 23, Z: 24}       # wybór osi, jeden z N
+  step: {1: 25, 10: 26, 100: 27}    # krok ×1/×10/×100, jeden z N
+  cycle_start: 28      # Start: impuls pulse_ms
+  feed_hold: 29        # Stop posuwu: impuls pulse_ms
+  key: 30              # przełącznik kluczykowy: stan stały
+  pulse_ms: 100
+```
+Połączenie pinów pulpitu z `halui`/`encoder` w konfiguracji LinuxCNC: sesja 029 (Tryby, JOG i pulpit MPG).
+Wstrzykiwanie awarii z panelu: sesja 023. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
 ## 8. Odporność i determinizm (REQ-QA-03, REQ-QA-04)
 | Sytuacja | Zachowanie |
 |---|---|

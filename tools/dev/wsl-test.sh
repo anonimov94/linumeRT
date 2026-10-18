@@ -11,12 +11,21 @@
 # MODEL=Codex zmienia autora blokady; LINUXCNC_DIR wskazuje RIP (domyślnie ~/.cache/linuxcnc-2.9).
 set -uo pipefail
 repo=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../.." && pwd)
-branch=$(git -C "$repo" rev-parse --abbrev-ref HEAD)
+src=$repo
+if [ -f "$repo/.git" ]; then
+    # worktree z Git for Windows: `gitdir: C:/...` nieczytelne dla gita w WSL (sesja 022)
+    gd=$(sed -n 's/^gitdir: //p' "$repo/.git" | tr -d '\r')
+    case $gd in [A-Za-z]:/*) gd=$(wslpath -u "$gd") ;; esac
+    branch=$(git --git-dir="$gd" rev-parse --abbrev-ref HEAD)
+    src=$(cd "$gd" && cd "$(tr -d '\r' < commondir)" && pwd)
+else
+    branch=$(git -C "$repo" rev-parse --abbrev-ref HEAD)
+fi
 base=$HOME/linumert-test
 work=$base/${branch//\//-}
 export LINUMERT_LOCK_DIR=$base/locks
 rm -rf "$work/src" && mkdir -p "$work" "$LINUMERT_LOCK_DIR" || exit 3
-git clone -q --branch "$branch" "$repo" "$work/src" || exit 3
+git clone -q --branch "$branch" "$src" "$work/src" || exit 3
 cd "$work/src" || exit 3
 echo "== $branch @ $(git rev-parse --short HEAD) → $work/src"
 if [ ! -x "$work/venv/bin/python" ]; then
