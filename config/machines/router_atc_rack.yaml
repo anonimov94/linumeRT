@@ -40,11 +40,11 @@ axes:
     max_acceleration: 500
     homing: {method: switch, direction: 1, search_speed: 20, latch_speed: 2, order: 0}
 drives:
-  - {name: drv_x, template: stepper_open_loop}
-  - {name: drv_y1, template: stepper_open_loop}
-  - {name: drv_y2, template: stepper_open_loop}
-  - {name: drv_z, template: stepper_open_loop}
-  - {name: drv_spindle, template: vfd_modbus}
+  - {id: drv_x, template: stepper_nema23_3nm}
+  - {id: drv_y1, template: stepper_nema23_3nm}
+  - {id: drv_y2, template: stepper_nema23_3nm}
+  - {id: drv_z, template: stepper_nema23_3nm}
+  - {id: drv_spindle, template: spindle_vfd_22kw}
 toolchanger:
   type: rack_linear
   slots: 6

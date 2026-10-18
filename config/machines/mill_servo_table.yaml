@@ -40,11 +40,11 @@ axes:
     max_acceleration: 500
     homing: {method: switch, direction: 1, search_speed: 20, latch_speed: 2, order: 0}
 drives:
-  - {name: drv_x, template: servo_cia402}
-  - {name: drv_y1, template: servo_cia402}
-  - {name: drv_y2, template: servo_cia402}
-  - {name: drv_z, template: servo_cia402}
-  - {name: drv_spindle, template: vfd_modbus}
+  - {id: drv_x, template: servo_400w}
+  - {id: drv_y1, template: servo_400w}
+  - {id: drv_y2, template: servo_400w}
+  - {id: drv_z, template: servo_750w, overrides: {mechanics: {load: 40.0}}}
+  - {id: drv_spindle, template: spindle_vfd_22kw}
 spindle: {drive: drv_spindle, max_rpm: 8000, min_rpm: 100}
 positions:
   manual_change: [300, 450, -5]

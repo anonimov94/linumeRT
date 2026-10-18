@@ -1,4 +1,7 @@
-"""Wiersz poleceń Plant: `python -m linumert_plant drive <list|show|validate|clone|schema>`.
+"""Wiersz poleceń Plant: `python -m linumert_plant drive <polecenie>`.
+
+Polecenia: list, show, validate, clone, schema, instances. Z katalogu głównego repozytorium
+to samo działa jako `python -m plant drive ...` (plant/__main__.py).
 
 Model-Author: Claude · sesja 013 (REQ-VD-03). Kody wyjścia: 0 = OK, 1 = błąd danych, 2 = użycie.
 """
@@ -22,10 +25,11 @@ from .drive_library import (
     save_template,
 )
 from .drive_template import Issue, TemplateError, json_schema, total_inertia
+from .machine_drives import MachineConfigError, load_machine_drives
 
 
 def _build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(prog="linumert_plant", description="Plant: wirtualna maszyna")
+    parser = argparse.ArgumentParser(prog="plant", description="Plant: wirtualna maszyna")
     sub = parser.add_subparsers(dest="group", required=True)
     drive = sub.add_parser("drive", help="biblioteka napędów wirtualnych")
     drive.add_argument("--dir", type=Path, default=None,
@@ -44,6 +48,8 @@ def _build_parser() -> argparse.ArgumentParser:
     clone.add_argument("--name", default=None, help="nazwa wyświetlana kopii")
     clone.add_argument("--force", action="store_true", help="nadpisz istniejący szablon")
     cmds.add_parser("schema", help="wypisz JSON Schema szablonu")
+    inst = cmds.add_parser("instances", help="rozwiąż napędy z machine.yaml (szablon + overrides)")
+    inst.add_argument("machine", type=Path)
     return parser
 
 
@@ -56,7 +62,9 @@ def _find_machine_entry(machine: Path, source: str) -> dict:
     if not isinstance(drives, list):
         raise TemplateError(Issue(str(machine), "brak listy drives:"))
     for entry in drives:
-        if isinstance(entry, dict) and entry.get("id") == source:
+        if isinstance(entry, dict) and entry.get("id", entry.get("name")) == source:
+            entry = dict(entry)
+            entry["id"] = entry.pop("name", source) if "id" not in entry else entry["id"]
             return entry
     raise TemplateError(Issue(str(machine), f"brak instancji napędu „{source}”"))
 
@@ -80,6 +88,16 @@ def _run(args: argparse.Namespace) -> int:
         return 0
     if args.command == "schema":
         print(json.dumps(json_schema(), indent=2, ensure_ascii=False))
+        return 0
+    if args.command == "instances":
+        try:
+            _cfg, drives = load_machine_drives(args.machine, args.dir)
+        except MachineConfigError as exc:
+            print("Błąd:\n" + "\n".join(f"  {e}" for e in exc.errors), file=sys.stderr)
+            return 1
+        for inst in drives.values():
+            changed = ", ".join(f"{k}={v}" for k, v in inst.overrides.items()) or "-"
+            print(f"{inst.id:14} {inst.template_id:26} overrides: {changed}")
         return 0
     library = load_library(args.dir)
     if args.machine is not None:

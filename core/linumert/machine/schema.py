@@ -14,7 +14,7 @@ from pathlib import Path
 from typing import Any, Literal
 
 import yaml
-from pydantic import BaseModel, ConfigDict, Field, ValidationError, model_validator
+from pydantic import AliasChoices, BaseModel, ConfigDict, Field, ValidationError, model_validator
 
 Vec3 = tuple[float, float, float]
 Contact = Literal["NC", "NO"]
@@ -169,7 +169,8 @@ class Axis(Strict):
 
 
 class DriveInstance(Strict):
-    name: str = Field(min_length=1)
+    # Klucz `id` (REQ-VD-02, sesja 013); `name` pozostaje akceptowany dla zgodnosci z sesja 010.
+    name: str = Field(min_length=1, validation_alias=AliasChoices("id", "name"))
     template: str = Field(min_length=1)
     overrides: dict[str, Any] = {}
 
