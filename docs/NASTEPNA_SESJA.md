@@ -4,7 +4,7 @@ Prompt startowy i stan bieżący: `docs/PROMPT_NOWEJ_SESJI.md` (aktualizować na
 
 Model-Author: Codex · 2026-10-17
 
-Tura: Claude · od 2026-10-18 · stan: oddana (sesja 014 w PR z `wip/sesja-014`; kolejność przeglądu: #6–#9, #10, #11, potem 014)
+Tura: Claude · od 2026-10-18T10:00Z · stan: oddana (scalono #6–#12 do main; #3 wraca do Codexa — zlecenia niżej)
 
 ## Katalog i Git
 
@@ -19,8 +19,8 @@ stan przed rozpoczęciem. Dawne gałęzie sesji 001 i 002 są już zawarte w mai
 
 ## Zasady użytkownika
 
-Claude jest niedostępny do odwołania. Codex kontynuuje samodzielnie przez PR,
-autokontrolę i testy; nie czeka na Claude. Oznaczaj autorstwo modelu w commitach,
+Modele pracują na zmianę (tura w linii `Tura:`). Gdy drugi model jest niedostępny,
+pracuj samodzielnie przez PR, autokontrolę i testy (D26 wariant b); nie czekaj. Oznaczaj autorstwo modelu w commitach,
 PR i dzienniku. Po każdym ukończonym kroku commit i push, bez czekania na koniec
 sesji lub limit tokenów. Po ukończonym etapie przekaż prompt następnej sesji.
 
@@ -37,60 +37,38 @@ Te dane dotyczą bieżącego uruchomienia; po restarcie odczytaj wartości z now
 Starszy ręczny podgląd mógł pozostać na porcie 5909. Nie zabijaj obcych sesji.
 Lokalne raporty `state/test-runs/` są ignorowane przez Git.
 
-## Następne zadanie — sesja 003
+## Stan main — 2026-10-18 (Model-Author: Claude)
 
-Przeczytaj AGENTS.md, CLAUDE.md, DECYZJE, trzy ostatnie wpisy DZIENNIK oraz
-`prompts/sesja-003.md`. Zrealizuj spike LinuxCNC 2.9 zgodnie z promptem:
-skrypt budowania RIP/uspace, test importu i konfiguracji sim, próba QtDragon
-pod Xvfb z raportem, workflow ręczny/tygodniowy i decyzja D20 na podstawie
-rzeczywistych wyników. Pokazuj postęp w terminalu VNC użytkownika.
+W `main` są sesje 001, 002, 006, 007, 009, 010, 011, 012, 013, 014 (PR #1, #2, #4–#12).
+#6–#12 scalił Claude w `d53aa04` jako **autokontrolę, bez niezależnego przeglądu** (Codex był
+niedostępny; D26 wariant b). Kontrole na stanie scalonym (WSL Ubuntu 24.04): ruff czysty,
+pytest 248 OK bez pominięć (test tablicy awarii z katalogiem alarmów już nie jest pomijany),
+`make test-c` OK (osie, napęd, maszyna). Konflikty były tylko w plikach dziennikowych.
+Gałęzie `wip/sesja-007…014` są w main — można je usunąć po przeglądzie wstecznym.
 
-LinuxCNC nie został jeszcze zbudowany ani uruchomiony w tej sesji.
-Nie wpisuj 003 do DONE przed spełnieniem kryteriów. Ubuntu WSL jest środowiskiem
-deweloperskim; docelowy system projektu nadal Debian 12 + LinuxCNC 2.9.
-Historyczny prompts/LOCK wskazuje sesję Claude 001; właściciel potwierdził,
-że Claude nie pracuje. Przejmij blokadę jawnie do swojej sesji, zachowując ślad
-w dzienniku. Nie instaluj ani nie uruchamiaj sterowania rzeczywistą maszyną.
+Otwarty jest tylko **#3 (sesja 003, Codex)**. Sesje 004, 005 i 008 nie są rozpoczęte.
 
-## Zlecenia po sesji 011 (Model-Author: Claude → Codex)
+## Zlecenia dla Codexa (kolejność)
 
-1. **Przegląd i scalenie:** kolejność #4 (protokół), potem niezależne #5, #6, #7, #8 i #9 (rdzeń osi
-   Plant w C; w opisie PR SHA do przeglądu). Konflikty tylko w plikach dziennikowych (DZIENNIK, DECYZJE,
-   DONE: zostaw wszystkie wpisy), `docs/PROMPT_NOWEJ_SESJI.md` (add/add: weź wersję z #9) i `ci.yml`
-   (zachowaj krok `make test-c`).
-2. **Sprawdź #9 w WSL Debian 12** (po zakończeniu zadania z #3): `make -C plant/core test` oraz
-   `cc -std=c11 -g -O1 -fsanitize=address,undefined -fno-sanitize-recover=undefined plant/core/axis.c
-   plant/core/tests/test_axis.c -lm -o /tmp/t && /tmp/t`; oczekiwane 23 testy `ok`, brak raportów
-   sanitizerów. Zgłoś wynik komentarzem do PR (model + SHA).
-3. **Czerwone CI w #3** pozostaje u Ciebie (spec w komentarzu do #3). Bez zmian.
-4. **Dla Claude, następna sesja:** 012 (napęd CiA 402 i krokowce w C) buduje na `plant/core/axis.h`:
-   bazuj na `wip/sesja-011` albo na `main` po scaleniu #9.
+1. **#3 — czerwony krok CI `LinuxCNC RIP smoke`.** Przyczyna (log runu 39102795987): oba testy
+   przechodzą, błąd jest w *teardown* `test_qtdragon_screen` — proces QtDragon kończy się
+   `Segmentation fault (core dumped)` po `WM_DELETE_WINDOW`, a fixture zabrania segfaultu w logu.
+   Lokalnie (WSL Ubuntu 24.04, Xvfb) Claude nie odtworzył błędu: 7/7 przebiegów zielonych, więc to
+   niestabilne zamykanie ekranu na runnerze. Status i ewentualna poprawka Claude'a: komentarz w #3.
+   Najpierw `git merge origin/main` do `codex/sesja-003` (konflikty: DZIENNIK/DECYZJE/DONE —
+   zostaw wszystkie wpisy; `ci.yml` — zachowaj `make test-c`).
+2. **#3 — Debian 12** według specyfikacji w komentarzu do #3 z 06:30Z (dystrybucja WSL Debian 12,
+   guard w `build-linuxcnc.sh`, job CI w `container: debian:bookworm`, D27). To jest nadal
+   wymaganie właściciela przed scaleniem #3.
+3. **Przegląd wsteczny `d53aa04`** (sesje 007–014, kod Claude): uwagi z dawnych sekcji zleceń —
+   `machine.c` (kinematyka `forward`, styki NC/NO, E-4207, E-STOP), presety `PRESET_CHAINS`
+   w `build_machine.py` (znaki osi trunnion), wartości 7 szablonów napędów, model krokowca
+   i mapowanie awarii w `drive.c`, `lrt_drive_set_live` i `live.c`. W WSL Debian 12:
+   `make -C plant/core test shared` oraz ASan/UBSan na `axis.c`/`drive.c`/`machine.c`.
+   Usterki zgłaszaj jako issue albo PR poprawkowy (model + SHA).
+4. **Po scaleniu #3:** sesja 004 (konfiguracja sim 3 osie z QtDragon) i 005 (kopia ekranu
+   QtDragon) — obszar Codexa (LinuxCNC, INI/HAL). 008 (bramka G0) dopiero po 003–005.
+5. **Sesja 018** (z LinuxCNC): porównaj znaki A/B/C presetów trunnion z `xyzac-trt-kins` /
+   `xyzbc-trt-kins` (`PlantMachine.tool_tip(workpiece=True)` vs układ detalu w LinuxCNC).
 
-## Zlecenia po sesji 013 (Model-Author: Claude → Codex)
-
-1. **Przegląd PR sesji 013** (gałąź `wip/sesja-013`, SHA w opisie PR). PR zawiera scalone `wip/sesja-010`
-   (#8) oraz commity #9/#10 — scalaj po nich albo razem z nimi. Uwaga: dotyka kodu #8
-   (`core/linumert/machine/schema.py`: `id` jako alias `name`; przykładowe maszyny używają szablonów
-   biblioteki; jedna nazwa szablonu w `tests/test_machine_config.py`).
-2. **Przejrzyj niezależnie:** wartości 7 szablonów (przykładowe), `drive_template._cross_checks`,
-   `machine_drives.py` (zgodność linear/rotary), `lrt_drive_set_live` i `live.c`, fizyczny test C
-   `test_drive_live_heavier_load_lowers_max_acceleration`.
-3. **Po scaleniu #6:** `pytest tests/test_plant_core.py -rs` — test spójności tablicy awarii ma przejść bez skipu.
-4. Następna sesja Claude: 014 (`prompts/START-014.md`).
-
-## Zlecenia po sesji 014 (Model-Author: Claude → Codex)
-
-1. **Przegląd PR sesji 014** (gałąź `wip/sesja-014`, SHA w opisie PR). Zbudowany na #11 — scalaj po nim.
-   Dotyka kodu #8: `core/linumert/machine/schema.py` (nowe pola: `Link.branch`, `HardStops.drive_fault`,
-   `EStop.action`, sekcja `probe`) i `validate.py` (człon łańcucha dla każdej osi, gałąź rodzica, wejście sondy).
-2. **Przejrzyj niezależnie:** `plant/core/machine.c` — kinematyka prosta (`forward`), logika styków
-   (`update_switches`, `update_inputs`: NC szeregowo/NO równolegle, drgania), wykrywanie nowego kontaktu
-   ze zderzakiem i wstrzykiwanie E-4207, E-STOP (STO/quick stop); presety `PRESET_CHAINS` w
-   `build_machine.py` (zwłaszcza znaki osi stołu i obrotów trunnion).
-3. **W WSL Debian 12** (gdy dostępny): `make -C plant/core test shared` i
-   `PYTHONPATH=core:plant/server python -m pytest tests/test_build_machine.py` — oczekiwane 17 testów C
-   maszyny `ok` i 30 testów pytest; zgłoś wynik komentarzem do PR (model + SHA).
-4. **Sesja 018 (Twoja albo moja, z LinuxCNC):** porównaj znaki A/B/C presetów trunnion z modułami
-   `xyzac-trt-kins`/`xyzbc-trt-kins` — pozycja narzędzia z `PlantMachine.tool_tip(workpiece=True)` ma się
-   zgadzać z pozycją w układzie detalu w LinuxCNC.
-5. Następna sesja Claude: 015 (`prompts/START-015.md`).
+Następna sesja Claude: 015 (`prompts/START-015.md`, bazowanie po rozruchu) — na gałęzi od `main`.

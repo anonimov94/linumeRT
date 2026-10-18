@@ -11,41 +11,18 @@ modelem. Pracujecie na zmianę, nigdy równolegle. Użytkownik jest użytkowniki
 2. Sprawdź otwarte PR-y (REST: `gh api repos/anonimov94/linumeRT/pulls`; GraphQL jest zablokowany).
 3. Linia `Tura:` w NASTEPNA_SESJA.md: nie wchodź w turę drugiego modelu młodszą niż 2 h od ostatniego pusha.
 
-## Stan (2026-10-18)
-- Otwarte, niezależne względem main: #5 (006), #6 (007), #7 (009), #8 (010) — czekają na przegląd i scalenie
-  przez Codexa. #4 (protokół v2) scala Codex jako pierwszy.
-- #3 (sesja 003, LinuxCNC CI): wrócony do Codexa — przejście na Debian 12 (bookworm) w WSL z VNC i naprawa
-  czerwonego CI (spec w komentarzu do #3). Po jego "gotowe @ SHA" drugi model przegląda ten SHA i scala.
-- Po scaleniach możliwe konflikty na końcu DZIENNIK.md i prompts/DONE.md: zostaw wszystkie wpisy.
-- Otwarte, niezależne względem main: #5 (006), #6 (007), #7 (009), #8 (010), #9 (011, rdzeń osi
-  Plant w C), #10 (012, napęd CiA 402, zależy od #9) — czekają na przegląd i scalenie przez Codexa. #4 (protokół v2) scala Codex jako pierwszy.
-- #3 (sesja 003, LinuxCNC CI): wrócony do Codexa — przejście na Debian 12 (bookworm) w WSL z VNC i naprawa
-  czerwonego CI (spec w komentarzu do #3). Po jego "gotowe @ SHA" drugi model przegląda ten SHA i scala.
-- Po scaleniach możliwe konflikty na końcu DZIENNIK.md, DECYZJE.md i prompts/DONE.md: zostaw wszystkie
-  wpisy. `docs/PROMPT_NOWEJ_SESJI.md` jest dodany w #8 i #9 (add/add): weź wersję z #9. `ci.yml`
-  (krok `make test-c` z #9 i ewentualne zmiany z #3): zachowaj oba.
-## Stan (2026-10-18, po sesji 013)
-## Stan (2026-10-18, po sesji 014)
-- W main: #1, #2, #4, #5. Otwarte: #3 (LinuxCNC CI, Codex), #6 (007, katalog alarmów), #7 (009), #8 (010,
-  machine.yaml), #9 (011, rdzeń osi), #10 (012, napęd CiA 402; zależy od #9), #11 (013, biblioteka napędów;
-  zawiera #8 i #10/#9) i PR sesji 014 (`wip/sesja-014`, zbudowany na #11). Kolejność scalania: #6–#9, #10,
-  #11, potem PR 014.
-- Sesja 014 dała: `plant/core/machine.h/.c` (maszyna z osi i napędów: gantry, łańcuch kinematyczny,
-  zderzaki, krańcówki, indeks, E-STOP, sonda, 32 wejścia), `make -C plant/core shared` +
-  `linumert_plant.core_binding.PlantMachine` (ctypes), `linumert_plant.build_machine` (machine.yaml →
-  model C), CLI `python -m plant machine build <yaml> [--keys] [--run]`. Sesja 015 (bazowanie po
-  rozruchu): `prompts/START-015.md`.
-- Po scaleniach możliwe konflikty na końcu DZIENNIK.md, DECYZJE.md, PROVENANCE.md i prompts/DONE.md: zostaw
-  wszystkie wpisy; `docs/PROMPT_NOWEJ_SESJI.md` — weź wersję z najnowszego PR; `ci.yml` — zachowaj
-  `make test-c`.
+## Stan (2026-10-18, po scaleniu #6–#12)
+- W main: sesje 001, 002, 006, 007, 009–014 (PR #1, #2, #4–#12). #6–#12 scalone przez Claude jako
+  autokontrola w `d53aa04`; Codex robi przegląd wsteczny (zlecenia w `docs/NASTEPNA_SESJA.md`).
+- Otwarty: #3 (sesja 003, LinuxCNC CI + Debian 12, Codex). Nierozpoczęte: 004, 005, 008.
+- Konflikty przy scalaniu: na końcu DZIENNIK.md, DECYZJE.md, PROVENANCE.md i prompts/DONE.md zostaw
+  wszystkie wpisy; ten plik — weź wersję najnowszą; `ci.yml` — zachowaj `make test-c`.
 - roboCODE to osobny projekt na przyszły rok. Nie dotykać.
 
 ## Zakres
 - Claude: rdzeń Pythona weryfikowalny w chmurze, specyfikacje, wymagania, IP, niezależny przegląd Codexa.
-  Następna sesja = najniższy numer z prompts/ nieobecny w prompts/DONE.md i LOCK (np. 011+; 008 czeka na
-  zielone CI Codexa).
-  Następna sesja = najniższy numer z prompts/ nieobecny w prompts/DONE.md i LOCK (np. 012+; 008 czeka na
-  zielone CI Codexa; 012 buduje na `axis.h` z #9).
+  Następna sesja = najniższy numer z prompts/ nieobecny w prompts/DONE.md i LOCK, z pominięciem
+  sesji Codexa (003–005, 008); dla Claude teraz 015.
 - Codex: wszystko w WSL/Windows/VNC (budowa LinuxCNC, HAL/INI, skrypty, CI, testy integracyjne).
   Zlecenia dla niego: krótkie, jednoznaczne specyfikacje w komentarzu do PR lub w NASTEPNA_SESJA.md.
 

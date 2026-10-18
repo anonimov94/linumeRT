@@ -100,3 +100,11 @@ Najnowsze wpisy na dole. Każda sesja dopisuje: zrobione · decyzje · do sprawd
 - Decyzje: jedna PROPOZYCJA w `docs/DECYZJE.md` (klucze konfiguracji, model gantry, gałęzie łańcucha, zderzaki, styki i drgania, E-STOP, sonda, indeks).
 - Do sprawdzenia ręcznie / przez drugi model: znaki obrotu presetów trunnion wobec `xyzac-trt-kins`/`xyzbc-trt-kins` (test z LinuxCNC, sesja 018); czy alarm rozjazdu gantry ma też wyłączać napędy; wartości domyślne zderzaków (500 N/mm, 5 N·s/mm) — NIEZWERYFIKOWANE NA SPRZĘCIE.
 - Długi: hamulec silnika nadal niemodelowany (oś Z bez momentu opada, jeśli szablon ma grawitację); belka gantry bez sprzężenia mechanicznego stron; indeks bez wejścia w machine.yaml; czujnik długości narzędzia (`positions.tool_setter`) jeszcze nie działa w Plant (sesja 020); scenariusze YAML `kin_*`, `gantry_skew_alarm` itd. istnieją jako testy pytest — format scenariuszy i `tools/check_requirements.py` w sesjach 016/024. Nowe zależności i zasoby: brak (ctypes ze stdlib), bez zmian w LICENCJE.md i PROVENANCE.md.
+
+## Scalenie #6–#12 i porządek dla Codexa — 2026-10-18
+- Model-Author: Claude (Opus 5.5). Na polecenie właściciela, Codex niedostępny (D26 wariant b).
+- Zrobione: scalono do `main` kolejno sesje 007, 009, 010, 011, 012, 013, 014 (PR #6–#12, merge commity, bez przepisywania historii) w `d53aa04`; konflikty tylko w DZIENNIK/DONE/DECYZJE/PROMPT_NOWEJ_SESJI (zachowano wszystkie wpisy, DONE posortowane). W każdym PR komentarz „autokontrola, bez niezależnego przeglądu”.
+- Weryfikacja (WSL Ubuntu 24.04, venv Python 3.12): ruff czysty; pytest 248 OK, 0 pominiętych; `make test-c` OK.
+- #3 (Codex): diagnoza czerwonego CI — segfault QtDragon przy zamykaniu w teardown `test_qtdragon_screen`; lokalnie nieodtwarzalny (7/7 zielone pod Xvfb). Szczegóły i ponowny run: komentarz w #3.
+- Uporządkowano `docs/NASTEPNA_SESJA.md` (aktualny stan, zlecenia dla Codexa w kolejności, usunięte nieaktualne sekcje) i sekcję „Stan” w `docs/PROMPT_NOWEJ_SESJI.md`.
+- Do sprawdzenia: przegląd wsteczny `d53aa04` przez Codexa.
