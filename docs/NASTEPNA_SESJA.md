@@ -1,6 +1,6 @@
 # Stan projektu i przekazanie
 
-Tura: Claude · od 2026-10-18T16:02Z · stan: oddana (sesja 021, porządek dokumentacji i integracja do `main` gotowe)
+Tura: Claude · od 2026-10-18T19:01Z · stan: w toku (krok 0: sprzątanie testów LinuxCNC, potem sesja 008)
 
 Jedyny plik ze **stanem bieżącym**: kto ma turę, co jest scalone, co czeka, co dalej. Aktualizuje go każda
 sesja na końcu (zasady: [`WSPOLPRACA_MODELI.md`](WSPOLPRACA_MODELI.md) §1–3). Historia jest w
@@ -86,10 +86,5 @@ Prompt startowy następnej sesji: [`prompts/START-008.md`](../prompts/START-008.
 
 ## 8. Stan zatrzymania (bieżąca tura)
 
-- 2026-10-18T16:02Z Przejęcie tury, kontynuacja sesji 021 według `prompts/archiwum/START-021.md`.
-- Sesja 021 ukończona: testy `vfd.py` (fb4aed2), integracja z serwerem (c658f6c), wariant LinuxCNC `_vfd` z
-  prawdziwym hy_vfd (07c70ad), dokumentacja (dbf0d9e); PR #32.
-- 2026-10-18T16:33Z Integracja stosu do `main` wstrzymana: mechanizm uprawnień zablokował scalanie bez
-  przeglądu. Porządek dokumentacji na `claude/dokumentacja`.
-- 2026-10-18T16:37Z Porządek dokumentacji gotowy (PR #33); `make lint test` 489 OK. Tura oddana, LOCK i blokady zwolnione.
-- Integracja stosu do `main` za zgodą właściciela (merge commity #19…#33); testy zielone; tura oddana.
+- 2026-10-18T19:01Z Przejęcie tury według `prompts/START-008.md`; gałąź `wip/sesja-008`, blokada `linuxcnc`.
+  Środowisko: Windows + WSL Ubuntu-24.04 z RIP (`~/.cache/linuxcnc-2.9`), bez podmana.
