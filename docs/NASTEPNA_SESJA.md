@@ -31,6 +31,10 @@ można usunąć.
 
 ## 3. Następna praca
 
+0. **Najpierw:** pełny przebieg `pytest -m linuxcnc` w jednym kontenerze RIP: 55 OK, 4 nie przechodzą —
+   `tests/test_plant_vfd_linuxcnc.py` (3) i `tests/test_sim_config.py::test_headless_run_20s`. Osobno przechodziły
+   (sesja 021); podejrzenie: proces `linuxcncsvr` po `tests/test_plant_linuxcnc.py` zostaje i blokuje kolejny start
+   LinuxCNC. Naprawić sprzątanie po teście (np. `halrun -U` / zabicie `linuxcncsvr` w teardown).
 1. Sesje według [`prompts/README.md`](../prompts/README.md): **008** (bufor i bramka G0), potem 022 (panel Plant
    i pulpit MPG), 023 (edytor wirtualnej obrabiarki), 024 (scenariusze, raport, `tools/check_requirements.py`).
 2. **HMI według kolejności pracy (D32)**: docelowy kierunek ekranu; etapy HMI-01…06 prowadzi Codex (§6).
