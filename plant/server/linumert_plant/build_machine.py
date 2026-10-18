@@ -78,6 +78,10 @@ LINUXCNC_KINEMATICS: dict[str, dict[str, str]] = {
 }
 
 ESTOP_ACTIONS = {"sto": 0, "quick_stop": 1}
+# Przetwornik napędu osi (drive.h: lrt_drive_encoder); krokowiec bez sprzężenia nie ma enkodera.
+ENC_IDEAL, ENC_INCREMENTAL, ENC_ABSOLUTE = 0, 1, 2
+STEPPER_OPEN = 1
+START_MODES = ("random", "center")
 PROBE_TYPES = {"box": 1, "plate": 2}
 
 
@@ -96,6 +100,12 @@ class MachineModel:
     inputs: dict[str, int] = field(default_factory=dict)
     outputs: dict[str, int] = field(default_factory=dict)
     home_inputs: dict[str, str] = field(default_factory=dict)  # oś → wejście czujnika bazy
+    # Sesja 015 (REQ-VM-07): wejście czujnika bazy każdego napędu (gantry: osobne strony; ""
+    # = styk tylko na wejściu napędu), impulsy na jednostkę osi (jak SCALE w INI LinuxCNC)
+    # i rodzaj przetwornika napędu.
+    drive_home_inputs: dict[str, str] = field(default_factory=dict)
+    counts_per_unit: dict[str, float] = field(default_factory=dict)
+    encoders: dict[str, int] = field(default_factory=dict)
     spindle: str | None = None
     kinematics: dict[str, str] = field(default_factory=dict)
     config: MachineConfig | None = field(default=None, repr=False)
@@ -163,8 +173,16 @@ def _stops(axis: Axis, index: int, unit: float) -> tuple[list[tuple[str, float]]
     return out, errors
 
 
-def build_model(cfg: MachineConfig, drives: dict[str, Any], seed: int = 1) -> MachineModel:
-    """Zamienia konfigurację i rozwiązane napędy na model rdzenia C (zbiera wszystkie błędy)."""
+def build_model(cfg: MachineConfig, drives: dict[str, Any], seed: int = 1,
+                start: str = "random") -> MachineModel:
+    """Zamienia konfigurację i rozwiązane napędy na model rdzenia C (zbiera wszystkie błędy).
+
+    `start`: "random" — pozycja po włączeniu losowa w soft limits z ziarna `seed` (REQ-VM-07);
+    "center" — środek soft limits (testy kinematyki). Pozycję z pliku stanu nakłada
+    `plant_state.apply_state()` przed pierwszym krokiem.
+    """
+    if start not in START_MODES:
+        raise ValueError(f"start: {start!r} (dozwolone: {', '.join(START_MODES)})")
     errors: list[str] = []
     model = MachineModel(name=cfg.machine.name, config=cfg)
     model.inputs = dict(cfg.io.inputs)
@@ -179,8 +197,10 @@ def build_model(cfg: MachineConfig, drives: dict[str, Any], seed: int = 1) -> Ma
     # Napędy: kolejność z listy drives:
     model.drives = [d.name for d in cfg.drives]
     index_of = {name: i for i, name in enumerate(model.drives)}
+    mapped_of: dict[str, dict[str, Any]] = {}
     for i, name in enumerate(model.drives):
         mapped = to_c_params(drives[name].params)
+        mapped_of[name] = mapped
         put((f"drive.{i}.type", float(mapped["type"])))
         for key, value in mapped["drive"].items():
             put((f"drive.{i}.{key}", float(value)))
@@ -203,6 +223,23 @@ def build_model(cfg: MachineConfig, drives: dict[str, Any], seed: int = 1) -> Ma
         if axis.gantry_max_skew is not None:
             put((f"joint.{j}.max_skew", axis.gantry_max_skew * unit))
         put((f"joint.{j}.initial", 0.5 * (axis.soft_limits[0] + axis.soft_limits[1]) * unit))
+        if start == "random":
+            put((f"joint.{j}.initial_random", 1.0))
+            put((f"joint.{j}.initial_min", axis.soft_limits[0] * unit))
+            put((f"joint.{j}.initial_max", axis.soft_limits[1] * unit))
+        for name in axis.drives[:2]:
+            mapped = mapped_of[name]
+            ratio = mapped["axis"]["ratio"]
+            cpr = mapped["drive"]["counts_per_rev"]
+            model.counts_per_unit[name] = unit / ratio * cpr / (2.0 * math.pi)
+            if mapped["type"] == STEPPER_OPEN:
+                encoder = ENC_IDEAL
+            elif axis.homing.method == "absolute":
+                encoder = ENC_ABSOLUTE
+            else:
+                encoder = ENC_INCREMENTAL
+            model.encoders[name] = encoder
+            put((f"drive.{index_of[name]}.encoder", float(encoder)))
         stops, stop_errors = _stops(axis, j, unit)
         errors += stop_errors
         for key, value in stops:
@@ -230,31 +267,13 @@ def build_model(cfg: MachineConfig, drives: dict[str, Any], seed: int = 1) -> Ma
         for name, value in zip(("ox", "oy", "oz"), link.offset, strict=True):
             put((f"link.{n}.{name}", value * MM))
 
-    # Krańcówki i czujniki bazowe
+    # Krańcówki i czujniki bazowe. Gantry z `gantry_square`: styk bazy (własny czujnik albo
+    # krańcówka wspólna) ma kopię na każdym napędzie (`switch.S.drive`), bo każda strona belki
+    # bazuje na własnym czujniku; druga strona używa wejścia `<nazwa>_2`, jeśli jest w io.inputs,
+    # inaczej styk jest tylko na wejściu napędu.
     switches: list[dict[str, float]] = []
     for j, axis in enumerate(cfg.axes):
-        unit = model.unit(axis.letter)
-        for side_name, side in (("min", -1.0), ("max", 1.0)):
-            sw = getattr(axis.limits, side_name)
-            if sw is None:
-                continue
-            switches.append({"joint": j, "role": 0, "side": side, "position": sw.position * unit,
-                             "hysteresis": sw.hysteresis * unit, "nc": sw.contact == "NC",
-                             "input": cfg.io.inputs.get(sw.input, -1),
-                             "bounce": sw.debounce_ms / 1000.0})
-        sensor = axis.home_sensor
-        if sensor is None:
-            continue
-        if sensor.shared_with is not None:
-            shared = getattr(axis.limits, sensor.shared_with.removeprefix("limit_"))
-            if shared is not None:
-                model.home_inputs[axis.letter] = shared.input
-            continue
-        model.home_inputs[axis.letter] = sensor.input or ""
-        switches.append({"joint": j, "role": 1, "side": float(axis.homing.direction),
-                         "position": (sensor.position or 0.0) * unit,
-                         "hysteresis": sensor.hysteresis * unit, "nc": sensor.contact == "NC",
-                         "input": cfg.io.inputs.get(sensor.input or "", -1), "bounce": 0.0})
+        _axis_switches(model, cfg, axis, j, index_of, switches, put)
     for s, sw in enumerate(switches):
         for key, value in sw.items():
             put((f"switch.{s}.{key}", float(value)))
@@ -281,8 +300,76 @@ def build_model(cfg: MachineConfig, drives: dict[str, Any], seed: int = 1) -> Ma
     return model
 
 
+def _axis_switches(model: MachineModel, cfg: MachineConfig, axis: Axis, j: int,
+                   index_of: dict[str, int], switches: list[dict[str, float]], put) -> None:
+    """Styki osi `j` (krańcówki, czujnik bazy) i podłączenie ich do wejść napędów."""
+    unit = model.unit(axis.letter)
+    gantry = axis.homing.gantry_square and len(axis.drives) > 1
+    sides: list[str | None] = list(axis.drives[:2]) if gantry else [None]
+    sensor = axis.home_sensor
+    shared = sensor.shared_with.removeprefix("limit_") if sensor and sensor.shared_with else None
+    found: dict[str, dict[str | None, int]] = {"min": {}, "max": {}, "home": {}}
+
+    def add(kind: str, sw: dict[str, float], name: str, drive: str | None) -> None:
+        if drive is not None:
+            sw["drive"] = float(index_of[drive])
+            if drive != axis.drives[0]:
+                sw["input"] = float(cfg.io.inputs.get(f"{name}_2", -1))
+        found[kind][drive] = len(switches)
+        switches.append(sw)
+
+    for side_name, side in (("min", -1.0), ("max", 1.0)):
+        sw = getattr(axis.limits, side_name)
+        if sw is None:
+            continue
+        for drive in (sides if shared == side_name else [None]):
+            add(side_name, {"joint": j, "role": 0, "side": side, "position": sw.position * unit,
+                            "hysteresis": sw.hysteresis * unit, "nc": sw.contact == "NC",
+                            "input": cfg.io.inputs.get(sw.input, -1),
+                            "bounce": sw.debounce_ms / 1000.0}, sw.input, drive)
+            if shared == side_name:
+                found["home"][drive] = found[side_name][drive]
+                _home_input(model, axis, drive, sw.input, cfg)
+    if shared is not None:
+        limit = getattr(axis.limits, shared)
+        if limit is not None:
+            model.home_inputs[axis.letter] = limit.input
+    elif sensor is not None:
+        model.home_inputs[axis.letter] = sensor.input or ""
+        for drive in sides:
+            add("home", {"joint": j, "role": 1, "side": float(axis.homing.direction),
+                         "position": (sensor.position or 0.0) * unit,
+                         "hysteresis": sensor.hysteresis * unit, "nc": sensor.contact == "NC",
+                         "input": cfg.io.inputs.get(sensor.input or "", -1), "bounce": 0.0},
+                sensor.input or "", drive)
+            _home_input(model, axis, drive, sensor.input or "", cfg)
+
+    # Bazowanie w napędzie (metoda drive, tryb 6) i styki na wejściach napędów.
+    for name in axis.drives[:2]:
+        d = index_of[name]
+        if axis.homing.method == "drive":
+            scale = model.counts_per_unit[name]
+            put((f"drive.{d}.homing_method", float(axis.homing.cia402_method or 0)))
+            put((f"drive.{d}.homing_speed_switch", float(round(axis.homing.search_speed * scale))))
+            put((f"drive.{d}.homing_speed_zero", float(round(axis.homing.latch_speed * scale))))
+            put((f"drive.{d}.home_offset", float(round(axis.homing.offset * scale))))
+        for kind, key in (("min", "din_neg_limit"), ("max", "din_pos_limit"), ("home", "din_home")):
+            where = found[kind]
+            s = where.get(name, where.get(None))
+            if s is not None:
+                put((f"drive.{d}.{key}", float(s)))
+
+
+def _home_input(model: MachineModel, axis: Axis, drive: str | None, name: str,
+                cfg: MachineConfig) -> None:
+    """Zapamiętuje wejście czujnika bazy napędu (dla mastera bazowania)."""
+    for d in ([drive] if drive is not None else axis.drives[:2]):
+        own = name if (drive is None or d == axis.drives[0]) else f"{name}_2"
+        model.drive_home_inputs[d] = own if own in cfg.io.inputs else ""
+
+
 def build_machine(machine: Path | str, library_dir: Path | None = None,
-                  seed: int = 1) -> MachineModel:
+                  seed: int = 1, start: str = "random") -> MachineModel:
     """Wczytuje `machine.yaml` z biblioteką napędów i buduje model (błędy: MachineConfigError)."""
     cfg, drives = load_machine_drives(machine, library_dir)
-    return build_model(cfg, drives, seed=seed)
+    return build_model(cfg, drives, seed=seed, start=start)

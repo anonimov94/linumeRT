@@ -1,0 +1,10 @@
+# linumeRT Plant: przykład plant.yaml (uruchomienie Plant, nie maszyna). Model-Author: Claude · sesja 016.
+# Start: python -m linumert_plant serve --plant config/plant/plant.example.yaml
+# Ścieżki względne liczone od katalogu tego pliku.
+machine: ../machines/mill_servo_table.yaml
+network: {listen: 127.0.0.1, port: 47700}   # VM-B w sieci lrtnet: listen 0.0.0.0
+timing: {cycle_ns: 1000000, substeps: 1, watchdog_ms: 50}
+mode: lockstep            # lockstep (testy, CI, deterministyczny) | realtime (VM-B)
+seed: 1
+state_file: ../../state/plant_state.json
+trace: {path: ../../state/traces/plant.csv, format: csv}   # csv | jsonl
