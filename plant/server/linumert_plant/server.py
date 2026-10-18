@@ -15,6 +15,8 @@ z sekcją `vfd` — falownik przez hy_vfd (pty) albo Modbus TCP (serwery w `serv
 `spindle_actual` to zawsze obroty wału modelu [obr/min].
 Odporność (REQ-QA-03): uszkodzona ramka jest odrzucana i liczona; wyjątek modelu przełącza
 w stan bezpieczny (napędy wyłączone, wyjścia zerowe) bez kończenia procesu.
+Panel (sesja 022): telemetria osi w buforze pierścieniowym (`panel.telemetry`), parametry
+live napędów (`set_live`, presety), wirtualny pulpit jako bity `digital_in` (`panel.desk`).
 Ten moduł działa poza RT (CLAUDE.md §5).
 """
 
@@ -47,7 +49,10 @@ from .lrtnet import (
     encode_reply,
     seq_delta,
 )
+from .drive_template import LiveParams
 from .oracle import Oracle
+from .panel.desk import Desk, DeskConfig
+from .panel.telemetry import Telemetry
 from .trace import TraceWriter
 from .vfd import SpindleModel, VfdConfig, VfdFaults
 
@@ -59,6 +64,7 @@ ERR_MODEL = 0xFF00  # 603Fh awarii ogólnej (E-4200) zgłaszany po wyjątku mode
 DT_MIN, DT_MAX = 100_000, 10_000_000  # [ns], docs/PLANT.md §3 reguła 3
 JITTER_WINDOW = 100
 MODES = ("lockstep", "realtime")
+PANEL_PORT = 8080
 
 
 class PlantConfigError(ValueError):
@@ -83,6 +89,10 @@ class PlantConfig:
     oracle_arm_bit: int | None = 31  # bit digital_out uzbrajający wyrocznię (None = zawsze)
     tools: dict[int, ToolSpec] = field(default_factory=dict)  # wysięg i średnica narzędzi
     vfd: VfdConfig | None = None  # falownik wrzeciona (hy_vfd / Modbus TCP); None = LRT-NET
+    panel_listen: str = "127.0.0.1"  # panel web (sesja 022)
+    panel_port: int = PANEL_PORT  # 0 = port wybrany przez system (testy)
+    telemetry_ms: float = 5.0  # okres próbki telemetrii panelu [ms czasu modelu]
+    desk: DeskConfig | None = None  # wirtualny pulpit (bity digital_in); None = brak
 
     def check(self) -> None:
         errors = []
@@ -102,6 +112,12 @@ class PlantConfig:
             errors.append(f"trace.format: {self.trace_format!r} — dozwolone csv, jsonl")
         if self.vfd is not None:
             errors += self.vfd.problems()
+        if not 0 <= self.panel_port < 65536:
+            errors.append(f"network.panel_port: {self.panel_port} poza 0–65535")
+        if not 0.5 <= self.telemetry_ms <= 1000:
+            errors.append(f"panel.telemetry_ms: {self.telemetry_ms} poza 0,5–1000")
+        if self.desk is not None:
+            errors += self.desk.problems()
         if errors:
             raise PlantConfigError("; ".join(errors))
 
@@ -130,6 +146,9 @@ def load_plant_config(path: Path | str) -> PlantConfig:
 
     net, timing, trace = section("network"), section("timing"), section("trace")
     oracle, vfd = section("oracle"), data.get("vfd")
+    panel, desk = section("panel"), data.get("desk")
+    if desk is not None and not isinstance(desk, dict):
+        raise PlantConfigError(f"{path}: desk: oczekiwano mapy")
     if vfd is not None and not isinstance(vfd, dict):
         raise PlantConfigError(f"{path}: vfd: oczekiwano mapy")
     tools_raw = section("tools")
@@ -147,7 +166,11 @@ def load_plant_config(path: Path | str) -> PlantConfig:
             tools={int(k): ToolSpec(float((v or {}).get("length", 50.0)),
                                     float((v or {}).get("diameter", 6.0)))
                    for k, v in tools_raw.items()},
-            vfd=None if vfd is None else VfdConfig.from_dict(vfd, base))
+            vfd=None if vfd is None else VfdConfig.from_dict(vfd, base),
+            panel_listen=str(net.get("panel_listen", "127.0.0.1")),
+            panel_port=int(net.get("panel_port", PANEL_PORT)),
+            telemetry_ms=float(panel.get("telemetry_ms", 5.0)),
+            desk=None if desk is None else DeskConfig.from_dict(desk))
     except (TypeError, ValueError) as exc:
         raise PlantConfigError(f"{path}: zły typ wartości ({exc})") from None
     cfg.check()
@@ -191,7 +214,9 @@ class PlantServer:
     """Protokół LRT-NET nad uruchomioną maszyną (`PlantMachine`)."""
 
     def __init__(self, machine: PlantMachine, config: PlantConfig | None = None,
-                 trace: TraceWriter | None = None, spindle_template: dict | None = None):
+                 trace: TraceWriter | None = None, spindle_template: dict | None = None,
+                 drive_params: dict[str, dict] | None = None):
+        """`drive_params`: parametry instancji napędów (szablon + overrides) dla zmian live."""
         self.machine = machine
         self.cfg = config or PlantConfig()
         self.cfg.check()
@@ -227,6 +252,18 @@ class PlantServer:
         self._estop = self._estop_input()
         self._lock = threading.Lock()
         self._stop = threading.Event()
+        # panel (sesja 022): parametry live, telemetria, pulpit
+        self.live = {d: LiveParams(p) for d, p in (drive_params or {}).items() if d in self.drives}
+        self.live_base = {d: lp.params for d, lp in self.live.items()}
+        self.scale = {d: machine.counts_per_unit(d) or 1.0 for d in self.drives}
+        self._letters = {d: machine.drive_letter(d) for d in self.drives}
+        self.telemetry = Telemetry(self.drives, period_s=self.cfg.telemetry_ms / 1000.0)
+        self.desk = None
+        if self.cfg.desk is not None:
+            problems = self.cfg.desk.problems(getattr(getattr(mcfg, "io", None), "inputs", None))
+            if problems:
+                raise PlantConfigError("; ".join(problems))
+            self.desk = Desk(self.cfg.desk)
 
     # ---- pomocnicze --------------------------------------------------------------------
     def _estop_input(self) -> tuple[int, bool] | None:
@@ -395,6 +432,9 @@ class PlantServer:
                             self._note(f"ORACLE_VIOLATION {v.kind} {v.name}: {v.detail} "
                                        f"(ramka {v.seq})")
                     self._step_discrete(dt_ns / 1e9, cmd.digital_out)
+                    if self.desk is not None:
+                        self.desk.step(dt_ns / 1e9)
+                    self._sample()
                 except Exception as exc:  # noqa: BLE001 - REQ-QA-03: proces nie może upaść
                     self.safe_state(f"{type(exc).__name__}: {exc}")
         reply = encode_reply(self._reply(cmd.seq, cmd.time_ns))
@@ -449,6 +489,9 @@ class PlantServer:
             self._note("E-4003 skasowany: napędy po fault reset, wyjścia zwolnione")
         mask, value = self._extra_inputs  # magazyn, czujnik długości (sesja 020)
         inputs = (m.inputs & ~mask) | value
+        if self.desk is not None:  # wirtualny pulpit (sesja 022)
+            mask, value = self.desk.inputs()
+            inputs = (inputs & ~mask) | value
         flags = FLAG_FAULT if fault else 0
         if self._estop is not None:
             bit, nc = self._estop
@@ -461,6 +504,74 @@ class PlantServer:
                      spindle_actual=self.spindle.rpm,
                      frames_lost=self.stats.lost, frames_late=self.stats.late,
                      jitter_us=self.stats.jitter_us, flags=flags)
+
+    # ---- panel (sesja 022) -------------------------------------------------------------
+    def _sample(self) -> None:
+        """Próbka telemetrii co `telemetry_ms` czasu modelu (bez I/O; panel czyta kopię)."""
+        m = self.machine
+        t = m.time
+        if not self.telemetry.due(t):
+            return
+        values: list[float] = []
+        for d in self.drives:
+            k = self.scale[d]
+            act = m.position_actual(d)
+            cmd = self._target[d] if (self._mode[d] or MODE_CSP) == MODE_CSP else act
+            values += (cmd / k, act / k, (cmd - act) / k, m.torque_actual(d),
+                       m.joint_velocity(self._letters[d]), m.lost_steps(d))
+        self.telemetry.put(t, tuple(values))
+
+    def live_values(self) -> dict[str, dict[str, float]]:
+        """Bieżące wartości parametrów live każdego napędu osi."""
+        with self._lock:
+            return {d: {p: lp.get(p) for p in lp.params["live"]} for d, lp in self.live.items()}
+
+    def set_live(self, drive: str, path: str, value) -> dict:
+        """Zmiana parametru live (REQ-VD-04): walidacja szablonu, rdzeń C, dziennik z czasem.
+
+        Błąd (`TemplateError`, `KeyError`, `ValueError`) nie zmienia modelu ani dziennika.
+        """
+        with self._lock:
+            return self._set_live(drive, path, value)
+
+    def _set_live(self, drive: str, path: str, value) -> dict:
+        if drive not in self.live:
+            raise KeyError(f"napęd {drive} bez parametrów live (znane: {', '.join(self.live)})")
+        live = self.live[drive]
+        params, log_len = live.params, len(live.log)
+        record = live.set(path, value, t=self.machine.time)
+        target, c_value = live.c_command(path, record.new)
+        try:
+            self.machine.set_live(drive, target, c_value)
+        except RuntimeError as exc:
+            live.params = params
+            del live.log[log_len:]
+            raise ValueError(f"{drive} {path}: rdzeń C odrzucił zmianę ({exc})") from None
+        self.messages.append(f"live {drive} {path}: {record.old} → {record.new} "
+                             f"(t = {record.t:.3f} s)")
+        return {"drive": drive, **record._asdict()}
+
+    def apply_live(self, values: dict[str, dict[str, float]]) -> list[dict]:
+        """Preset: najpierw walidacja wszystkich zmian na kopiach, potem zapis do modelu."""
+        with self._lock:
+            for drive, changes in values.items():
+                if drive not in self.live:
+                    raise KeyError(f"napęd {drive} bez parametrów live")
+                probe = LiveParams(self.live[drive].params)
+                for path, value in changes.items():
+                    probe.set(path, value, t=0.0)
+            done = []
+            for drive, changes in values.items():
+                for path, value in changes.items():
+                    if self.live[drive].get(path) != value:
+                        done.append(self._set_live(drive, path, value))
+            return done
+
+    def live_log(self) -> list[dict]:
+        """Dziennik zmian live wszystkich napędów, chronologicznie."""
+        with self._lock:
+            out = [{"drive": d, **r._asdict()} for d, lp in self.live.items() for r in lp.log]
+        return sorted(out, key=lambda r: r["t"])
 
     # ---- UDP ---------------------------------------------------------------------------
     def bind(self) -> socket.socket:

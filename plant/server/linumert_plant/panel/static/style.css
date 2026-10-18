@@ -1,0 +1,97 @@
+/* linumeRT Plant: panel testowy (sesja 022). SPDX-License-Identifier: GPL-2.0-or-later.
+   Model-Author: Claude. Kolory, fonty i rozmiary wyłącznie z docs/design/tokens.yaml. */
+:root {
+  --bg: #0a0c0f; --bg2: #0f1317; --panel: #12171d; --raise: #182029;
+  --line: #26303a; --line2: #34404c;
+  --fg: #e8eef4; --fg2: #9aa7b4; --fg3: #66727e;
+  --teal: #2dd4bf; --teal2: #5eead4; --tealbg: #0e2c29;
+  --amber: #fbbf24; --amberbg: #2a2110;
+  --ok: #4ade80; --okbg: #11301d; --err: #f87171; --errbg: #341416;
+  --info: #7dd3fc; --infobg: #132634;
+  --gap: 8px; --r-card: 14px; --r-btn: 12px; --touch: 44px;
+  --sans: "IBM Plex Sans", system-ui, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, monospace;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--bg); color: var(--fg); font: 14px/1.4 var(--sans); }
+.mono, code { font-family: var(--mono); }
+.grow { flex: 1; }
+.c-teal { color: var(--teal); } .c-amber { color: var(--amber); } .c-err { color: var(--err); }
+.c-info { color: var(--info); }
+
+.top { display: flex; align-items: center; gap: calc(var(--gap) * 1.5); padding: 16px 24px; }
+.mark { width: 32px; height: 32px; }
+.brand { font-size: 20px; font-weight: 600; } .brand b { color: var(--teal); font-weight: 600; }
+.badge { font: 600 12px var(--mono); color: var(--teal); background: var(--tealbg);
+  border: 1px solid var(--teal); border-radius: 6px; padding: 3px 8px; letter-spacing: .08em; }
+.sub { color: var(--fg2); }
+.pill { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; color: var(--fg2);
+  border: 1px solid var(--line); background: var(--bg2); border-radius: 999px; padding: 6px 12px; }
+.dot { width: 8px; height: 8px; border-radius: 50%; background: var(--fg3); }
+.pill.ok .dot { background: var(--ok); } .pill.bad .dot { background: var(--err); }
+
+.grid { display: grid; gap: calc(var(--gap) * 2); padding: 0 24px 24px;
+  grid-template-columns: 320px minmax(0, 1fr) 260px;
+  grid-template-areas: "live chart desk" "live rec desk"; }
+#live-card { grid-area: live; } #chart-card { grid-area: chart; } #desk-card { grid-area: desk; }
+#rec-card { grid-area: rec; }
+@media (max-width: 1100px) {
+  .grid { grid-template-columns: 1fr; grid-template-areas: "chart" "live" "desk" "rec"; }
+}
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-card);
+  padding: 16px; display: flex; flex-direction: column; gap: var(--gap); min-width: 0; }
+h2 { display: flex; align-items: center; gap: 8px; margin: 0 0 4px; font-size: 12px;
+  font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--fg2); }
+h3 { margin: 8px 0 0; font-size: 12px; color: var(--fg3); font-weight: 600; }
+.ic { display: inline-block; width: 18px; height: 18px; background: currentColor;
+  -webkit-mask: var(--ic) center / contain no-repeat; mask: var(--ic) center / contain no-repeat; }
+.note { color: var(--fg3); font-size: 12px; text-transform: none; letter-spacing: 0; }
+.err { color: var(--err); font-size: 12px; min-height: 16px; }
+
+.btn { min-height: var(--touch); padding: 0 16px; border-radius: var(--r-btn); cursor: pointer;
+  border: 1px solid var(--line2); background: var(--raise); color: var(--fg); font: 600 14px var(--sans); }
+.btn:hover { border-color: var(--fg3); } .btn:disabled { opacity: .45; cursor: default; }
+.btn.small { min-height: 32px; padding: 0 10px; font-size: 12px; }
+.btn.primary { background: var(--teal); color: var(--bg); border-color: var(--teal); }
+.btn.warn { background: var(--amberbg); color: var(--amber); border-color: var(--amber); }
+.btn.on { background: var(--tealbg); color: var(--teal2); border-color: var(--teal); }
+.btn.flash { outline: 2px solid var(--teal2); }
+.seg, .chips, .row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.seg.center { justify-content: center; }
+.row.big .btn { flex: 1; min-height: 52px; }
+input[type=text], input:not([type]) { flex: 1; min-height: 32px; background: var(--bg2); color: var(--fg);
+  border: 1px solid var(--line2); border-radius: 8px; padding: 0 10px; font: 12px var(--mono); }
+
+.slider { display: grid; grid-template-columns: 1fr auto; gap: 2px 8px; margin-top: 6px; }
+.slider label { color: var(--fg); font-size: 13px; }
+.slider .val { font: 600 13px var(--mono); text-align: right; }
+.slider input[type=range] { grid-column: 1 / 3; width: 100%; accent-color: var(--teal); height: 28px; }
+.slider.changed .val { color: var(--teal2); }
+
+.chart { width: 100%; min-height: 160px; }
+.legend { display: flex; gap: 16px; font: 12px var(--mono); }
+.uplot, .u-legend { font-family: var(--mono); color: var(--fg2); }
+.u-legend { display: none; }
+
+.dial { position: relative; width: 168px; height: 168px; margin: 4px auto; border-radius: 50%;
+  background: var(--bg2); border: 2px solid var(--line2); cursor: grab; touch-action: none; }
+.dial:focus { outline: 2px solid var(--teal); }
+.ticks { position: absolute; inset: 6px; border-radius: 50%;
+  background: repeating-conic-gradient(var(--fg3) 0 1deg, transparent 1deg 7.2deg);
+  -webkit-mask: radial-gradient(circle, transparent 62%, #000 63%);
+  mask: radial-gradient(circle, transparent 62%, #000 63%); }
+.knob { position: absolute; inset: 26px; border-radius: 50%; background: var(--raise);
+  border: 1px solid var(--line2); }
+.knob i { position: absolute; width: 16px; height: 16px; border-radius: 50%; left: 50%; top: 10px;
+  margin-left: -8px; border: 2px solid var(--teal); }
+.mpgbtns { display: flex; justify-content: center; gap: 8px; }
+.key { display: flex; align-items: center; gap: 8px; min-height: var(--touch); color: var(--fg2); cursor: pointer; }
+.key input { width: 20px; height: 20px; accent-color: var(--amber); }
+.bits { font-size: 12px; color: var(--fg3); word-break: break-all; }
+.foot { text-align: center; color: var(--fg2); font-size: 12px; }
+
+.stats { font-size: 12px; color: var(--fg2); }
+.recdot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--err); margin-right: 6px; }
+.files, .msgs { list-style: none; margin: 0; padding: 0; font-size: 12px; }
+.files a { color: var(--info); }
+.msgs li { color: var(--fg2); border-top: 1px solid var(--line); padding: 3px 0; }

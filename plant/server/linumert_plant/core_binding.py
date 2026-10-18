@@ -48,6 +48,11 @@ SW_TARGET_REACHED, SW_HOMING_ATTAINED, SW_HOMING_ERROR = 0x0400, 0x1000, 0x2000
 SW_INTERNAL_LIMIT = 0x0800
 MODE_HOMING, MODE_CSP = 6, 8
 HOMING_PHASES = ("IDLE", "SEARCH", "BACKOFF", "INDEX", "PUSH", "STOP", "DONE", "ERROR")
+# Parametry live w kolejności `lrt_live_param` (plant/core/live.h); indeks = wartość enum.
+LIVE_PARAMS = ("LRT_LIVE_LOAD", "LRT_LIVE_J_MOTOR", "LRT_LIVE_J_SCREW",
+               "LRT_LIVE_FRICTION_COULOMB", "LRT_LIVE_FRICTION_STATIC",
+               "LRT_LIVE_FRICTION_VISCOUS", "LRT_LIVE_BACKLASH", "LRT_LIVE_SUPPLY_SCALE",
+               "LRT_LIVE_TORQUE_LIMIT", "LRT_LIVE_INERTIA_EST")
 ERR_DRIVE, ERR_MECH, ERR_JOINT, ERR_LINK, ERR_SWITCH, ERR_IO, ERR_STEP = (
     -5, -6, -7, -8, -9, -10, -13)
 
@@ -368,6 +373,25 @@ class PlantMachine:
     def joint_position(self, letter: str) -> float:
         si = self.lib.lrt_machine_joint_position(self._m, self._j(letter))
         return si / self.model.unit(letter)
+
+    def joint_velocity(self, letter: str) -> float:
+        """Prędkość osi [jedn. machine.yaml/s] (sesja 022, telemetria panelu)."""
+        si = self.lib.lrt_machine_joint_velocity(self._m, self._j(letter))
+        return si / self.model.unit(letter)
+
+    def drive_letter(self, drive: str) -> str:
+        return next(a for a, ds in self.model.joint_drives.items() if drive in ds)
+
+    def counts_per_unit(self, drive: str) -> float:
+        """Impulsy 6064h na jednostkę osi (mm albo stopień) — skala telemetrii panelu."""
+        d, unit = self._d(drive), self.model.unit(self.drive_letter(drive))
+        return float(self.lib.lrt_machine_counts_for(self._m, d, unit)
+                     - self.lib.lrt_machine_counts_for(self._m, d, 0.0))
+
+    def set_live(self, drive: str, param: str, value: float) -> None:
+        """Zmiana parametru live w rdzeniu C (`param` = nazwa z live.h, np. LRT_LIVE_LOAD)."""
+        self._check(self.lib.lrt_machine_set_live(self._m, self._d(drive),
+                                                  LIVE_PARAMS.index(param), float(value)))
 
     def drive_position(self, drive: str) -> float:
         """Rzeczywiste położenie strony osi napędzanej przez `drive` [jedn. machine.yaml]."""

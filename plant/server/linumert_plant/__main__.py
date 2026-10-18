@@ -2,7 +2,8 @@
 
 Polecenia napędów: list, show, validate, clone, schema, instances. Maszyna (sesja 014):
 `machine build <machine.yaml> [--keys] [--run]` — model z machine.yaml, z --run próba w rdzeniu C.
-Serwer LRT-NET (sesja 016): `serve [machine.yaml] [--plant plant.yaml] [--lockstep|--realtime]`.
+Serwer LRT-NET (sesja 016): `serve [machine.yaml] [--plant plant.yaml] [--lockstep|--realtime]`;
+z panelem web (sesja 022): `serve --panel PORT` albo `panel [--panel-port PORT]`.
 Z katalogu głównego repozytorium to samo działa jako `python -m plant ...` (plant/__main__.py).
 
 Model-Author: Claude · sesja 013 (REQ-VD-03). Kody wyjścia: 0 = OK, 1 = błąd danych, 2 = użycie.
@@ -126,7 +127,7 @@ def _find_machine_entry(machine: Path, source: str) -> dict:
 
 
 def _run(args: argparse.Namespace) -> int:
-    if args.group == "serve":
+    if args.group in ("serve", "panel"):
         return serve_cli.run_serve(args)
     if args.group == "machine":
         return _run_machine(args)
