@@ -29,6 +29,7 @@ import socket
 import struct
 import threading
 from dataclasses import dataclass, field
+from pathlib import Path
 
 TWO_PI = 2.0 * math.pi
 AT_SPEED_TOL = 0.02
@@ -327,6 +328,45 @@ class ModbusMap:
 
 
 @dataclass
+class VfdConfig:
+    """Sekcja `vfd` w plant.yaml: transport falownika (co najmniej jeden)."""
+
+    device: Path | None = None        # dowiązanie pty dla `hy_vfd -d` (RTU)
+    modbus_listen: str = "127.0.0.1"
+    modbus_port: int | None = None    # Modbus TCP dla mb2hal (0 = port wolny, testy)
+    slave: int = 1
+    modbus_map: dict[str, int] | None = None
+
+    @classmethod
+    def from_dict(cls, data: dict, base: Path) -> VfdConfig:
+        device = data.get("device")
+        port = data.get("modbus_port")
+        mapping = data.get("modbus_map")
+        return cls(device=None if device in (None, "") else base / str(device),
+                   modbus_listen=str(data.get("modbus_listen", "127.0.0.1")),
+                   modbus_port=None if port is None else int(port),
+                   slave=int(data.get("slave", 1)),
+                   modbus_map=None if mapping is None else {str(k): int(v)
+                                                            for k, v in mapping.items()})
+
+    def problems(self) -> list[str]:
+        errors = []
+        if self.device is None and self.modbus_port is None:
+            errors.append("vfd: podaj device (hy_vfd) albo modbus_port (Modbus TCP)")
+        if self.modbus_port is not None and not 0 <= self.modbus_port < 65536:
+            errors.append(f"vfd.modbus_port: {self.modbus_port} poza 0–65535")
+        if not 1 <= self.slave <= 247:
+            errors.append(f"vfd.slave: {self.slave} poza 1–247")
+        if self.modbus_map is not None:
+            unknown = sorted(set(self.modbus_map) - set(DEFAULT_MODBUS_MAP))
+            if unknown:
+                errors.append(f"vfd.modbus_map: nieznane rejestry {', '.join(unknown)}")
+            if len(set(self.modbus_map.values())) != len(self.modbus_map):
+                errors.append("vfd.modbus_map: powtórzony adres rejestru")
+        return errors
+
+
+@dataclass
 class VfdFaults:
     comm_lost: bool = False       # serwery nie odpowiadają (utrata komunikacji)
 
@@ -448,3 +488,21 @@ class ModbusTcpServer:
         self._stop.set()
         self.thread.join(timeout=1)
         self.sock.close()
+
+
+def start_servers(cfg: VfdConfig, spindle: SpindleModel, lock: threading.Lock,
+                  faults: VfdFaults) -> list:
+    """Uruchamia transporty z `cfg`; zwraca obiekty z `close()` (błąd: zamyka już otwarte)."""
+    started: list = []
+    try:
+        if cfg.device is not None:
+            started.append(HyVfdPty(HyVfdProtocol(spindle, cfg.slave), str(cfg.device), lock,
+                                    faults).start())
+        if cfg.modbus_port is not None:
+            started.append(ModbusTcpServer(ModbusMap(spindle, cfg.modbus_map), cfg.modbus_listen,
+                                           cfg.modbus_port, lock, faults, cfg.slave).start())
+    except OSError:
+        for srv in started:
+            srv.close()
+        raise
+    return started

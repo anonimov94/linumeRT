@@ -20,6 +20,7 @@ from pathlib import Path
 from linumert.machine.schema import MachineConfigError
 
 from .server import PlantConfig, PlantConfigError, PlantServer, load_plant_config
+from .vfd import start_servers
 
 
 def add_parser(sub) -> None:
@@ -61,16 +62,19 @@ def _config(args: argparse.Namespace) -> PlantConfig:
 
 def build_server(cfg: PlantConfig, library_dir: Path | None = None) -> PlantServer:
     """machine.yaml → model C → serwer (z plikiem stanu enkoderów absolutnych i śladem)."""
-    from .build_machine import build_machine
+    from .build_machine import build_model
     from .core_binding import PlantMachine
+    from .machine_drives import load_machine_drives
     from .plant_state import apply_state, load_state
     from .trace import TraceWriter
 
-    model = build_machine(cfg.machine, library_dir, seed=cfg.seed)
+    mcfg, drives = load_machine_drives(cfg.machine, library_dir)
+    model = build_model(mcfg, drives, seed=cfg.seed)
     machine = PlantMachine(model)
     if cfg.state_file is not None and cfg.state_file.exists():
         apply_state(machine, load_state(cfg.state_file))
-    server = PlantServer(machine, cfg)
+    spindle = drives.get(mcfg.spindle.drive)
+    server = PlantServer(machine, cfg, spindle_template=None if spindle is None else spindle.params)
     if cfg.trace_path is not None:
         server.trace = TraceWriter(cfg.trace_path, server.drives, cfg.trace_format)
     return server
@@ -95,14 +99,27 @@ def run_serve(args: argparse.Namespace) -> int:
     except OSError as exc:
         print(f"Plant nie wystartował: gniazdo UDP: {exc}", file=sys.stderr)
         return 1
+    vfd_servers: list = []
+    if cfg.vfd is not None:
+        try:
+            vfd_servers = start_servers(cfg.vfd, server.spindle, server._lock, server.vfd_faults)
+        except OSError as exc:
+            sock.close()
+            print(f"Plant nie wystartował: falownik (pty/Modbus TCP): {exc}", file=sys.stderr)
+            return 1
     signal.signal(signal.SIGTERM, lambda *_: server.stop())
     print(f"Plant: {server.machine.model.name}, {len(server.drives)} osi LRT-NET, "
           f"{cfg.mode}, UDP {cfg.listen}:{cfg.port}", flush=True)
+    for srv in vfd_servers:
+        where = getattr(srv, "link", None) or f"Modbus TCP {cfg.vfd.modbus_listen}:{srv.port}"
+        print(f"Plant: falownik wrzeciona — {where}", flush=True)
     try:
         server.serve(sock, args.frames)
     except KeyboardInterrupt:
         pass
     finally:
+        for srv in vfd_servers:
+            srv.close()
         sock.close()
         if server.trace is not None:
             server.trace.close()

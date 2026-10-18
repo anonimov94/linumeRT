@@ -292,3 +292,88 @@ def test_hy_vfd_over_pty(tmp_path):
         os.close(fd)
         pty.close()
     assert not link.exists()
+
+
+# --- integracja z serwerem Plant ----------------------------------------------------------------
+
+ROOT = __import__("pathlib").Path(__file__).resolve().parents[1]
+MACHINE = ROOT / "config" / "machines" / "mill_servo_table.yaml"
+
+
+def test_plant_yaml_vfd_section(tmp_path):
+    from linumert_plant.server import PlantConfigError, load_plant_config
+
+    cfg_file = tmp_path / "plant.yaml"
+    cfg_file.write_text("vfd: {device: run/hy_vfd, modbus_port: 1502, slave: 2,\n"
+                        "      modbus_map: {command: 10, speed_cmd: 11}}\n", encoding="utf-8")
+    vfd = load_plant_config(cfg_file).vfd
+    assert vfd.device == tmp_path / "run" / "hy_vfd"
+    assert (vfd.modbus_port, vfd.slave, vfd.modbus_map) == (1502, 2, {"command": 10,
+                                                                     "speed_cmd": 11})
+    cfg_file.write_text("vfd: {slave: 300, modbus_map: {foo: 1}}\n", encoding="utf-8")
+    with pytest.raises(PlantConfigError) as err:
+        load_plant_config(cfg_file)
+    msg = str(err.value)
+    assert "device" in msg and "vfd.slave" in msg and "foo" in msg
+
+
+@pytest.fixture(scope="module")
+def core():
+    from linumert_plant import core_binding
+
+    try:
+        core_binding.load_library()
+    except core_binding.PlantCoreUnavailable as exc:
+        pytest.skip(f"rdzeń C niedostępny: {exc}")
+    return core_binding
+
+
+def _server(core, vfd=None):
+    from linumert_plant.build_machine import build_machine
+    from linumert_plant.server import PlantConfig, PlantServer
+
+    machine = core.PlantMachine(build_machine(MACHINE))
+    return PlantServer(machine, PlantConfig(vfd=vfd))
+
+
+def test_server_spindle_from_lrt_net(core):
+    # REQ-VD-01 — bez sekcji vfd wrzeciono zadaje spindle_cmd; spindle_actual z modelu
+    from test_master import Master
+
+    server = _server(core)
+    assert server.spindle.max_rpm == 8000 and server.spindle.inertia == pytest.approx(8e-4)
+    master = Master(len(server.drives), transport=server.handle)
+    master.spindle_cmd = -3000.0
+    for _ in range(3000):
+        master.exchange()
+    assert master.last.spindle_actual == pytest.approx(-3000, rel=0.02)
+    assert server.report()["spindle"]["fault"] == FAULT_NONE
+    master.spindle_cmd = 0.0
+    for _ in range(3000):
+        master.exchange()
+    assert master.last.spindle_actual == pytest.approx(0, abs=1)
+
+
+def test_server_spindle_over_modbus_tcp(core):
+    # REQ-VD-01 — sekcja vfd: Modbus TCP steruje wrzecionem, LRT-NET tylko odczytuje obroty
+    from linumert_plant.vfd import VfdConfig, start_servers
+    from test_master import Master
+
+    server = _server(core, VfdConfig(modbus_port=0))
+    servers = start_servers(server.cfg.vfd, server.spindle, server._lock, server.vfd_faults)
+    master = Master(len(server.drives), transport=server.handle)
+    master.spindle_cmd = 5000.0  # ignorowane przy falowniku
+    try:
+        port = servers[0].port
+        with socket.create_connection(("127.0.0.1", port), timeout=2) as conn:
+            pdu = struct.pack(">BHHB", 16, 0, 2, 4) + struct.pack(">HH", 1, 4000)
+            conn.sendall(mbap(1, pdu))
+            assert conn.recv(64)[7:] == pdu[:5]
+            for _ in range(3000):
+                master.exchange()
+            assert master.last.spindle_actual == pytest.approx(4000, rel=0.02)
+            conn.sendall(mbap(2, struct.pack(">BHH", 3, DEFAULT_MODBUS_MAP["status"], 1)))
+            assert conn.recv(64)[-2:] == b"\x00\x03"  # pracuje i at-speed
+    finally:
+        for srv in servers:
+            srv.close()

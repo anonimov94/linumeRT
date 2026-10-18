@@ -9,8 +9,10 @@ ją wołać bezpośrednio; `serve()` dokłada pętlę UDP. Tryby:
             i ziarno dają identyczny ślad (SHA-256 odpowiedzi, REQ-QA-04);
   realtime  odstępy i watchdog z zegara monotonicznego hosta (VM-B).
 Osie ramki to napędy osi z `machine.yaml` w kolejności `drives:` bez napędu wrzeciona
-(gantry = dwa bloki, jak dwa jointy LinuxCNC). Wrzeciono przez LRT-NET nie jest jeszcze
-modelowane (`spindle_actual` = 0; VFD po Modbus w sesji 021).
+(gantry = dwa bloki, jak dwa jointy LinuxCNC). Wrzeciono (sesja 021, `vfd.SpindleModel`):
+bez sekcji `vfd` w plant.yaml zadaje je `spindle_cmd` ramki [obr/min, znak = kierunek],
+z sekcją `vfd` — falownik przez hy_vfd (pty) albo Modbus TCP (serwery w `serve.py`);
+`spindle_actual` to zawsze obroty wału modelu [obr/min].
 Odporność (REQ-QA-03): uszkodzona ramka jest odrzucana i liczona; wyjątek modelu przełącza
 w stan bezpieczny (napędy wyłączone, wyjścia zerowe) bez kończenia procesu.
 Ten moduł działa poza RT (CLAUDE.md §5).
@@ -47,6 +49,7 @@ from .lrtnet import (
 )
 from .oracle import Oracle
 from .trace import TraceWriter
+from .vfd import SpindleModel, VfdConfig, VfdFaults
 
 log = logging.getLogger("linumert_plant.server")
 
@@ -79,6 +82,7 @@ class PlantConfig:
     trace_format: str = "csv"
     oracle_arm_bit: int | None = 31  # bit digital_out uzbrajający wyrocznię (None = zawsze)
     tools: dict[int, ToolSpec] = field(default_factory=dict)  # wysięg i średnica narzędzi
+    vfd: VfdConfig | None = None  # falownik wrzeciona (hy_vfd / Modbus TCP); None = LRT-NET
 
     def check(self) -> None:
         errors = []
@@ -96,6 +100,8 @@ class PlantConfig:
             errors.append(f"oracle.arm_bit: {self.oracle_arm_bit} poza 0–31 (null = zawsze)")
         if self.trace_format not in ("csv", "jsonl"):
             errors.append(f"trace.format: {self.trace_format!r} — dozwolone csv, jsonl")
+        if self.vfd is not None:
+            errors += self.vfd.problems()
         if errors:
             raise PlantConfigError("; ".join(errors))
 
@@ -123,7 +129,9 @@ def load_plant_config(path: Path | str) -> PlantConfig:
         return None if value in (None, "") else (base / str(value))
 
     net, timing, trace = section("network"), section("timing"), section("trace")
-    oracle = section("oracle")
+    oracle, vfd = section("oracle"), data.get("vfd")
+    if vfd is not None and not isinstance(vfd, dict):
+        raise PlantConfigError(f"{path}: vfd: oczekiwano mapy")
     tools_raw = section("tools")
     try:
         cfg = PlantConfig(
@@ -138,7 +146,8 @@ def load_plant_config(path: Path | str) -> PlantConfig:
                             else int(oracle.get("arm_bit", 31))),
             tools={int(k): ToolSpec(float((v or {}).get("length", 50.0)),
                                     float((v or {}).get("diameter", 6.0)))
-                   for k, v in tools_raw.items()})
+                   for k, v in tools_raw.items()},
+            vfd=None if vfd is None else VfdConfig.from_dict(vfd, base))
     except (TypeError, ValueError) as exc:
         raise PlantConfigError(f"{path}: zły typ wartości ({exc})") from None
     cfg.check()
@@ -164,11 +173,25 @@ class Stats:
         self._gaps.clear()
 
 
+def _spindle_template(mcfg) -> dict | None:
+    """Parametry instancji napędu wrzeciona z domyślnej biblioteki (None = brak/niezgodność)."""
+    from linumert.machine.schema import MachineConfigError
+
+    from .drive_library import TemplateError, load_library
+    from .machine_drives import resolve_machine_drives
+
+    try:
+        inst = resolve_machine_drives(mcfg, load_library()).get(mcfg.spindle.drive)
+    except (MachineConfigError, TemplateError):
+        return None
+    return None if inst is None else inst.params
+
+
 class PlantServer:
     """Protokół LRT-NET nad uruchomioną maszyną (`PlantMachine`)."""
 
     def __init__(self, machine: PlantMachine, config: PlantConfig | None = None,
-                 trace: TraceWriter | None = None):
+                 trace: TraceWriter | None = None, spindle_template: dict | None = None):
         self.machine = machine
         self.cfg = config or PlantConfig()
         self.cfg.check()
@@ -196,6 +219,11 @@ class PlantServer:
         self._tool_len = mcfg.probe.tip_length if mcfg.probe is not None else 0.0
         self._extra_inputs = (0, 0)
         self.events: list = []
+        # wrzeciono z falownikiem (sesja 021): szablon napędu wrzeciona z machine.yaml
+        if spindle_template is None:
+            spindle_template = _spindle_template(mcfg)
+        self.spindle = SpindleModel.from_machine(mcfg, spindle_template)
+        self.vfd_faults = VfdFaults()
         self._estop = self._estop_input()
         self._lock = threading.Lock()
         self._stop = threading.Event()
@@ -231,6 +259,8 @@ class PlantServer:
         for drive in self.drives:
             self.machine.inject_fault(drive, FAULT_COMM_WATCHDOG, sticky=False)
         self.machine.set_outputs(0)
+        if self.cfg.vfd is None:
+            self.spindle.set_speed(0.0, False)  # wrzeciono zadawane przez LRT-NET
         self._note(f"E-4003: brak ramek magistrali przez {gap_ms:.0f} ms; napędy w stan błędu")
 
     def check_watchdog(self, now_ns: int | None = None) -> bool:
@@ -257,6 +287,7 @@ class PlantServer:
             self.machine.set_outputs(0)
         except Exception:  # noqa: BLE001
             pass
+        self.spindle.set_speed(0.0, False)
         self._note(f"E-4200: błąd modelu Plant ({reason}); napędy wyłączone, "
                    "wymagany restart Plant")
 
@@ -276,7 +307,8 @@ class PlantServer:
             self._tool_len = length
 
     def _step_discrete(self, dt: float, outputs: int) -> None:
-        """Magazyn, czujnik długości, kolizje (REQ-VM-08…10) po kroku modelu C."""
+        """Wrzeciono, magazyn, czujnik długości, kolizje (REQ-VM-08…10) po kroku modelu C."""
+        self.spindle.step(dt)
         nose = self.nose()
         fresh = list(self.atc.step(dt, nose, outputs))
         self._sync_tool_length()
@@ -311,7 +343,8 @@ class PlantServer:
                 "watchdog_tripped": self.watchdog_tripped, "model_failed": self.model_failed,
                 "digest": self.digest, "oracle": self.oracle.report(),
                 "events": [asdict(e) for e in self.events[:500]],
-                "spindle_tool": self.atc.spindle_tool, "slots": list(self.atc.slots)}
+                "spindle_tool": self.atc.spindle_tool, "slots": list(self.atc.slots),
+                "spindle": {"rpm": round(self.spindle.rpm, 1), "fault": self.spindle.fault}}
 
     def handle(self, frame: bytes, now_ns: int | None = None) -> bytes | None:
         """Jedna ramka master→plant. Zwraca odpowiedź albo None (ramka odrzucona)."""
@@ -390,6 +423,8 @@ class PlantServer:
                 self._reset_seen = True
         # Po watchdogu wyjścia zostają bezpieczne do fault resetu (zwolnienie w `_reply`).
         m.set_outputs(0 if self.watchdog_tripped else cmd.digital_out)
+        if self.cfg.vfd is None and not self.watchdog_tripped:
+            self.spindle.set_speed(cmd.spindle_cmd, cmd.spindle_cmd != 0.0)
 
     def _reply(self, seq: int, time_ns: int) -> Reply:
         m = self.machine
@@ -423,6 +458,7 @@ class PlantServer:
         if self.trace is not None:
             self.trace.put(seq, time_ns, axes)
         return Reply(seq=seq, time_ns=time_ns, axes=axes, digital_in=inputs,
+                     spindle_actual=self.spindle.rpm,
                      frames_lost=self.stats.lost, frames_late=self.stats.late,
                      jitter_us=self.stats.jitter_us, flags=flags)
 
