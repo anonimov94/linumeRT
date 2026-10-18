@@ -1,0 +1,370 @@
+"""Serwer LRT-NET Plant: ramka mastera → krok modelu → odpowiedź (docs/PLANT.md §2–3, §8).
+
+SPDX-License-Identifier: GPL-2.0-or-later
+Model-Author: Claude · sesja 016.
+
+`PlantServer.handle()` jest czystą funkcją protokołu (bez gniazd), więc testy i scenariusze mogą
+ją wołać bezpośrednio; `serve()` dokłada pętlę UDP. Tryby:
+  lockstep  czas wyłącznie z pola `time_ns` ramek (bez zegara ściennego) — ten sam przebieg
+            i ziarno dają identyczny ślad (SHA-256 odpowiedzi, REQ-QA-04);
+  realtime  odstępy i watchdog z zegara monotonicznego hosta (VM-B).
+Osie ramki to napędy osi z `machine.yaml` w kolejności `drives:` bez napędu wrzeciona
+(gantry = dwa bloki, jak dwa jointy LinuxCNC). Wrzeciono przez LRT-NET nie jest jeszcze
+modelowane (`spindle_actual` = 0; VFD po Modbus w sesji 021).
+Odporność (REQ-QA-03): uszkodzona ramka jest odrzucana i liczona; wyjątek modelu przełącza
+w stan bezpieczny (napędy wyłączone, wyjścia zerowe) bez kończenia procesu.
+Ten moduł działa poza RT (CLAUDE.md §5).
+"""
+
+from __future__ import annotations
+
+import hashlib
+import logging
+import socket
+import threading
+import time
+from collections import deque
+from dataclasses import dataclass, field
+from pathlib import Path
+from typing import Any
+
+import yaml
+
+from .core_binding import MODE_CSP, PlantMachine
+from .lrtnet import (
+    FLAG_ESTOP_OPEN,
+    FLAG_FAULT,
+    FLAG_RESET_STATS,
+    PORT,
+    AxisReply,
+    FrameError,
+    Reply,
+    decode_command,
+    encode_reply,
+    seq_delta,
+)
+from .trace import TraceWriter
+
+log = logging.getLogger("linumert_plant.server")
+
+FAULT_COMM_WATCHDOG = 11  # drive.h: LRT_DRIVE_FAULT_COMM_WATCHDOG (E-4003, 8130h)
+SW_FAULT = 0x0008
+ERR_MODEL = 0xFF00  # 603Fh awarii ogólnej (E-4200) zgłaszany po wyjątku modelu
+DT_MIN, DT_MAX = 100_000, 10_000_000  # [ns], docs/PLANT.md §3 reguła 3
+JITTER_WINDOW = 100
+MODES = ("lockstep", "realtime")
+
+
+class PlantConfigError(ValueError):
+    """Błędny `plant.yaml` (komunikat po polsku, ze ścieżką pola)."""
+
+
+@dataclass
+class PlantConfig:
+    """Uruchomienie Plant (`plant.yaml`, docs/PLANT.md §7) — nie maszyna."""
+
+    machine: Path | None = None
+    listen: str = "127.0.0.1"
+    port: int = PORT
+    cycle_ns: int = 1_000_000
+    substeps: int = 1
+    watchdog_ms: float = 50.0
+    mode: str = "lockstep"
+    seed: int = 1
+    state_file: Path | None = None
+    trace_path: Path | None = None
+    trace_format: str = "csv"
+
+    def check(self) -> None:
+        errors = []
+        if self.mode not in MODES:
+            errors.append(f"mode: {self.mode!r} — dozwolone {', '.join(MODES)}")
+        if not 0 < self.port < 65536:
+            errors.append(f"network.port: {self.port} poza 1–65535")
+        if not DT_MIN <= self.cycle_ns <= DT_MAX:
+            errors.append(f"timing.cycle_ns: {self.cycle_ns} poza {DT_MIN}–{DT_MAX}")
+        if not 1 <= self.substeps <= 100:
+            errors.append(f"timing.substeps: {self.substeps} poza 1–100")
+        if not 1 <= self.watchdog_ms <= 10_000:
+            errors.append(f"timing.watchdog_ms: {self.watchdog_ms} poza 1–10000")
+        if self.trace_format not in ("csv", "jsonl"):
+            errors.append(f"trace.format: {self.trace_format!r} — dozwolone csv, jsonl")
+        if errors:
+            raise PlantConfigError("; ".join(errors))
+
+
+def load_plant_config(path: Path | str) -> PlantConfig:
+    """Wczytuje `plant.yaml`; ścieżki względne liczone od katalogu pliku."""
+    path = Path(path)
+    try:
+        data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    except OSError as exc:
+        raise PlantConfigError(f"{path}: nie można odczytać ({exc.strerror})") from None
+    except yaml.YAMLError as exc:
+        raise PlantConfigError(f"{path}: błąd składni YAML ({exc})") from None
+    if not isinstance(data, dict):
+        raise PlantConfigError(f"{path}: oczekiwano mapy klucz: wartość")
+    base = path.parent
+
+    def section(name: str) -> dict[str, Any]:
+        value = data.get(name) or {}
+        if not isinstance(value, dict):
+            raise PlantConfigError(f"{path}: {name}: oczekiwano mapy")
+        return value
+
+    def rel(value: Any) -> Path | None:
+        return None if value in (None, "") else (base / str(value))
+
+    net, timing, trace = section("network"), section("timing"), section("trace")
+    try:
+        cfg = PlantConfig(
+            machine=rel(data.get("machine")), listen=str(net.get("listen", "127.0.0.1")),
+            port=int(net.get("port", PORT)), cycle_ns=int(timing.get("cycle_ns", 1_000_000)),
+            substeps=int(timing.get("substeps", 1)),
+            watchdog_ms=float(timing.get("watchdog_ms", 50)),
+            mode=str(data.get("mode", "lockstep")), seed=int(data.get("seed", 1)),
+            state_file=rel(data.get("state_file")),
+            trace_path=rel(trace.get("path")), trace_format=str(trace.get("format", "csv")))
+    except (TypeError, ValueError) as exc:
+        raise PlantConfigError(f"{path}: zły typ wartości ({exc})") from None
+    cfg.check()
+    return cfg
+
+
+@dataclass
+class Stats:
+    received: int = 0
+    rejected: int = 0
+    lost: int = 0
+    late: int = 0
+    steps: int = 0
+    _gaps: deque = field(default_factory=lambda: deque(maxlen=JITTER_WINDOW), repr=False)
+
+    @property
+    def jitter_us(self) -> int:
+        """Średnia ruchoma |odstęp − cycle_ns| z ostatnich 100 ramek [µs]."""
+        return int(sum(self._gaps) / len(self._gaps) / 1000) if self._gaps else 0
+
+    def reset(self) -> None:
+        self.received = self.rejected = self.lost = self.late = 0
+        self._gaps.clear()
+
+
+class PlantServer:
+    """Protokół LRT-NET nad uruchomioną maszyną (`PlantMachine`)."""
+
+    def __init__(self, machine: PlantMachine, config: PlantConfig | None = None,
+                 trace: TraceWriter | None = None):
+        self.machine = machine
+        self.cfg = config or PlantConfig()
+        self.cfg.check()
+        self.trace = trace
+        model = machine.model
+        self.drives = [d for d in model.drives if d != model.spindle]
+        self.stats = Stats()
+        self.messages: deque[str] = deque(maxlen=200)
+        self.watchdog_tripped = False
+        self.model_failed = False
+        self._digest = hashlib.sha256()
+        self._last_seq: int | None = None
+        self._last_time: int | None = None  # time_ns ostatniej ramki z krokiem
+        self._last_rx: int | None = None  # zegar odbioru (lockstep: time_ns, realtime: host)
+        self._mode = {d: None for d in self.drives}
+        self._target = {d: 0 for d in self.drives}
+        self._estop = self._estop_input()
+        self._lock = threading.Lock()
+        self._stop = threading.Event()
+
+    # ---- pomocnicze --------------------------------------------------------------------
+    def _estop_input(self) -> tuple[int, bool] | None:
+        cfg = self.machine.model.config
+        estop = getattr(getattr(cfg, "io", None), "estop", None)
+        if estop is None or estop.input not in self.machine.model.inputs:
+            return None
+        return self.machine.model.inputs[estop.input], estop.contact == "NC"
+
+    def _note(self, text: str) -> None:
+        self.messages.append(text)
+        log.warning(text)
+
+    @property
+    def digest(self) -> str:
+        """SHA-256 wszystkich wysłanych odpowiedzi (ślad przebiegu, REQ-QA-04)."""
+        return self._digest.hexdigest()
+
+    # ---- watchdog i stan bezpieczny ----------------------------------------------------
+    def trip_watchdog(self, gap_ms: float) -> None:
+        """Brak ramek > watchdog_ms → wszystkie napędy w fault (E-4003), wyjścia bezpieczne.
+
+        Awaria jest jednorazowa (nie trwała): wznowienie ramek jej nie kasuje, kasuje ją
+        dopiero fault reset mastera (bit 7 słowa sterującego), docs/PLANT.md §3 reguła 4.
+        """
+        if self.watchdog_tripped:
+            return
+        self.watchdog_tripped = True
+        for drive in self.drives:
+            self.machine.inject_fault(drive, FAULT_COMM_WATCHDOG, sticky=False)
+        self.machine.set_outputs(0)
+        self._note(f"E-4003: brak ramek magistrali przez {gap_ms:.0f} ms; napędy w stan błędu")
+
+    def check_watchdog(self, now_ns: int | None = None) -> bool:
+        """Sprawdzenie bez ramki (tryb realtime, pętla bezczynna). True = zadziałał."""
+        if self.cfg.mode != "realtime" or self._last_rx is None:
+            return False
+        now = time.monotonic_ns() if now_ns is None else now_ns
+        gap_ms = (now - self._last_rx) / 1e6
+        if gap_ms > self.cfg.watchdog_ms:
+            with self._lock:
+                self.trip_watchdog(gap_ms)
+            return True
+        return False
+
+    def safe_state(self, reason: str) -> None:
+        """Wyjątek modelu: napędy wyłączone (disable voltage), wyjścia zerowe, bez kroków."""
+        self.model_failed = True
+        for drive in self.drives:
+            try:
+                self.machine.set_controlword(drive, 0)
+            except Exception:  # noqa: BLE001 - model już niespójny; stan bezpieczny ważniejszy
+                pass
+        try:
+            self.machine.set_outputs(0)
+        except Exception:  # noqa: BLE001
+            pass
+        self._note(f"E-4200: błąd modelu Plant ({reason}); napędy wyłączone, "
+                   "wymagany restart Plant")
+
+    # ---- protokół ----------------------------------------------------------------------
+    def handle(self, frame: bytes, now_ns: int | None = None) -> bytes | None:
+        """Jedna ramka master→plant. Zwraca odpowiedź albo None (ramka odrzucona)."""
+        with self._lock:
+            return self._handle(frame, now_ns)
+
+    def _handle(self, frame: bytes, now_ns: int | None) -> bytes | None:
+        try:
+            cmd = decode_command(frame)
+            if len(cmd.axes) != len(self.drives):
+                raise FrameError(f"ramka ma {len(cmd.axes)} osi, maszyna {len(self.drives)}")
+        except FrameError as exc:
+            self.stats.rejected += 1
+            if self.stats.rejected <= 10 or self.stats.rejected % 1000 == 0:
+                self._note(f"odrzucona ramka ({self.stats.rejected}.): {exc}")
+            return None
+        self.stats.received += 1
+        if cmd.flags & FLAG_RESET_STATS:
+            self.stats.reset()
+        rx = cmd.time_ns if self.cfg.mode == "lockstep" else (
+            time.monotonic_ns() if now_ns is None else now_ns)
+
+        step = True
+        if self._last_seq is not None:
+            delta = seq_delta(cmd.seq, self._last_seq)
+            if delta <= 0:
+                self.stats.late += 1
+                step = False
+            else:
+                self.stats.lost += delta - 1
+        if step:
+            if self._last_rx is not None:
+                gap = rx - self._last_rx
+                if gap / 1e6 > self.cfg.watchdog_ms:
+                    self.trip_watchdog(gap / 1e6)
+                self.stats._gaps.append(abs(gap - self.cfg.cycle_ns))
+            dt_ns = self.cfg.cycle_ns if self._last_time is None else cmd.time_ns - self._last_time
+            dt_ns = min(max(dt_ns, DT_MIN), DT_MAX)
+            self._last_seq, self._last_time, self._last_rx = cmd.seq, cmd.time_ns, rx
+            if not self.model_failed:
+                try:
+                    self._apply(cmd)
+                    sub = self.cfg.substeps
+                    self.machine.step(dt_ns / 1e9 / sub, sub)
+                    self.stats.steps += 1
+                except Exception as exc:  # noqa: BLE001 - REQ-QA-03: proces nie może upaść
+                    self.safe_state(f"{type(exc).__name__}: {exc}")
+        reply = encode_reply(self._reply(cmd.seq, cmd.time_ns))
+        self._digest.update(reply)
+        return reply
+
+    def _apply(self, cmd) -> None:
+        m = self.machine
+        for drive, axis in zip(self.drives, cmd.axes, strict=True):
+            if axis.mode != self._mode[drive]:
+                m.set_mode(drive, axis.mode)
+                self._mode[drive] = axis.mode
+            if axis.mode == MODE_CSP:
+                m.set_target(drive, axis.target_pos)
+                self._target[drive] = axis.target_pos
+            m.set_controlword(drive, axis.controlword)
+        m.set_outputs(0 if self.watchdog_tripped and not self._all_reset() else cmd.digital_out)
+
+    def _all_reset(self) -> bool:
+        """Po watchdogu wyjścia zostają bezpieczne, aż żaden napęd nie jest w fault."""
+        if any(self.machine.statusword(d) & SW_FAULT for d in self.drives):
+            return False
+        self.watchdog_tripped = False
+        return True
+
+    def _reply(self, seq: int, time_ns: int) -> Reply:
+        m = self.machine
+        axes = []
+        fault = False
+        for drive in self.drives:
+            if self.model_failed:
+                axes.append(AxisReply(statusword=SW_FAULT, error_code=ERR_MODEL))
+                fault = True
+                continue
+            sw = m.statusword(drive)
+            actual = m.position_actual(drive)
+            mode = self._mode[drive] if self._mode[drive] is not None else MODE_CSP
+            ferr = self._target[drive] - actual if mode == MODE_CSP else 0
+            fault |= bool(sw & SW_FAULT)
+            axes.append(AxisReply(statusword=sw, mode_display=m.od_read(drive, 0x6061),
+                                  actual_pos=actual, following_error=ferr,
+                                  torque_pct=m.torque_actual(drive),
+                                  error_code=m.drive_error_code(drive)))
+        inputs = m.inputs
+        flags = FLAG_FAULT if fault else 0
+        if self._estop is not None:
+            bit, nc = self._estop
+            closed = bool(inputs >> bit & 1)
+            if closed != nc:
+                flags |= FLAG_ESTOP_OPEN
+        if self.trace is not None:
+            self.trace.put(seq, time_ns, axes)
+        return Reply(seq=seq, time_ns=time_ns, axes=axes, digital_in=inputs,
+                     frames_lost=self.stats.lost, frames_late=self.stats.late,
+                     jitter_us=self.stats.jitter_us, flags=flags)
+
+    # ---- UDP ---------------------------------------------------------------------------
+    def bind(self) -> socket.socket:
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        sock.bind((self.cfg.listen, self.cfg.port))
+        return sock
+
+    def serve(self, sock: socket.socket, max_frames: int | None = None) -> None:
+        """Pętla odbioru do `stop()` (albo `max_frames` przyjętych ramek)."""
+        poll = max(self.cfg.watchdog_ms / 4000.0, 0.001)
+        sock.settimeout(poll)
+        while not self._stop.is_set():
+            try:
+                frame, addr = sock.recvfrom(2048)
+            except TimeoutError:
+                self.check_watchdog()
+                continue
+            except OSError as exc:  # np. ICMP port unreachable od mastera
+                if self._stop.is_set():
+                    break
+                self._note(f"błąd gniazda: {exc}")
+                continue
+            reply = self.handle(frame, time.monotonic_ns())
+            if reply is not None:
+                try:
+                    sock.sendto(reply, addr)
+                except OSError as exc:
+                    self._note(f"nie wysłano odpowiedzi do {addr}: {exc}")
+            if max_frames is not None and self.stats.received >= max_frames:
+                break
+
+    def stop(self) -> None:
+        self._stop.set()
