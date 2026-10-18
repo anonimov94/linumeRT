@@ -108,7 +108,8 @@ typedef enum {
 /* Awarie napedu. Kolumny: nazwa, numer, kod 603Fh, alarm w core/linumert/alarms/catalog.yaml.
  * Kody 603Fh wedlug powszechnej praktyki CiA 301/402 (0xFFxx = wlasne, zakres producenta);
  * wartosci nie byly porownywane z norma (niedostepna) - NIEZWERYFIKOWANE. Kazda awaria ma
- * odpowiednik E-42xx (test w tests/test_plant_core.py). */
+ * odpowiednik w katalogu: E-42xx, a COMM_WATCHDOG (sesja 016, watchdog serwera LRT-NET) E-4003
+ * (test w tests/test_plant_core.py). */
 #define LRT_DRIVE_FAULT_LIST(X)                                                              \
     X(GENERIC, 1, 0xFF00, "E-4200")                                                          \
     X(FOLLOWING_ERROR, 2, 0x8611, "E-4201")                                                  \
@@ -119,7 +120,8 @@ typedef enum {
     X(ENCODER_LOST, 7, 0x7305, "E-4206")                                                     \
     X(HW_LIMIT, 8, 0xFF01, "E-4207")                                                         \
     X(STO, 9, 0xFF02, "E-4208")                                                              \
-    X(ENCODER_BATTERY, 10, 0xFF03, "E-4211")
+    X(ENCODER_BATTERY, 10, 0xFF03, "E-4211")                                                 \
+    X(COMM_WATCHDOG, 11, 0x8130, "E-4003")
 
 typedef enum {
     LRT_DRIVE_FAULT_NONE = 0,

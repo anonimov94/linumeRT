@@ -77,7 +77,7 @@ def test_make_test_c_target_runs_core_tests() -> None:
 # ---- Napęd (drive.h): awarie ↔ katalog alarmów (sesja 012) -------------------------------
 
 DRIVE_FAULT_ROW = re.compile(
-    r'X\(\s*([A-Z_]+)\s*,\s*(\d+)\s*,\s*(0x[0-9A-Fa-f]+)\s*,\s*"(E-42\d\d)"\s*\)'
+    r'X\(\s*([A-Z_]+)\s*,\s*(\d+)\s*,\s*(0x[0-9A-Fa-f]+)\s*,\s*"(E-4[02]\d\d)"\s*\)'
 )
 
 
@@ -101,6 +101,6 @@ def test_every_drive_fault_has_alarm_in_catalog() -> None:  # kryterium sesji 01
     catalog = ROOT / "core" / "linumert" / "alarms" / "catalog.yaml"
     if not catalog.exists():
         pytest.skip("katalog alarmów dochodzi w PR sesji 007; test działa po scaleniu")
-    codes = set(re.findall(r"^- code: (E-42\d\d)\s*$", catalog.read_text("utf-8"), flags=re.M))
+    codes = set(re.findall(r"^- code: (E-4[02]\d\d)\s*$", catalog.read_text("utf-8"), flags=re.M))
     for name, _num, _cia, alarm in _drive_fault_rows():
         assert alarm in codes, f"awaria {name}: brak {alarm} w catalog.yaml"

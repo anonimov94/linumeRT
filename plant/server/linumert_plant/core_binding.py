@@ -84,6 +84,7 @@ def _signatures(lib: ctypes.CDLL) -> ctypes.CDLL:
         "lrt_machine_set_joint_target": ([vp, i, d], i),
         "lrt_machine_counts_for": ([vp, i, d], ctypes.c_int32),
         "lrt_machine_set_outputs": ([vp, u32], None),
+        "lrt_machine_outputs": ([vp], u32),
         "lrt_machine_set_estop": ([vp, i], None),
         "lrt_machine_set_tool_length": ([vp, d], i),
         "lrt_machine_set_joint_position": ([vp, i, d], i),
@@ -348,6 +349,14 @@ class PlantMachine:
         letter = next(a for a, ds in self.model.joint_drives.items() if drive in ds)
         si = value * self.model.unit(letter)
         self._check(self.lib.lrt_machine_set_drive_position(self._m, self._d(drive), si))
+
+    def set_outputs(self, mask: int) -> None:
+        """Wyjścia cyfrowe sterowania (`io.outputs`, 32 bity) — z ramki LRT-NET."""
+        self.lib.lrt_machine_set_outputs(self._m, mask & 0xFFFFFFFF)
+
+    @property
+    def outputs(self) -> int:
+        return self.lib.lrt_machine_outputs(self._m)
 
     def set_estop(self, pressed: bool) -> None:
         self.lib.lrt_machine_set_estop(self._m, int(pressed))

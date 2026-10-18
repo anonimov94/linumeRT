@@ -303,7 +303,9 @@ static void test_fault_table_complete(void) /* REQ-VD-01 */
         const char *alarm = lrt_drive_fault_alarm(f);
 
         LRT_CHECK(alarm != NULL);
-        LRT_CHECK(alarm != NULL && strlen(alarm) == 6 && strncmp(alarm, "E-42", 4) == 0);
+        /* E-42xx: awarie napedu; E-4003: watchdog magistrali (sesja 016) */
+        LRT_CHECK(alarm != NULL && strlen(alarm) == 6 &&
+                  (strncmp(alarm, "E-42", 4) == 0 || strcmp(alarm, "E-4003") == 0));
         LRT_CHECK(lrt_drive_fault_error_code(f) != 0);
         for (g = f + 1; g < LRT_DRIVE_FAULT_COUNT; g++) {
             LRT_CHECK(strcmp(alarm, lrt_drive_fault_alarm(g)) != 0);
@@ -314,6 +316,8 @@ static void test_fault_table_complete(void) /* REQ-VD-01 */
     LRT_CHECK(lrt_drive_fault_alarm(LRT_DRIVE_FAULT_COUNT) == NULL);
     LRT_CHECK(lrt_drive_fault_error_code(LRT_DRIVE_FAULT_COUNT) == 0);
     LRT_CHECK(lrt_drive_fault_error_code(LRT_DRIVE_FAULT_FOLLOWING_ERROR) == 0x8611u);
+    LRT_CHECK(strcmp(lrt_drive_fault_alarm(LRT_DRIVE_FAULT_COMM_WATCHDOG), "E-4003") == 0);
+    LRT_CHECK(lrt_drive_fault_error_code(LRT_DRIVE_FAULT_COMM_WATCHDOG) == 0x8130u);
 }
 
 static void test_tune_servo_formulas_and_bandwidth_clamp(void)
