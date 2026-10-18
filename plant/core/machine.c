@@ -132,6 +132,9 @@ static lrt_machine_drive_cfg *touch_drive(lrt_machine_cfg *c, int n)
         lrt_axis_params_default(&d->mech);
         d->index_input = -1;
         d->index_width = 0.01;
+        d->din_neg_limit = -1;
+        d->din_pos_limit = -1;
+        d->din_home = -1;
         d->used = 1;
     }
     if (n + 1 > c->n_drives) {
@@ -185,6 +188,7 @@ static lrt_machine_switch_cfg *touch_switch(lrt_machine_cfg *c, int n)
         s->side = -1;
         s->nc = 1;
         s->input = -1;
+        s->drive = -1;
     }
     if (n + 1 > c->n_switches) {
         c->n_switches = n + 1;
@@ -257,6 +261,15 @@ static int cfg_drive(lrt_machine_cfg *c, int n, const char *f, double v)
         d->index_width = v;
         return LRT_MACHINE_OK;
     }
+    if (strcmp(f, "din_neg_limit") == 0) {
+        return set_int(&d->din_neg_limit, v, -1.0, LRT_MACHINE_MAX_SWITCHES - 1.0);
+    }
+    if (strcmp(f, "din_pos_limit") == 0) {
+        return set_int(&d->din_pos_limit, v, -1.0, LRT_MACHINE_MAX_SWITCHES - 1.0);
+    }
+    if (strcmp(f, "din_home") == 0) {
+        return set_int(&d->din_home, v, -1.0, LRT_MACHINE_MAX_SWITCHES - 1.0);
+    }
     return set_from_table(&d->drive, drive_fields, N_FIELDS(drive_fields), f, v);
 }
 
@@ -302,6 +315,9 @@ static int cfg_joint(lrt_machine_cfg *c, int n, const char *f, double v)
     if (strcmp(f, "stop_fault") == 0) {
         return set_int(&j->stop_fault, v, 0.0, 1.0);
     }
+    if (strcmp(f, "initial_random") == 0) {
+        return set_int(&j->initial_random, v, 0.0, 1.0);
+    }
     if (!isfinite(v)) {
         return LRT_MACHINE_ERR_VALUE;
     }
@@ -317,6 +333,10 @@ static int cfg_joint(lrt_machine_cfg *c, int n, const char *f, double v)
         j->stop_c = v;
     } else if (strcmp(f, "initial") == 0) {
         j->initial = v;
+    } else if (strcmp(f, "initial_min") == 0) {
+        j->initial_min = v;
+    } else if (strcmp(f, "initial_max") == 0) {
+        j->initial_max = v;
     } else {
         return LRT_MACHINE_ERR_KEY;
     }
@@ -386,7 +406,10 @@ static int cfg_switch(lrt_machine_cfg *c, int n, const char *f, double v)
         return set_int(&s->nc, v, 0.0, 1.0);
     }
     if (strcmp(f, "input") == 0) {
-        return set_int(&s->input, v, 0.0, LRT_MACHINE_MAX_IO - 1.0);
+        return set_int(&s->input, v, -1.0, LRT_MACHINE_MAX_IO - 1.0);
+    }
+    if (strcmp(f, "drive") == 0) {
+        return set_int(&s->drive, v, -1.0, LRT_MACHINE_MAX_DRIVES - 1.0);
     }
     if (!isfinite(v)) {
         return LRT_MACHINE_ERR_VALUE;
@@ -726,7 +749,8 @@ static int check_joints(lrt_machine *m, int *owner)
             return fail(m, LRT_MACHINE_ERR_JOINT, j, -1);
         }
         if (jc->stop_k < 0.0 || jc->stop_c < 0.0 ||
-            (jc->use_stops && !(jc->stop_min < jc->stop_max))) {
+            (jc->use_stops && !(jc->stop_min < jc->stop_max)) ||
+            (jc->initial_random && !(jc->initial_min <= jc->initial_max))) {
             return fail(m, LRT_MACHINE_ERR_JOINT, j, -1);
         }
     }
@@ -805,17 +829,24 @@ static int check_io(lrt_machine *m)
         if (!w->used) {
             return fail(m, LRT_MACHINE_ERR_INDEX, s, 0);
         }
-        if (w->joint < 0 || w->joint >= c->n_joints || w->input < 0 ||
-            !(w->hysteresis >= 0.0) || !(w->bounce >= 0.0)) {
-            return fail(m, LRT_MACHINE_ERR_SWITCH, s, 0);
+        if (w->joint < 0 || w->joint >= c->n_joints || !(w->hysteresis >= 0.0) ||
+            !(w->bounce >= 0.0) ||
+            (w->drive >= 0 && c->joints[w->joint].drive[0] != w->drive &&
+             c->joints[w->joint].drive[1] != w->drive)) {
+            return fail(m, LRT_MACHINE_ERR_SWITCH, s, 0); /* naped czujnika spoza osi */
         }
         if (io_claim(contact, w->input, w->nc) != 0) {
             return fail(m, LRT_MACHINE_ERR_IO, w->input, s);
         }
     }
     for (s = 0; s < c->n_drives; s++) {
-        if (io_claim(contact, c->drives[s].index_input, 0) != 0) {
-            return fail(m, LRT_MACHINE_ERR_IO, c->drives[s].index_input, -1);
+        const lrt_machine_drive_cfg *dc = &c->drives[s];
+        if (io_claim(contact, dc->index_input, 0) != 0) {
+            return fail(m, LRT_MACHINE_ERR_IO, dc->index_input, -1);
+        }
+        if (dc->din_neg_limit >= c->n_switches || dc->din_pos_limit >= c->n_switches ||
+            dc->din_home >= c->n_switches) {
+            return fail(m, LRT_MACHINE_ERR_SWITCH, -1, s); /* styk napedu nie istnieje */
         }
     }
     if (io_claim(contact, c->estop_input, c->estop_nc) != 0) {
@@ -840,6 +871,7 @@ static int check_io(lrt_machine *m)
 
 static void update_inputs(lrt_machine *m);
 static void refresh(lrt_machine *m);
+static uint32_t next_rng(lrt_machine *m);
 
 int lrt_machine_init(lrt_machine *m, const lrt_machine_cfg *c)
 {
@@ -899,6 +931,14 @@ int lrt_machine_init(lrt_machine *m, const lrt_machine_cfg *c)
         sl->target = 0;
     }
     m->rng = c->seed ? c->seed : 0x2545F491u;
+    for (j = 0; j < c->n_joints; j++) {
+        lrt_machine_joint_cfg *jc = &m->c.joints[j];
+        if (jc->initial_random) {
+            /* Start po wlaczeniu: losowo w zakresie, powtarzalnie dla ziarna (REQ-VM-07). */
+            double u = (double)(next_rng(m) >> 8) * (1.0 / 16777216.0);
+            jc->initial = jc->initial_min + u * (jc->initial_max - jc->initial_min);
+        }
+    }
     m->tool_length = c->probe_type != LRT_PROBE_NONE ? c->probe_tip_length : 0.0;
     lrt_live_log_init(&m->log);
     for (s = 0; s < c->n_switches; s++) {
@@ -908,7 +948,7 @@ int lrt_machine_init(lrt_machine *m, const lrt_machine_cfg *c)
         int k;
         for (k = 0; k < 2; k++) {
             if (c->joints[j].drive[k] >= 0) {
-                lrt_axis_reset(&m->slots[c->joints[j].drive[k]].axis, c->joints[j].initial);
+                lrt_axis_reset(&m->slots[c->joints[j].drive[k]].axis, m->c.joints[j].initial);
             }
         }
     }
@@ -944,6 +984,36 @@ static int joint_of(const lrt_machine *m, int drive)
         }
     }
     return -1;
+}
+
+/* Stan logiczny styku S (po drganiach): 1 = zadzialal. */
+static int switch_active(const lrt_machine *m, int s)
+{
+    if (s < 0) {
+        return 0;
+    }
+    return m->c.switches[s].nc ? !m->sw[s].closed : m->sw[s].closed;
+}
+
+/* Wejscia napedu N z poprzedniego kroku: styki na jego wejsciach i impuls indeksu. */
+static unsigned drive_inputs(const lrt_machine *m, int s)
+{
+    const lrt_machine_drive_cfg *dc = &m->c.drives[s];
+    unsigned in = 0u;
+
+    if (switch_active(m, dc->din_neg_limit)) {
+        in |= LRT_DIN_NEG_LIMIT;
+    }
+    if (switch_active(m, dc->din_pos_limit)) {
+        in |= LRT_DIN_POS_LIMIT;
+    }
+    if (switch_active(m, dc->din_home)) {
+        in |= LRT_DIN_HOME;
+    }
+    if (m->slots[s].index_pulse) {
+        in |= LRT_DIN_INDEX;
+    }
+    return in;
 }
 
 static void joint_event(lrt_machine *m, int joint, unsigned ev)
@@ -988,7 +1058,7 @@ static void update_switches(lrt_machine *m, double dt)
     for (s = 0; s < m->c.n_switches; s++) {
         const lrt_machine_switch_cfg *w = &m->c.switches[s];
         lrt_machine_switch_state *st = &m->sw[s];
-        double p = m->joint_pos[w->joint];
+        double p = w->drive >= 0 ? m->slots[w->drive].axis.pos : m->joint_pos[w->joint];
         double over = (p - w->position) * w->side; /* > 0: po stronie aktywnej */
         int tripped = st->tripped;
         int logical;
@@ -1120,6 +1190,7 @@ int lrt_machine_step(lrt_machine *m, double dt)
         }
         lrt_drive_set_controlword(&sl->drive, cw);
         lrt_drive_set_target_position(&sl->drive, sl->target);
+        lrt_drive_set_inputs(&sl->drive, drive_inputs(m, s));
         fb.theta_m = sl->axis.th_m;
         fb.omega_m = sl->axis.w_m;
         fb.torque_avail = lrt_axis_torque_limit(&sl->axis, fabs(sl->axis.w_m));
@@ -1269,7 +1340,9 @@ int32_t lrt_machine_counts_for(const lrt_machine *m, int drive, double position)
     if (!valid_drive(m, drive) || !isfinite(position)) {
         return 0;
     }
-    counts = position / m->slots[drive].axis.p.ratio * m->slots[drive].drive.counts_per_rad;
+    /* Kat walu w impulsach minus przesuniecie przetwornika (enkoder przyrostowy, baza). */
+    counts = position / m->slots[drive].axis.p.ratio * m->slots[drive].drive.counts_per_rad -
+             (double)lrt_drive_position_offset(&m->slots[drive].drive);
     if (counts > 2147483647.0) {
         counts = 2147483647.0;
     } else if (counts < -2147483647.0) {
