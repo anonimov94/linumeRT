@@ -21,6 +21,10 @@ jobs:
         shell: bash
     timeout-minutes: 35
     steps:
+      # Git przed checkoutem: bez niego actions/checkout pobiera archiwum bez .git i krok
+      # `git diff --check` w runnerze kończy się błędem (run 39121565345).
+      - name: Install git
+        run: apt-get update && apt-get install -y --no-install-recommends git ca-certificates
       - uses: actions/checkout@v4
       - name: Install build and GUI dependencies
         run: |
