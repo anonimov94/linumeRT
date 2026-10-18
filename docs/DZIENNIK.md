@@ -210,3 +210,7 @@ Uzupełnienie: README plant/core (liczby testów 29/59/20, bazowanie, parametry 
 - Zrobione: `linumert_plant/atc.py` (regał, karuzela, parasolowy, ręczny; zacisk z czasem i czujnikiem, osłona, indeks karuzeli; TOOL_PLACED/PICKED/DROP, CLAMP_FAULT, POCKET_OCCUPIED, COVER_CRASH, MANUAL_CHANGE_POSITION; czujnik długości), `collisions.py` (CRASH z parą brył), integracja w serwerze (wejścia w ramce, długość narzędzia w modelu C, raport), schemat `toolchanger.outputs`/`index_ms`/`tolerance_mm` z walidacją, router_atc_rack z wyjściami, czujnikami i bryłą magazynu.
 - Testy (9): atc_rack_geometry, atc_carousel_index, atc_cover_timing, manual_change_position, toolsetter_measure, crash_head_magazine, fizyka wymiany, błąd zacisku/osłony, I/O magazynu przez LRT-NET (atrapa mastera).
 - Długi: makra M6 w LinuxCNC (066), konfiguracja LinuxCNC dla routera z ATC.
+
+## 021 — Wrzeciono VFD (w toku, Model-Author: Claude, D31)
+- Zrobione: `plant/server/linumert_plant/vfd.py` (model wrzeciona, protokół hy_vfd, Modbus TCP, pty, usterki); lint czysty, pytest 468 OK.
+- Przerwane na prośbę właściciela; kontynuacja i lista kroków: `prompts/START-021.md`.
