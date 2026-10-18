@@ -4,7 +4,7 @@ Prompt startowy i stan bieżący: `docs/PROMPT_NOWEJ_SESJI.md` (aktualizować na
 
 Model-Author: Codex · 2026-10-17
 
-Tura: Claude · od 2026-10-18 · stan: oddana (sesja 013 w PR z `wip/sesja-013`; kolejność przeglądu: #6–#9, #10, potem 013)
+Tura: Claude · od 2026-10-18 · stan: w toku (sesja 014 na `wip/sesja-014`)
 
 ## Katalog i Git
 
