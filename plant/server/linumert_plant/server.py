@@ -17,13 +17,16 @@ Odporność (REQ-QA-03): uszkodzona ramka jest odrzucana i liczona; wyjątek mod
 w stan bezpieczny (napędy wyłączone, wyjścia zerowe) bez kończenia procesu.
 Panel (sesja 022): telemetria osi w buforze pierścieniowym (`panel.telemetry`), parametry
 live napędów (`set_live`, presety), wirtualny pulpit jako bity `digital_in` (`panel.desk`).
+Awarie (sesja 024, `faults.py`): utrata i opóźnienie ramek, wymuszone wejścia — `self.faults`.
 Ten moduł działa poza RT (CLAUDE.md §5).
 """
 
 from __future__ import annotations
 
+import contextlib
 import hashlib
 import logging
+import random
 import socket
 import threading
 import time
@@ -38,6 +41,7 @@ from .atc import ToolChangerModel, ToolSetterModel, ToolSpec
 from .collisions import CollisionModel
 from .core_binding import CW_FAULT_RESET, MODE_CSP, PlantMachine
 from .drive_template import LiveParams
+from .faults import Faults, FaultState
 from .lrtnet import (
     FLAG_ESTOP_OPEN,
     FLAG_FAULT,
@@ -264,6 +268,9 @@ class PlantServer:
             if problems:
                 raise PlantConfigError("; ".join(problems))
             self.desk = Desk(self.cfg.desk)
+        # awarie (sesja 024): stan czytany w pętli ramek, API w `faults.Faults`
+        self.fault_state = FaultState(rng=random.Random(self.cfg.seed))
+        self.faults = Faults(self)
 
     # ---- pomocnicze --------------------------------------------------------------------
     def _estop_input(self) -> tuple[int, bool] | None:
@@ -386,6 +393,8 @@ class PlantServer:
     def handle(self, frame: bytes, now_ns: int | None = None) -> bytes | None:
         """Jedna ramka master→plant. Zwraca odpowiedź albo None (ramka odrzucona)."""
         with self._lock:
+            if self.fault_state.drop():  # awaria frame_loss: ramka „nie dotarła”
+                return None
             return self._handle(frame, now_ns)
 
     def _handle(self, frame: bytes, now_ns: int | None) -> bytes | None:
@@ -492,6 +501,9 @@ class PlantServer:
         if self.desk is not None:  # wirtualny pulpit (sesja 022)
             mask, value = self.desk.inputs()
             inputs = (inputs & ~mask) | value
+        if self.fault_state.forced:  # awarie limit / atc_sensor (sesja 024)
+            mask, value = self.fault_state.inputs()
+            inputs = (inputs & ~mask) | value
         flags = FLAG_FAULT if fault else 0
         if self._estop is not None:
             bit, nc = self._estop
@@ -584,10 +596,18 @@ class PlantServer:
         """Pętla odbioru do `stop()` (albo `max_frames` przyjętych ramek)."""
         poll = max(self.cfg.watchdog_ms / 4000.0, 0.001)
         sock.settimeout(poll)
+        delayed: deque[tuple[float, bytes, Any]] = deque()  # awaria delay (sesja 024)
         while not self._stop.is_set():
+            while delayed and delayed[0][0] <= time.monotonic():
+                _due, data, to = delayed.popleft()
+                with contextlib.suppress(OSError):
+                    sock.sendto(data, to)
+            if delayed:
+                sock.settimeout(min(poll, max(delayed[0][0] - time.monotonic(), 0.0001)))
             try:
                 frame, addr = sock.recvfrom(2048)
             except TimeoutError:
+                sock.settimeout(poll)
                 self.check_watchdog()
                 continue
             except OSError as exc:  # np. ICMP port unreachable od mastera
@@ -596,7 +616,10 @@ class PlantServer:
                 self._note(f"błąd gniazda: {exc}")
                 continue
             reply = self.handle(frame, time.monotonic_ns())
-            if reply is not None:
+            if reply is not None and (self.fault_state.delay_ms > 0 or delayed):
+                delayed.append((time.monotonic() + self.fault_state.delay_ms / 1000.0,
+                                reply, addr))
+            elif reply is not None:
                 try:
                     sock.sendto(reply, addr)
                 except OSError as exc:

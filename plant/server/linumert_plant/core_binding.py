@@ -114,6 +114,7 @@ def _signatures(lib: ctypes.CDLL) -> ctypes.CDLL:
         "lrt_drive_error_code": ([vp], ctypes.c_uint16),
         "lrt_drive_position_actual": ([vp], ctypes.c_int32),
         "lrt_drive_inject_fault": ([vp, i, i], i),
+        "lrt_drive_clear_fault_cause": ([vp, i], None),
         "lrt_drive_statusword": ([vp], ctypes.c_uint16),
         "lrt_drive_torque_actual": ([vp], ctypes.c_int16),
         "lrt_drive_od_write": ([vp, ctypes.c_uint16, ctypes.c_uint8, ctypes.c_int64], i),
@@ -244,6 +245,10 @@ class PlantMachine:
         ptr = self.lib.lrt_machine_drive(self._m, self._d(drive))
         if self.lib.lrt_drive_inject_fault(ptr, fault, int(sticky)) != 0:
             raise ValueError(f"nieznana awaria napędu {fault}")
+
+    def clear_fault_cause(self, drive: str, fault: int) -> None:
+        """Usuwa trwałą przyczynę awarii (sesja 024); napęd kasuje ją fault reset mastera."""
+        self.lib.lrt_drive_clear_fault_cause(self._ptr(drive), int(fault))
 
     def set_controlword(self, drive: str, word: int) -> None:
         self._check(self.lib.lrt_machine_set_controlword(self._m, self._d(drive), word))
