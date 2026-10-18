@@ -11,7 +11,7 @@ symulację z kolizjami, kreator konfiguracji i diagnostykę napędów. Do testó
 wirtualna frezarka w osobnej maszynie wirtualnej. Symuluje bezwładność, ograniczenia momentu i przyspieszenia,
 napędy, krańcówki, sondę, falownik i magazyn narzędzi.
 
-> **Status:** wczesny rozwój: 23 z 84 sesji planu ([postęp](prompts/README.md)). Nic nie zostało sprawdzone
+> **Status:** wczesny rozwój: 24 z 84 sesji planu ([postęp](prompts/README.md)). Nic nie zostało sprawdzone
 > na prawdziwej maszynie.
 
 ## Co już działa (bez sprzętu, LinuxCNC 2.9 na Debianie 12)

@@ -1,6 +1,6 @@
 # Stan projektu i przekazanie
 
-Tura: Claude · od 2026-10-18T19:01Z · stan: w toku (krok 0: sprzątanie testów LinuxCNC, potem sesja 008)
+Tura: Claude · od 2026-10-18T19:01Z · stan: oddana (sesja 008 gotowa, PR #35)
 
 Jedyny plik ze **stanem bieżącym**: kto ma turę, co jest scalone, co czeka, co dalej. Aktualizuje go każda
 sesja na końcu (zasady: [`WSPOLPRACA_MODELI.md`](WSPOLPRACA_MODELI.md) §1–3). Historia jest w
@@ -10,34 +10,27 @@ Model-Author: Claude · 2026-10-18
 
 ## 1. W skrócie
 
-- Wykonane sesje: 23 z 84 ([`prompts/DONE.md`](../prompts/DONE.md)). Kamień M0 bez 008, kamień M1 do 021 włącznie.
+- Wykonane sesje: 24 z 84 ([`prompts/DONE.md`](../prompts/DONE.md)). Kamień M0 domknięty (bramka G0 czeka na checklistę
+  właściciela: [`docs/raporty/G0.md`](raporty/G0.md)), kamień M1 do 021 włącznie.
 - Działa (sprawdzone w LinuxCNC 2.9 RIP na Debianie 12, bez sprzętu): LinuxCNC z ekranem linumert steruje
   wirtualną obrabiarką Plant przez LRT-NET: bazowanie, ruch G1, wyrocznia soft limits i stref, magazyn
   narzędzi i kolizje w Plant, wrzeciono przez prawdziwy `hy_vfd` i emulator falownika.
-- Testy na `wip/sesja-021`: ruff czysty, pytest 489 OK, testy LinuxCNC 8/8 OK, testy C 29/59/20 (sesja 020).
+- Testy (sesja 008, WSL Ubuntu 24.04 + RIP): ruff czysty, pytest 499 OK, testy C 29/59/20, `-m linuxcnc` 61/61 w jednym
+  przebiegu (3× pod rząd).
 - **Nic nie jest sprawdzone na sprzęcie.** Prace od sesji 004 to autokontrola Claude, bez niezależnego przeglądu.
 
-## 2. Gałęzie i PR (stan 2026-10-18, po integracji)
+## 2. Gałęzie i PR (stan 2026-10-18)
 
-`main` zawiera wszystkie ukończone sesje: 001–007, 009–021, 032, 039, 044, oraz porządek dokumentacji i
-kierunek HMI (D32). Integracja 2026-10-18 za zgodą właściciela: PR #19 (z #20–#22), #18, #23, #24, #25, #27–#30,
-#32, #33 scalone po kolei merge commitami, bez przepisywania historii. PR #31 jest zawarty w #33.
-Rozwiązane konflikty: dokumenty statusowe (wersja z #33, PROVENANCE z obu stron), `Makefile` (`test-san` +
-`test-linuxcnc` z sesji 003), `tests/test_ip_guard.py` (`docs/raporty/` dozwolone); usunięty `nextPROMPT.md`.
-Testy na zintegrowanym drzewie (Debian 12): ruff czysty, pytest 499 OK, testy C i ASan/UBSan bez błędów.
-
-Otwarte PR: brak, poza #31 do zamknięcia przez właściciela albo autora. Scalone gałęzie `wip/*` i `claude/*`
-można usunąć.
+`main` zawiera wszystkie ukończone sesje: 001–021, 032, 039, 044, porządek dokumentacji i kierunek HMI (D32).
+Sesja 008: PR #35 (autokontrola, bez niezależnego przeglądu). Otwarte: #34 (Codex, HMI-01, draft);
+#31 do zamknięcia (zawarty w #33). Scalone gałęzie `wip/*` i `claude/*` można usunąć.
 
 ## 3. Następna praca
 
-Prompt startowy następnej sesji: [`prompts/START-008.md`](../prompts/START-008.md).
+Brak promptu `START-*`: następna sesja startuje według [`PROMPT_NOWEJ_SESJI.md`](PROMPT_NOWEJ_SESJI.md).
 
-0. **Najpierw:** pełny przebieg `pytest -m linuxcnc` w jednym kontenerze RIP: 55 OK, 4 nie przechodzą —
-   `tests/test_plant_vfd_linuxcnc.py` (3) i `tests/test_sim_config.py::test_headless_run_20s`. Osobno przechodziły
-   (sesja 021); podejrzenie: proces `linuxcncsvr` po `tests/test_plant_linuxcnc.py` zostaje i blokuje kolejny start
-   LinuxCNC. Naprawić sprzątanie po teście (np. `halrun -U` / zabicie `linuxcncsvr` w teardown).
-1. Sesje według [`prompts/README.md`](../prompts/README.md): **008** (bufor i bramka G0), potem 022 (panel Plant
+0. Właściciel: checklista bramki G0, [`docs/raporty/G0.md`](raporty/G0.md).
+1. Sesje według [`prompts/README.md`](../prompts/README.md): **022** (panel Plant
    i pulpit MPG), 023 (edytor wirtualnej obrabiarki), 024 (scenariusze, raport, `tools/check_requirements.py`).
 2. **HMI według kolejności pracy (D32)**: docelowy kierunek ekranu; etapy HMI-01…06 prowadzi Codex (§6).
    Sesje ekranu z planu (M2, 027–038) muszą być z nim zgodne.
@@ -86,5 +79,8 @@ Prompt startowy następnej sesji: [`prompts/START-008.md`](../prompts/START-008.
 
 ## 8. Stan zatrzymania (bieżąca tura)
 
-- 2026-10-18T19:01Z Przejęcie tury według `prompts/START-008.md`; gałąź `wip/sesja-008`, blokada `linuxcnc`.
+- 2026-10-18T19:01Z Przejęcie tury według `prompts/archiwum/START-008.md`; gałąź `wip/sesja-008`, blokada `linuxcnc`.
   Środowisko: Windows + WSL Ubuntu-24.04 z RIP (`~/.cache/linuxcnc-2.9`), bez podmana.
+- Krok 0 (96f4299): sprzątanie po testach LinuxCNC; `-m linuxcnc` 61/61.
+- Sesja 008 (3303a40): test czytnika na RIP, G0.md, README; PR #35.
+- 2026-10-18T19:17Z Zamknięcie: dziennik, DONE, decyzja; tura oddana, LOCK i blokady zwolnione.
