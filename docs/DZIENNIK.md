@@ -41,6 +41,18 @@ Najnowsze wpisy na dole. Każda sesja dopisuje: zrobione · decyzje · do sprawd
 - Do sprawdzenia: LinuxCNC jeszcze niebudowany; kolejny etap to sesja 003.
 - Długi: VNC/WSL nie potwierdzają czasu rzeczywistego i sprzętu; wymagane osobne testy VM-A/VM-B.
 
+## Start sesji 003 — 2026-10-18
+- Model-Author: Codex. Przejęto historyczną blokadę sesji 001 Claude zgodnie z poleceniem właściciela; PR #2 scalony, checkout czysty.
+- Budowa i testy LinuxCNC w WSL; pulpit VNC uruchomiony ponownie na porcie 5911.
+
+
+## 003 — Spike: LinuxCNC 2.9 w środowisku agenta (2026-10-18, do dokończenia)
+- Model-Author: Codex.
+- Zrobione: budowa RIP/uspace upstream a33293f46575c809e082e0806e79ab996f982513; skrypt apt/build/cache; pełna kompilacja po make clean 50 s; import, headless sim, bazowanie XYZ, ruch MDI i pozycja końcowa, QtDragon/Xvfb i zrzut; integracja wspólnego runnera; workflow PR/ręczny/tygodniowy; raport, licencje i provenance.
+- Testy lokalne: PASS, 47 bazowych + 2 integracyjne, lint i diff OK. Raport state/test-runs/20261018T060319.515034Z-Codex/report.json. Testy pokazywane w VNC localhost:5911.
+- Decyzje: D20 przyjęta dla testów funkcjonalnych non-realtime. Bez zmian kodu upstream i bez make setuid. Tymczasowa preferencja QtDragon wyłącza dialog zamknięcia, test weryfikuje brak awarii przy wyjściu.
+- Do sprawdzenia: najnowsze CI LinuxCNC PR #3 (trwa przy zatrzymaniu), autokontrola końcowego diffu i merge po zielonych kontrolach. CI Python przeszło. NIEZWERYFIKOWANE NA SPRZĘCIE.
+- Długi: użytkownik polecił kończyć i wypchnąć postęp; PR pozostaje draft, bez merge i bez wpisu 003 do DONE. Najpierw zamknąć 003, potem sesja 004. Szczegóły w docs/NASTEPNA_SESJA.md.
 ## 007 — Katalog alarmów i manager (2026-10-18)
 - Model-Author: Claude (Sonnet 5.5).
 - Zrobione: `alarms/catalog.yaml` (56 kodów W/E/K/P, teksty własne PL/EN), `catalog.py` (loader z walidacją), `manager.py` (raise/ack/clear/reset/historia, zegar wstrzykiwany, wątkowo bezpieczny), package-data dla yaml, 23 testy; `make lint test`: 100 OK.
@@ -149,3 +161,9 @@ Najnowsze wpisy na dole. Każda sesja dopisuje: zrobione · decyzje · do sprawd
 - Decyzje: jedna PROPOZYCJA w `docs/DECYZJE.md` (sesja 044).
 - Do sprawdzenia ręcznie: czy surowość `strict` (np. puste `#<>`) nie przeszkadza w prawdziwych programach z CAM.
 - Długi: przycisk „Sprawdź”, lista błędów i ostrzeżenie przy edycji `.ngc` z `.lnx` w ekranie (po sesji 005); komunikaty rs274 tylko po angielsku i bez numeru linii; lekser nie zna jeszcze `(MSG,` / `(DEBUG,` jako osobnych typów komentarzy (traktuje jak komentarze).
+
+## 003 — dokończenie (Model-Author: Claude, D31; praca bazowa: Codex)
+- Scalony `main` do pracy Codexa (konflikty w DECYZJE/NASTEPNA_SESJA — wszystkie wpisy zostawione).
+- Debian 12 (podman): budowa RIP OK (a33293f), testy linuxcnc 49 passed + QtDragon pod Xvfb 3/3, pytest 432 passed.
+- Przyczyna czerwonego CI: brak gita przed checkoutem w `debian:bookworm` (nie segfault); poprawka w `linuxcnc.yml`.
+- Gałąź `claude/sesja-003` (nowy PR zamiast #3; `codex/sesja-003` nietknięta). Push wymagał zakresu `workflow` tokenu gh.

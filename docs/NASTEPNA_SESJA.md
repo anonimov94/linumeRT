@@ -1,42 +1,65 @@
-# Przekazanie do następnej sesji
+# Przekazanie — stan bieżący
 
-Prompt startowy i stan bieżący: `docs/PROMPT_NOWEJ_SESJI.md` (aktualizować na końcu każdej sesji).
+Model-Author: Codex · 2026-10-18
 
-Model-Author: Codex · 2026-10-17
+## Podział pracy zatwierdzony przez właściciela
 
+Codex: dokończenie PR #3 (LinuxCNC 2.9, Debian 12, CI, VNC) i `nextPROMPT.md`.
+Osobny worktree `../linumeRT-codex-003`, gałąź `codex/sesja-003`.
+Claude: rdzeń i Plant, otwarte PR #13 (015), #14 (039), #15 (044), #16 (032).
+Checkout `linumeRT` na `wip/sesja-032` pozostaje dla Claude. Nie przełączać go.
+Właściciel zezwolił teraz na niezależną pracę równoległą; używać osobnych checkoutów
+i instancji LinuxCNC. Poprzednie ograniczenie do jednej tury jest zastąpione
+w tym zakresie. Nie zmieniać plików roboczych drugiego modelu.
 Tura: Claude · od 2026-10-18T10:55Z · stan: oddana (sesja 016 → PR #17; #13–#17 czekają na przegląd Codexa)
 
-## Katalog i Git
+## Stan i bieżące zadania Codexa
 
-Repo: https://github.com/anonimov94/linumeRT
-Aktualny checkout Windows:
-`C:/Users/pc/Documents/PythonProjects/linumeRT/.collaboration/linumeRT`
-WSL: `/mnt/c/Users/pc/Documents/PythonProjects/linumeRT/.collaboration/linumeRT`.
-Katalog nadrzędny jest starszą kopią dokumentacji bez własnego repo; nie pracuj w nim.
+Main zawiera sesje 001, 002, 006, 007, 009–014 (scalenie Claude d53aa04).
+PR #3 nadal otwarty. Wyniki Ubuntu: 47 testów bazowych + 2 integracyjne,
+pełny build 50 s; log w state/test-runs/20261018T060319.515034Z-Codex/report.json.
+CI po ponowieniu zielone, ale wystąpił niestabilny segfault QtDragon przy
+zamykaniu. Nie usuwać asercji wykrywającej awarię.
 
-PR #1: zasady współpracy, scalony. PR #2: paczka testowa z VNC, sprawdź aktualny
-stan przed rozpoczęciem. Dawne gałęzie sesji 001 i 002 są już zawarte w main.
+Przed scaleniem #3:
+1. Zintegrować main z zachowaniem wpisów obu modeli i make test-c w CI.
+2. Wykonać wymaganie Debian 12 z komentarza Claude w PR #3: dedykowana
+   dystrybucja WSL, setup-debian12-wsl.ps1, guard builda (obejście tylko jawne),
+   job CI w debian:bookworm, Python 3.11, venv --system-site-packages, D27.
+3. Pełna budowa i runner w Debian 12, testy w VNC, powtórzenie zamykania GUI;
+   raport, autokontrola/przegląd aktualnego SHA, zielone kontrole, merge.
+4. Dopiero po spełnieniu kryteriów wpis 003 do DONE i zwolnienie własnej blokady.
 
-## Zasady użytkownika
+## Kolejne zadania (nie są wykonywane równolegle z domknięciem 003)
 
-Modele pracują na zmianę (tura w linii `Tura:`). Gdy drugi model jest niedostępny,
-pracuj samodzielnie przez PR, autokontrolę i testy (D26 wariant b); nie czekaj. Oznaczaj autorstwo modelu w commitach,
-PR i dzienniku. Po każdym ukończonym kroku commit i push, bez czekania na koniec
-sesji lub limit tokenów. Po ukończonym etapie przekaż prompt następnej sesji.
+- Codex: 004 (własna konfiguracja sim XYZ i HAL), 005 (kopia QtDragon), potem 008.
+- Przegląd wsteczny d53aa04: machine.c (forward, NC/NO, E-4207, E-STOP),
+  PRESET_CHAINS (znaki trunnion), 7 szablonów, model krokowca, mapowanie awarii,
+  lrt_drive_set_live i live.c; make test shared i ASan/UBSan. Usterki jako issue/PR.
+- Sesja 018: znaki A/B/C wobec xyzac-trt-kins i xyzbc-trt-kins.
+- Czytnik stanu z 006: sprawdzić prawdziwy RIP (gcodes/mcodes, axis, limit, spindle).
+- Claude: kontynuacja swoich PR; sprawdzić ich aktualny stan przed wyborem pracy.
 
-## Gotowa paczka testowa
+## Środowisko i instrukcje
 
-`tools/agent_tests/README.md`: runner, launcher Windows i VNC.
-Pełna próba Windows -> WSL -> VNC -> terminal -> raport: PASS, 47 testów, czysty lint.
-Venv `.venv` z pytest/ruff istnieje w Ubuntu-24.04; python3-venv doinstalowany.
-Uruchomienie: `tools/agent_tests/Start-Tests.ps1 -Model Codex -DisplayNumber 11`.
-Jeśli ta sesja nadal działa, użyj istniejącego pulpitu zamiast uruchamiać drugi na
-tym samym porcie. Podczas przekazania aktywny podgląd paczki używał portu 5911,
-DISPLAY=:11 i XAUTHORITY=/tmp/linumert-vnc.atrgdu3j/Xauthority.
-Te dane dotyczą bieżącego uruchomienia; po restarcie odczytaj wartości z nowego startu.
-Starszy ręczny podgląd mógł pozostać na porcie 5909. Nie zabijaj obcych sesji.
-Lokalne raporty `state/test-runs/` są ignorowane przez Git.
+Repo Windows: `C:/Users/pc/Documents/PythonProjects/linumeRT/.collaboration/linumeRT`.
+Repo Codexa: sąsiedni `linumeRT-codex-003`. Katalog nadrzędny to stara kopia.
+Dotychczasowy Ubuntu RIP: /home/pc/.cache/linuxcnc-2.9, SHA
+a33293f46575c809e082e0806e79ab996f982513. Nie modyfikować kodu upstream.
+VNC poprzedniej sesji: localhost:5911, DISPLAY=:11,
+XAUTHORITY=/tmp/linumert-vnc.rSYjwuGM/Xauthority — sprawdzić proces przed użyciem.
+Nie zabijać obcych sesji. tools/agent_tests jest wspólną paczką.
+Budowa: bash tools/ci/build-linuxcnc.sh; zależności: --install-deps.
+Testy: .venv/bin/python tools/agent_tests/run.py --model Codex --linuxcnc.
+API poll wymaga gotowej pamięci narzędzi; fixture sprawdza gotowość osobnym procesem.
+Tymczasowe shutdown_check=False wyłącza dialog potwierdzenia w teście.
+W przykładzie upstream są ostrzeżenia opcjonalnego PDF/NGCGUI/PROGRAM_PREFIX;
+uporządkować ścieżki w 004. Plant jest już obecny na main.
 
+WSL2 nie jest PREEMPT_RT. NIEZWERYFIKOWANE NA SPRZĘCIE; pomiary RT wymagają
+VM lub sprzętu z właściwym jądrem. Historia poprzednich przekazań jest w Git:
+f0227f3 (Codex) oraz adcc7bb (Claude). Wyniki i pochodzenie są też w DZIENNIK,
+PROVENANCE i docs/raporty/SPIKE_LINUXCNC.md; przy scaleniu zachowano oba zestawy.
 ## Stan main — 2026-10-18 (Model-Author: Claude)
 
 W `main` są sesje 001, 002, 006, 007, 009, 010, 011, 012, 013, 014 (PR #1, #2, #4–#12).

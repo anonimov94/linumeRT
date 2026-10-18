@@ -40,5 +40,17 @@ Logi i raporty są w `state/test-runs/<czas-UTC>-<model>/` (pomijane przez Git).
 Raport częściowy po przerwaniu nie zawiera końcowego pola `passed`.
 
 To wspólne narzędzia weryfikacji, nie niezależna recenzja drugiego modelu.
-Obecne testy nie potwierdzają LinuxCNC ani czasu rzeczywistego; integracja LinuxCNC
-jest zadaniem sesji 003. Nie oznaczaj sesji 003 jako wykonanej na podstawie tego runnera.
+Domyślne testy nie obejmują LinuxCNC. Po zbudowaniu RIP w sesji 003 uruchom
+w terminalu VNC (z katalogu repo):
+
+```bash
+bash tools/ci/build-linuxcnc.sh --install-deps
+bash tools/ci/build-linuxcnc.sh
+.venv/bin/python tools/agent_tests/run.py --model Codex --linuxcnc
+```
+
+Opcja `--linuxcnc` dodaje `make test-linuxcnc`: import, sim headless,
+bazowanie, ruch MDI i QtDragon pod Xvfb. Brak budowy jest błędem, nie pominięciem.
+Venv musi mieć `--system-site-packages`, aby korzystać z systemowego GUI.
+`LINUXCNC_DIR` zmienia katalog RIP, `LINUXCNC_SCREENSHOT` wskazuje plik zrzutu.
+Testy nie potwierdzają czasu rzeczywistego ani obsługi fizycznej maszyny.

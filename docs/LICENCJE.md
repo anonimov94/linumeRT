@@ -34,3 +34,10 @@ wpis ma status „do potwierdzenia”.
 ## Narzędzia lokalnego pulpitu testowego (bez dołączania binariów)
 
 Model-Author: Codex. Skrypty używają zainstalowanych w Ubuntu TigerVNC, XFCE, X11, D-Bus i util-linux. Nie kopiujemy ich kodu ani binariów do repozytorium. Właściwe licencje pakietów znajdują się w `/usr/share/doc/<pakiet>/copyright`; przy ewentualnej dystrybucji obrazu wymagany osobny przegląd. Runner używa stdlib Pythona oraz istniejących zależności dev: pytest i ruff.
+
+## Środowisko budowy LinuxCNC — sesja 003
+
+Model-Author: Codex. LinuxCNC 2.9 jest pobierany do cache z oficjalnego repozytorium (GPL-2.0-or-later); nie dołączamy binariów ani źródeł do tego repo. Pełna lista pakietów budowy, GUI i testów jest w tools/ci/build-linuxcnc.sh, wyprowadzona z upstream debian/configure i debian/control. Obejmuje toolchain GNU, biblioteki systemowe, Tcl/Tk, Python, Qt/PyQt5/QtPy, Xvfb, ImageMagick i narzędzia AsciiDoc/DocBook. Licencje konkretnych wersji pakietów: /usr/share/doc/<pakiet>/copyright. Są to zależności środowiska deweloperskiego; przegląd licencji obrazu dystrybucyjnego pozostaje do sesji 080.
+
+
+Środowisko Debian 12: bootstrap przez systemowy debootstrap i debian-archive-keyring, podpisy oficjalnego repo Debian sprawdzane przed eksportem rootfs. To lokalne narzędzia środowiska, bez dołączania kodu lub obrazu do Git; licencje konkretnych pakietów w /usr/share/doc/<pakiet>/copyright. Instalacja VNC: TigerVNC, XFCE, D-Bus i X11 jak w poprzednim pulpicie testowym.

@@ -19,7 +19,5 @@ test-c:
 	@if [ -f plant/core/Makefile ]; then $(MAKE) -C plant/core test; \
 	else echo "test-c: brak plant/core/Makefile - pomijam"; fi
 
-# No-op do sesji 003 (LinuxCNC w srodowisku agenta).
 test-linuxcnc:
-	@if [ -x tools/ci/build-linuxcnc.sh ]; then $(PYTHON) -m pytest -m linuxcnc; \
-	else echo "test-linuxcnc: brak tools/ci/build-linuxcnc.sh (sesja 003) - pomijam"; fi
+	PYTHON=$(PYTHON) xvfb-run -a -s '-screen 0 1440x1100x24' bash tools/ci/test-linuxcnc.sh
