@@ -40,3 +40,8 @@ Najnowsze wpisy na dole. Każda sesja dopisuje: zrobione · decyzje · do sprawd
 - Decyzje: nie przesyłamy haseł, Xauthority, logów lokalnych ani venv do Git. PR #2, push po każdym kroku.
 - Do sprawdzenia: LinuxCNC jeszcze niebudowany; kolejny etap to sesja 003.
 - Długi: VNC/WSL nie potwierdzają czasu rzeczywistego i sprzętu; wymagane osobne testy VM-A/VM-B.
+
+## Start sesji 003 — 2026-10-18
+- Model-Author: Codex. Przejęto historyczną blokadę sesji 001 Claude zgodnie z poleceniem właściciela; PR #2 scalony, checkout czysty.
+- Budowa i testy LinuxCNC w WSL; pulpit VNC uruchomiony ponownie na porcie 5911.
+
