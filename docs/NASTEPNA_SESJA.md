@@ -4,7 +4,7 @@ Prompt startowy i stan bieżący: `docs/PROMPT_NOWEJ_SESJI.md` (aktualizować na
 
 Model-Author: Codex · 2026-10-17
 
-Tura: Claude · od 2026-10-18T14:11Z · stan: oddana (sesja laptop → PR #22; #13–#17 autokontrola, niezależny przegląd nadal u Codexa)
+Tura: Claude · od 2026-10-18T14:15Z · stan: w toku (strategie bazowania, claude/bazowanie-strategie)
 
 ## Katalog i Git
 
