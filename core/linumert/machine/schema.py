@@ -127,6 +127,12 @@ class Homing(Strict):
     direction: Literal[-1, 1] = -1
     search_speed: float = Field(default=20.0, gt=0)
     latch_speed: float = Field(default=2.0, gt=0)
+    # metody switch/switch_index: zbocze zatrzaśnięcia bazy (jak znak HOME_LATCH_VEL w LinuxCNC)
+    #   approach — zjazd z czujnika, ponowny wolny dojazd, baza na zadziałaniu (ten sam znak);
+    #   release  — wolny zjazd z czujnika, baza na zwolnieniu styku (NC: obwód znów zamknięty;
+    #              znak przeciwny). Po zadziałaniu czujnika master zawsze zawraca, nigdy nie
+    #              jedzie dalej w stronę zderzaka.
+    latch: Literal["approach", "release"] = "approach"
     offset: float = 0.0
     order: int = Field(default=0, ge=0)
     gantry_square: bool = False
@@ -150,6 +156,8 @@ class Homing(Strict):
             ]
             if missing:
                 raise ValueError(f"metoda hardstop wymaga pol: {', '.join(missing)}")
+        if self.latch == "release" and self.method not in ("switch", "switch_index"):
+            raise ValueError("latch: release dotyczy tylko metod switch i switch_index")
         if self.method == "drive" and self.cia402_method is None:
             raise ValueError("metoda drive wymaga pola cia402_method")
         return self
