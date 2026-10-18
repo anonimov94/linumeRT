@@ -342,3 +342,9 @@ def test_serve_cli_process(core, tmp_path) -> None:
     assert proc.returncode == 0, err
     assert "ramki 2000, odrzucone 0, utracone 0" in out and "SHA-256" in out
     assert len(trace.read_text(encoding="utf-8").splitlines()) == 2001
+
+
+def test_example_plant_yaml_loads() -> None:
+    cfg = load_plant_config(ROOT / "config" / "plant" / "plant.example.yaml")
+    assert cfg.machine.resolve() == MACHINE.resolve() and cfg.mode == "lockstep"
+    assert cfg.trace_format == "csv" and cfg.port == 47700
