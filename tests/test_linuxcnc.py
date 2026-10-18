@@ -112,6 +112,8 @@ def simulation(tmp_path):
         log_text = (tmp_path / "linuxcnc.log").read_text()
         print(log_text)
         assert "Segmentation fault" not in log_text, "LinuxCNC crashed during shutdown"
+        if not headless:
+            assert process.returncode == 0, "QtDragon did not shut down normally"
 
 
 def test_sim_import_home_and_mdi(simulation):
