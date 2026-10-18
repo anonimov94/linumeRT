@@ -11,14 +11,16 @@ modelem. Pracujecie na zmianę, nigdy równolegle. Użytkownik jest użytkowniki
 2. Sprawdź otwarte PR-y (REST: `gh api repos/anonimov94/linumeRT/pulls`; GraphQL jest zablokowany).
 3. Linia `Tura:` w NASTEPNA_SESJA.md: nie wchodź w turę drugiego modelu młodszą niż 2 h od ostatniego pusha.
 
-## Stan (2026-10-18, po sesji 013)
+## Stan (2026-10-18, po sesji 014)
 - W main: #1, #2, #4, #5. Otwarte: #3 (LinuxCNC CI, Codex), #6 (007, katalog alarmów), #7 (009), #8 (010,
-  machine.yaml), #9 (011, rdzeń osi), #10 (012, napęd CiA 402; zależy od #9) i PR sesji 013
-  (`wip/sesja-013`, biblioteka napędów; zawiera #8 i #10/#9). Kolejność scalania: #6–#9, #10, potem PR 013.
-- Sesja 013 dała: 7 szablonów YAML (`plant/library/drives/`), `linumert_plant.drive_template` /
-  `drive_library` / `machine_drives` (instancje `drives:` z `machine.yaml`), CLI `python -m plant drive ...`
-  (list, show, validate, clone, schema, instances), API live w C (`lrt_axis_set_live`, `lrt_drive_set_live`,
-  dziennik `live.h`). Sesja 014 (kinematyka, przejazdy, zderzaki, krańcówki): `prompts/START-014.md`.
+  machine.yaml), #9 (011, rdzeń osi), #10 (012, napęd CiA 402; zależy od #9), #11 (013, biblioteka napędów;
+  zawiera #8 i #10/#9) i PR sesji 014 (`wip/sesja-014`, zbudowany na #11). Kolejność scalania: #6–#9, #10,
+  #11, potem PR 014.
+- Sesja 014 dała: `plant/core/machine.h/.c` (maszyna z osi i napędów: gantry, łańcuch kinematyczny,
+  zderzaki, krańcówki, indeks, E-STOP, sonda, 32 wejścia), `make -C plant/core shared` +
+  `linumert_plant.core_binding.PlantMachine` (ctypes), `linumert_plant.build_machine` (machine.yaml →
+  model C), CLI `python -m plant machine build <yaml> [--keys] [--run]`. Sesja 015 (bazowanie po
+  rozruchu): `prompts/START-015.md`.
 - Po scaleniach możliwe konflikty na końcu DZIENNIK.md, DECYZJE.md, PROVENANCE.md i prompts/DONE.md: zostaw
   wszystkie wpisy; `docs/PROMPT_NOWEJ_SESJI.md` — weź wersję z najnowszego PR; `ci.yml` — zachowaj
   `make test-c`.
