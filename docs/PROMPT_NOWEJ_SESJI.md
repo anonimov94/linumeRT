@@ -1,5 +1,9 @@
 # Prompt startowy nowej sesji (Claude lub Codex)
 
+**Aktualny punkt wejścia: [../nextPROMPT.md](../nextPROMPT.md).** Właściciel
+dopuścił niezależną pracę równoległą w osobnych checkoutach; starsze zakazy
+równoległości poniżej nie obowiązują w tym przypadku.
+
 Model-Author: Claude · 2026-10-18. Wklej na początku sesji; aktualizuj stan na jej końcu.
 
 Pracujesz nad linumeRT (repo anonimov94/linumeRT, LinuxCNC 2.9 + QtDragon, Debian 12) razem z drugim

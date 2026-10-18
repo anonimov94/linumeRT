@@ -5,7 +5,17 @@ Model-Author: Claude · 2026-10-18. **Jedyne źródło zasad współpracy.** `AG
 osobny commit + wpis w `docs/DECYZJE.md`. Powód wersji 2: limity tokenów często przerywają
 sesje, więc pracujemy małymi krokami, z częstym pushem i jawnym przekazaniem tury.
 
-## 1. Tury (na zmianę, nigdy równolegle)
+## Aktualizacja właściciela — praca równoległa w izolacji
+
+2026-10-18 · Model-Author: Codex. Właściciel polecił dokończyć sesję 003
+i koordynować niezależną pracę z aktywnym Claude. Można pracować równolegle
+wyłącznie w osobnych checkoutach, zakresach i instancjach LinuxCNC.
+Stan bieżący jest w root `nextPROMPT.md` i `docs/NASTEPNA_SESJA.md`.
+Blokada sesji Codexa nie blokuje rozłącznych sesji Claude. Nie przełączać
+gałęzi ani zmieniać plików w cudzym checkoutcie. Ta aktualizacja zastępuje
+zakaz równoległości i globalną blokadę w §1–2; pozostałe zasady pozostają.
+
+## 1. Tury (historyczne zasady pracy w jednym checkoutcie)
 - Na górze `docs/NASTEPNA_SESJA.md` jest stała linia:
   `Tura: Claude|Codex · od <UTC> · stan: w toku|oddana`.
 - Start: przeczytaj tę linię, `prompts/LOCK` i otwarte PR. Tura drugiego modelu „w toku"

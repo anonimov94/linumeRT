@@ -1,5 +1,7 @@
 # linumeRT
 
+**AI — zacznij tutaj: [nextPROMPT.md](nextPROMPT.md)** · aktualny następny krok i podział pracy.
+
 ![linumeRT](docs/design/marka/baner.png)
 
 Otwarty ekran operatora i zestaw narzędzi dla **LinuxCNC**, przeznaczony dla hobbystycznych maszyn CNC:
