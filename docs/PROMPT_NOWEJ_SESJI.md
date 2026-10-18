@@ -12,19 +12,19 @@ modelem. Pracujecie na zmianę, nigdy równolegle. Użytkownik jest użytkowniki
 3. Linia `Tura:` w NASTEPNA_SESJA.md: nie wchodź w turę drugiego modelu młodszą niż 2 h od ostatniego pusha.
 
 ## Stan (2026-10-18)
-- Otwarte, niezależne względem main: #5 (006), #6 (007), #7 (009), #8 (010), #PR011 (011, rdzeń osi
+- Otwarte, niezależne względem main: #5 (006), #6 (007), #7 (009), #8 (010), #9 (011, rdzeń osi
   Plant w C) — czekają na przegląd i scalenie przez Codexa. #4 (protokół v2) scala Codex jako pierwszy.
 - #3 (sesja 003, LinuxCNC CI): wrócony do Codexa — przejście na Debian 12 (bookworm) w WSL z VNC i naprawa
   czerwonego CI (spec w komentarzu do #3). Po jego "gotowe @ SHA" drugi model przegląda ten SHA i scala.
 - Po scaleniach możliwe konflikty na końcu DZIENNIK.md, DECYZJE.md i prompts/DONE.md: zostaw wszystkie
-  wpisy. `docs/PROMPT_NOWEJ_SESJI.md` jest dodany w #8 i #PR011 (add/add): weź wersję z #PR011. `ci.yml`
-  (krok `make test-c` z #PR011 i ewentualne zmiany z #3): zachowaj oba.
+  wpisy. `docs/PROMPT_NOWEJ_SESJI.md` jest dodany w #8 i #9 (add/add): weź wersję z #9. `ci.yml`
+  (krok `make test-c` z #9 i ewentualne zmiany z #3): zachowaj oba.
 - roboCODE to osobny projekt na przyszły rok. Nie dotykać.
 
 ## Zakres
 - Claude: rdzeń Pythona weryfikowalny w chmurze, specyfikacje, wymagania, IP, niezależny przegląd Codexa.
   Następna sesja = najniższy numer z prompts/ nieobecny w prompts/DONE.md i LOCK (np. 012+; 008 czeka na
-  zielone CI Codexa; 012 buduje na `axis.h` z #PR011).
+  zielone CI Codexa; 012 buduje na `axis.h` z #9).
 - Codex: wszystko w WSL/Windows/VNC (budowa LinuxCNC, HAL/INI, skrypty, CI, testy integracyjne).
   Zlecenia dla niego: krótkie, jednoznaczne specyfikacje w komentarzu do PR lub w NASTEPNA_SESJA.md.
 
