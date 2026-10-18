@@ -1,20 +1,12 @@
 # Wspólna praca nad linumeRT
 
-Przeczytaj `CLAUDE.md`, `docs/DECYZJE.md`, `docs/WSPOLPRACA_MODELI.md`,
-ostatnie trzy wpisy `docs/DZIENNIK.md` i właściwy prompt z `prompts/`.
-Realizuj kierunek właściciela: LinuxCNC, QtDragon, Plant, plan 84 sesji.
-Pracujemy naprzemiennie: Codex implementuje, Claude przegląda, następnie odwrotnie.
-Zmiany przez PR; autor modelowy jawny w commitach, PR i dzienniku.
-Nie oznaczaj sesji jako wykonanej, dopóki nie spełnia kryteriów akceptacji.
+Przeczytaj: `CLAUDE.md` (kontrakt), `docs/DECYZJE.md`, **`docs/WSPOLPRACA_MODELI.md`**
+(jedyne źródło zasad współpracy), `docs/NASTEPNA_SESJA.md` (czyja tura, stan, zadania),
+trzy ostatnie wpisy `docs/DZIENNIK.md` i prompt z `prompts/`.
 
-
-## Aktualizacja właściciela — samodzielna praca Codex
-
-2026-10-17 · Model-Author: Codex. Claude jest niedostępny do odwołania.
-Codex kontynuuje implementację i przegląd własnych zmian przez PR oraz testy,
-a następnie może scalać poprawne PR bez oczekiwania na Claude. Przegląd Claude
-po powrocie jest dodatkową kontrolą, nie blokadą pracy. Nie przedstawiamy
-autokontroli jako niezależnego przeglądu. Ta aktualizacja zastępuje wcześniejszy
-wymóg przeglądu drugiego modelu przed każdym scaleniem.
-Po każdym ukończonym kroku: commit i push; nie odkładać publikacji do końca sesji
-ani do zbliżającego się limitu kontekstu/tokenów.
+Skrót (szczegóły w `WSPOLPRACA_MODELI.md`):
+- Claude i Codex pracują na zmianę, nigdy równolegle: linia `Tura:` w `NASTEPNA_SESJA.md` i `prompts/LOCK`.
+- Małe kroki: po każdym commit i push; draft PR od pierwszego kroku; limit tokenów może przerwać w każdej chwili.
+- Oszczędzaj tokeny: czytaj zakresy i `diff --stat`, nie całe pliki; bez subagentów.
+- `Model-Author:` w każdym commicie i PR; autokontrola to nie niezależny przegląd.
+- Scala model niebędący autorem; wyjątek D25 (drugi model niedostępny) z adnotacją w PR.
