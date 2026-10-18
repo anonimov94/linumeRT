@@ -52,6 +52,9 @@ class Link(Strict):
     axis: Vec3
     offset: Vec3 = (0.0, 0.0, 0.0)
     parent: str | None = None
+    # Galaz lancucha (sesja 014): czlony niosace narzedzie albo detal (stol). Czlon o id rownym
+    # literze osi jest napedzany ta osia; pozostale sa stale.
+    branch: Literal["tool", "workpiece"] = "tool"
 
     @model_validator(mode="after")
     def _axis_not_zero(self) -> Link:
@@ -115,6 +118,8 @@ class Limits(Strict):
 class HardStops(Strict):
     min: HardStop | None = None
     max: HardStop | None = None
+    # REQ-VM-04: wjazd w zderzak daje dodatkowo awarie napedu (E-4207)
+    drive_fault: bool = False
 
 
 class Homing(Strict):
@@ -249,6 +254,31 @@ class CollisionBody(Strict):
 class EStop(Strict):
     input: str = Field(min_length=1)
     contact: Contact = "NC"
+    # Reakcja Plant na otwarcie petli: STO (awaria napedow) albo quick stop (hamowanie rampa)
+    action: Literal["sto", "quick_stop"] = "sto"
+
+
+class ProbeTarget(Strict):
+    # box: prostopadloscian przygotowki; plate: plytka (kontakt ponizej max.z w obrysie XY)
+    type: Literal["box", "plate"]
+    min: Vec3
+    max: Vec3
+
+    @model_validator(mode="after")
+    def _ordered(self) -> ProbeTarget:
+        count = 3 if self.type == "box" else 2
+        if any(self.min[i] >= self.max[i] for i in range(count)):
+            raise ValueError("min musi byc mniejsze od max" + (" (x, y)" if count == 2 else ""))
+        return self
+
+
+class Probe(Strict):
+    """Sonda w wrzecionie (sesja 014): wejscie i cel w ukladzie detalu."""
+
+    input: str = Field(min_length=1)
+    contact: Contact = "NO"
+    tip_length: float = Field(default=50.0, ge=0)  # od nosa wrzeciona [mm]
+    target: ProbeTarget
 
 
 class IO(Strict):
@@ -268,6 +298,7 @@ class MachineConfig(Strict):
     toolchanger: ToolChanger = ToolChanger()
     positions: Positions
     collision_bodies: list[CollisionBody] = []
+    probe: Probe | None = None
     io: IO
 
     def axis(self, letter: str) -> Axis | None:

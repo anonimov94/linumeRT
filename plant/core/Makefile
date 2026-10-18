@@ -4,6 +4,7 @@
 #   make        - buduje build/libplant_core.a
 #   make test   - buduje i uruchamia testy (build/test_axis, build/test_drive)
 #   make tools  - buduje build/lrt_check_params (walidacja szablonow napedow)
+#   make shared - buduje build/libplant_core.so (wiazanie ctypes, sesja 014)
 #   make clean
 CC ?= cc
 CFLAGS ?= -O2
@@ -13,10 +14,11 @@ LDLIBS += -lm
 BUILD := build
 SRC := live.c axis.c drive.c machine.c
 OBJ := $(SRC:%.c=$(BUILD)/%.o)
+PIC_OBJ := $(SRC:%.c=$(BUILD)/pic/%.o)
 TESTS := $(BUILD)/test_axis $(BUILD)/test_drive $(BUILD)/test_machine
 TOOLS := $(BUILD)/lrt_check_params
 
-.PHONY: all test tools clean
+.PHONY: all test tools shared clean
 
 all: $(BUILD)/libplant_core.a
 
@@ -34,6 +36,18 @@ $(BUILD)/%.o: %.c live.h axis.h drive.h machine.h | $(BUILD)
 
 $(BUILD)/libplant_core.a: $(OBJ)
 	$(AR) rcs $@ $^
+
+# Biblioteka wspoldzielona dla wiazania ctypes (plant/server/linumert_plant/core_binding.py).
+shared: $(BUILD)/libplant_core.so
+
+$(BUILD)/pic:
+	mkdir -p $(BUILD)/pic
+
+$(BUILD)/pic/%.o: %.c live.h axis.h drive.h machine.h | $(BUILD)/pic
+	$(CC) $(CFLAGS) -fPIC -c $< -o $@
+
+$(BUILD)/libplant_core.so: $(PIC_OBJ)
+	$(CC) -shared $^ $(LDLIBS) -o $@
 
 $(BUILD)/test_axis: tests/test_axis.c tests/lrt_test.h live.h axis.h $(BUILD)/libplant_core.a
 	$(CC) $(CFLAGS) tests/test_axis.c $(BUILD)/libplant_core.a $(LDLIBS) -o $@

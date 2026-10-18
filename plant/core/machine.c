@@ -13,7 +13,6 @@
 #include <string.h>
 
 #define LRT_TWO_PI 6.283185307179586476925286766559
-#define LRT_FAR_STOP 1.0e3 /* zderzak "brak" po jednej stronie [m|rad] */
 
 /* ---- tablice pol (klucze drive.N.* i mech.N.*) ------------------------------------- */
 
@@ -1210,6 +1209,16 @@ const char *lrt_machine_strerror(int status)
     default:
         return "nieznany kod bledu maszyny";
     }
+}
+
+int lrt_machine_err_index(const lrt_machine *m)
+{
+    return m != NULL ? m->err_index : -1;
+}
+
+int lrt_machine_err_detail(const lrt_machine *m)
+{
+    return m != NULL ? m->err_detail : 0;
 }
 
 unsigned long lrt_machine_cfg_size(void)

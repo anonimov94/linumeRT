@@ -220,6 +220,9 @@ int lrt_machine_init(lrt_machine *m, const lrt_machine_cfg *c);
 /* Jeden krok dt [s] wszystkich napedow i osi, potem czujniki, kinematyka i wejscia. */
 int lrt_machine_step(lrt_machine *m, double dt);
 const char *lrt_machine_strerror(int status);
+/* Element i kod szczegolowy ostatniego bledu init/step (dla wiazania bez dostepu do struktury). */
+int lrt_machine_err_index(const lrt_machine *m);
+int lrt_machine_err_detail(const lrt_machine *m);
 /* Rozmiary struktur dla wiazania ctypes (bufor alokowany po stronie Pythona). */
 unsigned long lrt_machine_cfg_size(void);
 unsigned long lrt_machine_size(void);

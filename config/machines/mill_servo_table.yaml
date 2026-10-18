@@ -10,7 +10,7 @@ axes:
     limits:
       min: {position: 0.5, input: lim_x_min}
       max: {position: 599.5, input: lim_x_max}
-    hardstops: {min: {position: -2}, max: {position: 602}}
+    hardstops: {min: {position: -2}, max: {position: 602}, drive_fault: true}
     home_sensor: {shared_with: limit_min}
     max_velocity: 200
     max_acceleration: 1000
@@ -53,7 +53,12 @@ positions:
 collision_bodies:
   - {name: wrzeciono, shape: cylinder, attached_to: spindle, size: [80, 150], position: [0, 0, 75]}
   - {name: stol, shape: box, attached_to: table, size: [700, 1000, 40], position: [300, 450, -150]}
+# Sonda w wrzecionie i przygotówka na stole (sesja 014)
+probe:
+  input: probe
+  tip_length: 60
+  target: {type: box, min: [250, 350, -110], max: [350, 450, -90]}
 io:
-  inputs: {estop: 0, lim_x_min: 1, lim_x_max: 2, lim_y_min: 3, lim_y_max: 4, lim_z_max: 5, toolsetter: 6}
+  inputs: {estop: 0, lim_x_min: 1, lim_x_max: 2, lim_y_min: 3, lim_y_max: 4, lim_z_max: 5, toolsetter: 6, probe: 7}
   outputs: {spindle_on: 0, coolant: 1}
   estop: {input: estop, contact: NC}
