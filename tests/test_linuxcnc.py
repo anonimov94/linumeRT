@@ -56,6 +56,11 @@ def simulation(tmp_path):
             text = re.sub(r"(?m)^DISPLAY\s*=.*$", "DISPLAY = halui", text)
             text = re.sub(r"(?m)^HALUI\s*=.*$", "", text)
             text = re.sub(r"(?m)^HALFILE\s*= axis_manualtoolchange.hal.*$", "", text)
+        else:
+            # The test must close without an unattended confirmation dialog.
+            (ini.parent / "qtdragon.pref").write_text(
+                "[SCREEN_OPTIONS]\nshutdown_check = False\n"
+            )
         ini.write_text(text)
         log = (tmp_path / "linuxcnc.log").open("w")
         process = subprocess.Popen(
