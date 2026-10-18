@@ -3,9 +3,18 @@
 # Model-Author: Codex
 set -euo pipefail
 
+source /etc/os-release
+if [[ $ID != debian || $VERSION_ID != 12 ]]; then
+    if [[ ${LINUMERT_ALLOW_NON_DEBIAN:-0} != 1 ]]; then
+        echo 'Debian 12 required; explicit exploratory override: LINUMERT_ALLOW_NON_DEBIAN=1' >&2
+        exit 2
+    fi
+    echo "Exploratory non-target build: $ID $VERSION_ID" >&2
+fi
+
 # RIP/uspace only. Dependencies derived from upstream debian/configure no-docs
 # and debian/control (2.9, a33293f46575c809e082e0806e79ab996f982513).
-packages=(git build-essential autoconf automake libtool pkg-config gettext intltool
+packages=(ca-certificates python3-venv git build-essential autoconf automake libtool pkg-config gettext intltool
     asciidoc-base xsltproc docbook-xsl docbook-xml libxml2-utils
     libudev-dev libboost-python-dev libepoxy-dev libgl-dev libglu1-mesa-dev
     libgtk2.0-dev libgtk-3-dev libmodbus-dev libgpiod-dev libeditreadline-dev
@@ -19,6 +28,7 @@ packages=(git build-essential autoconf automake libtool pkg-config gettext intlt
     pyqt5-dev-tools sound-theme-freedesktop xvfb xauth imagemagick
     netcat-openbsd netpbm procps psmisc desktop-file-utils)
 if [[ ${1:-} == --install-deps ]]; then
+    export PATH="/usr/sbin:/sbin:$PATH"
     if (( EUID == 0 )); then admin=(); else admin=(sudo); fi
     "${admin[@]}" apt-get update
     "${admin[@]}" env DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends "${packages[@]}"
@@ -31,7 +41,7 @@ if [[ ! -d $target ]]; then
 fi
 cd "$target"
 revision=$(git rev-parse HEAD)
-signature="$revision $(uname -m) $(python3 --version)"
+signature="$revision $ID $VERSION_ID $(uname -m) $(python3 --version)"
 if [[ -f .linumert-built && $(cat .linumert-built) == "$signature" && -x bin/linuxcnc ]]; then
     echo "Reusing LinuxCNC $revision in $target"
     exit
