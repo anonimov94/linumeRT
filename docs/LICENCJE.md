@@ -46,6 +46,15 @@ wpis ma status „do potwierdzenia”.
 
 Model-Author: Codex. Skrypty używają zainstalowanych w Ubuntu TigerVNC, XFCE, X11, D-Bus i util-linux. Nie kopiujemy ich kodu ani binariów do repozytorium. Właściwe licencje pakietów znajdują się w `/usr/share/doc/<pakiet>/copyright`; przy ewentualnej dystrybucji obrazu wymagany osobny przegląd. Runner używa stdlib Pythona oraz istniejących zależności dev: pytest i ruff.
 
+## Maszyny wirtualne VirtualBox — sesja 025
+
+Model-Author: Claude. Skrypty `tools/vm/` wywołują zainstalowane programy, niczego nie dołączamy do
+repozytorium: VirtualBox 7 (`VBoxManage`, GPL-2.0, poza Extension Pack, którego nie używamy), w VM pakiety
+Debiana 12 `socat` (GPL-2.0), `ifupdown` (GPL-2.0+), `python3-venv`, `gcc`, `make`, `git` oraz
+`linuxcnc-uspace-dev` (GPL-2.0, `halcompile`). Narzędzia testów, opcjonalne (testy pomijane bez nich):
+ShellCheck (GPL-3.0, tylko uruchamiany), PowerShell 7 (MIT) i moduł PSScriptAnalyzer (MIT). Obrazy ISO
+LinuxCNC i Debiana pobiera właściciel; ich licencje są w obrazach.
+
 ## Środowisko budowy LinuxCNC — sesja 003
 
 Model-Author: Codex. LinuxCNC 2.9 jest pobierany do cache z oficjalnego repozytorium (GPL-2.0-or-later); nie dołączamy binariów ani źródeł do tego repo. Pełna lista pakietów budowy, GUI i testów jest w tools/ci/build-linuxcnc.sh, wyprowadzona z upstream debian/configure i debian/control. Obejmuje toolchain GNU, biblioteki systemowe, Tcl/Tk, Python, Qt/PyQt5/QtPy, Xvfb, ImageMagick i narzędzia AsciiDoc/DocBook. Licencje konkretnych wersji pakietów: /usr/share/doc/<pakiet>/copyright. Są to zależności środowiska deweloperskiego; przegląd licencji obrazu dystrybucyjnego pozostaje do sesji 080.

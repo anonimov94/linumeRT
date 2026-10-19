@@ -7,7 +7,7 @@ Model-Author: Claude · 2026-10-18 · polecenie właściciela (D33). Wspólne za
 |---|---|---|---|
 | 022 Panel Plant i pulpit MPG | [START-022](START-022.md) | od razu | `plant/server/linumert_plant/panel/`, `plant/server/linumert_plant/server.py`, `serve.py`, `pyproject.toml`, `tests/test_panel*.py` |
 | 024 Scenariusze, raport, check_requirements | [START-024](START-024.md) | od razu | `plant/scenarios/`, `plant/server/linumert_plant/faults.py`, `tools/run_scenario.py`, `tools/check_requirements.py`, `Makefile`, `.github/workflows/`, `docs/wymagania/MACIERZ.md`, `tests/test_scenario*.py`, `tests/test_requirements*.py` |
-| 025 Maszyny wirtualne | [START-025](../START-025.md) | od razu | `tools/vm/`, `docs/VM.md`, `tests/test_vm*.py` |
+| 025 Maszyny wirtualne | [START-025](START-025.md) | od razu | `tools/vm/`, `docs/VM.md`, `tests/test_vm*.py` |
 | 023 Edytor obrabiarki i awarie w panelu | [START-023](START-023.md) | po scaleniu 022 i 024 | panel (zakładki Maszyna, Napędy, Awarie), `plant/scenarios/edit_reload.yaml` |
 
 Plik spoza swojej kolumny zmieniasz tylko wtedy, gdy bez tego nie da się zrobić zakresu: zmiana minimalna,

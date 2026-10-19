@@ -1,7 +1,7 @@
 # Prompt startowy: sesja 025, maszyny wirtualne VM-A i VM-B (równolegle z 022 i 024)
 
-Model-Author: Claude · 2026-10-18. Najpierw [`START-PODZIAL.md`](archiwum/START-PODZIAL.md) (zasady, worktree, testy),
-potem pełny zakres w [`sesja-025.md`](sesja-025.md).
+Model-Author: Claude · 2026-10-18. Najpierw [`START-PODZIAL.md`](START-PODZIAL.md) (zasady, worktree, testy),
+potem pełny zakres w [`sesja-025.md`](../sesja-025.md).
 
 ## Zakres w tej sesji
 1. Zakres `sesja-025.md` 1–4: `tools/vm/create-vms.ps1` (VBoxManage), `post-install-ctl.sh`,

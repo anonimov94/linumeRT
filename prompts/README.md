@@ -44,8 +44,8 @@ wymagały ekranu ani LinuxCNC. Bieżący stan i następny krok: [`docs/NASTEPNA_
 | [022](sesja-022.md) | M1 | Plant: panel sterowania i pulpit MPG | zrobiona |
 | [023](sesja-023.md) | M1 | Edytor wirtualnej obrabiarki w panelu Plant | zrobiona |
 | [024](sesja-024.md) | M1 | Plant: scenariusze i raport prototypu | zrobiona |
-| [025](sesja-025.md) | M1 | Skrypty maszyn wirtualnych (VirtualBox) | **następna** (równolegle, [START-025](START-025.md)) |
-| [026](sesja-026.md) | M1 | Bufor i bramka G1 (prototyp P0) |  |
+| [025](sesja-025.md) | M1 | Skrypty maszyn wirtualnych (VirtualBox) | zrobiona |
+| [026](sesja-026.md) | M1 | Bufor i bramka G1 (prototyp P0) | **następna** |
 | [027](sesja-027.md) | M2 | Własny system projektowy ekranu |  |
 | [028](sesja-028.md) | M2 | Kompozycja ekranu głównego |  |
 | [029](sesja-029.md) | M2 | Tryby, JOG i pulpit MPG |  |

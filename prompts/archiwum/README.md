@@ -17,6 +17,7 @@ jednorazowe). Są zrealizowane i zostają jako historia; nie używaj ich do star
 | [START-022.md](START-022.md) | sesja 022 równolegle z 024 i 025 (D33): panel Plant i pulpit MPG | PR #37 |
 | [START-024.md](START-024.md) | sesja 024 (D33): awarie, scenariusze, raport, check_requirements | PR #38 |
 | [START-023.md](START-023.md) | sesja 023 (D33): edytor maszyny, napędy, awarie w panelu, widok 3D | PR #39 |
+| [START-025.md](START-025.md) | sesja 025 (D33): skrypty maszyn wirtualnych VirtualBox | PR #41 |
 | [START-PODZIAL.md](START-PODZIAL.md) | podział D33 na sesje 022–025 (zasady wspólne) | PR #36 |
 
 Aktualny prompt startowy: [`docs/PROMPT_NOWEJ_SESJI.md`](../../docs/PROMPT_NOWEJ_SESJI.md).
