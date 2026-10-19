@@ -39,7 +39,7 @@ def test_alarm_panel_last_three_and_persistent_causes(app):
 def test_controls_keyboard_jog_units_mdi_and_tool_change(app, monkeypatch):
     import linumert_shell_model as model
     from linumert_operator_controls import OperatorControls
-    from PyQt5 import QtWidgets
+    from PyQt5 import QtCore, QtWidgets
     shell = SimpleNamespace(s=model.ShellState(estop=False, machine_on=True,
                                                homed={"X", "Y", "Z"}),
                             action=Mock(), info=SimpleNamespace(MACHINE_IS_METRIC=False),
@@ -57,7 +57,8 @@ def test_controls_keyboard_jog_units_mdi_and_tool_change(app, monkeypatch):
     panel.tool.setValue(1)
     panel.buttons["next"].click()
     assert panel.tool.value() == 5
-    monkeypatch.setattr(QtWidgets.QMessageBox, "question", lambda *a: QtWidgets.QMessageBox.Yes)
+    QtCore.QTimer.singleShot(50, lambda: app.activeModalWidget().button(
+        QtWidgets.QMessageBox.Yes).click())
     panel.buttons["m6"].click()
     shell.action.CALL_MDI.assert_called_with("T5 M6")
     panel.buttons["m3"].click()

@@ -159,7 +159,7 @@ class SelfTest(QtCore.QObject):
         def accept():
             box = QtWidgets.QApplication.activeModalWidget()
             if isinstance(box, QtWidgets.QMessageBox):
-                box.done(QtWidgets.QMessageBox.Yes)
+                box.button(QtWidgets.QMessageBox.Yes).click()
         QtCore.QTimer.singleShot(100, accept)
         self._click(panel.buttons["m6"])
 
