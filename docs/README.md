@@ -37,6 +37,7 @@ sprzecznościach: `CLAUDE.md` → `DECYZJE.md` → `wymagania/` → specyfikacje
 | Dokument | Zakres |
 |---|---|
 | [`PLANT_START.md`](PLANT_START.md) | LinuxCNC (RIP) + Plant: budowa, komponenty HAL, testy z LinuxCNC, warianty (w tym `_vfd`) |
+| [`VM.md`](VM.md) | maszyny VirtualBox VM-A (LinuxCNC + ekran) i VM-B (Plant jako usługa): tworzenie, instalacja, łącze, falownik, RT w VM |
 | [`SIM_WSL.md`](SIM_WSL.md) | symulator `config/sim/linumert_xyz` z ekranem (podman na Linuksie, WSL) |
 | [`PODGLAD_UBUNTU.md`](PODGLAD_UBUNTU.md) | podgląd testów przez VNC w Ubuntu WSL (Windows) |
 | [`../tools/README.md`](../tools/README.md) | narzędzia: kontenery deweloperskie, CI, blokady zasobów, paczka testowa |

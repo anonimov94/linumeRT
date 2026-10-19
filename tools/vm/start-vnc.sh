@@ -26,7 +26,7 @@ repo=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../.." && pwd)
 # Prefer the project's development environment, while keeping system GUI packages available.
 if [[ -x $repo/.venv/bin/python ]]; then export PATH="$repo/.venv/bin:$PATH"; fi
 runtime=$(mktemp -d "${TMPDIR:-/tmp}/linumert-vnc.XXXXXXXX")
-server_pid= desktop_pid= terminal_pid= viewer_pid=
+server_pid='' desktop_pid='' terminal_pid='' viewer_pid=''
 cleanup() {
     trap - EXIT INT TERM
     for pid in "$viewer_pid" "$terminal_pid" "$server_pid"; do

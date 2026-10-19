@@ -39,6 +39,7 @@ sesji: proces, scalenia, przeglądy). Treść: zrobione · testy · decyzje · d
 | [022](#022--plant-panel-sterowania-i-pulpit-mpg-pr-37--2026-10-18--claude-opus-55) | Plant: panel sterowania i pulpit MPG | #37 | Claude (Opus 5.5) |
 | [023](#023--edytor-wirtualnej-obrabiarki-w-panelu-plant-pr-39--2026-10-18--claude-opus-55) | Edytor wirtualnej obrabiarki w panelu Plant | #39 | Claude (Opus 5.5) |
 | [024](#024--plant-scenariusze-i-raport-prototypu-pr-38--2026-10-18--claude-opus-55) | Plant: scenariusze i raport prototypu | #38 | Claude (Opus 5.5) |
+| [025](#025--skrypty-maszyn-wirtualnych-virtualbox-pr-41--2026-10-19--claude-opus-55) | Skrypty maszyn wirtualnych (VirtualBox) | #41 | Claude (Opus 5.5) |
 | [032](#032--baza-narzędzi-z-typami-część-rdzenia-pr-16--2026-10-18--claude-opus-55) | Baza narzędzi z typami, część rdzenia | #16 | Claude (Opus 5.5) |
 | [039](#039--format-lnx-i-basemacrogenerator-pr-14--2026-10-18--claude-opus-55) | Format .lnx i BaseMacroGenerator | #14 | Claude (Opus 5.5) |
 | [044](#044--lekser-g-code-i-walidacja-w-edytorze-pr-15--2026-10-18--claude-opus-55) | Lekser G-code i walidacja w edytorze | #15 | Claude (Opus 5.5) |
@@ -308,3 +309,11 @@ Uzupełnienie: README plant/core (liczby testów 29/59/20, bazowanie, parametry 
 - Zamknięcie podziału D33: 022, 023, 024 scalone; 025 (skrypty VM) nadal otwarta.
 - Do sprawdzenia ręcznie: `python -m linumert_plant panel --plant config/plant/plant.example.yaml` → zakładki Maszyna (obrót 3D, przesuwanie magazynu, „Zapisz wersję”, „Przeładuj model” przy wyłączonych napędach) i Napędy („Kopiuj”).
 - Długi: formularz edytuje istniejące pola (dodawanie stref/brył przez plik); przeciąganie elementów myszą w 3D zastąpione przyciskami X/Y/Z; zakładka Scenariusze z makiety jeszcze nie istnieje (CLI `tools/run_scenario.py`). Autokontrola, bez niezależnego przeglądu. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## 025 — Skrypty maszyn wirtualnych (VirtualBox) (PR #41) · 2026-10-19 · Claude (Opus 5.5)
+- Zrobione (START-025, sesja w chmurze Claude, gałąź `ccr-e8ca8a53-ajgyrd`): `tools/vm/vm.conf`, `create-vms.ps1` (VBoxManage, sumy SHA-256, karty NAT/lrtnet/host-only, unattended VM-B z `preseed-plant.cfg`), `post-install-plant.sh` (usługa `linumert-plant`, `--vfd`: most socat), `post-install-ctl.sh` (`halcompile --install`, `*_vm.ini`, `--vfd`), `lib.sh`, `lrtnet_probe.py` (pomiar łącza), `docs/VM.md` krok po kroku (Hyper-V, RT w VM, pomiary).
+- Znalezisko i poprawka (plik spoza zakresu `server.py`): przy Plant działającym jako usługa restart LinuxCNC (seq od 1) dawał same ramki „spóźnione” — Plant przyjmuje teraz nową sesję mastera po przerwie > `watchdog_ms`.
+- Testy (kontener Ubuntu 24.04, Python 3.13, bez LinuxCNC): ruff czysty, pytest 598 OK (35 nowych: `tests/test_vm_scripts.py`, `tests/test_vm_link.py`), testy C 29/59/20, check_requirements 0 błędów; shellcheck i PSScriptAnalyzer czyste, `create-vms.ps1` uruchomiony w PowerShell 7 z atrapą VBoxManage; `-m linuxcnc`: job CI `linuxcnc` uruchomiony ręcznie na gałęzi.
+- Pomiary łącza (localhost, Plant realtime): RTT p50 0,4 ms; 20 ms opóźnienia bez strat i watchdoga; zawieszenie mastera 120 ms → E-4003. `tc netem` niedostępne — opóźnienie z przekaźnika UDP.
+- Do sprawdzenia ręcznie: `docs/VM.md` §10 (create-vms.ps1 na Windows, instalacja VM-B z preseed, post-install-ctl.sh na obrazie LinuxCNC, `lrtnet_probe.py` z VM-A).
+- Długi: NIEZWERYFIKOWANE W VIRTUALBOX (brak VirtualBoxa w środowisku agenta); pola preseed `@@VBOX_INSERT_…@@` z dokumentacji, nie z działającej instalacji; zmiana kolejności ramek (rozrzut > cykl) daje ramki spóźnione bez kroku. Autokontrola, bez niezależnego przeglądu. NIEZWERYFIKOWANE NA SPRZĘCIE.

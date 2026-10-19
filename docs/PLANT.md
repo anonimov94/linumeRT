@@ -85,6 +85,9 @@ potem `digital_in` u32, `spindle_actual` f32, statystyki (`frames_lost` u32, `fr
   sprawdzany w pętli co `watchdog_ms/4`). Awaria napędu `COMM_WATCHDOG` = 603Fh **8130h**, alarm
   **E-4003**; wyjścia cyfrowe zerowe, dopóki master nie wyśle fault reset i żaden napęd nie jest w fault.
 - Ramka powtórzona albo starsza dostaje odpowiedź (stan bieżący) bez kroku modelu.
+- Nowa sesja mastera (sesja 025): ramka starsza niż ostatnia, ale po przerwie > `watchdog_ms` czasu hosta,
+  zaczyna numerację od nowa (restart LinuxCNC przy Plant działającym jako usługa w VM-B; `lrt_net`
+  numeruje od 1). Watchdog z przerwy zostaje do fault resetu.
 - Wyjątek w modelu: napędy wyłączone (6040h = 0), wyjścia zerowe, dalej tylko odpowiedzi ze słowem
   stanu FAULT i 603Fh = FF00h (E-4200) do restartu Plant.
 - `spindle_cmd` / `spindle_actual` [obr/min, znak = kierunek]: bez sekcji `vfd` w plant.yaml

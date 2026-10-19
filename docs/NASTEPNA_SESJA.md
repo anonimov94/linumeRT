@@ -1,36 +1,36 @@
 # Stan projektu i przekazanie
 
-Tura: Claude · od 2026-10-18T19:30Z · stan: oddana (sesje 022, 023, 024 scalone; PR #37–#39)
+Tura: Claude · od 2026-10-19T04:56Z · stan: oddana (sesja 025, PR #41)
 
 Jedyny plik ze **stanem bieżącym**: kto ma turę, co jest scalone, co czeka, co dalej. Aktualizuje go każda
 sesja na końcu (zasady: [`WSPOLPRACA_MODELI.md`](WSPOLPRACA_MODELI.md) §1–3). Historia jest w
 [`DZIENNIK.md`](DZIENNIK.md), poprzednie wersje tego pliku w [`archiwum/`](archiwum/).
 
-Model-Author: Claude · 2026-10-18
+Model-Author: Claude · 2026-10-19
 
 ## 1. W skrócie
 
-- Wykonane sesje: 27 z 84 ([`prompts/DONE.md`](../prompts/DONE.md)). Kamień M0 domknięty (bramka G0 czeka na checklistę
-  właściciela: [`docs/raporty/G0.md`](raporty/G0.md)); kamień M1 do 024 włącznie, bez 025 (skrypty VM).
+- Wykonane sesje: 28 z 84 ([`prompts/DONE.md`](../prompts/DONE.md)). Kamień M0 domknięty (bramka G0 czeka na checklistę
+  właściciela: [`docs/raporty/G0.md`](raporty/G0.md)); kamień M1 do 025 włącznie, zostaje 026 (bramka G1).
 - Działa (LinuxCNC 2.9 RIP, bez sprzętu): LinuxCNC + ekran linumert steruje Plant przez LRT-NET; panel web Plant
   (telemetria, parametry live, pulpit MPG, CSV, edytor maszyny z widokiem 3D, napędy, awarie); scenariusze
-  z atrapą mastera (CI) i z LinuxCNC, raport HTML w `docs/raporty/prototypy/`; `check_requirements.py` w `make test`.
-- Testy (sesja 023, WSL Ubuntu 24.04 + RIP): wyniki w PR #39; CI: `python`, `plant-matrix`, `linuxcnc` zielone.
+  z atrapą mastera (CI) i z LinuxCNC, raport HTML w `docs/raporty/prototypy/`; `check_requirements.py` w `make test`;
+  skrypty VirtualBox dla VM-A i VM-B ([`VM.md`](VM.md), NIEZWERYFIKOWANE W VIRTUALBOX).
+- Testy (sesja 025, kontener Ubuntu 24.04 bez LinuxCNC + CI): wyniki w PR #41.
 - **Nic nie jest sprawdzone na sprzęcie.** Prace od sesji 004 to autokontrola Claude, bez niezależnego przeglądu.
 
-## 2. Gałęzie i PR (stan 2026-10-18)
+## 2. Gałęzie i PR (stan 2026-10-19)
 
-`main` zawiera wszystkie ukończone sesje: 001–024, 032, 039, 044, porządek dokumentacji i kierunek HMI (D32).
-Sesje 022, 024, 023: PR #37, #38, #39 (autokontrola, bez niezależnego przeglądu). Otwarte: #34 (Codex, HMI-01, draft);
-#31 do zamknięcia (zawarty w #33). Scalone gałęzie `wip/*` i `claude/*` można usunąć.
+`main` zawiera wszystkie ukończone sesje: 001–025, 032, 039, 044, porządek dokumentacji i kierunek HMI (D32).
+Sesje 022, 024, 023, 025: PR #37, #38, #39, #41; dług 024: PR #40 (autokontrola, bez niezależnego przeglądu).
+Otwarte: #34 (Codex, HMI-01, draft). Scalone gałęzie `wip/*`, `claude/*` i `ccr-*` można usunąć.
 
 ## 3. Następna praca
 
 0. Właściciel: checklista bramki G0, [`docs/raporty/G0.md`](raporty/G0.md); podgląd panelu Plant
    (`python -m linumert_plant panel --plant config/plant/plant.example.yaml`).
-1. Sesja 025 (skrypty maszyn wirtualnych): [`prompts/START-025.md`](../prompts/START-025.md) — ostatnia z podziału D33
-   ([`archiwum/START-PODZIAL.md`](../prompts/archiwum/START-PODZIAL.md)); potem sesje według
-   [`prompts/README.md`](../prompts/README.md) (026 i dalej).
+1. Sesja 026 (bufor i bramka G1, domknięcie M1): [`prompts/sesja-026.md`](../prompts/sesja-026.md); potem sesje według
+   [`prompts/README.md`](../prompts/README.md) (027 i dalej). Właściciel: [`VM.md`](VM.md) §10 (pierwsza instalacja VM).
 2. **HMI według kolejności pracy (D32)**: docelowy kierunek ekranu; etapy HMI-01…06 prowadzi Codex (§6).
    Sesje ekranu z planu (M2, 027–038) muszą być z nim zgodne.
 3. Propozycja do decyzji: ramka LRT-NET v2 (zatrzask indeksu enkodera, 6072h), opis w DECYZJE (sesja 017).
@@ -56,7 +56,7 @@ Sesje 022, 024, 023: PR #37, #38, #39 (autokontrola, bez niezależnego przegląd
 |---|---|---|
 | Niezależny przegląd wsteczny prac Claude: `d53aa04` (sesje 007–014), #13–#17, sesje 004–005, 017–021 | 2026-10-18 | drugi model albo właściciel |
 | Weryfikacja na sprzęcie (napędy, falownik RS485, E-STOP); obecnie wszystko NIEZWERYFIKOWANE NA SPRZĘCIE | — | właściciel, po zakupie sprzętu |
-| Tryb `--realtime` Plant między dwiema VM (jitter, watchdog) i `socat` dla hy_vfd między VM | sesja 016, 021 | 025 (skrypty VM) |
+| Tryb `--realtime` i `socat` dla hy_vfd między dwiema VM w VirtualBox (na localhost sprawdzone w sesji 025) | sesja 016, 021, 025 | właściciel, [`VM.md`](VM.md) §10 |
 | Znaki presetów trunnion wobec `xyzac-trt-kins` / `xyzbc-trt-kins` w LinuxCNC | sesja 014 | sesja z 4/5 osiami (065) |
 | Warianty bazowania hardstop / w napędzie / switch_index bez testu e2e (ramka v2) | sesja 018 | decyzja o LRT-NET v2 |
 | mb2hal z Modbus TCP w LinuxCNC (test e2e); alarmy falownika E-4100/E-4102/E-4104 na ekranie | sesja 021 | sesje ekranu |
@@ -80,7 +80,6 @@ Sesje 022, 024, 023: PR #37, #38, #39 (autokontrola, bez niezależnego przegląd
 
 ## 8. Stan zatrzymania (bieżąca tura)
 
-- 2026-10-18 Sesje 022 → 024 → 023 według podziału D33 (worktree na sesję, testy w WSL `tools/dev/wsl-test.sh`).
-- 022: PR #37 scalony (panel, pulpit MPG). 024: PR #38 scalony (awarie, scenariusze, raport, check_requirements;
-  poprawka łańcucha E-STOP w HAL i procesów-zombie w testach CI). 023: PR #39 (edytor, widok 3D, napędy, awarie).
-- Tura oddana; blokady `linuxcnc` zwolnione.
+- 2026-10-19 Sesja 025 (skrypty VM) w chmurze Claude, gałąź `ccr-e8ca8a53-ajgyrd` (nazwę narzuca środowisko sesji), PR #41.
+- Kroki 1–4: skrypty VM, sonda łącza, testy, `docs/VM.md`, poprawka nowej sesji mastera w Plant; zamknięcie sesji.
+- Tura oddana; LOCK pusty.
