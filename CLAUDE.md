@@ -126,6 +126,13 @@ Nie deklaruj przeglądu drugiego modelu bez jego rzeczywistej oceny konkretnego 
    `docs/DECYZJE.md` jako PROPOZYCJA i idź dalej.
 
 ## 11. Definition of Done
+**GUI od pierwszego kroku (D36, polecenie właściciela):** funkcja przeznaczona dla operatora
+pojawia się od razu w nawigacji i ma minimalne użyteczne działanie. Backend rozwijamy iteracyjnie
+za dostępnym widokiem. Każda porcja zwiększa działające możliwości. Wersję częściową opisujemy
+uczciwie w GUI (co działa i co jeszcze powstaje); nie pokazujemy pozornie działających przycisków.
+Odbiór obejmuje kliknięcie przez GUI i pokazanie efektu właścicielowi (zrzut lub podgląd),
+oprócz testów logiki. Nie uznajemy samego backendu za ukończoną funkcję operatora.
+
 Testy przechodzą · błędy obsłużone jawnie · brak blokowania RT · dokumentacja zaktualizowana ·
 nowe zależności i zasoby w LICENCJE.md / PROVENANCE.md · wpis w DZIENNIK.md.
 
