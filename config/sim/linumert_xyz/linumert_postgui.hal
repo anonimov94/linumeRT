@@ -6,7 +6,9 @@
 
 # Wirtualny magazyn potwierdza M6 bez okna ręcznej wymiany fizycznego freza.
 # Operator zatwierdza WYMIANA M6 w HMI; LinuxCNC aktualizuje tool-in-spindle.
-net linumert.io.tool-change iocontrol.0.tool-change => iocontrol.0.tool-changed
+net linumert.io.tool-change iocontrol.0.tool-change => sim_toolchange.in
+net linumert.io.tool-changed sim_toolchange.out => iocontrol.0.tool-changed
+net linumert.io.tool-number iocontrol.0.tool-prep-number => hal_manualtoolchange.number
 
 net linumert.spindle.inhibit    linumert.spindle-inhibit => spindle.0.inhibit
 net linumert.z.eoffset-clear    linumert.eoffset-clear => axis.z.eoffset-clear
