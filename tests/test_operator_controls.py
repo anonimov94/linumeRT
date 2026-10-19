@@ -34,3 +34,39 @@ def test_alarm_panel_last_three_and_persistent_causes(app):
     panel.reset.click()
     shell.reset_alarms.assert_called_once_with(True)
     panel.close()
+
+
+def test_controls_keyboard_jog_units_mdi_and_tool_change(app, monkeypatch):
+    import linumert_shell_model as model
+    from linumert_operator_controls import OperatorControls
+    from PyQt5 import QtWidgets
+    shell = SimpleNamespace(s=model.ShellState(estop=False, machine_on=True,
+                                               homed={"X", "Y", "Z"}),
+                            action=Mock(), info=SimpleNamespace(MACHINE_IS_METRIC=False),
+                            _allowed=Mock(return_value=True), set_specialist=Mock(),
+                            sim=SimpleNamespace(tools={1: {}, 5: {}, 12: {}}))
+    panel = OperatorControls(shell)
+    panel.speed.setValue(100)
+    panel.jog("X", 1)
+    assert shell.action.JOG.call_args.args == (0, 1, 100 / 25.4, 0)
+    panel.jog("X", 0)
+    assert shell.action.JOG.call_args.args[1] == 0
+    panel.mdi.setText("G0 X10")
+    panel.buttons["mdi"].click()
+    shell.action.CALL_MDI.assert_called_with("G0 X10")
+    panel.tool.setValue(1)
+    panel.buttons["next"].click()
+    assert panel.tool.value() == 5
+    monkeypatch.setattr(QtWidgets.QMessageBox, "question", lambda *a: QtWidgets.QMessageBox.Yes)
+    panel.buttons["m6"].click()
+    shell.action.CALL_MDI.assert_called_with("T5 M6")
+    panel.buttons["m3"].click()
+    shell.action.SET_SPINDLE_ROTATION.assert_called_with(1, 1000)
+    shell.s.specialist = True
+    panel.refresh()
+    assert panel.buttons["jog_X1"].isEnabled()
+    assert not panel.buttons["m3"].isEnabled() and not panel.buttons["m6"].isEnabled()
+    shell.s.estop = True
+    panel.refresh()
+    assert not panel.buttons["jog_X1"].isEnabled()
+    panel.close()

@@ -27,6 +27,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from qtvcp.core import Action, Info, Status
 
 from linumert_alarm_panel import AlarmPanel
+from linumert_operator_controls import OperatorControls
 import linumert_shell_model as model
 import linumert_shell_pages as pages
 from linumert_homing_page import HomingPage
@@ -138,6 +139,7 @@ class LinumertShell(QtCore.QObject):
         self._estop_requested = False
         self.sim_cause = ""  # ostatnia kolizja/przeciążenie z symulacji (przyczyna E-STOP)
         self.buttons: dict[str, QtWidgets.QPushButton] = {}
+        self.operator_panels = []
 
     # ---- budowa ---------------------------------------------------------------------------
     def install(self) -> LinumertShell:
@@ -383,31 +385,11 @@ class LinumertShell(QtCore.QObject):
 
     def _manual_card(self) -> QtWidgets.QWidget:
         frame, lay, self.lbl_jog_side = _card("Ruch ręczny i MDI", "")
-        jog = QtWidgets.QGridLayout()
-        jog.setSpacing(8)
-        for i, axis in enumerate(self.s.axes[:4]):
-            for j, (sign, direction) in enumerate((("−", -1), ("+", 1))):
-                btn = QtWidgets.QPushButton(f"{axis}{sign}")
-                btn.setProperty("role", "jog")
-                btn.setToolTip(f"JOG {axis}{sign}: przytrzymaj (prędkość i krok jak w QtDragon)")
-                btn.setAutoRepeat(False)
-                btn.pressed.connect(lambda a=axis, d=direction: self.jog(a, d))
-                btn.released.connect(lambda a=axis: self.jog(a, 0))
-                jog.addWidget(btn, i // 2, (i % 2) * 2 + j)
-                self.buttons[f"jog_{axis}{direction}"] = btn
-        lay.addLayout(jog)
-        mdi = QtWidgets.QHBoxLayout()
-        self.mdi = QtWidgets.QLineEdit()
-        self.mdi.setObjectName("lrtMdi")
-        self.mdi.setPlaceholderText("MDI, np. G0 X10 Y10")
-        self.mdi.returnPressed.connect(self.send_mdi)
-        send = QtWidgets.QPushButton("Wyślij")
-        send.clicked.connect(self.send_mdi)
-        self.buttons["mdi"] = send
-        mdi.addWidget(self.mdi, 1)
-        mdi.addWidget(send)
-        lay.addLayout(mdi)
-        lay.addStretch(1)
+        panel = OperatorControls(self)
+        self.operator_panels.append(panel)
+        self.mdi = panel.mdi
+        self.buttons.update(panel.buttons)
+        lay.addWidget(panel)
         return frame
 
     def _bottom_bar(self) -> QtWidgets.QWidget:
@@ -657,7 +639,21 @@ class LinumertShell(QtCore.QObject):
     def jog(self, axis: str, direction: int) -> None:
         if direction and not self._allowed("jog"):
             return
+        if self.s.specialist:
+            ACTION.SET_JOG_RATE(600 if getattr(INFO, "MACHINE_IS_METRIC", True) else 600 / 25.4)
         ACTION.DO_JOG(axis, direction)
+
+    def set_specialist(self, enabled: bool) -> None:
+        ACTION.ABORT()
+        for axis in self.s.axes:
+            ACTION.DO_JOG(axis, 0)
+        self.s.specialist = enabled
+        if enabled:
+            ACTION.SET_MANUAL_MODE()
+            ACTION.SET_SPINDLE_STOP()
+        if self.s.virtual:
+            self.sim.client.send(cmd="recovery", on=enabled)
+        self.refresh()
 
     def send_mdi(self) -> None:
         text = self.mdi.text().strip()
@@ -763,6 +759,8 @@ class LinumertShell(QtCore.QObject):
     def refresh(self) -> None:
         s, g = self.s, model.gates(self.s)
         self._alarm_causes()
+        for panel in self.operator_panels:
+            panel.refresh()
         production = getattr(self, "production", None)
         if production is not None:
             production.on_state()
