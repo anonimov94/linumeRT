@@ -48,7 +48,18 @@ PARAMS: dict[str, Param] = {p.name: p for p in (
     Param("angle", "Kąt", unit="°", maximum=180.0),
     Param("h", "Wysokość H"),
     Param("flutes", "Liczba ostrzy", unit="", maximum=50.0),
+    Param("pitch", "Skok gwintu"),
+    # Wspólne dla wszystkich typów (symulacja HMI, 2026-10-19): obroty, kierunek, korekcja, oprawka
+    Param("max_rpm", "Maks. obroty", unit="obr/min", maximum=200000.0),
+    Param("hand", "Kierunek skrawania (1 = prawy M3, -1 = lewy M4)", unit="", minimum=-1.0,
+          maximum=1.0, exclusive_minimum=False),
+    Param("d_wear", "Korekcja średnicy", minimum=-1.0, maximum=1.0, exclusive_minimum=False),
+    Param("holder_d", "Średnica oprawki"),
+    Param("holder_l", "Długość oprawki"),
 )}
+
+# Pola dozwolone w każdym typie (i w narzędziu bez typu)
+COMMON: tuple[str, ...] = ("flutes", "max_rpm", "hand", "d_wear", "holder_d", "holder_l")
 
 TYPES: dict[str, ToolType] = {t.id: t for t in (
     ToolType("flat", "Frez palcowy", ("d", "l", "flute_length"), ("flutes",),
@@ -65,6 +76,8 @@ TYPES: dict[str, ToolType] = {t.id: t for t in (
     ToolType("drill_angle", "Wiertło z kątem", ("d", "angle"), ("l", "flute_length"),
              "walec + stożek (180° = płaskie)"),
     ToolType("face_mill", "Głowica frezarska", ("d", "h"), ("l", "flutes"), "walec D × H"),
+    ToolType("tap", "Gwintownik", ("d", "l", "pitch"), ("flute_length",),
+             "walec, tylko z obrotami"),
     ToolType("special_stl", "Specjalne (STL)", (), ("d", "l"), "z pliku STL"),
 )}
 
@@ -120,7 +133,7 @@ def validate_geometry(number: int, type_id: str | None, params: dict[str, Any],
     for name in tool_type.required:
         if name not in params:
             issues.append(_bad(number, name, f"pole wymagane dla typu {type_id}"))
-    allowed = set(tool_type.required) | set(tool_type.optional)
+    allowed = set(tool_type.required) | set(tool_type.optional) | set(COMMON)
     for name in params:
         if name in PARAMS and name not in allowed:
             issues.append(_bad(number, name, f"pole nieużywane przez typ {type_id}"))
@@ -135,6 +148,8 @@ def validate_geometry(number: int, type_id: str | None, params: dict[str, Any],
         issues.append(_bad(number, "corner_radius", "<= D/2"))
     if type_id in ("tslot", "lollipop") and p["neck_d"] >= p["d"]:
         issues.append(_bad(number, "neck_d", "< D"))
+    if "hand" in p and p["hand"] not in (1, -1):
+        issues.append(_bad(number, "hand", "1 (prawy, M3) albo -1 (lewy, M4)"))
     if type_id in ("chamfer",) and p["angle"] >= 180:
         issues.append(_bad(number, "angle", "< 180° dla fazownika"))
     return issues
