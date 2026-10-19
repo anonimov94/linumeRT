@@ -290,9 +290,7 @@ class Live:
         if name == "stock":
             self.set_stock(c.get("line"))
         elif name == "stock_reset":
-            if self.engine.stock is not None:
-                self.engine.stock.reset()
-                self.engine.path.clear()
+            self.engine.reset_stock()
         elif name == "machine":
             self.load_machine(str(c.get("path", "")))
         elif name == "tools":
