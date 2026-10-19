@@ -26,6 +26,7 @@ import linuxcnc
 from PyQt5 import QtCore, QtGui, QtWidgets
 from qtvcp.core import Action, Info, Status
 
+from linumert_alarm_panel import AlarmPanel
 import linumert_shell_model as model
 import linumert_shell_pages as pages
 from linumert_homing_page import HomingPage
@@ -147,8 +148,8 @@ class LinumertShell(QtCore.QObject):
         grid = QtWidgets.QVBoxLayout(root)
         grid.setContentsMargins(0, 0, 0, 0)
         grid.setSpacing(0)
-        grid.addWidget(self._top_bar())
         grid.addWidget(self._alarm_bar())
+        grid.addWidget(self._top_bar())
         body = QtWidgets.QHBoxLayout()
         body.setSpacing(0)
         body.addWidget(self._rail())
@@ -248,19 +249,8 @@ class LinumertShell(QtCore.QObject):
         return bar
 
     def _alarm_bar(self) -> QtWidgets.QWidget:
-        self.alarm = QtWidgets.QFrame()
-        self.alarm.setObjectName("lrtAlarm")
-        self.alarm.setProperty("level", "info")
-        lay = QtWidgets.QHBoxLayout(self.alarm)
-        lay.setContentsMargins(16, 6, 8, 6)
-        self.lbl_alarm = QtWidgets.QLabel()
-        self.lbl_alarm.setWordWrap(True)
-        lay.addWidget(self.lbl_alarm, 1)
-        close = QtWidgets.QPushButton("Potwierdź")
-        close.setToolTip("Ukryj komunikat (historia: Diagnostyka)")
-        close.clicked.connect(self.clear_alarm)
-        lay.addWidget(close)
-        self.alarm.hide()
+        self.alarm = AlarmPanel(self)
+        self.lbl_alarm = self.alarm.rows[0]
         return self.alarm
 
     def _rail(self) -> QtWidgets.QWidget:
@@ -533,7 +523,7 @@ class LinumertShell(QtCore.QObject):
             self.sim_cause = ""
         self._estop_requested = False
         self._set(estop=True, machine_on=False)
-        self.show_alarm("err", reason)
+        self.show_alarm("err", reason, "safety")
 
     def _estop_cause(self, requested: bool = False) -> str:
         loop = pages._hal("lrt-net.0.din-00")
@@ -704,20 +694,33 @@ class LinumertShell(QtCore.QObject):
         self._refresh_dro()
 
     # ---- alarmy -------------------------------------------------------------------------
-    def show_alarm(self, level: str, text: str) -> None:
+    def show_alarm(self, level: str, text: str, source: str = "") -> None:
         text = " ".join(str(text).split())
         if not text:
             return
         self.s.alarm = model.Alarm(level, text)
         if getattr(self, "diag", None) is not None:
             self.diag.add_log(level, text)
-        self.lbl_alarm.setText(text)
-        _restyle(self.alarm, level=level)
-        self.alarm.show()
+        self.alarm.add(level, text, source)
 
     def clear_alarm(self) -> None:
-        self.s.alarm = None
-        self.alarm.hide()
+        self.reset_alarms(False)
+
+    def reset_alarms(self, double: bool = False) -> None:
+        if double:
+            self.acknowledge_estop()  # HAL odrzuci reset przy otwartym fizycznym safety
+        self._alarm_causes()
+        self.alarm.acknowledge()
+        self.s.alarm = (model.Alarm(*self.alarm.entries[0][:2])
+                        if self.alarm.entries else None)
+
+    def _alarm_causes(self) -> None:
+        active = set(getattr(self, "sim_active", set()))
+        if self.s.estop:
+            active.add("safety")
+        if self.s.plant == "lost":
+            active.add("plant")
+        self.alarm.active = active
 
     # ---- odświeżanie ----------------------------------------------------------------------
     def _tick(self) -> None:
@@ -759,6 +762,7 @@ class LinumertShell(QtCore.QObject):
 
     def refresh(self) -> None:
         s, g = self.s, model.gates(self.s)
+        self._alarm_causes()
         production = getattr(self, "production", None)
         if production is not None:
             production.on_state()

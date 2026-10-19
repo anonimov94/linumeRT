@@ -206,6 +206,7 @@ class Live:
     def run(self, rate: float, commands: queue.Queue) -> None:
         period = 1 / rate
         last_pos = last_map = 0.0
+        active_codes = None
         self.reload_tools(force=True)
         emit(ev="ready", ini=str(self.ini_path), pid=os.getpid())
         while True:
@@ -234,6 +235,10 @@ class Live:
             self.reload_tools()
             sample = self.sample(t0)
             events = self.engine.step(sample)
+            codes = sorted({key[0] for key in self.engine._active})
+            if codes != active_codes:
+                active_codes = codes
+                emit(ev="alarms", active=codes)
             on = self.stat.task_state == self.lc.STATE_ON
             if self.latched == "sent" and (not on or t0 - self.latched_at > 3.0):
                 self.latched = "off"

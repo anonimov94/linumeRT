@@ -544,6 +544,11 @@ class SimPage(QtWidgets.QWidget):
         pages._restyle(bar, level=level)
         label.setText(text)
 
+    def _on_alarms(self, msg):
+        self.shell.sim_active = set(msg.get("active", []))
+        if not self.shell.sim_active:
+            self.shell.sim_cause = ""
+
     def _on_event(self, msg) -> None:
         level = KIND_LEVEL.get(msg.get("kind"), "info")
         pos = msg.get("pos", [0, 0, 0])
@@ -551,7 +556,7 @@ class SimPage(QtWidgets.QWidget):
         if msg.get("stop"):
             text += f" (X{pos[0]:.1f} Y{pos[1]:.1f} Z{pos[2]:.1f}) → E-STOP"
             self.shell.sim_cause = f"{msg.get('code')} {msg.get('text', '')}"
-            self.shell.show_alarm("err", text)
+            self.shell.show_alarm("err", text, msg.get("code", ""))
         self._add_event(level, text)
 
     def _add_event(self, level: str, text: str) -> None:
