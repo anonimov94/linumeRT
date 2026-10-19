@@ -7,9 +7,9 @@ VM_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 log() { printf '\033[1m[linumeRT]\033[0m %s\n' "$*"; }
 die() { printf '[linumeRT] BŁĄD: %s\n' "$*" >&2; exit 1; }
 
-# Wczytuje tools/vm/vm.conf (KLUCZ=wartość) do zmiennych powłoki; zmienne środowiska wygrywają.
+# Wczytuje vm.conf (KLUCZ=wartość; inny plik: VM_CONF=ścieżka) do zmiennych; zmienne środowiska wygrywają.
 load_conf() {
-    local file=${1:-$VM_DIR/vm.conf} key value
+    local file=${VM_CONF:-$VM_DIR/vm.conf} key value
     [[ -r $file ]] || die "brak pliku $file"
     while IFS='=' read -r key value; do
         [[ $key =~ ^[A-Z][A-Z0-9_]*$ ]] || continue
