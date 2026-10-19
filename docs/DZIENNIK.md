@@ -368,3 +368,5 @@ Uzupełnienie: README plant/core (liczby testów 29/59/20, bazowanie, parametry 
 - Monitor terminalowy `python3 tools/dev/hmi-progress.py`: 6 kroków, odświeżanie i znaczniki; sprawdzony `--once`, lint OK.
 
 - Zero detalu, geometria: cztery zamknięte siatki, profil odlewu Z/R obracany 360°, punkty odniesienia i komendy G54–G59 z przeliczeniem mm/inch. 9 testów objętości, domknięcia i walidacji OK; lint OK.
+
+- Zero detalu, widok 3D: maszyna i cztery przygotówki, obrót myszą, powiększanie i znacznik zera; renderuje także bez OpenGL. 13 testów geometrii i rzeczywistego renderowania Qt OK, lint OK.

@@ -103,3 +103,5 @@ Wiersze fontów dostają ścieżki i pliki `OFL.txt` w `licenses/` przy ich doda
 | Monitor postępu HMI | skrypt Python | model językowy Codex na zlecenie właściciela | 2026-10-19 | własna implementacja, biblioteka standardowa | GPL-2.0-or-later | lista kroków w terminalu | `tools/dev/hmi-progress.py` |
 
 | Przygotówka parametryczna i odlew obrotowy | kod Python, testy | model językowy Codex na zlecenie właściciela | 2026-10-19 | własna geometria siatek: BOX, walec, rura, profil Z/R obracany 360° | GPL-2.0-or-later | Zero detalu HMI | `core/linumert/programs/workpiece.py`, `tests/test_workpiece.py` |
+
+| Widok brył Zero detalu | kod Python i testy Qt | model językowy Codex na zlecenie właściciela | 2026-10-19 | własna projekcja 3D i rasteryzacja Qt, bez OpenGL; kolory z tokens.yaml | GPL-2.0-or-later | obrót i zoom maszyny/przygotówki | `screens/linumert/linumert_workpiece_view.py`, `tests/test_workpiece_view.py` |
