@@ -4,6 +4,14 @@ Status: **docelowy kierunek ekranu operatora** (decyzja właściciela D32, 2026-
 niezatwierdzony na maszynie. Baza: QtVCP/QtDragon 2.9.10, `screens/linumert`. Realizacja: Codex, etapy
 HMI-01…HMI-06 (niżej). Pochodzenie: PR #31 (`feature/hmi-workflow-tabs`).
 
+## Stan realizacji
+- **HMI-PoC (2026-10-19, Claude, decyzja właściciela D34):** nakładka `screens/linumert/linumert_shell*.py` —
+  globalny pasek (tryb JOG/MDI/AUTO, program, Plant/LRT-NET, stan maszyny, zegar), pasek alarmów, lewa szyna
+  obszarów (Maszyna, Program, Narzędzia, Zero detalu, Sonda, Diagnostyka, Konfiguracja, Pełny QtDragon), dolny pasek
+  akcji (Cykl start, Wstrzymaj/Wznów, Stop, Pojedynczy blok, Bazuj, Maszyna, E-STOP) i widok „Maszyna” wg makiety 01
+  (DRO, bieżący blok, narzędzie, posuw/wrzeciono z korekcjami, JOG, MDI). Pozostałe obszary pokazują strony QtDragon
+  (przeniesione, nie skopiowane). Zrzuty: `docs/raporty/hmi_poc/`. Kolejne etapy HMI-02…06 rozwijają tę nakładkę.
+
 ## Cel
 Rozdzielić monolityczny QtDragon na dedykowane widoki operatora bez przepisywania sterowania LinuxCNC. Nawigacja nie może wykonywać komend ruchu ani zmieniać trybu pracy automatycznie.
 

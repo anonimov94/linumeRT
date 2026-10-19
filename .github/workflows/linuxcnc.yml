@@ -6,6 +6,8 @@ on:
       - 'tools/ci/**'
       - 'tools/agent_tests/**'
       - 'tests/test_linuxcnc.py'
+      - 'tests/test_hmi_shell_gui.py'
+      - 'screens/**'
       - 'Makefile'
   workflow_dispatch:
   schedule:

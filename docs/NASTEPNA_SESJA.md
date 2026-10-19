@@ -15,7 +15,8 @@ Model-Author: Claude · 2026-10-19
 - Działa (LinuxCNC 2.9 RIP, bez sprzętu): LinuxCNC + ekran linumert steruje Plant przez LRT-NET; panel web Plant
   (telemetria, parametry live, pulpit MPG, CSV, edytor maszyny z widokiem 3D, napędy, awarie); scenariusze
   z atrapą mastera (CI) i z LinuxCNC, raport HTML w `docs/raporty/prototypy/`; `check_requirements.py` w `make test`;
-  skrypty VirtualBox dla VM-A i VM-B ([`VM.md`](VM.md), NIEZWERYFIKOWANE W VIRTUALBOX).
+  skrypty VirtualBox dla VM-A i VM-B ([`VM.md`](VM.md), NIEZWERYFIKOWANE W VIRTUALBOX); **ekran HMI linumeRT**
+  (nakładka na QtDragon, HMI-PoC, D34): pasek trybu/stanu, szyna obszarów, widok „Maszyna”, pasek akcji.
 - Testy (sesja 025, kontener Ubuntu 24.04 bez LinuxCNC + CI): wyniki w PR #41.
 - **Nic nie jest sprawdzone na sprzęcie.** Prace od sesji 004 to autokontrola Claude, bez niezależnego przeglądu.
 
@@ -31,8 +32,9 @@ Otwarte: #34 (Codex, HMI-01, draft). Scalone gałęzie `wip/*`, `claude/*` i `cc
    (`python -m linumert_plant panel --plant config/plant/plant.example.yaml`).
 1. Sesja 026 (bufor i bramka G1, domknięcie M1): [`prompts/sesja-026.md`](../prompts/sesja-026.md); potem sesje według
    [`prompts/README.md`](../prompts/README.md) (027 i dalej). Właściciel: [`VM.md`](VM.md) §10 (pierwsza instalacja VM).
-2. **HMI według kolejności pracy (D32)**: docelowy kierunek ekranu; etapy HMI-01…06 prowadzi Codex (§6).
-   Sesje ekranu z planu (M2, 027–038) muszą być z nim zgodne.
+2. **HMI według kolejności pracy (D32, D34)**: działa HMI-PoC (nakładka `screens/linumert/linumert_shell*.py`, PR #42);
+   kolejne etapy (widoki Start, Bazowanie, Produkcja, Diagnostyka, tłumaczenia, poziomy dostępu) rozwijają tę nakładkę.
+   Sesje ekranu z planu (M2, 027–038) muszą być z nią zgodne.
 3. Propozycja do decyzji: ramka LRT-NET v2 (zatrzask indeksu enkodera, 6072h), opis w DECYZJE (sesja 017).
 4. Dług 024: kontener CI dostał `--init` (zombie są sprzątane), a pominięcie testów scenariuszy z LinuxCNC na Actions
    zdjęto; potwierdzone: job `LinuxCNC RIP smoke` zielony w PR #40 (2026-10-19). Dług zamknięty.
@@ -66,6 +68,7 @@ Otwarte: #34 (Codex, HMI-01, draft). Scalone gałęzie `wip/*`, `claude/*` i `cc
 ## 6. Dla Codex:
 
 **HMI według kolejności pracy (D32), w wolnej chwili.** Specyfikacja: `docs/design/HMI_WORKFLOW.md`.
+Od D34 (2026-10-19) jest działająca nakładka (HMI-PoC, Claude, PR #42): kolejne etapy budują na niej, nie od zera.
 - Kolejność: HMI-01 (inwentaryzacja widgetów `screens/linumert/linumert.ui`, kontrakt sygnałów, zrzut bazowy) →
   HMI-02 (pasek stanu, nawigacja, Start, Bazowanie, Ręczne) → HMI-03 … HMI-06; każdy etap = osobny PR do `main`.
 - Zasady: `linumert_upstream_handler.py` bez zmian; logika w `linumert_handler.py` i osobnych modułach;
@@ -83,3 +86,4 @@ Otwarte: #34 (Codex, HMI-01, draft). Scalone gałęzie `wip/*`, `claude/*` i `cc
 - 2026-10-19 Sesja 025 (skrypty VM) w chmurze Claude, gałąź `ccr-e8ca8a53-ajgyrd` (nazwę narzuca środowisko sesji), PR #41.
 - Kroki 1–4: skrypty VM, sonda łącza, testy, `docs/VM.md`, poprawka nowej sesji mastera w Plant; zamknięcie sesji.
 - Tura oddana; LOCK pusty.
+- 2026-10-19 HMI-PoC (D34): nakładka linumeRT na QtDragon, PR #42, samotest GUI 18/18 z LinuxCNC RIP i z Plant.
