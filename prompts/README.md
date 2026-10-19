@@ -96,7 +96,7 @@ wymagały ekranu ani LinuxCNC. Bieżący stan i następny krok: [`docs/NASTEPNA_
 | [074](sesja-074.md) | M6 | Menedżer wtyczek |  |
 | [075](sesja-075.md) | M6 | Panel cykli i skryptów |  |
 | [076](sesja-076.md) | M6 | Repozytorium społeczności i przykłady |  |
-| [077](sesja-077.md) | M6 | Instalator dla Debiana 12 + LinuxCNC 2.9 |  |
+| [077](sesja-077.md) | M6 | Instalator dla Debiana 12 + LinuxCNC 2.9 (+ obraz live USB / ISO) |  |
 | [078](sesja-078.md) | M6 | Pierwsze uruchomienie i linumert doctor |  |
 | [079](sesja-079.md) | M6 | Dokumentacja użytkownika |  |
 | [080](sesja-080.md) | M6 | Przegląd IP przed wydaniem |  |

@@ -84,7 +84,8 @@ To podgląd offline z zapisami tymczasowymi. [Zero detalu](docs/ZERO_DETALU.md).
 3. Programy dialogowe: kieszenie, rowki, kontur, pliki `.lnx`, walidacja z bazą narzędzi (040–047).
 4. Tryby, MDI, alarmy, poziomy dostępu, PL/EN na ekranie (029–037).
 5. Generator konfiguracji: step/dir, EtherCAT, RS485, 4/5 osi, ATC, kreator maszyny (061–067).
-6. Wtyczki, instalator Debian 12, dokumentacja użytkownika, wydanie v0.5.0-alpha (073–083).
+6. Wtyczki, instalator Debian 12 i **obraz live USB / ISO** do wypalenia (Debian 12 + RT + LinuxCNC + linumeRT),
+   dokumentacja użytkownika, wydanie v0.5.0-alpha (073–083).
 
 Pełny plan sesji: [`prompts/README.md`](prompts/README.md).
 
