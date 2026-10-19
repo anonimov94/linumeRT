@@ -134,7 +134,7 @@ def test_plant_pill() -> None:
 
 
 def test_formatting() -> None:
-    assert m.fmt_pos(50) == "50.000" and m.fmt_pos(-4, metric=False) == "-4.0000"
+    assert m.fmt_pos(50) == "50.0000" and m.fmt_pos(-4, metric=False) == "-4.0000"
     assert m.fmt_int(18000) == "18 000" and m.fmt_int(960.4) == "960"
     assert m.fmt_pct(0.8) == "80 %"
 

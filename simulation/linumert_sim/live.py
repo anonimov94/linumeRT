@@ -250,10 +250,7 @@ class Live:
                 if self.latched and e.stop:
                     continue  # skutki wtórne zatrzymania (wrzeciono staje w materiale)
                 emit(ev="event", **e.to_dict())
-            recovery = (self.virtual and self.recovery
-                        and self.stat.task_mode == self.lc.MODE_MANUAL)
-            stop = bool(self.engine._active) or any(e.stop for e in events)
-            if self.estop_on_event and not recovery and not self.latched and stop:
+            if self.stop_required(events):
                 self.cmd.state(self.lc.STATE_ESTOP)
                 self.latched, self.latched_at = "sent", t0
             smap = self.engine.stock
@@ -279,6 +276,12 @@ class Live:
                            "axis": {a: [round(f), round(lim)] for a, (f, lim)
                                     in ld.axis.items()}})
             time.sleep(max(period - (time.monotonic() - t0), 0.0))
+
+    def stop_required(self, events):
+        recovery = (self.virtual and self.recovery
+                    and self.stat.task_mode == self.lc.MODE_MANUAL)
+        stop = bool(self.engine._active) or any(e.stop for e in events)
+        return self.estop_on_event and not recovery and not self.latched and stop
 
     def command(self, c: dict) -> bool:
         name = c.get("cmd")

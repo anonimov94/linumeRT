@@ -6,13 +6,12 @@ Model-Author: Claude · HMI-PoC (2026-10-19). Proof of concept: funkcje dochodz�
 (docs/design/HMI_WORKFLOW.md).
 
 Zasady (HMI_WORKFLOW.md, CLAUDE.md §6):
-- cały interfejs QtDragon zostaje nietknięty i dostępny w obszarach szyny („Program”,
-  „Narzędzia”…); nakładka tylko przenosi go do stosu stron, niczego nie kopiuje;
+- własne strony operatora współdzielą stan LinuxCNC; bazowy QtDragon pozostaje w stosie stron;
 - zmiana obszaru nie wykonuje ruchu ani zmiany trybu;
 - komendy maszyny wyłącznie przez ACTION QtVCP, stan wyłącznie ze STATUS QtVCP;
 - ekran nie jest funkcją bezpieczeństwa; grzyb E-STOP w HMI to DODATKOWY, szeregowy element
   łańcucha E-STOP w HAL (D35, config/hal/linumert_hmi_estop.hal): wciśnięcie odbiera zezwolenie,
-  zwolnienie jest jedynym sposobem potwierdzenia (resetu) E-STOP, ekran wysyła sygnał życia
+  zwolnienie albo podwójny Reset potwierdza zatrzask E-STOP, ekran wysyła sygnał życia
   (watchdog HAL). Obwód sprzętowy maszyny jest nadrzędny i podłączony do HAL fizycznie.
 """
 
@@ -613,6 +612,9 @@ class LinumertShell(QtCore.QObject):
 
     # ---- akcje (wyłącznie ACTION QtVCP) -----------------------------------------------------
     def set_mode(self, mode: str) -> None:
+        if self.s.specialist and mode != "manual":
+            self.show_alarm("warn", "Tryb specjalisty: dostępny tylko JOG")
+            return
         if not self._allowed("mode"):
             return
         {"manual": ACTION.SET_MANUAL_MODE, "mdi": ACTION.SET_MDI_MODE,
@@ -710,6 +712,7 @@ class LinumertShell(QtCore.QObject):
     def reset_alarms(self, double: bool = False) -> None:
         if double:
             self.acknowledge_estop()  # HAL odrzuci reset przy otwartym fizycznym safety
+            QtCore.QTimer.singleShot(700, lambda: self.reset_alarms(False))
         self._alarm_causes()
         self.alarm.acknowledge()
         self.s.alarm = (model.Alarm(*self.alarm.entries[0][:2])

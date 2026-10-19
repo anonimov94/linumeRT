@@ -168,7 +168,7 @@ def plant_pill(s: ShellState) -> tuple[str, str]:
 
 
 def fmt_pos(value: float, metric: bool = True) -> str:
-    return f"{value:.3f}" if metric else f"{value:.4f}"
+    return f"{value:.4f}"
 
 
 def fmt_int(value: float) -> str:
