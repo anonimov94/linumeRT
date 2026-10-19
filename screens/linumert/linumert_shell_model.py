@@ -263,5 +263,86 @@ QLineEdit#lrtMdi {{ background: {c['bg2']}; color: {c['fg']}; border: 1px solid 
     border-radius: {btn}px; min-height: {touch}px; padding: 0 12px; font-family: {FONT_NUM};
     font-size: 16px; }}
 QLineEdit#lrtMdi:focus {{ border-color: {c['teal']}; }}
+QLabel#lrtValue {{ font-family: {FONT_NUM}; font-size: 15px; }}
+QLabel#lrtBit {{ font-family: {FONT_NUM}; font-size: {small}px; border-radius: 6px; padding: 4px;
+    min-width: 28px; }}
+QLabel#lrtBit[on="false"] {{ background: {c['raise']}; color: {c['fg3']}; }}
+QLabel#lrtBit[on="true"] {{ background: {c['okbg']}; color: {c['ok']}; }}
+QTableWidget#lrtTable, QListWidget#lrtLog {{ background: {c['bg2']}; color: {c['fg']}; border: 0;
+    border-radius: {btn}px; font-family: {FONT_NUM}; font-size: 13px; }}
+QTableWidget#lrtTable::item {{ padding: 4px 8px; border-bottom: 1px solid {c['line']}; }}
+QHeaderView::section {{ background: {c['panel']}; color: {c['fg2']}; border: 0;
+    border-bottom: 1px solid {c['line2']}; padding: 6px 8px; font-size: {small}px; }}
 QToolTip {{ background: {c['raise']}; color: {c['fg']}; border: 1px solid {c['line2']}; }}
 """
+
+
+# ---- diagnostyka (CiA 402, LRT-NET, alarmy) ---------------------------------------------------
+
+CIA402_STATES = (  # (maska, wartość, nazwa, poziom) według 6041h, kolejność ma znaczenie
+    (0x4F, 0x08, "Błąd", "err"),
+    (0x4F, 0x0F, "Reakcja na błąd", "err"),
+    (0x4F, 0x40, "Wyłączony (switch on disabled)", "warn"),
+    (0x6F, 0x21, "Gotowy do załączenia", "warn"),
+    (0x6F, 0x23, "Załączony", "warn"),
+    (0x6F, 0x27, "Praca", "ok"),
+    (0x6F, 0x07, "Szybki stop", "err"),
+)
+
+
+def cia402_state(statusword: int) -> tuple[str, str]:
+    """Stan napędu CiA 402 ze słowa 6041h: (nazwa, poziom)."""
+    for mask, value, name, level in CIA402_STATES:
+        if statusword & mask == value:
+            return name, level
+    return "Rozruch (not ready)", "info"
+
+
+def drive_fault_codes(drive_h: str) -> dict[int, str]:
+    """Kod 603Fh → alarm katalogu z listy LRT_DRIVE_FAULT_LIST w plant/core/drive.h."""
+    import re
+
+    return {int(code, 16): alarm for code, alarm in
+            re.findall(r"X\(\w+,\s*\d+,\s*(0x[0-9A-Fa-f]+),\s*\"([EWKP]-\d{4})\"\)", drive_h)}
+
+
+def catalog_texts(catalog: list) -> dict[str, str]:
+    """Kod alarmu → tekst polski z core/linumert/alarms/catalog.yaml (lista wpisów)."""
+    return {e["code"]: e.get("pl", "") for e in catalog or [] if isinstance(e, dict) and "code" in e}
+
+
+def alarm_text(code: str, texts: dict[str, str], **params) -> str:
+    """„E-4201 · tekst” z parametrami; brakujące parametry jako „?”."""
+    import string
+
+    text = texts.get(code, "")
+    fields = {f for _, f, _, _ in string.Formatter().parse(text) if f}
+    values = {f: params.get(f, "?") for f in fields}
+    try:
+        text = text.format(**values)
+    except (KeyError, IndexError, ValueError):
+        pass
+    return f"{code} · {text}" if text else code
+
+
+def drive_error_text(error_code: int, faults: dict[int, str], texts: dict[str, str],
+                     axis: str = "?") -> str:
+    if not error_code:
+        return "—"
+    code = faults.get(error_code)
+    if code is None:
+        return f"603Fh = 0x{error_code:04X}"
+    return alarm_text(code, texts, axis=axis, error_code=f"0x{error_code:04X}", ms="?")
+
+
+LINK_COUNTERS = (  # (pin lrt-net.0.*, etykieta)
+    ("sent", "Ramki wysłane"),
+    ("received", "Odpowiedzi"),
+    ("missed", "Cykle bez odpowiedzi"),
+    ("bad-frames", "Odpowiedzi odrzucone"),
+    ("send-errors", "Błędy wysyłania"),
+    ("plant-lost", "Plant: utracone"),
+    ("plant-late", "Plant: spóźnione"),
+    ("plant-jitter-us", "Plant: jitter [µs]"),
+    ("reply-age", "Wiek odpowiedzi [cykle]"),
+)

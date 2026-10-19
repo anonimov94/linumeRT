@@ -10,7 +10,7 @@ zamyka wywołujący (okno potwierdzenia QtDragon przy zamykaniu nie blokuje test
 `tools/dev/hmi-demo.sh`.
 
 Scenariusz: zwolnienie E-STOP → maszyna WŁ. → bazowanie → MDI G0 → program w AUTO → Wstrzymaj →
-Wznów → Stop → JOG X+ → obszary szyny (QtDragon) → powrót do „Maszyna”.
+Wznów → Stop → JOG X+ → obszary szyny (QtDragon) → powrót do „Maszyna” → Diagnostyka.
 """
 
 from __future__ import annotations
@@ -86,6 +86,8 @@ class SelfTest(QtCore.QObject):
             ("16_obszar_narzedzia", lambda: click(self.shell.areas["tools"]), None, 1),
             ("17_obszar_qtdragon", lambda: click(self.shell.areas["classic"]), None, 1),
             ("18_maszyna", lambda: click(self.shell.areas["machine"]), None, 1),
+            ("19_diagnostyka", lambda: click(self.shell.areas["diag"]),
+             lambda: self.shell.diag.joints.rowCount() >= len(s.axes), 5),
         ]
 
     @staticmethod
@@ -157,6 +159,9 @@ class SelfTest(QtCore.QObject):
             "z": round(rel[2], 3), "area": self.shell.stack.currentIndex(),
             "alarm": s.alarm.text if s.alarm else "",
             "start_enabled": self.shell.buttons["start"].isEnabled(),
+            "diag_joints": self.shell.diag.joints.rowCount(),
+            "diag_drives": self.shell.diag.drives.rowCount(),
+            "log": self.shell.diag.log.count(),
         })
 
     def _finish(self) -> None:

@@ -24,6 +24,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from qtvcp.core import Action, Info, Status
 
 import linumert_shell_model as model
+import linumert_shell_pages as pages
 
 STATUS = Status()
 ACTION = Action()
@@ -33,14 +34,15 @@ NML_KINDS = {k: getattr(linuxcnc, k) for k in
              ("NML_ERROR", "NML_TEXT", "NML_DISPLAY", "OPERATOR_ERROR", "OPERATOR_TEXT",
               "OPERATOR_DISPLAY") if hasattr(linuxcnc, k)}
 
-# Obszary szyny: (id, etykieta, ikona, przycisk QtDragon pokazywany w widoku klasycznym).
+# Obszary szyny: (id, etykieta, ikona, cel). Cel „page:<id>” = własna strona linumeRT,
+# inaczej nazwa przycisku QtDragon, którego strona pojawia się w widoku klasycznym.
 AREAS = (
-    ("machine", "Maszyna", "maszyna", None),
+    ("machine", "Maszyna", "maszyna", "page:machine"),
     ("program", "Program", "program", "btn_file"),
     ("tools", "Narzędzia", "narzedzia", "btn_tool"),
     ("offsets", "Zero detalu", "zero", "btn_offsets"),
     ("probe", "Sonda", "sonda", "btn_probe"),
-    ("diag", "Diagnostyka", "diagnostyka", "btn_status"),
+    ("diag", "Diagnostyka", "diagnostyka", "page:diag"),
     ("settings", "Konfiguracja", "konfiguracja", "btn_settings"),
     ("classic", "Pełny QtDragon", "wtyczka", "btn_main"),
 )
@@ -129,6 +131,8 @@ class LinumertShell(QtCore.QObject):
         lay.setContentsMargins(0, 0, 0, 0)
         lay.addWidget(classic)
         self.stack.addWidget(classic_page)
+        self.diag = pages.DiagPage(self)
+        self.pages = {"machine": 0, "classic": 1, "diag": self.stack.addWidget(self.diag)}
         body.addWidget(self.stack, 1)
         grid.addLayout(body, 1)
         grid.addWidget(self._bottom_bar())
@@ -516,10 +520,13 @@ class LinumertShell(QtCore.QObject):
     def select_area(self, area: str) -> None:
         self.areas[area].setChecked(True)
         target = dict((a, b) for a, _t, _i, b in AREAS)[area]
-        if target is None:
-            self.stack.setCurrentIndex(0)
+        if target.startswith("page:"):
+            page = target[5:]
+            self.stack.setCurrentIndex(self.pages[page])
+            if page == "diag":
+                self.diag.refresh()
             return
-        self.stack.setCurrentIndex(1)
+        self.stack.setCurrentIndex(self.pages["classic"])
         btn = getattr(self.w, target, None)
         if btn is not None and btn.isEnabled():
             btn.click()  # przełącza tylko stronę QtDragon (main_tab_changed), bez ruchu
@@ -534,6 +541,8 @@ class LinumertShell(QtCore.QObject):
         if not text:
             return
         self.s.alarm = model.Alarm(level, text)
+        if getattr(self, "diag", None) is not None:
+            self.diag.add_log(level, text)
         self.lbl_alarm.setText(text)
         _restyle(self.alarm, level=level)
         self.alarm.show()
@@ -545,6 +554,8 @@ class LinumertShell(QtCore.QObject):
     # ---- odświeżanie ----------------------------------------------------------------------
     def _tick(self) -> None:
         self.lbl_clock.setText(time.strftime("%H:%M"))
+        if self.stack.currentWidget() is self.diag:
+            self.diag.refresh()
         plant = self._plant_link()
         if plant != self.s.plant:
             self.s.plant = plant

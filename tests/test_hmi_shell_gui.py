@@ -4,7 +4,8 @@ SPDX-License-Identifier: GPL-2.0-or-later
 Model-Author: Claude · HMI-PoC.
 
 Samotest (`screens/linumert/linumert_shell_selftest.py`) klika przyciski nakładki w procesie GUI:
-E-STOP → Maszyna → Bazuj → MDI → program w AUTO → Wstrzymaj/Wznów → Stop → JOG → obszary szyny.
+E-STOP → Maszyna → Bazuj → MDI → program w AUTO → Wstrzymaj/Wznów → Stop → JOG → obszary szyny
+→ Diagnostyka.
 Zrzuty kroków: katalog z `LINUMERT_HMI_SHOTS` (domyślnie tmp_path).
 """
 
@@ -58,7 +59,9 @@ def test_shell_selftest_in_gui(tmp_path) -> None:
     data = json.loads(result.read_text(encoding="utf-8"))
     steps = {s["step"]: s for s in data["steps"]}
     assert data["errors"] == [], data["errors"]
-    assert len(steps) == 18 and all(s["ok"] for s in steps.values())
+    assert len(steps) == 19 and all(s["ok"] for s in steps.values())
+    # QtDragon zgłaszał „Hard limits tripped” przy starcie i przy bazowaniu na krańcówce (handler)
+    assert not any("Hard limits" in s["alarm"] or "krańcówka" in s["alarm"] for s in steps.values())
     assert steps["01_start"]["estop"] and not steps["01_start"]["start_enabled"]
     assert steps["03_maszyna_wl"]["machine_on"]
     assert steps["04_bazowanie"]["homed"] == ["X", "Y", "Z"]
@@ -69,4 +72,6 @@ def test_shell_selftest_in_gui(tmp_path) -> None:
     assert steps["12_stop"]["interp"] == "idle"
     assert steps["14_jog_x_plus"]["x"] > steps["13_tryb_jog"]["x"] + 1.0
     assert steps["15_obszar_program"]["area"] == 1 and steps["18_maszyna"]["area"] == 0
+    assert steps["19_diagnostyka"]["diag_joints"] == 3  # symulator: bez napędów Plant
+    assert steps["19_diagnostyka"]["diag_drives"] == 0
     assert all((out / f"{name}.png").stat().st_size > 20000 for name in steps)

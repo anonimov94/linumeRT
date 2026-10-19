@@ -168,3 +168,33 @@ def test_upstream_handler_unchanged_marker() -> None:
     assert "LINUMERT_SHELL" in handler and "linumert_shell.install(self)" in handler
     upstream = (SCREEN / "linumert_upstream_handler.py").read_text(encoding="utf-8")
     assert "linumert_shell" not in upstream
+
+
+# ---- diagnostyka ----------------------------------------------------------------------------
+
+@pytest.mark.parametrize(("sw", "name", "level"), [
+    (0x0000, "Rozruch (not ready)", "info"), (0x0250, "Wyłączony (switch on disabled)", "warn"),
+    (0x0231, "Gotowy do załączenia", "warn"), (0x0233, "Załączony", "warn"),
+    (0x1237, "Praca", "ok"), (0x0218, "Błąd", "err"), (0x021F, "Reakcja na błąd", "err"),
+    (0x0217, "Szybki stop", "err"),
+])
+def test_cia402_state(sw, name, level) -> None:
+    assert m.cia402_state(sw) == (name, level)
+
+
+def test_drive_faults_map_to_catalog() -> None:
+    faults = m.drive_fault_codes((ROOT / "plant/core/drive.h").read_text(encoding="utf-8"))
+    texts = m.catalog_texts(yaml.safe_load(
+        (ROOT / "core/linumert/alarms/catalog.yaml").read_text(encoding="utf-8")))
+    assert faults[0x8130] == "E-4003" and faults[0x8611] == "E-4201" and len(faults) == 11
+    assert all(code in texts for code in faults.values())
+    assert m.drive_error_text(0, faults, texts) == "—"
+    assert m.drive_error_text(0x8130, faults, texts, "X").startswith("E-4003 · Brak ramek")
+    assert "?" not in m.drive_error_text(0xFF00, faults, texts, "Z")
+    assert m.drive_error_text(0x1234, faults, texts) == "603Fh = 0x1234"
+
+
+def test_link_counters_are_lrt_net_pins() -> None:
+    comp = (ROOT / "hal/lrt_net.comp").read_text(encoding="utf-8")
+    for pin, _label in m.LINK_COUNTERS:
+        assert re.search(rf"^pin out \w+\s+{re.escape(pin)}\b", comp, re.M), pin

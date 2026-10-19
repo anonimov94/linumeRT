@@ -46,6 +46,24 @@ class HandlerClass(_upstream.HandlerClass):
 
                 self._selftest = linumert_shell_selftest.maybe_start(self.shell)
 
+    def hard_limit_tripped(self, obj, tripped, list_of_tripped):
+        # QtDragon 2.9.10 zgłasza „Hard limits tripped” przy każdym sygnale, także tripped=False
+        # wysyłanym na starcie; tu komunikat tylko przy faktycznym zadziałaniu, z listą osi.
+        self.w.chk_override_limits.setEnabled(tripped)
+        if not tripped:
+            self.w.chk_override_limits.setChecked(False)
+            return
+        hits = [j for j, hit in enumerate(list_of_tripped or [])
+                if isinstance(hit, (list, tuple)) and any(hit)]
+        # Krańcówka wspólna z czujnikiem bazowania jest aktywna w trakcie bazowania (LinuxCNC
+        # ją wtedy ignoruje): to nie alarm.
+        joint = _upstream.STATUS.stat.joint
+        hits = [j for j in hits if not joint[j]["homing"]]
+        if list_of_tripped and not hits:
+            return
+        where = f" (stawy {', '.join(map(str, hits))})" if hits else ""
+        self.add_status(f"Zadziałała krańcówka sprzętowa{where}", _upstream.CRITICAL)
+
     def add_status(self, message, alertLevel=_upstream.DEFAULT):
         super().add_status(message, alertLevel)
         if self.shell is not None and alertLevel != _upstream.DEFAULT:
