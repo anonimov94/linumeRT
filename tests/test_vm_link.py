@@ -123,18 +123,25 @@ def test_realtime_link_direct(plant) -> None:  # REQ-QA-03
     assert not server.watchdog_tripped
 
 
-def test_realtime_link_with_network_delay_and_jitter(plant) -> None:  # REQ-QA-03
-    # 5 ms ± 2 ms w każdą stronę: dłużej niż cykl 1 ms, ale przerwy między ramkami < watchdog 50 ms.
+@pytest.mark.parametrize(("delay_ms", "jitter_ms"), [(20.0, 0.0), (5.0, 2.0)])
+def test_realtime_link_with_network_delay(plant, delay_ms, jitter_ms) -> None:  # REQ-QA-03
+    # Opóźnienie dłuższe niż cykl 1 ms, ale przerwy między ramkami < watchdog 50 ms.
     server, port = plant
-    relay = Relay(port, delay_ms=5.0, jitter_ms=2.0)
+    relay = Relay(port, delay_ms=delay_ms, jitter_ms=jitter_ms)
     try:
-        r = lrtnet_probe.probe("127.0.0.1", relay.port, frames=1500, cycle_ms=1.0, drain_s=0.3)
+        r = lrtnet_probe.probe("127.0.0.1", relay.port, frames=2500, cycle_ms=1.0)
     finally:
         relay.close()
     assert not r["watchdog"] and not server.watchdog_tripped
-    assert lrtnet_probe.verdict(r) == 0, r
-    assert 6.0 <= r["rtt_ms"]["p50"] <= 30.0  # ok. 2 × 5 ms + obsługa w Pythonie
-    # Rozrzut zmienia kolejność ramek: Plant liczy je jako spóźnione, nie przerywa pracy.
+    assert lrtnet_probe.verdict(r) == 0 and r["missing"] == 0, r
+    assert r["enabled_at_frame"] is not None
+    assert 2 * delay_ms <= r["rtt_ms"]["p50"] <= 2 * delay_ms + 25.0
+    if jitter_ms == 0.0:
+        assert server.stats.late == 0 and server.stats.lost == 0
+    else:
+        # Rozrzut > cykl zmienia kolejność: starsza ramka jest spóźniona (bez kroku), luka przed
+        # nią utracona; Plant pracuje dalej (intnet VirtualBox na jednym hoście trzyma kolejność).
+        assert server.stats.late > 0 and server.stats.late == server.stats.lost
     assert server.stats.rejected == 0
 
 

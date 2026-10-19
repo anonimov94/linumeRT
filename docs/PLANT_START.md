@@ -25,6 +25,7 @@ Ekran: `linumert` (kopia QtDragon). Połączenie: komponenty HAL `lrt_net` + `lr
    pozycji (ziarno `seed` w plant.yaml) i bazują na krańcówkach wirtualnej maszyny.
 
 ## WSL lub VM
+- Dwie maszyny VirtualBox (VM-A z LinuxCNC, VM-B z Plant jako usługą): [`VM.md`](VM.md), skrypty `tools/vm/`.
 - Plant w VM-B: w `plant.yaml` `mode: realtime`, `network.listen: 0.0.0.0`; w INI `[PLANT]IP` =
   adres VM-B. LinuxCNC w VM-A z RIP (`tools/ci/build-linuxcnc.sh`) albo z pakietów
   (`linuxcnc-uspace-dev` dla `halcompile`).

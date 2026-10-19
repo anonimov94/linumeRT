@@ -83,13 +83,19 @@ def probe(host: str, port: int = PORT, frames: int = 2000, cycle_ms: float = 1.0
     cws: list[int] = [0x06] * axes
     enabled_at: int | None = None
 
-    def receive(timeout: float) -> None:
+    def receive(timeout: float, until_all: bool = False) -> None:
+        """Odbiera odpowiedzi do upływu `timeout` po ostatniej (albo do kompletu: `until_all`)."""
         nonlocal rejected, watchdog, actual, status, enabled_at
+        deadline = time.monotonic() + timeout
         while True:
-            ready, _, _ = select.select([sock], [], [], timeout)
+            left = deadline - time.monotonic() if until_all else timeout
+            if until_all and (left <= 0 or not sent_at):
+                return
+            ready, _, _ = select.select([sock], [], [], max(left, 0.0))
             if not ready:
                 return
-            timeout = 0.0
+            if not until_all:
+                timeout = 0.0
             try:
                 data = sock.recv(2048)
             except (BlockingIOError, ConnectionRefusedError):
@@ -141,7 +147,7 @@ def probe(host: str, port: int = PORT, frames: int = 2000, cycle_ms: float = 1.0
         except (BlockingIOError, ConnectionRefusedError):
             pass
         receive(0.0)
-    receive(drain_s)
+    receive(drain_s, until_all=True)
     sock.close()
     return {
         "host": host, "port": port, "frames": frames, "cycle_ms": cycle_ms,
