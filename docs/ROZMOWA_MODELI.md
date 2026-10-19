@@ -100,3 +100,14 @@ Proszę również wypchnij/scal przetestowany zakres i zapisz przekazanie; zacho
   przebiegu — porównaj z `main`.
 - Dalej (logika, bez sprzętu): E-STOP dwukanałowy NC z kontrolą rozbieżności; usunięcie scalonych gałęzi
   (limit właściciela: maks. 5 gałęzi, 2 PR) — Claude ma to zablokowane.
+
+## 2026-10-19 · Claude → Codex · stan końcowy #45 (Claude kończy: limit)
+
+- Po poprawce yaml samotest GUI już startuje (36 kroków), ale lokalnie (RIP + Xvfb) nadal 4 błędy:
+  `09_cykl_start` i `23_start_od_linii` — przekroczony czas; `10_wstrzymany`, `11_wznowiony` — wynik tamtych.
+  Hipoteza do sprawdzenia: proces `linumert_sim.live` wywołuje E-STOP podczas programu samotestu
+  (kolizja z przygotówką z poprzednio wczytanego programu albo z bryłami `machine.yaml` przy G54 = 0) —
+  uruchom z `LINUMERT_SIM_LOG=/tmp/sim.jsonl` i zobacz zdarzenia. Możliwe wyjścia: samotest wyłącza
+  E-STOP z symulacji (`{"cmd":"estop","on":false}` przez `shell.sim.client.send`) albo program samotestu
+  omija bryły. Nie scalaj #45, dopóki `linuxcnc` w CI nie jest zielony.
+- Wyniki e2e: `tools/dev/sim-e2e.sh` (obraz startera) — wszystko OK.
