@@ -10,7 +10,8 @@
 # → E-STOP. Watchdog po zadziałaniu wymaga ponownego uzbrojenia (zbocze linumert.hmi-wd-enable),
 # które HMI robi tylko przy potwierdzeniu grzybem.
 # [LINUMERT]HMI_ESTOP_BYPASS = 1 wyłącznie dla uruchomień BEZ ekranu (testy headless).
-# Piny ekranu łączy linumert_postgui.hal. NIEZWERYFIKOWANE NA SPRZĘCIE.
+# Piny ekranu łączy linumert_postgui.hal. Moduły watchdog, logic i or2 ładuje WYŁĄCZNIE ten plik
+# (drugi loadrt tego samego modułu w HAL się nie udaje). NIEZWERYFIKOWANE NA SPRZĘCIE.
 
 loadrt watchdog num_inputs=1
 loadrt logic names=lrt_hmi_ok personality=0x102

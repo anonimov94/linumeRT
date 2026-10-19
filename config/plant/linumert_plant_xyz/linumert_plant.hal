@@ -11,7 +11,8 @@ loadrt [EMCMOT]EMCMOT servo_period_nsec=[EMCMOT]SERVO_PERIOD num_joints=[KINS]JO
 loadrt lrt_net personality=[PLANT]AXES ip=[PLANT]IP port=[PLANT]PORT
 loadrt lrt_cia402 count=4
 loadrt not names=nc_x_min,nc_x_max,nc_y_min,nc_y_max,nc_z_max
-loadrt logic names=estop_chain personality=0x103
+# łańcuch E-STOP: (din-00 ∧ łącze) ∧ grzyb HMI — dwa and2 (logic ładuje już plik HMI, D35)
+loadrt and2 names=estop_chain,estop_chain_hmi
 loadrt estop_latch names=estop_latch
 
 addf motion-command-handler servo-thread
@@ -27,6 +28,7 @@ addf nc_y_min servo-thread
 addf nc_y_max servo-thread
 addf nc_z_max servo-thread
 addf estop_chain servo-thread
+addf estop_chain_hmi servo-thread
 addf estop_latch servo-thread
 
 # ---- napędy (Plant przez LRT-NET) ---------------------------------------------------------
@@ -92,11 +94,12 @@ net linumert.io.toolsetter   lrt-net.0.din-06
 # Sesja 024: fault napędu nie wchodzi do łańcucha E-STOP (wcześniej przez not amp_ok): napęd w
 # FAULT (np. STO po E-STOP) blokował reset, a bez włączenia lrt_cia402 nie kasuje faultu —
 # zakleszczenie. Fault napędu obsługuje joint.N.amp-fault-in (maszyna OFF, komunikat LinuxCNC).
-net linumert.io.estop-button lrt-net.0.din-00 => estop_chain.in-00
-net lrt.connected            lrt-net.0.connected => estop_chain.in-01
+net linumert.io.estop-button lrt-net.0.din-00 => estop_chain.in0
+net lrt.connected            lrt-net.0.connected => estop_chain.in1
 # D35: grzyb HMI z sygnałem życia szeregowo (config/hal/linumert_hmi_estop.hal); reset tylko grzybem
-net linumert.hmi.estop-ok    => estop_chain.in-02
-net lrt.estop-ok-in          estop_chain.and => estop_latch.ok-in
+net lrt.estop-hw-ok          estop_chain.out => estop_chain_hmi.in0
+net linumert.hmi.estop-ok    => estop_chain_hmi.in1
+net lrt.estop-ok-in          estop_chain_hmi.out => estop_latch.ok-in
 net lrt.drive-fault          lrt-net.0.drive-fault
 net lrt.estop-reset          iocontrol.0.user-request-enable => estop_latch.reset
 net linumert.io.estop-ok     estop_latch.ok-out => iocontrol.0.emc-enable-in

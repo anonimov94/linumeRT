@@ -69,6 +69,29 @@ Otwarte: #34 (Codex, HMI-01, draft). Scalone gałęzie `wip/*`, `claude/*` i `cc
 
 ## 6. Dla Codex:
 
+**Najpierw: trudne problemy, których Claude nie domknął (2026-10-19, kolejność = priorytet).** Każdy = osobny PR,
+`Model-Author: Codex`, wynik w DZIENNIK. Masz Windows/WSL z pełną siecią i prawdziwym pulpitem — tego brakuje Claude.
+
+1. **Łącze LRT-NET gubi ≥ 20 odpowiedzi → E-STOP (niestabilne testy z Plant).** LinuxCNC RIP bez RT + Plant
+   (Python, lockstep 1 kHz) na wspólnych rdzeniach: losowo `first_motion`/`rapid_vs_feed`/`hy_vfd_m4/m5` czerwone,
+   także na `main` sprzed zmian (A/B). Nakładka pokazuje przyczynę („przerwa łącza LRT-NET, N cykli”). Do zrobienia:
+   zmierzyć, czy to opóźnienie wątku servo (`latency-histogram`, `lrt-net.0.reply-age`, `missed`), czy Plant
+   (czas `PlantServer.handle`); naprawić u źródła (np. pętla UDP Plant w C, priorytet tylko dla Plant, odbiór
+   w `lrt_net` bez gubienia kolejnych odpowiedzi) — NIE przez podniesienie `timeout-cycles` w konfiguracji
+   produkcyjnej. Kryterium: `-m linuxcnc` z Plant 10× z rzędu zielone w WSL.
+2. **`tests/test_hal_comps.py::test_hardstop_home_comp_in_halrun` czerwony na Ubuntu 24.04 + Python 3.12 (RIP
+   ze źródeł)**, także na `main`; w CI (Debian 12) zielony. Ustalić: środowisko (Python/halrun) czy błąd komponentu
+   `lrt_hardstop_home`.
+3. **Starter `tools/linumert-start.sh` nigdy nie zbudował obrazu** (u Claude proxy blokuje linuxcnc.org i
+   deb.debian.org). Sprawdzić na prawdziwym Linuksie (WSL Debian/Ubuntu z podmanem): pierwszy start, `--plant`
+   (panel :8080), `--classic`, skróty `.desktop`; poprawić to, co nie działa.
+4. **Grzyb E-STOP w HMI (D35) przy zamrożeniu GUI:** limit sygnału życia 2 s. Zmierzyć najdłuższe zamrożenie
+   ekranu przy wczytaniu dużego programu (podgląd 3D QtDragon, np. 50 000 linii) i zaproponować limit albo
+   przeniesienie sygnału życia poza wątek GUI — bez osłabienia zasady „zawieszone HMI = E-STOP”.
+5. **Skrypty VirtualBox (sesja 025, `docs/VM.md` §10) niesprawdzone w VirtualBox:** `create-vms.ps1` na Windows,
+   instalacja VM-B z `preseed-plant.cfg` (pola `@@VBOX_INSERT_…@@`), `lrtnet_probe.py` z VM-A — wyniki do VM.md.
+
+
 **HMI według kolejności pracy (D32), w wolnej chwili.** Specyfikacja: `docs/design/HMI_WORKFLOW.md`.
 Od D34 (2026-10-19) jest działająca nakładka (HMI-PoC, Claude, PR #42): kolejne etapy budują na niej, nie od zera.
 - Kolejność: HMI-01 (inwentaryzacja widgetów `screens/linumert/linumert.ui`, kontrakt sygnałów, zrzut bazowy) →

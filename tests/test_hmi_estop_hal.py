@@ -57,11 +57,11 @@ def test_chains_take_hmi_in_series() -> None:
     assert "iocontrol.0.user-enable-out => iocontrol.0.emc-enable-in" not in sim  # bez obejścia
     plant = (ROOT / "config/plant/linumert_plant_xyz/linumert_plant.hal").read_text(
         encoding="utf-8")
-    assert "loadrt logic names=estop_chain personality=0x103" in plant  # AND 3 wejść
-    for line in ("lrt-net.0.din-00 => estop_chain.in-00",
-                 "lrt-net.0.connected => estop_chain.in-01",
-                 "net linumert.hmi.estop-ok    => estop_chain.in-02",
-                 "estop_chain.and => estop_latch.ok-in"):
+    assert "loadrt and2 names=estop_chain,estop_chain_hmi" in plant  # (din ∧ łącze) ∧ HMI
+    for line in ("lrt-net.0.din-00 => estop_chain.in0", "lrt-net.0.connected => estop_chain.in1",
+                 "estop_chain.out => estop_chain_hmi.in0",
+                 "net linumert.hmi.estop-ok    => estop_chain_hmi.in1",
+                 "estop_chain_hmi.out => estop_latch.ok-in"):
         assert line in plant, line
     hmi = HMI_HAL.read_text(encoding="utf-8")
     assert "personality=0x102" in hmi  # grzyb ∧ watchdog
@@ -165,3 +165,14 @@ def test_hmi_chain_in_halrun(tmp_path: Path) -> None:
         cmd("exit")
         proc.wait(timeout=10)
         subprocess.run(["halrun", "-U"], capture_output=True)
+
+
+@pytest.mark.parametrize("ini", INIS, ids=lambda p: p.name)
+def test_each_module_loaded_once(ini: Path) -> None:
+    # Drugi loadrt tego samego modułu w HAL się nie udaje (LinuxCNC nie startuje).
+    text = ini.read_text(encoding="utf-8")
+    modules: list[str] = []
+    for rel in re.findall(r"^(?:POSTGUI_)?HALFILE = (.+)$", text, re.M):
+        hal = (ini.parent / rel).read_text(encoding="utf-8")
+        modules += [m for m in re.findall(r"^loadrt\s+(\S+)", hal, re.M) if not m.startswith("[")]
+    assert len(modules) == len(set(modules)), sorted(m for m in modules if modules.count(m) > 1)
