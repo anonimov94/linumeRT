@@ -1,0 +1,175 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+"""Samotest nakładki linumeRT w działającym GUI (Xvfb + LinuxCNC RIP).
+
+Model-Author: Claude · HMI-PoC (2026-10-19).
+
+Włączany wyłącznie zmienną środowiska `LINUMERT_SHELL_SELFTEST=<katalog wyników>`; bez niej
+moduł nie jest importowany. Klika prawdziwe przyciski nakładki w procesie GUI (te same sloty co
+operator), po każdym kroku zapisuje zrzut okna `NN_nazwa.png` i stan do `wynik.json`; LinuxCNC
+zamyka wywołujący (okno potwierdzenia QtDragon przy zamykaniu nie blokuje testu). Uruchamia go `tests/test_hmi_shell_gui.py` (marker `linuxcnc`) i
+`tools/dev/hmi-demo.sh`.
+
+Scenariusz: zwolnienie E-STOP → maszyna WŁ. → bazowanie → MDI G0 → program w AUTO → Wstrzymaj →
+Wznów → Stop → JOG X+ → obszary szyny (QtDragon) → powrót do „Maszyna”.
+"""
+
+from __future__ import annotations
+
+import json
+import os
+import time
+
+from PyQt5 import QtCore, QtWidgets
+from qtvcp.core import Action, Status
+
+STATUS = Status()
+ACTION = Action()
+
+PROGRAM = """( linumeRT · samotest nakładki: kwadrat 40 x 40 mm bez wymiany narzędzia )
+( oś Z symulatora: -120…0 mm, więc wysokość bezpieczna Z-2 )
+G21 G90 G17 G40 G49 G80
+G0 Z-2
+G0 X20 Y20
+G1 Z-4 F300
+G1 X60 F600
+G1 Y60
+G1 X20
+G1 Y20
+G0 Z-2
+M2
+"""
+
+
+class SelfTest(QtCore.QObject):
+    def __init__(self, shell, out_dir: str):
+        super().__init__(shell)
+        self.shell = shell
+        self.out = out_dir
+        os.makedirs(out_dir, exist_ok=True)
+        self.steps: list[dict] = []
+        self.errors: list[str] = []
+        self.program = os.path.join(out_dir, "linumert_hmi_selftest.ngc")
+        with open(self.program, "w", encoding="utf-8") as fh:
+            fh.write(PROGRAM)
+        self.plan = self._plan()
+        self.index = 0
+        self.wait_until = None
+        self.deadline = 0.0
+        self.timer = QtCore.QTimer(self)
+        self.timer.timeout.connect(self._tick)
+
+    def start(self, delay_ms: int = 3000) -> None:
+        QtCore.QTimer.singleShot(delay_ms, lambda: self.timer.start(200))
+
+    # ---- scenariusz -------------------------------------------------------------------------
+    def _plan(self) -> list[tuple]:
+        s, b = self.shell.s, self.shell.buttons
+        click = self._click
+        return [
+            ("01_start", None, None, 0),
+            ("02_estop_zwolniony", lambda: click(b["estop"]), lambda: not s.estop, 5),
+            ("03_maszyna_wl", lambda: click(b["power"]), lambda: s.machine_on, 5),
+            ("04_bazowanie", lambda: click(b["home"]), lambda: s.all_homed, 90),
+            ("05_tryb_mdi", lambda: click(b["mode_mdi"]), lambda: s.mode == "mdi", 5),
+            ("06_mdi_g0", self._mdi, lambda: self._settled(), 30),
+            ("07_program", lambda: ACTION.OPEN_PROGRAM(self.program),
+             lambda: s.file.endswith("linumert_hmi_selftest.ngc"), 10),
+            ("08_tryb_auto", lambda: click(b["mode_auto"]), lambda: s.mode == "auto", 5),
+            ("09_cykl_start", lambda: click(b["start"]), lambda: s.interp == "run" and s.line >= 4,
+             15),
+            ("10_wstrzymany", lambda: click(b["pause"]), lambda: s.interp == "paused", 5),
+            ("11_wznowiony", lambda: click(b["pause"]), lambda: s.interp == "run", 5),
+            ("12_stop", lambda: click(b["stop"]), lambda: s.interp == "idle", 10),
+            ("13_tryb_jog", lambda: click(b["mode_manual"]), lambda: s.mode == "manual", 5),
+            ("14_jog_x_plus", self._jog, lambda: self._settled(), 10),
+            ("15_obszar_program", lambda: click(self.shell.areas["program"]), None, 1),
+            ("16_obszar_narzedzia", lambda: click(self.shell.areas["tools"]), None, 1),
+            ("17_obszar_qtdragon", lambda: click(self.shell.areas["classic"]), None, 1),
+            ("18_maszyna", lambda: click(self.shell.areas["machine"]), None, 1),
+        ]
+
+    @staticmethod
+    def _click(widget) -> None:
+        if not widget.isEnabled():
+            raise RuntimeError(f"przycisk „{widget.text()}” nieaktywny: {widget.toolTip()}")
+        widget.click()
+
+    def _mdi(self) -> None:
+        self.shell.mdi.setText("G0 X100 Y80 Z-10")
+        self._click(self.shell.buttons["mdi"])
+        self._start_pos = None
+
+    def _jog(self) -> None:
+        btn = self.shell.buttons["jog_X1"]
+        if not btn.isEnabled():
+            raise RuntimeError(f"JOG nieaktywny: {btn.toolTip()}")
+        btn.pressed.emit()
+        QtCore.QTimer.singleShot(700, btn.released.emit)
+        self._jog_released_at = time.monotonic() + 0.7
+
+    def _settled(self) -> bool:
+        """Ruch zakończony: interpreter bezczynny i brak prędkości (krótko po komendzie)."""
+        if getattr(self, "_jog_released_at", 0) > time.monotonic():
+            return False
+        STATUS.stat.poll()
+        return STATUS.stat.interp_state == 1 and abs(STATUS.stat.current_vel) < 1e-6 \
+            and STATUS.stat.inpos
+
+    # ---- pętla ------------------------------------------------------------------------------
+    def _tick(self) -> None:
+        now = time.monotonic()
+        if self.wait_until is not None:
+            name, check, _timeout = self.plan[self.index]
+            ok = check() if check else now >= self.deadline
+            if not ok and now < self.deadline:
+                return
+            if check and not ok:
+                self.errors.append(f"{name}: przekroczony czas oczekiwania")
+            self._record(name, ok if check else True)
+            self.wait_until = None
+            self.index += 1
+        if self.index >= len(self.plan):
+            self._finish()
+            return
+        name, action, check, timeout = self.plan[self.index]
+        try:
+            if action:
+                action()
+        except Exception as exc:  # noqa: BLE001 - błąd kroku trafia do wyniku testu
+            self.errors.append(f"{name}: {exc}")
+            self._record(name, False)
+            self.index += 1
+            return
+        self.plan[self.index] = (name, check, timeout)
+        self.wait_until = True
+        self.deadline = now + max(timeout, 0.6)
+
+    def _record(self, name: str, ok: bool) -> None:
+        QtWidgets.QApplication.processEvents()
+        path = os.path.join(self.out, f"{name}.png")
+        self.shell.w.grab().save(path)
+        s = self.shell.s
+        rel = self.shell.positions[0]
+        self.steps.append({
+            "step": name, "ok": ok, "estop": s.estop, "machine_on": s.machine_on,
+            "mode": s.mode, "interp": s.interp, "homed": sorted(s.homed), "line": s.line,
+            "file": os.path.basename(s.file), "x": round(rel[0], 3), "y": round(rel[1], 3),
+            "z": round(rel[2], 3), "area": self.shell.stack.currentIndex(),
+            "alarm": s.alarm.text if s.alarm else "",
+            "start_enabled": self.shell.buttons["start"].isEnabled(),
+        })
+
+    def _finish(self) -> None:
+        self.timer.stop()
+        with open(os.path.join(self.out, "wynik.json"), "w", encoding="utf-8") as fh:
+            json.dump({"steps": self.steps, "errors": self.errors}, fh, indent=2,
+                      ensure_ascii=False)
+
+
+def maybe_start(shell) -> SelfTest | None:
+    out = os.environ.get("LINUMERT_SHELL_SELFTEST")
+    if not out:
+        return None
+    test = SelfTest(shell, out)
+    test.start()
+    return test
