@@ -50,7 +50,7 @@ wymagały ekranu ani LinuxCNC. Bieżący stan i następny krok: [`docs/NASTEPNA_
 | [028](sesja-028.md) | M2 | Kompozycja ekranu głównego |  |
 | [029](sesja-029.md) | M2 | Tryby, JOG i pulpit MPG |  |
 | [030](sesja-030.md) | M2 | MDI i klawiatura ekranowa |  |
-| [031](sesja-031.md) | M2 | AUTO i wznowienie od linii (+ D37: wycofanie, helisa, łuk, zakładka) |  |
+| [031](sesja-031.md) | M2 | AUTO i wznowienie od linii (+ D38: wycofanie, helisa, łuk, zakładka) |  |
 | [032](sesja-032.md) | M2 | Baza narzędzi z typami | zrobiona |
 | [033](sesja-033.md) | M2 | Zerowanie detalu i sonda |  |
 | [034](sesja-034.md) | M2 | Ręczna zmiana narzędzia |  |

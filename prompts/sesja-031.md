@@ -21,7 +21,7 @@ Tryb AUTO i poprawiony run-from-line.
 1. Start/Pauza/Stop, pojedynczy blok, opcjonalny stop, override posuwu/szybkiego/wrzeciona, postęp i czas.
 2. Wznowienie od linii: przed startem okno z podsumowaniem stanu modalnego w tej linii (narzędzie, układ, wrzeciono, posuw) i opcją „uruchom wrzeciono i potwierdź narzędzie” — odpowiedź na znane ograniczenie QtDragon. Użyj mechanizmów LinuxCNC (sprawdź dokumentację run-from-line / `task_plan_synch`), opisz ograniczenia.
 3. Scenariusz Plant `auto_pause_resume` i `run_from_line`.
-4. **Wycofanie i powrót do obróbki (D37, `docs/design/WZNOWIENIE.md`)**: w pauzie — external offsets HAL
+4. **Wycofanie i powrót do obróbki (D38, `docs/design/WZNOWIENIE.md`)**: w pauzie — external offsets HAL
    (Wycofaj / Powrót / Wznów); po przerwaniu programu — prolog generowany przez ekran: zejście po helisie,
    dojazd łukiem stycznym w XY (z Z), wejście na ścieżkę z zakładką przed punktem przerwania (bez naddatku),
    parametry `[LINUMERT]RESUME_*` w ustawieniach maszyny; sprawdzenie prologu w `linumert_sim` przed startem,
