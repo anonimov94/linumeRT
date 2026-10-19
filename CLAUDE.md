@@ -73,8 +73,8 @@ tests/ docs/ docs/prawne/ prompts/ community/
 - Ekran nie jest funkcją bezpieczeństwa. E-STOP i STO to obwód sprzętowy, podłączony fizycznie do HAL i
   nadrzędny wobec ekranu.
 - Grzyb E-STOP w HMI to DODATKOWY, szeregowy element łańcucha E-STOP w HAL (D35): może tylko odebrać
-  zezwolenie, nigdy go nadać; reset (potwierdzenie) E-STOP — także zdarzeń emulowanych w symulatorze —
-  wyłącznie grzybem w HMI; ekran wysyła sygnał życia do `watchdog` w HAL (zawieszone HMI = E-STOP).
+  zezwolenie, nigdy go nadać; reset (potwierdzenie) E-STOP grzybem HMI albo podwójnym Resetem (D37),
+  zawsze przez ten sam zatrzask HAL i bez zamykania otwartego fizycznego safety; ekran wysyła sygnał życia do `watchdog` w HAL (zawieszone HMI = E-STOP).
   Obejście (`[LINUMERT]HMI_ESTOP_BYPASS = 1`) wolno tylko w uruchomieniach bez ekranu (testy).
 - Wtyczki generują wyłącznie tekst G-code.
 - Generator konfiguracji odmawia konfiguracji sprzętowej bez wejścia E-STOP.
@@ -126,6 +126,9 @@ Nie deklaruj przeglądu drugiego modelu bez jego rzeczywistej oceny konkretnego 
    `docs/DECYZJE.md` jako PROPOZYCJA i idź dalej.
 
 ## 11. Definition of Done
+
+**Kontrakt operatora D37:** [`docs/OBSLUGA_OPERATORA.md`](docs/OBSLUGA_OPERATORA.md) obowiązuje
+wszystkie dalsze zmiany: alarmy, Reset, specjalista, pola liczbowe i sterowanie bliźniakiem.
 **GUI od pierwszego kroku (D36, polecenie właściciela):** funkcja przeznaczona dla operatora
 pojawia się od razu w nawigacji i ma minimalne użyteczne działanie. Backend rozwijamy iteracyjnie
 za dostępnym widokiem. Każda porcja zwiększa działające możliwości. Wersję częściową opisujemy

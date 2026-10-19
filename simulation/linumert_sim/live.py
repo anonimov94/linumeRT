@@ -7,7 +7,7 @@ Model-Author: Claude · 2026-10-19 (symulacja HMI).
 
 Co 1/rate s czyta `linuxcnc.stat` (pozycja nosa w G53, narzędzie, obroty, rodzaj ruchu, linia),
 prowadzi materiał przygotówki i reguły `SimEngine`. Kolizja albo przeciążenie → E-STOP
-(`linuxcnc.command().state(STATE_ESTOP)`); w łańcuchu D35 reset wymaga potwierdzenia grzybem w HMI.
+(`linuxcnc.command().state(STATE_ESTOP)`); w łańcuchu D35/D37 reset wymaga potwierdzenia w HMI.
 
 Protokół z ekranem: polecenia JSON na stdin (po jednym w linii), zdarzenia JSON na stdout.
 Mapa wysokości przygotówki: plik `float32` (np.memmap), ścieżka w zdarzeniu `stock`.

@@ -73,7 +73,7 @@ sets linumert.spindle.at-speed 1
 
 # ---- wejścia/wyjścia ---------------------------------------------------------------------
 # E-STOP (D35): w symulacji jedynym elementem łańcucha jest grzyb HMI z sygnałem życia
-# (config/hal/linumert_hmi_estop.hal); reset (potwierdzenie) tylko grzybem w HMI. Na maszynie
+# (config/hal/linumert_hmi_estop.hal); reset grzybem albo podwójnym Resetem HMI. Na maszynie
 # szeregowo dochodzi obwód sprzętowy (wejście HAL), nadrzędny wobec HMI.
 addf estop_latch servo-thread
 net linumert.hmi.estop-ok      => estop_latch.ok-in

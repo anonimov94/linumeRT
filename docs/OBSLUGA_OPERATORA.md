@@ -29,3 +29,21 @@ M3/M4/M5, wybór poprzedniego/następnego numeru narzędzia lub wpis numeru i pr
 Zero detalu ustawia G54–G59. Bliźniak korzysta z konfiguracji machine.yaml i HOME z INI;
 Reset symulacji odnawia materiał i wraca do HOME po potwierdzeniu operatora.
 Samodzielny podgląd Zero detalu jest edytorem offline, bez ruchu i komend maszyny.
+
+## Pierwszy start
+
+Uruchom `tools/linumert-start.sh`, przejdź do Symulacja i naciśnij
+„Uruchom / Reset symulacji → HOME”. Potwierdź odnowienie materiału i bazowanie.
+Poczekaj na stan Gotowa, wybierz JOG w górnym pasku. Dla MDI i M6 wymagane jest bazowanie.
+Wymianę w konfiguracji wirtualnej potwierdza magazyn symulowany; na fizycznej maszynie
+obowiązuje jej procedura ręcznej wymiany/ATC. Zero detalu jest dostępne w szynie obszarów;
+zapisany układ i model maszyny są właściwe dla bieżącej konfiguracji.
+
+Po kolizji w bliźniaku: włącz Specjalista, potwierdź E-STOP podwójnym Resetem,
+włącz Maszyna i przytrzymaj JOG, aby się wycofać. Zakończ specjalistę po opuszczeniu kolizji.
+W czasie wycofania model nadal raportuje kolizje; nie zatrzymują one ponownie ruchu ręcznego.
+Po wyłączeniu specjalisty lub zmianie na AUTO/MDI kontrola zatrzymania jest ponownie aktywna.
+Zakresy osi LinuxCNC nadal obowiązują, również w symulacji. Klawiatura w specjaliście: 10 mm/s.
+
+`[LINUMERT] VIRTUAL_MODE=1` oznacza konfigurację bez fizycznych wyjść napędów.
+Nie ustawiaj tej flagi w konfiguracji podłączonej maszyny. Brak flagi oznacza tryb fizyczny.

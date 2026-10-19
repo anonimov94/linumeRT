@@ -5,7 +5,7 @@ Model-Author: Claude · 2026-10-19.
 
 Obliczenia robi osobny proces `python -m linumert_sim.live` (nice 10, CLAUDE.md §5): czyta stan
 LinuxCNC, usuwa materiał przejazdem narzędzia i przy kolizji albo przeciążeniu wywołuje E-STOP
-(reset tylko grzybem w HMI, D35). Ten moduł: klient procesu (QProcess, JSON w liniach), widok 3D
+(reset grzybem lub podwójnym Resetem, D35/D37). Ten moduł: klient procesu (QProcess, JSON w liniach), widok 3D
 (pyqtgraph.opengl, maks. 30 FPS, render tylko przy zmianie; bez pyqtgraph — widok z góry 2D)
 i karty: przygotówka, model maszyny, obciążenie napędów, zdarzenia. Symulacja nie jest funkcją
 bezpieczeństwa.

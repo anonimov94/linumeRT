@@ -6,13 +6,13 @@ Otwarty ekran operatora i zestaw narzędzi dla **LinuxCNC**, przeznaczony dla ho
 frezarek 3, 4 i 5 osi, silników krokowych, serw krokowych i serw, ręcznej zmiany narzędzia i ATC,
 napędów EtherCAT (CiA 402) i step/dir oraz wrzecion sterowanych przez RS485.
 
-Ekran powstaje na bazie **QtDragon** (QtVCP, część LinuxCNC). Ma mieć własny wygląd, programowanie dialogowe,
-symulację z kolizjami, kreator konfiguracji i diagnostykę napędów. Do testów służy **Plant**, czyli
+Ekran używa **QtVCP** i bazy QtDragon (LinuxCNC), z własnymi widokami operatora: Start, Bazowanie,
+Zero detalu 3D, Narzędzia, Program, Symulacja, Produkcja i Diagnostyka. Do testów służy **Plant**, czyli
 wirtualna frezarka w osobnej maszynie wirtualnej. Symuluje bezwładność, ograniczenia momentu i przyspieszenia,
 napędy, krańcówki, sondę, falownik i magazyn narzędzi.
 
-> **Status:** wczesny rozwój: 28 z 84 sesji planu ([postęp](prompts/README.md)). Nic nie zostało sprawdzone
-> na prawdziwej maszynie.
+> **Status:** działające HMI i wirtualny bliźniak; rozwój i testy na Debianie 12 / LinuxCNC 2.9.
+> Sprzęt fizyczny pozostaje niezweryfikowany. [Obsługa operatora](docs/OBSLUGA_OPERATORA.md).
 
 ## Szybki start (Linux z podmanem, np. EndeavourOS)
 
@@ -36,7 +36,15 @@ Kolejne uruchomienia: z menu aplikacji („linumeRT”, „linumeRT + Plant”) 
 | `--no-update`, `--rebuild`, `--shell`, `--desktop`, `--dir KATALOG` | bez aktualizacji, nowy obraz kontenera, powłoka w kontenerze, tylko skróty w menu, inne repozytorium |
 
 Pierwsze uruchomienie trwa kilka minut (obraz ok. 1,5 GB), kolejne kilkanaście sekund. W oknie: **Start** →
-„Zwolnij E-STOP” → „Włącz” → „Bazuj wszystkie”, potem program w **Produkcja** albo ruch ręczny w **Maszyna**.
+„Potwierdź grzybem” → „Włącz” → „Bazuj wszystkie”. W **Symulacja** przycisk
+**Uruchom / Reset symulacji → HOME** przygotowuje bliźniaka po potwierdzeniu operatora.
+JOG, MDI, wrzeciono M3/M4/M5 i **WYMIANA M6** są dostępne w **Maszyna** i **Symulacja**.
+Na górze są trzy ostatnie alarmy i Reset. [Pełna instrukcja](docs/OBSLUGA_OPERATORA.md).
+
+Sam edytor przygotówki bez uruchamiania LinuxCNC: `bash tools/dev/preview-zero.sh`.
+To podgląd offline z zapisami tymczasowymi. [Zero detalu](docs/ZERO_DETALU.md).
+
+![Własne Zero detalu: maszyna, odlew 360° i edytor profilu](docs/raporty/zero_detalu/offline.png)
 
 ## Co już działa (bez sprzętu, LinuxCNC 2.9 na Debianie 12)
 
@@ -46,9 +54,10 @@ Pierwsze uruchomienie trwa kilka minut (obraz ok. 1,5 GB), kolejne kilkanaście 
 | Wirtualna obrabiarka Plant | dynamika osi w C, napędy CiA 402 i krokowce, biblioteka napędów, kinematyka, krańcówki, zderzaki, bazowanie, magazyn narzędzi, kolizje, wrzeciono z falownikiem | `plant/`, [`docs/PLANT.md`](docs/PLANT.md) |
 | LinuxCNC ↔ Plant | komponenty HAL `lrt_net` / `lrt_cia402`; bazowanie z losowego startu, ruch G1, wyrocznia soft limits i stref, wrzeciono przez `hy_vfd` | `hal/`, `config/plant/` |
 | Rdzeń (Python) | model stanu maszyny, katalog alarmów PL/EN, `machine.yaml`, baza narzędzi, format `.lnx` i kompilator do `.ngc`, lekser G-code | `core/linumert/` |
-| Ekran HMI linumeRT (D32, D34) | nakładka na QtDragon: pasek trybu i stanu, szyna obszarów, widoki Start, Maszyna, Produkcja, Diagnostyka; reszta funkcji przez strony QtDragon | `screens/linumert/`, [`docs/design/HMI_WORKFLOW.md`](docs/design/HMI_WORKFLOW.md) |
+| Ekran HMI linumeRT (D32, D34) | własne widoki workflow, trzy alarmy i Reset, JOG/MDI, wrzeciono, wymiana M6, tryb specjalisty, Zero detalu 3D i konfiguracja przygotówki | `screens/linumert/`, [`docs/design/HMI_WORKFLOW.md`](docs/design/HMI_WORKFLOW.md) |
 | Uruchomienie jednym poleceniem | `tools/linumert-start.sh` (podman, Debian 12, LinuxCNC 2.9) | „Szybki start” wyżej |
-| Własny wygląd ekranu, programy dialogowe, symulacja materiału, generator konfiguracji | zaplanowane (kamienie M2–M6) | [`prompts/README.md`](prompts/README.md) |
+| Symulacja materiału i kolizji | działający proces, obciążenia i zdarzenia, wirtualne wycofanie po kolizji | `simulation/` |
+| Edytor G-code w HMI, programy dialogowe, kreator konfiguracji | kolejne etapy | [`prompts/README.md`](prompts/README.md) |
 
 ## Kierunek rozwoju
 

@@ -113,3 +113,10 @@ Wiersze fontów dostają ścieżki i pliki `OFL.txt` w `licenses/` przy ich doda
 | Podgląd offline Zero detalu | kod Python, testy Qt | model językowy Codex na zlecenie właściciela | 2026-10-19 | niezależny proces Qt bez importowania LinuxCNC/QtVCP, pliki tymczasowe | GPL-2.0-or-later | bezpieczna edycja przygotówki | `tools/dev/preview-zero.py`, `screens/linumert/linumert_view_helpers.py` |
 
 | Podgląd offline Zero detalu i launcher | własny zrzut aplikacji Qt i skrypt bash | model językowy Codex na zlecenie właściciela | 2026-10-19 | zrzut `preview-zero.py --snapshot`, kontener podglądu bez sieci, repo tylko do odczytu | GPL-2.0-or-later | bezpieczna edycja przygotówki | `tools/dev/preview-zero.sh`, `docs/raporty/zero_detalu/offline.png` |
+
+## Obsługa operatora — 2026-10-19
+
+Codex, własny kod GPL-2.0-or-later: `linumert_alarm_panel.py`, `linumert_operator_controls.py`,
+`linumert_virtual_session.py`, testy operatora i integracja z powłoką. Projekt według wymagań właściciela D37.
+HAL symulatora wykorzystuje standardowy komponent LinuxCNC `timedelay` (GPL-2) do handshake M6;
+bez kopiowania kodu komponentu i bez zmian w konfiguracji fizycznej maszyny.
