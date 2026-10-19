@@ -11,8 +11,32 @@ symulację z kolizjami, kreator konfiguracji i diagnostykę napędów. Do testó
 wirtualna frezarka w osobnej maszynie wirtualnej. Symuluje bezwładność, ograniczenia momentu i przyspieszenia,
 napędy, krańcówki, sondę, falownik i magazyn narzędzi.
 
-> **Status:** wczesny rozwój: 24 z 84 sesji planu ([postęp](prompts/README.md)). Nic nie zostało sprawdzone
+> **Status:** wczesny rozwój: 28 z 84 sesji planu ([postęp](prompts/README.md)). Nic nie zostało sprawdzone
 > na prawdziwej maszynie.
+
+## Szybki start (Linux z podmanem, np. EndeavourOS)
+
+Jedno polecenie pobiera `main` z GitHuba do `~/linumeRT`, instaluje `git` i `podman` (pacman/dnf/apt, z sudo),
+buduje kontener Debian 12 z LinuxCNC 2.9 (pakiety linuxcnc.org) i otwiera okno LinuxCNC z ekranem linumeRT
+na symulatorze:
+
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/anonimov94/linumeRT/main/tools/linumert-start.sh)
+```
+
+Kolejne uruchomienia: z menu aplikacji („linumeRT”, „linumeRT + Plant”) albo `~/linumeRT/tools/linumert-start.sh`
+(przy każdym starcie `git pull` main). Opcje:
+
+| Polecenie | Co uruchamia |
+|---|---|
+| `tools/linumert-start.sh` | symulator LinuxCNC + ekran linumeRT |
+| `tools/linumert-start.sh --plant` | + wirtualna obrabiarka Plant przez LRT-NET; panel Plant otwiera się w przeglądarce (http://127.0.0.1:8080/) |
+| `tools/linumert-start.sh --plant --vfd` | jak wyżej, wrzeciono przez falownik (`hy_vfd`) |
+| `tools/linumert-start.sh --classic` | czysty QtDragon (bez nakładki linumeRT) |
+| `--no-update`, `--rebuild`, `--shell`, `--desktop`, `--dir KATALOG` | bez aktualizacji, nowy obraz kontenera, powłoka w kontenerze, tylko skróty w menu, inne repozytorium |
+
+Pierwsze uruchomienie trwa kilka minut (obraz ok. 1,5 GB), kolejne kilkanaście sekund. W oknie: **Start** →
+„Zwolnij E-STOP” → „Włącz” → „Bazuj wszystkie”, potem program w **Produkcja** albo ruch ręczny w **Maszyna**.
 
 ## Co już działa (bez sprzętu, LinuxCNC 2.9 na Debianie 12)
 
@@ -22,7 +46,8 @@ napędy, krańcówki, sondę, falownik i magazyn narzędzi.
 | Wirtualna obrabiarka Plant | dynamika osi w C, napędy CiA 402 i krokowce, biblioteka napędów, kinematyka, krańcówki, zderzaki, bazowanie, magazyn narzędzi, kolizje, wrzeciono z falownikiem | `plant/`, [`docs/PLANT.md`](docs/PLANT.md) |
 | LinuxCNC ↔ Plant | komponenty HAL `lrt_net` / `lrt_cia402`; bazowanie z losowego startu, ruch G1, wyrocznia soft limits i stref, wrzeciono przez `hy_vfd` | `hal/`, `config/plant/` |
 | Rdzeń (Python) | model stanu maszyny, katalog alarmów PL/EN, `machine.yaml`, baza narzędzi, format `.lnx` i kompilator do `.ngc`, lekser G-code | `core/linumert/` |
-| HMI według kolejności pracy (D32) | projekt gotowy, implementacja HMI-01…06 | [`docs/design/HMI_WORKFLOW.md`](docs/design/HMI_WORKFLOW.md) |
+| Ekran HMI linumeRT (D32, D34) | nakładka na QtDragon: pasek trybu i stanu, szyna obszarów, widoki Start, Maszyna, Produkcja, Diagnostyka; reszta funkcji przez strony QtDragon | `screens/linumert/`, [`docs/design/HMI_WORKFLOW.md`](docs/design/HMI_WORKFLOW.md) |
+| Uruchomienie jednym poleceniem | `tools/linumert-start.sh` (podman, Debian 12, LinuxCNC 2.9) | „Szybki start” wyżej |
 | Własny wygląd ekranu, programy dialogowe, symulacja materiału, generator konfiguracji | zaplanowane (kamienie M2–M6) | [`prompts/README.md`](prompts/README.md) |
 
 ## Kierunek rozwoju
