@@ -256,8 +256,10 @@ class SimEngine:
                 "K-306", "overload", s.line, s.tool, tip,
                 {"line": s.line, "torque": f"{load.torque:.2f}",
                  "limit": f"{load.torque_limit:.2f}"}, ("wrzeciono", "")))
-        elif load.torque < 0.8 * load.torque_limit:
+        elif load.torque == 0 or load.torque < 0.8 * load.torque_limit:
             self._active.discard(("K-306",))
+        if not load.axis:
+            self._active -= {key for key in self._active if key[0] == "K-307"}
         for axis, (force, limit) in load.axis.items():
             if force > limit:
                 self._once(events, ("K-307", axis), Event(

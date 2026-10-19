@@ -268,3 +268,10 @@ def test_segment_end_of_feed_is_not_rapid():
         motion = "rapid" if i == len(pts) - 1 else "feed"
         out += e.step(Sample(i * 0.01, (p[0], p[1], p[2] + 80), 1, 10000.0, motion, i))
     assert [x.code for x in out] == []
+
+
+def test_overload_causes_clear_after_spindle_stops():
+    engine = SimEngine()
+    engine._active.update({("K-306",), ("K-307", "X")})
+    engine.step(Sample(0, (0, 0, 0)))
+    assert not engine._active

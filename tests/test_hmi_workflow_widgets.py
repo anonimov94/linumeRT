@@ -162,3 +162,21 @@ def test_offline_preview_cannot_set_offsets_even_when_machine_ready(page_env):
     assert not page.zero_button.isEnabled()
     assert not page.apply_zero(confirm=False) and not action.mock_calls
     page.close()
+
+
+def test_numeric_keyboard_entry_is_not_clamped_during_typing(page_env):
+    _home, shell, _status, _action = page_env
+    from PyQt5 import QtCore, QtTest
+    shell.c = importlib.import_module("linumert_shell_model").load_tokens()["kolory"]
+    page = importlib.import_module("linumert_offsets_page").OffsetsPage(shell)
+    page.shape.setCurrentIndex(1)
+    spin = page.fields["diameter"]
+    spin.lineEdit().selectAll()
+    QtTest.QTest.keyClicks(spin.lineEdit(), "12.0001")
+    QtTest.QTest.keyClick(spin.lineEdit(), QtCore.Qt.Key_Return)
+    assert spin.value() == 12.0001 and spin.decimals() == 4
+    spin.setValue(12)
+    spin.stepUp()
+    assert spin.value() == 13.0
+    assert "13.0000" in spin.text()
+    page.close()

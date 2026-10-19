@@ -4,9 +4,9 @@
 # bez pętli prędkości wrzeciona (robi to sim_spindle w linumert_sim.hal).
 # Model-Author: Claude · sesja 004.
 
-net linumert.io.tool-change     hal_manualtoolchange.change  <= iocontrol.0.tool-change
-net linumert.io.tool-changed    hal_manualtoolchange.changed => iocontrol.0.tool-changed
-net linumert.io.tool-number     hal_manualtoolchange.number  <= iocontrol.0.tool-prep-number
+# Wirtualny magazyn potwierdza M6 bez okna ręcznej wymiany fizycznego freza.
+# Operator zatwierdza WYMIANA M6 w HMI; LinuxCNC aktualizuje tool-in-spindle.
+net linumert.io.tool-change iocontrol.0.tool-change => iocontrol.0.tool-changed
 
 net linumert.spindle.inhibit    linumert.spindle-inhibit => spindle.0.inhibit
 net linumert.z.eoffset-clear    linumert.eoffset-clear => axis.z.eoffset-clear
