@@ -236,6 +236,7 @@ class PlantServer:
         self._last_seq: int | None = None
         self._last_time: int | None = None  # time_ns ostatniej ramki z krokiem
         self._last_rx: int | None = None  # zegar odbioru (lockstep: time_ns, realtime: host)
+        self._last_wall: int | None = None  # zegar hosta ostatniej przyjętej ramki (sesja 025)
         self._mode = {d: None for d in self.drives}
         self.mode_rejects = 0
         self._target = {d: 0 for d in self.drives}
@@ -417,8 +418,17 @@ class PlantServer:
             time.monotonic_ns() if now_ns is None else now_ns)
 
         step = True
+        wall = time.monotonic_ns()
         if self._last_seq is not None:
             delta = seq_delta(cmd.seq, self._last_seq)
+            if (delta <= 0 and self._last_wall is not None
+                    and (wall - self._last_wall) / 1e6 > self.cfg.watchdog_ms):
+                # Nowa sesja mastera (restart LinuxCNC przy działającym Plant, VM-B jako usługa):
+                # lrt_net numeruje od 1: po przerwie > watchdog_ms numeracja liczy się od nowa.
+                self._note(f"nowa sesja mastera: seq {cmd.seq} po {self._last_seq}, "
+                           f"przerwa {(wall - self._last_wall) / 1e6:.0f} ms")
+                self._last_seq = self._last_time = self._last_rx = None
+                delta = 1
             if delta <= 0:
                 self.stats.late += 1
                 step = False
@@ -433,6 +443,7 @@ class PlantServer:
             dt_ns = self.cfg.cycle_ns if self._last_time is None else cmd.time_ns - self._last_time
             dt_ns = min(max(dt_ns, DT_MIN), DT_MAX)
             self._last_seq, self._last_time, self._last_rx = cmd.seq, cmd.time_ns, rx
+            self._last_wall = wall
             if not self.model_failed:
                 try:
                     self._apply(cmd)
