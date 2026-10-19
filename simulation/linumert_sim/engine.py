@@ -146,7 +146,7 @@ class SimEngine:
                     (part, "przygotówka")))
             if removed > MIN_REMOVED:
                 self._idle = 0
-                self._material_rules(cutter, s, pos, events)
+                self._material_rules(cutter, s, prev, pos, events)
             else:
                 self._idle += 1
                 if self._idle > 20:  # ok. 0,2 s bez kontaktu: następny kontakt = nowe zdarzenie
@@ -186,17 +186,21 @@ class SimEngine:
         else:
             self._active.discard(("K-309", s.tool))
 
-    def _material_rules(self, cutter: Cutter, s: Sample, pos, events: list[Event]) -> None:
-        if s.motion == "rapid":
+    def _material_rules(self, cutter: Cutter, s: Sample, prev: Sample, pos,
+                        events: list[Event]) -> None:
+        # Odcinek między próbkami: G0 tylko gdy obie próbki to G0 (koniec G1 → początek G0),
+        # obroty z próbki, w której wrzeciono wirowało (zatrzymanie wrzeciona w trakcie odcinka)
+        rpm = s.rpm if abs(s.rpm) >= abs(prev.rpm) else prev.rpm
+        if s.motion == "rapid" and prev.motion == "rapid":
             self._once(events, ("K-302",), Event("K-302", "collision", s.line, s.tool, pos,
                                                  {"line": s.line, "tool": s.tool},
                                                  ("narzedzie", "przygotówka")))
-        elif abs(s.rpm) < MIN_RPM:
+        elif abs(rpm) < MIN_RPM:
             self._once(events, ("K-301",), Event("K-301", "collision", s.line, s.tool, pos,
                                                  {"line": s.line, "tool": s.tool},
                                                  ("narzedzie", "przygotówka")))
-        elif cutter.kind != "tap" and (1 if s.rpm > 0 else -1) != cutter.hand:
-            direction = "M4, lewe" if s.rpm < 0 else "M3, prawe"
+        elif cutter.kind != "tap" and (1 if rpm > 0 else -1) != cutter.hand:
+            direction = "M4, lewe" if rpm < 0 else "M3, prawe"
             self._once(events, ("K-308",), Event("K-308", "collision", s.line, s.tool, pos,
                                                  {"line": s.line, "tool": s.tool,
                                                   "direction": direction},

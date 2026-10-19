@@ -257,3 +257,14 @@ def test_sample_programs_stock_lines():
         line = find_stock_line(path)
         assert line, path.name
         parse_stock_line(line)
+
+
+def test_segment_end_of_feed_is_not_rapid():
+    """Koniec G1 w materiale, następna próbka już G0 (odjazd): bez K-302."""
+    e = _engine()
+    pts = _line((20, 50, 5), (20, 50, -1))
+    out = []
+    for i, p in enumerate(pts):
+        motion = "rapid" if i == len(pts) - 1 else "feed"
+        out += e.step(Sample(i * 0.01, (p[0], p[1], p[2] + 80), 1, 10000.0, motion, i))
+    assert [x.code for x in out] == []
