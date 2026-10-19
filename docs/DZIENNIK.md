@@ -362,3 +362,7 @@ Uzupełnienie: README plant/core (liczby testów 29/59/20, bazowanie, parametry 
 - Rozwiązano konflikty rejestracji stron i dokumentacji; 154 testy zakresu oraz lint OK, pełny GUI w CI.
 
 - Poprawka integracji: kopia konfiguracji samotestu nie dziedziczy linumert.var po lokalnym demo (G54=100,100,−150 powodowało soft limit Z zamiast ruchu). Ustawienia operatora pozostają nienaruszone; symulacja nadal może zatrzymać ruch.
+
+## HMI — Priorytet Zero detalu · 2026-10-19 · Codex
+- Polecenie właściciela: własny widok maszyny i przygotówki BOX/walec/rura/odlew obrotowy.
+- Monitor terminalowy `python3 tools/dev/hmi-progress.py`: 6 kroków, odświeżanie i znaczniki; sprawdzony `--once`, lint OK.
