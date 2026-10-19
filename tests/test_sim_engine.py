@@ -248,3 +248,12 @@ def test_tool_seed_db(tmp_path):
     cs = cutters(tools, [(n, t.offsets["Z"], t.diameter or 0) for n, t in tools.items()])
     assert all(c.gauge > c.stickout >= c.cut_top > 0 for c in cs.values())
     assert any(c.hand == -1 for c in cs.values())
+
+
+def test_sample_programs_stock_lines():
+    from linumert_sim.placement import find_stock_line
+
+    for path in sorted((ROOT / "config/sim/nc_files").glob("*.ngc")):
+        line = find_stock_line(path)
+        assert line, path.name
+        parse_stock_line(line)
