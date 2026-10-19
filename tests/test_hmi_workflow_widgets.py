@@ -33,7 +33,8 @@ def page_env(monkeypatch):
         monkeypatch.delitem(sys.modules, name, raising=False)
     module = importlib.import_module("linumert_homing_page")
     shell = SimpleNamespace(s=module.model.ShellState(estop=False, machine_on=True),
-                            home_all=Mock(), _allowed=Mock(return_value=True))
+                            home_all=Mock(), _allowed=Mock(return_value=True),
+                            action=action, info=info)
     page = module.HomingPage(shell)
     yield page, shell, status, action
     page.close()
@@ -149,4 +150,15 @@ def test_zero_detalu_invalid_load_preserves_model(page_env, tmp_path):
     path.write_text('{"shape": "casting", "profile": [[0, 10], [0, 20]]}')
     previous = page.spec
     assert not page.load(path) and page.spec == previous
+    page.close()
+
+
+def test_offline_preview_cannot_set_offsets_even_when_machine_ready(page_env):
+    _home, shell, _status, action = page_env
+    shell.c = importlib.import_module("linumert_shell_model").load_tokens()["kolory"]
+    shell.preview = True
+    shell.s.homed = set(shell.s.axes)
+    page = importlib.import_module("linumert_offsets_page").OffsetsPage(shell)
+    assert not page.zero_button.isEnabled()
+    assert not page.apply_zero(confirm=False) and not action.mock_calls
     page.close()

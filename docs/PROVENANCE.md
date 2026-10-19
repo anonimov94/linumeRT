@@ -109,3 +109,5 @@ Wiersze fontów dostają ścieżki i pliki `OFL.txt` w `licenses/` przy ich doda
 | Edytor profilu odlewu | kod Python, testy Qt | model językowy Codex na zlecenie właściciela | 2026-10-19 | własny wykres jednej strony konturu Z/R, edytowalna tabela | GPL-2.0-or-later | przygotówka obrotowa w Zero detalu | `screens/linumert/linumert_profile_editor.py`, `tests/test_workpiece_view.py` |
 
 | Własna strona Zero detalu | kod Python, testy Qt | model językowy Codex na zlecenie właściciela | 2026-10-19 | własny formularz przygotówki i położenia, istniejące tokeny | GPL-2.0-or-later | BOX, walec, rura i odlew w maszynie | `screens/linumert/linumert_offsets_page.py`, `tests/test_hmi_workflow_widgets.py` |
+
+| Podgląd offline Zero detalu | kod Python, testy Qt | model językowy Codex na zlecenie właściciela | 2026-10-19 | niezależny proces Qt bez importowania LinuxCNC/QtVCP, pliki tymczasowe | GPL-2.0-or-later | bezpieczna edycja przygotówki | `tools/dev/preview-zero.py`, `screens/linumert/linumert_view_helpers.py` |

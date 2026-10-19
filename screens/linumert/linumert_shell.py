@@ -123,6 +123,7 @@ class LinumertShell(QtCore.QObject):
         super().__init__(handler.w)
         self.h = handler
         self.w = handler.w
+        self.action, self.info = ACTION, INFO
         # Piny grzyba HMI (D35): ok = 1 grzyb zwolniony, hb = sygnał życia, wd = uzbrojenie watchdoga
         self.hmi_pins = hmi_pins or {}
         self.tokens = model.load_tokens()

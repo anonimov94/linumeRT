@@ -4,6 +4,9 @@ SPDX-License-Identifier: GPL-2.0-or-later
 """
 
 import importlib
+import os
+import subprocess
+import sys
 from pathlib import Path
 
 import pytest
@@ -57,3 +60,19 @@ def test_profile_editor_updates_contour_and_rejects_bad_input(monkeypatch):
     assert editor.table.rowCount() == 2
     editor.close()
     app.processEvents()
+
+
+def test_standalone_preview_has_no_linuxcnc_connection(tmp_path):
+    pytest.importorskip("PyQt5.QtWidgets")
+    root = Path(__file__).parents[1]
+    screenshot = tmp_path / "offline.png"
+    source = tmp_path / "machine.ini"
+    source.write_text("oryginalna konfiguracja")
+    run = subprocess.run([sys.executable, str(root / "tools/dev/preview-zero.py"),
+                          "--snapshot", str(screenshot)], capture_output=True, text=True,
+                         env={**os.environ, "QT_QPA_PLATFORM": "offscreen",
+                              "INI_FILE_NAME": str(source)}, timeout=20)
+    assert run.returncode == 0, run.stdout + run.stderr
+    assert "PODGLĄD OFFLINE GOTOWY" in run.stdout
+    assert screenshot.read_bytes().startswith(b"\x89PNG")
+    assert source.read_text() == "oryginalna konfiguracja"

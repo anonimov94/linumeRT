@@ -374,3 +374,5 @@ Uzupełnienie: README plant/core (liczby testów 29/59/20, bazowanie, parametry 
 - Własny widok Zero detalu zastępuje stronę QtDragon: maszyna, cztery kształty, edycja wymiarów, profil Z/R, punkt odniesienia i pozycja w G53. 19 testów geometrii/widgetów OK; edycja i nawigacja nie wysyłają komend maszyny.
 
 - Zero detalu, zapis i układy: atomowy zapis/wczytanie przygotówki przy konfiguracji maszyny, pełny profil odlewu; jawne G10 L2 po potwierdzeniu, blokada przed bazowaniem i w trakcie programu, przeliczenie mm/inch. 21 testów geometrii, renderowania i operacji GUI OK.
+
+- Podgląd offline Zero detalu: osobna aplikacja Qt, brak importów LinuxCNC/QtVCP, zapisy tylko w katalogu tymczasowym, ustawianie zer zablokowane także w slocie. Akcje zapisu i zera zawsze widoczne pod formularzem. Test osobnego procesu i izolacji konfiguracji OK.

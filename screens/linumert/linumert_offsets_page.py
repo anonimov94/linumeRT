@@ -8,9 +8,11 @@ from pathlib import Path
 
 from PyQt5 import QtCore, QtWidgets
 
-import linumert_shell_pages as pages
+import linumert_shell_model as model
 from linumert_profile_editor import ProfileEditor
-from linumert_sim_page import ROOT
+from linumert_view_helpers import card, label as _label
+
+ROOT = os.environ.get("LINUMERT_ROOT", str(Path(__file__).resolve().parents[2]))
 
 if os.path.join(ROOT, "core") not in sys.path:
     sys.path.insert(0, os.path.join(ROOT, "core"))
@@ -30,12 +32,12 @@ class OffsetsPage(QtWidgets.QWidget):
         super().__init__()
         self.setObjectName("lrtPage")
         self.shell, self.spec, self.loading, self.valid = shell, Workpiece(), True, True
-        ini = os.environ.get("INI_FILE_NAME") or getattr(pages.INFO, "INIPATH", "")
+        ini = getattr(getattr(shell, "info", None), "INIPATH", "") or os.environ.get("INI_FILE_NAME")
         self.state_path = (Path(ini).resolve().parent / "linumert_workpiece.json" if ini else
                            Path.home() / ".config/linumert/workpiece.json")
         root = QtWidgets.QHBoxLayout(self)
         root.setContentsMargins(16, 16, 16, 16)
-        frame, left, self.machine_name = pages.card("Maszyna i detal", "model poglądowy")
+        frame, left, self.machine_name = card("Maszyna i detal", "model poglądowy")
         self.view = WorkpieceView(shell.c)
         left.addWidget(self.view, 1)
         camera = QtWidgets.QHBoxLayout()
@@ -46,9 +48,13 @@ class OffsetsPage(QtWidgets.QWidget):
         left.addLayout(camera)
         root.addWidget(frame, 3)
         scroll = QtWidgets.QScrollArea()
+        right = QtWidgets.QWidget()
+        right_layout = QtWidgets.QVBoxLayout(right)
+        right_layout.setContentsMargins(0, 0, 0, 0)
+        right_layout.addWidget(scroll, 1)
         scroll.setWidgetResizable(True)
         scroll.setMinimumWidth(350)
-        panel, form_body, _side = pages.card("Zero detalu i przygotówka", "mm")
+        panel, form_body, _side = card("Zero detalu i przygotówka", "mm")
         form = QtWidgets.QFormLayout()
         self.shape = QtWidgets.QComboBox()
         for title, value in SHAPES:
@@ -91,9 +97,9 @@ class OffsetsPage(QtWidgets.QWidget):
         self.profile.set_points(self.spec.profile)
         self.profile.changed.connect(self.preview)
         form_body.addWidget(self.profile)
-        self.message = pages._label("", "lrtMuted")
+        self.message = _label("", "lrtMuted")
         self.message.setWordWrap(True)
-        form_body.addWidget(self.message)
+        right_layout.addWidget(self.message)
         actions = QtWidgets.QHBoxLayout()
         self.save_button = QtWidgets.QPushButton("Zapisz przygotówkę")
         self.save_button.clicked.connect(self.save)
@@ -101,12 +107,12 @@ class OffsetsPage(QtWidgets.QWidget):
         load_button.clicked.connect(self.choose_definition)
         actions.addWidget(self.save_button)
         actions.addWidget(load_button)
-        form_body.addLayout(actions)
+        right_layout.addLayout(actions)
         self.zero_button = QtWidgets.QPushButton("Ustaw G54")
         self.zero_button.clicked.connect(lambda: self.apply_zero())
-        form_body.addWidget(self.zero_button)
+        right_layout.addWidget(self.zero_button)
         scroll.setWidget(panel)
-        root.addWidget(scroll, 2)
+        root.addWidget(right, 2)
         self.form_body = form_body
         for combo in (self.shape, self.anchor, self.offset):
             combo.currentIndexChanged.connect(self.preview)
@@ -157,14 +163,16 @@ class OffsetsPage(QtWidgets.QWidget):
 
     def refresh(self):
         if hasattr(self, "zero_button"):
-            gate = pages.model.gates(self.shell.s)["mdi"]
+            gate = model.gates(self.shell.s)["mdi"]
             self.zero_button.setText(f"Ustaw {self.offset.currentText()}")
-            self.zero_button.setEnabled(self.valid and gate.enabled)
+            self.zero_button.setEnabled(self.valid and gate.enabled and
+                                        not getattr(self.shell, "preview", False))
             self.zero_button.setToolTip(gate.reason or "Zapis położenia układu, bez ruchu osi")
             self.save_button.setEnabled(self.valid)
 
     def apply_zero(self, confirm=True):
-        if not self.valid or not pages.model.gates(self.shell.s)["mdi"].enabled:
+        if (getattr(self.shell, "preview", False) or not self.valid or
+                not model.gates(self.shell.s)["mdi"].enabled):
             return False
         spec = self.build_spec()
         if confirm and QtWidgets.QMessageBox.question(
@@ -173,7 +181,7 @@ class OffsetsPage(QtWidgets.QWidget):
                 QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
                 QtWidgets.QMessageBox.No) != QtWidgets.QMessageBox.Yes:
             return False
-        pages.ACTION.CALL_MDI(offset_command(spec, self.shell.s.metric))
+        self.shell.action.CALL_MDI(offset_command(spec, self.shell.s.metric))
         self.message.setText(f"Zlecono ustawienie {spec.offset}. Sprawdź wskazanie DRO.")
         return True
 
