@@ -1,6 +1,6 @@
 # Stan projektu i przekazanie
 
-Tura: Claude · od 2026-10-18T19:30Z · stan: oddana (sesje 022, 023, 024 scalone; PR #37–#39)
+Tura: Claude · od 2026-10-19T04:56Z · stan: w toku (sesja 025, gałąź ccr-e8ca8a53-ajgyrd)
 
 Jedyny plik ze **stanem bieżącym**: kto ma turę, co jest scalone, co czeka, co dalej. Aktualizuje go każda
 sesja na końcu (zasady: [`WSPOLPRACA_MODELI.md`](WSPOLPRACA_MODELI.md) §1–3). Historia jest w
@@ -80,7 +80,4 @@ Sesje 022, 024, 023: PR #37, #38, #39 (autokontrola, bez niezależnego przegląd
 
 ## 8. Stan zatrzymania (bieżąca tura)
 
-- 2026-10-18 Sesje 022 → 024 → 023 według podziału D33 (worktree na sesję, testy w WSL `tools/dev/wsl-test.sh`).
-- 022: PR #37 scalony (panel, pulpit MPG). 024: PR #38 scalony (awarie, scenariusze, raport, check_requirements;
-  poprawka łańcucha E-STOP w HAL i procesów-zombie w testach CI). 023: PR #39 (edytor, widok 3D, napędy, awarie).
-- Tura oddana; blokady `linuxcnc` zwolnione.
+- 2026-10-19 Sesja 025 (skrypty VM) w chmurze Claude, gałąź `ccr-e8ca8a53-ajgyrd` (nazwę narzuca środowisko sesji). Krok 0: tura i LOCK.
