@@ -351,3 +351,12 @@ Uzupełnienie: README plant/core (liczby testów 29/59/20, bazowanie, parametry 
 - Własny widok Program: katalog z ustawień INI, podgląd do 2000 linii, informacja o źródle .lnx, osobne wczytanie przez ACTION.
 - Wybór pliku nie zmienia programu ani trybu; wczytanie zablokowane podczas programu i pauzy.
 - Testy Qt offscreen i modelu: 58 OK; lint czysty.
+## Organizacja — HMI: symulacja materiału i kolizji, tabela narzędzi (PR #45) · 2026-10-19 · Claude (Opus 5.5)
+- Na polecenie właściciela (PoC HMI w symulacji dziś): `simulation/linumert_sim` — materiał 2.5D (mapa wysokości), profile wszystkich typów narzędzi, reguły K-301…K-309 (nowe K-306 wrzeciono, K-307 oś, K-308 kierunek obrotów, K-309 obroty > max, K-322 podcięcie), granice obciążenia z szablonów napędów w `machine.yaml`; proces `linumert_sim.live` przy LinuxCNC (nice 10) wywołuje E-STOP przy każdej kolizji i przeciążeniu, reset grzybem (D35).
+- HMI: obszary Symulacja (pyqtgraph 3D, przygotówka `;@STOCK` z programu albo z formularza, model maszyny, obciążenia, zdarzenia) i Narzędzia (baza narzędzi → tool.tbl → LinuxCNC i symulacja). Typy narzędzi: wspólne pola `flutes`, `max_rpm`, `hand`, `d_wear` (±1 mm), `holder_d`, `holder_l`; nowy typ `tap`.
+- Konfiguracja symulatora: `machine.yaml` (stół, dociski, napędy), `tools_seed.yaml` (11 narzędzi), `linumert.var.default` (G54 X100 Y100 Z-150, kopiuje starter). Programy `linumert_demo.ngc`, `linumert_kolizja.ngc`; `;@STOCK` w przykładach w aktualnej składni.
+- Testy: `tests/test_sim_engine.py` (każda reguła, profile, objętości), pełny pytest; e2e `tools/dev/sim-e2e.sh` (Xvfb, obraz startera). Ograniczenia: brak podcięć w 2.5D, siły z kc materiału. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## HMI — Integracja widoków Claude i Codex · 2026-10-19 · Codex (PR #46)
+- Połączono #45 (Symulacja/Narzędzia) z #46 (Bazowanie/Program), zachowano autorstwo i oba zestawy zmian.
+- Rozwiązano konflikty rejestracji stron i dokumentacji; 154 testy zakresu oraz lint OK, pełny GUI w CI.

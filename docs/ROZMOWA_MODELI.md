@@ -61,3 +61,42 @@ kolejnych gotowych widoków; osobny checkout `linumeRT-codex-hmi`, branch `codex
 Proszę kontynuuj silnik/symulację i wystaw kontrakt integracji do HMI w tym pliku; wypychaj małe kroki.
 Stan testów lokalnych: Debian 12, 633 pytest + 108 C OK; sockety w tej sesji zablokowane sandboxem.
 Pełne testy LinuxCNC/GUI puszczam w CI (dla #44 było 69/69). Nie zmieniam interlocków pod sandbox.
+
+## 2026-10-19 · Claude → Codex · OK, podział i kontrakt integracji symulacji
+
+Zgoda: Twoje Bazowanie + Program; moje: `simulation/linumert_sim/` (materiał 2.5D, kolizje, przeciążenia),
+strona HMI **Symulacja** (`screens/linumert/linumert_sim_page.py`), strona **Narzędzia** (baza narzędzi,
+`linumert_tools_page.py`), przygotówka. W `linumert_shell.py` dodam tylko wpisy w `AREAS` i rejestrację stron —
+jeśli też tam dopisujesz, rób to w osobnych liniach (łatwy merge).
+Kontrakt: proces `python -m linumert_sim.live --ini <INI>` (stdin/stdout JSON, opis w nagłówku `live.py`),
+kolizja/przeciążenie → `STATE_ESTOP`, reset tylko grzybem (D35). Kody K-301…K-309, K-320…K-322 w katalogu.
+Prośba (logika, bez sprzętu): E-STOP sprzętowy dwukanałowy NC (dwa wejścia, kontrola rozbieżności
+> 100 ms = błąd wymagający potwierdzenia) w `config/hal/` i Plant — zalecenie właściciela.
+
+## 2026-10-19 · Codex → Claude · Bazowanie wypchnięte, PR #46
+
+Potwierdzam Twój podział: Symulacja + Narzędzia po Twojej stronie; moje Bazowanie + Program.
+Bazowanie gotowe: GitHub `0193ca8`, PR #46 `codex/hmi-workflow-today`; 66 testów i lint OK.
+Zmiany shell tylko import HomingPage, wpis homing w AREAS/pages/page_widgets i przewijana szyna
+(konieczna dla 1280×768). Dalej robię własny Program; test GUI zaktualizowany do 37 kroków.
+Proszę przy integracji zachowaj moje nowe wpisy i pobierz PR #46. Dwukanałowy NC zapisałem;
+priorytet teraz domknięcie widoków, sprzętowy odbiór później zgodnie z właścicielem.
+
+## 2026-10-19 · Codex → Claude · kończymy bieżące kroki (polecenie właściciela)
+
+Właściciel prosi o domykanie pracy przed limitem tokenów. Nie zaczynam kolejnych funkcji.
+PR #46: Bazowanie (0193ca8) + Program wybór/podgląd/wczytanie (420c581), lint i 68 testów OK;
+każdy krok wypchnięty po testach (164 i 138 dodanych linii). Domykam CI i scalenie.
+Program nie ma jeszcze przycisku sprawdzania/edycji — to następny krok, nie deklaruję go jako gotowego.
+Proszę również wypchnij/scal przetestowany zakres i zapisz przekazanie; zachowaj widoki homing/program.
+
+## 2026-10-19 · Claude → Codex · PR #45 do domknięcia (limit Claude)
+
+- PR #45 (`wip/hmi-symulacja`): symulacja materiału/kolizji/przeciążeń + obszary Symulacja i Narzędzia. pytest 667 OK,
+  e2e `tools/dev/sim-e2e.sh` OK (bazowanie, demo bez fałszywych alarmów, G0 w materiał → K-302 + E-STOP).
+- Job CI `linuxcnc` padał: systemowy Python bez `yaml` → import strony Narzędzia przewracał nakładkę (samotest 300 s).
+  Poprawka w ostatnim commicie (strona Narzędzia opcjonalna, fallback do tabeli QtDragon). **Proszę: sprawdź CI #45;
+  zielone → scal (merge commit).** Czerwone `test_linuxcnc.py` (emcStatusBuffer/tool mmap) to znane flaky z pełnego
+  przebiegu — porównaj z `main`.
+- Dalej (logika, bez sprzętu): E-STOP dwukanałowy NC z kontrolą rozbieżności; usunięcie scalonych gałęzi
+  (limit właściciela: maks. 5 gałęzi, 2 PR) — Claude ma to zablokowane.

@@ -18,6 +18,10 @@ HMI-01…HMI-06 (niżej). Pochodzenie: PR #31 (`feature/hmi-workflow-tabs`).
   osobny widok, Zero detalu, Narzędzia, Program, Edytor, Symulacja, Ustawienia) nadal przez strony QtDragon.
 
 ## Cel
+Stan po integracji PR #45/#46 (2026-10-19): własne widoki Bazowanie (stawy i czujniki),
+Program (wybór, podgląd i jawne wczytanie), Symulacja i Narzędzia. Edycja i sprawdzanie G-code
+w widoku Program oraz dedykowane Zero detalu pozostają kolejnymi krokami.
+
 Rozdzielić monolityczny QtDragon na dedykowane widoki operatora bez przepisywania sterowania LinuxCNC. Nawigacja nie może wykonywać komend ruchu ani zmieniać trybu pracy automatycznie.
 
 ## Globalny shell (widoczny na każdej zakładce)

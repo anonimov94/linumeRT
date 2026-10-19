@@ -1,5 +1,11 @@
-T1 P1 Z40.000 D6.000 ;frez walcowy 6 mm, 2 ostrza
-T2 P2 Z45.000 D10.000 ;frez walcowy 10 mm, 3 ostrza
-T3 P3 Z55.000 D5.000 ;wiertlo 5 mm
-T4 P4 Z35.000 D3.000 ;nawiertak 90 st. 3 mm
-T5 P5 Z50.000 D50.000 ;glowica planujaca 50 mm
+T1 P1 Z75 D6 ;frez palcowy 6 mm, 2 ostrza
+T2 P2 Z80 D10 ;frez palcowy 10 mm, 3 ostrza
+T3 P3 Z95 D5 ;wiertło 5 mm 118°
+T4 P4 Z70 D10 ;fazownik 90° 10 mm
+T5 P5 Z65 D50 ;głowica 50 mm, 4 płytki
+T6 P6 Z80 D8 ;frez kulowy 8 mm
+T7 P7 Z80 D12 ;frez torusowy 12 mm R1
+T8 P8 Z75 D20 ;frez teowy 20 × 4 mm
+T9 P9 Z75 D6 ;frez lizakowy 6 mm
+T10 P10 Z85 D6 ;gwintownik M6
+T11 P11 Z75 D8 ;frez palcowy 8 mm lewy (M4)

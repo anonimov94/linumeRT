@@ -235,6 +235,26 @@
   params: [line, element]
   pl: "Linia {line}: element ruchomy maszyny ({element}) koliduje z innym elementem."
   en: "Line {line}: a moving machine element ({element}) collides with another element."
+- code: K-306
+  clear: ack
+  params: [line, torque, limit]
+  pl: "Linia {line}: przeciążenie wrzeciona, moment {torque} N·m powyżej granicy {limit} N·m."
+  en: "Line {line}: spindle overload, torque {torque} N·m above the limit {limit} N·m."
+- code: K-307
+  clear: ack
+  params: [line, axis, force, limit]
+  pl: "Linia {line}: przeciążenie napędu osi {axis}, siła {force} N powyżej granicy {limit} N."
+  en: "Line {line}: axis {axis} drive overload, force {force} N above the limit {limit} N."
+- code: K-308
+  clear: ack
+  params: [line, tool, direction]
+  pl: "Linia {line}: narzędzie T{tool} skrawa przy obrotach w złym kierunku ({direction})."
+  en: "Line {line}: tool T{tool} cuts with the spindle turning the wrong way ({direction})."
+- code: K-309
+  clear: ack
+  params: [tool, rpm, limit]
+  pl: "Obroty {rpm} obr/min powyżej maksimum narzędzia T{tool} ({limit} obr/min)."
+  en: "Speed {rpm} rpm above the maximum of tool T{tool} ({limit} rpm)."
 - code: K-310
   clear: ack
   params: [line, axis]
@@ -257,6 +277,11 @@
   en: "No stock definition; define the stock before simulating."
 
 # ---- Programowanie i ścieżka ---------------------------------------------
+- code: K-322
+  clear: ack
+  params: [tool]
+  pl: "Narzędzie T{tool} robi podcięcia, których model materiału 2.5D nie odwzorowuje."
+  en: "Tool T{tool} makes undercuts the 2.5D material model does not represent."
 - code: P-5001
   clear: ack
   params: [line, word]

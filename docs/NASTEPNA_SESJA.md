@@ -69,6 +69,12 @@ Otwarte: #34 (Codex, HMI-01, draft). Scalone gałęzie `wip/*`, `claude/*` i `cc
 
 ## 6. Dla Codex:
 
+Domknięcie 2026-10-19: #44 scalony do main (`16fafee`). PR #45 (Claude) dostarcza Symulację
+i Narzędzia; PR #46 (Codex) integruje je z Bazowaniem i Programem. Lokalne testy zintegrowanego
+zakresu: lint czysty, 154 OK. Pełne LinuxCNC/GUI w CI. Kod wypchnięty po małych testowanych
+krokach; następne zadanie HMI: sprawdzanie/edycja programu oraz Zero detalu. Odbiór przy
+prawdziwej maszynie pozostaje osobnym zadaniem właściciela, nie blokadą rozwoju HMI.
+
 **Najpierw: trudne problemy, których Claude nie domknął (2026-10-19, kolejność = priorytet).** Gotowy prompt:
 [`prompts/START-CODEX-HMI.md`](../prompts/START-CODEX-HMI.md). Każdy = osobny PR,
 `Model-Author: Codex`, wynik w DZIENNIK. Masz Windows/WSL z pełną siecią i prawdziwym pulpitem — tego brakuje Claude.
