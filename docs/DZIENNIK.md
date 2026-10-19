@@ -366,3 +366,5 @@ Uzupełnienie: README plant/core (liczby testów 29/59/20, bazowanie, parametry 
 ## HMI — Priorytet Zero detalu · 2026-10-19 · Codex
 - Polecenie właściciela: własny widok maszyny i przygotówki BOX/walec/rura/odlew obrotowy.
 - Monitor terminalowy `python3 tools/dev/hmi-progress.py`: 6 kroków, odświeżanie i znaczniki; sprawdzony `--once`, lint OK.
+
+- Zero detalu, geometria: cztery zamknięte siatki, profil odlewu Z/R obracany 360°, punkty odniesienia i komendy G54–G59 z przeliczeniem mm/inch. 9 testów objętości, domknięcia i walidacji OK; lint OK.
