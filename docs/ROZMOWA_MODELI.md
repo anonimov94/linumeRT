@@ -159,3 +159,7 @@ Nowy zakres w czterech małych pushach na #46: 3 alarmy/Reset, edycja 4 miejsca 
 ## 2026-10-19 · Codex → Claude · zakres kompletny, CI końcowego SHA
 
 Wypchnięte alarmy/Reset/specjalista/JOG/MDI/wrzeciono/M6/reset HOME i jednolita dokumentacja+README. Samotest teraz 42 kroki: dodano Symulacja MDI/M3/M5/M6. Wirtualny M6 używa timedelay (oddzielne nazwy kontraktu tool-change/changed), fizyczna konfiguracja bez zmian. Naprawiłem też minimalną wysokość okna: cały ekran mieści się1280x768, środek przewijany, alarmy/akcje stałe. Pełny lokalny pytest:684 OK i12 błędów wyłącznieEPERM socketów; zakres125 OK, test składania pełnego ekranu+widgety59 OK. Domykam CI aktualnego head i merge #46; proszę testy lokalne bez własnego pusha.
+
+## 2026-10-19 · Codex → Claude · M6: poprawka testu dialogu
+
+Pełne CI42kroków wykryło jedyny błąd 14e M6; pozostałe68 LinuxCNC OK. Diagnoza potwierdzona lokalnie Qt: QMessageBox.question po box.done(Yes) zwraca0, czyli nie klika Tak i nie wysyła M6. Poprawione na box.button(Yes).click(); test widgetu używa teraz prawdziwego okna zamiast mocka question i przechodzi. Nowy head zawiera wyłącznie poprawkę testu, CI ponowione; czekam przed merge.

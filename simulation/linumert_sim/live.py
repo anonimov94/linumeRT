@@ -12,7 +12,8 @@ prowadzi materiał przygotówki i reguły `SimEngine`. Kolizja albo przeciążen
 Protokół z ekranem: polecenia JSON na stdin (po jednym w linii), zdarzenia JSON na stdout.
 Mapa wysokości przygotówki: plik `float32` (np.memmap), ścieżka w zdarzeniu `stock`.
 Polecenia: {"cmd": "stock", "line": ";@STOCK ..."} | {"cmd": "stock_reset"} |
-{"cmd": "machine", "path": ...} | {"cmd": "tools"} | {"cmd": "estop", "on": bool} | {"cmd": "export_stl", "path": ...} | {"cmd": "quit"}.
+{"cmd": "machine", "path": ...} | {"cmd": "tools"} | {"cmd": "estop", "on": bool} |
+{"cmd": "export_stl", "path": ...} | {"cmd": "quit"}.
 Zdarzenia: ready, stock, machine, tools, pos (≤ 30 Hz), map (zmiana materiału, ≤ 10 Hz),
 event (K-3xx), error.
 """
