@@ -77,3 +77,53 @@ def test_hardstop_home_comp_in_halrun(rip, tmp_path):  # REQ-VM-07 (c): strona L
     # poza bazowaniem: brak czujnika, limit normalny; w bazowaniu: limit zredukowany,
     # czujnik dopiero po 20 ms ponad progiem, znika po spadku poniżej progu
     assert values == ["FALSE", "1000", "FALSE", "300", "TRUE", "FALSE"], run.stdout + run.stderr
+
+
+ESTOP2_SCRIPT = """\
+loadrt threads name1=t period1=1000000
+loadrt lrt_estop2
+addf lrt-estop2.0 t
+setp lrt-estop2.0.discrepancy-time 0.05
+setp lrt-estop2.0.ch-a 1
+setp lrt-estop2.0.ch-b 1
+start
+loadusr -w sleep 0.02
+getp lrt-estop2.0.ok
+setp lrt-estop2.0.ch-b 0
+loadusr -w sleep 0.1
+getp lrt-estop2.0.fault
+setp lrt-estop2.0.ch-b 1
+setp lrt-estop2.0.reset 1
+loadusr -w sleep 0.01
+getp lrt-estop2.0.ok
+setp lrt-estop2.0.reset 0
+setp lrt-estop2.0.ch-a 0
+setp lrt-estop2.0.ch-b 0
+loadusr -w sleep 0.01
+setp lrt-estop2.0.ch-a 1
+setp lrt-estop2.0.ch-b 1
+loadusr -w sleep 0.01
+setp lrt-estop2.0.reset 1
+loadusr -w sleep 0.01
+getp lrt-estop2.0.ok
+stop
+"""
+
+
+def test_estop2_comp_in_halrun(rip, tmp_path):
+    """Dwukanałowy E-STOP NC: rozbieżność → błąd; reset bez testu obwodu nieskuteczny."""
+    shutil.copy(ROOT / "hal" / "lrt_estop2.comp", tmp_path)
+    built = _rip(rip, "halcompile --compile lrt_estop2.comp", tmp_path)
+    assert built.returncode == 0, built.stdout + built.stderr
+    target = rip / "rtlib" / "lrt_estop2.so"
+    assert not target.exists(), f"{target} już istnieje — nie nadpisuję cudzego modułu"
+    (tmp_path / "test.hal").write_text(ESTOP2_SCRIPT, encoding="utf-8")
+    shutil.copy(tmp_path / "lrt_estop2.so", target)
+    try:
+        run = _rip(rip, "halrun -f test.hal", tmp_path)
+    finally:
+        target.unlink(missing_ok=True)
+        _rip(rip, "halrun -U", tmp_path)
+    values = [line.strip() for line in run.stdout.splitlines()
+              if line.strip() in {"TRUE", "FALSE"}]
+    assert values == ["TRUE", "TRUE", "FALSE", "TRUE"], run.stdout + run.stderr

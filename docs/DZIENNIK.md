@@ -392,3 +392,9 @@ Model-Author: Codex.
 - 042: generator `drill_holes` — wzory pojedynczy/lista/rząd/siatka/okrąg/łuk, G81/G82/G83/G73, G33.1 tylko przy `spindle_sync` (G84 nie istnieje w LinuxCNC 2.9), walidacja, podgląd 2D.
 - 059: eksport STL materiału z mapy wysokości (bryła szczelna, objętość zgodna) + przycisk „Eksport STL” w widoku Symulacja.
 - Brak: walidacja z ToolDB (040 p.2), raport HTML symulacji (059 p.1), panel dialogowy (045). Testy: `test_gen_basic.py`, `test_gen_drilling.py`, `test_sim_engine.py::test_stl_*`; pytest 684 OK.
+
+## Organizacja — domknięcie pracy z 2026-10-19: #46 scalony, Program, E-STOP dwukanałowy · Claude (Opus 5.5)
+- #46 Codexa (Bazowanie, Program, Zero detalu, D36/D37) scalony po zielonym CI; wcześniej poprawka `INFO.JOINT_SEQUENCE` (lista w LinuxCNC 2.9 — ekran nie wstawał).
+- Program: przyciski Sprawdź (lekser, kursor na pierwszym błędzie) i Edytuj/Zapisz (zapis atomowy, blokada w trakcie programu, „wczytaj ponownie” dla aktywnego pliku).
+- E-STOP dwukanałowy NC (zalecenie właściciela): `hal/lrt_estop2.comp` + model `core/linumert/diag/estop2.py` — oba kanały zamknięte = ok; rozbieżność > 0,1 s = błąd zatrzaśnięty; kasowanie: test obwodu (oba otwarte → oba zamknięte) + Reset. Plant: `io.inputs.estop_b` (bit 15) = kopia kanału A, awaria `estop_channel` (kanał B zablokowany). Konfiguracja Plant: łańcuch przez `lrt_estop2`; ekran podaje przyczynę „rozbieżność kanałów”. Testy: model, `halrun`, Plant. NIEZWERYFIKOWANE NA SPRZĘCIE.
+- D38 (PROPOZYCJA, wznowienie z helisą i łukiem) w sesji 031; stan częściowy sesji 040, 042, 055–059 w `prompts/README.md`.

@@ -171,8 +171,8 @@ set -e
 cfg=$1 ini=$2 yaml=$3 port=$4
 make -s -C plant/core shared >/dev/null
 T=$(mktemp -d)
-cp hal/lrt_net.comp hal/lrt_net_proto.h hal/lrt_cia402.comp hal/lrt_hardstop_home.comp "$T"/
-(cd "$T" && for c in lrt_net lrt_cia402 lrt_hardstop_home; do halcompile --install $c.comp >/dev/null; done)
+cp hal/lrt_net.comp hal/lrt_net_proto.h hal/lrt_cia402.comp hal/lrt_hardstop_home.comp hal/lrt_estop2.comp "$T"/
+(cd "$T" && for c in lrt_net lrt_cia402 lrt_hardstop_home lrt_estop2; do halcompile --install $c.comp >/dev/null; done)
 PYTHONPATH=/work/core:/work/plant/server /opt/linumert/bin/python -m linumert_plant serve \
     --plant "$cfg/$yaml" --panel "$port" --panel-listen 0.0.0.0 --state-dir /home/lcnc/plant-state \
     > /home/lcnc/plant.log 2>&1 &

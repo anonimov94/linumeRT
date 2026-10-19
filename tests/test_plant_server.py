@@ -123,7 +123,12 @@ def test_outputs_and_inputs_pass_through(core) -> None:
     master.digital_out = 0b101
     master.exchange()
     assert server.machine.outputs == 0b101
-    assert master.last.digital_in == server.machine.inputs
+    # estop_b (kanał B E-STOP) = kopia kanału A; reszta bitów jak w modelu C
+    b = server.machine.model.inputs.get("estop_b")
+    expected = server.machine.inputs
+    if b is not None:
+        expected |= (server.machine.inputs >> server.machine.model.inputs["estop"] & 1) << b
+    assert master.last.digital_in == expected
 
 
 def test_mode_zero_and_unsupported_mode_do_not_stop_plant(core) -> None:  # REQ-QA-03

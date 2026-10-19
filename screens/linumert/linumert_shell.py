@@ -515,6 +515,9 @@ class LinumertShell(QtCore.QObject):
         self.show_alarm("err", reason, "safety")
 
     def _estop_cause(self, requested: bool = False) -> str:
+        if pages._hal("lrt-estop2.0.fault"):
+            return ("E-STOP: rozbieżność kanałów A/B obwodu E-STOP (styk albo przewód) — "
+                    "test: wciśnij i zwolnij grzyb sprzętowy, potem Reset")
         loop = pages._hal("lrt-net.0.din-00")
         connected = pages._hal("lrt-net.0.connected")
         missed = pages._hal("lrt-net.0.missed")
