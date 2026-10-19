@@ -372,3 +372,5 @@ Uzupełnienie: README plant/core (liczby testów 29/59/20, bazowanie, parametry 
 - Zero detalu, widok 3D: maszyna i cztery przygotówki, obrót myszą, powiększanie i znacznik zera; renderuje także bez OpenGL. 13 testów geometrii i rzeczywistego renderowania Qt OK, lint OK.
 
 - Własny widok Zero detalu zastępuje stronę QtDragon: maszyna, cztery kształty, edycja wymiarów, profil Z/R, punkt odniesienia i pozycja w G53. 19 testów geometrii/widgetów OK; edycja i nawigacja nie wysyłają komend maszyny.
+
+- Zero detalu, zapis i układy: atomowy zapis/wczytanie przygotówki przy konfiguracji maszyny, pełny profil odlewu; jawne G10 L2 po potwierdzeniu, blokada przed bazowaniem i w trakcie programu, przeliczenie mm/inch. 21 testów geometrii, renderowania i operacji GUI OK.

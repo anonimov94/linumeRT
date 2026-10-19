@@ -113,3 +113,40 @@ def test_zero_detalu_edits_all_shapes_without_machine_commands(page_env):
     assert page.machine_name.text() == "Test XYZ"
     assert not action.mock_calls
     page.close()
+
+
+def test_zero_detalu_save_load_and_explicit_offset_command(page_env, tmp_path):
+    _home, shell, _status, action = page_env
+    shell.c = importlib.import_module("linumert_shell_model").load_tokens()["kolory"]
+    module = importlib.import_module("linumert_offsets_page")
+    page = module.OffsetsPage(shell)
+    page.state_path = tmp_path / "przygotówka.json"
+    page.shape.setCurrentIndex(3)
+    page.offset.setCurrentText("G59")
+    for spin, value in zip(page.position, (25.4, 50.8, -25.4), strict=True):
+        spin.setValue(value)
+    assert page.save() and page.state_path.exists()
+    page.shape.setCurrentIndex(0)
+    assert page.load(page.state_path) and page.spec.shape == "casting"
+    assert not action.mock_calls
+    assert not page.apply_zero(confirm=False)  # najpierw bazowanie
+    shell.s.homed = set(shell.s.axes)
+    shell.s.metric = False
+    assert page.apply_zero(confirm=False)
+    action.CALL_MDI.assert_called_once_with("G10 L2 P6 X1.000000 Y2.000000 Z-1.000000")
+    action.reset_mock()
+    shell.s.interp = "run"
+    assert not page.apply_zero(confirm=False) and not action.mock_calls
+    page.close()
+
+
+def test_zero_detalu_invalid_load_preserves_model(page_env, tmp_path):
+    _home, shell, _status, _action = page_env
+    shell.c = importlib.import_module("linumert_shell_model").load_tokens()["kolory"]
+    module = importlib.import_module("linumert_offsets_page")
+    page = module.OffsetsPage(shell)
+    path = tmp_path / "broken.json"
+    path.write_text('{"shape": "casting", "profile": [[0, 10], [0, 20]]}')
+    previous = page.spec
+    assert not page.load(path) and page.spec == previous
+    page.close()

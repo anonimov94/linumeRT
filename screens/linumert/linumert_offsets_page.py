@@ -1,10 +1,12 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
 """Zero detalu: maszyna, przygotówka i profil odlewu. Model-Author: Codex."""
 
+import json
 import os
 import sys
+from pathlib import Path
 
-from PyQt5 import QtWidgets
+from PyQt5 import QtCore, QtWidgets
 
 import linumert_shell_pages as pages
 from linumert_profile_editor import ProfileEditor
@@ -13,7 +15,7 @@ from linumert_sim_page import ROOT
 if os.path.join(ROOT, "core") not in sys.path:
     sys.path.insert(0, os.path.join(ROOT, "core"))
 
-from linumert.programs.workpiece import Workpiece
+from linumert.programs.workpiece import Workpiece, offset_command
 from linumert_workpiece_view import WorkpieceView
 
 SHAPES = (("Prostopadłościan", "box"), ("Walec", "cylinder"),
@@ -28,6 +30,9 @@ class OffsetsPage(QtWidgets.QWidget):
         super().__init__()
         self.setObjectName("lrtPage")
         self.shell, self.spec, self.loading, self.valid = shell, Workpiece(), True, True
+        ini = os.environ.get("INI_FILE_NAME") or getattr(pages.INFO, "INIPATH", "")
+        self.state_path = (Path(ini).resolve().parent / "linumert_workpiece.json" if ini else
+                           Path.home() / ".config/linumert/workpiece.json")
         root = QtWidgets.QHBoxLayout(self)
         root.setContentsMargins(16, 16, 16, 16)
         frame, left, self.machine_name = pages.card("Maszyna i detal", "model poglądowy")
@@ -89,6 +94,17 @@ class OffsetsPage(QtWidgets.QWidget):
         self.message = pages._label("", "lrtMuted")
         self.message.setWordWrap(True)
         form_body.addWidget(self.message)
+        actions = QtWidgets.QHBoxLayout()
+        self.save_button = QtWidgets.QPushButton("Zapisz przygotówkę")
+        self.save_button.clicked.connect(self.save)
+        load_button = QtWidgets.QPushButton("Wczytaj…")
+        load_button.clicked.connect(self.choose_definition)
+        actions.addWidget(self.save_button)
+        actions.addWidget(load_button)
+        form_body.addLayout(actions)
+        self.zero_button = QtWidgets.QPushButton("Ustaw G54")
+        self.zero_button.clicked.connect(lambda: self.apply_zero())
+        form_body.addWidget(self.zero_button)
         scroll.setWidget(panel)
         root.addWidget(scroll, 2)
         self.form_body = form_body
@@ -100,6 +116,8 @@ class OffsetsPage(QtWidgets.QWidget):
         client = getattr(getattr(shell, "sim", None), "client", None)
         if client is not None:
             client.message.connect(self.scene_event)
+        if self.state_path.exists():
+            self.load(self.state_path)
 
     def build_spec(self):
         kind = self.shape.currentData()
@@ -138,4 +156,73 @@ class OffsetsPage(QtWidgets.QWidget):
                 self.view.update()
 
     def refresh(self):
-        pass  # edycja geometrii nie zmienia stanu LinuxCNC
+        if hasattr(self, "zero_button"):
+            gate = pages.model.gates(self.shell.s)["mdi"]
+            self.zero_button.setText(f"Ustaw {self.offset.currentText()}")
+            self.zero_button.setEnabled(self.valid and gate.enabled)
+            self.zero_button.setToolTip(gate.reason or "Zapis położenia układu, bez ruchu osi")
+            self.save_button.setEnabled(self.valid)
+
+    def apply_zero(self, confirm=True):
+        if not self.valid or not pages.model.gates(self.shell.s)["mdi"].enabled:
+            return False
+        spec = self.build_spec()
+        if confirm and QtWidgets.QMessageBox.question(
+                self, "Ustaw zero detalu", f"Zapisać {spec.offset} w położeniu G53 "
+                f"{spec.position} mm? Osie pozostaną w miejscu.",
+                QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
+                QtWidgets.QMessageBox.No) != QtWidgets.QMessageBox.Yes:
+            return False
+        pages.ACTION.CALL_MDI(offset_command(spec, self.shell.s.metric))
+        self.message.setText(f"Zlecono ustawienie {spec.offset}. Sprawdź wskazanie DRO.")
+        return True
+
+    def save(self):
+        if not self.valid:
+            return False
+        try:
+            data = json.dumps(self.build_spec().to_dict(), ensure_ascii=False, indent=2).encode()
+            self.state_path.parent.mkdir(parents=True, exist_ok=True)
+            target = QtCore.QSaveFile(str(self.state_path))
+            if not target.open(QtCore.QIODevice.WriteOnly):
+                raise OSError(target.errorString())
+            if target.write(data) != len(data):
+                target.cancelWriting()
+                raise OSError(target.errorString())
+            if not target.commit():
+                raise OSError(target.errorString())
+            self.message.setText(f"Zapisano przygotówkę: {self.state_path}")
+            return True
+        except (OSError, ValueError, TypeError) as exc:
+            self.message.setText(f"Błąd zapisu: {exc}")
+            return False
+
+    def choose_definition(self):
+        path, _filter = QtWidgets.QFileDialog.getOpenFileName(
+            self, "Przygotówka", str(self.state_path.parent), "Przygotówka (*.json)")
+        if path:
+            self.load(path)
+
+    def load(self, path):
+        try:
+            with Path(path).open("rb") as source:
+                raw = source.read(65537)
+            if len(raw) > 65536:
+                raise ValueError("Definicja przygotówki jest za duża")
+            spec = Workpiece(**json.loads(raw))
+        except (OSError, ValueError, TypeError) as exc:
+            self.message.setText(f"Błąd odczytu przygotówki: {exc}")
+            return False
+        self.loading, self.spec = True, spec
+        self.shape.setCurrentIndex(self.shape.findData(spec.shape))
+        self.anchor.setCurrentIndex(self.anchor.findData(spec.anchor))
+        self.offset.setCurrentText(spec.offset)
+        for name, field in self.fields.items():
+            field.setValue(getattr(spec, name))
+        for field, value in zip(self.position, spec.position, strict=True):
+            field.setValue(value)
+        self.material.setText(spec.material)
+        self.profile.set_points(spec.profile)
+        self.loading = False
+        self.preview()
+        return True

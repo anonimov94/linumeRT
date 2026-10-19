@@ -28,26 +28,28 @@ class Workpiece:
         if self.shape not in ("box", "cylinder", "tube", "casting"):
             raise ValueError("Nieznany kształt przygotówki")
         dims = (self.x, self.y, self.height, self.diameter, self.bore)
-        if not all(isfinite(v) and v > 0 for v in dims):
-            raise ValueError("Wymiary muszą być dodatnimi, skończonymi liczbami")
+        if not all(isfinite(v) and 0 < v <= 100000 for v in dims):
+            raise ValueError("Wymiary muszą być dodatnimi liczbami do 100000 mm")
         if self.shape == "tube" and self.bore >= self.diameter:
             raise ValueError("Otwór rury musi być mniejszy niż średnica zewnętrzna")
         if self.anchor not in ("top-center", "bottom-center", "top-front-left"):
             raise ValueError("Nieznany punkt zerowy przygotówki")
         if self.offset not in ("G54", "G55", "G56", "G57", "G58", "G59"):
             raise ValueError("Wybierz układ od G54 do G59")
-        if len(self.position) != 3 or not all(isfinite(v) for v in self.position):
+        if len(self.position) != 3 or not all(isfinite(v) and abs(v) <= 100000
+                                             for v in self.position):
             raise ValueError("Położenie wymaga trzech skończonych współrzędnych")
-        if self.shape == "casting":
-            if not 2 <= len(self.profile) <= 32:
-                raise ValueError("Profil odlewu wymaga od 2 do 32 punktów (Z, R)")
-            if any(len(p) != 2 or not all(isfinite(v) for v in p) or p[1] < 0
-                   for p in self.profile):
-                raise ValueError("Punkty profilu: skończone Z i promień R ≥ 0")
-            if any(a[0] >= b[0] for a, b in zip(self.profile, self.profile[1:], strict=False)):
-                raise ValueError("Współrzędne Z profilu muszą rosnąć")
-            if not any(p[1] > 0 for p in self.profile):
-                raise ValueError("Profil musi mieć dodatni promień")
+        if not 2 <= len(self.profile) <= 32:
+            raise ValueError("Profil odlewu wymaga od 2 do 32 punktów (Z, R)")
+        if any(len(p) != 2 or not all(isfinite(v) and abs(v) <= 100000 for v in p) or p[1] < 0
+               for p in self.profile):
+            raise ValueError("Punkty profilu: skończone Z i promień R ≥ 0")
+        if any(a[0] >= b[0] for a, b in zip(self.profile, self.profile[1:], strict=False)):
+            raise ValueError("Współrzędne Z profilu muszą rosnąć")
+        if not any(p[1] > 0 for p in self.profile):
+            raise ValueError("Profil musi mieć dodatni promień")
+        if not isinstance(self.material, str) or not 1 <= len(self.material) <= 60:
+            raise ValueError("Nazwa materiału wymaga od 1 do 60 znaków")
 
     def to_dict(self):
         return asdict(self)
