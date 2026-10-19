@@ -37,14 +37,70 @@ class HandlerClass(_upstream.HandlerClass):
     def initialized__(self):
         super().initialized__()
         self.w.setWindowTitle("linumeRT")
-        if os.environ.get("LINUMERT_SHELL", "1") != "0":
+        # D35: piny grzyba E-STOP w HMI i sygnału życia (config/hal/linumert_hmi_estop.hal);
+        # tworzone zawsze, bo łączy je postgui.
+        qhal = _upstream.QHAL
+        pins = {key: qhal.newpin(name, qhal.HAL_BIT, qhal.HAL_OUT) for key, name in
+                (("ok", "hmi-estop-ok"), ("hb", "hmi-heartbeat"), ("wd", "hmi-wd-enable"),
+                 ("ack", "hmi-ack"))}
+        if os.environ.get("LINUMERT_SHELL", "1") == "0":
+            self._classic_heartbeat(pins)
+        else:
             import linumert_shell
 
-            self.shell = linumert_shell.install(self)
+            self.shell = linumert_shell.install(self, pins)
+            # Reset E-STOP wyłącznie grzybem HMI: przycisk E-STOP/RESET QtDragon ukryty.
+            self.w.action_estop.hide()
             if os.environ.get("LINUMERT_SHELL_SELFTEST"):
                 import linumert_shell_selftest
 
                 self._selftest = linumert_shell_selftest.maybe_start(self.shell)
+
+    def _classic_heartbeat(self, pins):
+        """Tryb klasyczny (bez nakładki): HMI żyje, grzyba HMI brak; E-STOP przyciskiem QtDragon.
+
+        Każde żądanie resetu E-STOP z procesu ekranu (przycisk QtDragon, klawisz) najpierw potwierdza
+        zdarzenie (impuls hmi-ack) i ponownie uzbraja watchdog; reset z innego procesu (np. komenda
+        LinuxCNC) dalej nie zamknie łańcucha bez potwierdzenia (D35, przegląd Codexa P2).
+        """
+        from PyQt5 import QtCore
+
+        pins["ok"].set(True)
+        pins["wd"].set(False)
+        pins["ack"].set(False)
+        self._hb_state = False
+
+        def beat():
+            self._hb_state = not self._hb_state
+            pins["hb"].set(self._hb_state)
+
+        self._hb_timer = QtCore.QTimer()
+        self._hb_timer.timeout.connect(beat)
+        self._hb_timer.start(100)
+        QtCore.QTimer.singleShot(400, lambda: pins["wd"].set(True))
+        import linuxcnc
+
+        # Podmiana w KLASIE Action: przycisk QtDragon (ActionButton) ma własną instancję Action.
+        cls = type(_upstream.ACTION)
+        original = cls.SET_ESTOP_STATE
+
+        def set_estop_state(action, state):
+            reset = state is False or (not isinstance(state, bool)
+                                       and state == linuxcnc.STATE_ESTOP_RESET)
+            if not reset:
+                return original(action, state)
+            pins["ack"].set(True)  # zbocze: potwierdzenie zdarzenia
+            pins["wd"].set(False)
+            QtCore.QTimer.singleShot(100, lambda: (pins["wd"].set(True), pins["ack"].set(False)))
+            QtCore.QTimer.singleShot(300, lambda: original(action, False))
+            return None
+
+        cls.SET_ESTOP_STATE = set_estop_state
+        self.classic_pins = pins
+        if os.environ.get("LINUMERT_SHELL_SELFTEST"):
+            import linumert_shell_selftest
+
+            self._selftest = linumert_shell_selftest.maybe_start_classic(self)
 
     def hard_limit_tripped(self, obj, tripped, list_of_tripped):
         # QtDragon 2.9.10 zgłasza „Hard limits tripped” przy każdym sygnale, także tripped=False
@@ -63,6 +119,13 @@ class HandlerClass(_upstream.HandlerClass):
             return
         where = f" (stawy {', '.join(map(str, hits))})" if hits else ""
         self.add_status(f"Zadziałała krańcówka sprzętowa{where}", _upstream.CRITICAL)
+
+    def on_keycall_ESTOP(self, event, state, shift, cntrl):
+        # F1: wciśnięcie grzyba HMI (zwolnienie tylko świadomie, przyciskiem grzyba)
+        if state and self.shell is not None:
+            self.shell.press_estop()
+        elif state:
+            super().on_keycall_ESTOP(event, state, shift, cntrl)
 
     def add_status(self, message, alertLevel=_upstream.DEFAULT):
         super().add_status(message, alertLevel)

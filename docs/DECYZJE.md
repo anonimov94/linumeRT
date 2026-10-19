@@ -5,7 +5,7 @@ Format: decyzja · uzasadnienie · status (PRZYJĘTA / PROPOZYCJA / ODRZUCONA / 
 
 Spis: [wersja 2 (D01–D23)](#wersja-2--2026-10-17-qtdragon-wirtualna-maszyna-wytyczne-ip) ·
 [do dyskusji](#do-dyskusji-nie-blokują-pracy) · [zastąpione z wersji 1](#zastąpione-z-wersji-1-2026-10-17-rano) ·
-[decyzje właściciela o procesie i kierunku (D24–D34)](#decyzje-właściciela-o-procesie-i-kierunku-d24d34) ·
+[decyzje właściciela o procesie i kierunku (D24–D34)](#decyzje-właściciela-o-procesie-i-kierunku-d24d35) ·
 [decyzje techniczne sesji](#decyzje-techniczne-sesji-według-numeru-sesji).
 
 ## Wersja 2 — 2026-10-17 (QtDragon, wirtualna maszyna, wytyczne IP)
@@ -45,7 +45,7 @@ Spis: [wersja 2 (D01–D23)](#wersja-2--2026-10-17-qtdragon-wirtualna-maszyna-wy
 - v1 D10 three.js → zastąpione przez D10 v2.
 - v1 D17 3 sesje w tygodniu → zastąpione przez D17 v2.
 
-## Decyzje właściciela o procesie i kierunku (D24–D34)
+## Decyzje właściciela o procesie i kierunku (D24–D35)
 
 Współpraca modeli, scalanie, środowisko. Obowiązujące zasady w skrócie: [`WSPOLPRACA_MODELI.md`](WSPOLPRACA_MODELI.md).
 
@@ -60,6 +60,7 @@ Współpraca modeli, scalanie, środowisko. Obowiązujące zasady w skrócie: [`
 - 2026-10-18 · D32 · Właściciel: docelowym kierunkiem ekranu operatora jest HMI według kolejności pracy operatora (`docs/design/HMI_WORKFLOW.md`, z PR #31): globalny pasek stanu, nawigacja Start / Przygotowanie / Program / Produkcja / Ręczne / Diagnostyka, ekrany 0–10, etapy HMI-01…HMI-06 z kryteriami odbioru. Realizuje Codex w wolnej chwili; sesje ekranu z planu (M2, 027–038) mają być z nim zgodne. Nie zmienia D02 (baza QtDragon, handler-patch, `linumert_upstream_handler.py` bez zmian) ani CLAUDE.md §6a: dokument opisuje układ informacji i przepływ pracy, a wygląd wynika z `tokens.yaml`, ikon i makiet; sprzeczność z makietami zgłaszać jako PROPOZYCJA · kierunek rozwoju produktu końcowego · PRZYJĘTA
 - 2026-10-18 · D33 · Właściciel: kolejną pracę podzielić na 4 sesje. 022 (panel Plant), 024 (scenariusze, `faults.py`, `check_requirements`) i 025 (VM) idą równolegle w osobnych worktree, z rozłącznymi plikami i blokadą `linuxcnc` w WSL (`tools/dev/wsl-test.sh`); 023 (edytor obrabiarki i przyciski awarii przeniesione z 022) po scaleniu 022 i 024. Zasady: `prompts/START-PODZIAL.md`; w czasie podziału `prompts/LOCK` i linia `Tura:` nie są używane (stan w opisie PR), `NASTEPNA_SESJA.md` zamyka 023 · PRZYJĘTA
 - 2026-10-19 · D34 · Właściciel: „dopracuj HMI tak, żebym miał ekran do sterowania, nakładkę na QtDragon; proof of concept działający w GUI, funkcje uzupełniamy potem”. Claude robi HMI-PoC mimo zapisu D32 (etapy HMI prowadzi Codex): nakładka w `linumert_handler.py` + moduły `linumert_shell*.py`, `linumert_upstream_handler.py` bez zmian, QtDragon przeniesiony do obszarów szyny (nie kopiowany), komendy tylko przez ACTION, stan tylko ze STATUS, wygląd z `tokens.yaml` i makiety 01. Etapy HMI-02…06 (Codex albo Claude) rozwijają tę nakładkę zamiast budować drugą · kierunek D32 bez zmian, szybki działający ekran · PRZYJĘTA
+- 2026-10-19 · D35 · Właściciel: „całe safety emulowane w symulatorze ma być potwierdzane grzybem w HMI; prawdziwy układ safety maszyny będzie podłączony pod HAL fizycznie, a grzyb z HMI będzie dodatkowym zabezpieczeniem (grzybów nigdy za wiele)”. Realizacja: `config/hal/linumert_hmi_estop.hal` — grzyb HMI (pin `linumert.hmi-estop-ok`) ∧ sygnał życia ekranu (`watchdog`, `linumert.hmi-heartbeat`, limit `[LINUMERT]HMI_HEARTBEAT_TIMEOUT`) szeregowo w łańcuchu E-STOP z zatrzaskiem `estop_latch` (symulator i Plant); przed startem ekranu łańcuch otwarty (fail-safe); reset E-STOP tylko zwolnieniem grzyba (przycisk E-STOP QtDragon ukryty, F1 = wciśnięcie; zatrzask potwierdzenia `lrt_hmi_ack` kasowany każdym wejściem w E-STOP, ustawiany tylko impulsem `linumert.hmi-ack` — po przeglądzie Codexa P1; w `--classic` potwierdza żądanie resetu z procesu ekranu — P2); watchdog po zadziałaniu ponownie uzbraja tylko potwierdzenie grzybem; `HMI_ESTOP_BYPASS = 1` wyłącznie w uruchomieniach bez ekranu. Zmiana CLAUDE.md §6 · bezpieczeństwo najważniejsze, HMI może tylko zatrzymać · PRZYJĘTA
 
 ## Decyzje techniczne sesji (według numeru sesji)
 

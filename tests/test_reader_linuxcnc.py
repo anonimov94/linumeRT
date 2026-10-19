@@ -78,6 +78,10 @@ def result(tmp_path_factory):
     ini = work / "linumert_xyz.ini"
     text = ini.read_text(encoding="utf-8")
     text = text.replace("DISPLAY = qtvcp linumert", "DISPLAY = linumert_bez_ekranu")
+    # Bez ekranu nie ma grzyba HMI ani sygnału życia (D35): jawne obejście tylko tutaj;
+    # plik HAL grzyba z repozytorium (ścieżka względna nie działa w kopii konfiguracji).
+    text = text.replace("HMI_ESTOP_BYPASS = 0", "HMI_ESTOP_BYPASS = 1")
+    text = text.replace("HALFILE = ../../hal/", f"HALFILE = {CFG.parent.parent / 'hal'}/")
     text = re.sub(r"^POSTGUI_HALFILE.*$", "", text, flags=re.M)
     text = text.replace("PROGRAM_PREFIX = ../nc_files",
                         f"PROGRAM_PREFIX = {ROOT / 'config/sim/nc_files'}")

@@ -14,3 +14,9 @@ net linumert.z.eoffset-counts   linumert.eoffset-spindle-count => axis.z.eoffset
 net linumert.z.eoffset          linumert.eoffset-value <= axis.z.eoffset
 setp axis.z.eoffset-enable 1
 setp axis.z.eoffset-scale 1.0
+
+# D35: grzyb E-STOP w HMI i sygnał życia ekranu (config/hal/linumert_hmi_estop.hal)
+net linumert.hmi.button         linumert.hmi-estop-ok   => lrt_hmi_ok.in-00
+net linumert.hmi.heartbeat      linumert.hmi-heartbeat  => watchdog.input-0
+net linumert.hmi.wd-enable      linumert.hmi-wd-enable  => watchdog.enable-in
+net linumert.hmi.ack            linumert.hmi-ack        => lrt_ack_edge.in
