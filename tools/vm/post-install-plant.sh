@@ -6,7 +6,7 @@
 # Użycie (w VM-B):  sudo bash tools/vm/post-install-plant.sh [--vfd] [--repo URL|ŚCIEŻKA] [--no-net]
 #   --vfd     Plant z falownikiem (pty dla hy_vfd) i most socat TCP:$VFD_BRIDGE_PORT → pty
 #   --repo    źródło klonu (domyślnie REPO_URL z vm.conf; może być katalog z udostępnionego folderu)
-#   --no-net  bez konfiguracji karty lrtnet (np. adres ustawiony ręcznie)
+#   --no-net  bez konfiguracji kart lrtnet i host-only (np. adresy ustawione ręcznie)
 # Skrypt można uruchomić ponownie (aktualizuje repozytorium i pliki usług).
 set -euo pipefail
 # shellcheck source=tools/vm/lib.sh
@@ -33,7 +33,7 @@ export DEBIAN_FRONTEND=noninteractive
 apt-get update -q
 apt-get install -y -q --no-install-recommends git ca-certificates python3 python3-venv \
     python3-pip gcc make libc6-dev socat ifupdown
-[[ $net == 1 ]] && configure_lrtnet "$LRTNET_PLANT_IP"
+if [[ $net == 1 ]]; then configure_networks "$LRTNET_PLANT_IP"; fi
 
 fetch_repo "$repo"
 make_venv "[panel]"

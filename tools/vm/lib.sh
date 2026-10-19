@@ -27,32 +27,39 @@ require_debian12() {
     [[ $id == debian && $version == 12 ]] || die "oczekiwano Debiana 12, jest $id $version"
 }
 
-# Druga karta Ethernet (pierwsza to NAT): w VirtualBox karta 2 = lrtnet, np. enp0s8.
-second_nic() {
-    local nics=() path
+# Karty Ethernet według nazwy; w VirtualBox: 1 = NAT, 2 = lrtnet, 3 = host-only (np. enp0s3/8/9).
+nics() {
+    local found=() path
     for path in /sys/class/net/en* /sys/class/net/eth*; do
-        [[ -e $path ]] && nics+=("${path##*/}")
+        [[ -e $path ]] && found+=("${path##*/}")
     done
-    mapfile -t nics < <(printf '%s\n' "${nics[@]}" | sort)
-    [[ ${#nics[@]} -ge 2 ]] || die "brak drugiej karty sieciowej (lrtnet); sprawdź ustawienia VM"
-    echo "${nics[1]}"
+    printf '%s\n' "${found[@]}" | sort
 }
 
-# Statyczny adres w sieci lrtnet (ifupdown, domyślny w Debianie 12 bez NetworkManagera).
-configure_lrtnet() {
-    local ip=$1 nic=${LRTNET_NIC:-$(second_nic)} file=/etc/network/interfaces.d/lrtnet
+# Karta 2: statyczny adres w lrtnet; karta 3 (jeśli jest): DHCP z sieci host-only VirtualBox.
+configure_networks() {
+    local ip=$1 all lrt host file=/etc/network/interfaces.d/linumert
+    mapfile -t all < <(nics)
+    [[ ${#all[@]} -ge 2 ]] || die "brak drugiej karty sieciowej (lrtnet); sprawdź ustawienia VM"
+    lrt=${LRTNET_NIC:-${all[1]}} host=${HOSTONLY_NIC:-${all[2]:-}}
     if command -v nmcli >/dev/null && systemctl is-active -q NetworkManager; then
-        log "NetworkManager: $nic → $ip/$LRTNET_PREFIX (połączenie lrtnet)"
-        nmcli -t -f NAME con show | grep -qx lrtnet && nmcli con delete lrtnet >/dev/null
-        nmcli con add type ethernet ifname "$nic" con-name lrtnet ipv4.method manual \
+        log "NetworkManager: $lrt → $ip/$LRTNET_PREFIX (połączenie lrtnet); host-only: DHCP NetworkManagera"
+        if nmcli -t -f NAME con show | grep -qx lrtnet; then nmcli con delete lrtnet >/dev/null; fi
+        nmcli con add type ethernet ifname "$lrt" con-name lrtnet ipv4.method manual \
             ipv4.addresses "$ip/$LRTNET_PREFIX" ipv6.method disabled >/dev/null
         nmcli con up lrtnet >/dev/null
         return
     fi
-    log "ifupdown: $nic → $ip/$LRTNET_PREFIX ($file)"
-    printf 'auto %s\niface %s inet static\n    address %s/%s\n' "$nic" "$nic" "$ip" "$LRTNET_PREFIX" >"$file"
-    ifdown "$nic" 2>/dev/null || true
-    ifup "$nic"
+    log "ifupdown: $lrt → $ip/$LRTNET_PREFIX${host:+, $host → DHCP (host-only)} ($file)"
+    {
+        printf 'auto %s\niface %s inet static\n    address %s/%s\n' "$lrt" "$lrt" "$ip" "$LRTNET_PREFIX"
+        [[ -z $host ]] || printf '\nauto %s\niface %s inet dhcp\n' "$host" "$host"
+    } >"$file"
+    local nic
+    for nic in "$lrt" $host; do
+        ifdown "$nic" 2>/dev/null || true
+        ifup "$nic" || die "ifup $nic"
+    done
 }
 
 # Klon albo aktualizacja repozytorium w $REPO_DIR (właściciel: $VM_USER).

@@ -7,7 +7,7 @@
 # Użycie (w VM-A):  sudo bash tools/vm/post-install-ctl.sh [--vfd] [--repo URL|ŚCIEŻKA] [--no-net]
 #   --vfd     także most socat: lokalny pty $VFD_DEVICE ↔ TCP VM-B:$VFD_BRIDGE_PORT (dla hy_vfd)
 #   --repo    źródło klonu (domyślnie REPO_URL z vm.conf)
-#   --no-net  bez konfiguracji karty lrtnet
+#   --no-net  bez konfiguracji kart lrtnet i host-only
 # Skrypt można uruchomić ponownie.
 set -euo pipefail
 # shellcheck source=tools/vm/lib.sh
@@ -35,7 +35,7 @@ export DEBIAN_FRONTEND=noninteractive
 apt-get update -q
 apt-get install -y -q --no-install-recommends git ca-certificates python3-venv python3-pip \
     linuxcnc-uspace-dev socat
-[[ $net == 1 ]] && configure_lrtnet "$LRTNET_CTL_IP"
+if [[ $net == 1 ]]; then configure_networks "$LRTNET_CTL_IP"; fi
 
 fetch_repo "$repo"
 # --system-site-packages: moduły linuxcnc, qtvcp i PyQt5 pochodzą z pakietów Debiana/LinuxCNC.
