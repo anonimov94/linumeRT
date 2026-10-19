@@ -28,6 +28,7 @@ from qtvcp.core import Action, Info, Status
 
 import linumert_shell_model as model
 import linumert_shell_pages as pages
+from linumert_homing_page import HomingPage
 
 STATUS = Status()
 ACTION = Action()
@@ -42,6 +43,7 @@ NML_KINDS = {k: getattr(linuxcnc, k) for k in
 AREAS = (
     ("start", "Start", "klucz", "page:start"),
     ("machine", "Maszyna", "maszyna", "page:machine"),
+    ("homing", "Bazowanie", "bazuj", "page:homing"),
     ("production", "Produkcja", "start", "page:production"),
     ("program", "Program", "program", "btn_file"),
     ("tools", "Narzędzia", "narzedzia", "btn_tool"),
@@ -148,11 +150,13 @@ class LinumertShell(QtCore.QObject):
         self.diag = pages.DiagPage(self)
         self.production = pages.ProductionPage(self)
         self.start = pages.StartPage(self)
+        self.homing = HomingPage(self)
         self.pages = {"machine": 0, "classic": 1, "diag": self.stack.addWidget(self.diag),
                       "production": self.stack.addWidget(self.production),
-                      "start": self.stack.addWidget(self.start)}
+                      "start": self.stack.addWidget(self.start),
+                      "homing": self.stack.addWidget(self.homing)}
         self.page_widgets = {"diag": self.diag, "production": self.production,
-                             "start": self.start}
+                             "start": self.start, "homing": self.homing}
         body.addWidget(self.stack, 1)
         grid.addLayout(body, 1)
         grid.addWidget(self._bottom_bar())
@@ -249,7 +253,13 @@ class LinumertShell(QtCore.QObject):
             lay.addWidget(btn)
             self.areas[area] = btn
         lay.addStretch(1)
-        return rail
+        scroll = QtWidgets.QScrollArea()
+        scroll.setFrameShape(QtWidgets.QFrame.NoFrame)
+        scroll.setWidgetResizable(True)
+        scroll.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
+        scroll.setFixedWidth(116)
+        scroll.setWidget(rail)
+        return scroll
 
     def _machine_page(self) -> QtWidgets.QWidget:
         page = QtWidgets.QWidget()

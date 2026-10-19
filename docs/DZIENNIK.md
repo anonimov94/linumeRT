@@ -341,3 +341,8 @@ Uzupełnienie: README plant/core (liczby testów 29/59/20, bazowanie, parametry 
 - CLAUDE.md §6 zmieniony osobnym commitem (D35). Uruchomienia bez ekranu (testy headless, scenariusze z LinuxCNC) jawnie `HMI_ESTOP_BYPASS = 1`.
 - Testy: `tests/test_hmi_estop_hal.py` (statycznie + `halrun`: grzyb, reset przy wciśniętym, watchdog, ponowne uzbrojenie), samotest GUI 33 kroki (grzyb wciśnięty, nieskuteczny reset inną drogą, zwolnienie, brak sygnału życia → E-STOP z przyczyną, potwierdzenie), pełny `-m linuxcnc` lokalnie. NIEZWERYFIKOWANE NA SPRZĘCIE.
 - Przegląd Codexa (SHA 7b2cb32, `docs/ROZMOWA_MODELI.md`): P1 — po przywróceniu pętli/łącza reset inną drogą omijał grzyb → zatrzask potwierdzenia `lrt_hmi_ack` (kasowany zboczem opadającym `iocontrol.0.user-enable-out`, ustawiany impulsem `linumert.hmi-ack`); P2 — `--classic` bez ponownego uzbrojenia watchdoga → żądanie resetu z procesu ekranu potwierdza i uzbraja. Testy: `halrun` (pętla przerwana/przywrócona, reset inną drogą nieskuteczny), samotest nakładki 36 kroków, samotest `--classic`.
+
+## HMI — Bazowanie · 2026-10-19 · Codex (PR #46)
+- Własny widok stawów, czujników i krańcówek; jawne bazowanie przez ACTION, bez ruchu przy nawigacji.
+- Portal i stawy ze zsynchronizowaną sekwencją pozostają w Home All; blokada podczas programu i bazowania.
+- Przewijana szyna zapewnia dostęp do wszystkich widoków na niskich ekranach. Qt offscreen: 56 testów OK, ruff czysty; pełny GUI w CI.

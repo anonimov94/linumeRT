@@ -90,6 +90,7 @@ class SelfTest(QtCore.QObject):
             ("03_maszyna_wl", lambda: self._start_action("power"), lambda: s.machine_on, 5),
             ("04_bazowanie", lambda: self._start_action("homed"), lambda: s.all_homed, 90),
             ("04b_start_gotowosc", None, None, 1),
+            ("04b_widok_bazowania", lambda: click(self.shell.areas["homing"]), None, 1),
             ("04c_maszyna", lambda: click(self.shell.areas["machine"]), None, 1),
             ("05_tryb_mdi", lambda: click(b["mode_mdi"]), lambda: s.mode == "mdi", 5),
             ("06_mdi_g0", self._mdi, lambda: self._settled(), 30),
