@@ -29,7 +29,13 @@ from qtvcp.core import Action, Info, Status
 import linumert_shell_model as model
 import linumert_shell_pages as pages
 import linumert_sim_page as sim_page
-import linumert_tools_page as tools_page
+
+try:  # baza narzędzi wymaga rdzenia linumert (pyyaml); bez niego obszar = tabela QtDragon
+    import linumert_tools_page as tools_page
+    TOOLS_ERROR = ""
+except Exception as exc:  # noqa: BLE001 - nakładka musi wstać także bez tej strony
+    tools_page = None
+    TOOLS_ERROR = f"{type(exc).__name__}: {exc}"
 
 STATUS = Status()
 ACTION = Action()
@@ -154,15 +160,16 @@ class LinumertShell(QtCore.QObject):
         self.start = pages.StartPage(self)
         self.sim = sim_page.SimPage(self)
         ini = os.environ.get("INI_FILE_NAME") or getattr(INFO, "INIPATH", "")
-        self.tools = tools_page.ToolsPage(self, ini)
+        self.tools = tools_page.ToolsPage(self, ini) if tools_page is not None else None
         self.pages = {"machine": 0, "classic": 1, "diag": self.stack.addWidget(self.diag),
                       "production": self.stack.addWidget(self.production),
                       "start": self.stack.addWidget(self.start),
-                      "sim": self.stack.addWidget(self.sim),
-                      "tools": self.stack.addWidget(self.tools)}
+                      "sim": self.stack.addWidget(self.sim)}
         self.page_widgets = {"diag": self.diag, "production": self.production,
-                             "start": self.start, "sim": self.sim,
-                             "tools": self.tools}
+                             "start": self.start, "sim": self.sim}
+        if self.tools is not None:
+            self.pages["tools"] = self.stack.addWidget(self.tools)
+            self.page_widgets["tools"] = self.tools
         body.addWidget(self.stack, 1)
         grid.addLayout(body, 1)
         grid.addWidget(self._bottom_bar())
@@ -180,6 +187,9 @@ class LinumertShell(QtCore.QObject):
         self._timer.timeout.connect(self._tick)
         self._timer.start(500)
         self._start_mushroom()
+        if TOOLS_ERROR:
+            self.diag.add_log("warn", f"Strona Narzędzia linumeRT niedostępna ({TOOLS_ERROR}); "
+                                      "obszar Narzędzia = tabela QtDragon")
         ini = os.environ.get("INI_FILE_NAME") or getattr(INFO, "INIPATH", "")
         if ini:
             self.sim.start(ini)  # proces symulacji materiału i kolizji (nice 10)
@@ -658,6 +668,8 @@ class LinumertShell(QtCore.QObject):
     def select_area(self, area: str) -> None:
         self.areas[area].setChecked(True)
         target = dict((a, b) for a, _t, _i, b in AREAS)[area]
+        if target == "page:tools" and self.tools is None:
+            target = "btn_tool"  # bez strony linumeRT: tabela narzędzi QtDragon
         if target.startswith("page:"):
             page = target[5:]
             self.stack.setCurrentIndex(self.pages[page])
