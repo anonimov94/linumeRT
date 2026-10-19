@@ -70,7 +70,12 @@ tests/ docs/ docs/prawne/ prompts/ community/
 - Wirtualny napęd to zawsze instancja szablonu z `plant/library/drives/`; wirtualna obrabiarka powstaje wyłącznie z `machine.yaml` (jedno źródło prawdy).
 
 ## 6. Bezpieczeństwo
-- Ekran nie jest funkcją bezpieczeństwa. E-STOP i STO to obwód sprzętowy; ekran tylko pokazuje stan.
+- Ekran nie jest funkcją bezpieczeństwa. E-STOP i STO to obwód sprzętowy, podłączony fizycznie do HAL i
+  nadrzędny wobec ekranu.
+- Grzyb E-STOP w HMI to DODATKOWY, szeregowy element łańcucha E-STOP w HAL (D35): może tylko odebrać
+  zezwolenie, nigdy go nadać; reset (potwierdzenie) E-STOP — także zdarzeń emulowanych w symulatorze —
+  wyłącznie grzybem w HMI; ekran wysyła sygnał życia do `watchdog` w HAL (zawieszone HMI = E-STOP).
+  Obejście (`[LINUMERT]HMI_ESTOP_BYPASS = 1`) wolno tylko w uruchomieniach bez ekranu (testy).
 - Wtyczki generują wyłącznie tekst G-code.
 - Generator konfiguracji odmawia konfiguracji sprzętowej bez wejścia E-STOP.
 
