@@ -9,7 +9,7 @@ operator), po każdym kroku zapisuje zrzut okna `NN_nazwa.png` i stan do `wynik.
 zamyka wywołujący (okno potwierdzenia QtDragon przy zamykaniu nie blokuje testu). Uruchamia go `tests/test_hmi_shell_gui.py` (marker `linuxcnc`) i
 `tools/dev/hmi-demo.sh`.
 
-Scenariusz: zwolnienie E-STOP → maszyna WŁ. → bazowanie → MDI G0 → program w AUTO → Wstrzymaj →
+Scenariusz (Start → lista gotowości): zwolnienie E-STOP → maszyna WŁ. → bazowanie → MDI G0 → program w AUTO → Wstrzymaj →
 Wznów → Stop → JOG X+ → obszary szyny (QtDragon) → powrót do „Maszyna” → Diagnostyka → Produkcja
 (korekcja posuwu 80 %, start od linii 6 do końca programu, korekcja 100 %).
 """
@@ -68,9 +68,12 @@ class SelfTest(QtCore.QObject):
         click = self._click
         return [
             ("01_start", None, None, 0),
-            ("02_estop_zwolniony", lambda: click(b["estop"]), lambda: not s.estop, 5),
-            ("03_maszyna_wl", lambda: click(b["power"]), lambda: s.machine_on, 5),
-            ("04_bazowanie", lambda: click(b["home"]), lambda: s.all_homed, 90),
+            # Kroki 02–04 przyciskami listy gotowości widoku Start
+            ("02_estop_zwolniony", lambda: self._start_action("estop"), lambda: not s.estop, 5),
+            ("03_maszyna_wl", lambda: self._start_action("power"), lambda: s.machine_on, 5),
+            ("04_bazowanie", lambda: self._start_action("homed"), lambda: s.all_homed, 90),
+            ("04b_start_gotowosc", None, None, 1),
+            ("04c_maszyna", lambda: click(self.shell.areas["machine"]), None, 1),
             ("05_tryb_mdi", lambda: click(b["mode_mdi"]), lambda: s.mode == "mdi", 5),
             ("06_mdi_g0", self._mdi, lambda: self._settled(), 30),
             ("07_program", lambda: ACTION.OPEN_PROGRAM(self.program),
@@ -116,6 +119,14 @@ class SelfTest(QtCore.QObject):
 
     def _reset_feed(self):
         return self.shell.production.reset_buttons["feed"]
+
+    def _start_action(self, key: str) -> None:
+        page = self.shell.start
+        page.refresh()
+        btn = page.row_widgets[key][3]
+        if not btn.isVisible():
+            raise RuntimeError(f"brak akcji przy „{key}” na liście gotowości")
+        self._click(btn)
 
     def _mdi(self) -> None:
         self.shell.mdi.setText("G0 X100 Y80 Z-10")
@@ -178,6 +189,8 @@ class SelfTest(QtCore.QObject):
             "mode": s.mode, "interp": s.interp, "homed": sorted(s.homed), "line": s.line,
             "file": os.path.basename(s.file), "x": round(rel[0], 3), "y": round(rel[1], 3),
             "z": round(rel[2], 3), "area": self.shell.stack.currentIndex(),
+            "page": {v: k for k, v in self.shell.pages.items()}[self.shell.stack.currentIndex()],
+            "ready": self.shell.start.lbl_ready.text(),
             "alarm": s.alarm.text if s.alarm else "",
             "start_enabled": self.shell.buttons["start"].isEnabled(),
             "diag_joints": self.shell.diag.joints.rowCount(),

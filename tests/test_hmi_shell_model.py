@@ -224,6 +224,51 @@ def test_run_from_line_gate() -> None:
     s = ready(total_lines=12)
     assert m.run_from_line_gate(s, 6).enabled
     assert m.run_from_line_gate(s, 13).reason == "linia poza zakresem 1–12"
-    assert m.run_from_line_gate(ready(total_lines=12, interp="paused"), 6).reason == "program w toku"
-    assert m.run_from_line_gate(ready(total_lines=12, homed=set()), 6).reason == "najpierw bazowanie"
+    paused, unhomed = ready(total_lines=12, interp="paused"), ready(total_lines=12, homed=set())
+    assert m.run_from_line_gate(paused, 6).reason == "program w toku"
+    assert m.run_from_line_gate(unhomed, 6).reason == "najpierw bazowanie"
     assert "pomija wcześniejsze bloki" in m.RUN_FROM_LINE_WARNING.format(line=6)
+
+
+# ---- start i przyczyny E-STOP -------------------------------------------------------------------
+
+def test_checklist_fresh_machine() -> None:
+    items = {i.key: i for i in m.checklist(m.ShellState())}
+    assert items["estop"].level == "err" and items["estop"].action == "estop"
+    assert items["power"].action == ""  # najpierw E-STOP
+    assert items["homed"].detail == "niebazowane: X, Y, Z" and items["homed"].action == ""
+    assert items["plant"].level == "info" and "drives" not in items
+    assert items["program"].action == "program"
+    assert not m.ready_to_run(list(items.values()))
+
+
+def test_checklist_ready_and_plant() -> None:
+    s = ready(plant="ok", tool=3)
+    items = m.checklist(s, drive_fault=False)
+    assert all(i.level == "ok" for i in items) and m.ready_to_run(items)
+    s.feed_override = 0.8
+    items = {i.key: i for i in m.checklist(s, drive_fault=True)}
+    assert items["overrides"].detail == "F 80 %" and items["overrides"].level == "warn"
+    assert items["drives"].action == "diag"
+    assert not m.ready_to_run(list(items.values()))
+    lost = {i.key: i for i in m.checklist(ready(plant="lost"))}
+    assert lost["plant"].level == "err"
+
+
+def test_checklist_actions_have_labels() -> None:
+    for s in (m.ShellState(), m.ShellState(estop=False), ready(homed=set()), ready(file=""),
+              ready(feed_override=0.5), ready(plant="ok")):
+        for item in m.checklist(s, drive_fault=True):
+            assert not item.action or item.action in m.ACTION_LABEL
+
+
+@pytest.mark.parametrize(("args", "text"), [
+    ((None, None, None, True), "E-STOP z ekranu (programowy)"),
+    ((False, True, 0), "pętla E-STOP otwarta"),
+    ((True, False, 3), "przerwa łącza LRT-NET z Plant, 3 cykli"),
+    ((True, True, 25), "przerwa łącza LRT-NET z Plant, 25 cykli"),
+    ((None, None, None), "emc-enable-in"),
+    ((True, True, 2), "przyczyna przejściowa"),
+])
+def test_estop_reason(args, text) -> None:
+    assert text in m.estop_reason(*args)

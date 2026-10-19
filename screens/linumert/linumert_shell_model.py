@@ -280,6 +280,12 @@ QSlider#lrtSlider::handle:horizontal {{ background: {c['fg']}; width: 24px; marg
 QSpinBox#lrtSpin {{ background: {c['bg2']}; color: {c['fg']}; border: 1px solid {c['line2']};
     border-radius: {btn}px; min-height: {touch}px; padding: 0 12px; font-family: {FONT_NUM};
     font-size: 16px; }}
+QLabel#lrtTitleSmall {{ font-size: 16px; font-weight: 600; }}
+QLabel#lrtDot {{ font-size: 18px; }}
+QLabel#lrtDot[level="ok"] {{ color: {c['ok']}; }}
+QLabel#lrtDot[level="warn"] {{ color: {c['amber']}; }}
+QLabel#lrtDot[level="err"] {{ color: {c['err']}; }}
+QLabel#lrtDot[level="info"] {{ color: {c['info']}; }}
 QToolTip {{ background: {c['raise']}; color: {c['fg']}; border: 1px solid {c['line2']}; }}
 """
 
@@ -401,3 +407,79 @@ def run_from_line_gate(s: ShellState, line: int) -> Gate:
 RUN_FROM_LINE_WARNING = ("Start od linii {line} pomija wcześniejsze bloki: wybór narzędzia (M6), "
                          "obroty wrzeciona (S/M3), chłodziwo, układ detalu i tryby G. Sprawdź, czy "
                          "maszyna jest w stanie, jakiego wymaga linia {line}.")
+
+
+# ---- start (lista gotowości) ---------------------------------------------------------------
+
+@dataclass(frozen=True)
+class CheckItem:
+    key: str
+    label: str
+    level: str  # ok | warn | err | info
+    detail: str
+    action: str = ""  # klucz akcji powłoki: estop | power | home | program | production | ""
+
+
+def checklist(s: ShellState, drive_fault: bool | None = None) -> list[CheckItem]:
+    """Lista gotowości widoku Start (kolejność pracy operatora)."""
+    unhomed = [a for a in s.axes if a not in s.homed]
+    items = [
+        CheckItem("estop", "Obwód E-STOP", "err" if s.estop else "ok",
+                  "otwarty: zwolnij grzybek i E-STOP" if s.estop else "zamknięty",
+                  "estop" if s.estop else ""),
+        CheckItem("power", "Zasilanie napędów", "ok" if s.machine_on else "err",
+                  "włączone" if s.machine_on else "maszyna wyłączona",
+                  "" if s.machine_on or s.estop else "power"),
+        CheckItem("homed", "Bazowanie osi", "ok" if not unhomed else "warn",
+                  "wszystkie osie zbazowane" if not unhomed else
+                  f"niebazowane: {', '.join(unhomed)}",
+                  "" if not unhomed or not s.machine_on else "home"),
+    ]
+    if s.plant is None:
+        items.append(CheckItem("plant", "Łącze z maszyną", "info",
+                               "symulator LinuxCNC (bez Plant)"))
+    else:
+        items.append(CheckItem("plant", "Łącze LRT-NET (Plant)", "ok" if s.plant == "ok" else "err",
+                               "połączone" if s.plant == "ok" else "brak odpowiedzi Plant"))
+    if drive_fault is not None:
+        items.append(CheckItem("drives", "Napędy", "err" if drive_fault else "ok",
+                               "awaria napędu: zobacz Diagnostykę" if drive_fault else "bez awarii",
+                               "diag" if drive_fault else ""))
+    items += [
+        CheckItem("program", "Program", "ok" if s.file else "warn",
+                  os.path.basename(s.file) if s.file else "nie wybrano programu",
+                  "" if s.file else "program"),
+        CheckItem("tool", "Narzędzie w uchwycie", "ok" if s.tool else "warn",
+                  f"T{s.tool}" if s.tool else "brak (T0): wymiana M6 w MDI albo w programie"),
+    ]
+    overrides = [f"{name} {fmt_pct(v)}" for name, v in
+                 (("F", s.feed_override), ("S", s.spindle_override), ("G0", s.rapid_override))
+                 if abs(v - 1.0) > 0.005]
+    items.append(CheckItem("overrides", "Korekcje", "warn" if overrides else "ok",
+                           ", ".join(overrides) if overrides else "100 %",
+                           "production" if overrides else ""))
+    return items
+
+
+def ready_to_run(items: list[CheckItem]) -> bool:
+    return all(i.level in ("ok", "info") for i in items
+               if i.key in ("estop", "power", "homed", "plant", "drives", "program"))
+
+
+ACTION_LABEL = {"estop": "Zwolnij E-STOP", "power": "Włącz", "home": "Bazuj wszystkie",
+                "program": "Wybierz program", "production": "Produkcja", "diag": "Diagnostyka"}
+
+
+def estop_reason(loop_closed: bool | None, connected: bool | None, missed_delta: int | None,
+                 requested: bool = False) -> str:
+    """Przyczyna przejścia w E-STOP z odczytów HAL (None = brak pinu, np. symulator)."""
+    if requested:
+        return "E-STOP z ekranu (programowy)"
+    if loop_closed is False:
+        return "E-STOP: pętla E-STOP otwarta (grzybek albo obwód bezpieczeństwa, din-00)"
+    if connected is False or (missed_delta or 0) >= 20:
+        tail = f", {missed_delta} cykli bez odpowiedzi" if missed_delta else ""
+        return f"E-STOP: przerwa łącza LRT-NET z Plant{tail}"
+    if loop_closed is None and connected is None:
+        return "E-STOP: sygnał zezwolenia LinuxCNC (emc-enable-in) wyłączony"
+    return "E-STOP: łańcuch bezpieczeństwa HAL zwolnił zezwolenie (przyczyna przejściowa)"

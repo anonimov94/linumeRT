@@ -451,3 +451,82 @@ class ProductionPage(QtWidgets.QWidget):
         self.btn_from_line.setEnabled(gate.enabled)
         self.lbl_from_line.setText(gate.reason if not gate.enabled else
                                    "Uruchomienie wymaga potwierdzenia (pomija wcześniejsze bloki).")
+
+
+class StartPage(QtWidgets.QWidget):
+    """Start: lista gotowości maszyny z akcjami i ostatnie komunikaty."""
+
+    def __init__(self, shell):
+        super().__init__()
+        self.setObjectName("lrtPage")
+        self.shell = shell
+        self.items: list[model.CheckItem] = []
+        grid = QtWidgets.QGridLayout(self)
+        grid.setContentsMargins(16, 16, 16, 16)
+        grid.setSpacing(16)
+        frame, lay, self.lbl_ready = card("Gotowość maszyny", "")
+        self.rows = QtWidgets.QGridLayout()
+        self.rows.setHorizontalSpacing(16)
+        self.rows.setVerticalSpacing(10)
+        lay.addLayout(self.rows)
+        self.row_widgets: dict[str, tuple] = {}
+        lay.addStretch(1)
+        self.btn_next = QtWidgets.QPushButton("Dalej: Produkcja")
+        self.btn_next.setProperty("role", "start")
+        self.btn_next.clicked.connect(lambda: self.shell.select_area("production"))
+        lay.addWidget(self.btn_next, 0, QtCore.Qt.AlignRight)
+        grid.addWidget(frame, 0, 0)
+        frame, lay, _side = card("Ostatnie komunikaty", "pełna historia: Diagnostyka")
+        self.recent = []
+        for _ in range(8):
+            row = _label("", "lrtMuted")
+            row.setWordWrap(True)
+            lay.addWidget(row)
+            self.recent.append(row)
+        lay.addStretch(1)
+        grid.addWidget(frame, 0, 1)
+        grid.setColumnStretch(0, 3)
+        grid.setColumnStretch(1, 2)
+
+    def _row(self, key: str, index: int) -> tuple:
+        if key not in self.row_widgets:
+            dot = _label("●", "lrtDot", level="info")
+            title = _label("", "lrtTitleSmall")
+            detail = _label("", "lrtMuted")
+            btn = QtWidgets.QPushButton("")
+            btn.clicked.connect(lambda _c=False, k=key: self._act(k))
+            self.rows.addWidget(dot, index, 0)
+            self.rows.addWidget(title, index, 1)
+            self.rows.addWidget(detail, index, 2)
+            self.rows.addWidget(btn, index, 3)
+            self.rows.setColumnStretch(2, 1)
+            self.row_widgets[key] = (dot, title, detail, btn)
+        return self.row_widgets[key]
+
+    def _act(self, key: str) -> None:
+        item = next((i for i in self.items if i.key == key), None)
+        if item is None or not item.action:
+            return
+        shell = self.shell
+        {"estop": shell.toggle_estop, "power": shell.toggle_power, "home": shell.home_all,
+         "program": lambda: shell.select_area("program"),
+         "production": lambda: shell.select_area("production"),
+         "diag": lambda: shell.select_area("diag")}[item.action]()
+
+    def refresh(self) -> None:
+        fault = _hal("lrt-net.0.drive-fault")
+        self.items = model.checklist(self.shell.s, None if fault is None else bool(fault))
+        for index, item in enumerate(self.items):
+            dot, title, detail, btn = self._row(item.key, index)
+            _restyle(dot, level=item.level)
+            title.setText(item.label)
+            detail.setText(item.detail)
+            btn.setVisible(bool(item.action))
+            btn.setText(model.ACTION_LABEL.get(item.action, ""))
+        ready = model.ready_to_run(self.items)
+        self.lbl_ready.setText("gotowa do pracy" if ready else "wymaga działań")
+        self.btn_next.setEnabled(ready)
+        log = self.shell.diag.log
+        for i, row in enumerate(self.recent):
+            row.setText(log.item(i).text() if i < log.count() else ("brak komunikatów" if i == 0
+                                                                     else ""))
