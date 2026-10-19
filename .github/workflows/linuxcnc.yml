@@ -15,7 +15,10 @@ permissions:
 jobs:
   linuxcnc:
     runs-on: ubuntu-24.04
-    container: debian:bookworm
+    container:
+      image: debian:bookworm
+      # --init: bez procesu init zombie po testach LinuxCNC nigdy nie znikają (dług 024)
+      options: --init
     defaults:
       run:
         shell: bash
