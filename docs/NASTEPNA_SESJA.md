@@ -69,7 +69,8 @@ Otwarte: #34 (Codex, HMI-01, draft). Scalone gałęzie `wip/*`, `claude/*` i `cc
 
 ## 6. Dla Codex:
 
-**Najpierw: trudne problemy, których Claude nie domknął (2026-10-19, kolejność = priorytet).** Każdy = osobny PR,
+**Najpierw: trudne problemy, których Claude nie domknął (2026-10-19, kolejność = priorytet).** Gotowy prompt:
+[`prompts/START-CODEX-HMI.md`](../prompts/START-CODEX-HMI.md). Każdy = osobny PR,
 `Model-Author: Codex`, wynik w DZIENNIK. Masz Windows/WSL z pełną siecią i prawdziwym pulpitem — tego brakuje Claude.
 
 1. **Łącze LRT-NET gubi ≥ 20 odpowiedzi → E-STOP (niestabilne testy z Plant).** LinuxCNC RIP bez RT + Plant
