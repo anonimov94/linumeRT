@@ -221,3 +221,35 @@ def test_program_check_and_edit(page_env, tmp_path):
     assert path.read_text() == "G21 G90\nG1 X5 F100\nM2\n" and page.preview.isReadOnly()
     assert not action.mock_calls
     page.close()
+
+
+def test_cycles_page_builds_program(page_env, tmp_path, monkeypatch):
+    """Cykle: formularz z pól generatora, walidacja, kroki, zapis .ngc i wczytanie bez ruchu."""
+    pytest.importorskip("yaml")
+    _home, shell, _status, action = page_env
+    shell.c = {"bg2": "#000000", "fg3": "#666666", "teal": "#2dd4bf"}
+    monkeypatch.delitem(sys.modules, "linumert_cycles_page", raising=False)
+    module = importlib.import_module("linumert_cycles_page")
+    page = module.CyclesPage(shell)
+    page.cmb.setCurrentIndex(page.cmb.findText("Planowanie"))
+    assert page.preview() is None and "brak wymaganego pola" in page.lbl_issue.text()
+    for name, value in (("x1", "100"), ("y1", "50"), ("depth", "1"), ("tool_d", "50")):
+        page.inputs[name].setText(value)
+    page.add_step()
+    page.cmb.setCurrentIndex(page.cmb.findText("Otwory: wiercenie i gwintowanie"))
+    page.inputs["pattern"].setCurrentText("grid")
+    page.inputs["count"].setText("2")
+    page.inputs["rows"].setText("2")
+    page.inputs["depth"].setText("5")
+    page.add_step()
+    text = page.text()
+    assert "G1 X" in text and "G98 G81" in text and text.rstrip().endswith("M2")
+    assert page.view2d.lines and page.lbl_prog.text() == "2 kroków"
+    target = tmp_path / "cykle.ngc"
+    monkeypatch.setattr(module.QtWidgets.QFileDialog, "getSaveFileName",
+                        staticmethod(lambda *a, **k: (str(target), "")))
+    shell.s.interp = "idle"
+    page.load()
+    assert target.read_text() == text
+    module.ACTION.OPEN_PROGRAM.assert_called_with(str(target))
+    page.close()

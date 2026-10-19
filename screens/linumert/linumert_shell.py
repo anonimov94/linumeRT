@@ -41,6 +41,10 @@ try:  # baza narzędzi wymaga rdzenia linumert (pyyaml); bez niego obszar = tabe
 except Exception as exc:  # noqa: BLE001 - nakładka musi wstać także bez tej strony
     tools_page = None
     TOOLS_ERROR = f"{type(exc).__name__}: {exc}"
+try:  # generatory cykli: rdzeń linumert (pyyaml); bez niego obszar Cykle = widok Program
+    import linumert_cycles_page as cycles_page
+except Exception:  # noqa: BLE001 - nakładka musi wstać także bez tej strony
+    cycles_page = None
 
 STATUS = Status()
 ACTION = Action()
@@ -59,6 +63,7 @@ AREAS = (
     ("production", "Produkcja", "start", "page:production"),
     ("sim", "Symulacja", "symulacja", "page:sim"),
     ("program", "Program", "program", "page:program"),
+    ("cycles", "Cykle", "dialog", "page:cycles"),
     ("tools", "Narzędzia", "narzedzia", "page:tools"),
     ("offsets", "Zero detalu", "zero", "page:offsets"),
     ("probe", "Sonda", "sonda", "btn_probe"),
@@ -185,6 +190,10 @@ class LinumertShell(QtCore.QObject):
         self.page_widgets = {"diag": self.diag, "production": self.production,
                              "start": self.start, "sim": self.sim,
                              "homing": self.homing, "program": self.program, "offsets": self.offsets}
+        self.cycles = cycles_page.CyclesPage(self) if cycles_page is not None else None
+        if self.cycles is not None:
+            self.pages["cycles"] = self.stack.addWidget(self.cycles)
+            self.page_widgets["cycles"] = self.cycles
         if self.tools is not None:
             self.pages["tools"] = self.stack.addWidget(self.tools)
             self.page_widgets["tools"] = self.tools
@@ -688,6 +697,8 @@ class LinumertShell(QtCore.QObject):
         target = dict((a, b) for a, _t, _i, b in AREAS)[area]
         if target == "page:tools" and self.tools is None:
             target = "btn_tool"  # bez strony linumeRT: tabela narzędzi QtDragon
+        if target == "page:cycles" and self.cycles is None:
+            target = "page:program"
         if target.startswith("page:"):
             page = target[5:]
             self.stack.setCurrentIndex(self.pages[page])
