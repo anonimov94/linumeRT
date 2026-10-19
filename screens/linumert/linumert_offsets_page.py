@@ -112,6 +112,10 @@ class OffsetsPage(QtWidgets.QWidget):
         actions.addWidget(self.save_button)
         actions.addWidget(load_button)
         right_layout.addLayout(actions)
+        self.machine_zero = QtWidgets.QPushButton("Wczytaj bazę z maszyny")
+        self.machine_zero.setEnabled(not getattr(shell, "preview", False))
+        self.machine_zero.clicked.connect(self.read_machine_zero)
+        right_layout.addWidget(self.machine_zero)
         self.zero_button = QtWidgets.QPushButton("Ustaw G54")
         self.zero_button.clicked.connect(lambda: self.apply_zero())
         right_layout.addWidget(self.zero_button)
@@ -128,6 +132,39 @@ class OffsetsPage(QtWidgets.QWidget):
             client.message.connect(self.scene_event)
         if self.state_path.exists():
             self.load(self.state_path)
+
+    def read_machine_zero(self):
+        """Aktywny układ ze STATUS; pozostałe zapisane układy z PARAMETER_FILE."""
+        if getattr(self.shell, "preview", False):
+            return
+        import configparser
+        import math
+        from linumert_sim.placement import OFFSET_INDEX, read_var_offsets
+
+        name = self.offset.currentText()
+        stat = getattr(getattr(self.shell, "status", None), "stat", None)
+        value = None
+        if stat is not None and getattr(stat, "g5x_index", None) == OFFSET_INDEX[name]:
+            value = tuple(stat.g5x_offset[:3])
+        else:
+            path = getattr(self.shell.info, "INIPATH", "") or os.environ.get("INI_FILE_NAME", "")
+            ini = configparser.ConfigParser(strict=False, interpolation=None)
+            ini.read(path)
+            filename = ini.get("RS274NGC", "PARAMETER_FILE", fallback="linuxcnc.var")
+            source = Path(filename).expanduser()
+            if not source.is_absolute():
+                source = Path(path).resolve().parent / source
+            value = read_var_offsets(source).get(name)
+        if value is None or len(value) != 3 or not all(math.isfinite(v) for v in value):
+            self.message.setText(f"Brak zapisanej bazy {name}; wpisz pozycję ręcznie.")
+            return
+        scale = 1 if getattr(self.shell.info, "MACHINE_IS_METRIC", True) else 25.4
+        self.loading = True
+        for spin, number in zip(self.position, value, strict=True):
+            spin.setValue(number * scale)
+        self.loading = False
+        self.preview()
+        self.message.setText(f"Wczytano {name} z konfiguracji maszyny — bez zmiany zer i bez ruchu.")
 
     def build_spec(self):
         kind = self.shape.currentData()

@@ -21,3 +21,7 @@ postoju programu i potwierdzenia; wysyła `G10 L2` przez ACTION, bez polecenia r
 Geometria pokazuje nominalną przygotówkę; aktualnie skrawany materiał ogląda się w Symulacji.
 
 Zrzut rzeczywistej aplikacji offline: [podgląd](raporty/zero_detalu/offline.png).
+
+„Wczytaj bazę z maszyny” w pełnym HMI pobiera wybrany G54–G59 z bieżącej konfiguracji
+(aktywny układ na żywo, pozostałe zapisane w PARAMETER_FILE). Pola można następnie edytować
+z dokładnością wpisu 0,0001 mm. Dopiero potwierdzony przycisk „Ustaw” zmienia układ LinuxCNC.

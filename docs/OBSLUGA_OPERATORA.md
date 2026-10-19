@@ -37,7 +37,8 @@ Uruchom `tools/linumert-start.sh`, przejdź do Symulacja i naciśnij
 Poczekaj na stan Gotowa, wybierz JOG w górnym pasku. Dla MDI i M6 wymagane jest bazowanie.
 Wymianę w konfiguracji wirtualnej potwierdza magazyn symulowany; na fizycznej maszynie
 obowiązuje jej procedura ręcznej wymiany/ATC. Zero detalu jest dostępne w szynie obszarów;
-zapisany układ i model maszyny są właściwe dla bieżącej konfiguracji.
+„Wczytaj bazę z maszyny” pobiera wybrany G54–G59: aktywny układ ze STATUS,
+pozostałe z PARAMETER_FILE bieżącej konfiguracji. Odczyt nie zmienia zer ani nie wykonuje ruchu.
 
 Po kolizji w bliźniaku: włącz Specjalista, potwierdź E-STOP podwójnym Resetem,
 włącz Maszyna i przytrzymaj JOG, aby się wycofać. Zakończ specjalistę po opuszczeniu kolizji.

@@ -180,3 +180,21 @@ def test_numeric_keyboard_entry_is_not_clamped_during_typing(page_env):
     assert spin.value() == 13.0
     assert "13.0000" in spin.text()
     page.close()
+
+
+def test_zero_reads_live_and_saved_machine_offsets_without_commands(page_env, tmp_path):
+    _home, shell, _status, action = page_env
+    shell.c = importlib.import_module("linumert_shell_model").load_tokens()["kolory"]
+    shell.status = SimpleNamespace(stat=SimpleNamespace(g5x_index=1, g5x_offset=[10, 20, -30]))
+    ini = tmp_path / "machine.ini"
+    ini.write_text("[RS274NGC]\nPARAMETER_FILE=machine.var\n")
+    (tmp_path / "machine.var").write_text("5241 45\n5242 60\n5243 -90\n")
+    shell.info.INIPATH = str(ini)
+    page = importlib.import_module("linumert_offsets_page").OffsetsPage(shell)
+    page.machine_zero.click()
+    assert tuple(spin.value() for spin in page.position) == (10, 20, -30)
+    page.offset.setCurrentText("G55")
+    page.machine_zero.click()
+    assert tuple(spin.value() for spin in page.position) == (45, 60, -90)
+    assert not action.mock_calls
+    page.close()
