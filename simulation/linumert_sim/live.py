@@ -40,9 +40,19 @@ POS_PERIOD = 1 / 30
 MAP_PERIOD = 0.1
 
 
+LOG = os.environ.get("LINUMERT_SIM_LOG")  # dziennik zdarzeń (JSON w liniach), np. do testów
+
+
 def emit(**msg) -> None:
-    sys.stdout.write(json.dumps(msg, ensure_ascii=False) + "\n")
+    text = json.dumps(msg, ensure_ascii=False)
+    sys.stdout.write(text + "\n")
     sys.stdout.flush()
+    if LOG and msg.get("ev") != "pos":
+        try:
+            with open(LOG, "a", encoding="utf-8") as fh:
+                fh.write(text + "\n")
+        except OSError:
+            pass
 
 
 def _stdin_reader(q: queue.Queue) -> None:

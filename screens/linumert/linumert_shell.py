@@ -183,7 +183,9 @@ class LinumertShell(QtCore.QObject):
         ini = os.environ.get("INI_FILE_NAME") or getattr(INFO, "INIPATH", "")
         if ini:
             self.sim.start(ini)  # proces symulacji materiału i kolizji (nice 10)
-        self.select_area("start")  # po uruchomieniu zawsze Start (HMI_WORKFLOW)
+        # po uruchomieniu Start (HMI_WORKFLOW); LINUMERT_START_AREA tylko do testów i pokazów
+        area = os.environ.get("LINUMERT_START_AREA", "start")
+        self.select_area(area if area in self.areas else "start")
         self.refresh()
         return self
 
