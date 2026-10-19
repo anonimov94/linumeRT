@@ -346,3 +346,8 @@ Uzupełnienie: README plant/core (liczby testów 29/59/20, bazowanie, parametry 
 - Własny widok stawów, czujników i krańcówek; jawne bazowanie przez ACTION, bez ruchu przy nawigacji.
 - Portal i stawy ze zsynchronizowaną sekwencją pozostają w Home All; blokada podczas programu i bazowania.
 - Przewijana szyna zapewnia dostęp do wszystkich widoków na niskich ekranach. Qt offscreen: 56 testów OK, ruff czysty; pełny GUI w CI.
+
+## HMI — Program: wybór i podgląd · 2026-10-19 · Codex (PR #46)
+- Własny widok Program: katalog z ustawień INI, podgląd do 2000 linii, informacja o źródle .lnx, osobne wczytanie przez ACTION.
+- Wybór pliku nie zmienia programu ani trybu; wczytanie zablokowane podczas programu i pauzy.
+- Testy Qt offscreen i modelu: 58 OK; lint czysty.

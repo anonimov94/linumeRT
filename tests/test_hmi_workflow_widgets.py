@@ -27,7 +27,7 @@ def page_env(monkeypatch):
     core.Info, core.Status, core.Action = lambda: info, lambda: status, lambda: action
     monkeypatch.setitem(sys.modules, "qtvcp", types.ModuleType("qtvcp"))
     monkeypatch.setitem(sys.modules, "qtvcp.core", core)
-    names = ("linumert_shell_pages", "linumert_homing_page")
+    names = ("linumert_shell_pages", "linumert_homing_page", "linumert_program_page")
     for name in names:
         monkeypatch.delitem(sys.modules, name, raising=False)
     module = importlib.import_module("linumert_homing_page")
@@ -50,6 +50,36 @@ def test_homing_navigation_does_not_command_motion(page_env):
     assert page.table.rowCount() == 4
     page.joint_buttons[3].click()
     action.SET_MACHINE_HOMING.assert_called_once_with(3)
+
+
+def test_program_selection_previews_without_loading(page_env, tmp_path):
+    _home, shell, _status, action = page_env
+    module = importlib.import_module("linumert_program_page")
+    page = module.ProgramPage(shell)
+    path = tmp_path / "program ze spacją.ngc"
+    path.write_text("G21 G90\nG0 X10\nM2\n")
+    assert page.show_file(path)
+    assert "G0 X10" in page.preview.toPlainText() and not action.mock_calls
+    page.load.click()
+    action.OPEN_PROGRAM.assert_called_once_with(str(path))
+    action.reset_mock()
+    shell.s.interp = "paused"
+    page.refresh()
+    page.load.click()
+    assert not action.mock_calls
+    page.close()
+
+
+def test_program_bad_file_preserves_previous_preview(page_env, tmp_path):
+    _home, shell, _status, _action = page_env
+    module = importlib.import_module("linumert_program_page")
+    page = module.ProgramPage(shell)
+    path = tmp_path / "good.ngc"
+    path.write_text("M2\n")
+    assert page.show_file(path)
+    assert not page.show_file(tmp_path / "missing.ngc")
+    assert page.path == path and "M2" in page.preview.toPlainText()
+    page.close()
 
 
 def test_homing_blocks_commands_during_program_and_homing(page_env):

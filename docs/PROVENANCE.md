@@ -96,3 +96,5 @@ Wiersze fontów dostają ścieżki i pliki `OFL.txt` w `licenses/` przy ich doda
 | Grzyb E-STOP w HMI w łańcuchu HAL (D35) | HAL, kod (Python), testy | model językowy Claude na zlecenie właściciela | 2026-10-19 | własna konfiguracja; komponenty LinuxCNC 2.9 `watchdog`, `logic`, `or2`, `estop_latch` (GPL-2, używane, nie kopiowane) | GPL-2.0-or-later | łańcuch E-STOP symulatora i Plant | `config/hal/linumert_hmi_estop.hal`, `tests/test_hmi_estop_hal.py` |
 
 | Widok Bazowanie HMI | kod Python i testy Qt | model językowy Codex na zlecenie właściciela | 2026-10-19 | własna implementacja według HMI_WORKFLOW.md, istniejące tokeny i API QtVCP; bez kopiowania kodu | GPL-2.0-or-later | stan stawów, bazowanie, nawigacja | `screens/linumert/linumert_homing_page.py`, `tests/test_hmi_workflow_widgets.py` |
+
+| Widok Program HMI | kod Python, testy Qt | model językowy Codex na zlecenie właściciela | 2026-10-19 | własna implementacja wg HMI_WORKFLOW.md, API QtVCP użyte bez kopiowania kodu | GPL-2.0-or-later | wybór, podgląd i jawne wczytanie G-code | `screens/linumert/linumert_program_page.py`, `tests/test_hmi_workflow_widgets.py` |

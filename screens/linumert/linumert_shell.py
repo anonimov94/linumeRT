@@ -29,6 +29,7 @@ from qtvcp.core import Action, Info, Status
 import linumert_shell_model as model
 import linumert_shell_pages as pages
 from linumert_homing_page import HomingPage
+from linumert_program_page import ProgramPage
 
 STATUS = Status()
 ACTION = Action()
@@ -45,7 +46,7 @@ AREAS = (
     ("machine", "Maszyna", "maszyna", "page:machine"),
     ("homing", "Bazowanie", "bazuj", "page:homing"),
     ("production", "Produkcja", "start", "page:production"),
-    ("program", "Program", "program", "btn_file"),
+    ("program", "Program", "program", "page:program"),
     ("tools", "Narzędzia", "narzedzia", "btn_tool"),
     ("offsets", "Zero detalu", "zero", "btn_offsets"),
     ("probe", "Sonda", "sonda", "btn_probe"),
@@ -151,12 +152,14 @@ class LinumertShell(QtCore.QObject):
         self.production = pages.ProductionPage(self)
         self.start = pages.StartPage(self)
         self.homing = HomingPage(self)
+        self.program = ProgramPage(self)
         self.pages = {"machine": 0, "classic": 1, "diag": self.stack.addWidget(self.diag),
                       "production": self.stack.addWidget(self.production),
                       "start": self.stack.addWidget(self.start),
-                      "homing": self.stack.addWidget(self.homing)}
+                      "homing": self.stack.addWidget(self.homing),
+                      "program": self.stack.addWidget(self.program)}
         self.page_widgets = {"diag": self.diag, "production": self.production,
-                             "start": self.start, "homing": self.homing}
+                             "start": self.start, "homing": self.homing, "program": self.program}
         body.addWidget(self.stack, 1)
         grid.addLayout(body, 1)
         grid.addWidget(self._bottom_bar())

@@ -99,7 +99,7 @@ def test_shell_selftest_in_gui(tmp_path) -> None:
     assert steps["10_wstrzymany"]["interp"] == "paused"
     assert steps["12_stop"]["interp"] == "idle"
     assert steps["14_jog_x_plus"]["x"] > steps["13_tryb_jog"]["x"] + 1.0
-    assert steps["15_obszar_program"]["page"] == "classic"
+    assert steps["15_obszar_program"]["page"] == "program"
     assert steps["18_maszyna"]["page"] == "machine"
     assert steps["19_diagnostyka"]["diag_joints"] == 3  # symulator: bez napędów Plant
     assert steps["19_diagnostyka"]["diag_drives"] == 0
