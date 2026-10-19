@@ -354,7 +354,8 @@ class SimPage(QtWidgets.QWidget):
                                           ("H", 40), ("TOP", 0))):
             spin = QtWidgets.QDoubleSpinBox()
             spin.setRange(0 if key == "TOP" else 0.1, 5000)
-            spin.setDecimals(2)
+            spin.setDecimals(4)
+            spin.setKeyboardTracking(False)
             spin.setValue(value)
             spin.setSuffix(" mm")
             self.dims[key] = spin

@@ -66,8 +66,9 @@ class OffsetsPage(QtWidgets.QWidget):
                             ("height", "Wysokość Z"), ("diameter", "Średnica D"),
                             ("bore", "Otwór rury d")):
             spin = QtWidgets.QDoubleSpinBox()
-            spin.setRange(0.01, 100000)
-            spin.setDecimals(3)
+            spin.setRange(0.0001, 100000)
+            spin.setDecimals(4)
+            spin.setKeyboardTracking(False)
             spin.setValue(getattr(self.spec, name))
             spin.setSuffix(" mm")
             spin.valueChanged.connect(self.preview)
@@ -85,7 +86,8 @@ class OffsetsPage(QtWidgets.QWidget):
         for axis, value in zip("XYZ", self.spec.position, strict=True):
             spin = QtWidgets.QDoubleSpinBox()
             spin.setRange(-100000, 100000)
-            spin.setDecimals(3)
+            spin.setDecimals(4)
+            spin.setKeyboardTracking(False)
             spin.setValue(value)
             spin.setSuffix(" mm")
             spin.valueChanged.connect(self.preview)
