@@ -34,8 +34,8 @@ Sesje 022, 024, 023: PR #37, #38, #39 (autokontrola, bez niezależnego przegląd
 2. **HMI według kolejności pracy (D32)**: docelowy kierunek ekranu; etapy HMI-01…06 prowadzi Codex (§6).
    Sesje ekranu z planu (M2, 027–038) muszą być z nim zgodne.
 3. Propozycja do decyzji: ramka LRT-NET v2 (zatrzask indeksu enkodera, 6072h), opis w DECYZJE (sesja 017).
-4. Dług 024: testy scenariuszy z LinuxCNC pomijane na GitHub Actions — po poprawce procesów-zombie
-   w `tests/rip_support.py` można je włączyć i sprawdzić w CI.
+4. Dług 024: kontener CI dostał `--init` (zombie są sprzątane), a pominięcie testów scenariuszy z LinuxCNC na Actions
+   zdjęto; do potwierdzenia przez zielony job `LinuxCNC RIP smoke` w PR (wynik: dopisać tu po przebiegu).
 
 ## 4. Środowisko
 

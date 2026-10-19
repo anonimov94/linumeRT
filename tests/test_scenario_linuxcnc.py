@@ -9,7 +9,6 @@ NIEZWERYFIKOWANE NA SPRZĘCIE.
 
 from __future__ import annotations
 
-import os
 from pathlib import Path
 
 import pytest
@@ -22,10 +21,6 @@ SCENARIOS = ROOT / "plant" / "scenarios"
 BOTH = sorted(p for p in SCENARIOS.glob("*.yaml") if load_scenario(p).master == "both")
 
 
-# Dług (sesja 024): w kontenerze CI (Debian, runner współdzielony) po scenariuszach zostają
-# procesy rtapi_app i psują kolejne testy LinuxCNC; lokalnie (WSL, wsl-test.sh --linuxcnc) zielone.
-@pytest.mark.skipif(os.environ.get("GITHUB_ACTIONS") == "true",
-                    reason="dług 024: resztki rtapi_app w kontenerze CI; uruchamiane lokalnie")
 @pytest.mark.parametrize("index, path", list(enumerate(BOTH)), ids=[p.stem for p in BOTH])
 def test_scenario_with_linuxcnc(index: int, path: Path) -> None:  # REQ-QA-03
     from linumert_plant.scenario_linuxcnc import run_linuxcnc
