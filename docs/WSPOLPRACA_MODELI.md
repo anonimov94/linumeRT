@@ -30,6 +30,9 @@ współdzielone zasoby chroni `tools/lock.py` (blokada w `state/locks/`, atomowa
 - pliki w repo (kod, dokumenty) chronią osobne gałęzie i checkouty (D28), nie blokady.
 
 ## 3. Małe kroki i częsty push
+- D36: GUI od pierwszego kroku — obowiązuje `CLAUDE.md` §11 i
+  [`SAVOIR_VIVRE_AI.md`](SAVOIR_VIVRE_AI.md). Funkcja operatora od razu trafia do widocznego,
+  użytecznego widoku; kolejne przetestowane porcje (najwyżej około 200 nowych linii) są wypychane.
 - Krok = jedna spójna zmiana, zwykle ≤ 5 plików lub ≈ 200 linii. Po każdym kroku:
   lint i szybkie testy → commit → push. Niczego nie kumuluj lokalnie.
 - Draft PR otwieraj po pierwszym kroku, nie na końcu sesji.

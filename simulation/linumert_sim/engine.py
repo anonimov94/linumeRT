@@ -110,6 +110,16 @@ class SimEngine:
         self._prev = None
         self.path.clear()
 
+    def reset_stock(self) -> None:
+        if self.stock is not None:
+            self.stock.reset()
+        self.path.clear()
+        self._active.clear()
+        self._window.clear()
+        self._prev = None
+        self._idle = 0
+        self.load = Load()
+
     def set_tools(self, tools: dict[int, Cutter]) -> None:
         self.tools = dict(tools)
         self._warned = {w for w in self._warned if w[0] != "K-320"}
@@ -121,6 +131,8 @@ class SimEngine:
     # ---- krok ----------------------------------------------------------------------------
     def step(self, s: Sample) -> list[Event]:
         events: list[Event] = []
+        self._active -= {key for key in self._active
+                         if key[0] == "K-309" and key[1] != s.tool}
         cutter = self.tools.get(s.tool) if s.tool else None
         gauge = cutter.gauge if cutter else 0.0
         tip = (s.nose[0], s.nose[1], s.nose[2] - gauge)
@@ -256,8 +268,10 @@ class SimEngine:
                 "K-306", "overload", s.line, s.tool, tip,
                 {"line": s.line, "torque": f"{load.torque:.2f}",
                  "limit": f"{load.torque_limit:.2f}"}, ("wrzeciono", "")))
-        elif load.torque < 0.8 * load.torque_limit:
+        elif load.torque == 0 or load.torque < 0.8 * load.torque_limit:
             self._active.discard(("K-306",))
+        if not load.axis:
+            self._active -= {key for key in self._active if key[0] == "K-307"}
         for axis, (force, limit) in load.axis.items():
             if force > limit:
                 self._once(events, ("K-307", axis), Event(

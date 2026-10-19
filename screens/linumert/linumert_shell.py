@@ -6,13 +6,12 @@ Model-Author: Claude · HMI-PoC (2026-10-19). Proof of concept: funkcje dochodz�
 (docs/design/HMI_WORKFLOW.md).
 
 Zasady (HMI_WORKFLOW.md, CLAUDE.md §6):
-- cały interfejs QtDragon zostaje nietknięty i dostępny w obszarach szyny („Program”,
-  „Narzędzia”…); nakładka tylko przenosi go do stosu stron, niczego nie kopiuje;
+- własne strony operatora współdzielą stan LinuxCNC; bazowy QtDragon pozostaje w stosie stron;
 - zmiana obszaru nie wykonuje ruchu ani zmiany trybu;
 - komendy maszyny wyłącznie przez ACTION QtVCP, stan wyłącznie ze STATUS QtVCP;
 - ekran nie jest funkcją bezpieczeństwa; grzyb E-STOP w HMI to DODATKOWY, szeregowy element
   łańcucha E-STOP w HAL (D35, config/hal/linumert_hmi_estop.hal): wciśnięcie odbiera zezwolenie,
-  zwolnienie jest jedynym sposobem potwierdzenia (resetu) E-STOP, ekran wysyła sygnał życia
+  zwolnienie albo podwójny Reset potwierdza zatrzask E-STOP, ekran wysyła sygnał życia
   (watchdog HAL). Obwód sprzętowy maszyny jest nadrzędny i podłączony do HAL fizycznie.
 """
 
@@ -26,8 +25,14 @@ import linuxcnc
 from PyQt5 import QtCore, QtGui, QtWidgets
 from qtvcp.core import Action, Info, Status
 
+from linumert_alarm_panel import AlarmPanel
+from linumert_operator_controls import OperatorControls
+from linumert_virtual_session import VirtualSession, virtual_config
 import linumert_shell_model as model
 import linumert_shell_pages as pages
+from linumert_homing_page import HomingPage
+from linumert_program_page import ProgramPage
+from linumert_offsets_page import OffsetsPage
 import linumert_sim_page as sim_page
 
 try:  # baza narzędzi wymaga rdzenia linumert (pyyaml); bez niego obszar = tabela QtDragon
@@ -50,11 +55,12 @@ NML_KINDS = {k: getattr(linuxcnc, k) for k in
 AREAS = (
     ("start", "Start", "klucz", "page:start"),
     ("machine", "Maszyna", "maszyna", "page:machine"),
+    ("homing", "Bazowanie", "bazuj", "page:homing"),
     ("production", "Produkcja", "start", "page:production"),
     ("sim", "Symulacja", "symulacja", "page:sim"),
-    ("program", "Program", "program", "btn_file"),
+    ("program", "Program", "program", "page:program"),
     ("tools", "Narzędzia", "narzedzia", "page:tools"),
-    ("offsets", "Zero detalu", "zero", "btn_offsets"),
+    ("offsets", "Zero detalu", "zero", "page:offsets"),
     ("probe", "Sonda", "sonda", "btn_probe"),
     ("diag", "Diagnostyka", "diagnostyka", "page:diag"),
     ("settings", "Konfiguracja", "konfiguracja", "btn_settings"),
@@ -119,11 +125,15 @@ class LinumertShell(QtCore.QObject):
         super().__init__(handler.w)
         self.h = handler
         self.w = handler.w
+        self.action, self.info, self.status = ACTION, INFO, STATUS
         # Piny grzyba HMI (D35): ok = 1 grzyb zwolniony, hb = sygnał życia, wd = uzbrojenie watchdoga
         self.hmi_pins = hmi_pins or {}
         self.tokens = model.load_tokens()
         self.c = self.tokens["kolory"]
         self.s = model.ShellState(axes=tuple(a.upper() for a in INFO.AVAILABLE_AXES))
+        ini = os.environ.get("INI_FILE_NAME") or getattr(INFO, "INIPATH", "")
+        self.s.virtual = bool(ini and virtual_config(ini))
+        self.virtual_session = VirtualSession(self)
         self.dro_view = "work"
         self.program_lines: list[str] = []
         self.positions = ([0.0] * 9, [0.0] * 9, [0.0] * 9)
@@ -132,6 +142,7 @@ class LinumertShell(QtCore.QObject):
         self._estop_requested = False
         self.sim_cause = ""  # ostatnia kolizja/przeciążenie z symulacji (przyczyna E-STOP)
         self.buttons: dict[str, QtWidgets.QPushButton] = {}
+        self.operator_panels = []
 
     # ---- budowa ---------------------------------------------------------------------------
     def install(self) -> LinumertShell:
@@ -142,8 +153,8 @@ class LinumertShell(QtCore.QObject):
         grid = QtWidgets.QVBoxLayout(root)
         grid.setContentsMargins(0, 0, 0, 0)
         grid.setSpacing(0)
-        grid.addWidget(self._top_bar())
         grid.addWidget(self._alarm_bar())
+        grid.addWidget(self._top_bar())
         body = QtWidgets.QHBoxLayout()
         body.setSpacing(0)
         body.addWidget(self._rail())
@@ -158,19 +169,30 @@ class LinumertShell(QtCore.QObject):
         self.diag = pages.DiagPage(self)
         self.production = pages.ProductionPage(self)
         self.start = pages.StartPage(self)
+        self.homing = HomingPage(self)
+        self.program = ProgramPage(self)
         self.sim = sim_page.SimPage(self)
         ini = os.environ.get("INI_FILE_NAME") or getattr(INFO, "INIPATH", "")
         self.tools = tools_page.ToolsPage(self, ini) if tools_page is not None else None
+        self.offsets = OffsetsPage(self)
         self.pages = {"machine": 0, "classic": 1, "diag": self.stack.addWidget(self.diag),
                       "production": self.stack.addWidget(self.production),
                       "start": self.stack.addWidget(self.start),
-                      "sim": self.stack.addWidget(self.sim)}
+                      "sim": self.stack.addWidget(self.sim),
+                      "homing": self.stack.addWidget(self.homing),
+                      "program": self.stack.addWidget(self.program),
+                      "offsets": self.stack.addWidget(self.offsets)}
         self.page_widgets = {"diag": self.diag, "production": self.production,
-                             "start": self.start, "sim": self.sim}
+                             "start": self.start, "sim": self.sim,
+                             "homing": self.homing, "program": self.program, "offsets": self.offsets}
         if self.tools is not None:
             self.pages["tools"] = self.stack.addWidget(self.tools)
             self.page_widgets["tools"] = self.tools
-        body.addWidget(self.stack, 1)
+        content = QtWidgets.QScrollArea()
+        content.setWidgetResizable(True)
+        content.setFrameShape(QtWidgets.QFrame.NoFrame)
+        content.setWidget(self.stack)
+        body.addWidget(content, 1)
         grid.addLayout(body, 1)
         grid.addWidget(self._bottom_bar())
         self.w.setCentralWidget(root)
@@ -236,19 +258,8 @@ class LinumertShell(QtCore.QObject):
         return bar
 
     def _alarm_bar(self) -> QtWidgets.QWidget:
-        self.alarm = QtWidgets.QFrame()
-        self.alarm.setObjectName("lrtAlarm")
-        self.alarm.setProperty("level", "info")
-        lay = QtWidgets.QHBoxLayout(self.alarm)
-        lay.setContentsMargins(16, 6, 8, 6)
-        self.lbl_alarm = QtWidgets.QLabel()
-        self.lbl_alarm.setWordWrap(True)
-        lay.addWidget(self.lbl_alarm, 1)
-        close = QtWidgets.QPushButton("Potwierdź")
-        close.setToolTip("Ukryj komunikat (historia: Diagnostyka)")
-        close.clicked.connect(self.clear_alarm)
-        lay.addWidget(close)
-        self.alarm.hide()
+        self.alarm = AlarmPanel(self)
+        self.lbl_alarm = self.alarm.rows[0]
         return self.alarm
 
     def _rail(self) -> QtWidgets.QWidget:
@@ -274,7 +285,13 @@ class LinumertShell(QtCore.QObject):
             lay.addWidget(btn)
             self.areas[area] = btn
         lay.addStretch(1)
-        return rail
+        scroll = QtWidgets.QScrollArea()
+        scroll.setFrameShape(QtWidgets.QFrame.NoFrame)
+        scroll.setWidgetResizable(True)
+        scroll.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
+        scroll.setFixedWidth(116)
+        scroll.setWidget(rail)
+        return scroll
 
     def _machine_page(self) -> QtWidgets.QWidget:
         page = QtWidgets.QWidget()
@@ -375,31 +392,11 @@ class LinumertShell(QtCore.QObject):
 
     def _manual_card(self) -> QtWidgets.QWidget:
         frame, lay, self.lbl_jog_side = _card("Ruch ręczny i MDI", "")
-        jog = QtWidgets.QGridLayout()
-        jog.setSpacing(8)
-        for i, axis in enumerate(self.s.axes[:4]):
-            for j, (sign, direction) in enumerate((("−", -1), ("+", 1))):
-                btn = QtWidgets.QPushButton(f"{axis}{sign}")
-                btn.setProperty("role", "jog")
-                btn.setToolTip(f"JOG {axis}{sign}: przytrzymaj (prędkość i krok jak w QtDragon)")
-                btn.setAutoRepeat(False)
-                btn.pressed.connect(lambda a=axis, d=direction: self.jog(a, d))
-                btn.released.connect(lambda a=axis: self.jog(a, 0))
-                jog.addWidget(btn, i // 2, (i % 2) * 2 + j)
-                self.buttons[f"jog_{axis}{direction}"] = btn
-        lay.addLayout(jog)
-        mdi = QtWidgets.QHBoxLayout()
-        self.mdi = QtWidgets.QLineEdit()
-        self.mdi.setObjectName("lrtMdi")
-        self.mdi.setPlaceholderText("MDI, np. G0 X10 Y10")
-        self.mdi.returnPressed.connect(self.send_mdi)
-        send = QtWidgets.QPushButton("Wyślij")
-        send.clicked.connect(self.send_mdi)
-        self.buttons["mdi"] = send
-        mdi.addWidget(self.mdi, 1)
-        mdi.addWidget(send)
-        lay.addLayout(mdi)
-        lay.addStretch(1)
+        panel = OperatorControls(self)
+        self.operator_panels.append(panel)
+        self.mdi = panel.mdi
+        self.buttons.update(panel.buttons)
+        lay.addWidget(panel)
         return frame
 
     def _bottom_bar(self) -> QtWidgets.QWidget:
@@ -515,7 +512,7 @@ class LinumertShell(QtCore.QObject):
             self.sim_cause = ""
         self._estop_requested = False
         self._set(estop=True, machine_on=False)
-        self.show_alarm("err", reason)
+        self.show_alarm("err", reason, "safety")
 
     def _estop_cause(self, requested: bool = False) -> str:
         loop = pages._hal("lrt-net.0.din-00")
@@ -619,6 +616,9 @@ class LinumertShell(QtCore.QObject):
 
     # ---- akcje (wyłącznie ACTION QtVCP) -----------------------------------------------------
     def set_mode(self, mode: str) -> None:
+        if self.s.specialist and mode != "manual":
+            self.show_alarm("warn", "Tryb specjalisty: dostępny tylko JOG")
+            return
         if not self._allowed("mode"):
             return
         {"manual": ACTION.SET_MANUAL_MODE, "mdi": ACTION.SET_MDI_MODE,
@@ -649,7 +649,22 @@ class LinumertShell(QtCore.QObject):
     def jog(self, axis: str, direction: int) -> None:
         if direction and not self._allowed("jog"):
             return
+        if self.s.specialist:
+            ACTION.SET_JOG_RATE(600 if getattr(INFO, "MACHINE_IS_METRIC", True) else 600 / 25.4)
         ACTION.DO_JOG(axis, direction)
+
+    def set_specialist(self, enabled: bool) -> None:
+        ACTION.ABORT()
+        for axis in self.s.axes:
+            ACTION.DO_JOG(axis, 0)
+        self.virtual_session.finish()
+        self.s.specialist = enabled
+        if enabled:
+            ACTION.SET_MANUAL_MODE()
+            ACTION.SET_SPINDLE_STOP()
+        if self.s.virtual:
+            self.sim.client.send(cmd="recovery", on=enabled)
+        self.refresh()
 
     def send_mdi(self) -> None:
         text = self.mdi.text().strip()
@@ -686,20 +701,39 @@ class LinumertShell(QtCore.QObject):
         self._refresh_dro()
 
     # ---- alarmy -------------------------------------------------------------------------
-    def show_alarm(self, level: str, text: str) -> None:
+    def show_alarm(self, level: str, text: str, source: str = "") -> None:
         text = " ".join(str(text).split())
         if not text:
             return
         self.s.alarm = model.Alarm(level, text)
         if getattr(self, "diag", None) is not None:
             self.diag.add_log(level, text)
-        self.lbl_alarm.setText(text)
-        _restyle(self.alarm, level=level)
-        self.alarm.show()
+        self.alarm.add(level, text, source or ("controller" if level == "err" else ""))
 
     def clear_alarm(self) -> None:
-        self.s.alarm = None
-        self.alarm.hide()
+        self.reset_alarms(False)
+
+    def reset_alarms(self, double: bool = False) -> None:
+        if double and (self.s.estop or self.s.hmi_pressed):
+            self.acknowledge_estop()  # HAL odrzuci reset przy otwartym fizycznym safety
+            QtCore.QTimer.singleShot(700, lambda: self.reset_alarms(False))
+        self._alarm_causes()
+        self.alarm.acknowledge()
+        self.s.alarm = (model.Alarm(*self.alarm.entries[0][:2])
+                        if self.alarm.entries else None)
+
+    def _alarm_causes(self) -> None:
+        active = set(getattr(self, "sim_active", set()))
+        if self.s.estop:
+            active.add("safety")
+        if self.s.plant == "lost":
+            active.add("plant")
+        joints = getattr(self.status.stat, "joint", ())
+        fault = any(j.get("fault") or j.get("min_hard_limit") or j.get("max_hard_limit")
+                    for j in joints)
+        if fault or self.s.estop or self.s.plant == "lost":
+            active.add("controller")
+        self.alarm.active = active
 
     # ---- odświeżanie ----------------------------------------------------------------------
     def _tick(self) -> None:
@@ -741,6 +775,9 @@ class LinumertShell(QtCore.QObject):
 
     def refresh(self) -> None:
         s, g = self.s, model.gates(self.s)
+        self._alarm_causes()
+        for panel in self.operator_panels:
+            panel.refresh()
         production = getattr(self, "production", None)
         if production is not None:
             production.on_state()

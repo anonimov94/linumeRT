@@ -96,7 +96,7 @@ class ToolsPage(QtWidgets.QWidget):
         for name, p in PARAMS.items():
             if name == "hand":
                 continue
-            low = p.minimum if not p.exclusive_minimum else p.minimum + (0.001 if p.unit else 1)
+            low = p.minimum  # zero = niewypełnione; wymagane >0 sprawdza model
             spin = self._spin(low, p.maximum, f" {p.unit}" if p.unit else "")
             if name in ("flutes",):
                 spin.setDecimals(0)
@@ -125,7 +125,8 @@ class ToolsPage(QtWidgets.QWidget):
     def _spin(low, high, suffix):
         spin = QtWidgets.QDoubleSpinBox()
         spin.setRange(low, high)
-        spin.setDecimals(3)
+        spin.setDecimals(4)
+        spin.setKeyboardTracking(False)
         spin.setSuffix(suffix)
         spin.setSpecialValueText("—")  # wartość minimalna = pole puste
         return spin
@@ -222,7 +223,7 @@ class ToolsPage(QtWidgets.QWidget):
             if name not in allowed:
                 continue
             if name == "d_wear":  # korekcja zawsze ma wartość (-1…+1 mm, 0 = brak)
-                params[name] = round(spin.value(), 3)
+                params[name] = round(spin.value(), 4)
             elif spin.value() != spin.minimum():
                 params[name] = round(spin.value(), 4)
         params["hand"] = float(self.cmb_hand.currentData())

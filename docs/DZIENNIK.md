@@ -342,12 +342,51 @@ Uzupełnienie: README plant/core (liczby testów 29/59/20, bazowanie, parametry 
 - Testy: `tests/test_hmi_estop_hal.py` (statycznie + `halrun`: grzyb, reset przy wciśniętym, watchdog, ponowne uzbrojenie), samotest GUI 33 kroki (grzyb wciśnięty, nieskuteczny reset inną drogą, zwolnienie, brak sygnału życia → E-STOP z przyczyną, potwierdzenie), pełny `-m linuxcnc` lokalnie. NIEZWERYFIKOWANE NA SPRZĘCIE.
 - Przegląd Codexa (SHA 7b2cb32, `docs/ROZMOWA_MODELI.md`): P1 — po przywróceniu pętli/łącza reset inną drogą omijał grzyb → zatrzask potwierdzenia `lrt_hmi_ack` (kasowany zboczem opadającym `iocontrol.0.user-enable-out`, ustawiany impulsem `linumert.hmi-ack`); P2 — `--classic` bez ponownego uzbrojenia watchdoga → żądanie resetu z procesu ekranu potwierdza i uzbraja. Testy: `halrun` (pętla przerwana/przywrócona, reset inną drogą nieskuteczny), samotest nakładki 36 kroków, samotest `--classic`.
 
+## HMI — Bazowanie · 2026-10-19 · Codex (PR #46)
+- Własny widok stawów, czujników i krańcówek; jawne bazowanie przez ACTION, bez ruchu przy nawigacji.
+- Portal i stawy ze zsynchronizowaną sekwencją pozostają w Home All; blokada podczas programu i bazowania.
+- Przewijana szyna zapewnia dostęp do wszystkich widoków na niskich ekranach. Qt offscreen: 56 testów OK, ruff czysty; pełny GUI w CI.
+
+## HMI — Program: wybór i podgląd · 2026-10-19 · Codex (PR #46)
+- Własny widok Program: katalog z ustawień INI, podgląd do 2000 linii, informacja o źródle .lnx, osobne wczytanie przez ACTION.
+- Wybór pliku nie zmienia programu ani trybu; wczytanie zablokowane podczas programu i pauzy.
+- Testy Qt offscreen i modelu: 58 OK; lint czysty.
 ## Organizacja — HMI: symulacja materiału i kolizji, tabela narzędzi (PR #45) · 2026-10-19 · Claude (Opus 5.5)
 - Na polecenie właściciela (PoC HMI w symulacji dziś): `simulation/linumert_sim` — materiał 2.5D (mapa wysokości), profile wszystkich typów narzędzi, reguły K-301…K-309 (nowe K-306 wrzeciono, K-307 oś, K-308 kierunek obrotów, K-309 obroty > max, K-322 podcięcie), granice obciążenia z szablonów napędów w `machine.yaml`; proces `linumert_sim.live` przy LinuxCNC (nice 10) wywołuje E-STOP przy każdej kolizji i przeciążeniu, reset grzybem (D35).
 - HMI: obszary Symulacja (pyqtgraph 3D, przygotówka `;@STOCK` z programu albo z formularza, model maszyny, obciążenia, zdarzenia) i Narzędzia (baza narzędzi → tool.tbl → LinuxCNC i symulacja). Typy narzędzi: wspólne pola `flutes`, `max_rpm`, `hand`, `d_wear` (±1 mm), `holder_d`, `holder_l`; nowy typ `tap`.
 - Konfiguracja symulatora: `machine.yaml` (stół, dociski, napędy), `tools_seed.yaml` (11 narzędzi), `linumert.var.default` (G54 X100 Y100 Z-150, kopiuje starter). Programy `linumert_demo.ngc`, `linumert_kolizja.ngc`; `;@STOCK` w przykładach w aktualnej składni.
 - Testy: `tests/test_sim_engine.py` (każda reguła, profile, objętości), pełny pytest; e2e `tools/dev/sim-e2e.sh` (Xvfb, obraz startera). Ograniczenia: brak podcięć w 2.5D, siły z kc materiału. NIEZWERYFIKOWANE NA SPRZĘCIE.
 
+## HMI — Integracja widoków Claude i Codex · 2026-10-19 · Codex (PR #46)
+- Połączono #45 (Symulacja/Narzędzia) z #46 (Bazowanie/Program), zachowano autorstwo i oba zestawy zmian.
+- Rozwiązano konflikty rejestracji stron i dokumentacji; 154 testy zakresu oraz lint OK, pełny GUI w CI.
+
+- Poprawka integracji: kopia konfiguracji samotestu nie dziedziczy linumert.var po lokalnym demo (G54=100,100,−150 powodowało soft limit Z zamiast ruchu). Ustawienia operatora pozostają nienaruszone; symulacja nadal może zatrzymać ruch.
+
+## HMI — Priorytet Zero detalu · 2026-10-19 · Codex
+- Polecenie właściciela: własny widok maszyny i przygotówki BOX/walec/rura/odlew obrotowy.
+- Monitor terminalowy `python3 tools/dev/hmi-progress.py`: 6 kroków, odświeżanie i znaczniki; sprawdzony `--once`, lint OK.
+
+- Zero detalu, geometria: cztery zamknięte siatki, profil odlewu Z/R obracany 360°, punkty odniesienia i komendy G54–G59 z przeliczeniem mm/inch. 9 testów objętości, domknięcia i walidacji OK; lint OK.
+
+- Zero detalu, widok 3D: maszyna i cztery przygotówki, obrót myszą, powiększanie i znacznik zera; renderuje także bez OpenGL. 13 testów geometrii i rzeczywistego renderowania Qt OK, lint OK.
+
+- Własny widok Zero detalu zastępuje stronę QtDragon: maszyna, cztery kształty, edycja wymiarów, profil Z/R, punkt odniesienia i pozycja w G53. 19 testów geometrii/widgetów OK; edycja i nawigacja nie wysyłają komend maszyny.
+
+- Zero detalu, zapis i układy: atomowy zapis/wczytanie przygotówki przy konfiguracji maszyny, pełny profil odlewu; jawne G10 L2 po potwierdzeniu, blokada przed bazowaniem i w trakcie programu, przeliczenie mm/inch. 21 testów geometrii, renderowania i operacji GUI OK.
+
+- Podgląd offline Zero detalu: osobna aplikacja Qt, brak importów LinuxCNC/QtVCP, zapisy tylko w katalogu tymczasowym, ustawianie zer zablokowane także w slocie. Akcje zapisu i zera zawsze widoczne pod formularzem. Test osobnego procesu i izolacji konfiguracji OK.
+
+- Końcowy zakres: 178 testów geometrii, UI, offline, symulacji, narzędzi, alarmów i wymagań OK; ruff czysty. Zrzut faktycznej aplikacji 1280×768 w docs/raporty/zero_detalu/offline.png; instrukcja w ZERO_DETALU.md. Otwarcie okna pulpitu z sesji agenta zablokowane (socket X11: EPERM); launcher gotowy do terminala właściciela.
+
+## 2026-10-19 · Obsługa operatora D37 · Codex
+
+Trzy alarmy, Reset, cztery miejsca po przecinku i wpis ręczny. Wspólny panel JOG/MDI,
+M3/M4/M5 i WYMIANA M6 w Maszyna/Symulacja. Jawny bliźniak: reset HOME i wycofanie po kolizji.
+Specjalista nie omija fizycznego safety ani limitów. Testy wykryły i poprawiono resztki alarmu
+przeciążenia po zatrzymaniu wrzeciona oraz brak sygnałów kontraktu HAL wymiany wirtualnej.
+Samotest GUI rozszerzony do 42 kroków; pełne CI w toku. Dokumentacja i README ujednolicone.
+Model-Author: Codex.
 ## Organizacja — punkty roadmapy na szybko: 040, 042, 059 (części) · 2026-10-19 · Claude (Opus 5.5)
 - 040: generatory `header`, `program_end`, `tool_change`, `face_mill` (zygzak / jednokierunkowo, warstwy, wybieg, podgląd 2D) — `core/linumert/generators/basic.py`; poprawka `fmt(x, 0)` (obcinało zera: S8000 → S8).
 - 042: generator `drill_holes` — wzory pojedynczy/lista/rząd/siatka/okrąg/łuk, G81/G82/G83/G73, G33.1 tylko przy `spindle_sync` (G84 nie istnieje w LinuxCNC 2.9), walidacja, podgląd 2D.

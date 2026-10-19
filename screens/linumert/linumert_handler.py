@@ -49,7 +49,7 @@ class HandlerClass(_upstream.HandlerClass):
             import linumert_shell
 
             self.shell = linumert_shell.install(self, pins)
-            # Reset E-STOP wyłącznie grzybem HMI: przycisk E-STOP/RESET QtDragon ukryty.
+            # Reset E-STOP przez grzyb lub podwójny Reset powłoki: przycisk E-STOP/RESET QtDragon ukryty.
             self.w.action_estop.hide()
             if os.environ.get("LINUMERT_SHELL_SELFTEST"):
                 import linumert_shell_selftest
@@ -119,6 +119,15 @@ class HandlerClass(_upstream.HandlerClass):
             return
         where = f" (stawy {', '.join(map(str, hits))})" if hits else ""
         self.add_status(f"Zadziałała krańcówka sprzętowa{where}", _upstream.CRITICAL)
+
+    def kb_jog(self, state, joint, direction, fast=False, linear=True):
+        if self.shell is None or not self.shell.s.specialist:
+            return super().kb_jog(state, joint, direction, fast, linear)
+        # W trybie wycofania także klawiatura (w tym Shift) ma wolny ruch ciągły.
+        if state and not self.shell._allowed("jog"):
+            return
+        scale = 1 if _upstream.INFO.MACHINE_IS_METRIC or not linear else 25.4
+        _upstream.ACTION.JOG(joint, direction if state else 0, 10 / scale, 0)
 
     def on_keycall_ESTOP(self, event, state, shift, cntrl):
         # F1: wciśnięcie grzyba HMI (zwolnienie tylko świadomie, przyciskiem grzyba)

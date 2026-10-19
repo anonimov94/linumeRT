@@ -10,6 +10,7 @@ loadrt [EMCMOT]EMCMOT servo_period_nsec=[EMCMOT]SERVO_PERIOD num_joints=[KINS]JO
 # napędy symulowane: idealne nadążanie (wyjście = wejście)
 loadrt scale names=sim_j0,sim_j1,sim_j2
 loadrt sim_spindle names=sim_spindle
+loadrt timedelay names=sim_toolchange
 loadrt ddt names=spindle_rps
 loadrt comp names=home_x,home_y,home_z
 loadrt estop_latch names=estop_latch
@@ -20,6 +21,7 @@ addf sim_j0 servo-thread
 addf sim_j1 servo-thread
 addf sim_j2 servo-thread
 addf sim_spindle servo-thread
+addf sim_toolchange servo-thread
 addf spindle_rps servo-thread
 addf home_x servo-thread
 addf home_y servo-thread
@@ -71,7 +73,7 @@ sets linumert.spindle.at-speed 1
 
 # ---- wejścia/wyjścia ---------------------------------------------------------------------
 # E-STOP (D35): w symulacji jedynym elementem łańcucha jest grzyb HMI z sygnałem życia
-# (config/hal/linumert_hmi_estop.hal); reset (potwierdzenie) tylko grzybem w HMI. Na maszynie
+# (config/hal/linumert_hmi_estop.hal); reset grzybem albo podwójnym Resetem HMI. Na maszynie
 # szeregowo dochodzi obwód sprzętowy (wejście HAL), nadrzędny wobec HMI.
 addf estop_latch servo-thread
 net linumert.hmi.estop-ok      => estop_latch.ok-in
