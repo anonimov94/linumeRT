@@ -16,7 +16,8 @@ Model-Author: Claude · 2026-10-19
   (telemetria, parametry live, pulpit MPG, CSV, edytor maszyny z widokiem 3D, napędy, awarie); scenariusze
   z atrapą mastera (CI) i z LinuxCNC, raport HTML w `docs/raporty/prototypy/`; `check_requirements.py` w `make test`;
   skrypty VirtualBox dla VM-A i VM-B ([`VM.md`](VM.md), NIEZWERYFIKOWANE W VIRTUALBOX); **ekran HMI linumeRT**
-  (nakładka na QtDragon, HMI-PoC, D34): pasek trybu/stanu, szyna obszarów, widok „Maszyna”, pasek akcji.
+  (nakładka na QtDragon, HMI-PoC, D34): pasek trybu/stanu, szyna obszarów, pasek akcji, widoki Start, Maszyna,
+  Produkcja, Diagnostyka (PR #42, #43).
 - Testy (sesja 025, kontener Ubuntu 24.04 bez LinuxCNC + CI): wyniki w PR #41.
 - **Nic nie jest sprawdzone na sprzęcie.** Prace od sesji 004 to autokontrola Claude, bez niezależnego przeglądu.
 
@@ -64,6 +65,7 @@ Otwarte: #34 (Codex, HMI-01, draft). Scalone gałęzie `wip/*`, `claude/*` i `cc
 | mb2hal z Modbus TCP w LinuxCNC (test e2e); alarmy falownika E-4100/E-4102/E-4104 na ekranie | sesja 021 | sesje ekranu |
 | Tłumaczenia Qt (`.ts`, `tools/i18n.sh`), przycisk „Sprawdź” G-code, zakładka narzędzi na ekranie | 007, 032, 044 | sesje ekranu (M2) |
 | Zgodność PyQt5 (GPL-3.0) z dystrybucją na GPL-2.0 | 001 | 080 |
+| Łącze LRT-NET z Plant w kontenerze chmurowym gubi ≥ 20 odpowiedzi → E-STOP (LinuxCNC bez RT, Plant w Pythonie); w VM-A/VM-B do sprawdzenia | HMI etap 2 | właściciel ([`VM.md`](VM.md) §6) / decyzja o `timeout-cycles` w konfiguracji deweloperskiej |
 
 ## 6. Dla Codex:
 
@@ -87,3 +89,4 @@ Od D34 (2026-10-19) jest działająca nakładka (HMI-PoC, Claude, PR #42): kolej
 - Kroki 1–4: skrypty VM, sonda łącza, testy, `docs/VM.md`, poprawka nowej sesji mastera w Plant; zamknięcie sesji.
 - Tura oddana; LOCK pusty.
 - 2026-10-19 HMI-PoC (D34): nakładka linumeRT na QtDragon, PR #42, samotest GUI 18/18 z LinuxCNC RIP i z Plant.
+- 2026-10-19 HMI etap 2: widoki Start, Produkcja, Diagnostyka, przyczyna E-STOP; PR #43.

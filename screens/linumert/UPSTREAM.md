@@ -19,7 +19,11 @@ Model-Author: Claude · sesja 005 · 2026-10-18
 | `linumert.qss` | `qtdragon.qss` | bez zmian |
 | `linumert_upstream_handler.py` | `qtdragon_handler.py` | **bez zmian** (wzorzec patch) |
 | `linumert_handler.py` | — | własny: klasa pochodna `HandlerClass`, tytuł okna, nakładka linumeRT (`LINUMERT_SHELL=0` wyłącza) |
-| `linumert_shell.py`, `linumert_shell_model.py`, `linumert_shell_selftest.py` | — | własne (HMI-PoC): powłoka i widok „Maszyna” wokół niezmienionego QtDragon, samotest GUI |
+| `linumert_shell.py`, `linumert_shell_model.py`, `linumert_shell_pages.py`, `linumert_shell_selftest.py` | — | własne (HMI-PoC, etap 2): powłoka, widoki Start, Maszyna, Produkcja, Diagnostyka wokół niezmienionego QtDragon, samotest GUI |
+
+Znane zachowanie upstream poprawione w `linumert_handler.py` (bez zmiany kopii): QtDragon 2.9.10 zgłasza
+„Hard limits tripped” przy każdym sygnale `hard-limits-tripped` (także `tripped=False` na starcie) i przy
+bazowaniu na krańcówce wspólnej z czujnikiem bazowania.
 | `linumert_ABOUT` | `qtdragon_ABOUT` | bez zmian |
 | `UPSTREAM_version.txt` | `version.txt` | bez zmian |
 | `images/*.png` | `images/*.png` | bez zmian; usunięty nieużywany `linuxcnc-wizard.gif` |

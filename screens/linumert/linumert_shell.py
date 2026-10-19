@@ -441,7 +441,9 @@ class LinumertShell(QtCore.QObject):
         STATUS.connect("file-loaded", lambda _w, f: self._file(f))
         STATUS.connect("line-changed", setter("line"))
         STATUS.connect("tool-in-spindle-changed", setter("tool", int))
-        STATUS.connect("current-feed-rate", setter("feed"))
+        # Posuw przychodzi przy każdym odpytaniu stanu (co CYCLE_TIME): tylko etykieta, bez
+        # pełnego odświeżenia ekranu.
+        STATUS.connect("current-feed-rate", lambda _w, v: self._feed(v))
         STATUS.connect("feed-override-changed", setter("feed_override", lambda v: v / 100.0))
         STATUS.connect("rapid-override-changed", setter("rapid_override", lambda v: v / 100.0))
         STATUS.connect("spindle-override-changed",
@@ -482,6 +484,13 @@ class LinumertShell(QtCore.QObject):
         self._estop_requested = False
         self._set(estop=True, machine_on=False)
         self.show_alarm("err", reason)
+
+    def _feed(self, value: float) -> None:
+        if abs(value - self.s.feed) < 0.5:
+            return
+        self.s.feed = value
+        units = "mm" if self.s.metric else "in"
+        self.lbl_feed.setText(f"{model.fmt_int(value)} {units}/min")
 
     def _set(self, **values) -> None:
         for key, value in values.items():
@@ -636,8 +645,8 @@ class LinumertShell(QtCore.QObject):
         if production is not None:
             production.on_state()
             current = self.stack.currentWidget()
-            if current is production or current is self.start:
-                current.refresh()
+            if current is production:
+                current.refresh()  # bieżąca linia i postęp; Start odświeża _tick (0,5 s)
         for mode in model.MODES:
             btn = self.buttons[f"mode_{mode}"]
             btn.setChecked(s.mode == mode)

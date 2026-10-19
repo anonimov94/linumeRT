@@ -11,6 +11,11 @@ HMI-01…HMI-06 (niżej). Pochodzenie: PR #31 (`feature/hmi-workflow-tabs`).
   akcji (Cykl start, Wstrzymaj/Wznów, Stop, Pojedynczy blok, Bazuj, Maszyna, E-STOP) i widok „Maszyna” wg makiety 01
   (DRO, bieżący blok, narzędzie, posuw/wrzeciono z korekcjami, JOG, MDI). Pozostałe obszary pokazują strony QtDragon
   (przeniesione, nie skopiowane). Zrzuty: `docs/raporty/hmi_poc/`. Kolejne etapy HMI-02…06 rozwijają tę nakładkę.
+- **Etap 2 (2026-10-19, Claude, PR #43):** własne widoki **Start** (faza 0: lista gotowości z akcjami, domyślny po
+  uruchomieniu, ostatnie komunikaty), **Produkcja** (faza 7: postęp, czas pracy, korekcje F/G0/S, blok „/”, M1, start
+  od linii z potwierdzeniem) i **Diagnostyka** (faza 9: LRT-NET, napędy CiA 402 z alarmami 603Fh, osie, wejścia,
+  historia); przyczyna E-STOP z HAL (pętla din-00, przerwa łącza) w pasku alarmów. Pozostałe fazy (Bazowanie jako
+  osobny widok, Zero detalu, Narzędzia, Program, Edytor, Symulacja, Ustawienia) nadal przez strony QtDragon.
 
 ## Cel
 Rozdzielić monolityczny QtDragon na dedykowane widoki operatora bez przepisywania sterowania LinuxCNC. Nawigacja nie może wykonywać komend ruchu ani zmieniać trybu pracy automatycznie.
