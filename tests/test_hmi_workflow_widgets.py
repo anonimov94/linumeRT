@@ -27,7 +27,8 @@ def page_env(monkeypatch):
     core.Info, core.Status, core.Action = lambda: info, lambda: status, lambda: action
     monkeypatch.setitem(sys.modules, "qtvcp", types.ModuleType("qtvcp"))
     monkeypatch.setitem(sys.modules, "qtvcp.core", core)
-    names = ("linumert_shell_pages", "linumert_homing_page", "linumert_program_page")
+    names = ("linumert_shell_pages", "linumert_homing_page", "linumert_program_page",
+             "linumert_offsets_page")
     for name in names:
         monkeypatch.delitem(sys.modules, name, raising=False)
     module = importlib.import_module("linumert_homing_page")
@@ -94,3 +95,21 @@ def test_homing_blocks_commands_during_program_and_homing(page_env):
     page.refresh()
     assert "3 / 4" in page.summary.text() and not page.home.isEnabled()
     assert not action.mock_calls
+
+
+def test_zero_detalu_edits_all_shapes_without_machine_commands(page_env):
+    _home, shell, _status, action = page_env
+    shell.c = importlib.import_module("linumert_shell_model").load_tokens()["kolory"]
+    module = importlib.import_module("linumert_offsets_page")
+    page = module.OffsetsPage(shell)
+    for index, shape in enumerate(("box", "cylinder", "tube", "casting")):
+        page.shape.setCurrentIndex(index)
+        assert page.valid and page.view.spec.shape == shape
+    page.profile.table.item(1, 1).setText("45")
+    assert page.view.spec.profile[1] == (15, 45)
+    page.position[0].setValue(123)
+    assert page.view.spec.position[0] == 123
+    page.scene_event({"ev": "machine", "name": "Test XYZ", "bodies": []})
+    assert page.machine_name.text() == "Test XYZ"
+    assert not action.mock_calls
+    page.close()

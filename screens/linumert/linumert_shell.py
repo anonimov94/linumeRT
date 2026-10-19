@@ -30,6 +30,7 @@ import linumert_shell_model as model
 import linumert_shell_pages as pages
 from linumert_homing_page import HomingPage
 from linumert_program_page import ProgramPage
+from linumert_offsets_page import OffsetsPage
 import linumert_sim_page as sim_page
 
 try:  # baza narzędzi wymaga rdzenia linumert (pyyaml); bez niego obszar = tabela QtDragon
@@ -57,7 +58,7 @@ AREAS = (
     ("sim", "Symulacja", "symulacja", "page:sim"),
     ("program", "Program", "program", "page:program"),
     ("tools", "Narzędzia", "narzedzia", "page:tools"),
-    ("offsets", "Zero detalu", "zero", "btn_offsets"),
+    ("offsets", "Zero detalu", "zero", "page:offsets"),
     ("probe", "Sonda", "sonda", "btn_probe"),
     ("diag", "Diagnostyka", "diagnostyka", "page:diag"),
     ("settings", "Konfiguracja", "konfiguracja", "btn_settings"),
@@ -166,15 +167,17 @@ class LinumertShell(QtCore.QObject):
         self.sim = sim_page.SimPage(self)
         ini = os.environ.get("INI_FILE_NAME") or getattr(INFO, "INIPATH", "")
         self.tools = tools_page.ToolsPage(self, ini) if tools_page is not None else None
+        self.offsets = OffsetsPage(self)
         self.pages = {"machine": 0, "classic": 1, "diag": self.stack.addWidget(self.diag),
                       "production": self.stack.addWidget(self.production),
                       "start": self.stack.addWidget(self.start),
                       "sim": self.stack.addWidget(self.sim),
                       "homing": self.stack.addWidget(self.homing),
-                      "program": self.stack.addWidget(self.program)}
+                      "program": self.stack.addWidget(self.program),
+                      "offsets": self.stack.addWidget(self.offsets)}
         self.page_widgets = {"diag": self.diag, "production": self.production,
                              "start": self.start, "sim": self.sim,
-                             "homing": self.homing, "program": self.program}
+                             "homing": self.homing, "program": self.program, "offsets": self.offsets}
         if self.tools is not None:
             self.pages["tools"] = self.stack.addWidget(self.tools)
             self.page_widgets["tools"] = self.tools
