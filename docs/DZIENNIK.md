@@ -376,3 +376,5 @@ Uzupełnienie: README plant/core (liczby testów 29/59/20, bazowanie, parametry 
 - Zero detalu, zapis i układy: atomowy zapis/wczytanie przygotówki przy konfiguracji maszyny, pełny profil odlewu; jawne G10 L2 po potwierdzeniu, blokada przed bazowaniem i w trakcie programu, przeliczenie mm/inch. 21 testów geometrii, renderowania i operacji GUI OK.
 
 - Podgląd offline Zero detalu: osobna aplikacja Qt, brak importów LinuxCNC/QtVCP, zapisy tylko w katalogu tymczasowym, ustawianie zer zablokowane także w slocie. Akcje zapisu i zera zawsze widoczne pod formularzem. Test osobnego procesu i izolacji konfiguracji OK.
+
+- Końcowy zakres: 178 testów geometrii, UI, offline, symulacji, narzędzi, alarmów i wymagań OK; ruff czysty. Zrzut faktycznej aplikacji 1280×768 w docs/raporty/zero_detalu/offline.png; instrukcja w ZERO_DETALU.md. Otwarcie okna pulpitu z sesji agenta zablokowane (socket X11: EPERM); launcher gotowy do terminala właściciela.

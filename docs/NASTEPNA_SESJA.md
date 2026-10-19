@@ -72,7 +72,9 @@ Otwarte: #34 (Codex, HMI-01, draft). Scalone gałęzie `wip/*`, `claude/*` i `cc
 Domknięcie 2026-10-19: #44 scalony do main (`16fafee`). PR #45 (Claude) dostarcza Symulację
 i Narzędzia; PR #46 (Codex) integruje je z Bazowaniem i Programem. Lokalne testy zintegrowanego
 zakresu: lint czysty, 154 OK. Pełne LinuxCNC/GUI w CI. Kod wypchnięty po małych testowanych
-krokach; następne zadanie HMI: sprawdzanie/edycja programu oraz Zero detalu. Odbiór przy
+krokach. Zero detalu ma własny widok, cztery przygotówki i bezpieczny podgląd offline
+(`tools/dev/preview-zero.sh`, instrukcja: `docs/ZERO_DETALU.md`); następne zadanie HMI:
+sprawdzanie/edycja programu. Odbiór przy
 prawdziwej maszynie pozostaje osobnym zadaniem właściciela, nie blokadą rozwoju HMI.
 
 **Najpierw: trudne problemy, których Claude nie domknął (2026-10-19, kolejność = priorytet).** Gotowy prompt:

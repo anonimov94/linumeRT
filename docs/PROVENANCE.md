@@ -111,3 +111,5 @@ Wiersze fontów dostają ścieżki i pliki `OFL.txt` w `licenses/` przy ich doda
 | Własna strona Zero detalu | kod Python, testy Qt | model językowy Codex na zlecenie właściciela | 2026-10-19 | własny formularz przygotówki i położenia, istniejące tokeny | GPL-2.0-or-later | BOX, walec, rura i odlew w maszynie | `screens/linumert/linumert_offsets_page.py`, `tests/test_hmi_workflow_widgets.py` |
 
 | Podgląd offline Zero detalu | kod Python, testy Qt | model językowy Codex na zlecenie właściciela | 2026-10-19 | niezależny proces Qt bez importowania LinuxCNC/QtVCP, pliki tymczasowe | GPL-2.0-or-later | bezpieczna edycja przygotówki | `tools/dev/preview-zero.py`, `screens/linumert/linumert_view_helpers.py` |
+
+| Podgląd offline Zero detalu i launcher | własny zrzut aplikacji Qt i skrypt bash | model językowy Codex na zlecenie właściciela | 2026-10-19 | zrzut `preview-zero.py --snapshot`, kontener podglądu bez sieci, repo tylko do odczytu | GPL-2.0-or-later | bezpieczna edycja przygotówki | `tools/dev/preview-zero.sh`, `docs/raporty/zero_detalu/offline.png` |

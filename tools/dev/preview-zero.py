@@ -41,6 +41,7 @@ def main():
         layout.addWidget(banner)
         page = OffsetsPage(shell)
         page.shape.setCurrentIndex(3)
+        page.position[2].setValue(-140)  # przykładowy odlew stoi na blacie Z=-180
         page.zero_button.setToolTip("Offline — ustawianie zer maszyny jest wyłączone")
         layout.addWidget(page, 1)
         try:
@@ -52,7 +53,8 @@ def main():
                               "bodies": bodies})
         except (ImportError, OSError, KeyError, ValueError):
             pass  # podgląd z domyślnym stołem nadal działa
-        window.resize(1280, 800)
+        page.view.fit(True)
+        window.resize(1280, 768)
         window.show()
         app.processEvents()
         assert "linuxcnc" not in sys.modules and "qtvcp.core" not in sys.modules

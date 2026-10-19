@@ -61,6 +61,7 @@ class OffsetsPage(QtWidgets.QWidget):
             self.shape.addItem(title, value)
         form.addRow("Kształt", self.shape)
         self.fields = {}
+        self.field_labels = {}
         for name, label in (("x", "Długość X"), ("y", "Szerokość Y"),
                             ("height", "Wysokość Z"), ("diameter", "Średnica D"),
                             ("bore", "Otwór rury d")):
@@ -71,7 +72,8 @@ class OffsetsPage(QtWidgets.QWidget):
             spin.setSuffix(" mm")
             spin.valueChanged.connect(self.preview)
             self.fields[name] = spin
-            form.addRow(label, spin)
+            self.field_labels[name] = _label(label)
+            form.addRow(self.field_labels[name], spin)
         self.anchor = QtWidgets.QComboBox()
         for title, value in ANCHORS:
             self.anchor.addItem(title, value)
@@ -141,6 +143,8 @@ class OffsetsPage(QtWidgets.QWidget):
                    "tube": {"height", "diameter", "bore"}, "casting": set()}[kind]
         for key, field in self.fields.items():
             field.setEnabled(key in enabled)
+            field.setVisible(key in enabled)
+            self.field_labels[key].setVisible(key in enabled)
         self.profile.setVisible(kind == "casting")
         try:
             self.spec = self.build_spec()
@@ -207,7 +211,8 @@ class OffsetsPage(QtWidgets.QWidget):
 
     def choose_definition(self):
         path, _filter = QtWidgets.QFileDialog.getOpenFileName(
-            self, "Przygotówka", str(self.state_path.parent), "Przygotówka (*.json)")
+            self, "Przygotówka", str(self.state_path.parent), "Przygotówka (*.json)",
+            options=QtWidgets.QFileDialog.ReadOnly | QtWidgets.QFileDialog.DontUseNativeDialog)
         if path:
             self.load(path)
 
