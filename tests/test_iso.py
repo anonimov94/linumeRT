@@ -54,5 +54,5 @@ def test_workflow_builds_and_publishes() -> None:
     on = wf.get("on") or wf.get(True)
     assert "workflow_dispatch" in on and on["push"]["tags"] == ["v*"]
     steps = " ".join(str(s) for s in wf["jobs"]["iso"]["steps"])
-    for word in ("tools/iso/build.sh", "--privileged", "gh release upload"):
+    for word in ("tools/iso/build.sh", "--privileged", "gh release upload", "--prerelease"):
         assert word in steps

@@ -38,8 +38,21 @@ jobs:
         with:
           name: linumert-iso
           path: build/iso/
-          retention-days: 14
+          retention-days: 90
           compression-level: 0
+      # Obrazy robocze zostają na stałe (decyzja właściciela 2026-10-19): każdy obraz spoza tagu v*
+      # = wydanie testowe (pre-release) iso-RRRRMMDD-<sha>; usuwane tylko na polecenie właściciela.
+      - name: Wydanie testowe (obraz roboczy, na stałe)
+        if: "!startsWith(github.ref, 'refs/tags/v')"
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          tag="iso-$(date -u +%Y%m%d)-${SHA:0:7}"
+          gh release view "$tag" >/dev/null 2>&1 || \
+            gh release create "$tag" --target "$SHA" --prerelease --title "Obraz roboczy $tag" \
+              --notes "Roboczy obraz live USB / ISO z commita ${SHA:0:7} (${GITHUB_REF_NAME}). Testowy, NIEZWERYFIKOWANE NA SPRZĘCIE."
+          gh release upload "$tag" build/iso/* --clobber
       - name: Zasób wydania (tag v*)
         if: startsWith(github.ref, 'refs/tags/v')
         env:

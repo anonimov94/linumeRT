@@ -67,6 +67,7 @@ Współpraca modeli, scalanie, środowisko. Obowiązujące zasady w skrócie: [`
   ulepszają działanie; testujemy drogę przez GUI i pokazujemy efekt. Reguła w CLAUDE.md §11,
   WSPOLPRACA_MODELI §3 oraz SAVOIR_VIVRE_AI.md. Model-Author: Codex. · PRZYJĘTA
 - 2026-10-19 · D38 · Właściciel: wycofanie narzędzia i powrót do obróbki — w pauzie przez external offsets HAL, po przerwaniu programu przez prolog generowany przez ekran: zejście po helisie i dojazd łukiem stycznym, wejście na ścieżkę z zakładką przed punktem przerwania (bez naddatku), parametry w ustawieniach maszyny. Opis: `docs/design/WZNOWIENIE.md`. Model-Author: Claude. · PROPOZYCJA
+- 2026-10-19 · D39 · Właściciel: obrazy robocze ISO zostają na stałe, aż właściciel każe je usunąć — każdy zbudowany obraz spoza tagu `v*` publikowany jako wydanie testowe (pre-release) `iso-RRRRMMDD-<sha>` (artefakty Actions mają limit 90 dni). Model-Author: Claude. · PRZYJĘTA
 
 ## Decyzje techniczne sesji (według numeru sesji)
 
