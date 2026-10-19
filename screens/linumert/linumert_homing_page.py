@@ -12,6 +12,15 @@ from linumert_shell_pages import _hal, _label, _set_row, _table, card
 ACTION, INFO, STATUS = Action(), Info(), Status()
 
 
+def _sequence(joint) -> int:
+    """HOME_SEQUENCE stawu; w LinuxCNC 2.9 INFO.JOINT_SEQUENCE to lista, nie słownik."""
+    seq = getattr(INFO, "JOINT_SEQUENCE", None) or []
+    try:
+        return int(seq[joint] if not hasattr(seq, "get") else seq.get(joint, 0))
+    except (IndexError, TypeError, ValueError):
+        return 0
+
+
 class HomingPage(QtWidgets.QWidget):
     def __init__(self, shell):
         super().__init__()
@@ -36,7 +45,7 @@ class HomingPage(QtWidgets.QWidget):
         for joint in INFO.AVAILABLE_JOINTS:
             name = names[joint].upper()
             # Portal pozostaje w sekwencji Home All; nie rozdzielamy jego napędów.
-            if counts[name[:1]] != 1 or getattr(INFO, "JOINT_SEQUENCE", {}).get(joint, 0) < 0:
+            if counts[name[:1]] != 1 or _sequence(joint) < 0:
                 continue
             button = QtWidgets.QPushButton(f"Bazuj {name}")
             button.setMinimumHeight(44)
