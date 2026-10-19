@@ -3,6 +3,7 @@
 ( Reset: grzyb E-STOP w HMI; potem wyjazd w górę w trybie ręcznym )
 ;@STOCK BOX X150 Y150 Z30 ORIGIN=TOP_FRONT_LEFT OFFSET=G54 MAT="aluminium"
 G21 G90 G17 G40 G49 G80 G54
+G53 G0 Z0
 T1 M6
 G43 H1
 S12000 M3

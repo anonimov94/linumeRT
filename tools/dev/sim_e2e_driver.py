@@ -134,8 +134,14 @@ def main():
     shot("02_po_demo")
     if s.task_state != linuxcnc.STATE_ON:
         c.state(linuxcnc.STATE_ESTOP_RESET)
+        wait(lambda: s.task_state == linuxcnc.STATE_ESTOP_RESET, 10, "reset po demo")
         c.state(linuxcnc.STATE_ON)
-        time.sleep(1)
+        wait(lambda: s.task_state == linuxcnc.STATE_ON, 10, "WŁ. po demo")
+    c.mode(linuxcnc.MODE_MANUAL)
+    c.wait_complete()
+    if not all(j["homed"] for j in s.joint[:3]):
+        c.home(-1)
+        wait(lambda: all(j["homed"] for j in s.joint[:3]), 180, "bazowanie po demo")
     run_program("linumert_kolizja.ngc", 120)
     time.sleep(2)
     poll()

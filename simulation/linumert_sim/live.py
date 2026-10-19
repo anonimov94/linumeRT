@@ -76,6 +76,7 @@ class Live:
         self.cmd = self.lc.command()
         self.engine = SimEngine()
         self.estop_on_event = True
+        self.latched: str | None = None  # E-STOP z symulacji: sent → estop → None (po resecie)
         self.map_file: Path | None = None
         self.map: np.ndarray | None = None
         self.map_version = -1
@@ -232,10 +233,18 @@ class Live:
             self.reload_tools()
             sample = self.sample(t0)
             events = self.engine.step(sample)
+            in_estop = self.stat.task_state == self.lc.STATE_ESTOP
+            if self.latched == "sent" and in_estop:
+                self.latched = "estop"
+            elif self.latched == "estop" and not in_estop:
+                self.latched = None  # po resecie (grzyb) zdarzenia znów zatrzymują
             for e in events:
+                if self.latched and e.stop:
+                    continue  # skutki wtórne zatrzymania (wrzeciono staje w materiale)
                 emit(ev="event", **e.to_dict())
-            if self.estop_on_event and any(e.stop for e in events):
+            if self.estop_on_event and not self.latched and any(e.stop for e in events):
                 self.cmd.state(self.lc.STATE_ESTOP)
+                self.latched = "sent"
             smap = self.engine.stock
             if smap is not None and self.map is not None and smap.version != self.map_version \
                     and t0 - last_map >= MAP_PERIOD:

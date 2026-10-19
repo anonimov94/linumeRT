@@ -4,6 +4,7 @@
 ;@STOCK BOX X150 Y150 Z30 ORIGIN=TOP_FRONT_LEFT OFFSET=G54 MAT="aluminium"
 G21 G90 G17 G40 G49 G80 G54 G94
 ( 1. planowanie głowicą 50 mm, 0,5 mm )
+G53 G0 Z0
 T5 M6
 G43 H5
 S6000 M3
@@ -19,6 +20,7 @@ G1 Y135
 G1 X-30
 G0 Z10
 ( 2. kieszeń 70 x 50, głębokość 6 mm w trzech warstwach, frez 10 mm )
+G53 G0 Z0
 T2 M6
 G43 H2
 S12000 M3
@@ -45,6 +47,7 @@ o100 while [#<z> GT -6]
 o100 endwhile
 G0 Z10
 ( 3. rowek frezem kulowym 8 mm )
+G53 G0 Z0
 T6 M6
 G43 H6
 S15000 M3
@@ -54,6 +57,7 @@ G1 Z-3 F200
 G1 X130 F700
 G0 Z10
 ( 4. fazowanie krawędzi kieszeni fazownikiem 90° )
+G53 G0 Z0
 T4 M6
 G43 H4
 S10000 M3
@@ -66,6 +70,7 @@ G1 X40
 G1 Y50
 G0 Z10
 ( 5. wiercenie 4 otworów 5 mm, cykl G83 )
+G53 G0 Z0
 T3 M6
 G43 H3
 S5000 M3
@@ -76,6 +81,7 @@ Y75
 X20
 G80
 ( 6. frez lewy 8 mm (M4): rowek przy tylnej krawędzi )
+G53 G0 Z0
 T11 M6
 G43 H11
 S9000 M4
