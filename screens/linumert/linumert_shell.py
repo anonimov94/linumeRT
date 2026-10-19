@@ -28,6 +28,8 @@ from qtvcp.core import Action, Info, Status
 
 import linumert_shell_model as model
 import linumert_shell_pages as pages
+import linumert_sim_page as sim_page
+import linumert_tools_page as tools_page
 
 STATUS = Status()
 ACTION = Action()
@@ -43,8 +45,9 @@ AREAS = (
     ("start", "Start", "klucz", "page:start"),
     ("machine", "Maszyna", "maszyna", "page:machine"),
     ("production", "Produkcja", "start", "page:production"),
+    ("sim", "Symulacja", "symulacja", "page:sim"),
     ("program", "Program", "program", "btn_file"),
-    ("tools", "Narzędzia", "narzedzia", "btn_tool"),
+    ("tools", "Narzędzia", "narzedzia", "page:tools"),
     ("offsets", "Zero detalu", "zero", "btn_offsets"),
     ("probe", "Sonda", "sonda", "btn_probe"),
     ("diag", "Diagnostyka", "diagnostyka", "page:diag"),
@@ -121,6 +124,7 @@ class LinumertShell(QtCore.QObject):
         self.areas: dict[str, QtWidgets.QToolButton] = {}
         self._missed: collections.deque[int] = collections.deque(maxlen=5)  # ok. 2 s historii
         self._estop_requested = False
+        self.sim_cause = ""  # ostatnia kolizja/przeciążenie z symulacji (przyczyna E-STOP)
         self.buttons: dict[str, QtWidgets.QPushButton] = {}
 
     # ---- budowa ---------------------------------------------------------------------------
@@ -148,11 +152,17 @@ class LinumertShell(QtCore.QObject):
         self.diag = pages.DiagPage(self)
         self.production = pages.ProductionPage(self)
         self.start = pages.StartPage(self)
+        self.sim = sim_page.SimPage(self)
+        ini = os.environ.get("INI_FILE_NAME") or getattr(INFO, "INIPATH", "")
+        self.tools = tools_page.ToolsPage(self, ini)
         self.pages = {"machine": 0, "classic": 1, "diag": self.stack.addWidget(self.diag),
                       "production": self.stack.addWidget(self.production),
-                      "start": self.stack.addWidget(self.start)}
+                      "start": self.stack.addWidget(self.start),
+                      "sim": self.stack.addWidget(self.sim),
+                      "tools": self.stack.addWidget(self.tools)}
         self.page_widgets = {"diag": self.diag, "production": self.production,
-                             "start": self.start}
+                             "start": self.start, "sim": self.sim,
+                             "tools": self.tools}
         body.addWidget(self.stack, 1)
         grid.addLayout(body, 1)
         grid.addWidget(self._bottom_bar())
@@ -170,6 +180,9 @@ class LinumertShell(QtCore.QObject):
         self._timer.timeout.connect(self._tick)
         self._timer.start(500)
         self._start_mushroom()
+        ini = os.environ.get("INI_FILE_NAME") or getattr(INFO, "INIPATH", "")
+        if ini:
+            self.sim.start(ini)  # proces symulacji materiału i kolizji (nice 10)
         self.select_area("start")  # po uruchomieniu zawsze Start (HMI_WORKFLOW)
         self.refresh()
         return self
@@ -485,6 +498,9 @@ class LinumertShell(QtCore.QObject):
             self._estop_requested = False
             return
         reason = self._estop_cause(requested=self._estop_requested)
+        if self.sim_cause:
+            reason = f"E-STOP z symulacji: {self.sim_cause}"
+            self.sim_cause = ""
         self._estop_requested = False
         self._set(estop=True, machine_on=False)
         self.show_alarm("err", reason)
