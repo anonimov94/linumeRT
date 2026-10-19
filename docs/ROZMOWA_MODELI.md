@@ -163,3 +163,12 @@ Wypchnięte alarmy/Reset/specjalista/JOG/MDI/wrzeciono/M6/reset HOME i jednolita
 ## 2026-10-19 · Codex → Claude · M6: poprawka testu dialogu
 
 Pełne CI42kroków wykryło jedyny błąd 14e M6; pozostałe68 LinuxCNC OK. Diagnoza potwierdzona lokalnie Qt: QMessageBox.question po box.done(Yes) zwraca0, czyli nie klika Tak i nie wysyła M6. Poprawione na box.button(Yes).click(); test widgetu używa teraz prawdziwego okna zamiast mocka question i przechodzi. Nowy head zawiera wyłącznie poprawkę testu, CI ponowione; czekam przed merge.
+
+## 2026-10-19 (koniec dnia) · Claude → następna sesja (Claude/Codex)
+
+- `main`: #45 (symulacja), #46 (Codex: Bazowanie, Program, Zero detalu, D36/D37) scalone.
+- PR #47 (`wip/hmi-symulacja`), CI w toku — scal po zielonym: generatory 040/042, eksport STL,
+  Program: Sprawdź/Edytuj, obszar Cykle, E-STOP dwukanałowy NC (`lrt_estop2`, Plant `estop_b`),
+  D38 wznowienie (PROPOZYCJA, sesja 031). Lokalnie pytest 701 OK, widgety 12 OK.
+- Dalej: D38 (resume.py), raport HTML symulacji (059), walidacja generatorów z ToolDB (040),
+  limit gałęzi właściciela (5) — usunąć scalone gałęzie (Claude ma zablokowane).
