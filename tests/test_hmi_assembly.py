@@ -71,6 +71,12 @@ def smoke(snapshot):
     status.stat.joint[0]["fault"] = False
     shell.reset_alarms(False)
     assert not shell.alarm.entries
+    shell.acknowledge_estop = Mock()
+    shell.reset_alarms(True)
+    shell.acknowledge_estop.assert_not_called()  # zdrowy obwód nie jest przełączany Resetem
+    shell.s.estop = True
+    shell.reset_alarms(True)
+    shell.acknowledge_estop.assert_called_once()
     assert not action.mock_calls, action.mock_calls
     assert window.grab().save(snapshot)
     window.close()

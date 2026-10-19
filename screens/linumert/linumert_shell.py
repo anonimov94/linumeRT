@@ -714,7 +714,7 @@ class LinumertShell(QtCore.QObject):
         self.reset_alarms(False)
 
     def reset_alarms(self, double: bool = False) -> None:
-        if double:
+        if double and (self.s.estop or self.s.hmi_pressed):
             self.acknowledge_estop()  # HAL odrzuci reset przy otwartym fizycznym safety
             QtCore.QTimer.singleShot(700, lambda: self.reset_alarms(False))
         self._alarm_causes()
