@@ -95,6 +95,7 @@ class ShellState:
     user_system: str = "G54"
     plant: str | None = None  # None = brak lrt_net (symulator); "ok" | "lost"
     alarm: Alarm | None = None
+    hmi_pressed: bool = False  # grzyb E-STOP w HMI wciśnięty (pin linumert.hmi-estop-ok = 0, D35)
 
     @property
     def all_homed(self) -> bool:
@@ -143,7 +144,7 @@ def gates(s: ShellState) -> dict[str, Gate]:
 def machine_pill(s: ShellState) -> tuple[str, str]:
     """Tekst i poziom kolorystyczny stanu maszyny w górnym pasku."""
     if s.estop:
-        return "E-STOP", "err"
+        return ("E-STOP · grzyb HMI" if s.hmi_pressed else "E-STOP"), "err"
     if not s.machine_on:
         return "Maszyna wyłączona", "warn"
     if s.interp == "run":
@@ -254,6 +255,13 @@ QPushButton[role="start"] {{ background: {c['teal']}; color: {c['bg']}; border-c
 QPushButton[role="start"]:disabled {{ background: {c['tealbg']}; color: {c['fg3']}; }}
 QPushButton[role="pause"] {{ background: {c['amberbg']}; color: {c['amber']}; border-color: {c['amber']}; }}
 QPushButton[role="stop"] {{ background: {c['errbg']}; color: {c['err']}; border-color: {c['err']}; }}
+QPushButton#lrtMushroom {{ border-radius: 38px; font-weight: 800; font-size: 13px; color: {c['fg']};
+    min-height: 0; padding: 0; }}
+QPushButton#lrtMushroom[state="armed"] {{ background: {c['err']}; border: 5px solid {c['amber']}; }}
+QPushButton#lrtMushroom[state="pressed"] {{ background: {c['errbg']}; color: {c['err']};
+    border: 5px solid {c['err']}; }}
+QPushButton#lrtMushroom[state="latched"] {{ background: {c['err']}; border: 5px solid {c['err']};
+    color: {c['bg']}; }}
 QPushButton[role="estop"] {{ background: {c['errbg']}; color: {c['err']}; border: 2px solid {c['err']};
     font-weight: 700; min-width: 120px; }}
 QPushButton[role="estop"][active="false"] {{ background: {c['okbg']}; color: {c['ok']}; border-color: {c['ok']}; }}
@@ -425,7 +433,8 @@ def checklist(s: ShellState, drive_fault: bool | None = None) -> list[CheckItem]
     unhomed = [a for a in s.axes if a not in s.homed]
     items = [
         CheckItem("estop", "Obwód E-STOP", "err" if s.estop else "ok",
-                  "otwarty: zwolnij grzybek i E-STOP" if s.estop else "zamknięty",
+                  ("grzyb HMI wciśnięty" if s.hmi_pressed else
+                   "otwarty: usuń przyczynę i potwierdź grzybem w HMI") if s.estop else "zamknięty",
                   "estop" if s.estop else ""),
         CheckItem("power", "Zasilanie napędów", "ok" if s.machine_on else "err",
                   "włączone" if s.machine_on else "maszyna wyłączona",
@@ -466,15 +475,17 @@ def ready_to_run(items: list[CheckItem]) -> bool:
                if i.key in ("estop", "power", "homed", "plant", "drives", "program"))
 
 
-ACTION_LABEL = {"estop": "Zwolnij E-STOP", "power": "Włącz", "home": "Bazuj wszystkie",
+ACTION_LABEL = {"estop": "Potwierdź grzybem", "power": "Włącz", "home": "Bazuj wszystkie",
                 "program": "Wybierz program", "production": "Produkcja", "diag": "Diagnostyka"}
 
 
 def estop_reason(loop_closed: bool | None, connected: bool | None, missed_delta: int | None,
-                 requested: bool = False) -> str:
+                 requested: bool = False, hmi_alive: bool | None = None) -> str:
     """Przyczyna przejścia w E-STOP z odczytów HAL (None = brak pinu, np. symulator)."""
     if requested:
-        return "E-STOP z ekranu (programowy)"
+        return "E-STOP: grzyb E-STOP w HMI wciśnięty"
+    if hmi_alive is False:
+        return "E-STOP: brak sygnału życia HMI (watchdog) — ekran nie odpowiadał"
     if loop_closed is False:
         return "E-STOP: pętla E-STOP otwarta (grzybek albo obwód bezpieczeństwa, din-00)"
     if connected is False or (missed_delta or 0) >= 20:
@@ -483,3 +494,12 @@ def estop_reason(loop_closed: bool | None, connected: bool | None, missed_delta:
     if loop_closed is None and connected is None:
         return "E-STOP: sygnał zezwolenia LinuxCNC (emc-enable-in) wyłączony"
     return "E-STOP: łańcuch bezpieczeństwa HAL zwolnił zezwolenie (przyczyna przejściowa)"
+
+
+def mushroom_view(s: ShellState) -> tuple[str, str, str]:
+    """Grzyb E-STOP w HMI: (napis, podpis, stan stylu: pressed | latched | armed)."""
+    if s.hmi_pressed:
+        return "E-STOP", "wciśnięty · kliknij, aby zwolnić i potwierdzić", "pressed"
+    if s.estop:
+        return "E-STOP", "obwód otwarty · potwierdź grzybem", "latched"
+    return "E-STOP", "gotowy · kliknij, aby zatrzymać", "armed"

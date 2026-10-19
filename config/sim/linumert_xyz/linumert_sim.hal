@@ -12,6 +12,7 @@ loadrt scale names=sim_j0,sim_j1,sim_j2
 loadrt sim_spindle names=sim_spindle
 loadrt ddt names=spindle_rps
 loadrt comp names=home_x,home_y,home_z
+loadrt estop_latch names=estop_latch
 
 addf motion-command-handler servo-thread
 addf motion-controller servo-thread
@@ -69,8 +70,13 @@ net linumert.spindle.at-speed  => spindle.0.at-speed
 sets linumert.spindle.at-speed 1
 
 # ---- wejścia/wyjścia ---------------------------------------------------------------------
-# E-STOP: w symulacji obwód zamyka zezwolenie z LinuxCNC; na maszynie sygnał z obwodu sprzętowego.
-net linumert.io.estop-ok       iocontrol.0.user-enable-out => iocontrol.0.emc-enable-in
+# E-STOP (D35): w symulacji jedynym elementem łańcucha jest grzyb HMI z sygnałem życia
+# (config/hal/linumert_hmi_estop.hal); reset (potwierdzenie) tylko grzybem w HMI. Na maszynie
+# szeregowo dochodzi obwód sprzętowy (wejście HAL), nadrzędny wobec HMI.
+addf estop_latch servo-thread
+net linumert.hmi.estop-ok      => estop_latch.ok-in
+net linumert.io.estop-reset    iocontrol.0.user-request-enable => estop_latch.reset
+net linumert.io.estop-ok       estop_latch.ok-out => iocontrol.0.emc-enable-in
 net linumert.io.tool-prepare   iocontrol.0.tool-prepare => iocontrol.0.tool-prepared
 net linumert.io.coolant-flood  iocontrol.0.coolant-flood
 net linumert.io.coolant-mist   iocontrol.0.coolant-mist

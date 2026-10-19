@@ -165,7 +165,7 @@ def test_shell_uses_only_qtvcp_actions() -> None:
 
 def test_upstream_handler_unchanged_marker() -> None:
     handler = (SCREEN / "linumert_handler.py").read_text(encoding="utf-8")
-    assert "LINUMERT_SHELL" in handler and "linumert_shell.install(self)" in handler
+    assert "LINUMERT_SHELL" in handler and "linumert_shell.install(self, pins)" in handler
     upstream = (SCREEN / "linumert_upstream_handler.py").read_text(encoding="utf-8")
     assert "linumert_shell" not in upstream
 
@@ -235,6 +235,7 @@ def test_run_from_line_gate() -> None:
 def test_checklist_fresh_machine() -> None:
     items = {i.key: i for i in m.checklist(m.ShellState())}
     assert items["estop"].level == "err" and items["estop"].action == "estop"
+    assert "potwierdź grzybem" in items["estop"].detail
     assert items["power"].action == ""  # najpierw E-STOP
     assert items["homed"].detail == "niebazowane: X, Y, Z" and items["homed"].action == ""
     assert items["plant"].level == "info" and "drives" not in items
@@ -263,7 +264,8 @@ def test_checklist_actions_have_labels() -> None:
 
 
 @pytest.mark.parametrize(("args", "text"), [
-    ((None, None, None, True), "E-STOP z ekranu (programowy)"),
+    ((None, None, None, True), "grzyb E-STOP w HMI wciśnięty"),
+    ((True, True, 0, False, False), "brak sygnału życia HMI"),
     ((False, True, 0), "pętla E-STOP otwarta"),
     ((True, False, 3), "przerwa łącza LRT-NET z Plant, 3 cykli"),
     ((True, True, 25), "przerwa łącza LRT-NET z Plant, 25 cykli"),
@@ -272,3 +274,13 @@ def test_checklist_actions_have_labels() -> None:
 ])
 def test_estop_reason(args, text) -> None:
     assert text in m.estop_reason(*args)
+
+
+def test_mushroom_view_and_pill() -> None:
+    assert m.mushroom_view(m.ShellState(estop=False))[2] == "armed"
+    assert m.mushroom_view(m.ShellState(estop=True))[2] == "latched"
+    pressed = m.ShellState(estop=True, hmi_pressed=True)
+    assert m.mushroom_view(pressed)[2] == "pressed"
+    assert m.machine_pill(pressed) == ("E-STOP · grzyb HMI", "err")
+    assert {i.key: i for i in m.checklist(pressed)}["estop"].detail == "grzyb HMI wciśnięty"
+    assert m.ACTION_LABEL["estop"] == "Potwierdź grzybem"

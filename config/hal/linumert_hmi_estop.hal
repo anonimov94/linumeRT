@@ -1,0 +1,28 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+# linumeRT · grzyb E-STOP w HMI jako DODATKOWY element łańcucha E-STOP (decyzja D35).
+# Model-Author: Claude · 2026-10-19.
+#
+# Wynik: sygnał linumert.hmi.estop-ok = grzyb HMI zwolniony ∧ HMI żyje (watchdog sygnału życia),
+# wchodzi SZEREGOWO do łańcucha E-STOP konfiguracji (AND z obwodem sprzętowym / emulowanym).
+# HMI może tylko ODEBRAĆ zezwolenie, nigdy go nadać; obwód sprzętowy maszyny jest nadrzędny.
+# Fail-safe: do startu ekranu piny HMI nie są podłączone (0) → łańcuch otwarty; zawieszone albo
+# zamknięte HMI (brak przełączeń linumert.hmi-heartbeat przez [LINUMERT]HMI_HEARTBEAT_TIMEOUT s)
+# → E-STOP. Watchdog po zadziałaniu wymaga ponownego uzbrojenia (zbocze linumert.hmi-wd-enable),
+# które HMI robi tylko przy potwierdzeniu grzybem.
+# [LINUMERT]HMI_ESTOP_BYPASS = 1 wyłącznie dla uruchomień BEZ ekranu (testy headless).
+# Piny ekranu łączy linumert_postgui.hal. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+loadrt watchdog num_inputs=1
+loadrt logic names=lrt_hmi_ok personality=0x102
+loadrt or2 names=lrt_hmi_bypass
+
+addf watchdog.set-timeouts servo-thread
+addf watchdog.process servo-thread
+addf lrt_hmi_ok servo-thread
+addf lrt_hmi_bypass servo-thread
+
+setp watchdog.timeout-0 [LINUMERT]HMI_HEARTBEAT_TIMEOUT
+net linumert.hmi.alive          watchdog.ok-out => lrt_hmi_ok.in-01
+net linumert.hmi.chain          lrt_hmi_ok.and => lrt_hmi_bypass.in0
+setp lrt_hmi_bypass.in1 [LINUMERT]HMI_ESTOP_BYPASS
+net linumert.hmi.estop-ok       lrt_hmi_bypass.out

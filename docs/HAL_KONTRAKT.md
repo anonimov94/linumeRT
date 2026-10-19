@@ -41,7 +41,12 @@ obr/s do `speed-in`), `linumert.spindle.enable` (`motion.motion-enabled` → `vf
 
 | Sygnał | Typ | Kierunek | Pin LinuxCNC | Znaczenie |
 |---|---|---|---|---|
-| `linumert.io.estop-ok` | bit | → | `iocontrol.0.emc-enable-in` | obwód E-STOP zamknięty. Na maszynie wyłącznie z obwodu sprzętowego (CLAUDE.md §6); w symulatorze pętla z `user-enable-out` |
+| `linumert.io.estop-ok` | bit | → | `iocontrol.0.emc-enable-in` | zezwolenie z zatrzasku `estop_latch` (reset: `linumert.io.estop-reset` = `iocontrol.0.user-request-enable`). Wejście zatrzasku = łańcuch AND: obwód sprzętowy maszyny (Plant: `din-00` i łącze LRT-NET) ∧ `linumert.hmi.estop-ok` (D35, CLAUDE.md §6); w symulatorze tylko grzyb HMI |
+| `linumert.hmi.estop-ok` | bit | → łańcuch | `lrt_hmi_bypass.out` | grzyb HMI zwolniony ∧ HMI żyje (`config/hal/linumert_hmi_estop.hal`); 0 przed startem ekranu |
+| `linumert.hmi.button` | bit | ← ekran | `linumert.hmi-estop-ok` | grzyb E-STOP w HMI: 1 = zwolniony (postgui) |
+| `linumert.hmi.heartbeat` | bit | ← ekran | `linumert.hmi-heartbeat` → `watchdog.input-0` | sygnał życia ekranu (przełączany co 100 ms; limit `[LINUMERT]HMI_HEARTBEAT_TIMEOUT`) |
+| `linumert.hmi.wd-enable` | bit | ← ekran | `linumert.hmi-wd-enable` → `watchdog.enable-in` | uzbrojenie watchdoga (zbocze przy starcie i przy potwierdzeniu grzybem) |
+| `linumert.hmi.alive`, `linumert.hmi.chain` | bit | wewn. | `watchdog.ok-out`, `lrt_hmi_ok.and` | stan watchdoga i iloczynu grzyb ∧ HMI żyje |
 | `linumert.io.tool-prepare` | bit | ← | `iocontrol.0.tool-prepare` | przygotowanie narzędzia (sim: pętla do `tool-prepared`) |
 | `linumert.io.tool-change` | bit | ← | `iocontrol.0.tool-change` | żądanie zmiany narzędzia |
 | `linumert.io.tool-changed` | bit | → | `iocontrol.0.tool-changed` | zmiana potwierdzona (ręcznie: okno ekranu) |

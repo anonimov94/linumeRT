@@ -11,7 +11,8 @@ zamyka wywołujący (okno potwierdzenia QtDragon przy zamykaniu nie blokuje test
 
 Scenariusz (Start → lista gotowości): zwolnienie E-STOP → maszyna WŁ. → bazowanie → MDI G0 → program w AUTO → Wstrzymaj →
 Wznów → Stop → JOG X+ → obszary szyny (QtDragon) → powrót do „Maszyna” → Diagnostyka → Produkcja
-(korekcja posuwu 80 %, start od linii 6 do końca programu, korekcja 100 %).
+(korekcja posuwu 80 %, start od linii 6 do końca programu, korekcja 100 %) → grzyb HMI
+(wciśnięcie, nieskuteczny reset inną drogą, zwolnienie, brak sygnału życia → watchdog, potwierdzenie).
 """
 
 from __future__ import annotations
@@ -39,6 +40,15 @@ G1 Y20
 G0 Z-2
 M2
 """
+
+
+def _hal_value(name: str):
+    try:
+        import hal
+
+        return bool(hal.get_value(name))
+    except Exception:  # noqa: BLE001 - brak pinu
+        return None
 
 
 class SelfTest(QtCore.QObject):
@@ -101,6 +111,14 @@ class SelfTest(QtCore.QObject):
             ("24_program_koniec", None, lambda: s.interp == "idle", 60),
             ("25_korekcja_100", lambda: click(self._reset_feed()),
              lambda: round(s.feed_override * 100) == 100, 5),
+            # D35: grzyb E-STOP w HMI w łańcuchu HAL
+            ("26_grzyb_wcisniety", lambda: click(b["estop"]),
+             lambda: s.estop and s.hmi_pressed and not s.machine_on, 5),
+            ("27_reset_obejsciem", lambda: ACTION.SET_ESTOP_STATE(False), None, 2),
+            ("28_grzyb_zwolniony", lambda: click(b["estop"]), lambda: not s.estop, 5),
+            ("29_brak_sygnalu_zycia", self.shell._hb_timer.stop, lambda: s.estop, 8),
+            ("30_potwierdzenie", self._resume_heartbeat, lambda: not s.estop, 5),
+            ("31_maszyna_wl", lambda: click(b["power"]), lambda: s.machine_on, 5),
         ]
 
     @staticmethod
@@ -119,6 +137,10 @@ class SelfTest(QtCore.QObject):
 
     def _reset_feed(self):
         return self.shell.production.reset_buttons["feed"]
+
+    def _resume_heartbeat(self) -> None:
+        self.shell._hb_timer.start(100)
+        QtCore.QTimer.singleShot(300, lambda: self._click(self.shell.buttons["estop"]))
 
     def _start_action(self, key: str) -> None:
         page = self.shell.start
@@ -191,6 +213,9 @@ class SelfTest(QtCore.QObject):
             "z": round(rel[2], 3), "area": self.shell.stack.currentIndex(),
             "page": {v: k for k, v in self.shell.pages.items()}[self.shell.stack.currentIndex()],
             "ready": self.shell.start.lbl_ready.text(),
+            "hmi_pressed": s.hmi_pressed,
+            "hmi_chain": _hal_value("lrt_hmi_bypass.out"),
+            "hmi_alive": _hal_value("watchdog.ok-out"),
             "alarm": s.alarm.text if s.alarm else "",
             "start_enabled": self.shell.buttons["start"].isEnabled(),
             "diag_joints": self.shell.diag.joints.rowCount(),

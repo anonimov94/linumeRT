@@ -42,7 +42,8 @@ def test_shell_selftest_in_gui(tmp_path) -> None:
     link.symlink_to(ROOT / "screens" / "linumert")  # tokeny i ikony z repozytorium
     ini = work / "linumert_xyz.ini"
     ini.write_text(ini.read_text(encoding="utf-8").replace(
-        "PROGRAM_PREFIX = ../nc_files", f"PROGRAM_PREFIX = {NC}"), encoding="utf-8")
+        "PROGRAM_PREFIX = ../nc_files", f"PROGRAM_PREFIX = {NC}").replace(
+        "HALFILE = ../../hal/", f"HALFILE = {ROOT / 'config' / 'hal'}/"), encoding="utf-8")
     out = Path(os.environ.get("LINUMERT_HMI_SHOTS", tmp_path / "hmi"))
     shutil.rmtree(out, ignore_errors=True)
     env = {**os.environ, "LINUMERT_SHELL_SELFTEST": str(out)}
@@ -60,14 +61,15 @@ def test_shell_selftest_in_gui(tmp_path) -> None:
     data = json.loads(result.read_text(encoding="utf-8"))
     steps = {s["step"]: s for s in data["steps"]}
     assert data["errors"] == [], data["errors"]
-    assert len(steps) == 27 and all(s["ok"] for s in steps.values())
+    assert len(steps) == 33 and all(s["ok"] for s in steps.values())
     assert steps["01_start"]["page"] == "start"  # po uruchomieniu widok Start
     assert steps["04b_start_gotowosc"]["ready"] == "wymaga działań"  # brak programu
     assert steps["04c_maszyna"]["page"] == "machine"
     # QtDragon zgłaszał „Hard limits tripped” przy starcie i przy bazowaniu na krańcówce (handler);
     # E-STOP w trakcie scenariusza byłby błędem (przyczynę podaje nakładka)
     bad = ("Hard limits", "krańcówka", "E-STOP")
-    assert not any(word in s["alarm"] for s in steps.values() for word in bad)
+    assert not any(word in s["alarm"] for name, s in steps.items() for word in bad
+                   if name < "26")  # E-STOP przed częścią D35 byłby błędem
     assert steps["01_start"]["estop"] and not steps["01_start"]["start_enabled"]
     assert steps["03_maszyna_wl"]["machine_on"]
     assert steps["04_bazowanie"]["homed"] == ["X", "Y", "Z"]
@@ -86,4 +88,16 @@ def test_shell_selftest_in_gui(tmp_path) -> None:
     assert steps["24_program_koniec"]["interp"] == "idle"
     assert steps["24_program_koniec"]["run_time"] != "00:00"
     assert steps["25_korekcja_100"]["feed_override"] == 100
+    # D35: grzyb HMI w łańcuchu HAL, reset tylko grzybem, sygnał życia (watchdog)
+    assert steps["01_start"]["hmi_chain"] is not None  # piny i komponenty HAL istnieją
+    assert steps["25_korekcja_100"]["hmi_chain"] and steps["25_korekcja_100"]["hmi_alive"]
+    pressed = steps["26_grzyb_wcisniety"]
+    assert pressed["estop"] and pressed["hmi_pressed"] and not pressed["hmi_chain"]
+    assert "grzyb E-STOP w HMI" in pressed["alarm"]
+    assert steps["27_reset_obejsciem"]["estop"]  # inna droga resetu nie działa przy wciśniętym
+    assert not steps["28_grzyb_zwolniony"]["estop"] and steps["28_grzyb_zwolniony"]["hmi_chain"]
+    lost = steps["29_brak_sygnalu_zycia"]
+    assert lost["estop"] and not lost["hmi_alive"] and "sygnału życia" in lost["alarm"]
+    assert not steps["30_potwierdzenie"]["estop"] and steps["30_potwierdzenie"]["hmi_alive"]
+    assert steps["31_maszyna_wl"]["machine_on"]
     assert all((out / f"{name}.png").stat().st_size > 20000 for name in steps)

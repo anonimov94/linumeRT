@@ -79,7 +79,7 @@ def test_hal_uses_inputs_from_machine_yaml():
     inputs = _machine()["io"]["inputs"]
     for name in ("lim_x_min", "lim_x_max", "lim_y_min", "lim_y_max", "lim_z_max"):
         assert re.search(rf"lrt-net\.0\.din-{inputs[name]:02d} => nc_{name[4:]}\.in", hal), name
-    assert f"lrt-net.0.din-{inputs['estop']:02d} => estop_chain.in0" in hal
+    assert f"lrt-net.0.din-{inputs['estop']:02d} => estop_chain.in-00" in hal
     assert f"lrt-net.0.din-{inputs['probe']:02d} => motion.probe-input" in hal
     assert "loadrt lrt_net personality=[PLANT]AXES ip=[PLANT]IP port=[PLANT]PORT" in hal
 

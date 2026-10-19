@@ -10,8 +10,10 @@ Zasady (HMI_WORKFLOW.md, CLAUDE.md §6):
   „Narzędzia”…); nakładka tylko przenosi go do stosu stron, niczego nie kopiuje;
 - zmiana obszaru nie wykonuje ruchu ani zmiany trybu;
 - komendy maszyny wyłącznie przez ACTION QtVCP, stan wyłącznie ze STATUS QtVCP;
-- ekran nie jest funkcją bezpieczeństwa: przycisk E-STOP steruje programowym E-STOP LinuxCNC,
-  obwód sprzętowy jest nadrzędny.
+- ekran nie jest funkcją bezpieczeństwa; grzyb E-STOP w HMI to DODATKOWY, szeregowy element
+  łańcucha E-STOP w HAL (D35, config/hal/linumert_hmi_estop.hal): wciśnięcie odbiera zezwolenie,
+  zwolnienie jest jedynym sposobem potwierdzenia (resetu) E-STOP, ekran wysyła sygnał życia
+  (watchdog HAL). Obwód sprzętowy maszyny jest nadrzędny i podłączony do HAL fizycznie.
 """
 
 from __future__ import annotations
@@ -104,10 +106,12 @@ def _card(title: str, right: str = "") -> tuple[QtWidgets.QFrame, QtWidgets.QVBo
 class LinumertShell(QtCore.QObject):
     """Powłoka linumeRT owinięta wokół centralnego widgetu QtDragon."""
 
-    def __init__(self, handler):
+    def __init__(self, handler, hmi_pins: dict | None = None):
         super().__init__(handler.w)
         self.h = handler
         self.w = handler.w
+        # Piny grzyba HMI (D35): ok = 1 grzyb zwolniony, hb = sygnał życia, wd = uzbrojenie watchdoga
+        self.hmi_pins = hmi_pins or {}
         self.tokens = model.load_tokens()
         self.c = self.tokens["kolory"]
         self.s = model.ShellState(axes=tuple(a.upper() for a in INFO.AVAILABLE_AXES))
@@ -165,6 +169,7 @@ class LinumertShell(QtCore.QObject):
         self._timer = QtCore.QTimer(self)
         self._timer.timeout.connect(self._tick)
         self._timer.start(500)
+        self._start_mushroom()
         self.select_area("start")  # po uruchomieniu zawsze Start (HMI_WORKFLOW)
         self.refresh()
         return self
@@ -402,11 +407,16 @@ class LinumertShell(QtCore.QObject):
         estop.addWidget(_label("Obwód E-STOP", "lrtMuted"), 0, QtCore.Qt.AlignRight)
         self.lbl_estop = _label("", "")
         estop.addWidget(self.lbl_estop, 0, QtCore.Qt.AlignRight)
+        self.lbl_mushroom = _label("", "lrtMuted")
+        estop.addWidget(self.lbl_mushroom, 0, QtCore.Qt.AlignRight)
         lay.addLayout(estop)
         btn = QtWidgets.QPushButton("E-STOP")
-        btn.setProperty("role", "estop")
-        btn.setMinimumHeight(56)
-        btn.setToolTip("Programowy E-STOP LinuxCNC. Obwód sprzętowy E-STOP jest nadrzędny.")
+        btn.setObjectName("lrtMushroom")
+        btn.setProperty("state", "armed")
+        btn.setFixedSize(76, 76)
+        btn.setToolTip("Grzyb E-STOP w HMI: dodatkowy element łańcucha E-STOP (HAL). Wciśnięty "
+                       "odbiera zezwolenie; zwolnienie potwierdza E-STOP. Obwód sprzętowy maszyny "
+                       "jest nadrzędny. Klawisz F1 = wciśnięcie.")
         btn.clicked.connect(self.toggle_estop)
         lay.addWidget(btn)
         self.buttons["estop"] = btn
@@ -474,16 +484,72 @@ class LinumertShell(QtCore.QObject):
         if self.s.estop:  # stan początkowy albo powtórzony sygnał: bez alarmu
             self._estop_requested = False
             return
-        loop = pages._hal("lrt-net.0.din-00")
-        connected = pages._hal("lrt-net.0.connected")
-        missed = pages._hal("lrt-net.0.missed")
-        delta = None if missed is None or not self._missed else int(missed) - self._missed[0]
-        reason = model.estop_reason(None if loop is None else bool(loop),
-                                    None if connected is None else bool(connected), delta,
-                                    requested=self._estop_requested)
+        reason = self._estop_cause(requested=self._estop_requested)
         self._estop_requested = False
         self._set(estop=True, machine_on=False)
         self.show_alarm("err", reason)
+
+    def _estop_cause(self, requested: bool = False) -> str:
+        loop = pages._hal("lrt-net.0.din-00")
+        connected = pages._hal("lrt-net.0.connected")
+        missed = pages._hal("lrt-net.0.missed")
+        alive = pages._hal("watchdog.ok-out")
+        delta = None if missed is None or not self._missed else int(missed) - self._missed[0]
+        return model.estop_reason(None if loop is None else bool(loop),
+                                  None if connected is None else bool(connected), delta,
+                                  requested=requested or self.s.hmi_pressed,
+                                  hmi_alive=None if alive is None else bool(alive))
+
+    # ---- grzyb E-STOP w HMI (D35) -------------------------------------------------------
+    def _pin(self, key: str, value: bool) -> None:
+        pin = self.hmi_pins.get(key)
+        if pin is not None:
+            pin.set(bool(value))
+
+    def _start_mushroom(self) -> None:
+        missing = [k for k in ("ok", "hb", "wd") if not hasattr(self.hmi_pins.get(k), "set")
+                   or type(self.hmi_pins[k]).__name__ == "DummyPin"]
+        if missing:
+            self.show_alarm("err", "Grzyb E-STOP w HMI niedostępny (brak pinów HAL linumert.hmi-*): "
+                                   "łańcuch E-STOP pozostaje otwarty")
+        self._pin("ok", True)  # grzyb zwolniony; E-STOP i tak zatrzaśnięty do potwierdzenia
+        self._pin("wd", False)
+        self._heartbeat = False
+        self._hb_timer = QtCore.QTimer(self)
+        self._hb_timer.timeout.connect(self._beat)
+        self._hb_timer.start(100)
+        QtCore.QTimer.singleShot(400, lambda: self._pin("wd", True))  # zbocze: uzbrojenie watchdoga
+
+    def _beat(self) -> None:
+        self._heartbeat = not self._heartbeat
+        self._pin("hb", self._heartbeat)
+
+    def press_estop(self) -> None:
+        """Wciśnięcie grzyba: natychmiast, bez warunków i potwierdzeń."""
+        self.s.hmi_pressed = True
+        self._pin("ok", False)
+        self._estop_requested = True
+        ACTION.SET_ESTOP_STATE(True)
+        if hasattr(self, "diag"):
+            self.diag.add_log("err", "Grzyb E-STOP w HMI wciśnięty")
+        self.refresh()
+
+    def acknowledge_estop(self) -> None:
+        """Zwolnienie grzyba = potwierdzenie E-STOP: uzbrojenie watchdoga i reset zatrzasku."""
+        self.s.hmi_pressed = False
+        self._pin("ok", True)
+        self._pin("wd", False)
+        QtCore.QTimer.singleShot(100, lambda: self._pin("wd", True))
+        QtCore.QTimer.singleShot(300, lambda: ACTION.SET_ESTOP_STATE(False))
+        QtCore.QTimer.singleShot(1500, self._check_acknowledge)
+        if hasattr(self, "diag"):
+            self.diag.add_log("info", "Grzyb E-STOP w HMI zwolniony: potwierdzenie E-STOP")
+        self.refresh()
+
+    def _check_acknowledge(self) -> None:
+        if self.s.estop and not self.s.hmi_pressed:
+            cause = self._estop_cause().replace("E-STOP: ", "")
+            self.show_alarm("err", f"Potwierdzenie nieskuteczne: obwód E-STOP nadal otwarty ({cause})")
 
     def _feed(self, value: float) -> None:
         if abs(value - self.s.feed) < 0.5:
@@ -545,8 +611,10 @@ class LinumertShell(QtCore.QObject):
             ACTION.SET_MACHINE_STATE(not self.s.machine_on)
 
     def toggle_estop(self) -> None:
-        self._estop_requested = not self.s.estop
-        ACTION.SET_ESTOP_STATE(not self.s.estop)
+        if self.s.estop or self.s.hmi_pressed:
+            self.acknowledge_estop()
+        else:
+            self.press_estop()
 
     def jog(self, axis: str, direction: int) -> None:
         if direction and not self._allowed("jog"):
@@ -694,8 +762,10 @@ class LinumertShell(QtCore.QObject):
         self.buttons["pause"].setText("Wznów" if s.interp == "paused" else "Wstrzymaj")
         self.buttons["power"].setText("Maszyna WŁ." if s.machine_on else "Maszyna WYŁ.")
         _restyle(self.buttons["power"], active="true" if s.machine_on else "false")
-        self.buttons["estop"].setText("E-STOP" if not s.estop else "Zwolnij E-STOP")
-        _restyle(self.buttons["estop"], active="true" if s.estop else "false")
+        text, hint, state = model.mushroom_view(s)
+        self.buttons["estop"].setText(text)
+        _restyle(self.buttons["estop"], state=state)
+        self.lbl_mushroom.setText(hint)
         self.lbl_estop.setText("otwarty" if s.estop else "zamknięty")
         self.lbl_estop.setStyleSheet(f"color: {self.c['err'] if s.estop else self.c['ok']};"
                                      "font-weight: 600;")
@@ -719,5 +789,5 @@ class LinumertShell(QtCore.QObject):
                 if len(info) > 11 else "")
 
 
-def install(handler) -> LinumertShell:
-    return LinumertShell(handler).install()
+def install(handler, hmi_pins: dict | None = None) -> LinumertShell:
+    return LinumertShell(handler, hmi_pins).install()
