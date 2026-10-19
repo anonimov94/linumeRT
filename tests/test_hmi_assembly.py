@@ -57,6 +57,10 @@ def smoke(snapshot):
     window.resize(1280, 768)
     window.show()
     app.processEvents()
+    shell.show_alarm("warn", "długi komunikat " * 100)
+    app.processEvents()
+    assert window.width() == 1280
+    shell.reset_alarms(False)
     assert window.height() == 768
     assert len(shell.operator_panels) == 2
     assert shell.alarm.isVisible() and all(row.isVisible() for row in shell.alarm.rows)

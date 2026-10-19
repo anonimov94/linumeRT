@@ -17,6 +17,7 @@ class AlarmPanel(QtWidgets.QFrame):
         self.rows = [QtWidgets.QLabel("—") for _ in range(3)]
         for row in self.rows:
             row.setTextFormat(QtCore.Qt.PlainText)
+            row.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Preferred)
             rows.addWidget(row)
         layout.addLayout(rows, 1)
         self.reset = QtWidgets.QPushButton("Reset")
@@ -48,6 +49,7 @@ class AlarmPanel(QtWidgets.QFrame):
     def render(self):
         for row, entry in zip(self.rows, self.entries[:3] + [None] * 3):
             row.setText(entry[1] if entry else "—")
+            row.setToolTip(entry[1] if entry else "")
         level = self.entries[0][0] if self.entries else "info"
         self.setProperty("level", level)
         self.style().unpolish(self)
