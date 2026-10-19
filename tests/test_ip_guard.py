@@ -12,7 +12,8 @@ from conftest import REPO
 NAMES_FILE = REPO / "docs" / "prawne" / "ZAKAZANE_NAZWY.txt"
 GLOSSARY = REPO / "docs" / "SLOWNIK.md"
 PROVENANCE = REPO / "docs" / "PROVENANCE.md"
-SKIP_DIRS = {".git", ".venv", "node_modules", ".pytest_cache", ".ruff_cache", "__pycache__"}
+SKIP_DIRS = {".git", ".venv", "node_modules", ".pytest_cache", ".ruff_cache", "__pycache__",
+             "build"}  # build/ = wyniki lokalne (gitignore), np. zrzuty tools/dev/sim-e2e.sh
 SKIP_SUFFIXES = (".egg-info",)
 # Skanowane drzewa (kod, UI, konfiguracja) oraz pliki w korzeniu repozytorium.
 SCAN_DIRS = (

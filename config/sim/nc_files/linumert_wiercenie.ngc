@@ -1,6 +1,6 @@
 ( linumeRT · program testowy 2: nawiercanie i wiercenie siatki 3 x 3, cykle G81/G83 )
 ( SPDX-License-Identifier: GPL-2.0-or-later )
-;@STOCK X0 Y0 Z-20 X120 Y120 Z0
+;@STOCK BOX X120 Y120 Z30 ORIGIN=TOP_FRONT_LEFT OFFSET=G54 MAT="aluminium"
 G21 G90 G17 G40 G49 G80
 T4 M6
 G43 H4

@@ -91,9 +91,9 @@ def test_contract_signals_present_and_documented():
 
 def test_tool_table_and_programs():
     tools = [line for line in (CFG / "tool.tbl").read_text().splitlines() if line.strip()]
-    assert [t.split()[0] for t in tools] == ["T1", "T2", "T3", "T4", "T5"]
+    assert [t.split()[0] for t in tools] == [f"T{n}" for n in range(1, 12)]
     programs = sorted(NC.glob("*.ngc"))
-    assert len(programs) == 3
+    assert len(programs) == 5
     for p in programs:
         text = p.read_text(encoding="utf-8")
         assert "M98" not in text and text.rstrip().endswith("M2")

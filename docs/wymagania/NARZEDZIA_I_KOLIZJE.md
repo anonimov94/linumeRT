@@ -15,9 +15,10 @@ Wersja 1.0 · 2026-10-17 · status: obowiązująca (zastępuje wcześniejsze dok
 | Wiertło 118°/120° (`drill_118`) | D, L | walec + stożek |
 | Wiertło z kątem (`drill_angle`) | D, kąt ≤ 180° | walec + stożek (180° = płaskie) |
 | Głowica frezarska (`face_mill`) | D, H | walec D × H |
+| Gwintownik (`tap`) | D, L, skok | walec; skrawa tylko z obrotami w kierunku narzędzia |
 | Specjalne (`special_stl`) | plik STL (oś Z, czoło w 0) | z pliku; w symulacji 2.5D obwiednia + ostrzeżenie |
 
-Wspólne pola: numer T, miejsce P, opis, oprawka (typ lub STL), długość ostrza (część tnąca), szyjka i
+Wspólne pola: maks. obroty, kierunek skrawania (prawy M3 / lewy M4), korekcja średnicy ±1 mm, oprawka (Ø, długość), numer T, miejsce P, opis, oprawka (typ lub STL), długość ostrza (część tnąca), szyjka i
 oprawka (część nietnąca), trwałość. Brak typu → model zastępczy walca D × L i ostrzeżenie K-320.
 
 ## 2. Przygotówka

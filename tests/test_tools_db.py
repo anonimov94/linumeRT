@@ -55,7 +55,7 @@ def _flat(number=1, pocket=1, **params) -> Tool:
 
 def test_all_types_from_requirements():
     assert set(TYPES) == {"flat", "ball", "bull", "tslot", "lollipop", "chamfer", "drill_118",
-                          "drill_angle", "face_mill", "special_stl"}
+                          "drill_angle", "face_mill", "tap", "special_stl"}
 
 
 @pytest.mark.parametrize("type_id,params", [

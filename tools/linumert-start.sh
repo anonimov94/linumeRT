@@ -18,7 +18,7 @@
 set -euo pipefail
 
 REPO_URL=https://github.com/anonimov94/linumeRT.git
-IMG_REV=1  # zmień przy każdej zmianie Containerfile niżej (wymusza przebudowę obrazu)
+IMG_REV=2  # zmień przy każdej zmianie Containerfile niżej (wymusza przebudowę obrazu)
 IMG=linumert-app:bookworm-$IMG_REV
 PANEL_PORT=8080
 
@@ -120,7 +120,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates
  && apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     linuxcnc-uspace linuxcnc-uspace-dev python3-pyqt5 python3-pyqt5.qsci python3-pyqt5.qtsvg \
     python3-pyqt5.qtopengl python3-dbus.mainloop.pyqt5 python3-opengl python3-numpy python3-yaml \
-    python3-venv python3-pip build-essential mesa-utils fonts-dejavu xdg-utils \
+    python3-venv python3-pip build-essential mesa-utils fonts-dejavu xdg-utils python3-pyqtgraph \
  && rm -rf /var/lib/apt/lists/*
 # Symulator bez RT jako zwykły użytkownik (keep-id): rtapi_app bez setuid (inaczej shmget EACCES),
 # katalog modułów zapisywalny dla halcompile --install komponentów linumeRT (lrt_net, lrt_cia402).
@@ -129,6 +129,13 @@ RUN chmod u-s /usr/bin/rtapi_app && chmod 1777 /usr/lib/linuxcnc/modules
 RUN python3 -m venv --system-site-packages /opt/linumert \
  && /opt/linumert/bin/pip install -q "pydantic>=2" "fastapi>=0.100" "uvicorn>=0.23" "websockets>=11"
 CONTAINERFILE
+fi
+
+# ---- 4a. układ detalu symulatora: G54 nad przygotówką (machine.yaml), gdy brak albo zerowy ---------
+simcfg=config/sim/linumert_xyz
+if ! awk '$1 ~ /^522[123]$/ && $2+0 != 0 {found=1} END {exit !found}' "$simcfg/linumert.var" 2>/dev/null; then
+    cp "$simcfg/linumert.var.default" "$simcfg/linumert.var"
+    say "układ detalu G54 symulatora: X100 Y100 Z-150 (wierzch przygotówki na stole)"
 fi
 
 # ---- 5. okno na pulpicie (X11 / Xwayland) ----------------------------------------------------------
