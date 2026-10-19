@@ -38,6 +38,10 @@ def _run_selftest(tmp_path: Path, out: Path, extra_env: dict[str, str] | None = 
     cleanup_linuxcnc(cwd=tmp_path)
     work = tmp_path / "linumert_xyz"
     shutil.copytree(CFG, work, symlinks=True)
+    # Samotest zakłada G54=0; nie dziedziczy przesunięć zapisanych po lokalnym demo.
+    # Usuwamy stan wyłącznie z kopii testowej, nigdy z konfiguracji operatora.
+    (work / "linumert.var").unlink(missing_ok=True)
+    (work / "linumert.var.bak").unlink(missing_ok=True)
     link = work / "qtvcp" / "screens" / "linumert"
     link.unlink()
     link.symlink_to(ROOT / "screens" / "linumert")  # tokeny i ikony z repozytorium
