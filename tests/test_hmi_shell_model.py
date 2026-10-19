@@ -168,3 +168,107 @@ def test_upstream_handler_unchanged_marker() -> None:
     assert "LINUMERT_SHELL" in handler and "linumert_shell.install(self)" in handler
     upstream = (SCREEN / "linumert_upstream_handler.py").read_text(encoding="utf-8")
     assert "linumert_shell" not in upstream
+
+
+# ---- diagnostyka ----------------------------------------------------------------------------
+
+@pytest.mark.parametrize(("sw", "name", "level"), [
+    (0x0000, "Rozruch (not ready)", "info"), (0x0250, "Wyłączony (switch on disabled)", "warn"),
+    (0x0231, "Gotowy do załączenia", "warn"), (0x0233, "Załączony", "warn"),
+    (0x1237, "Praca", "ok"), (0x0218, "Błąd", "err"), (0x021F, "Reakcja na błąd", "err"),
+    (0x0217, "Szybki stop", "err"),
+])
+def test_cia402_state(sw, name, level) -> None:
+    assert m.cia402_state(sw) == (name, level)
+
+
+def test_drive_faults_map_to_catalog() -> None:
+    faults = m.drive_fault_codes((ROOT / "plant/core/drive.h").read_text(encoding="utf-8"))
+    texts = m.catalog_texts(yaml.safe_load(
+        (ROOT / "core/linumert/alarms/catalog.yaml").read_text(encoding="utf-8")))
+    assert faults[0x8130] == "E-4003" and faults[0x8611] == "E-4201" and len(faults) == 11
+    assert all(code in texts for code in faults.values())
+    assert m.drive_error_text(0, faults, texts) == "—"
+    assert m.drive_error_text(0x8130, faults, texts, "X").startswith("E-4003 · Brak ramek")
+    assert "?" not in m.drive_error_text(0xFF00, faults, texts, "Z")
+    assert m.drive_error_text(0x1234, faults, texts) == "603Fh = 0x1234"
+
+
+def test_link_counters_are_lrt_net_pins() -> None:
+    comp = (ROOT / "hal/lrt_net.comp").read_text(encoding="utf-8")
+    for pin, _label in m.LINK_COUNTERS:
+        assert re.search(rf"^pin out \w+\s+{re.escape(pin)}\b", comp, re.M), pin
+
+
+# ---- produkcja --------------------------------------------------------------------------------
+
+def test_run_clock_counts_only_run() -> None:
+    clock = m.RunClock()
+    clock.update("run", 10.0)
+    clock.update("paused", 15.0)  # 5 s pracy
+    clock.update("paused", 40.0)
+    clock.update("run", 40.0)
+    assert clock.value(42.0) == pytest.approx(7.0)
+    clock.update("idle", 43.0)
+    assert clock.value(100.0) == pytest.approx(8.0)
+    clock.reset()
+    assert clock.value(100.0) == 0.0
+
+
+def test_fmt_duration() -> None:
+    assert m.fmt_duration(0) == "00:00" and m.fmt_duration(161) == "02:41"
+    assert m.fmt_duration(3725) == "1:02:05" and m.fmt_duration(-3) == "00:00"
+
+
+def test_run_from_line_gate() -> None:
+    s = ready(total_lines=12)
+    assert m.run_from_line_gate(s, 6).enabled
+    assert m.run_from_line_gate(s, 13).reason == "linia poza zakresem 1–12"
+    paused, unhomed = ready(total_lines=12, interp="paused"), ready(total_lines=12, homed=set())
+    assert m.run_from_line_gate(paused, 6).reason == "program w toku"
+    assert m.run_from_line_gate(unhomed, 6).reason == "najpierw bazowanie"
+    assert "pomija wcześniejsze bloki" in m.RUN_FROM_LINE_WARNING.format(line=6)
+
+
+# ---- start i przyczyny E-STOP -------------------------------------------------------------------
+
+def test_checklist_fresh_machine() -> None:
+    items = {i.key: i for i in m.checklist(m.ShellState())}
+    assert items["estop"].level == "err" and items["estop"].action == "estop"
+    assert items["power"].action == ""  # najpierw E-STOP
+    assert items["homed"].detail == "niebazowane: X, Y, Z" and items["homed"].action == ""
+    assert items["plant"].level == "info" and "drives" not in items
+    assert items["program"].action == "program"
+    assert not m.ready_to_run(list(items.values()))
+
+
+def test_checklist_ready_and_plant() -> None:
+    s = ready(plant="ok", tool=3)
+    items = m.checklist(s, drive_fault=False)
+    assert all(i.level == "ok" for i in items) and m.ready_to_run(items)
+    s.feed_override = 0.8
+    items = {i.key: i for i in m.checklist(s, drive_fault=True)}
+    assert items["overrides"].detail == "F 80 %" and items["overrides"].level == "warn"
+    assert items["drives"].action == "diag"
+    assert not m.ready_to_run(list(items.values()))
+    lost = {i.key: i for i in m.checklist(ready(plant="lost"))}
+    assert lost["plant"].level == "err"
+
+
+def test_checklist_actions_have_labels() -> None:
+    for s in (m.ShellState(), m.ShellState(estop=False), ready(homed=set()), ready(file=""),
+              ready(feed_override=0.5), ready(plant="ok")):
+        for item in m.checklist(s, drive_fault=True):
+            assert not item.action or item.action in m.ACTION_LABEL
+
+
+@pytest.mark.parametrize(("args", "text"), [
+    ((None, None, None, True), "E-STOP z ekranu (programowy)"),
+    ((False, True, 0), "pętla E-STOP otwarta"),
+    ((True, False, 3), "przerwa łącza LRT-NET z Plant, 3 cykli"),
+    ((True, True, 25), "przerwa łącza LRT-NET z Plant, 25 cykli"),
+    ((None, None, None), "emc-enable-in"),
+    ((True, True, 2), "przyczyna przejściowa"),
+])
+def test_estop_reason(args, text) -> None:
+    assert text in m.estop_reason(*args)

@@ -9,8 +9,9 @@ operator), po każdym kroku zapisuje zrzut okna `NN_nazwa.png` i stan do `wynik.
 zamyka wywołujący (okno potwierdzenia QtDragon przy zamykaniu nie blokuje testu). Uruchamia go `tests/test_hmi_shell_gui.py` (marker `linuxcnc`) i
 `tools/dev/hmi-demo.sh`.
 
-Scenariusz: zwolnienie E-STOP → maszyna WŁ. → bazowanie → MDI G0 → program w AUTO → Wstrzymaj →
-Wznów → Stop → JOG X+ → obszary szyny (QtDragon) → powrót do „Maszyna”.
+Scenariusz (Start → lista gotowości): zwolnienie E-STOP → maszyna WŁ. → bazowanie → MDI G0 → program w AUTO → Wstrzymaj →
+Wznów → Stop → JOG X+ → obszary szyny (QtDragon) → powrót do „Maszyna” → Diagnostyka → Produkcja
+(korekcja posuwu 80 %, start od linii 6 do końca programu, korekcja 100 %).
 """
 
 from __future__ import annotations
@@ -67,9 +68,12 @@ class SelfTest(QtCore.QObject):
         click = self._click
         return [
             ("01_start", None, None, 0),
-            ("02_estop_zwolniony", lambda: click(b["estop"]), lambda: not s.estop, 5),
-            ("03_maszyna_wl", lambda: click(b["power"]), lambda: s.machine_on, 5),
-            ("04_bazowanie", lambda: click(b["home"]), lambda: s.all_homed, 90),
+            # Kroki 02–04 przyciskami listy gotowości widoku Start
+            ("02_estop_zwolniony", lambda: self._start_action("estop"), lambda: not s.estop, 5),
+            ("03_maszyna_wl", lambda: self._start_action("power"), lambda: s.machine_on, 5),
+            ("04_bazowanie", lambda: self._start_action("homed"), lambda: s.all_homed, 90),
+            ("04b_start_gotowosc", None, None, 1),
+            ("04c_maszyna", lambda: click(self.shell.areas["machine"]), None, 1),
             ("05_tryb_mdi", lambda: click(b["mode_mdi"]), lambda: s.mode == "mdi", 5),
             ("06_mdi_g0", self._mdi, lambda: self._settled(), 30),
             ("07_program", lambda: ACTION.OPEN_PROGRAM(self.program),
@@ -86,6 +90,17 @@ class SelfTest(QtCore.QObject):
             ("16_obszar_narzedzia", lambda: click(self.shell.areas["tools"]), None, 1),
             ("17_obszar_qtdragon", lambda: click(self.shell.areas["classic"]), None, 1),
             ("18_maszyna", lambda: click(self.shell.areas["machine"]), None, 1),
+            ("19_diagnostyka", lambda: click(self.shell.areas["diag"]),
+             lambda: self.shell.diag.joints.rowCount() >= len(s.axes), 5),
+            ("20_produkcja", lambda: click(self.shell.areas["production"]), None, 1),
+            ("21_korekcja_posuwu_80", lambda: self.shell.production.sliders["feed"][0].setValue(80),
+             lambda: round(s.feed_override * 100) == 80, 5),
+            ("22_tryb_auto", lambda: click(b["mode_auto"]), lambda: s.mode == "auto", 5),
+            ("23_start_od_linii", self._from_line,
+             lambda: s.interp == "run" and s.line >= 6, 15),
+            ("24_program_koniec", None, lambda: s.interp == "idle", 60),
+            ("25_korekcja_100", lambda: click(self._reset_feed()),
+             lambda: round(s.feed_override * 100) == 100, 5),
         ]
 
     @staticmethod
@@ -93,6 +108,25 @@ class SelfTest(QtCore.QObject):
         if not widget.isEnabled():
             raise RuntimeError(f"przycisk „{widget.text()}” nieaktywny: {widget.toolTip()}")
         widget.click()
+
+    def _from_line(self) -> None:
+        page = self.shell.production
+        page.spin_line.setValue(6)
+        page.refresh()
+        if not page.btn_from_line.isEnabled():
+            raise RuntimeError(f"start od linii nieaktywny: {page.lbl_from_line.text()}")
+        page.run_from_line(confirm=False)  # okno potwierdzenia pomija tylko samotest
+
+    def _reset_feed(self):
+        return self.shell.production.reset_buttons["feed"]
+
+    def _start_action(self, key: str) -> None:
+        page = self.shell.start
+        page.refresh()
+        btn = page.row_widgets[key][3]
+        if not btn.isVisible():
+            raise RuntimeError(f"brak akcji przy „{key}” na liście gotowości")
+        self._click(btn)
 
     def _mdi(self) -> None:
         self.shell.mdi.setText("G0 X100 Y80 Z-10")
@@ -155,8 +189,15 @@ class SelfTest(QtCore.QObject):
             "mode": s.mode, "interp": s.interp, "homed": sorted(s.homed), "line": s.line,
             "file": os.path.basename(s.file), "x": round(rel[0], 3), "y": round(rel[1], 3),
             "z": round(rel[2], 3), "area": self.shell.stack.currentIndex(),
+            "page": {v: k for k, v in self.shell.pages.items()}[self.shell.stack.currentIndex()],
+            "ready": self.shell.start.lbl_ready.text(),
             "alarm": s.alarm.text if s.alarm else "",
             "start_enabled": self.shell.buttons["start"].isEnabled(),
+            "diag_joints": self.shell.diag.joints.rowCount(),
+            "diag_drives": self.shell.diag.drives.rowCount(),
+            "log": self.shell.diag.log.count(),
+            "feed_override": round(s.feed_override * 100),
+            "run_time": self.shell.production.lbl_time.text(),
         })
 
     def _finish(self) -> None:

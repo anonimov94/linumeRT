@@ -16,6 +16,7 @@ Zasady (HMI_WORKFLOW.md, CLAUDE.md §6):
 
 from __future__ import annotations
 
+import collections
 import os
 import time
 
@@ -24,6 +25,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from qtvcp.core import Action, Info, Status
 
 import linumert_shell_model as model
+import linumert_shell_pages as pages
 
 STATUS = Status()
 ACTION = Action()
@@ -33,14 +35,17 @@ NML_KINDS = {k: getattr(linuxcnc, k) for k in
              ("NML_ERROR", "NML_TEXT", "NML_DISPLAY", "OPERATOR_ERROR", "OPERATOR_TEXT",
               "OPERATOR_DISPLAY") if hasattr(linuxcnc, k)}
 
-# Obszary szyny: (id, etykieta, ikona, przycisk QtDragon pokazywany w widoku klasycznym).
+# Obszary szyny: (id, etykieta, ikona, cel). Cel „page:<id>” = własna strona linumeRT,
+# inaczej nazwa przycisku QtDragon, którego strona pojawia się w widoku klasycznym.
 AREAS = (
-    ("machine", "Maszyna", "maszyna", None),
+    ("start", "Start", "klucz", "page:start"),
+    ("machine", "Maszyna", "maszyna", "page:machine"),
+    ("production", "Produkcja", "start", "page:production"),
     ("program", "Program", "program", "btn_file"),
     ("tools", "Narzędzia", "narzedzia", "btn_tool"),
     ("offsets", "Zero detalu", "zero", "btn_offsets"),
     ("probe", "Sonda", "sonda", "btn_probe"),
-    ("diag", "Diagnostyka", "diagnostyka", "btn_status"),
+    ("diag", "Diagnostyka", "diagnostyka", "page:diag"),
     ("settings", "Konfiguracja", "konfiguracja", "btn_settings"),
     ("classic", "Pełny QtDragon", "wtyczka", "btn_main"),
 )
@@ -69,10 +74,15 @@ def _label(text: str = "", name: str = "", **props) -> QtWidgets.QLabel:
 
 
 def _restyle(widget: QtWidgets.QWidget, **props) -> None:
+    """Zmienia właściwości stylu; przestylowanie (kosztowne) tylko przy faktycznej zmianie."""
+    changed = False
     for key, value in props.items():
-        widget.setProperty(key, value)
-    widget.style().unpolish(widget)
-    widget.style().polish(widget)
+        if widget.property(key) != value:
+            widget.setProperty(key, value)
+            changed = True
+    if changed:
+        widget.style().unpolish(widget)
+        widget.style().polish(widget)
 
 
 def _card(title: str, right: str = "") -> tuple[QtWidgets.QFrame, QtWidgets.QVBoxLayout,
@@ -105,6 +115,8 @@ class LinumertShell(QtCore.QObject):
         self.program_lines: list[str] = []
         self.positions = ([0.0] * 9, [0.0] * 9, [0.0] * 9)
         self.areas: dict[str, QtWidgets.QToolButton] = {}
+        self._missed: collections.deque[int] = collections.deque(maxlen=5)  # ok. 2 s historii
+        self._estop_requested = False
         self.buttons: dict[str, QtWidgets.QPushButton] = {}
 
     # ---- budowa ---------------------------------------------------------------------------
@@ -129,6 +141,14 @@ class LinumertShell(QtCore.QObject):
         lay.setContentsMargins(0, 0, 0, 0)
         lay.addWidget(classic)
         self.stack.addWidget(classic_page)
+        self.diag = pages.DiagPage(self)
+        self.production = pages.ProductionPage(self)
+        self.start = pages.StartPage(self)
+        self.pages = {"machine": 0, "classic": 1, "diag": self.stack.addWidget(self.diag),
+                      "production": self.stack.addWidget(self.production),
+                      "start": self.stack.addWidget(self.start)}
+        self.page_widgets = {"diag": self.diag, "production": self.production,
+                             "start": self.start}
         body.addWidget(self.stack, 1)
         grid.addLayout(body, 1)
         grid.addWidget(self._bottom_bar())
@@ -145,7 +165,7 @@ class LinumertShell(QtCore.QObject):
         self._timer = QtCore.QTimer(self)
         self._timer.timeout.connect(self._tick)
         self._timer.start(500)
-        self.select_area("machine")
+        self.select_area("start")  # po uruchomieniu zawsze Start (HMI_WORKFLOW)
         self.refresh()
         return self
 
@@ -402,10 +422,10 @@ class LinumertShell(QtCore.QObject):
                 self.refresh()
             return cb
 
-        STATUS.connect("state-estop", lambda _w: self._set(estop=True, machine_on=False))
-        STATUS.connect("state-estop-reset", lambda _w: self._set(estop=False))
-        STATUS.connect("state-on", lambda _w: self._set(machine_on=True))
-        STATUS.connect("state-off", lambda _w: self._set(machine_on=False))
+        STATUS.connect("state-estop", lambda _w: self._estop())
+        STATUS.connect("state-estop-reset", lambda _w: self._event(estop=False))
+        STATUS.connect("state-on", lambda _w: self._event(machine_on=True))
+        STATUS.connect("state-off", lambda _w: self._event(machine_on=False))
         STATUS.connect("mode-manual", lambda _w: self._set(mode="manual"))
         STATUS.connect("mode-mdi", lambda _w: self._set(mode="mdi"))
         STATUS.connect("mode-auto", lambda _w: self._set(mode="auto"))
@@ -421,7 +441,9 @@ class LinumertShell(QtCore.QObject):
         STATUS.connect("file-loaded", lambda _w, f: self._file(f))
         STATUS.connect("line-changed", setter("line"))
         STATUS.connect("tool-in-spindle-changed", setter("tool", int))
-        STATUS.connect("current-feed-rate", setter("feed"))
+        # Posuw przychodzi przy każdym odpytaniu stanu (co CYCLE_TIME): tylko etykieta, bez
+        # pełnego odświeżenia ekranu.
+        STATUS.connect("current-feed-rate", lambda _w, v: self._feed(v))
         STATUS.connect("feed-override-changed", setter("feed_override", lambda v: v / 100.0))
         STATUS.connect("rapid-override-changed", setter("rapid_override", lambda v: v / 100.0))
         STATUS.connect("spindle-override-changed",
@@ -438,6 +460,37 @@ class LinumertShell(QtCore.QObject):
         STATUS.connect("error", lambda _w, kind, text: self.show_alarm(
             model.error_level(kind, NML_KINDS), text))
         STATUS.connect("current-position", self._positions)
+
+    def _event(self, **values) -> None:
+        """Zmiana stanu maszyny z wpisem do historii (Diagnostyka)."""
+        texts = {("estop", False): "E-STOP zwolniony", ("machine_on", True): "Maszyna włączona",
+                 ("machine_on", False): "Maszyna wyłączona"}
+        for key, value in values.items():
+            if getattr(self.s, key) != value and (key, value) in texts and hasattr(self, "diag"):
+                self.diag.add_log("info", texts[(key, value)])
+        self._set(**values)
+
+    def _estop(self) -> None:
+        if self.s.estop:  # stan początkowy albo powtórzony sygnał: bez alarmu
+            self._estop_requested = False
+            return
+        loop = pages._hal("lrt-net.0.din-00")
+        connected = pages._hal("lrt-net.0.connected")
+        missed = pages._hal("lrt-net.0.missed")
+        delta = None if missed is None or not self._missed else int(missed) - self._missed[0]
+        reason = model.estop_reason(None if loop is None else bool(loop),
+                                    None if connected is None else bool(connected), delta,
+                                    requested=self._estop_requested)
+        self._estop_requested = False
+        self._set(estop=True, machine_on=False)
+        self.show_alarm("err", reason)
+
+    def _feed(self, value: float) -> None:
+        if abs(value - self.s.feed) < 0.5:
+            return
+        self.s.feed = value
+        units = "mm" if self.s.metric else "in"
+        self.lbl_feed.setText(f"{model.fmt_int(value)} {units}/min")
 
     def _set(self, **values) -> None:
         for key, value in values.items():
@@ -492,6 +545,7 @@ class LinumertShell(QtCore.QObject):
             ACTION.SET_MACHINE_STATE(not self.s.machine_on)
 
     def toggle_estop(self) -> None:
+        self._estop_requested = not self.s.estop
         ACTION.SET_ESTOP_STATE(not self.s.estop)
 
     def jog(self, axis: str, direction: int) -> None:
@@ -516,10 +570,13 @@ class LinumertShell(QtCore.QObject):
     def select_area(self, area: str) -> None:
         self.areas[area].setChecked(True)
         target = dict((a, b) for a, _t, _i, b in AREAS)[area]
-        if target is None:
-            self.stack.setCurrentIndex(0)
+        if target.startswith("page:"):
+            page = target[5:]
+            self.stack.setCurrentIndex(self.pages[page])
+            if page in self.page_widgets:
+                self.page_widgets[page].refresh()
             return
-        self.stack.setCurrentIndex(1)
+        self.stack.setCurrentIndex(self.pages["classic"])
         btn = getattr(self.w, target, None)
         if btn is not None and btn.isEnabled():
             btn.click()  # przełącza tylko stronę QtDragon (main_tab_changed), bez ruchu
@@ -534,6 +591,8 @@ class LinumertShell(QtCore.QObject):
         if not text:
             return
         self.s.alarm = model.Alarm(level, text)
+        if getattr(self, "diag", None) is not None:
+            self.diag.add_log(level, text)
         self.lbl_alarm.setText(text)
         _restyle(self.alarm, level=level)
         self.alarm.show()
@@ -545,8 +604,18 @@ class LinumertShell(QtCore.QObject):
     # ---- odświeżanie ----------------------------------------------------------------------
     def _tick(self) -> None:
         self.lbl_clock.setText(time.strftime("%H:%M"))
+        current = self.stack.currentWidget()
+        if current in self.page_widgets.values():
+            current.refresh()
+        missed = pages._hal("lrt-net.0.missed")
+        if missed is not None and not self.s.estop:
+            self._missed.append(int(missed))  # odniesienie przyczyny E-STOP: najstarsza próbka
         plant = self._plant_link()
         if plant != self.s.plant:
+            if self.s.plant is not None or plant == "lost":
+                self.show_alarm("err" if plant == "lost" else "info",
+                                "Łącze LRT-NET z Plant utracone" if plant == "lost"
+                                else "Łącze LRT-NET z Plant odzyskane")
             self.s.plant = plant
             self.refresh()
 
@@ -572,6 +641,12 @@ class LinumertShell(QtCore.QObject):
 
     def refresh(self) -> None:
         s, g = self.s, model.gates(self.s)
+        production = getattr(self, "production", None)
+        if production is not None:
+            production.on_state()
+            current = self.stack.currentWidget()
+            if current is production:
+                current.refresh()  # bieżąca linia i postęp; Start odświeża _tick (0,5 s)
         for mode in model.MODES:
             btn = self.buttons[f"mode_{mode}"]
             btn.setChecked(s.mode == mode)

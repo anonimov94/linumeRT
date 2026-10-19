@@ -4,7 +4,9 @@ SPDX-License-Identifier: GPL-2.0-or-later
 Model-Author: Claude · HMI-PoC.
 
 Samotest (`screens/linumert/linumert_shell_selftest.py`) klika przyciski nakładki w procesie GUI:
-E-STOP → Maszyna → Bazuj → MDI → program w AUTO → Wstrzymaj/Wznów → Stop → JOG → obszary szyny.
+Start: E-STOP → Maszyna → Bazuj (lista gotowości) → MDI → program w AUTO → Wstrzymaj/Wznów
+→ Stop → JOG → obszary szyny
+→ Diagnostyka → Produkcja (korekcja posuwu, start od linii).
 Zrzuty kroków: katalog z `LINUMERT_HMI_SHOTS` (domyślnie tmp_path).
 """
 
@@ -58,7 +60,14 @@ def test_shell_selftest_in_gui(tmp_path) -> None:
     data = json.loads(result.read_text(encoding="utf-8"))
     steps = {s["step"]: s for s in data["steps"]}
     assert data["errors"] == [], data["errors"]
-    assert len(steps) == 18 and all(s["ok"] for s in steps.values())
+    assert len(steps) == 27 and all(s["ok"] for s in steps.values())
+    assert steps["01_start"]["page"] == "start"  # po uruchomieniu widok Start
+    assert steps["04b_start_gotowosc"]["ready"] == "wymaga działań"  # brak programu
+    assert steps["04c_maszyna"]["page"] == "machine"
+    # QtDragon zgłaszał „Hard limits tripped” przy starcie i przy bazowaniu na krańcówce (handler);
+    # E-STOP w trakcie scenariusza byłby błędem (przyczynę podaje nakładka)
+    bad = ("Hard limits", "krańcówka", "E-STOP")
+    assert not any(word in s["alarm"] for s in steps.values() for word in bad)
     assert steps["01_start"]["estop"] and not steps["01_start"]["start_enabled"]
     assert steps["03_maszyna_wl"]["machine_on"]
     assert steps["04_bazowanie"]["homed"] == ["X", "Y", "Z"]
@@ -68,5 +77,13 @@ def test_shell_selftest_in_gui(tmp_path) -> None:
     assert steps["10_wstrzymany"]["interp"] == "paused"
     assert steps["12_stop"]["interp"] == "idle"
     assert steps["14_jog_x_plus"]["x"] > steps["13_tryb_jog"]["x"] + 1.0
-    assert steps["15_obszar_program"]["area"] == 1 and steps["18_maszyna"]["area"] == 0
+    assert steps["15_obszar_program"]["page"] == "classic"
+    assert steps["18_maszyna"]["page"] == "machine"
+    assert steps["19_diagnostyka"]["diag_joints"] == 3  # symulator: bez napędów Plant
+    assert steps["19_diagnostyka"]["diag_drives"] == 0
+    assert steps["21_korekcja_posuwu_80"]["feed_override"] == 80
+    assert steps["23_start_od_linii"]["interp"] == "run" and steps["23_start_od_linii"]["line"] >= 6
+    assert steps["24_program_koniec"]["interp"] == "idle"
+    assert steps["24_program_koniec"]["run_time"] != "00:00"
+    assert steps["25_korekcja_100"]["feed_override"] == 100
     assert all((out / f"{name}.png").stat().st_size > 20000 for name in steps)
