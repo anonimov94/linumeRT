@@ -7,7 +7,7 @@ Model-Author: Claude · 2026-10-19 (symulacja HMI).
 
 Co 1/rate s czyta `linuxcnc.stat` (pozycja nosa w G53, narzędzie, obroty, rodzaj ruchu, linia),
 prowadzi materiał przygotówki i reguły `SimEngine`. Kolizja albo przeciążenie → E-STOP
-(`linuxcnc.command().state(STATE_ESTOP)`); w łańcuchu D35 reset wymaga potwierdzenia grzybem w HMI.
+(`linuxcnc.command().state(STATE_ESTOP)`); w łańcuchu D35/D37 reset wymaga potwierdzenia w HMI.
 
 Protokół z ekranem: polecenia JSON na stdin (po jednym w linii), zdarzenia JSON na stdout.
 Mapa wysokości przygotówki: plik `float32` (np.memmap), ścieżka w zdarzeniu `stock`.
@@ -76,6 +76,8 @@ class Live:
         self.cmd = self.lc.command()
         self.engine = SimEngine()
         self.estop_on_event = True
+        self.virtual = ini_value(self.ini, "LINUMERT", "VIRTUAL_MODE", "0") == "1"
+        self.recovery = False
         self.latched: str | None = None  # E-STOP z symulacji: sent → off → None (po resecie)
         self.latched_at = 0.0
         self.map_file: Path | None = None
@@ -206,6 +208,7 @@ class Live:
     def run(self, rate: float, commands: queue.Queue) -> None:
         period = 1 / rate
         last_pos = last_map = 0.0
+        active_codes = None
         self.reload_tools(force=True)
         emit(ev="ready", ini=str(self.ini_path), pid=os.getpid())
         while True:
@@ -234,6 +237,10 @@ class Live:
             self.reload_tools()
             sample = self.sample(t0)
             events = self.engine.step(sample)
+            codes = sorted({key[0] for key in self.engine._active})
+            if codes != active_codes:
+                active_codes = codes
+                emit(ev="alarms", active=codes)
             on = self.stat.task_state == self.lc.STATE_ON
             if self.latched == "sent" and (not on or t0 - self.latched_at > 3.0):
                 self.latched = "off"
@@ -243,7 +250,7 @@ class Live:
                 if self.latched and e.stop:
                     continue  # skutki wtórne zatrzymania (wrzeciono staje w materiale)
                 emit(ev="event", **e.to_dict())
-            if self.estop_on_event and not self.latched and any(e.stop for e in events):
+            if self.stop_required(events):
                 self.cmd.state(self.lc.STATE_ESTOP)
                 self.latched, self.latched_at = "sent", t0
             smap = self.engine.stock
@@ -270,6 +277,12 @@ class Live:
                                     in ld.axis.items()}})
             time.sleep(max(period - (time.monotonic() - t0), 0.0))
 
+    def stop_required(self, events):
+        recovery = (self.virtual and self.recovery
+                    and self.stat.task_mode == self.lc.MODE_MANUAL)
+        stop = bool(self.engine._active) or any(e.stop for e in events)
+        return self.estop_on_event and not recovery and not self.latched and stop
+
     def command(self, c: dict) -> bool:
         name = c.get("cmd")
         if name == "quit":
@@ -277,13 +290,13 @@ class Live:
         if name == "stock":
             self.set_stock(c.get("line"))
         elif name == "stock_reset":
-            if self.engine.stock is not None:
-                self.engine.stock.reset()
-                self.engine.path.clear()
+            self.engine.reset_stock()
         elif name == "machine":
             self.load_machine(str(c.get("path", "")))
         elif name == "tools":
             self.reload_tools(force=True)
+        elif name == "recovery":
+            self.recovery = self.virtual and bool(c.get("on", False))
         elif name == "estop":
             self.estop_on_event = bool(c.get("on", True))
         else:

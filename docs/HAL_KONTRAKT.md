@@ -123,3 +123,7 @@ net lrt.j0.md   lrt-net.0.axis.0.mode-display => lrt-cia402.0.mode-display
 | `homing`, `torque-limit-normal/-homing` → `torque-limit` | bit, float | in → out | zredukowany moment przy bazowaniu na zderzak (6072h; LRT-NET v1 bez pola — ramka v2) |
 
 NIEZWERYFIKOWANE NA SPRZĘCIE. Test: `tests/test_hal_lrt_net.py` (halrun + serwer Plant, marker linuxcnc).
+
+Obsługa D37: grzyb i podwójny Reset korzystają z impulsu `linumert.hmi-ack`;
+żaden nie zamyka fizycznego wejścia safety. W konfiguracji wirtualnej handshake
+`io.tool-change` → `sim_toolchange` → `io.tool-changed` zastępuje fizyczną wymianę narzędzia.

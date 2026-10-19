@@ -29,3 +29,4 @@ screens/linumert/resources.py
 .cache/
 config/plant/linumert_plant_xyz/*_vm.ini
 config/sim/linumert_xyz/linumert_tools.db
+config/**/linumert_workpiece.json

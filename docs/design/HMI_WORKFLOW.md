@@ -1,27 +1,28 @@
 # linumeRT HMI — architektura ekranów workflow (projekt v0.1)
 
-Status: **docelowy kierunek ekranu operatora** (decyzja właściciela D32, 2026-10-18); projekt do implementacji,
-niezatwierdzony na maszynie. Baza: QtVCP/QtDragon 2.9.10, `screens/linumert`. Realizacja: Codex, etapy
-HMI-01…HMI-06 (niżej). Pochodzenie: PR #31 (`feature/hmi-workflow-tabs`).
+Status: własne widoki operatora na QtVCP / LinuxCNC 2.9. Kontrakt obsługi i dalszych zmian:
+[`OBSLUGA_OPERATORA.md`](../OBSLUGA_OPERATORA.md), D36/D37. Sprzęt fizyczny niezweryfikowany.
 
 ## Stan realizacji
-- **HMI-PoC (2026-10-19, Claude, decyzja właściciela D34):** nakładka `screens/linumert/linumert_shell*.py` —
-  globalny pasek (tryb JOG/MDI/AUTO, program, Plant/LRT-NET, stan maszyny, zegar), pasek alarmów, lewa szyna
-  obszarów (Maszyna, Program, Narzędzia, Zero detalu, Sonda, Diagnostyka, Konfiguracja, Pełny QtDragon), dolny pasek
-  akcji (Cykl start, Wstrzymaj/Wznów, Stop, Pojedynczy blok, Bazuj, Maszyna, E-STOP) i widok „Maszyna” wg makiety 01
-  (DRO, bieżący blok, narzędzie, posuw/wrzeciono z korekcjami, JOG, MDI). Pozostałe obszary pokazują strony QtDragon
-  (przeniesione, nie skopiowane). Zrzuty: `docs/raporty/hmi_poc/`. Kolejne etapy HMI-02…06 rozwijają tę nakładkę.
-- **Etap 2 (2026-10-19, Claude, PR #43):** własne widoki **Start** (faza 0: lista gotowości z akcjami, domyślny po
-  uruchomieniu, ostatnie komunikaty), **Produkcja** (faza 7: postęp, czas pracy, korekcje F/G0/S, blok „/”, M1, start
-  od linii z potwierdzeniem) i **Diagnostyka** (faza 9: LRT-NET, napędy CiA 402 z alarmami 603Fh, osie, wejścia,
-  historia); przyczyna E-STOP z HAL (pętla din-00, przerwa łącza) w pasku alarmów. Pozostałe fazy (Bazowanie jako
-  osobny widok, Zero detalu, Narzędzia, Program, Edytor, Symulacja, Ustawienia) nadal przez strony QtDragon.
+
+Dostępne: Start, Maszyna, Bazowanie, Zero detalu 3D, Narzędzia, Program (wybór i podgląd),
+Symulacja, Produkcja i Diagnostyka. Bazowy QtDragon jest osobną stroną zaplecza.
+Na samej górze: trzy alarmy i Reset; niżej stan maszyny i tryb JOG/MDI/AUTO.
+Maszyna i Symulacja współdzielą panel JOG/MDI, M3/M4/M5 i potwierdzanej wymiany M6.
+Specjalista umożliwia wolne wycofanie; fizyczne safety i limity LinuxCNC pozostają nadrzędne.
+Wirtualny bliźniak jest jawnie oznaczony `VIRTUAL_MODE=1`; ma reset materiału i HOME.
 
 ## Cel
+Stan po integracji PR #45/#46 (2026-10-19): własne widoki Bazowanie (stawy i czujniki),
+Program (wybór, podgląd i jawne wczytanie), Symulacja i Narzędzia. Własne Zero detalu oferuje
+maszynę 3D, cztery przygotówki, profil odlewu i G54–G59 ([instrukcja](../ZERO_DETALU.md)).
+Edycja i sprawdzanie G-code w widoku Program pozostają kolejnymi krokami.
+
 Rozdzielić monolityczny QtDragon na dedykowane widoki operatora bez przepisywania sterowania LinuxCNC. Nawigacja nie może wykonywać komend ruchu ani zmieniać trybu pracy automatycznie.
 
 ## Globalny shell (widoczny na każdej zakładce)
-- Górny pasek: tryb AUTO/MDI/MANUAL, MACHINE ON, homed, interpreter, połączenie LRT-NET, aktywny program.
+- Najwyższy pasek: trzy ostatnie alarmy i Reset (pojedynczy/podwójny, D37).
+- Pasek stanu: tryb AUTO/MDI/MANUAL, MACHINE ON, homed, interpreter, połączenie LRT-NET, aktywny program.
 - Stałe DRO X/Y/Z (G54 i przełączalnie G53), F/S override, alarmy, status wrzeciona i narzędzia.
 - Wyraźny stan sprzętowego E-STOP; GUI nie zastępuje toru bezpieczeństwa.
 - Nawigacja główna: Start, Przygotowanie, Program, Produkcja, Ręczne, Diagnostyka; druga warstwa podstron.

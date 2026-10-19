@@ -268,3 +268,26 @@ def test_segment_end_of_feed_is_not_rapid():
         motion = "rapid" if i == len(pts) - 1 else "feed"
         out += e.step(Sample(i * 0.01, (p[0], p[1], p[2] + 80), 1, 10000.0, motion, i))
     assert [x.code for x in out] == []
+
+
+def test_overload_causes_clear_after_spindle_stops():
+    engine = SimEngine()
+    engine._active.update({("K-306",), ("K-307", "X")})
+    engine.step(Sample(0, (0, 0, 0)))
+    assert not engine._active
+
+
+def test_stock_reset_restores_material_and_discards_previous_swept_move():
+    engine = SimEngine()
+    engine.set_stock(_stock())
+    tool = make_cutter(1, 80, 10, "flat", {"d": 10, "l": 40, "flute_length": 20})
+    engine.set_tools({1: tool})
+    original = engine.stock.volume()
+    engine.step(Sample(0, (30, 50, 85), tool=1, rpm=1000))
+    engine.step(Sample(0.1, (50, 50, 75), tool=1, rpm=1000))
+    assert engine.stock.volume() < original
+    engine.reset_stock()
+    assert engine.stock.volume() == original
+    assert not engine._active and not engine.path and engine._prev is None
+    engine.step(Sample(0.2, (200, 200, 100), tool=1, rpm=0))
+    assert engine.stock.volume() == original  # brak starego odcinka do nowego HOME

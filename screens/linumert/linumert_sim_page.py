@@ -5,7 +5,7 @@ Model-Author: Claude · 2026-10-19.
 
 Obliczenia robi osobny proces `python -m linumert_sim.live` (nice 10, CLAUDE.md §5): czyta stan
 LinuxCNC, usuwa materiał przejazdem narzędzia i przy kolizji albo przeciążeniu wywołuje E-STOP
-(reset tylko grzybem w HMI, D35). Ten moduł: klient procesu (QProcess, JSON w liniach), widok 3D
+(reset grzybem lub podwójnym Resetem, D35/D37). Ten moduł: klient procesu (QProcess, JSON w liniach), widok 3D
 (pyqtgraph.opengl, maks. 30 FPS, render tylko przy zmianie; bez pyqtgraph — widok z góry 2D)
 i karty: przygotówka, model maszyny, obciążenie napędów, zdarzenia. Symulacja nie jest funkcją
 bezpieczeństwa.
@@ -22,6 +22,7 @@ import numpy as np
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 import linumert_shell_pages as pages
+from linumert_operator_controls import OperatorControls
 
 try:
     import pyqtgraph.opengl as gl
@@ -329,14 +330,29 @@ class SimPage(QtWidgets.QWidget):
         lay.addWidget(self.view, 1)
         self.lbl_tool = pages._label("", "lrtMuted")
         lay.addWidget(self.lbl_tool)
-        grid.addWidget(frame, 0, 0, 4, 1)
-        grid.addWidget(self._stock_card(), 0, 1)
-        grid.addWidget(self._machine_card(), 1, 1)
-        grid.addWidget(self._load_card(), 2, 1)
-        grid.addWidget(self._events_card(), 3, 1)
+        left = QtWidgets.QWidget()
+        left_layout = QtWidgets.QVBoxLayout(left)
+        left_layout.setContentsMargins(0, 0, 0, 0)
+        left_layout.addWidget(frame, 1)
+        panel = OperatorControls(shell)
+        shell.operator_panels.append(panel)
+        left_layout.addWidget(panel)
+        self.reset_twin = QtWidgets.QPushButton("Uruchom / Reset symulacji → HOME")
+        self.reset_twin.setEnabled(shell.s.virtual)
+        self.reset_twin.setToolTip("Tylko konfiguracja VIRTUAL_MODE=1; odnawia materiał i bazuje osie")
+        self.reset_twin.clicked.connect(shell.virtual_session.start)
+        left_layout.addWidget(self.reset_twin)
+        grid.addWidget(left, 0, 0)
+        right = QtWidgets.QWidget()
+        right_layout = QtWidgets.QVBoxLayout(right)
+        for card in (self._stock_card(), self._machine_card(), self._load_card(), self._events_card()):
+            right_layout.addWidget(card)
+        scroll = QtWidgets.QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setWidget(right)
+        grid.addWidget(scroll, 0, 1)
         grid.setColumnStretch(0, 3)
         grid.setColumnStretch(1, 2)
-        grid.setRowStretch(3, 1)
 
     # ---- karty ---------------------------------------------------------------------------
     def _stock_card(self):
@@ -354,7 +370,8 @@ class SimPage(QtWidgets.QWidget):
                                           ("H", 40), ("TOP", 0))):
             spin = QtWidgets.QDoubleSpinBox()
             spin.setRange(0 if key == "TOP" else 0.1, 5000)
-            spin.setDecimals(2)
+            spin.setDecimals(4)
+            spin.setKeyboardTracking(False)
             spin.setValue(value)
             spin.setSuffix(" mm")
             self.dims[key] = spin
@@ -543,6 +560,11 @@ class SimPage(QtWidgets.QWidget):
         pages._restyle(bar, level=level)
         label.setText(text)
 
+    def _on_alarms(self, msg):
+        self.shell.sim_active = set(msg.get("active", []))
+        if not self.shell.sim_active:
+            self.shell.sim_cause = ""
+
     def _on_event(self, msg) -> None:
         level = KIND_LEVEL.get(msg.get("kind"), "info")
         pos = msg.get("pos", [0, 0, 0])
@@ -550,7 +572,7 @@ class SimPage(QtWidgets.QWidget):
         if msg.get("stop"):
             text += f" (X{pos[0]:.1f} Y{pos[1]:.1f} Z{pos[2]:.1f}) → E-STOP"
             self.shell.sim_cause = f"{msg.get('code')} {msg.get('text', '')}"
-            self.shell.show_alarm("err", text)
+            self.shell.show_alarm("err", text, msg.get("code", ""))
         self._add_event(level, text)
 
     def _add_event(self, level: str, text: str) -> None:

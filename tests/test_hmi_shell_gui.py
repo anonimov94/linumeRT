@@ -38,6 +38,10 @@ def _run_selftest(tmp_path: Path, out: Path, extra_env: dict[str, str] | None = 
     cleanup_linuxcnc(cwd=tmp_path)
     work = tmp_path / "linumert_xyz"
     shutil.copytree(CFG, work, symlinks=True)
+    # Samotest zakłada G54=0; nie dziedziczy przesunięć zapisanych po lokalnym demo.
+    # Usuwamy stan wyłącznie z kopii testowej, nigdy z konfiguracji operatora.
+    (work / "linumert.var").unlink(missing_ok=True)
+    (work / "linumert.var.bak").unlink(missing_ok=True)
     link = work / "qtvcp" / "screens" / "linumert"
     link.unlink()
     link.symlink_to(ROOT / "screens" / "linumert")  # tokeny i ikony z repozytorium
@@ -80,7 +84,8 @@ def test_shell_selftest_in_gui(tmp_path) -> None:
     data = _run_selftest(tmp_path, out)
     steps = {s["step"]: s for s in data["steps"]}
     assert data["errors"] == [], data["errors"]
-    assert len(steps) == 36 and all(s["ok"] for s in steps.values())
+    assert len(steps) == 42 and all(s["ok"] for s in steps.values())
+    assert steps["04b_widok_bazowania"]["page"] == "homing"
     assert steps["01_start"]["page"] == "start"  # po uruchomieniu widok Start
     assert steps["04b_start_gotowosc"]["ready"] == "wymaga działań"  # brak programu
     assert steps["04c_maszyna"]["page"] == "machine"
@@ -98,7 +103,12 @@ def test_shell_selftest_in_gui(tmp_path) -> None:
     assert steps["10_wstrzymany"]["interp"] == "paused"
     assert steps["12_stop"]["interp"] == "idle"
     assert steps["14_jog_x_plus"]["x"] > steps["13_tryb_jog"]["x"] + 1.0
-    assert steps["15_obszar_program"]["page"] == "classic"
+    assert steps["14a_symulacja"]["page"] == "sim"
+    assert steps["14b_mdi_symulacji"]["x"] == 110.0
+    assert steps["14c_wrzeciono_m3"]["spindle_dir"] == 1
+    assert steps["14d_wrzeciono_m5"]["spindle_dir"] == 0
+    assert steps["14e_wymiana_m6"]["tool"] == 1
+    assert steps["15_obszar_program"]["page"] == "program"
     assert steps["18_maszyna"]["page"] == "machine"
     assert steps["19_diagnostyka"]["diag_joints"] == 3  # symulator: bez napędów Plant
     assert steps["19_diagnostyka"]["diag_drives"] == 0

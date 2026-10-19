@@ -74,6 +74,8 @@ class Alarm:
 class ShellState:
     """Stan maszyny widziany przez nakładkę (wypełniany sygnałami STATUS QtVCP)."""
 
+    specialist: bool = False
+    virtual: bool = False
     estop: bool = True
     machine_on: bool = False
     mode: str = "manual"
@@ -127,15 +129,16 @@ def gates(s: ShellState) -> dict[str, Gate]:
         "home": need(ready and idle, first or "program w toku"),
         "jog": need(ready and idle and s.mode == "manual", first or (
             "program w toku" if not idle else "przełącz na JOG")),
-        "mdi": need(ready and idle and s.all_homed, first or (
+        "mdi": need(ready and idle and s.all_homed and not s.specialist, first or (
+            "tryb specjalisty: tylko JOG" if s.specialist else
             "program w toku" if not idle else "najpierw bazowanie")),
-        "start": need(ready and s.all_homed and bool(s.file) and s.interp != "run", first or (
+        "start": need(ready and not s.specialist and s.all_homed and bool(s.file) and s.interp != "run", first or (
             "najpierw bazowanie" if not s.all_homed else "brak programu" if not s.file
             else "program w toku")),
         "pause": need(s.running, "brak programu w toku"),
         # Stop (abort) jest bezpieczny w każdym trybie: dostępny zawsze przy włączonej maszynie.
         "stop": need(ready, first),
-        "step": need(ready and s.all_homed and bool(s.file), first or (
+        "step": need(ready and not s.specialist and s.all_homed and bool(s.file), first or (
             "najpierw bazowanie" if not s.all_homed else "brak programu")),
     }
     return g
@@ -165,7 +168,7 @@ def plant_pill(s: ShellState) -> tuple[str, str]:
 
 
 def fmt_pos(value: float, metric: bool = True) -> str:
-    return f"{value:.3f}" if metric else f"{value:.4f}"
+    return f"{value:.4f}"
 
 
 def fmt_int(value: float) -> str:
@@ -208,6 +211,8 @@ def shell_qss(tokens: dict) -> str:
 QFrame#lrtRail {{ background: {c['bg2']}; border: none; border-right: 1px solid {c['line']}; }}
 QFrame#lrtTopBar, QFrame#lrtBottomBar {{ border-left: none; border-right: none; }}
 QWidget#lrtClassic {{ border: none; }}
+#lrtRoot QCheckBox {{ color: {c['fg']}; background: transparent; }}
+#lrtRoot QScrollArea {{ border: none; background: {c['bg']}; }}
 #lrtRoot QLabel {{ color: {c['fg']}; background: transparent; }}
 QLabel#lrtLogo {{ font-size: 20px; font-weight: 700; }}
 QLabel#lrtMuted, QLabel#lrtCardTitle {{ color: {c['fg2']}; font-size: {small}px; }}

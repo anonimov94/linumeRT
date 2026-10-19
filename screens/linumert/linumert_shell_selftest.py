@@ -90,6 +90,7 @@ class SelfTest(QtCore.QObject):
             ("03_maszyna_wl", lambda: self._start_action("power"), lambda: s.machine_on, 5),
             ("04_bazowanie", lambda: self._start_action("homed"), lambda: s.all_homed, 90),
             ("04b_start_gotowosc", None, None, 1),
+            ("04b_widok_bazowania", lambda: click(self.shell.areas["homing"]), None, 1),
             ("04c_maszyna", lambda: click(self.shell.areas["machine"]), None, 1),
             ("05_tryb_mdi", lambda: click(b["mode_mdi"]), lambda: s.mode == "mdi", 5),
             ("06_mdi_g0", self._mdi, lambda: self._settled(), 30),
@@ -103,6 +104,13 @@ class SelfTest(QtCore.QObject):
             ("12_stop", lambda: click(b["stop"]), lambda: s.interp == "idle", 10),
             ("13_tryb_jog", lambda: click(b["mode_manual"]), lambda: s.mode == "manual", 5),
             ("14_jog_x_plus", self._jog, lambda: self._settled(), 10),
+            ("14a_symulacja", lambda: click(self.shell.areas["sim"]), None, 1),
+            ("14b_mdi_symulacji", self._sim_mdi, self._settled, 15),
+            ("14c_wrzeciono_m3", lambda: click(self.shell.operator_panels[1].buttons["m3"]),
+             lambda: s.spindle_dir == 1, 5),
+            ("14d_wrzeciono_m5", lambda: click(self.shell.operator_panels[1].buttons["m5"]),
+             lambda: s.spindle_dir == 0, 5),
+            ("14e_wymiana_m6", self._sim_m6, lambda: s.tool == 1, 10),
             ("15_obszar_program", lambda: click(self.shell.areas["program"]), None, 1),
             ("16_obszar_narzedzia", lambda: click(self.shell.areas["tools"]), None, 1),
             ("17_obszar_qtdragon", lambda: click(self.shell.areas["classic"]), None, 1),
@@ -138,6 +146,22 @@ class SelfTest(QtCore.QObject):
         if not widget.isEnabled():
             raise RuntimeError(f"przycisk „{widget.text()}” nieaktywny: {widget.toolTip()}")
         widget.click()
+
+    def _sim_mdi(self):
+        panel = self.shell.operator_panels[1]
+        panel.mdi.setText("G0 X110 Y80 Z-5")
+        self._click(panel.buttons["mdi"])
+
+    def _sim_m6(self):
+        panel = self.shell.operator_panels[1]
+        panel.tool.setValue(1)
+
+        def accept():
+            box = QtWidgets.QApplication.activeModalWidget()
+            if isinstance(box, QtWidgets.QMessageBox):
+                box.button(QtWidgets.QMessageBox.Yes).click()
+        QtCore.QTimer.singleShot(100, accept)
+        self._click(panel.buttons["m6"])
 
     def _from_line(self) -> None:
         page = self.shell.production
@@ -226,6 +250,7 @@ class SelfTest(QtCore.QObject):
             "page": {v: k for k, v in self.shell.pages.items()}[self.shell.stack.currentIndex()],
             "ready": self.shell.start.lbl_ready.text(),
             "hmi_pressed": s.hmi_pressed,
+            "tool": s.tool, "spindle_dir": s.spindle_dir,
             "hmi_chain": _hal_value("lrt_hmi_bypass.out"),
             "hmi_alive": _hal_value("watchdog.ok-out"),
             "alarm": s.alarm.text if s.alarm else "",
