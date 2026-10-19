@@ -708,7 +708,7 @@ class LinumertShell(QtCore.QObject):
         self.s.alarm = model.Alarm(level, text)
         if getattr(self, "diag", None) is not None:
             self.diag.add_log(level, text)
-        self.alarm.add(level, text, source)
+        self.alarm.add(level, text, source or ("controller" if level == "err" else ""))
 
     def clear_alarm(self) -> None:
         self.reset_alarms(False)
@@ -728,6 +728,11 @@ class LinumertShell(QtCore.QObject):
             active.add("safety")
         if self.s.plant == "lost":
             active.add("plant")
+        joints = getattr(self.status.stat, "joint", ())
+        fault = any(j.get("fault") or j.get("min_hard_limit") or j.get("max_hard_limit")
+                    for j in joints)
+        if fault or self.s.estop or self.s.plant == "lost":
+            active.add("controller")
         self.alarm.active = active
 
     # ---- odświeżanie ----------------------------------------------------------------------

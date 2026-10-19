@@ -60,6 +60,13 @@ def smoke(snapshot):
     assert window.height() == 768
     assert len(shell.operator_panels) == 2
     assert shell.alarm.isVisible() and all(row.isVisible() for row in shell.alarm.rows)
+    status.stat.joint[0]["fault"] = True
+    shell.show_alarm("err", "Awaria napędu")
+    shell.reset_alarms(False)
+    assert shell.alarm.entries  # przyczyna fizycznego alarmu nadal obecna
+    status.stat.joint[0]["fault"] = False
+    shell.reset_alarms(False)
+    assert not shell.alarm.entries
     assert not action.mock_calls, action.mock_calls
     assert window.grab().save(snapshot)
     window.close()
