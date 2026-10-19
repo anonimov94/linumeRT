@@ -70,3 +70,31 @@ def test_controls_keyboard_jog_units_mdi_and_tool_change(app, monkeypatch):
     panel.refresh()
     assert not panel.buttons["jog_X1"].isEnabled()
     panel.close()
+
+
+def test_virtual_reset_requires_explicit_config_and_closed_safety(app, tmp_path, monkeypatch):
+    import linumert_shell_model as model
+    from linumert_virtual_session import VirtualSession, virtual_config
+    from PyQt5 import QtWidgets
+    ini = tmp_path / "machine.ini"
+    ini.write_text("[LINUMERT]\n")
+    assert not virtual_config(ini)
+    ini.write_text("[LINUMERT]\nVIRTUAL_MODE=1\n")
+    assert virtual_config(ini)
+    shell = SimpleNamespace(s=model.ShellState(virtual=True), action=Mock(),
+                            sim=SimpleNamespace(reset_stock=Mock(), client=Mock()),
+                            reset_alarms=Mock(), show_alarm=Mock())
+    session = VirtualSession(shell)
+    monkeypatch.setattr(QtWidgets.QMessageBox, "question", lambda *a: QtWidgets.QMessageBox.Yes)
+    session.start()
+    shell.action.reset_mock()
+    session.tick()
+    assert not shell.action.mock_calls  # otwarte safety nie włącza napędów
+    shell.s.estop = False
+    session.tick()
+    shell.action.SET_MACHINE_STATE.assert_called_once_with(True)
+    shell.s.machine_on = True
+    session.tick()
+    shell.action.SET_MACHINE_HOMING.assert_called_once_with(-1)
+    session.finish()
+    shell.sim.client.send.assert_called_with(cmd="recovery", on=False)

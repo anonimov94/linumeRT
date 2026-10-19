@@ -76,6 +76,8 @@ class Live:
         self.cmd = self.lc.command()
         self.engine = SimEngine()
         self.estop_on_event = True
+        self.virtual = ini_value(self.ini, "LINUMERT", "VIRTUAL_MODE", "0") == "1"
+        self.recovery = False
         self.latched: str | None = None  # E-STOP z symulacji: sent → off → None (po resecie)
         self.latched_at = 0.0
         self.map_file: Path | None = None
@@ -248,7 +250,10 @@ class Live:
                 if self.latched and e.stop:
                     continue  # skutki wtórne zatrzymania (wrzeciono staje w materiale)
                 emit(ev="event", **e.to_dict())
-            if self.estop_on_event and not self.latched and any(e.stop for e in events):
+            recovery = (self.virtual and self.recovery
+                        and self.stat.task_mode == self.lc.MODE_MANUAL)
+            stop = bool(self.engine._active) or any(e.stop for e in events)
+            if self.estop_on_event and not recovery and not self.latched and stop:
                 self.cmd.state(self.lc.STATE_ESTOP)
                 self.latched, self.latched_at = "sent", t0
             smap = self.engine.stock
@@ -289,6 +294,8 @@ class Live:
             self.load_machine(str(c.get("path", "")))
         elif name == "tools":
             self.reload_tools(force=True)
+        elif name == "recovery":
+            self.recovery = self.virtual and bool(c.get("on", False))
         elif name == "estop":
             self.estop_on_event = bool(c.get("on", True))
         else:

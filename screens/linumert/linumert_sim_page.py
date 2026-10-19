@@ -22,6 +22,7 @@ import numpy as np
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 import linumert_shell_pages as pages
+from linumert_operator_controls import OperatorControls
 
 try:
     import pyqtgraph.opengl as gl
@@ -329,14 +330,29 @@ class SimPage(QtWidgets.QWidget):
         lay.addWidget(self.view, 1)
         self.lbl_tool = pages._label("", "lrtMuted")
         lay.addWidget(self.lbl_tool)
-        grid.addWidget(frame, 0, 0, 4, 1)
-        grid.addWidget(self._stock_card(), 0, 1)
-        grid.addWidget(self._machine_card(), 1, 1)
-        grid.addWidget(self._load_card(), 2, 1)
-        grid.addWidget(self._events_card(), 3, 1)
+        left = QtWidgets.QWidget()
+        left_layout = QtWidgets.QVBoxLayout(left)
+        left_layout.setContentsMargins(0, 0, 0, 0)
+        left_layout.addWidget(frame, 1)
+        panel = OperatorControls(shell)
+        shell.operator_panels.append(panel)
+        left_layout.addWidget(panel)
+        self.reset_twin = QtWidgets.QPushButton("Uruchom / Reset symulacji → HOME")
+        self.reset_twin.setEnabled(shell.s.virtual)
+        self.reset_twin.setToolTip("Tylko konfiguracja VIRTUAL_MODE=1; odnawia materiał i bazuje osie")
+        self.reset_twin.clicked.connect(shell.virtual_session.start)
+        left_layout.addWidget(self.reset_twin)
+        grid.addWidget(left, 0, 0)
+        right = QtWidgets.QWidget()
+        right_layout = QtWidgets.QVBoxLayout(right)
+        for card in (self._stock_card(), self._machine_card(), self._load_card(), self._events_card()):
+            right_layout.addWidget(card)
+        scroll = QtWidgets.QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setWidget(right)
+        grid.addWidget(scroll, 0, 1)
         grid.setColumnStretch(0, 3)
         grid.setColumnStretch(1, 2)
-        grid.setRowStretch(3, 1)
 
     # ---- karty ---------------------------------------------------------------------------
     def _stock_card(self):

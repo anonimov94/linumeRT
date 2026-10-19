@@ -28,6 +28,7 @@ from qtvcp.core import Action, Info, Status
 
 from linumert_alarm_panel import AlarmPanel
 from linumert_operator_controls import OperatorControls
+from linumert_virtual_session import VirtualSession, virtual_config
 import linumert_shell_model as model
 import linumert_shell_pages as pages
 from linumert_homing_page import HomingPage
@@ -131,6 +132,9 @@ class LinumertShell(QtCore.QObject):
         self.tokens = model.load_tokens()
         self.c = self.tokens["kolory"]
         self.s = model.ShellState(axes=tuple(a.upper() for a in INFO.AVAILABLE_AXES))
+        ini = os.environ.get("INI_FILE_NAME") or getattr(INFO, "INIPATH", "")
+        self.s.virtual = bool(ini and virtual_config(ini))
+        self.virtual_session = VirtualSession(self)
         self.dro_view = "work"
         self.program_lines: list[str] = []
         self.positions = ([0.0] * 9, [0.0] * 9, [0.0] * 9)
@@ -647,6 +651,7 @@ class LinumertShell(QtCore.QObject):
         ACTION.ABORT()
         for axis in self.s.axes:
             ACTION.DO_JOG(axis, 0)
+        self.virtual_session.finish()
         self.s.specialist = enabled
         if enabled:
             ACTION.SET_MANUAL_MODE()
