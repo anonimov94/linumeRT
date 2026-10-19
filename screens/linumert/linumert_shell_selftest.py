@@ -10,7 +10,8 @@ zamyka wywołujący (okno potwierdzenia QtDragon przy zamykaniu nie blokuje test
 `tools/dev/hmi-demo.sh`.
 
 Scenariusz: zwolnienie E-STOP → maszyna WŁ. → bazowanie → MDI G0 → program w AUTO → Wstrzymaj →
-Wznów → Stop → JOG X+ → obszary szyny (QtDragon) → powrót do „Maszyna” → Diagnostyka.
+Wznów → Stop → JOG X+ → obszary szyny (QtDragon) → powrót do „Maszyna” → Diagnostyka → Produkcja
+(korekcja posuwu 80 %, start od linii 6 do końca programu, korekcja 100 %).
 """
 
 from __future__ import annotations
@@ -88,6 +89,15 @@ class SelfTest(QtCore.QObject):
             ("18_maszyna", lambda: click(self.shell.areas["machine"]), None, 1),
             ("19_diagnostyka", lambda: click(self.shell.areas["diag"]),
              lambda: self.shell.diag.joints.rowCount() >= len(s.axes), 5),
+            ("20_produkcja", lambda: click(self.shell.areas["production"]), None, 1),
+            ("21_korekcja_posuwu_80", lambda: self.shell.production.sliders["feed"][0].setValue(80),
+             lambda: round(s.feed_override * 100) == 80, 5),
+            ("22_tryb_auto", lambda: click(b["mode_auto"]), lambda: s.mode == "auto", 5),
+            ("23_start_od_linii", self._from_line,
+             lambda: s.interp == "run" and s.line >= 6, 15),
+            ("24_program_koniec", None, lambda: s.interp == "idle", 60),
+            ("25_korekcja_100", lambda: click(self._reset_feed()),
+             lambda: round(s.feed_override * 100) == 100, 5),
         ]
 
     @staticmethod
@@ -95,6 +105,17 @@ class SelfTest(QtCore.QObject):
         if not widget.isEnabled():
             raise RuntimeError(f"przycisk „{widget.text()}” nieaktywny: {widget.toolTip()}")
         widget.click()
+
+    def _from_line(self) -> None:
+        page = self.shell.production
+        page.spin_line.setValue(6)
+        page.refresh()
+        if not page.btn_from_line.isEnabled():
+            raise RuntimeError(f"start od linii nieaktywny: {page.lbl_from_line.text()}")
+        page.run_from_line(confirm=False)  # okno potwierdzenia pomija tylko samotest
+
+    def _reset_feed(self):
+        return self.shell.production.reset_buttons["feed"]
 
     def _mdi(self) -> None:
         self.shell.mdi.setText("G0 X100 Y80 Z-10")
@@ -162,6 +183,8 @@ class SelfTest(QtCore.QObject):
             "diag_joints": self.shell.diag.joints.rowCount(),
             "diag_drives": self.shell.diag.drives.rowCount(),
             "log": self.shell.diag.log.count(),
+            "feed_override": round(s.feed_override * 100),
+            "run_time": self.shell.production.lbl_time.text(),
         })
 
     def _finish(self) -> None:

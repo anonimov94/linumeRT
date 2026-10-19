@@ -273,6 +273,13 @@ QTableWidget#lrtTable, QListWidget#lrtLog {{ background: {c['bg2']}; color: {c['
 QTableWidget#lrtTable::item {{ padding: 4px 8px; border-bottom: 1px solid {c['line']}; }}
 QHeaderView::section {{ background: {c['panel']}; color: {c['fg2']}; border: 0;
     border-bottom: 1px solid {c['line2']}; padding: 6px 8px; font-size: {small}px; }}
+QSlider#lrtSlider::groove:horizontal {{ background: {c['raise']}; height: 8px; border-radius: 4px; }}
+QSlider#lrtSlider::sub-page:horizontal {{ background: {c['teal']}; border-radius: 4px; }}
+QSlider#lrtSlider::handle:horizontal {{ background: {c['fg']}; width: 24px; margin: -10px 0;
+    border-radius: 12px; }}
+QSpinBox#lrtSpin {{ background: {c['bg2']}; color: {c['fg']}; border: 1px solid {c['line2']};
+    border-radius: {btn}px; min-height: {touch}px; padding: 0 12px; font-family: {FONT_NUM};
+    font-size: 16px; }}
 QToolTip {{ background: {c['raise']}; color: {c['fg']}; border: 1px solid {c['line2']}; }}
 """
 
@@ -346,3 +353,51 @@ LINK_COUNTERS = (  # (pin lrt-net.0.*, etykieta)
     ("plant-jitter-us", "Plant: jitter [µs]"),
     ("reply-age", "Wiek odpowiedzi [cykle]"),
 )
+
+
+# ---- produkcja ------------------------------------------------------------------------------
+
+@dataclass
+class RunClock:
+    """Czas pracy programu: liczy tylko stan „run” (pauza i bezczynność nie)."""
+
+    elapsed: float = 0.0
+    since: float | None = None
+
+    def update(self, interp: str, now: float) -> None:
+        if interp == "run":
+            if self.since is None:
+                self.since = now
+        elif self.since is not None:
+            self.elapsed += now - self.since
+            self.since = None
+
+    def value(self, now: float) -> float:
+        return self.elapsed + (now - self.since if self.since is not None else 0.0)
+
+    def reset(self) -> None:
+        self.elapsed, self.since = 0.0, None
+
+
+def fmt_duration(seconds: float) -> str:
+    total = max(int(seconds), 0)
+    hours, rest = divmod(total, 3600)
+    minutes, secs = divmod(rest, 60)
+    return f"{hours}:{minutes:02d}:{secs:02d}" if hours else f"{minutes:02d}:{secs:02d}"
+
+
+def run_from_line_gate(s: ShellState, line: int) -> Gate:
+    """Start od linii: jak Cykl start, plus numer w zakresie programu."""
+    base = gates(s)["start"]
+    if not base.enabled:
+        return base
+    if s.interp != "idle":
+        return Gate(False, "program w toku")
+    if not 1 <= line <= max(s.total_lines, 1):
+        return Gate(False, f"linia poza zakresem 1–{s.total_lines}")
+    return Gate(True)
+
+
+RUN_FROM_LINE_WARNING = ("Start od linii {line} pomija wcześniejsze bloki: wybór narzędzia (M6), "
+                         "obroty wrzeciona (S/M3), chłodziwo, układ detalu i tryby G. Sprawdź, czy "
+                         "maszyna jest w stanie, jakiego wymaga linia {line}.")

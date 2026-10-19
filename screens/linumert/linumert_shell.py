@@ -38,6 +38,7 @@ NML_KINDS = {k: getattr(linuxcnc, k) for k in
 # inaczej nazwa przycisku QtDragon, którego strona pojawia się w widoku klasycznym.
 AREAS = (
     ("machine", "Maszyna", "maszyna", "page:machine"),
+    ("production", "Produkcja", "start", "page:production"),
     ("program", "Program", "program", "btn_file"),
     ("tools", "Narzędzia", "narzedzia", "btn_tool"),
     ("offsets", "Zero detalu", "zero", "btn_offsets"),
@@ -71,10 +72,15 @@ def _label(text: str = "", name: str = "", **props) -> QtWidgets.QLabel:
 
 
 def _restyle(widget: QtWidgets.QWidget, **props) -> None:
+    """Zmienia właściwości stylu; przestylowanie (kosztowne) tylko przy faktycznej zmianie."""
+    changed = False
     for key, value in props.items():
-        widget.setProperty(key, value)
-    widget.style().unpolish(widget)
-    widget.style().polish(widget)
+        if widget.property(key) != value:
+            widget.setProperty(key, value)
+            changed = True
+    if changed:
+        widget.style().unpolish(widget)
+        widget.style().polish(widget)
 
 
 def _card(title: str, right: str = "") -> tuple[QtWidgets.QFrame, QtWidgets.QVBoxLayout,
@@ -132,7 +138,10 @@ class LinumertShell(QtCore.QObject):
         lay.addWidget(classic)
         self.stack.addWidget(classic_page)
         self.diag = pages.DiagPage(self)
-        self.pages = {"machine": 0, "classic": 1, "diag": self.stack.addWidget(self.diag)}
+        self.production = pages.ProductionPage(self)
+        self.pages = {"machine": 0, "classic": 1, "diag": self.stack.addWidget(self.diag),
+                      "production": self.stack.addWidget(self.production)}
+        self.page_widgets = {"diag": self.diag, "production": self.production}
         body.addWidget(self.stack, 1)
         grid.addLayout(body, 1)
         grid.addWidget(self._bottom_bar())
@@ -523,8 +532,8 @@ class LinumertShell(QtCore.QObject):
         if target.startswith("page:"):
             page = target[5:]
             self.stack.setCurrentIndex(self.pages[page])
-            if page == "diag":
-                self.diag.refresh()
+            if page in self.page_widgets:
+                self.page_widgets[page].refresh()
             return
         self.stack.setCurrentIndex(self.pages["classic"])
         btn = getattr(self.w, target, None)
@@ -554,8 +563,9 @@ class LinumertShell(QtCore.QObject):
     # ---- odświeżanie ----------------------------------------------------------------------
     def _tick(self) -> None:
         self.lbl_clock.setText(time.strftime("%H:%M"))
-        if self.stack.currentWidget() is self.diag:
-            self.diag.refresh()
+        current = self.stack.currentWidget()
+        if current in self.page_widgets.values():
+            current.refresh()
         plant = self._plant_link()
         if plant != self.s.plant:
             self.s.plant = plant
@@ -583,6 +593,11 @@ class LinumertShell(QtCore.QObject):
 
     def refresh(self) -> None:
         s, g = self.s, model.gates(self.s)
+        production = getattr(self, "production", None)
+        if production is not None:
+            production.on_state()
+            if self.stack.currentWidget() is production:
+                production.refresh()
         for mode in model.MODES:
             btn = self.buttons[f"mode_{mode}"]
             btn.setChecked(s.mode == mode)

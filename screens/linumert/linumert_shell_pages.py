@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
-"""Widoki nakładki linumeRT poza „Maszyna”: Diagnostyka (i kolejne strony HMI_WORKFLOW).
+"""Widoki nakładki linumeRT poza „Maszyna”: Diagnostyka, Produkcja, Start (HMI_WORKFLOW).
 
 Model-Author: Claude · HMI etap 2 (2026-10-19).
 
@@ -14,11 +14,12 @@ import os
 import time
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-from qtvcp.core import Info, Status
+from qtvcp.core import Action, Info, Status
 
 import linumert_shell_model as model
 
 STATUS = Status()
+ACTION = Action()
 INFO = Info()
 
 
@@ -265,3 +266,188 @@ class DiagPage(QtWidgets.QWidget):
         for bit, cell in enumerate(self.inputs):
             on = bool(_hal(f"lrt-net.0.din-{bit:02d}", False)) if plant else False
             _restyle(cell, on="true" if on else "false")
+
+
+class ProductionPage(QtWidgets.QWidget):
+    """Produkcja: program i postęp, czas pracy, korekcje F/G0/S, opcje, start od linii."""
+
+    def __init__(self, shell):
+        super().__init__()
+        self.setObjectName("lrtPage")
+        self.shell = shell
+        self.clock = model.RunClock()
+        self._last_interp = "idle"
+        grid = QtWidgets.QGridLayout(self)
+        grid.setContentsMargins(16, 16, 16, 16)
+        grid.setSpacing(16)
+        grid.addWidget(self._program_card(), 0, 0, 2, 1)
+        grid.addWidget(self._override_card(), 0, 1)
+        grid.addWidget(self._options_card(), 1, 1)
+        grid.setColumnStretch(0, 3)
+        grid.setColumnStretch(1, 2)
+        grid.setRowStretch(1, 1)
+
+    # ---- karty ----------------------------------------------------------------------------
+    def _program_card(self) -> QtWidgets.QWidget:
+        frame, lay, self.lbl_file = card("Program", "brak programu")
+        stats = QtWidgets.QHBoxLayout()
+        self.lbl_line = _label("—", "lrtTitle")
+        self.lbl_time = _label("00:00", "lrtTitle")
+        self.lbl_pct = _label("0 %", "lrtTitle")
+        for title, value in (("Linia", self.lbl_line), ("Czas pracy", self.lbl_time),
+                             ("Postęp", self.lbl_pct)):
+            box = QtWidgets.QVBoxLayout()
+            box.addWidget(_label(title, "lrtMuted"))
+            box.addWidget(value)
+            stats.addLayout(box)
+            stats.addStretch(1)
+        lay.addLayout(stats)
+        self.bar = QtWidgets.QProgressBar()
+        self.bar.setTextVisible(False)
+        lay.addWidget(self.bar)
+        self.code = []
+        for _ in range(12):
+            row = _label("", "lrtCode", current="false")
+            row.setTextFormat(QtCore.Qt.PlainText)
+            lay.addWidget(row)
+            self.code.append(row)
+        lay.addStretch(1)
+        return frame
+
+    def _override_card(self) -> QtWidgets.QWidget:
+        frame, lay, _side = card("Korekcje", "")
+        self.sliders: dict[str, tuple[QtWidgets.QSlider, QtWidgets.QLabel]] = {}
+        self.reset_buttons: dict[str, QtWidgets.QPushButton] = {}
+        spec = (
+            ("feed", "Posuw F", 0, max(round(INFO.MAX_FEED_OVERRIDE), 100)),
+            ("rapid", "Przejazdy G0", 0, 100),
+            ("spindle", "Wrzeciono S", max(round(INFO.MIN_SPINDLE_OVERRIDE), 0),
+             max(round(INFO.MAX_SPINDLE_OVERRIDE), 100)),
+        )
+        for key, title, lo, hi in spec:
+            head = QtWidgets.QHBoxLayout()
+            head.addWidget(_label(title, "lrtMuted"))
+            head.addStretch(1)
+            value = _label("100 %", "lrtValue")
+            head.addWidget(value)
+            lay.addLayout(head)
+            row = QtWidgets.QHBoxLayout()
+            minus = QtWidgets.QPushButton("−10")
+            slider = QtWidgets.QSlider(QtCore.Qt.Horizontal)
+            slider.setObjectName("lrtSlider")
+            slider.setRange(lo, hi)
+            slider.setValue(100)
+            slider.setPageStep(10)
+            plus = QtWidgets.QPushButton("+10")
+            reset = QtWidgets.QPushButton("100 %")
+            slider.valueChanged.connect(lambda v, k=key: self.set_override(k, v))
+            minus.clicked.connect(lambda _c=False, s=slider: s.setValue(s.value() - 10))
+            plus.clicked.connect(lambda _c=False, s=slider: s.setValue(s.value() + 10))
+            reset.clicked.connect(lambda _c=False, s=slider: s.setValue(100))
+            for wdg in (minus, slider, plus, reset):
+                row.addWidget(wdg, 1 if wdg is slider else 0)
+            lay.addLayout(row)
+            self.sliders[key] = (slider, value)
+            self.reset_buttons[key] = reset
+        lay.addStretch(1)
+        return frame
+
+    def _options_card(self) -> QtWidgets.QWidget:
+        frame, lay, _side = card("Opcje programu", "")
+        row = QtWidgets.QHBoxLayout()
+        self.chk_block = QtWidgets.QPushButton("Pomijaj bloki „/”")
+        self.chk_block.setCheckable(True)
+        self.chk_block.setToolTip("Block delete: linie zaczynające się od „/” są pomijane")
+        self.chk_block.clicked.connect(lambda on: (ACTION.SET_BLOCK_DELETE_ON if on
+                                                   else ACTION.SET_BLOCK_DELETE_OFF)())
+        self.chk_m1 = QtWidgets.QPushButton("Stop opcjonalny M1")
+        self.chk_m1.setCheckable(True)
+        self.chk_m1.setToolTip("Optional stop: M1 zatrzymuje program")
+        self.chk_m1.clicked.connect(lambda on: (ACTION.SET_OPTIONAL_STOP_ON if on
+                                                else ACTION.SET_OPTIONAL_STOP_OFF)())
+        row.addWidget(self.chk_block)
+        row.addWidget(self.chk_m1)
+        row.addStretch(1)
+        lay.addLayout(row)
+        lay.addSpacing(8)
+        lay.addWidget(_label("START OD LINII", "lrtCardTitle"))
+        line = QtWidgets.QHBoxLayout()
+        self.spin_line = QtWidgets.QSpinBox()
+        self.spin_line.setObjectName("lrtSpin")
+        self.spin_line.setRange(1, 1)
+        self.btn_from_line = QtWidgets.QPushButton("Start od linii")
+        self.btn_from_line.setProperty("role", "start")
+        self.btn_from_line.clicked.connect(self.run_from_line)
+        line.addWidget(self.spin_line, 1)
+        line.addWidget(self.btn_from_line)
+        lay.addLayout(line)
+        self.lbl_from_line = _label("", "lrtMuted")
+        self.lbl_from_line.setWordWrap(True)
+        lay.addWidget(self.lbl_from_line)
+        lay.addStretch(1)
+        STATUS.connect("block-delete-changed", lambda _w, on: self.chk_block.setChecked(on))
+        STATUS.connect("optional-stop-changed", lambda _w, on: self.chk_m1.setChecked(on))
+        return frame
+
+    # ---- akcje ----------------------------------------------------------------------------
+    def set_override(self, key: str, value: int) -> None:
+        {"feed": ACTION.SET_FEED_RATE, "rapid": ACTION.SET_RAPID_RATE,
+         "spindle": ACTION.SET_SPINDLE_RATE}[key](value)
+
+    def run_from_line(self, confirm: bool = True) -> None:
+        line = self.spin_line.value()
+        gate = model.run_from_line_gate(self.shell.s, line)
+        if not gate.enabled:
+            self.shell.show_alarm("warn", f"Niedostępne: {gate.reason}")
+            return
+        if confirm:
+            box = QtWidgets.QMessageBox(QtWidgets.QMessageBox.Warning, "Start od linii",
+                                        model.RUN_FROM_LINE_WARNING.format(line=line),
+                                        QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.Cancel,
+                                        self)
+            if box.exec_() != QtWidgets.QMessageBox.Ok:
+                return
+        ACTION.RUN(line)
+        self.shell.h.add_status(f"Start programu od linii {line}")
+
+    # ---- dane -----------------------------------------------------------------------------
+    def on_state(self) -> None:
+        """Woła powłoka przy każdej zmianie stanu (także gdy strona niewidoczna)."""
+        s, now = self.shell.s, time.monotonic()
+        if s.interp == "run" and self._last_interp == "idle":
+            self.clock.reset()
+        self.clock.update(s.interp, now)
+        self._last_interp = s.interp
+        for key, attr in (("feed", "feed_override"), ("rapid", "rapid_override"),
+                          ("spindle", "spindle_override")):
+            slider, value = self.sliders[key]
+            pct = round(getattr(s, attr) * 100)
+            if slider.value() != pct and not slider.isSliderDown():
+                slider.blockSignals(True)
+                slider.setValue(pct)
+                slider.blockSignals(False)
+            value.setText(f"{pct} %")
+
+    def refresh(self) -> None:
+        s, now = self.shell.s, time.monotonic()
+        self.lbl_file.setText(os.path.basename(s.file) or "brak programu")
+        total = max(s.total_lines, 1)
+        self.lbl_line.setText(f"{s.line} / {s.total_lines}" if s.file else "—")
+        self.lbl_time.setText(model.fmt_duration(self.clock.value(now)))
+        pct = round(100 * min(s.line, total) / total) if s.file else 0
+        self.lbl_pct.setText(f"{pct} %")
+        self.bar.setRange(0, total)
+        self.bar.setValue(min(s.line, total))
+        rows = model.program_window(self.shell.program_lines, s.line, before=3, after=8)
+        for label, row in zip(self.code, rows + [None] * len(self.code), strict=False):
+            if row is None:
+                label.setText("")
+                continue
+            n, code, current = row
+            label.setText(f"N{n:<5} {code}")
+            _restyle(label, current="true" if current else "false")
+        self.spin_line.setRange(1, max(s.total_lines, 1))
+        gate = model.run_from_line_gate(s, self.spin_line.value())
+        self.btn_from_line.setEnabled(gate.enabled)
+        self.lbl_from_line.setText(gate.reason if not gate.enabled else
+                                   "Uruchomienie wymaga potwierdzenia (pomija wcześniejsze bloki).")

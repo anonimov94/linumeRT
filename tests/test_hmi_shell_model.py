@@ -198,3 +198,32 @@ def test_link_counters_are_lrt_net_pins() -> None:
     comp = (ROOT / "hal/lrt_net.comp").read_text(encoding="utf-8")
     for pin, _label in m.LINK_COUNTERS:
         assert re.search(rf"^pin out \w+\s+{re.escape(pin)}\b", comp, re.M), pin
+
+
+# ---- produkcja --------------------------------------------------------------------------------
+
+def test_run_clock_counts_only_run() -> None:
+    clock = m.RunClock()
+    clock.update("run", 10.0)
+    clock.update("paused", 15.0)  # 5 s pracy
+    clock.update("paused", 40.0)
+    clock.update("run", 40.0)
+    assert clock.value(42.0) == pytest.approx(7.0)
+    clock.update("idle", 43.0)
+    assert clock.value(100.0) == pytest.approx(8.0)
+    clock.reset()
+    assert clock.value(100.0) == 0.0
+
+
+def test_fmt_duration() -> None:
+    assert m.fmt_duration(0) == "00:00" and m.fmt_duration(161) == "02:41"
+    assert m.fmt_duration(3725) == "1:02:05" and m.fmt_duration(-3) == "00:00"
+
+
+def test_run_from_line_gate() -> None:
+    s = ready(total_lines=12)
+    assert m.run_from_line_gate(s, 6).enabled
+    assert m.run_from_line_gate(s, 13).reason == "linia poza zakresem 1–12"
+    assert m.run_from_line_gate(ready(total_lines=12, interp="paused"), 6).reason == "program w toku"
+    assert m.run_from_line_gate(ready(total_lines=12, homed=set()), 6).reason == "najpierw bazowanie"
+    assert "pomija wcześniejsze bloki" in m.RUN_FROM_LINE_WARNING.format(line=6)
