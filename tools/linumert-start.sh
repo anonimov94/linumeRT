@@ -57,7 +57,10 @@ fi
 
 # ---- 2. repozytorium (main z GitHuba) ------------------------------------------------------------
 if [ -z "$dir" ]; then
-    here=$(cd "$(dirname "${BASH_SOURCE[0]}")" 2>/dev/null && git rev-parse --show-toplevel 2>/dev/null || true)
+    here=""
+    if src=$(cd "$(dirname "${BASH_SOURCE[0]}")" 2>/dev/null && pwd); then
+        here=$(git -C "$src" rev-parse --show-toplevel 2>/dev/null) || here=""
+    fi
     if [ -n "$here" ] && [ -f "$here/tools/linumert-start.sh" ]; then dir=$here; else dir=$HOME/linumeRT; fi
 fi
 if [ ! -d "$dir/.git" ]; then
@@ -130,7 +133,7 @@ fi
 
 # ---- 5. okno na pulpicie (X11 / Xwayland) ----------------------------------------------------------
 [ -n "${DISPLAY:-}" ] || die "brak DISPLAY: uruchom z sesji graficznej (X11 albo Wayland z Xwayland)"
-command -v xhost >/dev/null && xhost "+SI:localuser:$(id -un)" >/dev/null 2>&1 || true
+if command -v xhost >/dev/null; then xhost "+SI:localuser:$(id -un)" >/dev/null 2>&1 || true; fi
 X=(-e DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix:ro -e QT_X11_NO_MITSHM=1)
 if [ -n "${XAUTHORITY:-}" ] && [ -f "$XAUTHORITY" ]; then
     X+=(-e XAUTHORITY=/tmp/.Xauthority -v "$XAUTHORITY:/tmp/.Xauthority:ro")
