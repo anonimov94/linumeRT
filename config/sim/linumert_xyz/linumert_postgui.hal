@@ -19,3 +19,4 @@ setp axis.z.eoffset-scale 1.0
 net linumert.hmi.button         linumert.hmi-estop-ok   => lrt_hmi_ok.in-00
 net linumert.hmi.heartbeat      linumert.hmi-heartbeat  => watchdog.input-0
 net linumert.hmi.wd-enable      linumert.hmi-wd-enable  => watchdog.enable-in
+net linumert.hmi.ack            linumert.hmi-ack        => lrt_ack_edge.in

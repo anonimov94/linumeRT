@@ -42,6 +42,13 @@ M2
 """
 
 
+def _external_reset() -> None:
+    """Reset E-STOP z pominięciem ekranu (jak komenda innego programu): linuxcnc.command()."""
+    import linuxcnc
+
+    linuxcnc.command().state(linuxcnc.STATE_ESTOP_RESET)
+
+
 def _hal_value(name: str):
     try:
         import hal
@@ -119,6 +126,11 @@ class SelfTest(QtCore.QObject):
             ("29_brak_sygnalu_zycia", self.shell._hb_timer.stop, lambda: s.estop, 8),
             ("30_potwierdzenie", self._resume_heartbeat, lambda: not s.estop, 5),
             ("31_maszyna_wl", lambda: click(b["power"]), lambda: s.machine_on, 5),
+            # Przegląd Codexa P1: E-STOP z innej przyczyny (tu programowy) → reset bezpośrednią
+            # komendą LinuxCNC (inny proces niż ekran) nieskuteczny → potwierdzenie grzybem działa.
+            ("32_estop_programowy", lambda: ACTION.SET_ESTOP_STATE(True), lambda: s.estop, 5),
+            ("33_reset_komenda", _external_reset, None, 2),
+            ("34_potwierdzenie_grzybem", lambda: click(b["estop"]), lambda: not s.estop, 5),
         ]
 
     @staticmethod
@@ -239,3 +251,70 @@ def maybe_start(shell) -> SelfTest | None:
     test = SelfTest(shell, out)
     test.start()
     return test
+
+
+class ClassicSelfTest(QtCore.QObject):
+    """Samotest trybu klasycznego (LINUMERT_SHELL=0, przegląd Codexa P2): reset przyciskiem QtDragon,
+    brak sygnału życia → E-STOP, reset komendą z innego procesu nieskuteczny, wznowienie sygnału
+    życia + przycisk QtDragon → zezwolenie, bez BYPASS i bez restartu ekranu."""
+
+    def __init__(self, handler, out_dir: str):
+        super().__init__(handler.w)
+        self.h = handler
+        self.out = out_dir
+        os.makedirs(out_dir, exist_ok=True)
+        self.steps: list[dict] = []
+        self.errors: list[str] = []
+        clear = STATUS.estop_is_clear
+        btn = handler.w.action_estop
+        timer = handler._hb_timer
+        self.plan = [
+            ("c01_start", None, None, 0),
+            ("c02_reset_przyciskiem", btn.click, lambda: clear(), 5),
+            ("c03_brak_sygnalu_zycia", timer.stop, lambda: not clear(), 8),
+            ("c04_reset_komenda", lambda: (timer.start(100), _external_reset()), None, 2),
+            ("c05_reset_przyciskiem", btn.click, lambda: clear(), 5),
+        ]
+        self.index = 0
+        self.waiting = False
+        self.deadline = 0.0
+        self.timer = QtCore.QTimer(self)
+        self.timer.timeout.connect(self._tick)
+        QtCore.QTimer.singleShot(3000, lambda: self.timer.start(200))
+
+    def _tick(self) -> None:
+        now = time.monotonic()
+        name, action, check, timeout = self.plan[self.index]
+        if self.waiting:
+            ok = check() if check else now >= self.deadline
+            if not ok and now < self.deadline:
+                return
+            if check and not ok:
+                self.errors.append(f"{name}: przekroczony czas oczekiwania")
+            STATUS.stat.poll()
+            self.h.w.grab().save(os.path.join(self.out, f"{name}.png"))
+            self.steps.append({"step": name, "ok": ok if check else True,
+                               "estop": not STATUS.estop_is_clear(),
+                               "hmi_chain": _hal_value("lrt_hmi_bypass.out"),
+                               "hmi_alive": _hal_value("watchdog.ok-out"),
+                               "hmi_acked": _hal_value("lrt_hmi_ack.out")})
+            self.waiting = False
+            self.index += 1
+            if self.index >= len(self.plan):
+                self.timer.stop()
+                with open(os.path.join(self.out, "wynik.json"), "w", encoding="utf-8") as fh:
+                    json.dump({"steps": self.steps, "errors": self.errors}, fh, indent=2,
+                              ensure_ascii=False)
+            return
+        if action:
+            try:
+                action()
+            except Exception as exc:  # noqa: BLE001 - błąd kroku trafia do wyniku testu
+                self.errors.append(f"{name}: {exc}")
+        self.waiting = True
+        self.deadline = now + max(timeout, 0.6)
+
+
+def maybe_start_classic(handler) -> ClassicSelfTest | None:
+    out = os.environ.get("LINUMERT_SHELL_SELFTEST")
+    return ClassicSelfTest(handler, out) if out else None

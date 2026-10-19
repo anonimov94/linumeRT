@@ -41,7 +41,8 @@ class HandlerClass(_upstream.HandlerClass):
         # tworzone zawsze, bo łączy je postgui.
         qhal = _upstream.QHAL
         pins = {key: qhal.newpin(name, qhal.HAL_BIT, qhal.HAL_OUT) for key, name in
-                (("ok", "hmi-estop-ok"), ("hb", "hmi-heartbeat"), ("wd", "hmi-wd-enable"))}
+                (("ok", "hmi-estop-ok"), ("hb", "hmi-heartbeat"), ("wd", "hmi-wd-enable"),
+                 ("ack", "hmi-ack"))}
         if os.environ.get("LINUMERT_SHELL", "1") == "0":
             self._classic_heartbeat(pins)
         else:
@@ -56,11 +57,17 @@ class HandlerClass(_upstream.HandlerClass):
                 self._selftest = linumert_shell_selftest.maybe_start(self.shell)
 
     def _classic_heartbeat(self, pins):
-        """Tryb klasyczny (bez nakładki): HMI żyje, grzyba HMI brak; E-STOP przyciskiem QtDragon."""
+        """Tryb klasyczny (bez nakładki): HMI żyje, grzyba HMI brak; E-STOP przyciskiem QtDragon.
+
+        Każde żądanie resetu E-STOP z procesu ekranu (przycisk QtDragon, klawisz) najpierw potwierdza
+        zdarzenie (impuls hmi-ack) i ponownie uzbraja watchdog; reset z innego procesu (np. komenda
+        LinuxCNC) dalej nie zamknie łańcucha bez potwierdzenia (D35, przegląd Codexa P2).
+        """
         from PyQt5 import QtCore
 
         pins["ok"].set(True)
         pins["wd"].set(False)
+        pins["ack"].set(False)
         self._hb_state = False
 
         def beat():
@@ -71,6 +78,29 @@ class HandlerClass(_upstream.HandlerClass):
         self._hb_timer.timeout.connect(beat)
         self._hb_timer.start(100)
         QtCore.QTimer.singleShot(400, lambda: pins["wd"].set(True))
+        import linuxcnc
+
+        # Podmiana w KLASIE Action: przycisk QtDragon (ActionButton) ma własną instancję Action.
+        cls = type(_upstream.ACTION)
+        original = cls.SET_ESTOP_STATE
+
+        def set_estop_state(action, state):
+            reset = state is False or (not isinstance(state, bool)
+                                       and state == linuxcnc.STATE_ESTOP_RESET)
+            if not reset:
+                return original(action, state)
+            pins["ack"].set(True)  # zbocze: potwierdzenie zdarzenia
+            pins["wd"].set(False)
+            QtCore.QTimer.singleShot(100, lambda: (pins["wd"].set(True), pins["ack"].set(False)))
+            QtCore.QTimer.singleShot(300, lambda: original(action, False))
+            return None
+
+        cls.SET_ESTOP_STATE = set_estop_state
+        self.classic_pins = pins
+        if os.environ.get("LINUMERT_SHELL_SELFTEST"):
+            import linumert_shell_selftest
+
+            self._selftest = linumert_shell_selftest.maybe_start_classic(self)
 
     def hard_limit_tripped(self, obj, tripped, list_of_tripped):
         # QtDragon 2.9.10 zgłasza „Hard limits tripped” przy każdym sygnale, także tripped=False

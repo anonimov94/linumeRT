@@ -507,13 +507,14 @@ class LinumertShell(QtCore.QObject):
             pin.set(bool(value))
 
     def _start_mushroom(self) -> None:
-        missing = [k for k in ("ok", "hb", "wd") if not hasattr(self.hmi_pins.get(k), "set")
+        missing = [k for k in ("ok", "hb", "wd", "ack") if not hasattr(self.hmi_pins.get(k), "set")
                    or type(self.hmi_pins[k]).__name__ == "DummyPin"]
         if missing:
             self.show_alarm("err", "Grzyb E-STOP w HMI niedostępny (brak pinów HAL linumert.hmi-*): "
                                    "łańcuch E-STOP pozostaje otwarty")
         self._pin("ok", True)  # grzyb zwolniony; E-STOP i tak zatrzaśnięty do potwierdzenia
         self._pin("wd", False)
+        self._pin("ack", False)
         self._heartbeat = False
         self._hb_timer = QtCore.QTimer(self)
         self._hb_timer.timeout.connect(self._beat)
@@ -538,8 +539,9 @@ class LinumertShell(QtCore.QObject):
         """Zwolnienie grzyba = potwierdzenie E-STOP: uzbrojenie watchdoga i reset zatrzasku."""
         self.s.hmi_pressed = False
         self._pin("ok", True)
+        self._pin("ack", True)  # zbocze: potwierdzenie zdarzenia w zatrzasku HAL lrt_hmi_ack
         self._pin("wd", False)
-        QtCore.QTimer.singleShot(100, lambda: self._pin("wd", True))
+        QtCore.QTimer.singleShot(100, lambda: (self._pin("wd", True), self._pin("ack", False)))
         QtCore.QTimer.singleShot(300, lambda: ACTION.SET_ESTOP_STATE(False))
         QtCore.QTimer.singleShot(1500, self._check_acknowledge)
         if hasattr(self, "diag"):

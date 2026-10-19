@@ -2,7 +2,10 @@
 # linumeRT · grzyb E-STOP w HMI jako DODATKOWY element łańcucha E-STOP (decyzja D35).
 # Model-Author: Claude · 2026-10-19.
 #
-# Wynik: sygnał linumert.hmi.estop-ok = grzyb HMI zwolniony ∧ HMI żyje (watchdog sygnału życia),
+# Wynik: sygnał linumert.hmi.estop-ok = grzyb HMI zwolniony ∧ HMI żyje (watchdog sygnału życia)
+# ∧ E-STOP potwierdzony w HMI po ostatnim zdarzeniu (zatrzask lrt_hmi_ack: kasuje go każde wejście
+# LinuxCNC w E-STOP — zbocze opadające iocontrol.0.user-enable-out — ustawia tylko impuls
+# linumert.hmi-ack z ekranu, czyli zwolnienie grzyba; reset inną drogą nie zamknie łańcucha),
 # wchodzi SZEREGOWO do łańcucha E-STOP konfiguracji (AND z obwodem sprzętowym / emulowanym).
 # HMI może tylko ODEBRAĆ zezwolenie, nigdy go nadać; obwód sprzętowy maszyny jest nadrzędny.
 # Fail-safe: do startu ekranu piny HMI nie są podłączone (0) → łańcuch otwarty; zawieszone albo
@@ -10,20 +13,32 @@
 # → E-STOP. Watchdog po zadziałaniu wymaga ponownego uzbrojenia (zbocze linumert.hmi-wd-enable),
 # które HMI robi tylko przy potwierdzeniu grzybem.
 # [LINUMERT]HMI_ESTOP_BYPASS = 1 wyłącznie dla uruchomień BEZ ekranu (testy headless).
-# Piny ekranu łączy linumert_postgui.hal. Moduły watchdog, logic i or2 ładuje WYŁĄCZNIE ten plik
+# Piny ekranu łączy linumert_postgui.hal. Moduły watchdog, logic, or2, edge i flipflop ładuje WYŁĄCZNIE ten plik
 # (drugi loadrt tego samego modułu w HAL się nie udaje). NIEZWERYFIKOWANE NA SPRZĘCIE.
 
 loadrt watchdog num_inputs=1
-loadrt logic names=lrt_hmi_ok personality=0x102
+loadrt logic names=lrt_hmi_ok personality=0x103
 loadrt or2 names=lrt_hmi_bypass
+loadrt edge names=lrt_estop_edge,lrt_ack_edge
+loadrt flipflop names=lrt_hmi_ack
 
 addf watchdog.set-timeouts servo-thread
 addf watchdog.process servo-thread
+addf lrt_estop_edge servo-thread
+addf lrt_ack_edge servo-thread
+addf lrt_hmi_ack servo-thread
 addf lrt_hmi_ok servo-thread
 addf lrt_hmi_bypass servo-thread
 
 setp watchdog.timeout-0 [LINUMERT]HMI_HEARTBEAT_TIMEOUT
 net linumert.hmi.alive          watchdog.ok-out => lrt_hmi_ok.in-01
+# Zatrzask potwierdzenia: E-STOP (zbocze opadające user-enable-out) kasuje, impuls ack ustawia.
+setp lrt_estop_edge.in-edge 1
+setp lrt_ack_edge.in-edge 0
+net linumert.io.user-enable     iocontrol.0.user-enable-out => lrt_estop_edge.in
+net linumert.hmi.estop-event    lrt_estop_edge.out => lrt_hmi_ack.reset
+net linumert.hmi.ack-edge       lrt_ack_edge.out => lrt_hmi_ack.set
+net linumert.hmi.acked          lrt_hmi_ack.out => lrt_hmi_ok.in-02
 net linumert.hmi.chain          lrt_hmi_ok.and => lrt_hmi_bypass.in0
 setp lrt_hmi_bypass.in1 [LINUMERT]HMI_ESTOP_BYPASS
 net linumert.hmi.estop-ok       lrt_hmi_bypass.out
