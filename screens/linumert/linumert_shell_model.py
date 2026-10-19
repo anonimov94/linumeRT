@@ -211,6 +211,8 @@ def shell_qss(tokens: dict) -> str:
 QFrame#lrtRail {{ background: {c['bg2']}; border: none; border-right: 1px solid {c['line']}; }}
 QFrame#lrtTopBar, QFrame#lrtBottomBar {{ border-left: none; border-right: none; }}
 QWidget#lrtClassic {{ border: none; }}
+#lrtRoot QCheckBox {{ color: {c['fg']}; background: transparent; }}
+#lrtRoot QScrollArea {{ border: none; background: {c['bg']}; }}
 #lrtRoot QLabel {{ color: {c['fg']}; background: transparent; }}
 QLabel#lrtLogo {{ font-size: 20px; font-weight: 700; }}
 QLabel#lrtMuted, QLabel#lrtCardTitle {{ color: {c['fg2']}; font-size: {small}px; }}

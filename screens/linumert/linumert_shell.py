@@ -188,7 +188,11 @@ class LinumertShell(QtCore.QObject):
         if self.tools is not None:
             self.pages["tools"] = self.stack.addWidget(self.tools)
             self.page_widgets["tools"] = self.tools
-        body.addWidget(self.stack, 1)
+        content = QtWidgets.QScrollArea()
+        content.setWidgetResizable(True)
+        content.setFrameShape(QtWidgets.QFrame.NoFrame)
+        content.setWidget(self.stack)
+        body.addWidget(content, 1)
         grid.addLayout(body, 1)
         grid.addWidget(self._bottom_bar())
         self.w.setCentralWidget(root)

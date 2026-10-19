@@ -11,7 +11,9 @@ class AlarmPanel(QtWidgets.QFrame):
         self.active = set()
         self.setObjectName("lrtAlarm")
         layout = QtWidgets.QHBoxLayout(self)
+        layout.setContentsMargins(16, 4, 8, 4)
         rows = QtWidgets.QVBoxLayout()
+        rows.setSpacing(0)
         self.rows = [QtWidgets.QLabel("—") for _ in range(3)]
         for row in self.rows:
             row.setTextFormat(QtCore.Qt.PlainText)
