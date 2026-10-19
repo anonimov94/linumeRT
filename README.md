@@ -30,6 +30,20 @@ Każdy widok prowadzi operatora w kolejności, w jakiej naprawdę pracuje się n
 
 ![Symulacja: materiał po obróbce programu demo](docs/raporty/hmi_sym/demo_po_obrobce.png)
 
+## Obraz live USB / ISO (komputer maszyny)
+
+Gotowy system do wypalenia na pendrive: **Debian 12 + jądro PREEMPT_RT + LinuxCNC 2.9 + linumeRT**.
+Uruchom bez instalacji (tryb live: ekran linumeRT na symulatorze, „linumeRT + Plant” z wirtualną
+obrabiarką) albo zainstaluj na dysk komputera maszyny (Calamares).
+
+- Pobierz: [Releases](https://github.com/anonimov94/linumeRT/releases) (wydania `v*`) albo najnowszy
+  artefakt `linumert-iso` z [Actions → ISO live USB](https://github.com/anonimov94/linumeRT/actions/workflows/iso.yml)
+  (przycisk **Run workflow** buduje obraz na żądanie, ok. 30–60 min).
+- Sprawdź sumę: `sha256sum -c linumert-*.iso.sha256`.
+- Wypal: `sudo dd if=linumert-*.iso of=/dev/sdX bs=4M status=progress conv=fsync` albo Etcher / Ventoy.
+- Przed pracą na maszynie: test latencji (`latency-histogram`) — nie każdy komputer nadaje się do RT.
+  NIEZWERYFIKOWANE NA SPRZĘCIE.
+
 ## Szybki start (Linux z podmanem, np. EndeavourOS)
 
 Jedno polecenie pobiera `main` z GitHuba do `~/linumeRT`, instaluje `git` i `podman` (pacman/dnf/apt, z sudo),
