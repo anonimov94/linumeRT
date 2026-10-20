@@ -24,8 +24,8 @@ class DiagnosticSimulationTest(unittest.TestCase):
                     stat = SimpleNamespace(poll=Mock(), file="", actual_position=(0, 0, 0),
                                            spindle=[], motion_type=2, motion_line=1,
                                            current_line=1, tool_in_spindle=0)
-                    cnc = SimpleNamespace(stat=lambda: stat,
-                                          command=Mock(side_effect=AssertionError("command forbidden")),
+                    cnc = SimpleNamespace(stat=Mock(return_value=stat),
+                                          command=Mock(side_effect=AssertionError("no CNC commands")),
                                           error=RuntimeError)
                     live = module.Live(str(ini), None, cnc)
                     event = Event("K-305", kind, 1, 0, (0, 0, 0))
@@ -39,7 +39,7 @@ class DiagnosticSimulationTest(unittest.TestCase):
                     commands.put({"cmd": "recovery", "on": True})
                     with patch.object(module, "emit") as emit, patch.object(
                             module.time, "sleep",
-                            side_effect=lambda _: commands.put({"cmd": "quit"})):
+                            side_effect=lambda _, q=commands: q.put({"cmd": "quit"})):
                         live.run(100, commands)
                     cnc.command.assert_not_called()
                     messages = [call.kwargs for call in emit.call_args_list]
