@@ -449,3 +449,11 @@ Pełne testy i lint przez CI; NIEZWERYFIKOWANE NA SPRZĘCIE.
   narzędzie i na krok `.lnx`. Jednostki calowe przeliczane.
 - Testy: `tests/test_estimate.py` (7, w tym rs274 z pętlą `repeat`).
 - Długi: „czas pozostały” na ekranie, tabela odchyłek względem Plant w `docs/SYMULACJA.md` i strojenie modelu.
+
+## HMI — Cykle: baza narzędzi, czas, podprogramy (D36) · 2026-10-20 · Claude
+- Strona Cykle pokazuje wynik `check_steps` po każdej zmianie kroków (narzędzie z bazy strony Narzędzia; brak bazy =
+  jawny komunikat „niesprawdzone”), przycisk „Szacuj czas” (rs274 + limity INI w wątku tła, odczyt co 200 ms — GUI
+  nie staje, watchdog HMI D35) i „Podprogramy NgcGui…” (eksport `o<lrt_...>`, domyślny katalog z
+  `[RS274NGC]SUBROUTINE_PATH`, wpis z `user_macros`). Komunikaty o polach używają etykiet formularza.
+- Testy: 3 nowe w `tests/test_hmi_workflow_widgets.py` (Qt offscreen). Zrzut z prawdziwym rs274:
+  `docs/raporty/cykle/cykle_narzedzia_czas.png` (2:27 dla planowania 100×50, 2 warstwy; niezgodna średnica wykryta).

@@ -127,3 +127,5 @@ bez kopiowania kodu komponentu i bez zmian w konfiguracji fizycznej maszyny.
 
 Model-Author: Codex. Własne poprawki `linuxcnc_check.py` i testy `test_interpreter_process.py`,
 GPL-2.0-or-later, biblioteka standardowa; bez nowych zależności i kodu zewnętrznego.
+
+| Strona Cykle: baza narzędzi, czas obróbki, eksport podprogramów | kod (Python/Qt), testy, zrzut | model językowy Claude na zlecenie właściciela | 2026-10-20 | własna implementacja; zrzut widoku offscreen (Qt, tokeny), czas z rs274 LinuxCNC 2.9 RIP | GPL-2.0-or-later | ekran operatora | `screens/linumert/linumert_cycles_page.py`, `tests/test_hmi_workflow_widgets.py`, `docs/raporty/cykle/cykle_narzedzia_czas.png` |
