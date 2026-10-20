@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import os
 import re
+import shlex
 import shutil
 import subprocess
 from dataclasses import dataclass
@@ -46,9 +47,10 @@ def find_linuxcnc(root: Path | str | None = None) -> tuple[list[str], Path | Non
     systemowa (rs274 w PATH). Zwraca (prefiks polecenia powłoki, katalog konfiguracji sim)."""
     candidate = root or os.environ.get("LINUXCNC_DIR")
     if candidate:
-        base = Path(candidate)
+        base = Path(candidate).resolve()
         if (base / "scripts" / "rip-environment").exists() and (base / "bin" / "rs274").exists():
-            return ([f"source '{base}/scripts/rip-environment' >/dev/null &&"],
+            script = shlex.quote(str(base / "scripts" / "rip-environment"))
+            return ([f"source {script} >/dev/null &&"],
                     base / "configs" / "sim" / "axis")
         raise InterpreterUnavailable(f"{base}: brak scripts/rip-environment albo bin/rs274")
     if shutil.which("rs274"):
@@ -63,7 +65,8 @@ def check_with_linuxcnc(ngc: Path | str, root: Path | str | None = None,
     prefix, sim = find_linuxcnc(root)
     ngc = Path(ngc).resolve()
     options = "-i axis.ini -t sim.tbl " if sim is not None and (sim / "axis.ini").exists() else ""
-    command = " ".join(prefix + [f"rs274 {options}-n 0 '{ngc}' </dev/null"])
+    # exec keeps the timeout attached to rs274, not a shell waiting for its child.
+    command = " ".join(prefix + [f"exec rs274 {options}-n 0 {shlex.quote(str(ngc))} </dev/null"])
     try:
         run = subprocess.run(["bash", "-c", command], cwd=sim, capture_output=True, text=True,
                              timeout=timeout, check=False)
@@ -76,4 +79,6 @@ def check_with_linuxcnc(ngc: Path | str, root: Path | str | None = None,
         text = line.replace("enter choice => executing", "").strip()
         if text and not _CANON.match(line) and not text.startswith(_MENU):
             messages.append(text)
+    if run.returncode:
+        messages.append(f"interpreter zakończył się kodem {run.returncode}")
     return InterpreterResult(messages, "PROGRAM_END()" in output)

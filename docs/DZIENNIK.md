@@ -417,3 +417,11 @@ Model-Author: Codex.
 - Dodano pusty protokół odbioru toru PC: próby i pomiary niewykonane, brak deklaracji PL/SIL.
 - Pełne CI finalnego SHA do weryfikacji; autokontrola, bez niezależnego przeglądu.
 - NIEZWERYFIKOWANE NA SPRZĘCIE. Plant bez zmian zakresu.
+
+## 2026-10-20 · Granica procesu interpretera · Codex
+
+Model-Author: Codex. Część sesji 081, bez deklarowania całej sesji jako ukończonej.
+Ścieżki RIP i G-code są cytowane jako dane; exec wiąże limit czasu z procesem rs274.
+Niezerowy kod procesu blokuje sukces także po PROGRAM_END. Cztery testy bez LinuxCNC
+uruchamiają atrapę procesu (RIP/system, znaki powłoki, błąd procesu, timeout): OK.
+Pełne testy i lint przez CI; NIEZWERYFIKOWANE NA SPRZĘCIE.

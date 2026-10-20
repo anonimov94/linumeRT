@@ -142,3 +142,8 @@ Model-Author: Codex. Własna implementacja GPL-2.0-or-later z biblioteki standar
 `core/linumert/machine/hal_audit.py`, integracja deployment CLI,
 `tests/test_hal_audit_offline.py`, `tests/test_deployment_cli.py`,
 `docs/bezpieczenstwo/ODBIOR.md`. Bez nowych zależności i kodu zewnętrznego.
+
+## Kontrola procesu interpretera — 2026-10-20
+
+Model-Author: Codex. Własne poprawki `linuxcnc_check.py` i testy `test_interpreter_process.py`,
+GPL-2.0-or-later, biblioteka standardowa; bez nowych zależności i kodu zewnętrznego.

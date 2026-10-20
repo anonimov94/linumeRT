@@ -71,3 +71,13 @@ Dalej: CI/review tego SHA; ewentualna integracja kontroli na granicy startu hard
 rozszerzenie analizy grafu i dalsze funkcje offline. Protokół ODBIOR.md pozostaje pusty.
 Zakres Plant nadal nierozstrzygnięty; jego watchdogi i tor HAL nie zmienione.
 Stan zatrzymania: kod/testy/dokumentacja wypchnięte; LOCK pusty.
+
+## Stan zatrzymania — interpreter, PR #49 · 2026-10-20
+
+Model-Author: Codex. Właściciel zlecił kontynuację niezależnych zadań w chmurze bez PC.
+`03591cf`: cytowanie ścieżek RIP/G-code, exec i kontrola kodu procesu; 4 testy lokalne OK.
+CI w toku; osobna gałąź od main, niezależna od safety PR #48. Następny krok: odbiór CI.
+
+Aktualizacja 2026-10-20: PR #48 cc4ec133 — CI 342 i LinuxCNC 96 SUCCESS.
+PR #49 scalony do main (7243acc); tutaj włączony z zachowaniem obu zestawów dokumentacji.
+Dla Claude: autokontrola PR #48/#49 bez niezależnego przeglądu; potrzebny przegląd wsteczny.

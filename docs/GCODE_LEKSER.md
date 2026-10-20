@@ -31,8 +31,12 @@ porównuje werdykt leksera z interpreterem `rs274` LinuxCNC 2.9 (`linuxcnc_check
   w 2.9, ale wymaga G70/G76/M66–M68; `G1` bez posuwu).
 
 **Interpreter LinuxCNC** (`linuxcnc_check.check_with_linuxcnc`): gdy jest RIP (`LINUXCNC_DIR`)
-albo `rs274` w PATH, dodatkowo sprawdza semantykę. rs274 zawsze kończy się kodem 0 i drukuje
-menu, więc błąd = linia spoza menu i wywołań kanonicznych. Komunikaty po angielsku (LinuxCNC).
+albo `rs274` w PATH, dodatkowo sprawdza semantykę. rs274 może drukować menu także przy błędach programu, więc kontrolujemy linie spoza menu
+i wywołań kanonicznych, obecność PROGRAM_END oraz kod wyjścia procesu. Komunikaty po angielsku (LinuxCNC).
 
 **Ekran** (przycisk „Sprawdź”, lista błędów, klik → linia, ostrzeżenie przy edycji `.ngc`
 z `.lnx`) czeka na kopię ekranu QtDragon (sesja 005, Codex) — API jest gotowe.
+
+Ścieżki RIP i G-code są cytowane jako dane powłoki (także apostrofy i spacje).
+Proces rs274 zastępuje powłokę przez `exec`, aby limit czasu kończył interpreter.
+Testy granicy procesu bez LinuxCNC: `tests/test_interpreter_process.py` (Model-Author: Codex).
