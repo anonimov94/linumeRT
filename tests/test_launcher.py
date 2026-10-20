@@ -14,6 +14,8 @@ import os
 import re
 import shutil
 import subprocess
+import tempfile
+import time
 from pathlib import Path
 
 import pytest
@@ -74,8 +76,11 @@ def test_sim_run_with_fake_podman(tmp_path: Path) -> None:
     assert "LINUMERT_SHELL=1" in run
     apps = tmp_path / "home" / ".local" / "share" / "applications"
     desktop = (apps / "linumert.desktop").read_text()
-    assert f"Exec={repo}/tools/linumert-start.sh" in desktop
+    launcher = apps.parent / "linumert" / "launcher.sh"
+    assert f'Exec=bash "{launcher}" --dir "{repo}"' in desktop
+    assert launcher.read_bytes() == SCRIPT.read_bytes()
     assert (apps / "linumert-plant.desktop").read_text().count("--plant") == 1
+    assert "--classic" in (apps / "linumert-qtdragon.desktop").read_text()
     assert Path(re.search(r"^Icon=(.+)$", desktop, re.M).group(1)).exists()
     flags = subprocess.run(["git", "-C", str(repo), "ls-files", "-v", "config/plant"],
                            capture_output=True, text=True, check=True).stdout
@@ -124,3 +129,64 @@ def test_readme_documents_launcher() -> None:
         if opt in ("--help",):
             continue
         assert opt in readme or opt in text.split("set -euo")[0], opt
+
+
+def test_desktop_install_does_not_run_container_or_update(tmp_path):
+    repo = _clone(tmp_path)
+    out, calls = _run(tmp_path, repo, "--desktop")
+    assert not calls and "linumert-qtdragon.desktop" in out
+
+
+def test_existing_git_worktree_is_not_cloned_again(tmp_path):
+    repo = _clone(tmp_path)
+    work = tmp_path / "worktree"
+    subprocess.run(["git", "-C", str(repo), "worktree", "add", "--detach", str(work)],
+                   check=True, capture_output=True)
+    # Skrypt z drzewa roboczego jest kopią bieżącej wersji, niezależnie od HEAD testu.
+    shutil.copy(SCRIPT, work / "tools/linumert-start.sh")
+    assert (work / ".git").is_file()
+    _out, calls = _run(tmp_path, work, "--desktop", "--dir", str(work))
+    assert not calls
+
+
+def test_desktop_exec_passes_special_paths_as_literal_arguments(monkeypatch):
+    gi = pytest.importorskip("gi")
+    gi.require_version("Gio", "2.0")
+    from gi.repository import Gio
+
+    # Uploader artefaktów CI odrzuca nazwy z cudzysłowami; sprzątamy także po błędzie.
+    with tempfile.TemporaryDirectory(prefix="linumert-desktop-") as folder:
+        base = Path(folder) / 'folder with space $cash `ticks` "quote" 50% \\slash'
+        base.mkdir()
+        repo = _clone(base)
+        _run(base, repo, "--desktop")
+        desktop = base / "home/.local/share/applications/linumert.desktop"
+        text = desktop.read_text().replace("Terminal=true", "Terminal=false")
+        desktop.write_text(text)
+        target = base / "argv"
+        fake = base / "bin/bash"
+        fake.write_text('#!/bin/bash\nprintf "%s\\0" "$@" > "$LINUMERT_TEST_ARGV"\n')
+        fake.chmod(0o755)
+        monkeypatch.setenv("PATH", f"{base / 'bin'}:/usr/bin:/bin")
+        monkeypatch.setenv("LINUMERT_TEST_ARGV", str(target))
+        app = Gio.DesktopAppInfo.new_from_filename(str(desktop))
+        assert app is not None and app.launch([], None)
+        expected = [str(base / "home/.local/share/linumert/launcher.sh"), "--dir", str(repo)]
+        deadline = time.monotonic() + 5
+        while time.monotonic() < deadline:
+            if target.exists() and target.read_bytes().split(b"\0")[:-1] == [
+                    arg.encode() for arg in expected]:
+                break
+            time.sleep(0.01)
+        assert target.read_bytes().split(b"\0")[:-1] == [arg.encode() for arg in expected]
+
+
+@pytest.mark.skipif(shutil.which("desktop-file-validate") is None,
+                    reason="brak desktop-file-validate")
+def test_generated_desktop_entries_are_valid(tmp_path):
+    repo = _clone(tmp_path)
+    _run(tmp_path, repo, "--desktop")
+    for path in (tmp_path / "home/.local/share/applications").glob("linumert*.desktop"):
+        result = subprocess.run(["desktop-file-validate", str(path)],
+                                capture_output=True, text=True)
+        assert result.returncode == 0, result.stdout + result.stderr

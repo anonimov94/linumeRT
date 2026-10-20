@@ -13,7 +13,8 @@ Każdy widok prowadzi operatora w kolejności, w jakiej naprawdę pracuje się n
 - 🧱 **Symulacja obróbki na żywo** — materiał przygotówki ubywa tam, gdzie przejechało wirujące ostrze;
   frez palcowy, kulowy, torusowy, teowy, lizak, fazownik, wiertła, głowica, gwintownik.
 - 💥 **Kolizje i przeciążenia wykrywane bezwzględnie** — kontakt bez obrotów, G0 w materiał, szyjka i oprawka,
-  stół i dociski, przeciążenie wrzeciona i napędów osi z granic napędów → natychmiastowy E-STOP.
+  stół i dociski, przeciążenie wrzeciona i napędów osi z granic napędów; zdarzenia diagnostyczne K-3xx.
+  Proces symulacji nie wysyła E-STOP ani STO (aktualizacja właściciela 2026-10-20).
 - 🧰 **Tabela narzędzi z prawdziwą geometrią** — typ, D, korekcja ±1 mm, długość, ostrza, maks. obroty,
   kierunek skrawania M3/M4, oprawka.
 - 🧭 **Workflow operatora** — Start, Bazowanie, Zero detalu 3D (prostopadłościan, walec, rura, odlew),
@@ -90,7 +91,14 @@ To podgląd offline z zapisami tymczasowymi. [Zero detalu](docs/ZERO_DETALU.md).
 | Bezpieczeństwo | grzyb HMI w łańcuchu E-STOP (D35), watchdog ekranu, dwukanałowy E-STOP NC `lrt_estop2` | `config/hal/`, `hal/lrt_estop2.comp` |
 | Program i cykle | wybór, podgląd, sprawdzanie składni, edycja; generatory: nagłówek, narzędzie, planowanie, otwory, koniec | `screens/linumert/`, `core/linumert/generators/` |
 
+Skróty w menu aplikacji: **linumeRT**, **linumeRT + Plant**, **linumeRT — QtDragon**.
+Instalacja bez uruchamiania CNC: `bash tools/linumert-start.sh --desktop --dir ~/linumeRT`.
+Skróty wskazują wybrane repozytorium; przy uruchomieniu główna gałąź aktualizuje się przez fast-forward.
+
 ## Co dalej (najbliższe zadania)
+
+Polecenie właściciela: kończymy rozpoczęte zakresy. [Lista brakujących funkcji na 21–27.10.2026](docs/PLAN_TYGODNIA_2026-10-21.md).
+[Raport odbioru P0 i testów HMI](docs/raporty/prototypy/P0-2026-10-20.md).
 
 1. **Wznowienie obróbki (D38)** — wycofanie w pauzie, powrót po helisie i łuku stycznym z zakładką,
    bez naddatku ([`docs/design/WZNOWIENIE.md`](docs/design/WZNOWIENIE.md), sesja 031).
