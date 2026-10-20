@@ -8,7 +8,7 @@ import sys
 import types
 from pathlib import Path
 from types import SimpleNamespace
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
 import pytest
 
@@ -150,6 +150,37 @@ def test_program_editor_declines_bad_encoding_and_running(page_env, tmp_path):
     page.refresh()
     assert not page.edit_button.isEnabled()
     page.edit_program()
+    assert not action.mock_calls
+    page.close()
+
+
+def test_program_editor_confirm_discard_and_copy_preview(page_env, tmp_path):
+    from PyQt5 import QtWidgets
+
+    _home, shell, _status, action = page_env
+    module = importlib.import_module("linumert_program_page")
+    source = tmp_path / "source.ngc"
+    source.write_text("M2\n", encoding="utf-8")
+    editor = module.ProgramEditor(source, "M2\n")
+    editor.show()
+    editor.editor.insertPlainText("; edit\n")
+    with patch.object(QtWidgets.QMessageBox, "question", return_value=QtWidgets.QMessageBox.No):
+        editor.reject()
+        assert editor.isVisible()
+    with patch.object(QtWidgets.QMessageBox, "question", return_value=QtWidgets.QMessageBox.Yes):
+        editor.reject()
+        assert not editor.isVisible()
+    target = tmp_path / "copy.ngc"
+
+    def save_dialog(dialog):
+        assert dialog.save_to(target)
+        return QtWidgets.QDialog.Accepted
+
+    page = module.ProgramPage(shell)
+    assert page.show_file(source)
+    with patch.object(module.ProgramEditor, "exec_", save_dialog):
+        page.edit_button.click()
+    assert page.path == target and "M2" in page.preview.toPlainText()
     assert not action.mock_calls
     page.close()
 
