@@ -424,3 +424,10 @@ Pełne testy i lint przez CI; NIEZWERYFIKOWANE NA SPRZĘCIE.
   przebieg liczony od wczytania programu albo odnowienia materiału. Strona Symulacja: przycisk „Raport”.
 - Testy: `tests/test_sim_report.py` (7). Do sprawdzenia ręcznie: przycisk „Raport” w działającym HMI (CI: samotest GUI).
 - Długi: przycisk „Symuluj” w panelu dialogowym (045) i plikach; zrzut widoku 3D z ekranu do raportu.
+
+## 054 — Przygotówka: cel sondy Plant (p.2) · 2026-10-20 · Claude
+- Zrobione: `tools/stock_probe.py` — linia `;@STOCK` (z programu albo podana) + zero układu detalu (plik .var
+  LinuxCNC albo `--origin`) → `probe.target` w machine.yaml (układ maszyny, liczone jak w symulacji HMI,
+  `stock_bounds`); walec jako prostopadłościan opisany (Plant zna tylko box/plate). `--write` zmienia jedną linię
+  `target:` atomowo, komentarze zostają. p.1 (parser, dialog) i p.3 (K-321) były już zrobione.
+- Testy: `tests/test_stock_probe.py` (6; wynik wczytywany schematem machine.yaml). NIEZWERYFIKOWANE NA SPRZĘCIE.

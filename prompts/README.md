@@ -73,7 +73,7 @@ wymagały ekranu ani LinuxCNC. Bieżący stan i następny krok: [`docs/NASTEPNA_
 | [051](sesja-051.md) | M4 | Ścieżka z programu |  |
 | [052](sesja-052.md) | M4 | Proces symulacji |  |
 | [053](sesja-053.md) | M4 | Czas obróbki i porównanie z Plant |  |
-| [054](sesja-054.md) | M4 | Przygotówka |  |
+| [054](sesja-054.md) | M4 | Przygotówka | zrobiona (`;@STOCK`, dialog Symulacja, K-321, cel sondy Plant: `tools/stock_probe.py`) |
 | [055](sesja-055.md) | M4 | Materiał 2.5D | częściowo (symulacja HMI na żywo) |
 | [056](sesja-056.md) | M4 | Reguły kolizji lite | częściowo (na żywo; brak trybu offline) |
 | [057](sesja-057.md) | M4 | Widok 3D symulacji | częściowo (widok Symulacja, bez osi czasu) |
