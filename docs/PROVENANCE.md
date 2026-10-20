@@ -170,3 +170,9 @@ Model-Author: Codex. Własne poprawki GPL-2.0-or-later: tools/linumert-start.sh,
 tests/test_launcher.py, dokumentacja odbioru i lista tygodnia. Bez nowych zależności runtime.
 Cytowanie Exec według specyfikacji freedesktop.org (link w skrypcie); test używa opcjonalnego
 systemowego Gio, bez kopiowania jego kodu. Zachowane autorstwo pierwotnego startera Claude.
+
+## Wejście do kieszeni — 2026-10-21
+
+Model-Author: Codex. Własny kod GPL-2.0-or-later: generators/pockets.py,
+formularz Cyklów, testy golden/geometrii/materiału/Plant/rs274. Bez kodu zewnętrznego
+i nowych zależności. Plunge pozostaje zgodnym domyślnym wejściem dla istniejących programów.

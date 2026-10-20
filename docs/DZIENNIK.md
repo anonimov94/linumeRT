@@ -524,3 +524,9 @@ Brak komend ruchu przy kontroli; screenshot wykonany lokalnie. CI oraz odbiór w
 - Lokalnie 10 testów launchera PASS (w tym faktyczne uruchomienie przez Gio), shellcheck pominięty — brak narzędzia.
 - Skróty menu i Pulpit zainstalowane; uruchomienie pełnego okna na pulpicie z sandboxa niewykonane.
 - Lista braków i kryteria: docs/PLAN_TYGODNIA_2026-10-21.md; runtime sprawdzony w CI z raportu P0.
+
+## Plan 21.10 — wejście do kieszeni · Codex
+- Model-Author: Codex. Właściciel polecił kontynuować cały plan 21–27 bez czekania na odpowiedź, aż do „stop”.
+- Wybór plunge/ramp/helix, kąt i podgląd w Cyklach; wejście posuwem od poprzedniej warstwy, bez pionowego cięcia w trybie rampy/helisy.
+- Geometria wejścia mieści się w kieszeni, helisa nie zostawia centralnego rdzenia; ograniczenie liczby bloków także dla wejść.
+- Golden, kontrola kąta i Z, testy objętości i Plant; rs274 i pełna regresja wymagane w CI przed scaleniem. Autokontrola, bez niezależnego przeglądu.

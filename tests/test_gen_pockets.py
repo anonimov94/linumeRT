@@ -70,13 +70,14 @@ def test_rejects_excessive_output_and_geometry_lost_in_rounding(patch):
 @pytest.mark.parametrize("cls,dims", [(PocketRect, {"width": 40, "height": 30}),
                                      (PocketCircle, {"diameter": 40})])
 @pytest.mark.parametrize("stepover", [50, 90])
-def test_generated_path_removes_pocket_material_without_cutting_outside(cls, dims, stepover):
+@pytest.mark.parametrize("entry", ["plunge", "ramp", "helix"])
+def test_generated_path_removes_pocket_material_without_cutting_outside(cls, dims, stepover, entry):
     from linumert_sim.cutter import make_cutter
     from linumert_sim.zmap import StockMap
 
     gen = cls()
     values, issues = gen.normalize({"depth": 2, "tool_d": 8, "cx": 25, "cy": 25,
-                                    "stepover": stepover, **dims})
+                                    "stepover": stepover, "entry": entry, **dims})
     assert not issues and not gen.check(values, 0)
     stock = StockMap("BOX", 0, 0, 50, 50, -10, 0, cell=0.25)
     tool = make_cutter(1, 80, 8, "flat", {"d": 8, "l": 40, "flute_length": 20})
@@ -88,12 +89,17 @@ def test_generated_path_removes_pocket_material_without_cutting_outside(cls, dim
         words = {k: float(v) for k, v in re.findall(r"([XYZIJ])(-?[0-9.]+)", line)}
         end = tuple(words.get(k, pos[i]) for i, k in enumerate("XYZ"))
         if line.startswith("G3 "):
-            radius = -words["I"]
-            center = (pos[0] - radius, pos[1])
+            start = pos
+            center = (pos[0] + words["I"], pos[1] + words["J"])
+            radius = math.hypot(words["I"], words["J"])
+            a = math.atan2(pos[1] - center[1], pos[0] - center[0])
+            b = math.atan2(end[1] - center[1], end[0] - center[0])
+            sweep = (b - a) % math.tau or math.tau
             for i in range(1, 129):
-                angle = math.tau * i / 128
+                angle = a + sweep * i / 128
                 point = (center[0] + radius * math.cos(angle),
-                         center[1] + radius * math.sin(angle), end[2])
+                         center[1] + radius * math.sin(angle),
+                         start[2] + (end[2] - start[2]) * i / 128)
                 stock.cut(tool, pos, point)
                 pos = point
         else:
@@ -106,14 +112,15 @@ def test_generated_path_removes_pocket_material_without_cutting_outside(cls, dim
     assert stock.h[0, 0] == 0 and stock.h[100, 100] == -2
 
 
-def test_rectangular_pocket_on_stepper_plant(tmp_path):
+@pytest.mark.parametrize("entry", ["plunge", "ramp"])
+def test_rectangular_pocket_on_stepper_plant(tmp_path, entry):
     from linumert_plant.scenario import Scenario, Step, run_mock
 
     root = Path(__file__).resolve().parents[1]
     gen = PocketRect()
     values, issues = gen.normalize({"width": 16, "height": 12, "tool_d": 8, "depth": 1,
                                     "cx": 100, "cy": 100, "z_top": -20, "safe_z": -15,
-                                    "feed": 600, "plunge": 300})
+                                    "feed": 600, "plunge": 300, "entry": entry})
     assert not issues and not gen.check(values, 0)
     path = tmp_path / "pocket.ngc"
     # Atrapa Plant nie interpretuje łuków. G91.1 nie zmienia ruchów liniowych;
@@ -132,13 +139,57 @@ def test_rectangular_pocket_on_stepper_plant(tmp_path):
 @pytest.mark.linuxcnc
 @pytest.mark.parametrize("cls,dims", [(PocketRect, {"width": 40, "height": 30}),
                                      (PocketCircle, {"diameter": 40})])
-def test_complete_pocket_in_linuxcnc_from_nondefault_modes(tmp_path, cls, dims):
+@pytest.mark.parametrize("entry", ["plunge", "ramp", "helix"])
+def test_complete_pocket_in_linuxcnc_from_nondefault_modes(tmp_path, cls, dims, entry):
     from linumert.programs.linuxcnc_check import check_with_linuxcnc
 
     gen = cls()
     path = tmp_path / "pocket.ngc"
     # Odziedziczone G18/G91/G90.1/G93 nie mogą zmienić generowanej ścieżki.
-    program = gen.generate_ngc({"depth": 2, "tool_d": 8, **dims}, path.name)
+    program = gen.generate_ngc({"depth": 2, "tool_d": 8, "entry": entry, **dims}, path.name)
     path.write_text("G18 G91 G90.1 G93\n" + program)
     result = check_with_linuxcnc(path)
     assert result.ok, result.messages
+
+
+@pytest.mark.parametrize("entry", ["ramp", "helix"])
+def test_entry_has_no_vertical_cut_and_respects_slope(entry):
+    gen = PocketCircle()
+    values, issues = gen.normalize({"diameter": 30, "tool_d": 8, "depth": 3.3,
+                                    "step_down": 2, "entry": entry, "entry_angle": 2})
+    assert not issues and not gen.check(values, 0)
+    pos = (0, 0, 5)
+    reached = 0
+    for line in gen.generate(values):
+        if not line.startswith(("G0 ", "G1 ", "G3 ")):
+            continue
+        words = {k: float(v) for k, v in re.findall(r"([XYZIJ])(-?[0-9.]+)", line)}
+        end = tuple(words.get(k, pos[i]) for i, k in enumerate("XYZ"))
+        if end[2] < min(reached, pos[2]):
+            distance = (math.pi * abs(words["I"]) if line.startswith("G3 ")
+                        else math.hypot(end[0] - pos[0], end[1] - pos[1]))
+            assert distance > 0, line
+            assert (pos[2] - end[2]) / distance <= math.tan(math.radians(2)) + 0.0001
+            assert line.startswith(("G1 ", "G3 "))
+            reached = end[2]
+        pos = end
+    assert reached == -3.3
+
+
+@pytest.mark.parametrize("entry", ["ramp", "helix"])
+def test_rejects_entry_too_small_or_excessive(entry):
+    assert PocketCircle().validate({"diameter": 8.0001, "tool_d": 8, "depth": 1,
+                                    "entry": entry})
+    assert PocketCircle().validate({"diameter": 8.001, "tool_d": 8, "depth": 100,
+                                    "entry": entry, "entry_angle": 0.1})
+
+
+@pytest.mark.parametrize("cls,dims,entry", [
+    (PocketRect, {"width": 12, "height": 10}, "helix"),
+    (PocketCircle, {"diameter": 12}, "ramp"),
+])
+def test_entry_golden(cls, dims, entry):
+    program = cls().generate_ngc({"tool_d": 8, "depth": 1, "entry": entry,
+                                  "entry_angle": 5, **dims}, "pocket.ngc")
+    golden = Path(__file__).parent / "golden" / f"pocket_{entry}.ngc"
+    assert program == golden.read_text()

@@ -219,8 +219,11 @@ class CyclesPage(QtWidgets.QWidget):
         self.view2d.set_lines(gen.preview_2d(values))
         self.lbl_step.setText(f"{len(lines)} linii")
         if gen.name.startswith("pocket_"):
-            self.lbl_issue.setText("Prototyp: wejście pionowe wymaga frezu skrawającego w osi. "
-                                   "Sprawdź w symulacji. Rampa, helisa i wykańczanie: w planie.")
+            entry = {"plunge": "Wejście pionowe wymaga frezu skrawającego w osi.",
+                     "ramp": "Rampa: sprawdź dopuszczalny kąt zagłębiania frezu.",
+                     "helix": "Helisa: sprawdź dopuszczalny kąt zagłębiania frezu."}
+            self.lbl_issue.setText(entry[values["entry"]] +
+                                   " Sprawdź w symulacji. Wykańczanie: w planie.")
         self._last = (gen.name, values)
         return lines
 
