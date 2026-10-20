@@ -170,3 +170,16 @@ Model-Author: Codex. Własne poprawki GPL-2.0-or-later: tools/linumert-start.sh,
 tests/test_launcher.py, dokumentacja odbioru i lista tygodnia. Bez nowych zależności runtime.
 Cytowanie Exec według specyfikacji freedesktop.org (link w skrypcie); test używa opcjonalnego
 systemowego Gio, bez kopiowania jego kodu. Zachowane autorstwo pierwotnego startera Claude.
+
+## Wejście do kieszeni — 2026-10-21
+
+Model-Author: Codex. Własny kod GPL-2.0-or-later: generators/pockets.py,
+formularz Cyklów, testy golden/geometrii/materiału/Plant/rs274. Bez kodu zewnętrznego
+i nowych zależności. Wersja 1 pozostaje bez zmian w `pockets_v1.py`; nowe kieszenie to v2.
+
+## Geometria i wykańczanie kieszeni — 2026-10-21
+
+Model-Author: Codex. Własny algorytm konturów/offsetów, obrotu, naroży i naddatków;
+testy materiału oraz rozszerzenie istniejącej sesji LinuxCNC + Plant Claude.
+GPL-2.0-or-later, bez nowych zależności. Opis kierunku skrawania odsyła do przykładu
+Sandvik Coromant w planie tygodnia; nie kopiowano kodu ani ilustracji producenta.

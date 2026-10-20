@@ -1,8 +1,9 @@
 # Lista do wykonania: 21–27 października 2026
 
 Model-Author: Codex. Polecenie właściciela: dokończyć rozpoczęte prace; nie zaczynać nowych sesji.
-Ta lista obejmuje braki w już rozpoczętych obszarach. Poniższe zadania są zaplanowane,
-nie zostały wykonane w ramach odbioru. Nie dodano rowków, konturów ani nowych kamieni roadmapy.
+Ta lista obejmuje braki w już rozpoczętych obszarach. Właściciel następnie polecił realizować
+plan 21–27 bez czekania na odpowiedź, aż do „stop”. Stan początkowy zapisano w tabeli;
+wyniki dopisywane są poniżej po testach. Nie dodano rowków, konturów ani nowych kamieni roadmapy.
 
 | Termin | Priorytet | Funkcja i stwierdzony stan | Jak odtworzyć / dowód | Kryterium ukończenia |
 |---|---|---|---|---|
@@ -23,3 +24,20 @@ Przetestowane: HMI (42 kroki), edytor G-code, podstawowe generatory, prototypy k
 walidacja narzędzi, szacowanie czasu, eksport podprogramów, LinuxCNC/Plant/VFD i watchdogi.
 Kolizje materiału są diagnostyczne, zgodnie z poleceniem właściciela z 20.10; brak E-STOP
 z procesu symulacji jest zamierzonym zachowaniem, a nie usterką.
+
+Realizacja 21.10: wejście `plunge/ramp/helix` i kąt w formularzu, automatyczna geometria
+wewnątrz kieszeni, limit 20 000 bloków. Helisa o średnicy nie większej niż D frezu
+nie pozostawia rdzenia. Rampa i helisa schodzą od powierzchni / poprzedniej warstwy
+posuwem zagłębiania; podgląd XY pokazuje wejście. Golden, objętość, geometria i Plant
+sprawdzane automatycznie; odbiór rs274 w CI jest wymagany przed scaleniem.
+
+Realizacja 22.10: obrót prostokąta, promień naroża (0 oznacza minimalne D/2), CW/CCW,
+naddatki ścian/dna i jawne wykańczanie z oddzielnym posuwem. Bez wykańczania naddatki
+pozostają. Wykańczanie ścian jest wykonywane warstwami, a dna pełną ścieżką na końcu;
+naddatek dna nie może przekroczyć kroku Z. Kierunek dla kieszeni i M3: CCW współbieżny,
+CW przeciwbieżny ([przykład producenta narzędzi](https://videos.sandvik.coromant.com/cost-effective-solutions-for-face)).
+Test materiału sprawdza objętość, całe dno i brak cięcia poza obrysem. Odstęp prostokątnych
+pierścieni uwzględnia również przekątną, aby nie zostawiać wysp przy 90% kroku bocznego.
+CI obejmuje wykonanie obu kieszeni z helisą i wykańczaniem na LinuxCNC + Plant.
+Nowa geometria jest wersją 2 generatorów. Wersja 1 w rejestrze pozostaje niezmienna,
+a golden sprawdza G-code istniejących programów. Punkty 21–22 odbierane są wspólnym PR.

@@ -337,6 +337,11 @@ def test_cycles_page_builds_program(page_env, tmp_path, monkeypatch):
             page.inputs[name].setText(value)
         assert page.preview() and page.view2d.lines
         assert "frez" in page.lbl_issue.text() and not action.mock_calls
+        for entry in ("ramp", "helix"):
+            page.inputs["entry"].setCurrentText(entry)
+            lines = page.preview()
+            assert any(" Z-" in line and " X" in line for line in lines)
+            assert "kąt" in page.lbl_issue.text() and not action.mock_calls
     page.resize(1100, 750)
     page.show()
     module.QtWidgets.QApplication.processEvents()
