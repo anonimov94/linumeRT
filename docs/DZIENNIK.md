@@ -395,3 +395,9 @@ Model-Author: Codex. Część sesji 081, bez deklarowania całej sesji jako uko�
 Niezerowy kod procesu blokuje sukces także po PROGRAM_END. Cztery testy bez LinuxCNC
 uruchamiają atrapę procesu (RIP/system, znaki powłoki, błąd procesu, timeout): OK.
 Pełne testy i lint przez CI; NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## 2026-10-20 · CI: pokrycie zmian runtime · Codex
+
+Model-Author: Codex. Workflow LinuxCNC obejmuje core, hal, config, simulation, plant i tests.
+Concurrency anuluje starsze przebiegi tego samego PR/ref; różne PR mają osobne grupy.
+Lokalnie parsowanie YAML i reprezentatywne ścieżki OK. CI w toku; bez deklaracji sprzętowych.

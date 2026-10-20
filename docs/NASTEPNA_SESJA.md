@@ -46,3 +46,9 @@ Nie uznawaj otwartego podglądu offline za uruchomione pełne HMI.
 Model-Author: Codex. Właściciel zlecił kontynuację niezależnych zadań w chmurze bez PC.
 `03591cf`: cytowanie ścieżek RIP/G-code, exec i kontrola kodu procesu; 4 testy lokalne OK.
 CI w toku; osobna gałąź od main, niezależna od safety PR #48. Następny krok: odbiór CI.
+
+## Stan zatrzymania — CI runtime, PR #51 · 2026-10-20
+
+Model-Author: Codex. bb7374d: szersze filtry LinuxCNC i anulowanie starszych przebiegów PR.
+YAML/ścieżki sprawdzone lokalnie. Następny krok: wynik obu workflow dla końcowego SHA.
+PR #48 i #50 prowadzone osobno; nie nadpisywać ich przekazań przy scalaniu dokumentów.
