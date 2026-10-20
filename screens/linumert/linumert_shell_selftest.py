@@ -204,8 +204,8 @@ class SelfTest(QtCore.QObject):
         if getattr(self, "_jog_released_at", 0) > time.monotonic():
             return False
         STATUS.stat.poll()
-        return STATUS.stat.interp_state == 1 and abs(STATUS.stat.current_vel) < 1e-6 \
-            and STATUS.stat.inpos
+        return self.shell.s.interp == "idle" and STATUS.stat.interp_state == 1 \
+            and abs(STATUS.stat.current_vel) < 1e-6 and STATUS.stat.inpos
 
     # ---- pętla ------------------------------------------------------------------------------
     def _tick(self) -> None:
