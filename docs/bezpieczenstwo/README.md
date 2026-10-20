@@ -90,7 +90,7 @@ Dla hardware odrzuca VIRTUAL_MODE=1, HMI_ESTOP_BYPASS=1 i brak deklaracji:
 
 Piny muszą mieć różne nazwy; znane sygnały software (iocontrol, halui, HMI, watchdog HAL,
 LRT-NET) nie są akceptowane jako deklaracje fizycznego I/O. To kontrola deklaracji,
-nie dowód rodzaju, kierunku czy okablowania pinu. Nie analizuje grafu HAL.
+nie dowód rodzaju, kierunku czy okablowania pinu. Nie analizuje działania komponentów i pełnego grafu HAL.
 Nie potwierdza wykonania fizycznego resetu ani obecności urządzenia nadzoru.
 Przykład do uzupełnienia: `config/hardware/safety-contract.ini.example`.
 Nie zawiera HAL ani konfiguracji napędów; puste piny celowo powodują odmowę.
@@ -100,3 +100,28 @@ Wynik JSON zawsze ma `hardware_verified=false`; kod 2 oznacza błędną/niekompl
 ani do generatora/eksportu (sesje 061/062/070). Kolejny krok: integracja kontroli na granicy
 uruchomienia profilu hardware, kontrola rzeczywistych pinów/grafu HAL i testy odmowy startu.
 Nie zmieniamy automatycznie istniejących konfiguracji sim/Plant.
+
+## Etap 3 — audyt offline połączeń tekstowych HAL
+
+```bash
+PYTHONPATH=core python -m linumert.machine.deployment maszyna.ini --hal-from-ini
+# Albo wskazane pliki, ścieżki względem katalogu INI:
+PYTHONPATH=core python -m linumert.machine.deployment maszyna.ini --hal main.hal --hal post.hal
+```
+
+Sprawdza wszystkie powtarzane HALFILE oraz POSTGUI_HALFILE, dołączane pliki source (względem
+katalogu konfiguracji), cykle dołączeń, brakujące pliki, nierozwiązane nazwy i nieobsługiwane
+polecenia. Odrzuca Tcl i HALCMD zamiast udawać wykonanie kodu dynamicznego.
+Dla hardware wykrywa bezpośrednią pętlę user-enable-out/emc-enable-in także rozbitą na
+kilka poleceń net; wymaga bezpośredniego net monitora E-STOP do emc-enable-in, heartbeat HMI
+do deklarowanego wyjścia i obecności monitora zewnętrznego watchdoga w net.
+
+Pole declaration_complete dotyczy tylko deklaracji INI. static_hal_checked/static_hal_passed
+opisują ograniczony audyt połączeń. hardware_verified zawsze pozostaje false.
+Układ z logiką pośrednią wymaga osobnego przeglądu i może zostać odrzucony przez to narzędzie.
+Nie wykrywamy wszystkich możliwych pętli przez komponenty, kierunków pinów ani tego, co zrobi
+loadusr. Narzędzie niczego nie wykonuje i nie stanowi jeszcze obowiązkowej bramki startu CNC.
+Przykład hardware nadal jest niekompletny, bez HAL i bez zgody na uruchomienie napędów.
+
+Kolejny dokument do przygotowania bez LinuxCNC: [protokół odbioru](ODBIOR.md).
+Wszystkie próby i pomiary sprzętowe pozostają niewykonane.

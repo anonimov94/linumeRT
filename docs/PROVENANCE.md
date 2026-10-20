@@ -135,3 +135,10 @@ Model-Author: Codex. Własny kod GPL-2.0-or-later, biblioteka standardowa:
 `core/linumert/machine/deployment.py`, `tests/test_deployment_profile.py`,
 `config/hardware/safety-contract.ini.example`; test synchronizacji samotestu GUI
 `tests/test_hmi_selftest_sync.py`. Bez nowych zależności i kopiowania schematów sprzętowych.
+
+## Audyt tekstowych HAL offline — 2026-10-20
+
+Model-Author: Codex. Własna implementacja GPL-2.0-or-later z biblioteki standardowej:
+`core/linumert/machine/hal_audit.py`, integracja deployment CLI,
+`tests/test_hal_audit_offline.py`, `tests/test_deployment_cli.py`,
+`docs/bezpieczenstwo/ODBIOR.md`. Bez nowych zależności i kodu zewnętrznego.

@@ -407,3 +407,13 @@ Model-Author: Codex.
 - CI b626235: ogólne zielone; LinuxCNC 68/69, błąd synchronizacji MDI→M3; poprawka 6047a13.
 - Pełny wynik ostatniego SHA pozostaje do weryfikacji; bez lokalnego odbioru Qt/LinuxCNC.
 - Autokontrola, bez niezależnego przeglądu. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## Bezpieczeństwo — audyt HAL offline · 2026-10-20 · Codex
+- Model-Author: Codex. PR #48, po zgodzie właściciela na zadania bez LinuxCNC poza kolejnością.
+- Audyt tekstowych net/source bez wykonywania HAL, wykrycie pętli software i brakujących połączeń.
+- CLI --hal-from-ini zachowuje wszystkie HALFILE/POSTGUI_HALFILE; --hal dla wskazanych plików.
+- Wynik rozdziela deklarację i ograniczony audyt; hardware_verified=false, bez automatycznej zgody.
+- Lokalne Debian 13: 10 kolejnych unittest OK, łącznie 19 nowych testów gałęzi; bez LinuxCNC/Qt.
+- Dodano pusty protokół odbioru toru PC: próby i pomiary niewykonane, brak deklaracji PL/SIL.
+- Pełne CI finalnego SHA do weryfikacji; autokontrola, bez niezależnego przeglądu.
+- NIEZWERYFIKOWANE NA SPRZĘCIE. Plant bez zmian zakresu.

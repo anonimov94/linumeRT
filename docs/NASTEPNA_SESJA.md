@@ -61,3 +61,13 @@ Poprawka synchronizacji i regresja: 6047a13; zachowane interlocki. Lokalnie 9 no
 Dla Claude: przejrzeć PR #48; wynik CI dla finalnego SHA, potem integracja kontroli na granicy
 startu profilu hardware i analiza rzeczywistych połączeń I/O. Plant nadal czeka na określenie zakresu.
 Stan zatrzymania: krok wypchnięty; żadnej deklaracji odbioru sprzętu. LOCK pusty.
+
+### Zadania offline — 2026-10-20, Codex
+
+Właściciel: wykonywać możliwe punkty bez LinuxCNC, kolejność dowolna.
+PR #48: audyt tekstowych HAL 18b612e i CLI --hal-from-ini/--hal 2055611.
+Lokalnie 19 nowych unittest OK. Narzędzie nie uruchamia HAL, nie kwalifikuje sprzętu.
+Dalej: CI/review tego SHA; ewentualna integracja kontroli na granicy startu hardware,
+rozszerzenie analizy grafu i dalsze funkcje offline. Protokół ODBIOR.md pozostaje pusty.
+Zakres Plant nadal nierozstrzygnięty; jego watchdogi i tor HAL nie zmienione.
+Stan zatrzymania: kod/testy/dokumentacja wypchnięte; LOCK pusty.
