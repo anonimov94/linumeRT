@@ -59,6 +59,7 @@ probe:
   tip_length: 20
   target: {type: plate, min: [100, 100, -110], max: [160, 160, -100]}
 io:
-  inputs: {estop: 0, lim_x_min: 1, lim_x_max: 2, lim_y_min: 3, lim_y_max: 4, lim_z_max: 5, toolsetter: 6, probe: 7}
+  inputs: {estop: 0, lim_x_min: 1, lim_x_max: 2, lim_y_min: 3, lim_y_max: 4, lim_z_max: 5,
+           toolsetter: 6, probe: 7, lim_y_min_2: 8}
   outputs: {spindle_on: 0, coolant: 1}
   estop: {input: estop, contact: NC}

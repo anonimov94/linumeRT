@@ -22,6 +22,8 @@ from collections.abc import Callable
 from typing import Any
 
 from .base import Issue, fmt
+from .basic import FaceMill
+from .drilling import DrillHoles
 
 ToolLookup = Callable[[int], Any]
 
@@ -29,6 +31,8 @@ MILLING = ("flat", "bull", "ball", "face_mill")
 DRILLS = ("drill_118", "drill_angle")
 TAPS = ("tap",)
 DIAMETER_TOL = 0.01  # mm
+# Etykiety pól z formularzy generatorów — komunikat mówi językiem ekranu, nie nazwą parametru
+LABELS = {f.name: f.label for cls in (FaceMill, DrillHoles) for f in cls.fields}
 
 
 def _cutting_length(tool) -> float | None:
@@ -49,7 +53,7 @@ def _length_issue(step: int, tool, name: str, value: float) -> list[Issue]:
     limit = _cutting_length(tool)
     if limit is None or value <= limit + 1e-9:
         return []
-    return [Issue("P-5209", {"step": step, "tool": tool.number, "field": name,
+    return [Issue("P-5209", {"step": step, "tool": tool.number, "field": LABELS.get(name, name),
                              "value": fmt(value), "limit": fmt(limit)}, name)]
 
 
@@ -57,7 +61,7 @@ def _face_mill(step: int, v: dict[str, Any], tool, k: float) -> list[Issue]:
     issues = _type_issue(step, tool, MILLING)
     d = tool.tool_diameter()
     if d is not None and abs(v["tool_d"] * k - d) > DIAMETER_TOL:
-        issues.append(Issue("P-5208", {"step": step, "tool": tool.number, "field": "tool_d",
+        issues.append(Issue("P-5208", {"step": step, "tool": tool.number, "field": LABELS["tool_d"],
                                        "value": fmt(v["tool_d"]), "expected": f"D = {fmt(d)} mm"},
                             "tool_d"))
     return issues + _length_issue(step, tool, "step_down", v["step_down"] * k)
@@ -68,7 +72,8 @@ def _drill_holes(step: int, v: dict[str, Any], tool, k: float) -> list[Issue]:
     issues = _type_issue(step, tool, TAPS if tapping else DRILLS)
     if tapping and tool.type == "tap" and "pitch" in tool.params:
         if abs(v["pitch"] * k - tool.params["pitch"]) > 1e-6:
-            issues.append(Issue("P-5208", {"step": step, "tool": tool.number, "field": "pitch",
+            issues.append(Issue("P-5208", {"step": step, "tool": tool.number,
+                                           "field": LABELS["pitch"],
                                            "value": fmt(v["pitch"]),
                                            "expected": f"skok {fmt(tool.params['pitch'])} mm"},
                                 "pitch"))
@@ -92,7 +97,8 @@ def _spindle(step: int, v: dict[str, Any], tool) -> list[Issue]:
     return issues
 
 
-CHECKS = {"face_mill": _face_mill, "drill_holes": _drill_holes}
+CHECKS = {"face_mill": _face_mill, "drill_holes": _drill_holes,
+          "pocket_rect": _face_mill, "pocket_circle": _face_mill}
 
 
 def check_steps(steps: list[tuple[int, str, dict[str, Any]]], lookup: ToolLookup,

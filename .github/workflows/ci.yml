@@ -30,3 +30,25 @@ jobs:
         with:
           name: raporty-scenariuszy
           path: build/raporty/
+
+  # Porządki zlecone przez właściciela: tylko gałęzie w całości zawarte w main.
+  cleanup-merged-branches:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [python, plant-matrix]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Delete fully merged branches with a lease
+        shell: bash
+        run: |
+          set -euo pipefail
+          git for-each-ref --merged=HEAD --format='%(objectname) %(refname:strip=3)' \
+            refs/remotes/origin > "$RUNNER_TEMP/linumert-merged-branches"
+          while read -r sha branch; do
+            case "$branch" in main|HEAD|'') continue ;; esac
+            git push --force-with-lease="refs/heads/$branch:$sha" origin ":refs/heads/$branch"
+          done < "$RUNNER_TEMP/linumert-merged-branches"

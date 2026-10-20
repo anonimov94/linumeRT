@@ -8,7 +8,7 @@ import sys
 import types
 from pathlib import Path
 from types import SimpleNamespace
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
 import pytest
 
@@ -81,6 +81,107 @@ def test_program_bad_file_preserves_previous_preview(page_env, tmp_path):
     assert page.show_file(path)
     assert not page.show_file(tmp_path / "missing.ngc")
     assert page.path == path and "M2" in page.preview.toPlainText()
+    page.close()
+
+
+def test_program_syntax_checks_full_text_and_navigates(page_env, tmp_path):
+    _home, shell, _status, action = page_env
+    module = importlib.import_module("linumert_program_page")
+    page = module.ProgramPage(shell)
+    path = tmp_path / "bad.ngc"
+    path.write_text("; comment\n" * 2100 + "G0 X\nM2\n", encoding="utf-8")
+    assert page.show_file(path)
+    page.check_button.click()
+    assert page.issues.count() == 1
+    page.show_issue(page.issues.item(0))
+    assert page.preview.textCursor().selectedText() == "G0 X"
+    assert "2101" in page.filename.text()
+    assert not action.mock_calls
+    path.write_text("G1 X2\nM2\n", encoding="utf-8")
+    page.check_button.click()
+    assert page.issues.count() == 0  # missing feed is semantic, not a lexer error
+    assert "semantyki" in page.message.text()
+    page.close()
+
+
+def test_program_syntax_limits_and_failed_reread(page_env, tmp_path):
+    _home, shell, _status, action = page_env
+    module = importlib.import_module("linumert_program_page")
+    page = module.ProgramPage(shell)
+    path = tmp_path / "large.ngc"
+    path.write_text(";" + "a" * module.CHECK_BYTES, encoding="utf-8")
+    assert page.show_file(path)
+    page.check_button.click()
+    assert "nie został sprawdzony" in page.message.text()
+    path.unlink()
+    page.check_button.click()
+    assert "Nie można odczytać" in page.message.text()
+    assert not action.mock_calls
+    page.close()
+
+
+def test_program_editor_saves_full_copy_without_cnc(page_env, tmp_path):
+    _home, _shell, _status, action = page_env
+    module = importlib.import_module("linumert_program_editor")
+    source = tmp_path / "source.ngc"
+    text = "; line\n" * 3000 + "M2\n"
+    source.write_text(text, encoding="utf-8")
+    editor = module.ProgramEditor(source, text)
+    editor.editor.appendPlainText("; changed")
+    assert not editor.save_to(source)
+    assert source.read_text(encoding="utf-8") == text
+    target = tmp_path / "copy.ngc"
+    assert editor.save_to(target)
+    assert target.read_text(encoding="utf-8").endswith("M2\n\n; changed")
+    assert editor.saved_path == target and not action.mock_calls
+    editor.close()
+
+
+def test_program_editor_declines_bad_encoding_and_running(page_env, tmp_path):
+    _home, shell, _status, action = page_env
+    module = importlib.import_module("linumert_program_page")
+    page = module.ProgramPage(shell)
+    source = tmp_path / "broken.ngc"
+    source.write_bytes(b"\xff\nM2\n")
+    assert page.show_file(source)
+    page.edit_button.click()
+    assert "Nie można edytować" in page.message.text()
+    shell.s.interp = "run"
+    page.refresh()
+    assert not page.edit_button.isEnabled()
+    page.edit_program()
+    assert not action.mock_calls
+    page.close()
+
+
+def test_program_editor_confirm_discard_and_copy_preview(page_env, tmp_path):
+    from PyQt5 import QtWidgets
+
+    _home, shell, _status, action = page_env
+    module = importlib.import_module("linumert_program_page")
+    source = tmp_path / "source.ngc"
+    source.write_text("M2\n", encoding="utf-8")
+    editor = module.ProgramEditor(source, "M2\n")
+    editor.show()
+    editor.editor.insertPlainText("; edit\n")
+    with patch.object(QtWidgets.QMessageBox, "question", return_value=QtWidgets.QMessageBox.No):
+        editor.reject()
+        assert editor.isVisible()
+    with patch.object(QtWidgets.QMessageBox, "question", return_value=QtWidgets.QMessageBox.Yes):
+        editor.reject()
+        assert not editor.isVisible()
+    target = tmp_path / "copy.ngc"
+
+    def save_dialog(dialog):
+        assert dialog.save_to(target)
+        return QtWidgets.QDialog.Accepted
+
+    page = module.ProgramPage(shell)
+    assert page.show_file(source)
+    with patch.object(module.ProgramEditor, "exec_", save_dialog):
+        page.edit_button.click()
+    assert page.path == target and "M2" in page.preview.toPlainText()
+    assert not action.mock_calls
     page.close()
 
 
@@ -201,25 +302,23 @@ def test_zero_reads_live_and_saved_machine_offsets_without_commands(page_env, tm
 
 
 def test_program_check_and_edit(page_env, tmp_path):
-    """Sprawdź: składnia z rdzenia; Edytuj/Zapisz: plik na dysku, bez komend maszyny."""
-    pytest.importorskip("yaml")
+    """One check action and copy editing preserve the original without CNC commands."""
     _home, shell, _status, action = page_env
     module = importlib.import_module("linumert_program_page")
     page = module.ProgramPage(shell)
     path = tmp_path / "p.ngc"
     path.write_text("G21 G90\nG0 X10\nM2\n")
     page.show_file(path)
-    page.check.click()
-    assert "poprawna" in page.message.text()
-    page.edit.click()
-    assert not page.preview.isReadOnly() and not page.load.isEnabled()
-    page.preview.setPlainText("G21 G90\nG0 X10 X20 (\nM2")
+    assert page.check_program() == []
+    path.write_text("G21 G90\nG0 X10 X20 (\nM2")
     issues = page.check_program()
     assert issues and page.preview.textCursor().blockNumber() == issues[0].line - 1
-    page.preview.setPlainText("G21 G90\nG1 X5 F100\nM2")
-    page.edit.click()  # zapis
-    assert path.read_text() == "G21 G90\nG1 X5 F100\nM2\n" and page.preview.isReadOnly()
-    assert not action.mock_calls
+    editor = module.ProgramEditor(path, page.text)
+    editor.editor.setPlainText("G21 G90\nG1 X5 F100\nM2")
+    copy = tmp_path / "copy.ngc"
+    assert editor.save_to(copy)
+    assert "G1 X5" in copy.read_text() and "X20 (" in path.read_text()
+    assert page.preview.isReadOnly() and not action.mock_calls
     page.close()
 
 
@@ -231,6 +330,17 @@ def test_cycles_page_builds_program(page_env, tmp_path, monkeypatch):
     monkeypatch.delitem(sys.modules, "linumert_cycles_page", raising=False)
     module = importlib.import_module("linumert_cycles_page")
     page = module.CyclesPage(shell)
+    for cls, dimensions in ((module.pockets.PocketRect, {"width": "40", "height": "30"}),
+                            (module.pockets.PocketCircle, {"diameter": "40"})):
+        page.cmb.setCurrentIndex(page.cmb.findText(cls.title))
+        for name, value in {"tool_d": "8", "depth": "2", **dimensions}.items():
+            page.inputs[name].setText(value)
+        assert page.preview() and page.view2d.lines
+        assert "frez" in page.lbl_issue.text() and not action.mock_calls
+    page.resize(1100, 750)
+    page.show()
+    module.QtWidgets.QApplication.processEvents()
+    assert page.grab().save(str(tmp_path / "cycles-pocket.png"))
     page.cmb.setCurrentIndex(page.cmb.findText("Planowanie"))
     assert page.preview() is None and "brak wymaganego pola" in page.lbl_issue.text()
     for name, value in (("x1", "100"), ("y1", "50"), ("depth", "1"), ("tool_d", "50")):
@@ -253,3 +363,151 @@ def test_cycles_page_builds_program(page_env, tmp_path, monkeypatch):
     assert target.read_text() == text
     module.ACTION.OPEN_PROGRAM.assert_called_with(str(target))
     page.close()
+
+
+def _cycles(page_env, monkeypatch):
+    pytest.importorskip("yaml")
+    _home, shell, _status, action = page_env
+    shell.c = {"bg2": "#000000", "fg3": "#666666", "teal": "#2dd4bf"}
+    monkeypatch.delitem(sys.modules, "linumert_cycles_page", raising=False)
+    module = importlib.import_module("linumert_cycles_page")
+    return module, module.CyclesPage(shell), shell
+
+
+def _face_step(page, tool_d="10"):
+    page.cmb.setCurrentIndex(page.cmb.findText("Wymiana narzędzia"))
+    page.inputs["tool"].setText("1")
+    page.add_step()
+    page.cmb.setCurrentIndex(page.cmb.findText("Planowanie"))
+    for name, value in (("x1", "100"), ("y1", "50"), ("depth", "1"), ("tool_d", tool_d)):
+        page.inputs[name].setText(value)
+    page.add_step()
+
+
+def test_cycles_steps_checked_with_tool_db(page_env, monkeypatch):
+    """Cykle (Model-Author: Claude, sesja 040): kroki porównane z bazą narzędzi w GUI."""
+    from linumert.tools.db import Tool
+
+    module, page, shell = _cycles(page_env, monkeypatch)
+    shell.tools = None
+    _face_step(page)
+    assert "niedostępna" in page.lbl_tools.text()
+    tool = Tool(1, 1, "flat", params={"d": 10.0, "l": 40.0, "flute_length": 20.0})
+    shell.tools = SimpleNamespace(_open=lambda: True, db=SimpleNamespace(get={1: tool}.get))
+    page.pop_step()
+    page.add_step()
+    assert "zgodne z bazą" in page.lbl_tools.text()
+    page.pop_step()
+    page.inputs["tool_d"].setText("12")
+    page.add_step()
+    text = page.lbl_tools.text()
+    assert "Średnica narzędzia = 12 nie zgadza" in text and "T1" in text
+    assert len(page.check_tools()) == 1 and page.text().count("M2") == 1
+    page.close()
+
+
+def test_cycles_estimate_runs_off_gui_thread(page_env, monkeypatch, tmp_path):
+    """Cykle (Model-Author: Claude, sesja 053): czas obróbki z wątku tła, GUI nie stoi."""
+    import linumert.programs.estimate as estimate
+
+    module, page, _shell = _cycles(page_env, monkeypatch)
+    page.estimate()
+    assert "Brak kroków" in page.lbl_time.text()
+    _face_step(page)
+    monkeypatch.setenv("INI_FILE_NAME", str(tmp_path / "m.ini"))
+    seen = {}
+
+    def fake(path, ini):
+        seen["text"], seen["ini"] = Path(path).read_text(), ini
+        return estimate.Estimate(total=125.4, rapid=5, feed=110.4, tool_change=10)
+
+    monkeypatch.setattr(estimate, "estimate_ngc", fake)
+    page.estimate()
+    assert "Liczenie" in page.lbl_time.text()
+    page._job[0].result(timeout=5)
+    page._poll_estimate()
+    assert "2:05" in page.lbl_time.text() and "wymiany 0:10" in page.lbl_time.text()
+    assert seen["text"] == page.text() and seen["ini"].endswith("m.ini")
+    monkeypatch.setattr(estimate, "estimate_ngc", lambda *a: (_ for _ in ()).throw(
+        estimate.InterpreterUnavailable("brak rs274")))
+    page.estimate()
+    page._job[0].exception(timeout=5)
+    page._poll_estimate()
+    assert "niedostępny: brak rs274" in page.lbl_time.text()
+    page.close()
+
+
+def test_cycles_export_subroutines_to_ini_dir(page_env, monkeypatch, tmp_path):
+    """Cykle (Model-Author: Claude, sesja 048): eksport o<lrt_...> do katalogu z INI."""
+    module, page, _shell = _cycles(page_env, monkeypatch)
+    ini = tmp_path / "cfg" / "m.ini"
+    ini.parent.mkdir()
+    ini.write_text("[RS274NGC]\nSUBROUTINE_PATH = ../macros:../nc_files/user_macros\n")
+    monkeypatch.setenv("INI_FILE_NAME", str(ini))
+    assert page.subroutine_dir() == str(tmp_path / "nc_files" / "user_macros")
+    monkeypatch.setattr(module.QtWidgets.QFileDialog, "getExistingDirectory",
+                        staticmethod(lambda *a, **k: a[2]))
+    paths = page.export_subroutines()
+    assert [Path(p).name for p in paths] == ["lrt_face_mill.ngc", "lrt_drill_grid.ngc",
+                                             "lrt_drill_circle.ngc"]
+    assert "Zapisano 3 podprogramy" in page.lbl_issue.text()
+    page.close()
+
+
+def test_cycles_estimate_does_not_publish_stale_program_time(page_env, monkeypatch, tmp_path):
+    import threading
+
+    import linumert.programs.estimate as estimate
+
+    _module, page, _shell = _cycles(page_env, monkeypatch)
+    _face_step(page)
+    monkeypatch.setenv("INI_FILE_NAME", str(tmp_path / "m.ini"))
+    release = threading.Event()
+
+    def calculate(*_args):
+        assert release.wait(5)
+        return estimate.Estimate(total=125)
+
+    monkeypatch.setattr(estimate, "estimate_ngc", calculate)
+    page.estimate()
+    future, path, _revision = page._job
+    try:
+        page.pop_step()
+    finally:
+        release.set()
+    future.result(timeout=5)
+    page._poll_estimate()
+    assert "Program zmieniony" in page.lbl_time.text()
+    assert not Path(path).exists()
+    page._poll_estimate()  # zaległy tick timera po odebraniu wyniku
+    page.close()
+
+
+def test_cycles_close_cleans_pending_estimate_file(page_env, monkeypatch, tmp_path):
+    import threading
+
+    import linumert.programs.estimate as estimate
+
+    _module, page, _shell = _cycles(page_env, monkeypatch)
+    _face_step(page)
+    monkeypatch.setenv("INI_FILE_NAME", str(tmp_path / "m.ini"))
+    started, release, finished = (threading.Event() for _ in range(3))
+
+    def calculate(path, _ini):
+        started.set()
+        assert release.wait(5)
+        assert Path(path).is_file()
+        return estimate.Estimate(total=1)
+
+    monkeypatch.setattr(estimate, "estimate_ngc", calculate)
+    page.estimate()
+    future, path, _revision = page._job
+    try:
+        assert started.wait(5)
+        page.close()
+        assert Path(path).exists()
+        future.add_done_callback(lambda _future: finished.set())
+    finally:
+        release.set()
+    future.result(timeout=5)
+    assert finished.wait(5) and not Path(path).exists()

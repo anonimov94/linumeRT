@@ -399,6 +399,36 @@ Model-Author: Codex.
 - E-STOP dwukanałowy NC (zalecenie właściciela): `hal/lrt_estop2.comp` + model `core/linumert/diag/estop2.py` — oba kanały zamknięte = ok; rozbieżność > 0,1 s = błąd zatrzaśnięty; kasowanie: test obwodu (oba otwarte → oba zamknięte) + Reset. Plant: `io.inputs.estop_b` (bit 15) = kopia kanału A, awaria `estop_channel` (kanał B zablokowany). Konfiguracja Plant: łańcuch przez `lrt_estop2`; ekran podaje przyczynę „rozbieżność kanałów”. Testy: model, `halrun`, Plant. NIEZWERYFIKOWANE NA SPRZĘCIE.
 - D38 (PROPOZYCJA, wznowienie z helisą i łukiem) w sesji 031; stan częściowy sesji 040, 042, 055–059 w `prompts/README.md`.
 
+## Bezpieczeństwo — audyt i rozdział symulacji od toru PC · 2026-10-20 · Codex
+- Model-Author: Codex. PR #48, gałąź codex/safety-separation; założenia właściciela w CLAUDE/DECYZJE.
+- Audyt main 7ad6313: poprawki względem Groka, niezależny nadzór PC, bez przypisywania kategorii/PL.
+- Proces symulacji bez kanału komend LinuxCNC; kolizje/przeciążenia nadal raportowane; komunikat diagnostyczny.
+- Zastąpiony test obejścia geometrii testem braku możliwości przywrócenia sterowania; e2e oczekuje diagnostyki.
+- Testy lokalne Debian 13: 3 unittest (w tym 6 wariantów zdarzeń/profilu) i compileall OK; bez Qt/LinuxCNC.
+- Debian 12 i pełny LinuxCNC: CI PR, nie deklaruję lokalnego odbioru GUI ani sprzętu.
+- Zakres Plant oczekuje doprecyzowania; jego łańcuch, watchdogi i testy usterek zachowane.
+- Autokontrola, bez niezależnego przeglądu. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## Bezpieczeństwo — profile i kontrola deklaracji · 2026-10-20 · Codex
+- Model-Author: Codex. PR #48; jawne sim/plant/hardware, CLI bez uruchamiania CNC.
+- Hardware wymaga monitorów E-STOP/nadzoru PC, heartbeat, resetu fizycznego i zakazu autorestartu.
+- Odrzucane: bypass, virtual, sygnały software w rolach I/O, powtarzane deklaracje; hardware_verified=false.
+- Przykład celowo niekompletny, bez połączeń HAL; kontrola nie jest jeszcze bramką startu/eksportu.
+- Testy lokalne Debian 13: 5 unittest profili + 1 synchronizacji HMI; poprzednie 3 diagnostyki OK.
+- CI b626235: ogólne zielone; LinuxCNC 68/69, błąd synchronizacji MDI→M3; poprawka 6047a13.
+- Pełny wynik ostatniego SHA pozostaje do weryfikacji; bez lokalnego odbioru Qt/LinuxCNC.
+- Autokontrola, bez niezależnego przeglądu. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## Bezpieczeństwo — audyt HAL offline · 2026-10-20 · Codex
+- Model-Author: Codex. PR #48, po zgodzie właściciela na zadania bez LinuxCNC poza kolejnością.
+- Audyt tekstowych net/source bez wykonywania HAL, wykrycie pętli software i brakujących połączeń.
+- CLI --hal-from-ini zachowuje wszystkie HALFILE/POSTGUI_HALFILE; --hal dla wskazanych plików.
+- Wynik rozdziela deklarację i ograniczony audyt; hardware_verified=false, bez automatycznej zgody.
+- Lokalne Debian 13: 10 kolejnych unittest OK, łącznie 19 nowych testów gałęzi; bez LinuxCNC/Qt.
+- Dodano pusty protokół odbioru toru PC: próby i pomiary niewykonane, brak deklaracji PL/SIL.
+- Pełne CI finalnego SHA do weryfikacji; autokontrola, bez niezależnego przeglądu.
+- NIEZWERYFIKOWANE NA SPRZĘCIE. Plant bez zmian zakresu.
+
 ## 2026-10-20 · Granica procesu interpretera · Codex
 
 Model-Author: Codex. Część sesji 081, bez deklarowania całej sesji jako ukończonej.
@@ -456,3 +486,34 @@ Pełne testy i lint przez CI; NIEZWERYFIKOWANE NA SPRZĘCIE.
 Model-Author: Codex. Run 113 ujawnił BadWindow i pozostawiony proces przed testami Plant.
 Obsługa znikającego okna i zakończenie procesu w finally, także przy błędzie X11.
 Trzy testy regresji offline OK; pełna weryfikacja w CI. Wynik nieudanego shutdown nadal jest błędem.
+
+## 2026-10-20 · Program: kontrola składni w GUI · Codex
+
+Model-Author: Codex. Przycisk Sprawdź składnię, lista z kodami alarmów i przejście do linii.
+Kontrola ponownie czyta plik, obejmuje tekst poza pierwszymi 2000 liniami; limit 64 KiB,
+lista do 100 błędów. Komunikat odróżnia składnię od semantyki i ruchu LinuxCNC.
+Cztery funkcje testowe Program uruchomione na rzeczywistym Qt offscreen w chmurze: OK.
+Brak komend ruchu przy kontroli; screenshot wykonany lokalnie. CI oraz odbiór w pełnym HMI pozostają.
+
+## HMI — Cykle: baza narzędzi, czas, podprogramy (D36) · 2026-10-20 · Claude
+- Strona Cykle pokazuje wynik `check_steps` po każdej zmianie kroków (narzędzie z bazy strony Narzędzia; brak bazy =
+  jawny komunikat „niesprawdzone”), przycisk „Szacuj czas” (rs274 + limity INI w wątku tła, odczyt co 200 ms — GUI
+  nie staje, watchdog HMI D35) i „Podprogramy NgcGui…” (eksport `o<lrt_...>`, domyślny katalog z
+  `[RS274NGC]SUBROUTINE_PATH`, wpis z `user_macros`). Komunikaty o polach używają etykiet formularza.
+- Testy: 3 nowe w `tests/test_hmi_workflow_widgets.py` (Qt offscreen). Zrzut z prawdziwym rs274:
+  `docs/raporty/cykle/cykle_narzedzia_czas.png` (2:27 dla planowania 100×50, 2 warstwy; niezgodna średnica wykryta).
+
+## Odbiór rozpoczętych gałęzi — 2026-10-20 · Codex
+- Model-Author: Codex. PR #56 łączy #48/#50/#54/#55; historia każdego PR zachowana.
+- Odzyskano niescalony 7a71581 Claude: Cykle/narzędzia/czas/NgcGui; autokontrola, bez niezależnego przeglądu.
+- Poprawiono nieaktualny wynik czasu po edycji kroków i sprzątanie pliku interpretera przy zamknięciu.
+- Kieszenie: test usuwania materiału, router krokowy Plant, rs274 i rzeczywisty widget Qt.
+- Szablon routera: brakujący drugi czujnik bazy Y; pierwotna usterka odtworzona testem i usunięta.
+- Starszy D33 z codex/hmi-01 miał kolidującą numerację; zachowana historia i treść zasad bez nadpisania obecnego D33.
+- Pełny lokalny pytest: 816 PASS; 13 błędów testów sieci to EPERM sandboxa; wiążące testy Debian/LinuxCNC w CI.
+
+## 026 — Odbiór automatyczny P0/G1 · 2026-10-20 · Codex
+- Model-Author: Codex. Kod 4ca3f57: pełny runner Debian 12/LinuxCNC PASS, 81 testów CNC i 42 kroki HMI.
+- Ogólne CI: 823 PASS; C: 108 PASS, sanitizery Debian PASS; scenariusze 9 + matrix 5 PASS, REQ bez błędów.
+- Raport: docs/raporty/prototypy/P0-2026-10-20.md; MACIERZ zielona dla 21 bieżących REQ, REQ-VD-06 nadal planowane.
+- Odbiór ręczny i sprzęt oddzielnie w G1.md; sesja 041 pozostaje częściowa. Autokontrola, bez niezależnego przeglądu.

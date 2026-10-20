@@ -5,7 +5,7 @@ Model-Author: Claude · 2026-10-19 (symulacja HMI).
 
 Wejście: kolejne próbki stanu maszyny (`Sample`: pozycja nosa wrzeciona w G53, narzędzie,
 obroty ze znakiem, rodzaj ruchu, linia programu). Wyjście: zdarzenia (`Event`) z kodem K-3xx.
-Reguły (każda kolizja i przeciążenie = `stop`, proces na żywo wywołuje E-STOP):
+Reguły (kolizja i przeciążenie = wskazanie modelu `stop`, bez komend do LinuxCNC):
 - kontakt z materiałem bez obrotów (K-301), w złym kierunku obrotów (K-308),
   ruchem szybkim G0 (K-302);
 - część nietnąca (szyjka, oprawka, wrzeciono) w materiale (K-303);
