@@ -387,3 +387,11 @@ Specjalista nie omija fizycznego safety ani limitów. Testy wykryły i poprawion
 przeciążenia po zatrzymaniu wrzeciona oraz brak sygnałów kontraktu HAL wymiany wirtualnej.
 Samotest GUI rozszerzony do 42 kroków; pełne CI w toku. Dokumentacja i README ujednolicone.
 Model-Author: Codex.
+
+## 2026-10-20 · Granica procesu interpretera · Codex
+
+Model-Author: Codex. Część sesji 081, bez deklarowania całej sesji jako ukończonej.
+Ścieżki RIP i G-code są cytowane jako dane; exec wiąże limit czasu z procesem rs274.
+Niezerowy kod procesu blokuje sukces także po PROGRAM_END. Cztery testy bez LinuxCNC
+uruchamiają atrapę procesu (RIP/system, znaki powłoki, błąd procesu, timeout): OK.
+Pełne testy i lint przez CI; NIEZWERYFIKOWANE NA SPRZĘCIE.
