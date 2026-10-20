@@ -21,8 +21,17 @@ packaging/install.sh.
 1. Sprawdzenie systemu, venv /opt/linumert, instalacja ekranu do ścieżki QtVCP, halcompile komponentów, przykładowe konfiguracje, bez nadpisywania konfiguracji użytkownika.
 2. update.sh z kopią i rollbackiem, uninstall.sh, MANIFEST.json.
 3. Test idempotencji w kontenerze Debian 12.
+4. **Obraz live USB / ISO do instalacji (polecenie właściciela, 2026-10-19)**: Debian 12 + jądro PREEMPT_RT +
+   LinuxCNC 2.9 (pakiety linuxcnc.org) + linumeRT z `install.sh`, budowany `live-build` w GitHub Actions
+   (job ręczny i przy tagu wydania). Tryb live (próba bez instalacji, symulator + Plant od razu) i instalator
+   na dysk komputera maszyny. Wynik: `linumert-<wersja>-amd64.iso` jako artefakt / zasób wydania
+   (limit 2 GB na plik — w razie potrzeby obraz bez dokumentacji i z kompresją xz), suma SHA-256,
+   instrukcja wypalenia (`dd`, Etcher / Ventoy). Po pierwszym starcie: test latencji (`latency-histogram`)
+   i ostrzeżenie, gdy komputer nie nadaje się do RT. Laptop dewelopera (EndeavourOS) bez zmian:
+   tam instalatorem jest `tools/linumert-start.sh` (podman).
 
 ## Kryteria akceptacji
+- [ ] ISO startuje w QEMU (BIOS i UEFI) do pulpitu z ekranem linumeRT na symulatorze; instalator kończy się na dysku wirtualnym
 - [ ] dwukrotna instalacja nie psuje
 - [ ] `make lint test` przechodzi (oraz `make test-c` / `make test-linuxcnc`, jeśli dotyczy i są dostępne)
 - [ ] `tests/test_ip_guard.py` przechodzi; nowe zasoby w `docs/PROVENANCE.md`

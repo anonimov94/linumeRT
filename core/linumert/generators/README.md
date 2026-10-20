@@ -9,6 +9,10 @@ wbudowane (nagłówek, koniec, narzędzie, planowanie, kieszenie, wiercenie, row
   Zgodność: `is_valid(params) -> bool`, `generate_ngc(params, filename) -> str`.
 - `registry.py`: `GeneratorRegistry` — nazwa + wersja → klasa; kompilator bierze dokładnie wersję
   zapisaną w kroku (P-5011, gdy jej brak), więc stary program daje ten sam G-code.
+- `tooling.py`: `check_steps()` — kroki programu z bazą narzędzi: `tool_change` ustala narzędzie,
+  kolejne kroki sprawdzają typ (P-5207), średnicę i skok (P-5208), długość ostrza / wysokość
+  głowicy (P-5209), obroty i kierunek (P-5210, P-5211), brak narzędzia w bazie (P-5206).
+  Kompilator: `compile_program(..., tools=ToolDB(...).get)`; bez `tools` nic nie jest sprawdzane.
 
 Zasady: wyłącznie tekst G-code LinuxCNC; podprogramy `o<nazwa> call`; bez M98/M99 i bez M2/M30
 (koniec dopisuje kompilator); wynik zależy tylko od parametrów i wersji.

@@ -28,6 +28,7 @@ from pathlib import Path
 
 from linumert.generators.base import Issue
 from linumert.generators.registry import DEFAULT_REGISTRY, GeneratorRegistry
+from linumert.generators.tooling import ToolLookup, check_steps
 
 from .lnx import SCHEMA_VERSION, LnxProgram, atomic_write, load_lnx
 from .stock import format_stock_line
@@ -67,11 +68,15 @@ def _check_output(lines: list[str], step: int) -> list[Issue]:
 
 
 def compile_program(program: LnxProgram, registry: GeneratorRegistry | None = None,
-                    source: str | None = None) -> str:
-    """Program → tekst `.ngc` (CompileError przy dowolnym błędzie)."""
+                    source: str | None = None, tools: ToolLookup | None = None) -> str:
+    """Program → tekst `.ngc` (CompileError przy dowolnym błędzie).
+
+    `tools` (np. `ToolDB.get`): kroki sprawdzane dodatkowo z bazą narzędzi (P-5206…P-5211).
+    """
     registry = registry or DEFAULT_REGISTRY
     issues: list[Issue] = []
     body: list[str] = []
+    checked: list[tuple[int, str, dict]] = []
     for number, step in enumerate(program.steps, start=1):
         label = f"krok {number}: {step.generator} v{step.version}"
         if step.comment:
@@ -90,6 +95,7 @@ def compile_program(program: LnxProgram, registry: GeneratorRegistry | None = No
         if problems:
             issues += problems
             continue
+        checked.append((number, step.generator, values))
         lines = generator.generate(values)
         problems = _check_output(lines, number)
         if problems:
@@ -97,6 +103,8 @@ def compile_program(program: LnxProgram, registry: GeneratorRegistry | None = No
             continue
         body.append(_comment(label))
         body += lines
+    if tools is not None:
+        issues += check_steps(checked, tools, program.units)
     if issues:
         raise CompileError(issues)
     head = [_comment(f"linumeRT: program {program.name}")]
@@ -111,13 +119,14 @@ def compile_program(program: LnxProgram, registry: GeneratorRegistry | None = No
 
 
 def compile_file(lnx_path: Path | str, ngc_path: Path | str | None = None,
-                 registry: GeneratorRegistry | None = None) -> Path:
+                 registry: GeneratorRegistry | None = None,
+                 tools: ToolLookup | None = None) -> Path:
     """Kompiluje plik `.lnx` i zapisuje `.ngc` atomowo (domyślnie obok, z rozszerzeniem .ngc).
 
     Przy błędzie (LnxError albo CompileError) istniejący `.ngc` zostaje nietknięty.
     """
     lnx_path = Path(lnx_path)
     program = load_lnx(lnx_path)
-    text = compile_program(program, registry, source=lnx_path.name)
+    text = compile_program(program, registry, source=lnx_path.name, tools=tools)
     target = Path(ngc_path) if ngc_path is not None else lnx_path.with_suffix(".ngc")
     return atomic_write(target, text)

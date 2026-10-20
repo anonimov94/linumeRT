@@ -5,7 +5,6 @@ from pathlib import Path
 
 from PyQt5 import QtWidgets
 
-from linumert.programs.files import save_new_program
 
 
 class ProgramEditor(QtWidgets.QDialog):
@@ -51,12 +50,14 @@ class ProgramEditor(QtWidgets.QDialog):
 
     def save_to(self, path):
         try:
+            from linumert.programs.files import save_new_program
+
             save_new_program(path, self.editor.toPlainText())
         except FileExistsError:
             self.note.setText(
                 "Plik już istnieje. Wybierz nową nazwę — oryginał pozostaje bez zmian.")
             return False
-        except (OSError, ValueError) as exc:
+        except (OSError, ValueError, ImportError) as exc:
             self.note.setText(f"Nie zapisano kopii: {exc}")
             return False
         self.saved_path = path

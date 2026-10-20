@@ -111,7 +111,7 @@ def session(tmp_path_factory):
     plant_yaml.write_text(yaml.safe_dump(plant), encoding="utf-8")
     (work / "driver.py").write_text(DRIVER, encoding="utf-8")
     report = work / "report.json"
-    with installed_modules(root, work, ("lrt_net", "lrt_cia402")), \
+    with installed_modules(root, work, ("lrt_net", "lrt_cia402", "lrt_estop2")), \
             plant_server(plant_yaml, PORT, "--report", str(report)):
         env = {**os.environ, "PATH": f"{cfg}:{os.environ.get('PATH', '')}"}
         cnc = start_linuxcnc(root, ini, env)

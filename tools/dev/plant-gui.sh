@@ -33,8 +33,8 @@ exec podman run --rm -i "${TTY[@]}" --userns=keep-id --security-opt label=disabl
 set -e
 source /home/rip/.cache/linuxcnc-2.9/scripts/rip-environment >/dev/null
 make -s -C plant/core shared >/dev/null
-T=$(mktemp -d); cp hal/lrt_net.comp hal/lrt_net_proto.h hal/lrt_cia402.comp "$T"/
-( cd "$T" && halcompile --install lrt_net.comp >/dev/null && halcompile --install lrt_cia402.comp >/dev/null )
+T=$(mktemp -d); cp hal/lrt_net.comp hal/lrt_net_proto.h hal/lrt_cia402.comp hal/lrt_estop2.comp "$T"/
+( cd "$T" && halcompile --install lrt_net.comp >/dev/null && halcompile --install lrt_cia402.comp >/dev/null && halcompile --install lrt_estop2.comp >/dev/null )
 PY=/home/rip/venv/bin/python
 [ -x $PY ] || { python3 -m venv --system-site-packages /home/rip/venv && $PY -m pip install -q -e ".[dev]"; }
 PYTHONPATH=/work/core:/work/plant/server $PY -m linumert_plant serve --plant '"$CFG/$PLANT_YAML"' \

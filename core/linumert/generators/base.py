@@ -72,7 +72,9 @@ def fmt(value: float, decimals: int = 4) -> str:
     """Liczba dla G-code: zapis stały, bez wykładnika i zbędnych zer, bez „-0”."""
     if not math.isfinite(value):
         raise ValueError(f"wartość nieskończona albo NaN w G-code: {value!r}")
-    text = f"{value:.{decimals}f}".rstrip("0").rstrip(".")
+    text = f"{value:.{decimals}f}"
+    if "." in text:  # bez części ułamkowej (decimals = 0) zer nie obcinamy: 8000, nie 8
+        text = text.rstrip("0").rstrip(".")
     return "0" if text in ("-0", "", "-") else text
 
 

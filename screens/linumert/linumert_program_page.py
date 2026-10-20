@@ -1,14 +1,16 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
-"""Wybór i podgląd programu bez uruchamiania ruchu. Model-Author: Codex."""
+"""Program: podgląd, składnia i edycja kopii bez uruchamiania ruchu.
+
+Model-Author: Codex; integracja sprawdzania Claude (2026-10-19).
+"""
 
 import os
+import sys
 from pathlib import Path
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 from qtvcp.core import Action, Info
 
-from linumert.programs.files import read_editable
-from linumert.programs.lexer import check
 from linumert_program_editor import ProgramEditor
 from linumert_shell_pages import _label, card
 
@@ -17,6 +19,20 @@ MAX_BYTES = 8 * 1024 * 1024
 PREVIEW_LINES = 2000
 CHECK_BYTES = 64 * 1024
 MAX_ISSUES = 100
+
+_ROOT = os.path.normpath(os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", ".."))
+
+
+def _checker():
+    """Lekser G-code z rdzenia (pyyaml); None, gdy rdzeń niedostępny w tym interpreterze."""
+    core = os.path.join(_ROOT, "core")
+    if core not in sys.path:
+        sys.path.insert(0, core)
+    try:
+        from linumert.programs.lexer import check
+    except Exception:  # noqa: BLE001 - przycisk zostaje wyłączony z wyjaśnieniem
+        return None
+    return check
 
 
 class ProgramPage(QtWidgets.QWidget):
@@ -102,8 +118,13 @@ class ProgramPage(QtWidgets.QWidget):
         if self.path is None or self.shell.s.running:
             return
         try:
+            core = os.path.join(_ROOT, "core")
+            if core not in sys.path:
+                sys.path.insert(0, core)
+            from linumert.programs.files import read_editable
+
             text = read_editable(self.path)
-        except (OSError, ValueError) as exc:
+        except (OSError, ValueError, ImportError) as exc:
             self.message.setText(f"Nie można edytować programu: {exc}")
             return
         editor = ProgramEditor(self.path, text, self)
@@ -117,6 +138,10 @@ class ProgramPage(QtWidgets.QWidget):
         if len(self.text.encode("utf-8")) > CHECK_BYTES:
             self.message.setText("Kontrola w tym widoku: do 64 KiB. Plik nie został sprawdzony.")
             return
+        check = _checker()
+        if check is None:
+            self.message.setText("Sprawdzanie niedostępne: brak rdzenia linumert (pyyaml).")
+            return []
         try:
             issues = check(self.text)
         except (ValueError, RecursionError) as exc:
@@ -133,6 +158,10 @@ class ProgramPage(QtWidgets.QWidget):
             result += f" Lista pokazuje pierwsze {MAX_ISSUES}."
         self.message.setText(
             result + " Kontrola składni nie sprawdza ruchu ani semantyki LinuxCNC.")
+
+        if issues:
+            self.show_issue(self.issues.item(0))
+        return issues
 
     def show_issue(self, item):
         line, col = item.data(QtCore.Qt.UserRole)

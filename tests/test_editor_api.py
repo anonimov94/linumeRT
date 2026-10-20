@@ -142,7 +142,8 @@ def test_drive_templates_clone_and_diff(env) -> None:  # REQ-VD-03
 def test_faults_tab_api(env) -> None:
     server, client, _path, _lib = env()
     cat = client.get("/api/faults").json()
-    assert len(cat["catalog"]) == 8 and cat["drives"]["drv_x"]
+    kinds = [f["kind"] for f in cat["catalog"]]
+    assert len(kinds) == 9 and "estop_channel" in kinds and cat["drives"]["drv_x"]
     assert client.post("/api/faults/estop", json={}).status_code == 200
     assert [f["kind"] for f in client.get("/api/faults").json()["active"]] == ["estop"]
     assert client.post("/api/faults/estop/clear", json={}).status_code == 200
