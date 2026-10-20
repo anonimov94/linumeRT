@@ -53,7 +53,8 @@ class ProgramEditor(QtWidgets.QDialog):
         try:
             save_new_program(path, self.editor.toPlainText())
         except FileExistsError:
-            self.note.setText("Plik już istnieje. Wybierz nową nazwę — oryginał pozostaje bez zmian.")
+            self.note.setText(
+                "Plik już istnieje. Wybierz nową nazwę — oryginał pozostaje bez zmian.")
             return False
         except (OSError, ValueError) as exc:
             self.note.setText(f"Nie zapisano kopii: {exc}")

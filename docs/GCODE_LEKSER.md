@@ -31,8 +31,8 @@ porównuje werdykt leksera z interpreterem `rs274` LinuxCNC 2.9 (`linuxcnc_check
   w 2.9, ale wymaga G70/G76/M66–M68; `G1` bez posuwu).
 
 **Interpreter LinuxCNC** (`linuxcnc_check.check_with_linuxcnc`): gdy jest RIP (`LINUXCNC_DIR`)
-albo `rs274` w PATH, dodatkowo sprawdza semantykę. rs274 zawsze kończy się kodem 0 i drukuje
-menu, więc błąd = linia spoza menu i wywołań kanonicznych. Komunikaty po angielsku (LinuxCNC).
+albo `rs274` w PATH, dodatkowo sprawdza semantykę. rs274 może drukować menu także przy błędach programu, więc kontrolujemy linie spoza menu
+i wywołań kanonicznych, obecność PROGRAM_END oraz kod wyjścia procesu. Komunikaty po angielsku (LinuxCNC).
 
 **Ekran — Program** (Model-Author: Codex): wybierz plik, naciśnij „Sprawdź składnię”.
 Lista podaje kod P-51xx, linię i kolumnę; kliknięcie przenosi podgląd do wskazanej linii,
@@ -41,4 +41,11 @@ Kontrola działa bez LinuxCNC, dla plików do 64 KiB; pokazuje do 100 błędów 
 Większy plik pozostaje dostępny do podglądu/wczytania, ale otrzymuje komunikat „nie sprawdzony”.
 Brak błędów składni nie oznacza poprawnej semantyki ani sprawdzenia ruchu.
 Kontrola niczego nie uruchamia i nie jest warunkiem dopuszczenia maszyny do ruchu.
-Edycja i zapisywanie programu oraz kontrola semantyki w GUI pozostają kolejnymi etapami.
+„Edytuj kopię…” otwiera pełny tekst do 256 KiB. Edytor wymaga poprawnego UTF-8.
+„Zapisz nową kopię…” tworzy nowy plik; istniejący plik lub dowiązanie nie jest zastępowane.
+Po zapisie kopia trafia do podglądu. Wczytanie jej do LinuxCNC wymaga osobnego przycisku.
+Zamknięcie niezapisanych zmian wymaga potwierdzenia. Przy źródle .lnx widnieje ostrzeżenie,
+że kopia G-code nie aktualizuje modelu .lnx. Kontrola semantyki w GUI pozostaje kolejnym etapem.
+
+Ścieżki RIP i G-code są cytowane jako dane powłoki; exec wiąże timeout z procesem rs274.
+Testy granicy procesu: `tests/test_interpreter_process.py` (Model-Author: Codex).

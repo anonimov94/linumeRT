@@ -131,7 +131,8 @@ class ProgramPage(QtWidgets.QWidget):
         result = f"Błędy składni: {len(issues)}." if issues else "Nie wykryto błędów składni."
         if len(issues) > MAX_ISSUES:
             result += f" Lista pokazuje pierwsze {MAX_ISSUES}."
-        self.message.setText(result + " Kontrola składni nie sprawdza ruchu ani semantyki LinuxCNC.")
+        self.message.setText(
+            result + " Kontrola składni nie sprawdza ruchu ani semantyki LinuxCNC.")
 
     def show_issue(self, item):
         line, col = item.data(QtCore.Qt.UserRole)

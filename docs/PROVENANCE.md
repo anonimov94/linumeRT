@@ -126,3 +126,12 @@ bez kopiowania kodu komponentu i bez zmian w konfiguracji fizycznej maszyny.
 Model-Author: Codex. Własna integracja istniejącego leksera, lista i nawigacja Qt,
 `linumert_program_page.py`, testy `test_hmi_workflow_widgets.py`; GPL-2.0-or-later.
 Bez nowych zależności ani zewnętrznych zasobów.
+
+## Kontrola procesu interpretera — 2026-10-20
+
+Model-Author: Codex. Własne poprawki `linuxcnc_check.py` i testy `test_interpreter_process.py`,
+GPL-2.0-or-later, biblioteka standardowa; bez nowych zależności i kodu zewnętrznego.
+
+Edytor Program (Codex, 2026-10-20): własny kod GPL-2.0-or-later,
+`core/linumert/programs/files.py`, `linumert_program_editor.py`, `test_program_files.py`.
+Biblioteka standardowa i istniejący Qt; bez nowych zależności.

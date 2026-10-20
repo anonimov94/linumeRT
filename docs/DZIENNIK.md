@@ -395,3 +395,18 @@ Kontrola ponownie czyta plik, obejmuje tekst poza pierwszymi 2000 liniami; limit
 lista do 100 błędów. Komunikat odróżnia składnię od semantyki i ruchu LinuxCNC.
 Cztery funkcje testowe Program uruchomione na rzeczywistym Qt offscreen w chmurze: OK.
 Brak komend ruchu przy kontroli; screenshot wykonany lokalnie. CI oraz odbiór w pełnym HMI pozostają.
+
+## 2026-10-20 · Granica procesu interpretera · Codex
+
+Model-Author: Codex. Część sesji 081, bez deklarowania całej sesji jako ukończonej.
+Ścieżki RIP i G-code są cytowane jako dane; exec wiąże limit czasu z procesem rs274.
+Niezerowy kod procesu blokuje sukces także po PROGRAM_END. Cztery testy bez LinuxCNC
+uruchamiają atrapę procesu (RIP/system, znaki powłoki, błąd procesu, timeout): OK.
+Pełne testy i lint przez CI; NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## 2026-10-20 · Program: edycja i zapis kopii · Codex
+
+Model-Author: Codex. Edytor pełnego tekstu do 256 KiB, zapis nowej kopii, ostrzeżenie .lnx.
+Atomowe opublikowanie przez link bez nadpisania istniejącego pliku/dowiązania; UTF-8 ścisłe.
+Testy lokalne: 4 zapisu + 6 funkcji widoku na Qt offscreen OK; bez komend LinuxCNC.
+Zamknięcie niezapisanych zmian wymaga potwierdzenia; wczytanie kopii to osobny przycisk.

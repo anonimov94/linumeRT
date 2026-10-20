@@ -47,3 +47,13 @@ Model-Author: Codex. `6beec3d`: kontrola składni w GUI bez LinuxCNC, lista i na
 Cztery funkcje testowe widoku Program na rzeczywistym Qt offscreen OK; screenshot obejrzany.
 Limit 64 KiB/100 wyników jawny w GUI. CI w toku. Następny etap: edycja/zapis programu.
 Osobne PR: #48 safety/symulacja; #49 granica procesu rs274. Wszystkie wymagają zakończenia CI.
+
+## Stan zatrzymania — interpreter, PR #49 · 2026-10-20
+
+Model-Author: Codex. Właściciel zlecił kontynuację niezależnych zadań w chmurze bez PC.
+`03591cf`: cytowanie ścieżek RIP/G-code, exec i kontrola kodu procesu; 4 testy lokalne OK.
+CI w toku; osobna gałąź od main, niezależna od safety PR #48. Następny krok: odbiór CI.
+
+Aktualizacja PR #50: 90cea5f — edycja pełnego pliku i zapis nowej kopii (do 256 KiB).
+4 testy plików + 6 funkcji widoku Qt offscreen OK. CI w toku. PR #49 scalony, main włączony.
+Dalej: odbiór CI, kontrola niezapisanych zmian i integracja pełnego HMI. LinuxCNC lokalnie brak.
