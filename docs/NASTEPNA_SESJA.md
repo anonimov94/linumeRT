@@ -40,3 +40,9 @@ Nie uznawaj otwartego podglądu offline za uruchomione pełne HMI.
 2. Edycja i sprawdzanie G-code w widoku Program; tłumaczenia i pozostałe widoki workflow.
 3. Weryfikacja fizycznej maszyny, safety/STO i napędów pozostaje osobnym zadaniem właściciela.
 4. Pozostały plan sesji i bramki: `prompts/README.md`, `docs/raporty/G0.md`.
+
+## Stan zatrzymania — interpreter, PR #49 · 2026-10-20
+
+Model-Author: Codex. Właściciel zlecił kontynuację niezależnych zadań w chmurze bez PC.
+`03591cf`: cytowanie ścieżek RIP/G-code, exec i kontrola kodu procesu; 4 testy lokalne OK.
+CI w toku; osobna gałąź od main, niezależna od safety PR #48. Następny krok: odbiór CI.
