@@ -9,7 +9,7 @@ kroku. Kroki składają się w program; „Zapisz” zapisuje .ngc (koniec progr
 (typ, średnica, długość ostrza, obroty; sesja 040), „Szacuj czas” liczy czas obróbki z rs274
 i limitów INI w wątku tła (sesja 053; GUI nie może stanąć — watchdog HMI, D35), „Podprogramy
 NgcGui…” eksportuje `o<lrt_...>` do katalogu z SUBROUTINE_PATH (sesja 048).
-Wersja częściowa: brak plików .lnx i edycji kroków (sesje 045–047).
+Model-Author: Codex · 2026-10-21: pliki .lnx i edycja wybranego kroku (plan 23.10).
 """
 
 from __future__ import annotations
@@ -20,18 +20,20 @@ import sys
 import tempfile
 from concurrent.futures import ThreadPoolExecutor
 
-from PyQt5 import QtCore, QtGui, QtWidgets
-from qtvcp.core import Action
-
 import linumert_shell_pages as pages
 from linumert_sim_page import ROOT
+from PyQt5 import QtCore, QtGui, QtWidgets
+from qtvcp.core import Action
 
 for _p in (os.path.join(ROOT, "core"),):
     if _p not in sys.path:
         sys.path.insert(0, _p)
 
 from linumert.generators import basic, drilling, pockets, subroutines  # noqa: E402
+from linumert.generators.registry import GeneratorRegistry  # noqa: E402
 from linumert.generators.tooling import check_steps  # noqa: E402
+from linumert.programs.compiler import CompileError, compile_program  # noqa: E402
+from linumert.programs.lnx import LnxError, LnxProgram, Step, load_lnx, save_lnx  # noqa: E402
 
 ACTION = Action()
 GENERATORS = (basic.Header, basic.ToolChange, basic.FaceMill, drilling.DrillHoles,
@@ -82,7 +84,12 @@ class CyclesPage(QtWidgets.QWidget):
         super().__init__()
         self.setObjectName("lrtPage")
         self.shell = shell
-        self.steps: list[tuple[str, dict, list[str]]] = []  # (generator, parametry, linie)
+        self.program = LnxProgram(name="Program z cykli")
+        self.registry = GeneratorRegistry()
+        for group in (basic, drilling, pockets):
+            group.register(self.registry)
+        self.lnx_path = None
+        self._dirty = False
         self._pool = ThreadPoolExecutor(max_workers=1)
         self._job = None
         self._revision = 0
@@ -109,7 +116,8 @@ class CyclesPage(QtWidgets.QWidget):
         self.lbl_issue.setWordWrap(True)
         lay.addWidget(self.lbl_issue)
         row = QtWidgets.QHBoxLayout()
-        for text, slot in (("Podgląd", self.preview), ("Dodaj krok", self.add_step)):
+        for text, slot in (("Podgląd", self.preview), ("Dodaj krok", self.add_step),
+                           ("Zmień wybrany", self.update_step)):
             btn = QtWidgets.QPushButton(text)
             btn.setMinimumHeight(40)
             btn.clicked.connect(slot)
@@ -121,6 +129,10 @@ class CyclesPage(QtWidgets.QWidget):
         lay.addWidget(self.view2d)
         grid.addWidget(frame, 0, 1)
         frame, lay, self.lbl_prog = pages.card("Program z kroków", "0 kroków")
+        self.step_list = QtWidgets.QListWidget()
+        self.step_list.setMaximumHeight(110)
+        self.step_list.currentRowChanged.connect(self.select_step)
+        lay.addWidget(self.step_list)
         self.code = QtWidgets.QPlainTextEdit()
         self.code.setReadOnly(True)
         self.code.setLineWrapMode(QtWidgets.QPlainTextEdit.NoWrap)
@@ -134,6 +146,13 @@ class CyclesPage(QtWidgets.QWidget):
         row = QtWidgets.QHBoxLayout()
         for text, slot in (("Szacuj czas", self.estimate),
                            ("Podprogramy NgcGui…", self.export_subroutines)):
+            btn = QtWidgets.QPushButton(text)
+            btn.setMinimumHeight(40)
+            btn.clicked.connect(slot)
+            row.addWidget(btn)
+        lay.addLayout(row)
+        row = QtWidgets.QHBoxLayout()
+        for text, slot in (("Otwórz .lnx…", self.open_lnx), ("Zapisz .lnx…", self.save_lnx)):
             btn = QtWidgets.QPushButton(text)
             btn.setMinimumHeight(40)
             btn.clicked.connect(slot)
@@ -198,7 +217,8 @@ class CyclesPage(QtWidgets.QWidget):
                     out[f.name] = text
                 elif text:
                     try:
-                        out[f.name] = int(text) if f.kind == "int" else float(text.replace(",", "."))
+                        out[f.name] = (int(text) if f.kind == "int" else
+                                       float(text.replace(",", ".")))
                     except ValueError:
                         out[f.name] = text  # walidacja zgłosi P-5015
         return out
@@ -225,32 +245,83 @@ class CyclesPage(QtWidgets.QWidget):
             entry = {"plunge": "Wejście pionowe wymaga frezu skrawającego w osi.",
                      "ramp": "Rampa: sprawdź dopuszczalny kąt zagłębiania frezu.",
                      "helix": "Helisa: sprawdź dopuszczalny kąt zagłębiania frezu."}
-            finish = (" Wykańczanie usuwa zadane naddatki." if values["finish"] else
+            finish = (" Wykańczanie usuwa zadane naddatki." if values.get("finish") else
                       " Naddatki pozostają na ścianach i dnie.")
-            self.lbl_issue.setText(entry[values["entry"]] + finish + " Sprawdź w symulacji.")
-        self._last = (gen.name, values)
+            self.lbl_issue.setText(entry[values.get("entry", "plunge")] + finish +
+                                   " Sprawdź w symulacji.")
+        self._last = Step(generator=gen.name, version=gen.version, params=values)
         return lines
 
     # ---- program --------------------------------------------------------------------------
     def add_step(self) -> None:
         lines = self.preview()
         if lines is not None:
-            self.steps.append((*self._last, lines))
+            self.program.steps.append(self._last)
+            if self._last.generator == "header":
+                self.program.units = "inch" if self._last.params["units"] == "G20" else "mm"
             self._show()
 
+    def update_step(self) -> None:
+        index = self.step_list.currentRow()
+        if index < 0:
+            self.lbl_issue.setText("Wybierz krok z listy.")
+            return
+        if self.preview() is None:
+            return
+        original = self.program.steps[index]
+        self.program.steps[index] = original.model_copy(update={
+            "generator": self._last.generator, "version": self._last.version,
+            "params": self._last.params})
+        if self._last.generator == "header":
+            self.program.units = "inch" if self._last.params["units"] == "G20" else "mm"
+        self._show()
+
+    def select_step(self, index) -> None:
+        if not 0 <= index < len(self.program.steps):
+            return
+        step = self.program.steps[index]
+        gen = self.registry.get(step.generator, step.version)
+        for k in range(self.cmb.count()):
+            cls = self.cmb.itemData(k)
+            if (cls.name, cls.version) == (step.generator, step.version):
+                break
+        else:
+            self.cmb.addItem(f"{gen.title} [v{gen.version}]", type(gen))
+            k = self.cmb.count() - 1
+        self.cmb.setCurrentIndex(k)
+        self._build_form()
+        for name, value in step.params.items():
+            w = self.inputs.get(name)
+            if isinstance(w, QtWidgets.QComboBox):
+                w.setCurrentText(str(value))
+            elif isinstance(w, QtWidgets.QCheckBox):
+                w.setChecked(bool(value))
+            elif isinstance(w, QtWidgets.QLineEdit):
+                w.setText(str(value))
+        self.preview()
+
     def pop_step(self) -> None:
-        if self.steps:
-            self.steps.pop()
+        if self.program.steps:
+            self.program.steps.pop()
             self._show()
 
     def text(self) -> str:
-        body = [ln for _name, _values, lines in self.steps for ln in lines]
-        return "\n".join(["( linumeRT · program z cykli )", *body, "M2", ""])
+        return compile_program(self.program, self.registry)
 
     def _show(self) -> None:
         self._revision += 1
-        self.code.setPlainText(self.text() if self.steps else "")
-        self.lbl_prog.setText(f"{len(self.steps)} kroków")
+        self._dirty = True
+        selected = self.step_list.currentRow()
+        self.step_list.blockSignals(True)
+        self.step_list.clear()
+        for i, step in enumerate(self.program.steps, 1):
+            gen = self.registry.get(step.generator, step.version)
+            self.step_list.addItem(f"{i}. {gen.title} v{step.version}" +
+                                   (" (wyłączony)" if not step.enabled else ""))
+        self.step_list.setCurrentRow(min(selected, len(self.program.steps) - 1))
+        self.step_list.blockSignals(False)
+        self.code.setPlainText(self.text() if self.program.steps else "")
+        self.lbl_prog.setText(f"{len(self.program.steps)} kroków")
         self.lbl_time.setText("")
         self.check_tools()
 
@@ -263,17 +334,16 @@ class CyclesPage(QtWidgets.QWidget):
 
     def check_tools(self) -> list:
         """Kroki z bazą narzędzi (P-5206…P-5211); wynik w etykiecie, zapis nie jest blokowany."""
-        if not self.steps:
+        if not self.program.steps:
             self.lbl_tools.setText("")
             return []
         lookup = self._tool_lookup()
         if lookup is None:
             self.lbl_tools.setText("Baza narzędzi niedostępna: kroki niesprawdzone z narzędziami.")
             return []
-        units = next(("inch" for name, v, _l in self.steps
-                      if name == "header" and v.get("units") == "G20"), "mm")
-        steps = [(i, name, v) for i, (name, v, _l) in enumerate(self.steps, start=1)]
-        issues = check_steps(steps, lookup, units)
+        steps = [(i, step.generator, self.registry.get(step.generator, step.version).normalize(
+            step.params, i)[0]) for i, step in enumerate(self.program.steps, 1) if step.enabled]
+        issues = check_steps(steps, lookup, self.program.units)
         if issues:
             self.lbl_tools.setText("Narzędzia — sprawdź przed obróbką: "
                                    + "; ".join(i.message() for i in issues))
@@ -292,7 +362,7 @@ class CyclesPage(QtWidgets.QWidget):
         return os.environ.get("INI_FILE_NAME") or inipath or ""
 
     def estimate(self) -> None:
-        if not self.steps:
+        if not self.program.steps:
             self.lbl_time.setText("Brak kroków programu.")
             return
         if self._job is not None:
@@ -363,8 +433,54 @@ class CyclesPage(QtWidgets.QWidget):
                                "(lrt_face_mill, lrt_drill_grid, lrt_drill_circle).")
         return paths
 
+    def open_lnx(self) -> bool:
+        path, _filter = QtWidgets.QFileDialog.getOpenFileName(
+            self, "Otwórz program dialogowy", self.lnx_path or os.path.expanduser("~"),
+            "Program dialogowy (*.lnx)")
+        if not path:
+            return False
+        try:
+            program = load_lnx(path)
+            # Najpierw walidacja całego pliku. Przy błędzie obecny program pozostaje.
+            compile_program(program, self.registry)
+        except (LnxError, CompileError) as exc:
+            self.lbl_issue.setText(f"Nie otwarto: {exc}")
+            return False
+        if self._dirty and QtWidgets.QMessageBox.question(
+                self, "Niezapisany program", "Odrzucić niezapisane zmiany w krokach?",
+                QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
+                QtWidgets.QMessageBox.No) != QtWidgets.QMessageBox.Yes:
+            return False
+        self.program = program
+        self.lnx_path = path
+        self.path = None
+        self._show()
+        self._dirty = False
+        if self.program.steps:
+            self.step_list.setCurrentRow(0)
+        self.lbl_issue.setText(f"Otwarto {path}")
+        return True
+
+    def save_lnx(self) -> str | None:
+        start = self.lnx_path or os.path.join(os.path.expanduser("~"), "linumert_cykle.lnx")
+        path, _filter = QtWidgets.QFileDialog.getSaveFileName(
+            self, "Zapisz program dialogowy", start, "Program dialogowy (*.lnx)")
+        if not path:
+            return None
+        if not path.endswith(".lnx"):
+            path += ".lnx"
+        try:
+            save_lnx(self.program, path)
+        except OSError as exc:
+            self.lbl_issue.setText(f"Nie zapisano: {exc}")
+            return None
+        self.lnx_path = path
+        self._dirty = False
+        self.lbl_issue.setText(f"Zapisano {path}")
+        return path
+
     def save(self) -> str | None:
-        if not self.steps:
+        if not self.program.steps:
             self.lbl_issue.setText("Brak kroków programu.")
             return None
         start = self.path or os.path.join(os.path.expanduser("~"), "linumert_cykle.ngc")
@@ -385,7 +501,7 @@ class CyclesPage(QtWidgets.QWidget):
         return path
 
     def load(self) -> None:
-        if not self.steps:
+        if not self.program.steps:
             self.lbl_issue.setText("Brak kroków programu.")
             return
         if self.shell.s.running:
