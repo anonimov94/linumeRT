@@ -406,3 +406,12 @@ Model-Author: Codex. Część sesji 081, bez deklarowania całej sesji jako uko�
 Niezerowy kod procesu blokuje sukces także po PROGRAM_END. Cztery testy bez LinuxCNC
 uruchamiają atrapę procesu (RIP/system, znaki powłoki, błąd procesu, timeout): OK.
 Pełne testy i lint przez CI; NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## 040 — Generatory: walidacja z bazą narzędzi (p.2) · 2026-10-20 · Claude
+- Zrobione: `core/linumert/generators/tooling.py` — `tool_change` wybiera narzędzie z bazy, następne kroki
+  `face_mill` i `drill_holes` sprawdzane z jego danymi: typ do operacji (P-5207; narzędzie bez typu przepuszczane,
+  symulacja i tak zgłasza K-320), średnica i skok gwintu (P-5208), głębokość przejścia vs długość ostrza / wysokość
+  głowicy (P-5209), `max_rpm` (P-5210), kierunek M3/M4 vs `hand` (P-5211), brak w bazie (P-5206). Program w calach
+  przeliczany na mm. `compile_program(..., tools=ToolDB.get)`; bez `tools` zachowanie bez zmian.
+- Testy: `tests/test_gen_tooling.py` (11). Decyzje: tolerancja średnicy 0,01 mm.
+- Do sprawdzenia ręcznie: podpięcie `tools=` w panelu dialogowym (sesja 045). Długi: brak.
