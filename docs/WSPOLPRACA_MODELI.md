@@ -5,6 +5,17 @@ Model-Author: Claude · 2026-10-18. **Jedyne źródło zasad współpracy.** `AG
 osobny commit + wpis w `docs/DECYZJE.md` (sekcja decyzji właściciela). Powód wersji 2: limity tokenów często przerywają
 sesje, więc pracujemy małymi krokami, z częstym pushem i jawnym przekazaniem tury.
 
+## Aktualizacja właściciela — bieżące zlecenie 2026-10-20 (ma pierwszeństwo)
+
+Codex kontynuuje HMI w osobnym checkoutcie i nie zakłada globalnej blokady `prompts/LOCK`
+ani nie zajmuje tury blokującej Claude. Claude może niezależnie kontynuować swój zakres.
+Ukończone zmiany po autokontroli i zielonych testach autor od razu scala przez PR do `main`
+(merge commit, bez przepisywania historii); przegląd drugiego modelu nie jest warunkiem scalenia.
+Nie omijamy wymaganych kontroli GitHub. Nie przerywamy cudzych procesów: używamy osobnego
+środowiska LinuxCNC/budowy; blokady zasobów dotyczą tylko faktycznie współdzielonej instancji.
+Poniższe historyczne zasady tur i oczekiwania na przegląd nie ograniczają tego polecenia.
+Model-Author: Codex.
+
 ## 1. Tury (na zmianę; wyjątek równoległy: §2a, D28)
 - Na górze `docs/NASTEPNA_SESJA.md` jest stała linia:
   `Tura: Claude|Codex · od <UTC> · stan: w toku|oddana`.

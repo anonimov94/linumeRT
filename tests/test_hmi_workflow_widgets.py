@@ -363,3 +363,151 @@ def test_cycles_page_builds_program(page_env, tmp_path, monkeypatch):
     assert target.read_text() == text
     module.ACTION.OPEN_PROGRAM.assert_called_with(str(target))
     page.close()
+
+
+def _cycles(page_env, monkeypatch):
+    pytest.importorskip("yaml")
+    _home, shell, _status, action = page_env
+    shell.c = {"bg2": "#000000", "fg3": "#666666", "teal": "#2dd4bf"}
+    monkeypatch.delitem(sys.modules, "linumert_cycles_page", raising=False)
+    module = importlib.import_module("linumert_cycles_page")
+    return module, module.CyclesPage(shell), shell
+
+
+def _face_step(page, tool_d="10"):
+    page.cmb.setCurrentIndex(page.cmb.findText("Wymiana narzędzia"))
+    page.inputs["tool"].setText("1")
+    page.add_step()
+    page.cmb.setCurrentIndex(page.cmb.findText("Planowanie"))
+    for name, value in (("x1", "100"), ("y1", "50"), ("depth", "1"), ("tool_d", tool_d)):
+        page.inputs[name].setText(value)
+    page.add_step()
+
+
+def test_cycles_steps_checked_with_tool_db(page_env, monkeypatch):
+    """Cykle (Model-Author: Claude, sesja 040): kroki porównane z bazą narzędzi w GUI."""
+    from linumert.tools.db import Tool
+
+    module, page, shell = _cycles(page_env, monkeypatch)
+    shell.tools = None
+    _face_step(page)
+    assert "niedostępna" in page.lbl_tools.text()
+    tool = Tool(1, 1, "flat", params={"d": 10.0, "l": 40.0, "flute_length": 20.0})
+    shell.tools = SimpleNamespace(_open=lambda: True, db=SimpleNamespace(get={1: tool}.get))
+    page.pop_step()
+    page.add_step()
+    assert "zgodne z bazą" in page.lbl_tools.text()
+    page.pop_step()
+    page.inputs["tool_d"].setText("12")
+    page.add_step()
+    text = page.lbl_tools.text()
+    assert "Średnica narzędzia = 12 nie zgadza" in text and "T1" in text
+    assert len(page.check_tools()) == 1 and page.text().count("M2") == 1
+    page.close()
+
+
+def test_cycles_estimate_runs_off_gui_thread(page_env, monkeypatch, tmp_path):
+    """Cykle (Model-Author: Claude, sesja 053): czas obróbki z wątku tła, GUI nie stoi."""
+    import linumert.programs.estimate as estimate
+
+    module, page, _shell = _cycles(page_env, monkeypatch)
+    page.estimate()
+    assert "Brak kroków" in page.lbl_time.text()
+    _face_step(page)
+    monkeypatch.setenv("INI_FILE_NAME", str(tmp_path / "m.ini"))
+    seen = {}
+
+    def fake(path, ini):
+        seen["text"], seen["ini"] = Path(path).read_text(), ini
+        return estimate.Estimate(total=125.4, rapid=5, feed=110.4, tool_change=10)
+
+    monkeypatch.setattr(estimate, "estimate_ngc", fake)
+    page.estimate()
+    assert "Liczenie" in page.lbl_time.text()
+    page._job[0].result(timeout=5)
+    page._poll_estimate()
+    assert "2:05" in page.lbl_time.text() and "wymiany 0:10" in page.lbl_time.text()
+    assert seen["text"] == page.text() and seen["ini"].endswith("m.ini")
+    monkeypatch.setattr(estimate, "estimate_ngc", lambda *a: (_ for _ in ()).throw(
+        estimate.InterpreterUnavailable("brak rs274")))
+    page.estimate()
+    page._job[0].exception(timeout=5)
+    page._poll_estimate()
+    assert "niedostępny: brak rs274" in page.lbl_time.text()
+    page.close()
+
+
+def test_cycles_export_subroutines_to_ini_dir(page_env, monkeypatch, tmp_path):
+    """Cykle (Model-Author: Claude, sesja 048): eksport o<lrt_...> do katalogu z INI."""
+    module, page, _shell = _cycles(page_env, monkeypatch)
+    ini = tmp_path / "cfg" / "m.ini"
+    ini.parent.mkdir()
+    ini.write_text("[RS274NGC]\nSUBROUTINE_PATH = ../macros:../nc_files/user_macros\n")
+    monkeypatch.setenv("INI_FILE_NAME", str(ini))
+    assert page.subroutine_dir() == str(tmp_path / "nc_files" / "user_macros")
+    monkeypatch.setattr(module.QtWidgets.QFileDialog, "getExistingDirectory",
+                        staticmethod(lambda *a, **k: a[2]))
+    paths = page.export_subroutines()
+    assert [Path(p).name for p in paths] == ["lrt_face_mill.ngc", "lrt_drill_grid.ngc",
+                                             "lrt_drill_circle.ngc"]
+    assert "Zapisano 3 podprogramy" in page.lbl_issue.text()
+    page.close()
+
+
+def test_cycles_estimate_does_not_publish_stale_program_time(page_env, monkeypatch, tmp_path):
+    import threading
+
+    import linumert.programs.estimate as estimate
+
+    _module, page, _shell = _cycles(page_env, monkeypatch)
+    _face_step(page)
+    monkeypatch.setenv("INI_FILE_NAME", str(tmp_path / "m.ini"))
+    release = threading.Event()
+
+    def calculate(*_args):
+        assert release.wait(5)
+        return estimate.Estimate(total=125)
+
+    monkeypatch.setattr(estimate, "estimate_ngc", calculate)
+    page.estimate()
+    future, path, _revision = page._job
+    try:
+        page.pop_step()
+    finally:
+        release.set()
+    future.result(timeout=5)
+    page._poll_estimate()
+    assert "Program zmieniony" in page.lbl_time.text()
+    assert not Path(path).exists()
+    page._poll_estimate()  # zaległy tick timera po odebraniu wyniku
+    page.close()
+
+
+def test_cycles_close_cleans_pending_estimate_file(page_env, monkeypatch, tmp_path):
+    import threading
+
+    import linumert.programs.estimate as estimate
+
+    _module, page, _shell = _cycles(page_env, monkeypatch)
+    _face_step(page)
+    monkeypatch.setenv("INI_FILE_NAME", str(tmp_path / "m.ini"))
+    started, release, finished = (threading.Event() for _ in range(3))
+
+    def calculate(path, _ini):
+        started.set()
+        assert release.wait(5)
+        assert Path(path).is_file()
+        return estimate.Estimate(total=1)
+
+    monkeypatch.setattr(estimate, "estimate_ngc", calculate)
+    page.estimate()
+    future, path, _revision = page._job
+    try:
+        assert started.wait(5)
+        page.close()
+        assert Path(path).exists()
+    finally:
+        release.set()
+    future.result(timeout=5)
+    future.add_done_callback(lambda _future: finished.set())
+    assert finished.wait(5) and not Path(path).exists()

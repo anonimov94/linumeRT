@@ -494,3 +494,20 @@ Kontrola ponownie czyta plik, obejmuje tekst poza pierwszymi 2000 liniami; limit
 lista do 100 błędów. Komunikat odróżnia składnię od semantyki i ruchu LinuxCNC.
 Cztery funkcje testowe Program uruchomione na rzeczywistym Qt offscreen w chmurze: OK.
 Brak komend ruchu przy kontroli; screenshot wykonany lokalnie. CI oraz odbiór w pełnym HMI pozostają.
+
+## HMI — Cykle: baza narzędzi, czas, podprogramy (D36) · 2026-10-20 · Claude
+- Strona Cykle pokazuje wynik `check_steps` po każdej zmianie kroków (narzędzie z bazy strony Narzędzia; brak bazy =
+  jawny komunikat „niesprawdzone”), przycisk „Szacuj czas” (rs274 + limity INI w wątku tła, odczyt co 200 ms — GUI
+  nie staje, watchdog HMI D35) i „Podprogramy NgcGui…” (eksport `o<lrt_...>`, domyślny katalog z
+  `[RS274NGC]SUBROUTINE_PATH`, wpis z `user_macros`). Komunikaty o polach używają etykiet formularza.
+- Testy: 3 nowe w `tests/test_hmi_workflow_widgets.py` (Qt offscreen). Zrzut z prawdziwym rs274:
+  `docs/raporty/cykle/cykle_narzedzia_czas.png` (2:27 dla planowania 100×50, 2 warstwy; niezgodna średnica wykryta).
+
+## Odbiór rozpoczętych gałęzi — 2026-10-20 · Codex
+- Model-Author: Codex. PR #56 łączy #48/#50/#54/#55; historia każdego PR zachowana.
+- Odzyskano niescalony 7a71581 Claude: Cykle/narzędzia/czas/NgcGui; autokontrola, bez niezależnego przeglądu.
+- Poprawiono nieaktualny wynik czasu po edycji kroków i sprzątanie pliku interpretera przy zamknięciu.
+- Kieszenie: test usuwania materiału, router krokowy Plant, rs274 i rzeczywisty widget Qt.
+- Szablon routera: brakujący drugi czujnik bazy Y; pierwotna usterka odtworzona testem i usunięta.
+- Starszy D33 z codex/hmi-01 miał kolidującą numerację; zachowana historia i treść zasad bez nadpisania obecnego D33.
+- Pełny lokalny pytest: 816 PASS; 13 błędów testów sieci to EPERM sandboxa; wiążące testy Debian/LinuxCNC w CI.

@@ -161,3 +161,5 @@ i `test_doctor_gui.py`. Biblioteka standardowa i istniejący PyQt5; bez nowych z
 Model-Author: Codex. Własna integracja istniejącego leksera, lista i nawigacja Qt,
 `linumert_program_page.py`, testy `test_hmi_workflow_widgets.py`; GPL-2.0-or-later.
 Bez nowych zależności ani zewnętrznych zasobów.
+
+| Strona Cykle: baza narzędzi, czas obróbki, eksport podprogramów | kod (Python/Qt), testy, zrzut | model językowy Claude na zlecenie właściciela | 2026-10-20 | własna implementacja; zrzut widoku offscreen (Qt, tokeny), czas z rs274 LinuxCNC 2.9 RIP | GPL-2.0-or-later | ekran operatora | `screens/linumert/linumert_cycles_page.py`, `tests/test_hmi_workflow_widgets.py`, `docs/raporty/cykle/cykle_narzedzia_czas.png` |
