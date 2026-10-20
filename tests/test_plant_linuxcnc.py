@@ -94,6 +94,22 @@ out["pos"] = [round(v, 4) for v in s.actual_position[:3]]
 out["joint_ferror_max"] = max(abs(s.joint[i]["ferror_highmark"]) for i in range(4))
 out["task_state"] = s.task_state
 out["errors_motion"] = list(out["errors"]); out["errors"] = []
+# Model-Author: Codex · plan 22.10: prawdziwy interpreter/planner i napędy Plant.
+out["pockets"] = []
+for path in sys.argv[1:]:
+    c.mode(linuxcnc.MODE_AUTO); c.wait_complete()
+    c.program_open(path); c.wait_complete()
+    c.auto(linuxcnc.AUTO_RUN, 0); c.wait_complete()
+    started = wait(lambda: s.interp_state != linuxcnc.INTERP_IDLE, 5)
+    done = started and wait(lambda: s.interp_state == linuxcnc.INTERP_IDLE, 120)
+    time.sleep(0.3); s.poll()
+    out["pockets"].append({"started": started, "done": done,
+        "task_state": s.task_state, "errors": list(out["errors"]),
+        "ferror": max(abs(s.joint[i]["ferror_highmark"]) for i in range(4))})
+    out["errors"] = []
+c.mode(linuxcnc.MODE_MDI); c.wait_complete()
+c.mdi("G90 G1 X100 Y200 Z-20 F3000"); c.wait_complete(60)
+wait(lambda: s.interp_state == linuxcnc.INTERP_IDLE, 60)
 # softlimit_oracle: MDI poza soft limit X (599) — LinuxCNC powinien odrzucić
 c.mdi("G90 G0 X700"); c.wait_complete(30)
 wait(lambda: s.interp_state == linuxcnc.INTERP_IDLE, 30)
@@ -124,6 +140,19 @@ def session(tmp_path_factory):
     tmp_path = tmp_path_factory.mktemp("plant_cnc")
     ini = _prepare(tmp_path)
     (tmp_path / "driver.py").write_text(DRIVER, encoding="utf-8")
+    from linumert.generators.pockets import PocketCircle, PocketRect
+
+    programs = []
+    for cls, dims in [(PocketRect, {"width": 20, "height": 16, "rotation": 37,
+                                    "corner_radius": 5}), (PocketCircle, {"diameter": 18})]:
+        path = tmp_path / f"{cls.name}.ngc"
+        path.write_text(cls().generate_ngc({"depth": 1, "tool_d": 8, "cx": 100, "cy": 200,
+                                           "z_top": -20, "safe_z": -15, "feed": 600,
+                                           "plunge": 300, "entry": "helix", "entry_angle": 5,
+                                           "direction": "cw", "wall_allowance": 0.5,
+                                           "floor_allowance": 0.2, "finish": True, **dims},
+                                          path.name))
+        programs.append(str(path))
     report = tmp_path / "plant_report.json"
     plant_yaml = CFG / "plant.yaml"  # ścieżka machine względem oryginału
     with installed_modules(root, tmp_path, ("lrt_net", "lrt_cia402", "lrt_estop2")), \
@@ -142,7 +171,8 @@ def session(tmp_path_factory):
                     break
             assert ready, (cnc.stdout.read() if cnc.poll() is not None else "brak połączenia")
             time.sleep(1.0)
-            run = rip_run(root, f"python3 {tmp_path / 'driver.py'}", ini.parent, timeout=300,
+            run = rip_run(root, f"python3 {tmp_path / 'driver.py'} {' '.join(programs)}",
+                          ini.parent, timeout=420,
                           env=env)
             hal = rip_run(root, "halcmd getp lrt-net.0.axis.0.ferror; "
                           "halcmd getp lrt-net.0.plant-lost; halcmd getp lrt-net.0.bad-frames",
@@ -172,6 +202,15 @@ def test_plant_linuxcnc_home_and_move(session):  # REQ-VM-02, REQ-VM-07
 
 def _violations(res, kind):
     return [v for v in res["plant"]["oracle"]["violations"] if v["kind"] == kind]
+
+
+def test_pocket_helix_and_finishing_on_real_linuxcnc_plant(session):
+    assert len(session["pockets"]) == 2
+    for result in session["pockets"]:
+        assert result["started"] and result["done"], result
+        assert result["task_state"] == session["task_state"], result
+        assert not result["errors"], result
+        assert result["ferror"] < 0.5, result
 
 
 def test_softlimit_oracle(session):  # REQ-VM-06: scenariusz softlimit_oracle

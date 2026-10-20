@@ -175,4 +175,11 @@ systemowego Gio, bez kopiowania jego kodu. Zachowane autorstwo pierwotnego start
 
 Model-Author: Codex. Własny kod GPL-2.0-or-later: generators/pockets.py,
 formularz Cyklów, testy golden/geometrii/materiału/Plant/rs274. Bez kodu zewnętrznego
-i nowych zależności. Plunge pozostaje zgodnym domyślnym wejściem dla istniejących programów.
+i nowych zależności. Wersja 1 pozostaje bez zmian w `pockets_v1.py`; nowe kieszenie to v2.
+
+## Geometria i wykańczanie kieszeni — 2026-10-21
+
+Model-Author: Codex. Własny algorytm konturów/offsetów, obrotu, naroży i naddatków;
+testy materiału oraz rozszerzenie istniejącej sesji LinuxCNC + Plant Claude.
+GPL-2.0-or-later, bez nowych zależności. Opis kierunku skrawania odsyła do przykładu
+Sandvik Coromant w planie tygodnia; nie kopiowano kodu ani ilustracji producenta.

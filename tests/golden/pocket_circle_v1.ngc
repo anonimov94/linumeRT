@@ -1,0 +1,13 @@
+( linumeRT: program legacy.ngc )
+( zrodlo: legacy.ngc, schemat .lnx 1 )
+G21
+( krok 1: pocket_circle v1 )
+( Kieszen okragla: wejscie pionowe, symulacja wymagana )
+G17 G90 G91.1 G94 G40 G80
+G0 Z5
+G0 X0 Y0
+G1 Z-1 F100
+G1 X2 Y0 F400
+G3 X2 Y0 I-2 J0 F400
+G0 Z5
+M2

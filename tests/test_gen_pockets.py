@@ -82,19 +82,47 @@ def test_generated_path_removes_pocket_material_without_cutting_outside(cls, dim
     stock = StockMap("BOX", 0, 0, 50, 50, -10, 0, cell=0.25)
     tool = make_cutter(1, 80, 8, "flat", {"d": 8, "l": 40, "flute_length": 20})
     before = stock.volume()
+    _cut_program(stock, tool, gen.generate(values))
+    area = math.pi * 20**2 if cls is PocketCircle else 40 * 30 - (4 - math.pi) * 4**2
+    assert before - stock.volume() == pytest.approx(area * 2, rel=0.025)
+    assert stock.h[0, 0] == 0 and stock.h[100, 100] == -2
+    _assert_floor(stock, cls, dims, 0, 2)
+
+
+def _assert_floor(stock, cls, dims, wall, depth):
+    import numpy as np
+
+    x, y = np.meshgrid(stock.xs - 25, stock.ys - 25)
+    angle = math.radians(dims.get("rotation", 0))
+    x, y = math.cos(angle) * x + math.sin(angle) * y, -math.sin(angle) * x + math.cos(angle) * y
+    if cls is PocketCircle:
+        distance = np.hypot(x, y) - (dims["diameter"] / 2 - wall)
+    else:
+        radius = max(4, dims.get("corner_radius", 4) - wall)
+        qx = np.abs(x) - (dims["width"] / 2 - wall - radius)
+        qy = np.abs(y) - (dims["height"] / 2 - wall - radius)
+        distance = (np.hypot(np.maximum(qx, 0), np.maximum(qy, 0)) +
+                    np.minimum(np.maximum(qx, qy), 0) - radius)
+    # Siatka 0,25 mm: odsuwamy asercje o jedną komórkę od obrysu.
+    assert np.allclose(stock.h[distance < -stock.cell], -depth), "wyspy na dnie"
+    assert np.all(stock.h[distance > stock.cell] == 0), "cięcie poza obrysem"
+
+
+def _cut_program(stock, tool, lines):
     pos = (0.0, 0.0, 5.0)
-    for line in gen.generate(values):
-        if not line.startswith(("G0 ", "G1 ", "G3 ")):
+    for line in lines:
+        if not line.startswith(("G0 ", "G1 ", "G2 ", "G3 ")):
             continue
         words = {k: float(v) for k, v in re.findall(r"([XYZIJ])(-?[0-9.]+)", line)}
         end = tuple(words.get(k, pos[i]) for i, k in enumerate("XYZ"))
-        if line.startswith("G3 "):
+        if line.startswith(("G2 ", "G3 ")):
             start = pos
             center = (pos[0] + words["I"], pos[1] + words["J"])
             radius = math.hypot(words["I"], words["J"])
             a = math.atan2(pos[1] - center[1], pos[0] - center[0])
             b = math.atan2(end[1] - center[1], end[0] - center[0])
-            sweep = (b - a) % math.tau or math.tau
+            sign = 1 if line.startswith("G3 ") else -1
+            sweep = ((sign * (b - a)) % math.tau or math.tau) * sign
             for i in range(1, 129):
                 angle = a + sweep * i / 128
                 point = (center[0] + radius * math.cos(angle),
@@ -107,9 +135,6 @@ def test_generated_path_removes_pocket_material_without_cutting_outside(cls, dim
             if line.startswith("G0 "):
                 assert result.removed == 0, line
         pos = end
-    area = math.pi * 20**2 if cls is PocketCircle else 40 * 30 - (4 - math.pi) * 4**2
-    assert before - stock.volume() == pytest.approx(area * 2, rel=0.025)
-    assert stock.h[0, 0] == 0 and stock.h[100, 100] == -2
 
 
 @pytest.mark.parametrize("entry", ["plunge", "ramp"])
@@ -193,3 +218,100 @@ def test_entry_golden(cls, dims, entry):
                                   "entry_angle": 5, **dims}, "pocket.ngc")
     golden = Path(__file__).parent / "golden" / f"pocket_{entry}.ngc"
     assert program == golden.read_text()
+
+
+@pytest.mark.parametrize("cls,dims", [
+    (PocketRect, {"width": 32, "height": 24, "corner_radius": 8, "rotation": 37}),
+    (PocketCircle, {"diameter": 32}),
+])
+@pytest.mark.parametrize("finish", [False, True])
+def test_allowances_and_finishing_match_material(cls, dims, finish):
+    from linumert_sim.cutter import make_cutter
+    from linumert_sim.zmap import StockMap
+
+    gen = cls()
+    params = {"depth": 2, "tool_d": 8, "cx": 25, "cy": 25, "entry": "helix",
+              "direction": "cw", "wall_allowance": 1, "floor_allowance": 0.3,
+              "finish": finish, **dims}
+    values, issues = gen.normalize(params)
+    assert not issues and not gen.check(values, 0)
+    stock = StockMap("BOX", 0, 0, 50, 50, -10, 0, cell=0.25)
+    tool = make_cutter(1, 80, 8, "flat", {"d": 8, "l": 40, "flute_length": 20})
+    before = stock.volume()
+    _cut_program(stock, tool, gen.generate(values))
+    wall = 0 if finish else 1
+    depth = 2 if finish else 1.7
+    area = (math.pi * (16 - wall)**2 if cls is PocketCircle else
+            (32 - 2 * wall) * (24 - 2 * wall) - (4 - math.pi) * (8 - wall)**2)
+    assert before - stock.volume() == pytest.approx(area * depth, rel=0.025)
+    assert stock.h[100, 100] == pytest.approx(-depth)
+    assert stock.h[0, 0] == 0
+    _assert_floor(stock, cls, dims, wall, depth)
+    assert ("( wykanczanie dna )" in gen.generate(values)) == finish
+
+
+@pytest.mark.parametrize("patch,field", [
+    ({"corner_radius": 3}, "corner_radius"),
+    ({"corner_radius": 4.000001}, "corner_radius"),
+    ({"corner_radius": 16}, "corner_radius"),
+    ({"wall_allowance": 12}, "tool_d"),
+    ({"floor_allowance": 2}, "floor_allowance"),
+    ({"floor_allowance": 1.1, "finish": True}, "floor_allowance"),
+])
+def test_invalid_finishing_geometry(patch, field):
+    issues = PocketRect().validate({"width": 40, "height": 30, "tool_d": 8,
+                                     "depth": 2, **patch})
+    assert any(issue.field == field for issue in issues)
+
+
+@pytest.mark.parametrize("direction", ["cw", "ccw"])
+def test_rotated_preview_matches_gcode_bounds_and_direction(direction):
+    gen = PocketRect()
+    values, issues = gen.normalize({"width": 40, "height": 30, "tool_d": 8, "depth": 1,
+                                    "corner_radius": 7, "rotation": 90, "direction": direction})
+    assert not issues and not gen.check(values, 0)
+    paths = gen.preview_2d(values)
+    assert max(x for p in paths for x, y in p) == pytest.approx(11)
+    assert max(y for p in paths for x, y in p) == pytest.approx(16)
+    outer = paths[-1]
+    area = sum(x1 * y2 - x2 * y1 for (x1, y1), (x2, y2)
+               in zip(outer, outer[1:], strict=False))
+    assert (area > 0) == (direction == "ccw")
+    arc = "G2" if direction == "cw" else "G3"
+    assert any(line.startswith(arc + " ") for line in gen.generate(values))
+
+
+@pytest.mark.linuxcnc
+@pytest.mark.parametrize("cls,dims", [
+    (PocketRect, {"width": 32, "height": 24, "corner_radius": 8, "rotation": 37}),
+    (PocketCircle, {"diameter": 32}),
+])
+@pytest.mark.parametrize("direction", ["cw", "ccw"])
+def test_finishing_in_linuxcnc(tmp_path, cls, dims, direction):
+    from linumert.programs.linuxcnc_check import check_with_linuxcnc
+
+    params = {"depth": 2, "tool_d": 8, "entry": "helix", "direction": direction,
+              "wall_allowance": 1, "floor_allowance": 0.3, "finish": True, **dims}
+    path = tmp_path / "finished.ngc"
+    path.write_text(cls().generate_ngc(params, path.name))
+    result = check_with_linuxcnc(path)
+    assert result.ok, result.messages
+
+
+@pytest.mark.parametrize("name,dims", [
+    ("pocket_rect", {"width": 12, "height": 10}),
+    ("pocket_circle", {"diameter": 12}),
+])
+def test_saved_version_one_keeps_original_gcode(name, dims):
+    from linumert.generators.pockets import register
+    from linumert.generators.registry import GeneratorRegistry
+    from linumert.programs.compiler import compile_program
+    from linumert.programs.lnx import LnxProgram, Step
+
+    registry = GeneratorRegistry()
+    register(registry)
+    assert registry.latest(name).version == 2
+    program = LnxProgram(name="legacy.ngc", steps=[Step(generator=name, version=1,
+                                                     params={"tool_d": 8, "depth": 1, **dims})])
+    golden = Path(__file__).parent / "golden" / f"{name}_v1.ngc"
+    assert compile_program(program, registry, source="legacy.ngc") == golden.read_text()

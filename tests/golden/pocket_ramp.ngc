@@ -1,7 +1,7 @@
 ( linumeRT: program pocket.ngc )
 ( zrodlo: pocket.ngc, schemat .lnx 1 )
 G21
-( krok 1: pocket_circle v1 )
+( krok 1: pocket_circle v2 )
 ( Kieszen okragla: wejscie ramp, symulacja wymagana )
 G17 G90 G91.1 G94 G40 G80
 G0 Z5

@@ -167,6 +167,9 @@ class CyclesPage(QtWidgets.QWidget):
                 w.addItems(list(f.choices))
                 if f.default is not None:
                     w.setCurrentText(str(f.default))
+                if f.name == "direction" and self._gen().name.startswith("pocket_"):
+                    w.setToolTip("Kieszeń, wrzeciono M3: ccw — współbieżnie; cw — przeciwbieżnie. "
+                                 "Po zmianie kierunku wrzeciona zależność jest odwrotna.")
             elif f.kind == "bool":
                 w = QtWidgets.QCheckBox()
                 w.setChecked(bool(f.default))
@@ -222,8 +225,9 @@ class CyclesPage(QtWidgets.QWidget):
             entry = {"plunge": "Wejście pionowe wymaga frezu skrawającego w osi.",
                      "ramp": "Rampa: sprawdź dopuszczalny kąt zagłębiania frezu.",
                      "helix": "Helisa: sprawdź dopuszczalny kąt zagłębiania frezu."}
-            self.lbl_issue.setText(entry[values["entry"]] +
-                                   " Sprawdź w symulacji. Wykańczanie: w planie.")
+            finish = (" Wykańczanie usuwa zadane naddatki." if values["finish"] else
+                      " Naddatki pozostają na ścianach i dnie.")
+            self.lbl_issue.setText(entry[values["entry"]] + finish + " Sprawdź w symulacji.")
         self._last = (gen.name, values)
         return lines
 

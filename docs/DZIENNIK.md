@@ -530,3 +530,9 @@ Brak komend ruchu przy kontroli; screenshot wykonany lokalnie. CI oraz odbiór w
 - Wybór plunge/ramp/helix, kąt i podgląd w Cyklach; wejście posuwem od poprzedniej warstwy, bez pionowego cięcia w trybie rampy/helisy.
 - Geometria wejścia mieści się w kieszeni, helisa nie zostawia centralnego rdzenia; ograniczenie liczby bloków także dla wejść.
 - Golden, kontrola kąta i Z, testy objętości i Plant; rs274 i pełna regresja wymagane w CI przed scaleniem. Autokontrola, bez niezależnego przeglądu.
+
+## Plan 22.10 — geometria i wykańczanie kieszeni · Codex
+- Model-Author: Codex. Własne kontury z łukami G2/G3, obrót punktów i środków łuków, promień naroża, CW/CCW.
+- Naddatki pozostają bez zaznaczenia wykańczania; osobny posuw, ściany warstwami i dno pełną ścieżką.
+- Walidacja pasowania narzędzia z naddatkiem, naroży, dna i budżetu bloków. Krok XY uwzględnia odległość po przekątnej.
+- Lokalnie 65 testów kieszeni/widgetów PASS; dodatkowe rs274 i wykonanie kieszeni na prawdziwym LinuxCNC + Plant do odbioru CI. Niezweryfikowane na sprzęcie.

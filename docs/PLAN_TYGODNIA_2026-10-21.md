@@ -30,3 +30,14 @@ wewnątrz kieszeni, limit 20 000 bloków. Helisa o średnicy nie większej niż 
 nie pozostawia rdzenia. Rampa i helisa schodzą od powierzchni / poprzedniej warstwy
 posuwem zagłębiania; podgląd XY pokazuje wejście. Golden, objętość, geometria i Plant
 sprawdzane automatycznie; odbiór rs274 w CI jest wymagany przed scaleniem.
+
+Realizacja 22.10: obrót prostokąta, promień naroża (0 oznacza minimalne D/2), CW/CCW,
+naddatki ścian/dna i jawne wykańczanie z oddzielnym posuwem. Bez wykańczania naddatki
+pozostają. Wykańczanie ścian jest wykonywane warstwami, a dna pełną ścieżką na końcu;
+naddatek dna nie może przekroczyć kroku Z. Kierunek dla kieszeni i M3: CCW współbieżny,
+CW przeciwbieżny ([przykład producenta narzędzi](https://videos.sandvik.coromant.com/cost-effective-solutions-for-face)).
+Test materiału sprawdza objętość, całe dno i brak cięcia poza obrysem. Odstęp prostokątnych
+pierścieni uwzględnia również przekątną, aby nie zostawiać wysp przy 90% kroku bocznego.
+CI obejmuje wykonanie obu kieszeni z helisą i wykańczaniem na LinuxCNC + Plant.
+Nowa geometria jest wersją 2 generatorów. Wersja 1 w rejestrze pozostaje niezmienna,
+a golden sprawdza G-code istniejących programów. Punkty 21–22 odbierane są wspólnym PR.
