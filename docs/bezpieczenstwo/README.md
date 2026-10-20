@@ -71,3 +71,32 @@ są oddzielnymi czynnościami; żadne nie stanowi polecenia rozpoczęcia ruchu.
    Nie zastępujemy tego testem Qt, deklaracją YAML ani testem Plant.
 
 Brak odbioru sprzętowego oznacza brak deklaracji gotowości do użycia na maszynie.
+
+## Etap 2 — deklaracja profilu i toru I/O
+
+Narzędzie inżynierskie (nie uruchamia CNC):
+
+```bash
+PYTHONPATH=core python -m linumert.machine.deployment ścieżka/do/maszyna.ini
+```
+
+Wymaga jawnego `[LINUMERT] MACHINE_PROFILE = sim|plant|hardware`.
+Dla hardware odrzuca VIRTUAL_MODE=1, HMI_ESTOP_BYPASS=1 i brak deklaracji:
+
+- `ESTOP_MONITOR_PIN`: fizyczne wejście stanu niezależnego obwodu;
+- `PC_HEARTBEAT_OUTPUT_PIN`: fizyczne wyjście sygnału życia PC;
+- `PC_WATCHDOG_MONITOR_PIN`: osobne wejście sprzężenia z zewnętrznego nadzoru PC;
+- `EXTERNAL_PC_WATCHDOG=1`, `PHYSICAL_RESET=1`, `AUTOMATIC_RESTART=0` w sekcji SAFETY.
+
+Piny muszą mieć różne nazwy; znane sygnały software (iocontrol, halui, HMI, watchdog HAL,
+LRT-NET) nie są akceptowane jako deklaracje fizycznego I/O. To kontrola deklaracji,
+nie dowód rodzaju, kierunku czy okablowania pinu. Nie analizuje grafu HAL.
+Nie potwierdza wykonania fizycznego resetu ani obecności urządzenia nadzoru.
+Przykład do uzupełnienia: `config/hardware/safety-contract.ini.example`.
+Nie zawiera HAL ani konfiguracji napędów; puste piny celowo powodują odmowę.
+
+Wynik JSON zawsze ma `hardware_verified=false`; kod 2 oznacza błędną/niekompletną
+ deklarację, kod 0 jedynie jej kompletność. Nie jest jeszcze podłączony do startu HMI
+ani do generatora/eksportu (sesje 061/062/070). Kolejny krok: integracja kontroli na granicy
+uruchomienia profilu hardware, kontrola rzeczywistych pinów/grafu HAL i testy odmowy startu.
+Nie zmieniamy automatycznie istniejących konfiguracji sim/Plant.

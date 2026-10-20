@@ -397,3 +397,13 @@ Model-Author: Codex.
 - Debian 12 i pełny LinuxCNC: CI PR, nie deklaruję lokalnego odbioru GUI ani sprzętu.
 - Zakres Plant oczekuje doprecyzowania; jego łańcuch, watchdogi i testy usterek zachowane.
 - Autokontrola, bez niezależnego przeglądu. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## Bezpieczeństwo — profile i kontrola deklaracji · 2026-10-20 · Codex
+- Model-Author: Codex. PR #48; jawne sim/plant/hardware, CLI bez uruchamiania CNC.
+- Hardware wymaga monitorów E-STOP/nadzoru PC, heartbeat, resetu fizycznego i zakazu autorestartu.
+- Odrzucane: bypass, virtual, sygnały software w rolach I/O, powtarzane deklaracje; hardware_verified=false.
+- Przykład celowo niekompletny, bez połączeń HAL; kontrola nie jest jeszcze bramką startu/eksportu.
+- Testy lokalne Debian 13: 5 unittest profili + 1 synchronizacji HMI; poprzednie 3 diagnostyki OK.
+- CI b626235: ogólne zielone; LinuxCNC 68/69, błąd synchronizacji MDI→M3; poprawka 6047a13.
+- Pełny wynik ostatniego SHA pozostaje do weryfikacji; bez lokalnego odbioru Qt/LinuxCNC.
+- Autokontrola, bez niezależnego przeglądu. NIEZWERYFIKOWANE NA SPRZĘCIE.

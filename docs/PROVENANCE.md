@@ -128,3 +128,10 @@ Model-Author: Codex. Własna analiza i implementacja GPL-2.0-or-later na polecen
 komunikaty strony Symulacja, `tests/test_sim_diagnostics.py`, aktualizacja testów i e2e.
 Audyt Groka przekazany w czacie był wejściem do krytycznej oceny; bez kopiowania jego schematu
 jako zweryfikowanego projektu sprzętowego. Brak nowych zależności i zasobów zewnętrznych.
+
+## Deklaracje profilu i kontrola nadzoru PC — 2026-10-20
+
+Model-Author: Codex. Własny kod GPL-2.0-or-later, biblioteka standardowa:
+`core/linumert/machine/deployment.py`, `tests/test_deployment_profile.py`,
+`config/hardware/safety-contract.ini.example`; test synchronizacji samotestu GUI
+`tests/test_hmi_selftest_sync.py`. Bez nowych zależności i kopiowania schematów sprzętowych.

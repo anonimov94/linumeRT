@@ -51,3 +51,13 @@ Zakres usunięcia emulacji w Plant czeka na odpowiedź właściciela; nie zmieni
 Następnie jawny profil sprzętowy i kontrakt I/O/nadzoru PC; brak gotowej konfiguracji hardware.
 Stan zatrzymania: dokumentacja i pierwszy krok kodu wypchnięte, pełny odbiór Debian 12/GUI przez CI
 oraz środowisko lokalne. LOCK pusty; bez lokalnej instancji LinuxCNC.
+
+### Kolejny krok roadmapy safety — 2026-10-20
+
+PR #48: deklaracje profili i walidator CLI (92df198), bez podłączenia do startu CNC/eksportu.
+Przykład config/hardware/safety-contract.ini.example ma puste piny i jest celowo odrzucany.
+CI b626235: ogólne OK, LinuxCNC 68/69 — samotest naciskał M3 przed odświeżeniem interp HMI.
+Poprawka synchronizacji i regresja: 6047a13; zachowane interlocki. Lokalnie 9 nowych unittest OK.
+Dla Claude: przejrzeć PR #48; wynik CI dla finalnego SHA, potem integracja kontroli na granicy
+startu profilu hardware i analiza rzeczywistych połączeń I/O. Plant nadal czeka na określenie zakresu.
+Stan zatrzymania: krok wypchnięty; żadnej deklaracji odbioru sprzętu. LOCK pusty.
