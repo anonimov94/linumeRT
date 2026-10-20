@@ -1,9 +1,10 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
 """Environment report in Diagnostics. Model-Author: Codex."""
 
-from PyQt5 import QtWidgets
+import sys
+from pathlib import Path
 
-from linumert.diag.doctor import format_report, inspect_environment
+from PyQt5 import QtWidgets
 
 
 class DoctorDialog(QtWidgets.QDialog):
@@ -28,4 +29,12 @@ class DoctorDialog(QtWidgets.QDialog):
         self.refresh_report()
 
     def refresh_report(self):
+        core = str(Path(__file__).resolve().parents[2] / "core")
+        if core not in sys.path:
+            sys.path.insert(0, core)
+        try:
+            from linumert.diag.doctor import format_report, inspect_environment
+        except ImportError as exc:
+            self.output.setPlainText(f"Raport niedostępny: {exc}")
+            return
         self.output.setPlainText(format_report(inspect_environment()))

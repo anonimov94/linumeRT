@@ -45,7 +45,7 @@ dialog.close()
 page.close()
 """
         env = dict(os.environ, QT_QPA_PLATFORM="offscreen")
-        paths = [str(root / "core"), str(root / "screens/linumert")]
+        paths = [str(root / "screens/linumert")]
         env["PYTHONPATH"] = os.pathsep.join(paths)
         run = subprocess.run([sys.executable, "-c", script], env=env, cwd=root,
                              capture_output=True, text=True, timeout=20, check=False)

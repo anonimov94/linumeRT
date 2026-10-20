@@ -1,0 +1,64 @@
+# linumeRT · obraz live USB / ISO (Debian 12 + RT + LinuxCNC 2.9 + linumeRT), sesja 077.
+# Ręcznie (Actions → „ISO live USB” → Run workflow), przy tagu v* (zasób wydania) i przy zmianie
+# tools/iso/ w PR (sprawdzenie budowy). Model-Author: Claude · 2026-10-19.
+name: ISO live USB
+on:
+  workflow_dispatch:
+  push:
+    tags: ['v*']
+  pull_request:
+    paths:
+      - 'tools/iso/**'
+      - '.github/workflows/iso.yml'
+permissions:
+  contents: write
+jobs:
+  iso:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Miejsce na dysku runnera
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
+          df -h /
+      - name: Budowa obrazu (live-build w Debianie 12)
+        run: |
+          docker run --rm --privileged -e LINUMERT_VERSION="${GITHUB_REF_NAME//\//-}" \
+            -v "$PWD:/work" debian:bookworm bash /work/tools/iso/build.sh
+          sudo chown -R "$(id -u):$(id -g)" build
+      - name: Rozmiar (zasób wydania GitHub ≤ 2 GiB)
+        run: |
+          size=$(stat -c %s build/iso/*.iso)
+          echo "ISO: $((size / 1048576)) MiB"
+          [ "$size" -lt 2147483648 ] || { echo "::error::ISO większe niż 2 GiB"; exit 1; }
+      - uses: actions/upload-artifact@v4
+        with:
+          name: linumert-iso
+          path: build/iso/
+          retention-days: 90
+          compression-level: 0
+      # Obrazy robocze zostają na stałe (decyzja właściciela 2026-10-19): każdy obraz spoza tagu v*
+      # = wydanie testowe (pre-release) iso-RRRRMMDD-<sha>; usuwane tylko na polecenie właściciela.
+      - name: Wydanie testowe (obraz roboczy, na stałe)
+        if: "!startsWith(github.ref, 'refs/tags/v')"
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          tag="iso-$(date -u +%Y%m%d)-${SHA:0:7}"
+          gh release view "$tag" >/dev/null 2>&1 || \
+            gh release create "$tag" --target "$SHA" --prerelease --title "Obraz roboczy $tag" \
+              --notes "Roboczy obraz live USB / ISO z commita ${SHA:0:7} (${GITHUB_REF_NAME}). Testowy, NIEZWERYFIKOWANE NA SPRZĘCIE."
+          gh release upload "$tag" build/iso/* --clobber
+      - name: Zasób wydania (tag v*)
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1 || \
+            gh release create "$GITHUB_REF_NAME" --title "linumeRT $GITHUB_REF_NAME" \
+              --notes "Obraz live USB / ISO: Debian 12 + PREEMPT_RT + LinuxCNC 2.9 + linumeRT. NIEZWERYFIKOWANE NA SPRZĘCIE."
+          gh release upload "$GITHUB_REF_NAME" build/iso/* --clobber

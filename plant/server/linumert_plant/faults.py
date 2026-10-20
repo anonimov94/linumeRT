@@ -20,6 +20,7 @@ i `clear(rodzaj, **parametry)`. Każda awaria ma włączenie i zdjęcie; aktywne
   vfd_loss     utrata falownika wrzeciona: z sekcją `vfd` brak odpowiedzi Modbus/hy_vfd, bez niej
                awaria wrzeciona (wybieg do zatrzymania)
   atc_sensor   czujnik magazynu `input` zablokowany w stanie `closed` (True/False)
+  estop_channel  kanał B E-STOP (`io.inputs.estop_b`) zablokowany w stanie `closed`
 
 Wymuszenia wejść (limit, atc_sensor) nakładane są na `digital_in` jako ostatnie, po modelach
 magazynu i pulpicie. Moduł działa poza RT; zmiany robione pod blokadą serwera.
@@ -51,6 +52,7 @@ CATALOG: dict[str, tuple[str, tuple[str, ...]]] = {
     "axis_jam": ("Zablokowanie osi", ("axis",)),
     "vfd_loss": ("Utrata falownika wrzeciona", ()),
     "atc_sensor": ("Zablokowany czujnik magazynu", ("input", "closed")),
+    "estop_channel": ("E-STOP: kanał B zablokowany (rozbieżność kanałów)", ("closed",)),
 }
 TARGET = {"drive_fault": "drive", "limit": "input", "axis_jam": "axis", "atc_sensor": "input"}
 
@@ -222,6 +224,10 @@ class Faults:
                                      f"(toolchanger: {', '.join(sorted(sensors)) or 'brak'})")
                 bit = self._input_bit(params["input"])
                 self.state.forced[bit] = bool(params.get("closed", True))
+            elif kind == "estop_channel":
+                if srv._estop_b is None:
+                    raise FaultError("estop_channel: maszyna bez wejścia estop_b (io.inputs)")
+                self.state.forced[srv._estop_b] = bool(params.get("closed", True))
             self._active[key] = entry
             srv._note(f"awaria: {kind} {key[1]}".rstrip())
             return dict(entry)
@@ -244,6 +250,8 @@ class Faults:
                 self.state.delay_ms = 0.0
             elif kind in ("limit", "atc_sensor"):
                 self.state.forced.pop(self._input_bit(params["input"]), None)
+            elif kind == "estop_channel":
+                self.state.forced.pop(srv._estop_b, None)
             elif kind == "axis_jam":
                 saved = self._jam_saved.pop(key[1])
                 for d, values in saved.items():  # Coulomb przed statycznym (statyczne >= Coulomb)

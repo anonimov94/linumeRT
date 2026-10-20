@@ -1,0 +1,57 @@
+// SPDX-License-Identifier: GPL-2.0-or-later
+// linumeRT - dwukanalowy E-STOP ze stykami NC i kontrola rozbieznosci (zalecenie wlasciciela,
+// 2026-10-19). Model-Author: Claude.
+//
+// Grzyb E-STOP ma dwa styki NC na dwoch liniach przewodow (kanaly A i B; 1 = obwod zamkniety).
+// ok = 1 tylko gdy oba kanaly zamkniete i brak bledu. Kanaly rozne dluzej niz discrepancy_time
+// [s] = blad zatrzasniety (zwarcie albo przerwa w jednej linii, sklejony styk). Blad kasuje
+// dopiero test obwodu: oba kanaly otwarte, potem oba zamkniete, potem zbocze narastajace reset
+// (np. iocontrol.0.user-request-enable). Sam reset przy bledzie albo bez testu nic nie zmienia.
+// Ta sama logika: core/linumert/diag/estop2.py (testy bez LinuxCNC).
+// Zasady RT (CLAUDE.md §5): bez alokacji, bez I/O. NIEZWERYFIKOWANE NA SPRZECIE.
+component lrt_estop2 "linumeRT: dwukanalowy E-STOP NC z kontrola rozbieznosci";
+pin in bit ch_a "kanal A (styk NC, 1 = zamkniety)";
+pin in bit ch_b "kanal B (styk NC, 1 = zamkniety)";
+pin in bit reset "potwierdzenie bledu (zbocze narastajace)";
+pin in float discrepancy_time = 0.1 "dopuszczalny czas roznicy kanalow [s]";
+pin out bit ok "oba kanaly zamkniete i brak bledu (do lancucha E-STOP)";
+pin out bit fault "blad rozbieznosci kanalow (zatrzask)";
+pin out bit test_done "po bledzie: oba kanaly byly otwarte i ponownie zamkniete";
+pin out float timer "czas biezacej roznicy kanalow [s] (diagnostyka)";
+variable int last_reset;
+variable int both_opened;
+function _;
+license "GPL-2.0-or-later";
+author "linumeRT";
+;;
+
+FUNCTION(_) {
+    int rise = reset && !last_reset;
+    last_reset = reset;
+    if (ch_a != ch_b) {
+        timer = timer + fperiod;
+        if (timer > discrepancy_time) {
+            if (!fault) {
+                both_opened = 0;
+                test_done = 0;
+            }
+            fault = 1;
+        }
+    } else {
+        timer = 0.0;
+    }
+    if (fault) {
+        if (!ch_a && !ch_b) {
+            both_opened = 1;
+        }
+        if (both_opened && ch_a && ch_b) {
+            test_done = 1;
+        }
+        if (test_done && rise && ch_a && ch_b) {
+            fault = 0;
+            test_done = 0;
+            both_opened = 0;
+        }
+    }
+    ok = ch_a && ch_b && !fault;
+}

@@ -1,8 +1,8 @@
 # Stan projektu i przekazanie
 
-Tura: Codex · od 2026-10-19 · stan: w toku
+Tura: Codex · od 2026-10-20 · stan: w toku
 
-Model-Author: Codex. Bieżący stan jest w tym pliku; historia w DZIENNIK.md.
+Model-Author: Codex, aktualizacja Claude (koniec 2026-10-19). Bieżący stan jest w tym pliku; historia w DZIENNIK.md.
 Zasady: [WSPOLPRACA_MODELI.md](WSPOLPRACA_MODELI.md), kontrakt operatora:
 [OBSLUGA_OPERATORA.md](OBSLUGA_OPERATORA.md), D36/D37.
 
@@ -36,10 +36,12 @@ Nie uznawaj otwartego podglądu offline za uruchomione pełne HMI.
 
 ## Dalej
 
-1. Zakończyć CI #46; usunąć regresje; scalić po zielonych kontrolach.
-2. Edycja i sprawdzanie G-code w widoku Program; tłumaczenia i pozostałe widoki workflow.
-3. Weryfikacja fizycznej maszyny, safety/STO i napędów pozostaje osobnym zadaniem właściciela.
-4. Pozostały plan sesji i bramki: `prompts/README.md`, `docs/raporty/G0.md`.
+1. Scalić PR #47 po zielonym CI (Cykle, Program: Sprawdź/Edytuj, E-STOP dwukanałowy NC, generatory, STL, D38).
+2. **D38 wznowienie obróbki**: `core/linumert/programs/resume.py` (punkt wejścia z zakładką, helisa, łuk),
+   sprawdzenie w `linumert_sim`, external offsets dla pauzy, przyciski w HMI ([`design/WZNOWIENIE.md`](design/WZNOWIENIE.md)).
+3. Raport HTML symulacji i oś czasu zdarzeń (059, 057); walidacja generatorów z bazą narzędzi (040).
+4. Usunąć scalone gałęzie (limit właściciela: 5 gałęzi, 2 PR; Claude ma usuwanie zablokowane).
+5. Dalszy plan: `prompts/README.md` (stan częściowy 040, 042, 055–059 oznaczony); weryfikacja sprzętu — właściciel.
 
 ## Stan zatrzymania — interpreter, PR #49 · 2026-10-20
 
@@ -53,3 +55,6 @@ Model-Author: Codex. 1b438e5: inwentaryzacja środowiska w Diagnostyce i CLI; cz
 Cztery testy lokalne (w tym Qt offscreen) OK; CI w toku. Bez wykonania CNC/HAL i bez sieci.
 Następny krok: odbiór CI, potem pomiary/runtime i kreator jako kolejne osobne zakresy.
 Równoległe gałęzie tego samego Codexa: #48, #50, #51; zachować ich przekazania przy scalaniu.
+
+Integracja PR #52 z main 1987f28 (#47/#53): zachowane zmiany Claude i przekazanie.
+Raport ładuje rdzeń przy otwarciu; test Qt bez rdzenia na początkowym PYTHONPATH OK.
