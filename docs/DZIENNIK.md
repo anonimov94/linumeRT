@@ -440,3 +440,11 @@ Pełne testy i lint przez CI; NIEZWERYFIKOWANE NA SPRZĘCIE.
   zgodność ruchu (STRAIGHT_TRAVERSE/FEED z rs274) podprogramu i generatora Pythona dla 8 zestawów parametrów
   (sprawdzone lokalnie na LinuxCNC 2.9 RIP).
 - Długi: kieszenie i rowki (po sesjach 041/043); zakładka NgcGui w ekranie nie sprawdzona ręcznie.
+## 053 — Estymator czasu obróbki (część) · 2026-10-20 · Claude
+- Zrobione: `core/linumert/programs/estimate.py` — ruch z wywołań kanonicznych `rs274` (podprogramy, pętle i cykle
+  rozwinięte przez LinuxCNC), profil trapezowy od zera do zera na odcinek i łuk (górne oszacowanie względem G64),
+  limity `[AXIS_*]` i `[TRAJ]` z INI wzdłuż kierunku ruchu, posuw F, przyspieszenie dośrodkowe na łukach, DWELL,
+  stały czas wymiany `[LINUMERT]TOOL_CHANGE_TIME` (domyślnie 10 s); wynik całkowity, G0/G1/postoje/wymiany, na
+  narzędzie i na krok `.lnx`. Jednostki calowe przeliczane.
+- Testy: `tests/test_estimate.py` (7, w tym rs274 z pętlą `repeat`).
+- Długi: „czas pozostały” na ekranie, tabela odchyłek względem Plant w `docs/SYMULACJA.md` i strojenie modelu.

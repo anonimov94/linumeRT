@@ -72,7 +72,7 @@ wymagały ekranu ani LinuxCNC. Bieżący stan i następny krok: [`docs/NASTEPNA_
 | [050](sesja-050.md) | M3 | Bufor i bramka G3 (prototyp v0.2) |  |
 | [051](sesja-051.md) | M4 | Ścieżka z programu |  |
 | [052](sesja-052.md) | M4 | Proces symulacji |  |
-| [053](sesja-053.md) | M4 | Czas obróbki i porównanie z Plant |  |
+| [053](sesja-053.md) | M4 | Czas obróbki i porównanie z Plant | częściowo (estymator z rs274 i INI; ekran i porównanie z Plant później) |
 | [054](sesja-054.md) | M4 | Przygotówka | zrobiona (`;@STOCK`, dialog Symulacja, K-321, cel sondy Plant: `tools/stock_probe.py`) |
 | [055](sesja-055.md) | M4 | Materiał 2.5D | częściowo (symulacja HMI na żywo) |
 | [056](sesja-056.md) | M4 | Reguły kolizji lite | częściowo (na żywo; brak trybu offline) |
