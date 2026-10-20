@@ -400,6 +400,10 @@ class SimPage(QtWidgets.QWidget):
         btn.setToolTip("Zapis bieżącego materiału przygotówki do pliku STL")
         btn.clicked.connect(self.export_stl)
         row.addWidget(btn)
+        btn = QtWidgets.QPushButton("Raport")
+        btn.setToolTip("Raport HTML: program, czas, zdarzenia i widok materiału z góry")
+        btn.clicked.connect(self.export_report)
+        row.addWidget(btn)
         btn = QtWidgets.QPushButton("Odnów materiał")
         btn.setToolTip("Przywraca pełną przygotówkę i czyści ślad ruchu")
         btn.clicked.connect(self.reset_stock)
@@ -439,6 +443,17 @@ class SimPage(QtWidgets.QWidget):
 
     def _on_stl(self, msg) -> None:
         self._add_event("info", f"STL zapisany: {msg.get('path')} ({msg.get('triangles')} trójkątów)")
+
+    def export_report(self) -> None:
+        start = os.path.join(os.path.expanduser("~"), "raport_symulacji.html")
+        path, _f = QtWidgets.QFileDialog.getSaveFileName(self, "Raport symulacji", start,
+                                                         "HTML (*.html)")
+        if path:
+            self.client.send(cmd="export_report", path=path)
+
+    def _on_report(self, msg) -> None:
+        self._add_event("info", f"Raport zapisany: {msg.get('path')} "
+                                f"({msg.get('events')} zdarzeń)")
 
     def reset_stock(self) -> None:
         self.client.send(cmd="stock_reset")

@@ -415,3 +415,12 @@ Pełne testy i lint przez CI; NIEZWERYFIKOWANE NA SPRZĘCIE.
   przeliczany na mm. `compile_program(..., tools=ToolDB.get)`; bez `tools` zachowanie bez zmian.
 - Testy: `tests/test_gen_tooling.py` (11). Decyzje: tolerancja średnicy 0,01 mm.
 - Do sprawdzenia ręcznie: podpięcie `tools=` w panelu dialogowym (sesja 045). Długi: brak.
+
+## 059 — Raport symulacji HTML (p.1) · 2026-10-20 · Claude
+- Zrobione: `simulation/linumert_sim/report.py` — statyczny HTML (kolory z tokenów, bez JS i zasobów zewnętrznych):
+  program, czas symulacji, długość ruchów roboczych i G0, objętość materiału i usuniętego, zdarzenia K-3xx z czasem,
+  linią, narzędziem i pozycją G53, widok z góry (mapa wysokości PNG zapisywana biblioteką standardową + ślad
+  narzędzia SVG), opcjonalny zrzut widoku. Proces `linumert_sim.live`: polecenie `export_report`, zdarzenie `report`;
+  przebieg liczony od wczytania programu albo odnowienia materiału. Strona Symulacja: przycisk „Raport”.
+- Testy: `tests/test_sim_report.py` (7). Do sprawdzenia ręcznie: przycisk „Raport” w działającym HMI (CI: samotest GUI).
+- Długi: przycisk „Symuluj” w panelu dialogowym (045) i plikach; zrzut widoku 3D z ekranu do raportu.

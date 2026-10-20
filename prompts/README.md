@@ -78,7 +78,7 @@ wymagały ekranu ani LinuxCNC. Bieżący stan i następny krok: [`docs/NASTEPNA_
 | [056](sesja-056.md) | M4 | Reguły kolizji lite | częściowo (na żywo; brak trybu offline) |
 | [057](sesja-057.md) | M4 | Widok 3D symulacji | częściowo (widok Symulacja, bez osi czasu) |
 | [058](sesja-058.md) | M4 | Typy narzędzi w symulacji | częściowo (profile; STL = walec) |
-| [059](sesja-059.md) | M4 | Raport symulacji i eksport STL | częściowo (STL gotowy, brak raportu) |
+| [059](sesja-059.md) | M4 | Raport symulacji i eksport STL | częściowo (raport HTML i STL gotowe; „Symuluj” w panelu dialogowym: 045) |
 | [060](sesja-060.md) | M4 | Bufor i bramka G4 (prototyp v0.3) |  |
 | [061](sesja-061.md) | M5 | machine.yaml: napędy i wejścia rzeczywiste |  |
 | [062](sesja-062.md) | M5 | Generator INI/HAL: sim, Plant, step/dir |  |
