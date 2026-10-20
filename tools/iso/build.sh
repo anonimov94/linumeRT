@@ -31,6 +31,8 @@ gpg --show-keys --with-colons config/archives/linuxcnc.key.chroot \
 cp config/archives/linuxcnc.key.chroot config/archives/linuxcnc.key.binary
 echo 'deb http://www.linuxcnc.org/ bookworm base 2.9-uspace' > config/archives/linuxcnc.list.chroot
 cp config/archives/linuxcnc.list.chroot config/archives/linuxcnc.list.binary
+# Repo zamontowane z hosta ma innego właściciela niż root w kontenerze (git: dubious ownership).
+git config --global --add safe.directory "$SRC"
 # Kod linumeRT (bez historii git i katalogów roboczych) do /opt/linumeRT
 mkdir -p config/includes.chroot/opt/linumeRT
 git -C "$SRC" archive HEAD | tar -x -C config/includes.chroot/opt/linumeRT
