@@ -84,6 +84,42 @@ def test_program_bad_file_preserves_previous_preview(page_env, tmp_path):
     page.close()
 
 
+def test_program_syntax_checks_full_text_and_navigates(page_env, tmp_path):
+    _home, shell, _status, action = page_env
+    module = importlib.import_module("linumert_program_page")
+    page = module.ProgramPage(shell)
+    path = tmp_path / "bad.ngc"
+    path.write_text("; comment\n" * 2100 + "G0 X\nM2\n", encoding="utf-8")
+    assert page.show_file(path)
+    page.check_button.click()
+    assert page.issues.count() == 1
+    page.show_issue(page.issues.item(0))
+    assert page.preview.textCursor().selectedText() == "G0 X"
+    assert "2101" in page.filename.text()
+    assert not action.mock_calls
+    path.write_text("G1 X2\nM2\n", encoding="utf-8")
+    page.check_button.click()
+    assert page.issues.count() == 0  # missing feed is semantic, not a lexer error
+    assert "semantyki" in page.message.text()
+    page.close()
+
+
+def test_program_syntax_limits_and_failed_reread(page_env, tmp_path):
+    _home, shell, _status, action = page_env
+    module = importlib.import_module("linumert_program_page")
+    page = module.ProgramPage(shell)
+    path = tmp_path / "large.ngc"
+    path.write_text(";" + "a" * module.CHECK_BYTES, encoding="utf-8")
+    assert page.show_file(path)
+    page.check_button.click()
+    assert "nie został sprawdzony" in page.message.text()
+    path.unlink()
+    page.check_button.click()
+    assert "Nie można odczytać" in page.message.text()
+    assert not action.mock_calls
+    page.close()
+
+
 def test_homing_blocks_commands_during_program_and_homing(page_env):
     page, shell, status, action = page_env
     for state in ("run", "paused"):

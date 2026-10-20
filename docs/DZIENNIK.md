@@ -387,3 +387,11 @@ Specjalista nie omija fizycznego safety ani limitów. Testy wykryły i poprawion
 przeciążenia po zatrzymaniu wrzeciona oraz brak sygnałów kontraktu HAL wymiany wirtualnej.
 Samotest GUI rozszerzony do 42 kroków; pełne CI w toku. Dokumentacja i README ujednolicone.
 Model-Author: Codex.
+
+## 2026-10-20 · Program: kontrola składni w GUI · Codex
+
+Model-Author: Codex. Przycisk Sprawdź składnię, lista z kodami alarmów i przejście do linii.
+Kontrola ponownie czyta plik, obejmuje tekst poza pierwszymi 2000 liniami; limit 64 KiB,
+lista do 100 błędów. Komunikat odróżnia składnię od semantyki i ruchu LinuxCNC.
+Cztery funkcje testowe Program uruchomione na rzeczywistym Qt offscreen w chmurze: OK.
+Brak komend ruchu przy kontroli; screenshot wykonany lokalnie. CI oraz odbiór w pełnym HMI pozostają.
