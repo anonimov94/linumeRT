@@ -536,3 +536,9 @@ Brak komend ruchu przy kontroli; screenshot wykonany lokalnie. CI oraz odbiór w
 - Naddatki pozostają bez zaznaczenia wykańczania; osobny posuw, ściany warstwami i dno pełną ścieżką.
 - Walidacja pasowania narzędzia z naddatkiem, naroży, dna i budżetu bloków. Krok XY uwzględnia odległość po przekątnej.
 - Lokalnie 65 testów kieszeni/widgetów PASS; dodatkowe rs274 i wykonanie kieszeni na prawdziwym LinuxCNC + Plant do odbioru CI. Niezweryfikowane na sprzęcie.
+
+## Plan 23.10 — pliki .lnx i edycja kroków w Cyklach · Codex
+- Model-Author: Codex. Lista kroków i edycja wskazanego kroku; ponowna walidacja geometrii i narzędzi, unieważnienie oszacowanego czasu.
+- Otwieranie i atomowy zapis .lnx przez istniejący model; zachowane jednostki, przygotówka, komentarze, włączenie kroków i wersje generatorów, także kieszenie v1.
+- Niepoprawny plik nie zmienia bieżącego programu. Niezapisane zmiany wymagają świadomego odrzucenia w HMI. G-code pochodzi ze wspólnego kompilatora.
+- Testy rzeczywistych kliknięć Qt offscreen, roundtrip i odrzucenia błędnego pliku; pełny odbiór CI przed scaleniem. Autokontrola, bez niezależnego przeglądu.

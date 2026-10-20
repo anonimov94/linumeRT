@@ -183,3 +183,9 @@ Model-Author: Codex. Własny algorytm konturów/offsetów, obrotu, naroży i nad
 testy materiału oraz rozszerzenie istniejącej sesji LinuxCNC + Plant Claude.
 GPL-2.0-or-later, bez nowych zależności. Opis kierunku skrawania odsyła do przykładu
 Sandvik Coromant w planie tygodnia; nie kopiowano kodu ani ilustracji producenta.
+
+## Cykle: .lnx i wybrany krok — 2026-10-21
+
+Model-Author: Codex. Własna integracja istniejącego modelu/kompilatora .lnx Claude
+z listą kroków i formularzem Qt; zachowane autorstwo widoku i modelu. GPL-2.0-or-later,
+bez nowych zależności. Testy obejmują faktyczne kliknięcia przycisków i pliki na dysku.

@@ -41,3 +41,9 @@ pierścieni uwzględnia również przekątną, aby nie zostawiać wysp przy 90% 
 CI obejmuje wykonanie obu kieszeni z helisą i wykańczaniem na LinuxCNC + Plant.
 Nowa geometria jest wersją 2 generatorów. Wersja 1 w rejestrze pozostaje niezmienna,
 a golden sprawdza G-code istniejących programów. Punkty 21–22 odbierane są wspólnym PR.
+
+Realizacja 23.10: lista kroków, „Zmień wybrany”, „Otwórz .lnx…” i „Zapisz .lnx…”.
+Zapis atomowy, bez utraty komentarzy, przygotówki, jednostek, wyłączonych kroków i wersji.
+Nieznany generator/wersja, błędny JSON albo parametry odrzucają otwarcie bez naruszenia
+bieżącego programu. Edycja ponawia kontrolę narzędzi i unieważnia czas; eksport .ngc
+używa wspólnego kompilatora. Testy przycisków Qt i roundtrip wykonywane automatycznie.

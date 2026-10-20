@@ -516,3 +516,89 @@ def test_cycles_close_cleans_pending_estimate_file(page_env, monkeypatch, tmp_pa
         release.set()
     future.result(timeout=5)
     assert finished.wait(5) and not Path(path).exists()
+
+
+@pytest.mark.parametrize("units", ["mm", "inch"])
+def test_cycles_lnx_roundtrip_preserves_metadata_and_edits_selected_step(
+        page_env, monkeypatch, tmp_path, units):
+    from linumert.programs.lnx import LnxProgram, Step, load_lnx, save_lnx
+    from linumert.programs.stock import Stock
+    from linumert.tools.db import Tool
+
+    module, page, shell = _cycles(page_env, monkeypatch)
+    original = LnxProgram(name="Pokrywa", units=units, comment="Zachowaj opis",
+                          stock=Stock(shape="BOX", x=40, y=30, z=10, material="aluminium"),
+                          steps=[Step(generator="tool_change", version=1, params={"tool": 1}),
+                                 Step(generator="pocket_rect", version=1,
+                                      params={"width": 20, "height": 16, "tool_d": 8, "depth": 1},
+                                      comment="Stary program"),
+                                 Step(generator="face_mill", version=1, enabled=False,
+                                      params={}, comment="Nie obrabiaj")])
+    source, target = tmp_path / "source.lnx", tmp_path / "copy.lnx"
+    save_lnx(original, source)
+    monkeypatch.setattr(module.QtWidgets.QFileDialog, "getOpenFileName",
+                        staticmethod(lambda *a, **k: (str(source), "")))
+    monkeypatch.setattr(module.QtWidgets.QFileDialog, "getSaveFileName",
+                        staticmethod(lambda *a, **k: (str(target), "")))
+
+    def click(label):
+        button = next(b for b in page.findChildren(module.QtWidgets.QPushButton)
+                      if b.text() == label)
+        button.click()
+
+    click("Otwórz .lnx…")
+    assert page.program == original and page.step_list.count() == 3
+    page.step_list.setCurrentRow(1)
+    assert page._gen().version == 1 and "G1 Z-1" in page.text()
+    assert "pominiety" in page.text() and ";@STOCK" in page.text()
+    click("Zapisz .lnx…")
+    assert load_lnx(target) == original
+    assert ("G21" if units == "mm" else "G20") in page.text()
+    tool = Tool(1, 1, "flat", params={"d": 8 if units == "mm" else 8 * 25.4,
+                                    "l": 40, "flute_length": 20})
+    shell.tools = SimpleNamespace(_open=lambda: True, db=SimpleNamespace(get={1: tool}.get))
+    page.inputs["tool_d"].setText("10")
+    click("Zmień wybrany")
+    assert page.program.steps[1].params["tool_d"] == 10
+    assert page.program.steps[1].comment == "Stary program"
+    assert page.program.steps[1].version == 1 and not page.program.steps[2].enabled
+    assert "nie zgadza" in page.lbl_tools.text() and page._dirty
+    click("Zapisz .lnx…")
+    saved = load_lnx(target)
+    assert saved.stock == original.stock and saved.comment == original.comment
+    assert saved.steps[2] == original.steps[2]
+    assert saved.steps[1].params["tool_d"] == 10
+    page.close()
+
+
+@pytest.mark.parametrize("content", ['{"schema_version":99}',
+    '{"name":"bad","steps":[{"generator":"pocket_rect","version":99}]}',
+    '{"name":"bad","steps":[{"generator":"pocket_rect","version":2,"params":{}}]}'])
+def test_cycles_lnx_invalid_open_preserves_current_program(
+        page_env, monkeypatch, tmp_path, content):
+    module, page, _shell = _cycles(page_env, monkeypatch)
+    _face_step(page)
+    previous = page.text()
+    source = tmp_path / "invalid.lnx"
+    source.write_text(content)
+    monkeypatch.setattr(module.QtWidgets.QFileDialog, "getOpenFileName",
+                        staticmethod(lambda *a, **k: (str(source), "")))
+    assert not page.open_lnx()
+    assert page.text() == previous and "Nie otwarto" in page.lbl_issue.text()
+    page.close()
+
+
+def test_cycles_lnx_open_cancel_keeps_unsaved_changes(page_env, monkeypatch, tmp_path):
+    from linumert.programs.lnx import LnxProgram, save_lnx
+
+    module, page, _shell = _cycles(page_env, monkeypatch)
+    _face_step(page)
+    previous = page.text()
+    source = tmp_path / "empty.lnx"
+    save_lnx(LnxProgram(name="inny"), source)
+    monkeypatch.setattr(module.QtWidgets.QFileDialog, "getOpenFileName",
+                        staticmethod(lambda *a, **k: (str(source), "")))
+    monkeypatch.setattr(module.QtWidgets.QMessageBox, "question",
+                        staticmethod(lambda *a, **k: module.QtWidgets.QMessageBox.No))
+    assert not page.open_lnx() and page.text() == previous
+    page.close()
