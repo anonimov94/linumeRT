@@ -67,7 +67,7 @@ wymagały ekranu ani LinuxCNC. Bieżący stan i następny krok: [`docs/NASTEPNA_
 | [045](sesja-045.md) | M3 | Panel programu dialogowego |  |
 | [046](sesja-046.md) | M3 | Podglądy 2D w formularzach |  |
 | [047](sesja-047.md) | M3 | Menedżer programów i pliki .lnx |  |
-| [048](sesja-048.md) | M3 | Biblioteka podprogramów o-word |  |
+| [048](sesja-048.md) | M3 | Biblioteka podprogramów o-word | częściowo (planowanie i wiercenie; kieszenie i rowki po 041/043) |
 | [049](sesja-049.md) | M3 | Test technologiczny na Plant |  |
 | [050](sesja-050.md) | M3 | Bufor i bramka G3 (prototyp v0.2) |  |
 | [051](sesja-051.md) | M4 | Ścieżka z programu |  |

@@ -431,3 +431,12 @@ Pełne testy i lint przez CI; NIEZWERYFIKOWANE NA SPRZĘCIE.
   `stock_bounds`); walec jako prostopadłościan opisany (Plant zna tylko box/plate). `--write` zmienia jedną linię
   `target:` atomowo, komentarze zostają. p.1 (parser, dialog) i p.3 (K-321) były już zrobione.
 - Testy: `tests/test_stock_probe.py` (6; wynik wczytywany schematem machine.yaml). NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## 048 — Biblioteka podprogramów o-word (część) · 2026-10-20 · Claude
+- Zrobione: `core/linumert/generators/subroutines.py` — `o<lrt_face_mill>`, `o<lrt_drill_grid>`, `o<lrt_drill_circle>`
+  (cykle 81/82/83/73, G98/G99) z nagłówkiem NgcGui; eksport `python -m linumert.generators.subroutines <user_macros>`;
+  dokumentacja `docs/user/PODPROGRAMY.md`.
+- Testy: `tests/test_subroutines.py` — nagłówek NgcGui, lekser, eksport, dokumentacja; z markerem `linuxcnc`
+  zgodność ruchu (STRAIGHT_TRAVERSE/FEED z rs274) podprogramu i generatora Pythona dla 8 zestawów parametrów
+  (sprawdzone lokalnie na LinuxCNC 2.9 RIP).
+- Długi: kieszenie i rowki (po sesjach 041/043); zakładka NgcGui w ekranie nie sprawdzona ręcznie.
