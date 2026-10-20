@@ -6,8 +6,8 @@ Model-Author: Claude · 2026-10-19 (symulacja HMI).
     python -m linumert_sim.live --ini <plik.ini> [--machine machine.yaml] [--rate 100]
 
 Co 1/rate s czyta `linuxcnc.stat` (pozycja nosa w G53, narzędzie, obroty, rodzaj ruchu, linia),
-prowadzi materiał przygotówki i reguły `SimEngine`. Kolizja albo przeciążenie → E-STOP
-(`linuxcnc.command().state(STATE_ESTOP)`); w łańcuchu D35/D37 reset wymaga potwierdzenia w HMI.
+prowadzi materiał przygotówki i reguły `SimEngine`. Raportuje kolizje i przeciążenia.
+Nie tworzy kanału komend LinuxCNC i nie uczestniczy w zezwoleniu na ruch (2026-10-20).
 
 Protokół z ekranem: polecenia JSON na stdin (po jednym w linii), zdarzenia JSON na stdout.
 Mapa wysokości przygotówki: plik `float32` (np.memmap), ścieżka w zdarzeniu `stock`.
@@ -76,14 +76,8 @@ class Live:
         self.ini_path = Path(ini_path).resolve()
         self.ini = read_ini(self.ini_path)
         self.stat = self.lc.stat()
-        self.cmd = self.lc.command()
         self.engine = SimEngine()
         self.log = SimLog()
-        self.estop_on_event = True
-        self.virtual = ini_value(self.ini, "LINUMERT", "VIRTUAL_MODE", "0") == "1"
-        self.recovery = False
-        self.latched: str | None = None  # E-STOP z symulacji: sent → off → None (po resecie)
-        self.latched_at = 0.0
         self.map_file: Path | None = None
         self.map: np.ndarray | None = None
         self.map_version = -1
@@ -247,18 +241,9 @@ class Live:
             if codes != active_codes:
                 active_codes = codes
                 emit(ev="alarms", active=codes)
-            on = self.stat.task_state == self.lc.STATE_ON
-            if self.latched == "sent" and (not on or t0 - self.latched_at > 3.0):
-                self.latched = "off"
-            elif self.latched == "off" and on:
-                self.latched = None  # po resecie (grzyb) i włączeniu zdarzenia znów zatrzymują
             for e in events:
-                if self.latched and e.stop:
-                    continue  # skutki wtórne zatrzymania (wrzeciono staje w materiale)
+                # Pole stop jest wskazaniem modelu, nigdy komendą do maszyny.
                 emit(ev="event", **e.to_dict())
-            if self.stop_required(events):
-                self.cmd.state(self.lc.STATE_ESTOP)
-                self.latched, self.latched_at = "sent", t0
             smap = self.engine.stock
             if smap is not None and self.map is not None and smap.version != self.map_version \
                     and t0 - last_map >= MAP_PERIOD:
@@ -283,12 +268,6 @@ class Live:
                                     in ld.axis.items()}})
             time.sleep(max(period - (time.monotonic() - t0), 0.0))
 
-    def stop_required(self, events):
-        recovery = (self.virtual and self.recovery
-                    and self.stat.task_mode == self.lc.MODE_MANUAL)
-        stop = bool(self.engine._active) or any(e.stop for e in events)
-        return self.estop_on_event and not recovery and not self.latched and stop
-
     def command(self, c: dict) -> bool:
         name = c.get("cmd")
         if name == "quit":
@@ -302,14 +281,13 @@ class Live:
             self.load_machine(str(c.get("path", "")))
         elif name == "tools":
             self.reload_tools(force=True)
+        elif name in ("recovery", "estop"):
+            # Starsze HMI wysyła te polecenia; nie przywracają sterowania safety.
+            emit(ev="info", text="Symulacja jest diagnostyczna; nie steruje E-STOP ani STO")
         elif name == "export_stl":
             self.export_stl(str(c.get("path", "")))
         elif name == "export_report":
             self.export_report(str(c.get("path", "")))
-        elif name == "recovery":
-            self.recovery = self.virtual and bool(c.get("on", False))
-        elif name == "estop":
-            self.estop_on_event = bool(c.get("on", True))
         else:
             emit(ev="error", text=f"nieznane polecenie {name!r}")
         return True

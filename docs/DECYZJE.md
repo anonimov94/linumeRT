@@ -101,3 +101,13 @@ Dopisuje agent na końcu sesji, we właściwym miejscu listy:
 - 2026-10-18 · sesja 044 · Lekser G-code: (1) własna implementacja z opisu języka LinuxCNC 2.9 (bez kodu interpretera), spacje poza komentarzami pomijane jak w rs274ngc, kolumny liczone w oryginalnej linii; (2) tylko składnia i parowanie słów O w całym pliku — semantykę (grupy modalne, posuw, słowo E) zostawiamy interpreterowi LinuxCNC (`linuxcnc_check.py`, `rs274` w osobnym procesie z limitem czasu); (3) lekser jest celowo surowszy niż rs274 tam, gdzie rs274 przyjmuje błędny program albo się zawiesza (puste `#<>`, samotne `oN`, niezamknięty blok O, różne etykiety while/endwhile) — oznaczone `strict` w próbkach; (4) E jest literą słowa (LinuxCNC 2.9); P-5103 tylko dla znaków spoza alfabetu słów; (5) zgodność werdyktów z rs274 pilnuje test z markerem `linuxcnc` na 44 próbkach · zgodność z prawdziwym interpreterem, bez nowych zależności · PROPOZYCJA
 
 - 2026-10-19 · D37 · Obsługa operatora: trzy alarmy u góry, Reset pojedynczy/podwójny, specjalista JOG ≤100 mm/s z zachowaniem fizycznego safety, edycja 0,0001 mm, pełne sterowanie w symulacji i reset bliźniaka. Kontrakt: `OBSLUGA_OPERATORA.md`; obowiązuje dalsze prace HMI. Model-Author: Codex. · PRZYJĘTA
+
+## 2026-10-20 — PC w torze zezwolenia, diagnostyczna symulacja
+
+- Właściciel: PC ma być w ciągu zezwolenia na ruch; usunąć safety z symulacji. PRZYJĘTA.
+- Realizacja etapu 1: proces materiału/kolizji tylko odczytuje LinuxCNC i raportuje zdarzenia;
+  bez komend E-STOP/reset/STO. Zastępuje tę część D35/D37. Zakres Plant do doprecyzowania.
+- Niezależny nadzór sygnału PC ma odbierać zgodę; PC nie omija fizycznego safety i nie resetuje
+  jego urządzeń. Dobór architektury i poziomu bezpieczeństwa wymaga oceny ryzyka maszyny.
+- Audyt i dalsze kroki: [bezpieczenstwo/README.md](bezpieczenstwo/README.md).
+  Model-Author: Codex. NIEZWERYFIKOWANE NA SPRZĘCIE.

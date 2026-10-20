@@ -76,6 +76,13 @@ tests/ docs/ docs/prawne/ prompts/ community/
   zezwolenie, nigdy go nadać; reset (potwierdzenie) E-STOP grzybem HMI albo podwójnym Resetem (D37),
   zawsze przez ten sam zatrzask HAL i bez zamykania otwartego fizycznego safety; ekran wysyła sygnał życia do `watchdog` w HAL (zawieszone HMI = E-STOP).
   Obejście (`[LINUMERT]HMI_ESTOP_BYPASS = 1`) wolno tylko w uruchomieniach bez ekranu (testy).
+- Aktualizacja właściciela 2026-10-20: PC jest dodatkowym warunkiem zezwolenia na ruch fizycznej
+  obrabiarki; utrata sygnału PC ma odebrać zgodę, bez obejścia obwodu sprzętowego.
+  Nadzór całego PC wymaga niezależnego toru sprzętowego; sam watchdog HAL nie wystarcza.
+- Symulacja materiału/kolizji jest diagnostyczna: nie wystawia E-STOP, STO ani resetu do LinuxCNC.
+  To rozdzielenie zastępuje wcześniejsze zatrzymanie E-STOP z procesu symulacji w D35/D37.
+  Zakres zmian emulacji Plant pozostaje do doprecyzowania; nie usuwać jego zabezpieczeń przy okazji.
+  Kontrakt i audyt: `docs/bezpieczenstwo/README.md`. NIEZWERYFIKOWANE NA SPRZĘCIE.
 - Wtyczki generują wyłącznie tekst G-code.
 - Generator konfiguracji odmawia konfiguracji sprzętowej bez wejścia E-STOP.
 

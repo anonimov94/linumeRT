@@ -34,9 +34,18 @@ porównuje werdykt leksera z interpreterem `rs274` LinuxCNC 2.9 (`linuxcnc_check
 albo `rs274` w PATH, dodatkowo sprawdza semantykę. rs274 może drukować menu także przy błędach programu, więc kontrolujemy linie spoza menu
 i wywołań kanonicznych, obecność PROGRAM_END oraz kod wyjścia procesu. Komunikaty po angielsku (LinuxCNC).
 
-**Ekran** (przycisk „Sprawdź”, lista błędów, klik → linia, ostrzeżenie przy edycji `.ngc`
-z `.lnx`) czeka na kopię ekranu QtDragon (sesja 005, Codex) — API jest gotowe.
+**Ekran — Program** (Model-Author: Codex): wybierz plik, naciśnij „Sprawdź składnię”.
+Lista podaje kod P-51xx, linię i kolumnę; kliknięcie przenosi podgląd do wskazanej linii,
+także poza pierwszymi 2000 liniami. Przycisk ponownie odczytuje plik z dysku.
+Kontrola działa bez LinuxCNC, dla plików do 64 KiB; pokazuje do 100 błędów wraz z pełną liczbą.
+Większy plik pozostaje dostępny do podglądu/wczytania, ale otrzymuje komunikat „nie sprawdzony”.
+Brak błędów składni nie oznacza poprawnej semantyki ani sprawdzenia ruchu.
+Kontrola niczego nie uruchamia i nie jest warunkiem dopuszczenia maszyny do ruchu.
+„Edytuj kopię…” otwiera pełny tekst do 256 KiB. Edytor wymaga poprawnego UTF-8.
+„Zapisz nową kopię…” tworzy nowy plik; istniejący plik lub dowiązanie nie jest zastępowane.
+Po zapisie kopia trafia do podglądu. Wczytanie jej do LinuxCNC wymaga osobnego przycisku.
+Zamknięcie niezapisanych zmian wymaga potwierdzenia. Przy źródle .lnx widnieje ostrzeżenie,
+że kopia G-code nie aktualizuje modelu .lnx. Kontrola semantyki w GUI pozostaje kolejnym etapem.
 
-Ścieżki RIP i G-code są cytowane jako dane powłoki (także apostrofy i spacje).
-Proces rs274 zastępuje powłokę przez `exec`, aby limit czasu kończył interpreter.
-Testy granicy procesu bez LinuxCNC: `tests/test_interpreter_process.py` (Model-Author: Codex).
+Ścieżki RIP i G-code są cytowane jako dane powłoki; exec wiąże timeout z procesem rs274.
+Testy granicy procesu: `tests/test_interpreter_process.py` (Model-Author: Codex).

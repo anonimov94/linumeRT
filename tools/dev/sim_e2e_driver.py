@@ -146,9 +146,9 @@ def main():
     time.sleep(2)
     poll()
     codes = [e["code"] for e in events() if e.get("ev") == "event"]
-    step("kolizja G0 → K-302 i E-STOP",
-         "K-302" in codes and s.task_state != linuxcnc.STATE_ON, zdarzenia=codes,
-         stan=s.task_state)  # z BYPASS = 1 E-STOP kończy się stanem „wyłączona”
+    step("kolizja G0 → K-302 diagnostycznie, bez E-STOP",
+         "K-302" in codes and s.task_state == linuxcnc.STATE_ON, zdarzenia=codes,
+         stan=s.task_state)  # symulacja nie steruje stanem LinuxCNC
     shot("03_kolizja")
     with open(os.path.join(OUT, "wynik.json"), "w", encoding="utf-8") as fh:
         json.dump(result, fh, ensure_ascii=False, indent=1)

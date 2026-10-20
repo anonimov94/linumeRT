@@ -399,6 +399,36 @@ Model-Author: Codex.
 - E-STOP dwukanałowy NC (zalecenie właściciela): `hal/lrt_estop2.comp` + model `core/linumert/diag/estop2.py` — oba kanały zamknięte = ok; rozbieżność > 0,1 s = błąd zatrzaśnięty; kasowanie: test obwodu (oba otwarte → oba zamknięte) + Reset. Plant: `io.inputs.estop_b` (bit 15) = kopia kanału A, awaria `estop_channel` (kanał B zablokowany). Konfiguracja Plant: łańcuch przez `lrt_estop2`; ekran podaje przyczynę „rozbieżność kanałów”. Testy: model, `halrun`, Plant. NIEZWERYFIKOWANE NA SPRZĘCIE.
 - D38 (PROPOZYCJA, wznowienie z helisą i łukiem) w sesji 031; stan częściowy sesji 040, 042, 055–059 w `prompts/README.md`.
 
+## Bezpieczeństwo — audyt i rozdział symulacji od toru PC · 2026-10-20 · Codex
+- Model-Author: Codex. PR #48, gałąź codex/safety-separation; założenia właściciela w CLAUDE/DECYZJE.
+- Audyt main 7ad6313: poprawki względem Groka, niezależny nadzór PC, bez przypisywania kategorii/PL.
+- Proces symulacji bez kanału komend LinuxCNC; kolizje/przeciążenia nadal raportowane; komunikat diagnostyczny.
+- Zastąpiony test obejścia geometrii testem braku możliwości przywrócenia sterowania; e2e oczekuje diagnostyki.
+- Testy lokalne Debian 13: 3 unittest (w tym 6 wariantów zdarzeń/profilu) i compileall OK; bez Qt/LinuxCNC.
+- Debian 12 i pełny LinuxCNC: CI PR, nie deklaruję lokalnego odbioru GUI ani sprzętu.
+- Zakres Plant oczekuje doprecyzowania; jego łańcuch, watchdogi i testy usterek zachowane.
+- Autokontrola, bez niezależnego przeglądu. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## Bezpieczeństwo — profile i kontrola deklaracji · 2026-10-20 · Codex
+- Model-Author: Codex. PR #48; jawne sim/plant/hardware, CLI bez uruchamiania CNC.
+- Hardware wymaga monitorów E-STOP/nadzoru PC, heartbeat, resetu fizycznego i zakazu autorestartu.
+- Odrzucane: bypass, virtual, sygnały software w rolach I/O, powtarzane deklaracje; hardware_verified=false.
+- Przykład celowo niekompletny, bez połączeń HAL; kontrola nie jest jeszcze bramką startu/eksportu.
+- Testy lokalne Debian 13: 5 unittest profili + 1 synchronizacji HMI; poprzednie 3 diagnostyki OK.
+- CI b626235: ogólne zielone; LinuxCNC 68/69, błąd synchronizacji MDI→M3; poprawka 6047a13.
+- Pełny wynik ostatniego SHA pozostaje do weryfikacji; bez lokalnego odbioru Qt/LinuxCNC.
+- Autokontrola, bez niezależnego przeglądu. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## Bezpieczeństwo — audyt HAL offline · 2026-10-20 · Codex
+- Model-Author: Codex. PR #48, po zgodzie właściciela na zadania bez LinuxCNC poza kolejnością.
+- Audyt tekstowych net/source bez wykonywania HAL, wykrycie pętli software i brakujących połączeń.
+- CLI --hal-from-ini zachowuje wszystkie HALFILE/POSTGUI_HALFILE; --hal dla wskazanych plików.
+- Wynik rozdziela deklarację i ograniczony audyt; hardware_verified=false, bez automatycznej zgody.
+- Lokalne Debian 13: 10 kolejnych unittest OK, łącznie 19 nowych testów gałęzi; bez LinuxCNC/Qt.
+- Dodano pusty protokół odbioru toru PC: próby i pomiary niewykonane, brak deklaracji PL/SIL.
+- Pełne CI finalnego SHA do weryfikacji; autokontrola, bez niezależnego przeglądu.
+- NIEZWERYFIKOWANE NA SPRZĘCIE. Plant bez zmian zakresu.
+
 ## 2026-10-20 · Granica procesu interpretera · Codex
 
 Model-Author: Codex. Część sesji 081, bez deklarowania całej sesji jako ukończonej.
@@ -456,3 +486,12 @@ Pełne testy i lint przez CI; NIEZWERYFIKOWANE NA SPRZĘCIE.
 Model-Author: Codex. Run 113 ujawnił BadWindow i pozostawiony proces przed testami Plant.
 Obsługa znikającego okna i zakończenie procesu w finally, także przy błędzie X11.
 Trzy testy regresji offline OK; pełna weryfikacja w CI. Wynik nieudanego shutdown nadal jest błędem.
+
+## 2026-10-20 · Program: kontrola składni w GUI · Codex
+
+Model-Author: Codex. Przycisk Sprawdź składnię, lista z kodami alarmów i przejście do linii.
+Kontrola ponownie czyta plik, obejmuje tekst poza pierwszymi 2000 liniami; limit 64 KiB,
+lista do 100 błędów. Komunikat odróżnia składnię od semantyki i ruchu LinuxCNC.
+Cztery funkcje testowe Program uruchomione na rzeczywistym Qt offscreen w chmurze: OK.
+Brak komend ruchu przy kontroli; screenshot wykonany lokalnie. CI oraz odbiór w pełnym HMI pozostają.
+

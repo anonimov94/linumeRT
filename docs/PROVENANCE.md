@@ -123,6 +123,28 @@ bez kopiowania kodu komponentu i bez zmian w konfiguracji fizycznej maszyny.
 | Koncepcja wycofania i powrotu do obróbki (D38) | dokument projektowy | model językowy Claude na zlecenie właściciela | 2026-10-19 | własny opis; mechanizmy LinuxCNC (external offsets, G2/G3 z Z) opisane bez kopiowania dokumentacji | GPL-2.0-or-later | plan ekranu | `docs/design/WZNOWIENIE.md` |
 | Obraz live USB / ISO (live-build) | konfiguracja, skrypty, workflow | model językowy Claude na zlecenie właściciela | 2026-10-19 | własna konfiguracja live-build (Debian), pakiety z Debiana i linuxcnc.org instalowane w czasie budowy, bez kopiowania cudzych konfiguracji | GPL-2.0-or-later | dystrybucja | `tools/iso/`, `.github/workflows/iso.yml`, `tests/test_iso.py` |
 
+## Rozdział safety i symulacji — 2026-10-20
+
+Model-Author: Codex. Własna analiza i implementacja GPL-2.0-or-later na polecenie właściciela:
+`docs/bezpieczenstwo/README.md`, diagnostyczny proces `simulation/linumert_sim/live.py`,
+komunikaty strony Symulacja, `tests/test_sim_diagnostics.py`, aktualizacja testów i e2e.
+Audyt Groka przekazany w czacie był wejściem do krytycznej oceny; bez kopiowania jego schematu
+jako zweryfikowanego projektu sprzętowego. Brak nowych zależności i zasobów zewnętrznych.
+
+## Deklaracje profilu i kontrola nadzoru PC — 2026-10-20
+
+Model-Author: Codex. Własny kod GPL-2.0-or-later, biblioteka standardowa:
+`core/linumert/machine/deployment.py`, `tests/test_deployment_profile.py`,
+`config/hardware/safety-contract.ini.example`; test synchronizacji samotestu GUI
+`tests/test_hmi_selftest_sync.py`. Bez nowych zależności i kopiowania schematów sprzętowych.
+
+## Audyt tekstowych HAL offline — 2026-10-20
+
+Model-Author: Codex. Własna implementacja GPL-2.0-or-later z biblioteki standardowej:
+`core/linumert/machine/hal_audit.py`, integracja deployment CLI,
+`tests/test_hal_audit_offline.py`, `tests/test_deployment_cli.py`,
+`docs/bezpieczenstwo/ODBIOR.md`. Bez nowych zależności i kodu zewnętrznego.
+
 ## Kontrola procesu interpretera — 2026-10-20
 
 Model-Author: Codex. Własne poprawki `linuxcnc_check.py` i testy `test_interpreter_process.py`,
@@ -133,3 +155,11 @@ GPL-2.0-or-later, biblioteka standardowa; bez nowych zależności i kodu zewnęt
 Model-Author: Codex. Własny kod GPL-2.0-or-later: `core/linumert/diag/doctor.py`,
 `linumert_doctor_dialog.py`, integracja Diagnostyki, testy `test_doctor_offline.py`
 i `test_doctor_gui.py`. Biblioteka standardowa i istniejący PyQt5; bez nowych zasobów zewnętrznych.
+
+## Kontrola składni w widoku Program — 2026-10-20
+
+Model-Author: Codex. Własna integracja istniejącego leksera, lista i nawigacja Qt,
+`linumert_program_page.py`, testy `test_hmi_workflow_widgets.py`; GPL-2.0-or-later.
+Bez nowych zależności ani zewnętrznych zasobów.
+
+

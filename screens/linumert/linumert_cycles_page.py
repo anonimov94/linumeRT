@@ -24,10 +24,11 @@ for _p in (os.path.join(ROOT, "core"),):
     if _p not in sys.path:
         sys.path.insert(0, _p)
 
-from linumert.generators import basic, drilling  # noqa: E402
+from linumert.generators import basic, drilling, pockets  # noqa: E402
 
 ACTION = Action()
 GENERATORS = (basic.Header, basic.ToolChange, basic.FaceMill, drilling.DrillHoles,
+              pockets.PocketRect, pockets.PocketCircle,
               basic.ProgramEnd)
 
 
@@ -185,6 +186,9 @@ class CyclesPage(QtWidgets.QWidget):
         lines = gen.generate(values)
         self.view2d.set_lines(gen.preview_2d(values))
         self.lbl_step.setText(f"{len(lines)} linii")
+        if gen.name.startswith("pocket_"):
+            self.lbl_issue.setText("Prototyp: wejście pionowe wymaga frezu skrawającego w osi. "
+                                   "Sprawdź w symulacji. Rampa, helisa i wykańczanie: w planie.")
         return lines
 
     # ---- program --------------------------------------------------------------------------

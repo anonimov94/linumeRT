@@ -63,3 +63,11 @@ Raport ładuje rdzeń przy otwarciu; test Qt bez rdzenia na początkowym PYTHONP
 PR #52 scalony. PR #51: po błędzie Xlib.BadWindow proces LinuxCNC pozostawał żywy,
 psując kolejne testy Plant. Sprzątanie w finally i obsługa znikających okien; 3 regresje offline OK.
 Następny krok: ponowne CI, bez maskowania nieudanego zamknięcia QtDragon.
+
+## Bieżące polecenie właściciela — 2026-10-20
+
+Model-Author: Codex. Dokończyć rozpoczęte PR #48/#50/#54/#55/#56, bez nowych sesji.
+Kod połączony w PR #56 z zachowaniem historii pozostałych gałęzi; konflikty tylko w dokumentacji.
+54 testy zakresu lokalnie OK (Arch/Python 3.14, wynik pomocniczy); wiążący Debian 12/LinuxCNC w CI.
+Kieszenie pozostają jawnym prototypem wejścia pionowego, bez deklarowania zakończenia sesji 041.
+Następny krok: pełne CI, raport P0, scalenie; potem odbiór launchera i lista usterek na tydzień.

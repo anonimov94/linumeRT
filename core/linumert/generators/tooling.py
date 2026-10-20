@@ -92,7 +92,8 @@ def _spindle(step: int, v: dict[str, Any], tool) -> list[Issue]:
     return issues
 
 
-CHECKS = {"face_mill": _face_mill, "drill_holes": _drill_holes}
+CHECKS = {"face_mill": _face_mill, "drill_holes": _drill_holes,
+          "pocket_rect": _face_mill, "pocket_circle": _face_mill}
 
 
 def check_steps(steps: list[tuple[int, str, dict[str, Any]]], lookup: ToolLookup,

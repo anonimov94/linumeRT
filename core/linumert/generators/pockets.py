@@ -14,14 +14,13 @@ from typing import Any
 
 from .base import BaseMacroGenerator, Field, Issue, Polyline, fmt
 
-
 COMMON = (
     Field("cx", "float", "Środek X", "mm", default=0.0),
     Field("cy", "float", "Środek Y", "mm", default=0.0),
     Field("z_top", "float", "Powierzchnia Z", "mm", default=0.0),
     Field("depth", "float", "Głębokość", "mm", minimum=0, exclusive_minimum=True, maximum=100),
-    Field("step_down", "float", "Krok Z", "mm", default=1.0, minimum=0, exclusive_minimum=True),
-    Field("tool_d", "float", "Średnica frezu", "mm", minimum=0, exclusive_minimum=True),
+    Field("step_down", "float", "Krok Z", "mm", default=1.0, minimum=0.0001),
+    Field("tool_d", "float", "Średnica frezu", "mm", minimum=0.001),
     Field("stepover", "float", "Krok boczny", "% D", default=50.0, minimum=5, maximum=90),
     Field("feed", "float", "Posuw", "mm/min", default=400.0, minimum=0,
           exclusive_minimum=True),
@@ -39,13 +38,15 @@ def _levels(v: dict[str, Any]):
 
 def _check(v: dict[str, Any], step: int, clearance: float) -> list[Issue]:
     issues = []
-    for name, value, limit in (
-        ("safe_z", v["safe_z"], v["z_top"]),
-        ("step_down", v["step_down"], v["depth"] * 10),
-    ):
-        if (name == "safe_z" and value <= limit) or (name == "step_down" and value > limit):
-            issues.append(Issue("P-5003", {"name": name, "value": fmt(value),
-                                           "limit": f"{'>' if name == 'safe_z' else '<='} {fmt(limit)}"}, name))
+    if round(v["safe_z"], 4) <= round(v["z_top"], 4):
+        issues.append(Issue("P-5003", {"name": "safe_z", "value": fmt(v["safe_z"]),
+                                      "limit": f"> {fmt(v['z_top'])}"}, "safe_z"))
+    extent = max(v.get("width", 0), v.get("height", 0), v.get("diameter", 0))
+    rings = math.ceil(extent / (v["tool_d"] * v["stepover"] / 100))
+    blocks = math.ceil(v["depth"] / v["step_down"]) * (5 * rings + 4)
+    if blocks > 20000:
+        issues.append(Issue("P-5003", {"name": "liczba bloków", "value": str(blocks),
+                                      "limit": "<= 20000"}, "step_down"))
     if clearance <= 0:
         issues.append(Issue("P-5007", {"tool": 0, "what":
                                       "średnica frezu nie mieści się w kieszeni"}, "tool_d"))
@@ -57,8 +58,8 @@ class PocketRect(BaseMacroGenerator):
     version = 1
     title = "Kieszeń prostokątna (prototyp)"
     fields = COMMON + (
-        Field("width", "float", "Szerokość X", "mm", minimum=0, exclusive_minimum=True),
-        Field("height", "float", "Długość Y", "mm", minimum=0, exclusive_minimum=True),
+        Field("width", "float", "Szerokość X", "mm", minimum=0.001, maximum=10000),
+        Field("height", "float", "Długość Y", "mm", minimum=0.001, maximum=10000),
     )
 
     def check(self, v: dict[str, Any], step: int) -> list[Issue]:
@@ -78,7 +79,8 @@ class PocketRect(BaseMacroGenerator):
         return rings
 
     def generate(self, v: dict[str, Any]) -> list[str]:
-        lines = ["( Kieszen prostokatna: wejscie pionowe, symulacja wymagana )"]
+        lines = ["( Kieszen prostokatna: wejscie pionowe, symulacja wymagana )",
+                 "G17 G90 G91.1 G94 G40 G80"]
         rings = self._rings(v)
         for z in _levels(v):
             lines += [f"G0 Z{fmt(v['safe_z'])}", f"G0 X{fmt(v['cx'])} Y{fmt(v['cy'])}",
@@ -97,8 +99,7 @@ class PocketCircle(BaseMacroGenerator):
     version = 1
     title = "Kieszeń okrągła (prototyp)"
     fields = COMMON + (
-        Field("diameter", "float", "Średnica kieszeni", "mm", minimum=0,
-              exclusive_minimum=True),
+        Field("diameter", "float", "Średnica kieszeni", "mm", minimum=0.001, maximum=10000),
     )
 
     def check(self, v: dict[str, Any], step: int) -> list[Issue]:
@@ -112,7 +113,8 @@ class PocketCircle(BaseMacroGenerator):
 
     def generate(self, v: dict[str, Any]) -> list[str]:
         cx, cy = v["cx"], v["cy"]
-        lines = ["( Kieszen okragla: wejscie pionowe, symulacja wymagana )"]
+        lines = ["( Kieszen okragla: wejscie pionowe, symulacja wymagana )",
+                 "G17 G90 G91.1 G94 G40 G80"]
         for z in _levels(v):
             lines += [f"G0 Z{fmt(v['safe_z'])}", f"G0 X{fmt(cx)} Y{fmt(cy)}",
                       f"G1 Z{fmt(z)} F{fmt(v['plunge'])}"]

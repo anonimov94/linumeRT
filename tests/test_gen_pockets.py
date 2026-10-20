@@ -5,7 +5,6 @@ Model-Author: Codex · 2026-10-20
 """
 
 import pytest
-
 from linumert.generators.pockets import PocketCircle, PocketRect
 
 

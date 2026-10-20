@@ -8,7 +8,7 @@ import sys
 import types
 from pathlib import Path
 from types import SimpleNamespace
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
 import pytest
 
@@ -81,6 +81,107 @@ def test_program_bad_file_preserves_previous_preview(page_env, tmp_path):
     assert page.show_file(path)
     assert not page.show_file(tmp_path / "missing.ngc")
     assert page.path == path and "M2" in page.preview.toPlainText()
+    page.close()
+
+
+def test_program_syntax_checks_full_text_and_navigates(page_env, tmp_path):
+    _home, shell, _status, action = page_env
+    module = importlib.import_module("linumert_program_page")
+    page = module.ProgramPage(shell)
+    path = tmp_path / "bad.ngc"
+    path.write_text("; comment\n" * 2100 + "G0 X\nM2\n", encoding="utf-8")
+    assert page.show_file(path)
+    page.check_button.click()
+    assert page.issues.count() == 1
+    page.show_issue(page.issues.item(0))
+    assert page.preview.textCursor().selectedText() == "G0 X"
+    assert "2101" in page.filename.text()
+    assert not action.mock_calls
+    path.write_text("G1 X2\nM2\n", encoding="utf-8")
+    page.check_button.click()
+    assert page.issues.count() == 0  # missing feed is semantic, not a lexer error
+    assert "semantyki" in page.message.text()
+    page.close()
+
+
+def test_program_syntax_limits_and_failed_reread(page_env, tmp_path):
+    _home, shell, _status, action = page_env
+    module = importlib.import_module("linumert_program_page")
+    page = module.ProgramPage(shell)
+    path = tmp_path / "large.ngc"
+    path.write_text(";" + "a" * module.CHECK_BYTES, encoding="utf-8")
+    assert page.show_file(path)
+    page.check_button.click()
+    assert "nie został sprawdzony" in page.message.text()
+    path.unlink()
+    page.check_button.click()
+    assert "Nie można odczytać" in page.message.text()
+    assert not action.mock_calls
+    page.close()
+
+
+def test_program_editor_saves_full_copy_without_cnc(page_env, tmp_path):
+    _home, _shell, _status, action = page_env
+    module = importlib.import_module("linumert_program_editor")
+    source = tmp_path / "source.ngc"
+    text = "; line\n" * 3000 + "M2\n"
+    source.write_text(text, encoding="utf-8")
+    editor = module.ProgramEditor(source, text)
+    editor.editor.appendPlainText("; changed")
+    assert not editor.save_to(source)
+    assert source.read_text(encoding="utf-8") == text
+    target = tmp_path / "copy.ngc"
+    assert editor.save_to(target)
+    assert target.read_text(encoding="utf-8").endswith("M2\n\n; changed")
+    assert editor.saved_path == target and not action.mock_calls
+    editor.close()
+
+
+def test_program_editor_declines_bad_encoding_and_running(page_env, tmp_path):
+    _home, shell, _status, action = page_env
+    module = importlib.import_module("linumert_program_page")
+    page = module.ProgramPage(shell)
+    source = tmp_path / "broken.ngc"
+    source.write_bytes(b"\xff\nM2\n")
+    assert page.show_file(source)
+    page.edit_button.click()
+    assert "Nie można edytować" in page.message.text()
+    shell.s.interp = "run"
+    page.refresh()
+    assert not page.edit_button.isEnabled()
+    page.edit_program()
+    assert not action.mock_calls
+    page.close()
+
+
+def test_program_editor_confirm_discard_and_copy_preview(page_env, tmp_path):
+    from PyQt5 import QtWidgets
+
+    _home, shell, _status, action = page_env
+    module = importlib.import_module("linumert_program_page")
+    source = tmp_path / "source.ngc"
+    source.write_text("M2\n", encoding="utf-8")
+    editor = module.ProgramEditor(source, "M2\n")
+    editor.show()
+    editor.editor.insertPlainText("; edit\n")
+    with patch.object(QtWidgets.QMessageBox, "question", return_value=QtWidgets.QMessageBox.No):
+        editor.reject()
+        assert editor.isVisible()
+    with patch.object(QtWidgets.QMessageBox, "question", return_value=QtWidgets.QMessageBox.Yes):
+        editor.reject()
+        assert not editor.isVisible()
+    target = tmp_path / "copy.ngc"
+
+    def save_dialog(dialog):
+        assert dialog.save_to(target)
+        return QtWidgets.QDialog.Accepted
+
+    page = module.ProgramPage(shell)
+    assert page.show_file(source)
+    with patch.object(module.ProgramEditor, "exec_", save_dialog):
+        page.edit_button.click()
+    assert page.path == target and "M2" in page.preview.toPlainText()
+    assert not action.mock_calls
     page.close()
 
 
@@ -201,25 +302,23 @@ def test_zero_reads_live_and_saved_machine_offsets_without_commands(page_env, tm
 
 
 def test_program_check_and_edit(page_env, tmp_path):
-    """Sprawdź: składnia z rdzenia; Edytuj/Zapisz: plik na dysku, bez komend maszyny."""
-    pytest.importorskip("yaml")
+    """One check action and copy editing preserve the original without CNC commands."""
     _home, shell, _status, action = page_env
     module = importlib.import_module("linumert_program_page")
     page = module.ProgramPage(shell)
     path = tmp_path / "p.ngc"
     path.write_text("G21 G90\nG0 X10\nM2\n")
     page.show_file(path)
-    page.check.click()
-    assert "poprawna" in page.message.text()
-    page.edit.click()
-    assert not page.preview.isReadOnly() and not page.load.isEnabled()
-    page.preview.setPlainText("G21 G90\nG0 X10 X20 (\nM2")
+    assert page.check_program() == []
+    path.write_text("G21 G90\nG0 X10 X20 (\nM2")
     issues = page.check_program()
     assert issues and page.preview.textCursor().blockNumber() == issues[0].line - 1
-    page.preview.setPlainText("G21 G90\nG1 X5 F100\nM2")
-    page.edit.click()  # zapis
-    assert path.read_text() == "G21 G90\nG1 X5 F100\nM2\n" and page.preview.isReadOnly()
-    assert not action.mock_calls
+    editor = module.ProgramEditor(path, page.text)
+    editor.editor.setPlainText("G21 G90\nG1 X5 F100\nM2")
+    copy = tmp_path / "copy.ngc"
+    assert editor.save_to(copy)
+    assert "G1 X5" in copy.read_text() and "X20 (" in path.read_text()
+    assert page.preview.isReadOnly() and not action.mock_calls
     page.close()
 
 

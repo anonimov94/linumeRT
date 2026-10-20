@@ -7,7 +7,8 @@ Model-Author: Codex · wymagania właściciela 2026-10-19.
 Na samej górze ekranu są trzy wiersze ostatnich alarmów, najnowszy pierwszy.
 Historia pozostaje w Diagnostyce. Pojedynczy Reset potwierdza alarmy, których przyczyny ustały.
 Podwójny Reset dodatkowo potwierdza zatrzask E-STOP; fizycznie otwarty obwód safety nadal blokuje maszynę.
-Symulacja może resetować emulowane zdarzenia; nigdy nie traktujemy braku telemetrii jako symulacji.
+Symulacja materiału/kolizji raportuje zdarzenia diagnostyczne i nie wysyła E-STOP/STO ani resetu.
+Nigdy nie traktujemy braku telemetrii jako symulacji.
 
 ## Specjalista
 
@@ -40,10 +41,10 @@ obowiązuje jej procedura ręcznej wymiany/ATC. Zero detalu jest dostępne w szy
 „Wczytaj bazę z maszyny” pobiera wybrany G54–G59: aktywny układ ze STATUS,
 pozostałe z PARAMETER_FILE bieżącej konfiguracji. Odczyt nie zmienia zer ani nie wykonuje ruchu.
 
-Po kolizji w bliźniaku: włącz Specjalista, potwierdź E-STOP podwójnym Resetem,
-włącz Maszyna i przytrzymaj JOG, aby się wycofać. Zakończ specjalistę po opuszczeniu kolizji.
-W czasie wycofania model nadal raportuje kolizje; nie zatrzymują one ponownie ruchu ręcznego.
-Po wyłączeniu specjalisty lub zmianie na AUTO/MDI kontrola zatrzymania jest ponownie aktywna.
+Po kolizji model raportuje położenie i kod diagnostyczny; nie zatrzymuje sterownika.
+Operator może zatrzymać program przyciskiem Stop. Specjalista nadal udostępnia ograniczony JOG,
+bez obchodzenia fizycznych wejść i limitów. Zakończ specjalistę po wycofaniu.
+Zmiana trybu nie włącza komend safety z procesu symulacji.
 Zakresy osi LinuxCNC nadal obowiązują, również w symulacji. Klawiatura w specjaliście: 10 mm/s.
 
 `[LINUMERT] VIRTUAL_MODE=1` oznacza konfigurację bez fizycznych wyjść napędów.
