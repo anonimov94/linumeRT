@@ -14,6 +14,7 @@ import os
 import re
 import shutil
 import subprocess
+import tempfile
 import time
 from pathlib import Path
 
@@ -148,34 +149,36 @@ def test_existing_git_worktree_is_not_cloned_again(tmp_path):
     assert not calls
 
 
-def test_desktop_exec_passes_special_paths_as_literal_arguments(tmp_path, monkeypatch):
+def test_desktop_exec_passes_special_paths_as_literal_arguments(monkeypatch):
     gi = pytest.importorskip("gi")
     gi.require_version("Gio", "2.0")
     from gi.repository import Gio
 
-    base = tmp_path / 'folder with space $cash `ticks` "quote" 50% \\slash'
-    base.mkdir()
-    repo = _clone(base)
-    _run(base, repo, "--desktop")
-    desktop = base / "home/.local/share/applications/linumert.desktop"
-    text = desktop.read_text().replace("Terminal=true", "Terminal=false")
-    desktop.write_text(text)
-    target = base / "argv"
-    fake = base / "bin/bash"
-    fake.write_text('#!/bin/bash\nprintf "%s\\0" "$@" > "$LINUMERT_TEST_ARGV"\n')
-    fake.chmod(0o755)
-    monkeypatch.setenv("PATH", f"{base / 'bin'}:/usr/bin:/bin")
-    monkeypatch.setenv("LINUMERT_TEST_ARGV", str(target))
-    app = Gio.DesktopAppInfo.new_from_filename(str(desktop))
-    assert app is not None and app.launch([], None)
-    expected = [str(base / "home/.local/share/linumert/launcher.sh"), "--dir", str(repo)]
-    deadline = time.monotonic() + 5
-    while time.monotonic() < deadline:
-        if target.exists() and target.read_bytes().split(b"\0")[:-1] == [
-                arg.encode() for arg in expected]:
-            break
-        time.sleep(0.01)
-    assert target.read_bytes().split(b"\0")[:-1] == [arg.encode() for arg in expected]
+    # Uploader artefaktów CI odrzuca nazwy z cudzysłowami; sprzątamy także po błędzie.
+    with tempfile.TemporaryDirectory(prefix="linumert-desktop-") as folder:
+        base = Path(folder) / 'folder with space $cash `ticks` "quote" 50% \\slash'
+        base.mkdir()
+        repo = _clone(base)
+        _run(base, repo, "--desktop")
+        desktop = base / "home/.local/share/applications/linumert.desktop"
+        text = desktop.read_text().replace("Terminal=true", "Terminal=false")
+        desktop.write_text(text)
+        target = base / "argv"
+        fake = base / "bin/bash"
+        fake.write_text('#!/bin/bash\nprintf "%s\\0" "$@" > "$LINUMERT_TEST_ARGV"\n')
+        fake.chmod(0o755)
+        monkeypatch.setenv("PATH", f"{base / 'bin'}:/usr/bin:/bin")
+        monkeypatch.setenv("LINUMERT_TEST_ARGV", str(target))
+        app = Gio.DesktopAppInfo.new_from_filename(str(desktop))
+        assert app is not None and app.launch([], None)
+        expected = [str(base / "home/.local/share/linumert/launcher.sh"), "--dir", str(repo)]
+        deadline = time.monotonic() + 5
+        while time.monotonic() < deadline:
+            if target.exists() and target.read_bytes().split(b"\0")[:-1] == [
+                    arg.encode() for arg in expected]:
+                break
+            time.sleep(0.01)
+        assert target.read_bytes().split(b"\0")[:-1] == [arg.encode() for arg in expected]
 
 
 @pytest.mark.skipif(shutil.which("desktop-file-validate") is None,
