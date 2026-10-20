@@ -552,7 +552,7 @@ Brak komend ruchu przy kontroli; screenshot wykonany lokalnie. CI oraz odbiór w
 ## Plan 25.10 — czas pozostały i porównanie z Plant · Codex
 - Model-Author: Codex. Produkcja: szacowanie w tle, ETA podczas pracy i pauzy, unieważnienie po zmianie programu/INI, ograniczenia korekcji i startu od linii.
 - Estymator uwzględnia limit Z helisy; jawnie odmawia nieobsługiwanej płaszczyzny/trybu posuwu i brakujących limitów XYZ.
-- Lokalnie 40 testów czasu/widgetów/złożenia HMI PASS. Pomiar czasu obu kieszeni LinuxCNC + Plant oraz błąd modelu w pocket_calibration.json — odbiór CI wymagany.
+- Lokalnie 40 testów czasu/widgetów/złożenia HMI PASS. Pomiar czasu dwóch kieszeni i planowania LinuxCNC + Plant oraz błąd modelu w pocket_calibration.json — odbiór CI wymagany.
 - Wynik jest przybliżeniem, nie gwarancją czasu cyklu; start od XYZ=0 i oczekiwania operatora opisane w planie. Bez niezależnego przeglądu.
 
 ## Plan 26.10 — bieżący widok i oś czasu raportu · Codex

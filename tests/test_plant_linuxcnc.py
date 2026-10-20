@@ -142,19 +142,26 @@ def session(tmp_path_factory):
     tmp_path = tmp_path_factory.mktemp("plant_cnc")
     ini = _prepare(tmp_path)
     (tmp_path / "driver.py").write_text(DRIVER, encoding="utf-8")
+    from linumert.generators.basic import FaceMill
     from linumert.generators.pockets import PocketCircle, PocketRect
 
     programs = []
     for cls, dims in [(PocketRect, {"width": 20, "height": 16, "rotation": 37,
                                     "corner_radius": 5}), (PocketCircle, {"diameter": 18})]:
         path = tmp_path / f"{cls.name}.ngc"
-        path.write_text(cls().generate_ngc({"depth": 1, "tool_d": 8, "cx": 100, "cy": 200,
+        path.write_text("S3000 M3\n" + cls().generate_ngc({"depth": 1, "tool_d": 8,
+                                           "cx": 100, "cy": 200,
                                            "z_top": -20, "safe_z": -15, "feed": 600,
                                            "plunge": 300, "entry": "helix", "entry_angle": 5,
                                            "direction": "cw", "wall_allowance": 0.5,
                                            "floor_allowance": 0.2, "finish": True, **dims},
                                           path.name))
         programs.append(str(path))
+    face = tmp_path / "face_mill.ngc"
+    face.write_text("G61\nS3000 M3\n" + FaceMill().generate_ngc({
+        "x0": 100, "y0": 200, "x1": 125, "y1": 220, "depth": 1, "tool_d": 8,
+        "z_top": -20, "safe_z": -15, "feed": 600, "plunge": 300}, face.name))
+    programs.append(str(face))
     report = tmp_path / "plant_report.json"
     plant_yaml = CFG / "plant.yaml"  # ścieżka machine względem oryginału
     with installed_modules(root, tmp_path, ("lrt_net", "lrt_cia402", "lrt_estop2")), \
@@ -217,7 +224,7 @@ def _violations(res, kind):
 
 
 def test_pocket_helix_and_finishing_on_real_linuxcnc_plant(session):
-    assert len(session["pockets"]) == 2
+    assert len(session["pockets"]) == 3  # dwie kieszenie i planowanie do kalibracji
     for result in session["pockets"]:
         assert result["started"] and result["done"], result
         assert result["task_state"] == session["task_state"], result
@@ -225,10 +232,13 @@ def test_pocket_helix_and_finishing_on_real_linuxcnc_plant(session):
         assert result["ferror"] < 0.5, result
 
 
-def test_time_model_calibrated_against_linuxcnc_plant(session):
+def test_time_model_calibrated_against_linuxcnc_plant(session, request):
     # Kontrola rozsądku, nie deklaracja dokładności modelu G64. Dowód liczbowy
-    # i błąd względny obu programów zapisane w pocket_calibration.json artefaktu CI.
-    assert len(session["calibration"]) == 2
+    # i błąd względny trzech programów zapisane w pocket_calibration.json artefaktu CI.
+    assert len(session["calibration"]) == 3
+    reporter = request.config.pluginmanager.get_plugin("terminalreporter")
+    for result in session["calibration"]:
+        reporter.write_line("TIME_CALIBRATION " + json.dumps(result, ensure_ascii=False))
     for result in session["calibration"]:
         assert result["estimate_s"] > 0 and result["plant_s"] > 0
         assert 0.5 < result["estimate_s"] / result["plant_s"] < 3, result

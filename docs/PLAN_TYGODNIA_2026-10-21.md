@@ -69,7 +69,7 @@ niż 100% i po starcie od linii. Przekroczenie czasu modelu daje jawny komunikat
 Model łuków wymaga G17/G94, uwzględnia limit Z helisy i odmawia niekompletnych limitów XYZ.
 Nie gwarantuje czasu całego cyklu: start XYZ=0, uproszczony G64, pominięte oczekiwanie
 operatora i rozpędzanie wrzeciona. Test LinuxCNC + Plant zapisuje czas oszacowany,
-zmierzony i błąd względny dwóch kieszeni w `pocket_calibration.json` w artefaktach CI.
+zmierzony i błąd względny dwóch kieszeni i planowania w `pocket_calibration.json` w artefaktach CI.
 To porównanie kontrolne, bez uniwersalnego współczynnika kalibracyjnego dla wszystkich maszyn.
 
 Realizacja 26.10: Raport pobiera bieżący obraz widoku 3D przez
