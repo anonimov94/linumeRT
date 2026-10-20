@@ -37,8 +37,13 @@ git config --global --add safe.directory "$SRC"
 mkdir -p config/includes.chroot/opt/linumeRT
 git -C "$SRC" archive HEAD | tar -x -C config/includes.chroot/opt/linumeRT
 echo "$VERSION" > config/includes.chroot/opt/linumeRT/VERSION
-lb build 2>&1 | tail -n 40
+# Pełny dziennik lb w build/lb-build.log (poza build/iso, które idzie do wydania); na konsoli koniec, przy błędzie dłuższy.
 mkdir -p "$OUT"
+if ! lb build > "$SRC/build/lb-build.log" 2>&1; then
+    tail -n 200 "$SRC/build/lb-build.log"
+    exit 1
+fi
+tail -n 40 "$SRC/build/lb-build.log"
 ISO="$OUT/linumert-$VERSION-amd64.iso"
 mv live-image-amd64.hybrid.iso "$ISO"
 (cd "$OUT" && sha256sum "$(basename "$ISO")" > "$(basename "$ISO").sha256")
