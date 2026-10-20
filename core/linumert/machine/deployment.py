@@ -10,6 +10,7 @@ import argparse
 import configparser
 import json
 import re
+import shlex
 from pathlib import Path
 
 PROFILES = ("sim", "plant", "hardware")
@@ -71,19 +72,57 @@ def read_deployment(path: Path) -> configparser.ConfigParser:
     return cfg
 
 
+def hal_files_from_ini(path: Path) -> list[Path]:
+    """Zachowuje wszystkie HALFILE; ConfigParser przechowuje tylko ostatni."""
+    files = []
+    section = ""
+    for number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+        text = line.strip()
+        if text.startswith("[") and text.endswith("]"):
+            section = text[1:-1].strip()
+        elif section == "HAL" and text and not text.startswith(("#", ";")):
+            if "=" not in text:
+                raise ValueError(f"{path}:{number}: wymagane KEY=VALUE w HAL")
+            key, value = (part.strip() for part in text.split("=", 1))
+            if key.upper() in ("HALCMD", "POSTGUI_HALCMD"):
+                raise ValueError(f"{path}:{number}: HALCMD wymaga osobnej analizy")
+            if key.upper() in ("HALFILE", "POSTGUI_HALFILE"):
+                words = shlex.split(value, comments=True)
+                if len(words) != 1 or any(c in value for c in ("$", "[", "]")):
+                    raise ValueError(f"{path}:{number}: niejednoznaczna ścieżka HALFILE")
+                files.append(Path(words[0]))
+    return files
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Kontrola profilu, bez uruchamiania CNC")
     parser.add_argument("ini", type=Path)
+    parser.add_argument("--hal", type=Path, action="append", default=[],
+                        help="plik HAL względem katalogu INI; opcję można powtarzać")
+    parser.add_argument("--hal-from-ini", action="store_true",
+                        help="sprawdź wszystkie HALFILE i POSTGUI_HALFILE z INI")
     args = parser.parse_args(argv)
+    declaration_ok = False
+    hal_checked = bool(args.hal or args.hal_from_ini)
+    hal_ok = None
     try:
         cfg = read_deployment(args.ini)
         errors = check_deployment(cfg)
+        declaration_ok = not errors
+        if hal_checked:
+            from .hal_audit import audit_hal
+
+            files = args.hal + (hal_files_from_ini(args.ini) if args.hal_from_ini else [])
+            hal_errors = audit_hal(files, cfg, args.ini.resolve().parent)
+            hal_ok = not hal_errors
+            errors += hal_errors
         profile = cfg.get("LINUMERT", "MACHINE_PROFILE", fallback="")
     except (OSError, ValueError, configparser.Error) as exc:
         errors, profile = [str(exc)], ""
-    print(json.dumps({"profile": profile, "declaration_complete": not errors,
+    print(json.dumps({"profile": profile, "declaration_complete": declaration_ok,
+                      "static_hal_checked": hal_checked, "static_hal_passed": hal_ok,
                       "hardware_verified": False, "errors": errors,
-                      "note": "NIEZWERYFIKOWANE NA SPRZĘCIE; bez analizy połączeń HAL"},
+                      "note": "NIEZWERYFIKOWANE NA SPRZĘCIE; bez oceny komponentów"},
                      ensure_ascii=False))
     return 2 if errors else 0
 
