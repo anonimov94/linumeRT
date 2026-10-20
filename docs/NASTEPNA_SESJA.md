@@ -1,6 +1,6 @@
 # Stan projektu i przekazanie
 
-Tura: Codex · od 2026-10-20 · stan: w toku
+Tura: Codex · od 2026-10-20 · stan: oddana
 
 Model-Author: Codex. Bieżące polecenie właściciela: dokończyć rozpoczęte prace,
 bez rozpoczynania nowych sesji roadmapy; po scaleniu launcher i lista usterek na tydzień.
@@ -11,7 +11,7 @@ PR #56 łączy #48, #50, #54, #55 i #56 oraz niescalone Cykle Claude (7a71581).
 Zachowana historia wszystkich gałęzi, również historyczna aktualizacja codex/hmi-01.
 Kod 4ca3f57: pełne CI PASS — Debian 12: 849 testów + 81 LinuxCNC, C: 108 także z ASan/UBSan,
 42 kroki HMI, scenariusze 9 + matrix 5, wymagania bez błędów. Raport: [P0](raporty/prototypy/P0-2026-10-20.md).
-Ostatni commit uzupełnia wyłącznie dokumentację wynikami; scalenie w toku.
+PR #56 scalony do main (e3c7bab); wcześniejsze PR automatycznie oznaczone jako scalone.
 
 Działają: ekrany HMI, edycja kopii G-code, diagnostyczna symulacja bez komend safety,
 audyt deklaracji/HAL offline, generatory, raport HTML, narzędzia/czas/NgcGui w Cyklach.
@@ -20,7 +20,8 @@ Nie deklarować odbioru sprzętu ani ręcznych prób na pulpicie właściciela.
 
 ## Następny dozwolony krok
 
-Launcher HMI + QtDragon + LinuxCNC, test uruchamiania, lista braków na 21–27.10.2026.
+Launcher HMI + QtDragon + LinuxCNC gotowy; testy uruchamiania przechodzą, skróty zainstalowane.
+Lista i kryteria: [21–27.10.2026](PLAN_TYGODNIA_2026-10-21.md). Odbiór pulpitu pozostaje otwarty.
 Nie zaczynać nowych sesji 027…084. Porządkowy job usuwa tylko gałęzie zawarte w main,
 z lease dla ich SHA, po zielonym CI main. Autokontrola, bez niezależnego przeglądu.
 

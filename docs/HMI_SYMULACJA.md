@@ -5,7 +5,7 @@ Model-Author: Claude · 2026-10-19. Wszystko to symulacja: NIEZWERYFIKOWANE NA S
 ## Uruchomienie (EndeavourOS / Arch, podman)
 
 ```bash
-~/Projekty/linumeRT-claude/tools/linumert-start.sh --no-update --dir ~/Projekty/linumeRT-claude
+~/linumeRT/tools/linumert-start.sh --dir ~/linumeRT
 # albo z GitHuba (main):  bash <(curl -fsSL https://raw.githubusercontent.com/anonimov94/linumeRT/main/tools/linumert-start.sh)
 ```
 
@@ -16,10 +16,11 @@ minut. Starter ustawia G54 symulatora (X100 Y100 Z-150 = lewy przedni róg wierz
 ## Kolejność pracy
 
 1. **Grzyb E-STOP** w dolnym pasku (F1 = wciśnięcie). Zwolnienie grzyba = potwierdzenie E-STOP (D35);
-   tylko tak resetuje się E-STOP, także po kolizji w symulacji.
+   także podwójny Reset potwierdza zatrzask HAL (D37). Kolizje materiału są diagnostyczne
+   i nie wysyłają E-STOP ani STO (aktualizacja właściciela 2026-10-20).
 2. **Maszyna WŁ.**, potem **Bazuj** — bazowanie na krańcówkach (symulowane styki w HAL).
 3. **Program** → wczytaj, np. `linumert_demo.ngc` (planowanie, kieszeń, rowek kulowy, fazowanie,
-   wiercenie, frez lewy M4) albo `linumert_kolizja.ngc` (G0 w materiał → K-302 i E-STOP).
+   wiercenie, frez lewy M4) albo `linumert_kolizja.ngc` (G0 w materiał → diagnostyka K-302).
    Linia `;@STOCK …` w nagłówku programu ustawia przygotówkę automatycznie.
 4. **Symulacja** (szyna po lewej): widok 3D przygotówki, narzędzia (bryła z profilu), stołu, docisków
    i śladu ruchu (bursztynowy = G0, morski = posuw). Materiał ubywa tam, gdzie przejeżdża część tnąca
@@ -29,7 +30,7 @@ minut. Starter ustawia G54 symulatora (X100 Y100 Z-150 = lewy przedni róg wierz
    - **Model maszyny**: „Wczytaj model maszyny…” (`machine.yaml`: bryły kolizyjne, napędy). Domyślnie
      `config/sim/linumert_xyz/machine.yaml`.
    - **Obciążenie napędów**: moment wrzeciona wobec krzywej napędu, siły osi wobec granic napędów.
-   - **Zdarzenia symulacji**: K-3xx z pozycją; każda kolizja i przeciążenie = E-STOP.
+   - **Zdarzenia symulacji**: K-3xx z pozycją; kolizje i przeciążenia są raportowane bez zmiany stanu LinuxCNC.
 5. **Narzędzia**: tabela z bazy narzędzi; edycja typu (palcowy, kulowy, torusowy, teowy, lizak, fazownik,
    wiertła, głowica, gwintownik, specjalne), D, korekcji D ±1 mm, długości Z, ostrzy, maks. obrotów,
    kierunku skrawania (prawe M3 / lewe M4), oprawki. „Zapisz” = baza + `tool.tbl` + ponowne wczytanie

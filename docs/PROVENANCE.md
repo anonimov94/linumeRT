@@ -163,3 +163,10 @@ Model-Author: Codex. Własna integracja istniejącego leksera, lista i nawigacja
 Bez nowych zależności ani zewnętrznych zasobów.
 
 | Strona Cykle: baza narzędzi, czas obróbki, eksport podprogramów | kod (Python/Qt), testy, zrzut | model językowy Claude na zlecenie właściciela | 2026-10-20 | własna implementacja; zrzut widoku offscreen (Qt, tokeny), czas z rs274 LinuxCNC 2.9 RIP | GPL-2.0-or-later | ekran operatora | `screens/linumert/linumert_cycles_page.py`, `tests/test_hmi_workflow_widgets.py`, `docs/raporty/cykle/cykle_narzedzia_czas.png` |
+
+## Launcher i odbiór HMI — 2026-10-20
+
+Model-Author: Codex. Własne poprawki GPL-2.0-or-later: tools/linumert-start.sh,
+tests/test_launcher.py, dokumentacja odbioru i lista tygodnia. Bez nowych zależności runtime.
+Cytowanie Exec według specyfikacji freedesktop.org (link w skrypcie); test używa opcjonalnego
+systemowego Gio, bez kopiowania jego kodu. Zachowane autorstwo pierwotnego startera Claude.

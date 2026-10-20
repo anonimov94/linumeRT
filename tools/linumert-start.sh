@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: GPL-2.0-or-later
 # Model-Author: Claude · starter aplikacji (2026-10-19).
+# Zmiany launchera i skrótów: Model-Author: Codex (2026-10-20).
 # linumeRT jednym poleceniem na Linuksie z podmanem (EndeavourOS/Arch, także Fedora, Debian, Ubuntu):
 # pobiera albo aktualizuje main z GitHuba, instaluje zależności, buduje kontener Debian 12 z LinuxCNC 2.9
 # (pakiety linuxcnc.org) i otwiera okno LinuxCNC z ekranem linumeRT.
@@ -16,6 +17,11 @@
 # Pierwsze uruchomienie: kilka minut (obraz ok. 1,5 GB); kolejne: kilkanaście sekund.
 # NIEZWERYFIKOWANE NA SPRZĘCIE: to symulacja, bez połączenia z prawdziwą maszyną.
 set -euo pipefail
+
+SCRIPT_SOURCE=${BASH_SOURCE[0]}
+if [ -f "$SCRIPT_SOURCE" ]; then
+    SCRIPT_SOURCE=$(cd -- "$(dirname -- "$SCRIPT_SOURCE")" && pwd)/$(basename -- "$SCRIPT_SOURCE")
+fi
 
 REPO_URL=https://github.com/anonimov94/linumeRT.git
 IMG_REV=2  # zmień przy każdej zmianie Containerfile niżej (wymusza przebudowę obrazu)
@@ -46,7 +52,7 @@ done
 # ---- 1. zależności gospodarza -------------------------------------------------------------------
 need=()
 command -v git >/dev/null || need+=(git)
-command -v podman >/dev/null || need+=(podman)
+if [ "$desktop" = 0 ]; then command -v podman >/dev/null || need+=(podman); fi
 if [ ${#need[@]} -gt 0 ]; then
     say "instaluję: ${need[*]} (potrzebne sudo)"
     if command -v pacman >/dev/null; then sudo pacman -S --needed --noconfirm "${need[@]}"
@@ -63,7 +69,7 @@ if [ -z "$dir" ]; then
     fi
     if [ -n "$here" ] && [ -f "$here/tools/linumert-start.sh" ]; then dir=$here; else dir=$HOME/linumeRT; fi
 fi
-if [ ! -d "$dir/.git" ]; then
+if ! git -C "$dir" rev-parse --git-dir >/dev/null 2>&1; then
     say "pobieram $REPO_URL → $dir"
     git clone "$REPO_URL" "$dir"
 fi
@@ -72,7 +78,7 @@ cd "$dir"
 for f in config/*/*/linumert.var config/*/*/linumert.pref config/*/*/linumert.log; do
     git ls-files --error-unmatch "$f" >/dev/null 2>&1 && git update-index --skip-worktree "$f"
 done
-if [ "$update" = 1 ]; then
+if [ "$update" = 1 ] && [ "$desktop" = 0 ]; then
     branch=$(git rev-parse --abbrev-ref HEAD)
     if [ "$branch" != main ]; then
         say "gałąź $branch (nie main): bez aktualizacji"
@@ -83,24 +89,49 @@ fi
 say "wersja: $(git log -1 --format='%h %<(70,trunc)%s' | sed 's/ *$//')"  # git obcina po znakach, nie bajtach (UTF-8)
 
 # ---- 3. skróty w menu aplikacji -------------------------------------------------------------------
+desktop_quote() {
+    # Dwie warstwy cytowania: string Desktop Entry, potem argument Exec.
+    # https://specifications.freedesktop.org/desktop-entry/latest/exec-variables.html
+    local value=$1 result='"' char i
+    for ((i=0; i<${#value}; i++)); do
+        char=${value:i:1}
+        case "$char" in
+            \\) result+='\\\\' ;;
+            '"'|'$'|'`') result+='\\'; result+=$char ;;
+            '%') result+='%%' ;;
+            $'\n'|$'\r'|$'\t') die "ścieżka skrótu zawiera znak sterujący" ;;
+            *) result+=$char ;;
+        esac
+    done
+    printf '%s"' "$result"
+}
+
 install_desktop() {
     local apps=${XDG_DATA_HOME:-$HOME/.local/share}/applications
-    mkdir -p "$apps"
-    local name args
-    for entry in "linumeRT|" "linumeRT + Plant|--plant"; do
-        name=${entry%%|*} args=${entry#*|}
-        cat >"$apps/linumert${args:+-plant}.desktop" <<EOF
+    local launcher_dir=${XDG_DATA_HOME:-$HOME/.local/share}/linumert
+    mkdir -p "$apps" "$launcher_dir"
+    local launcher=$launcher_dir/launcher.sh source=$SCRIPT_SOURCE
+    [ -f "$source" ] || source=$dir/tools/linumert-start.sh
+    if [ "$source" != "$launcher" ]; then install -m 755 "$source" "$launcher"; fi
+    local name key args entry executable repo
+    executable=$(desktop_quote "$launcher")
+    repo=$(desktop_quote "$dir")
+    for entry in "linumeRT|linumert|" "linumeRT + Plant|linumert-plant|--plant" \
+                 "linumeRT — QtDragon|linumert-qtdragon|--classic"; do
+        name=${entry%%|*} entry=${entry#*|}
+        key=${entry%%|*} args=${entry#*|}
+        cat >"$apps/$key.desktop" <<EOF
 [Desktop Entry]
 Type=Application
 Name=$name
 Comment=Ekran operatora linumeRT na LinuxCNC (symulacja${args:+ z wirtualną obrabiarką Plant})
-Exec=$dir/tools/linumert-start.sh $args
+Exec=bash $executable --dir $repo $args
 Icon=$dir/docs/design/marka/znak.svg
 Terminal=true
 Categories=Development;Engineering;
 EOF
     done
-    say "skróty: $apps/linumert.desktop, linumert-plant.desktop (menu aplikacji: linumeRT)"
+    say "skróty: $apps/linumert.desktop, linumert-plant.desktop, linumert-qtdragon.desktop"
 }
 if [ "$desktop" = 1 ]; then install_desktop; exit 0; fi
 [ -f "${XDG_DATA_HOME:-$HOME/.local/share}/applications/linumert.desktop" ] || install_desktop

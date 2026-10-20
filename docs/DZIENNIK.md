@@ -517,3 +517,10 @@ Brak komend ruchu przy kontroli; screenshot wykonany lokalnie. CI oraz odbiór w
 - Ogólne CI: 823 PASS; C: 108 PASS, sanitizery Debian PASS; scenariusze 9 + matrix 5 PASS, REQ bez błędów.
 - Raport: docs/raporty/prototypy/P0-2026-10-20.md; MACIERZ zielona dla 21 bieżących REQ, REQ-VD-06 nadal planowane.
 - Odbiór ręczny i sprzęt oddzielnie w G1.md; sesja 041 pozostaje częściowa. Autokontrola, bez niezależnego przeglądu.
+
+## Launcher HMI i lista tygodnia · 2026-10-20 · Codex
+- Model-Author: Codex. Po scaleniu #56: skróty HMI/Plant/QtDragon dla głównego repozytorium.
+- Poprawiono Exec dla spacji i znaków specjalnych oraz rozpoznawanie worktree; instalacja skrótów bez kontenera i aktualizacji.
+- Lokalnie 10 testów launchera PASS (w tym faktyczne uruchomienie przez Gio), shellcheck pominięty — brak narzędzia.
+- Skróty menu i Pulpit zainstalowane; uruchomienie pełnego okna na pulpicie z sandboxa niewykonane.
+- Lista braków i kryteria: docs/PLAN_TYGODNIA_2026-10-21.md; runtime sprawdzony w CI z raportu P0.
