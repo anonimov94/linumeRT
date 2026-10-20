@@ -450,3 +450,9 @@ Pełne testy i lint przez CI; NIEZWERYFIKOWANE NA SPRZĘCIE.
   narzędzie i na krok `.lnx`. Jednostki calowe przeliczane.
 - Testy: `tests/test_estimate.py` (7, w tym rs274 z pętlą `repeat`).
 - Długi: „czas pozostały” na ekranie, tabela odchyłek względem Plant w `docs/SYMULACJA.md` i strojenie modelu.
+
+## 2026-10-20 · Izolacja awarii smoke LinuxCNC · Codex
+
+Model-Author: Codex. Run 113 ujawnił BadWindow i pozostawiony proces przed testami Plant.
+Obsługa znikającego okna i zakończenie procesu w finally, także przy błędzie X11.
+Trzy testy regresji offline OK; pełna weryfikacja w CI. Wynik nieudanego shutdown nadal jest błędem.

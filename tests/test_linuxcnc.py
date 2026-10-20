@@ -19,13 +19,61 @@ pytestmark = pytest.mark.linuxcnc
 
 def qtdragon_window():
     from Xlib.display import Display
+    from Xlib.error import BadWindow
 
     connection = Display()
-    for window in connection.screen().root.query_tree().children:
-        if "qtdragon" in (window.get_wm_name() or "").lower():
-            return connection, window
+    try:
+        for window in connection.screen().root.query_tree().children:
+            try:
+                if "qtdragon" in (window.get_wm_name() or "").lower():
+                    return connection, window
+            except BadWindow:
+                continue  # An unrelated window may disappear while we enumerate.
+    except Exception:
+        connection.close()
+        raise
     connection.close()
     return None
+
+
+def shutdown_simulation(process, headless):
+    """Always terminate our process group, including after an X11 error."""
+    try:
+        if not headless and process.poll() is None:
+            window_info = qtdragon_window()
+            if window_info:
+                from Xlib.error import BadWindow
+                from Xlib.protocol.event import ClientMessage
+
+                connection, window = window_info
+                try:
+                    window.send_event(ClientMessage(
+                        window=window.id, client_type=connection.intern_atom("WM_PROTOCOLS"),
+                        data=(32, [connection.intern_atom("WM_DELETE_WINDOW"), 0, 0, 0, 0]),
+                    ))
+                    connection.sync()
+                except BadWindow:
+                    pass  # It closed between lookup and WM_DELETE_WINDOW.
+                finally:
+                    connection.close()
+                try:
+                    process.wait(timeout=10)
+                except subprocess.TimeoutExpired:
+                    pass
+    finally:
+        if process.poll() is None:
+            try:
+                os.killpg(process.pid, signal.SIGTERM)
+            except ProcessLookupError:
+                pass
+            try:
+                process.wait(timeout=15)
+            except subprocess.TimeoutExpired:
+                try:
+                    os.killpg(process.pid, signal.SIGKILL)
+                except ProcessLookupError:
+                    pass
+                process.wait(timeout=5)
 
 
 def wait_for(predicate, process, timeout=30):
@@ -85,30 +133,10 @@ def simulation(tmp_path):
 
     yield start
     for process, log, headless in processes:
-        if not headless and process.poll() is None:
-            window_info = qtdragon_window()
-            if window_info:
-                from Xlib.protocol.event import ClientMessage
-
-                connection, window = window_info
-                window.send_event(ClientMessage(
-                    window=window.id, client_type=connection.intern_atom("WM_PROTOCOLS"),
-                    data=(32, [connection.intern_atom("WM_DELETE_WINDOW"), 0, 0, 0, 0]),
-                ))
-                connection.sync()
-                connection.close()
-                try:
-                    process.wait(timeout=10)
-                except subprocess.TimeoutExpired:
-                    pass
-        if process.poll() is None:
-            os.killpg(process.pid, signal.SIGTERM)
-            try:
-                process.wait(timeout=15)
-            except subprocess.TimeoutExpired:
-                os.killpg(process.pid, signal.SIGKILL)
-                process.wait(timeout=5)
-        log.close()
+        try:
+            shutdown_simulation(process, headless)
+        finally:
+            log.close()
         log_text = (tmp_path / "linuxcnc.log").read_text()
         print(log_text)
         assert "Segmentation fault" not in log_text, "LinuxCNC crashed during shutdown"
