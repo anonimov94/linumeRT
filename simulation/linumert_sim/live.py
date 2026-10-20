@@ -13,9 +13,10 @@ Protokół z ekranem: polecenia JSON na stdin (po jednym w linii), zdarzenia JSO
 Mapa wysokości przygotówki: plik `float32` (np.memmap), ścieżka w zdarzeniu `stock`.
 Polecenia: {"cmd": "stock", "line": ";@STOCK ..."} | {"cmd": "stock_reset"} |
 {"cmd": "machine", "path": ...} | {"cmd": "tools"} | {"cmd": "estop", "on": bool} |
-{"cmd": "export_stl", "path": ...} | {"cmd": "quit"}.
+{"cmd": "export_stl", "path": ...} | {"cmd": "export_report", "path": ...} | {"cmd": "quit"}.
 Zdarzenia: ready, stock, machine, tools, pos (≤ 30 Hz), map (zmiana materiału, ≤ 10 Hz),
-event (K-3xx), error.
+event (K-3xx), stl, report, error. Raport (`report.py`) obejmuje przebieg od wczytania
+programu albo odnowienia materiału.
 """
 
 from __future__ import annotations
@@ -35,6 +36,7 @@ import numpy as np
 from .engine import Sample, SimEngine
 from .machine import Machine, load_machine
 from .placement import find_stock_line, place_stock, read_var_offsets
+from .report import SimLog, write_report
 from .tooldata import cutters, ini_value, open_db, read_ini
 
 POS_PERIOD = 1 / 30
@@ -76,6 +78,7 @@ class Live:
         self.stat = self.lc.stat()
         self.cmd = self.lc.command()
         self.engine = SimEngine()
+        self.log = SimLog()
         self.estop_on_event = True
         self.virtual = ini_value(self.ini, "LINUMERT", "VIRTUAL_MODE", "0") == "1"
         self.recovery = False
@@ -229,6 +232,7 @@ class Live:
                 continue
             if self.stat.file != self.file:
                 self.file = self.stat.file
+                self.log.reset(Path(self.file).name if self.file else "")
                 if self.file:
                     line = find_stock_line(self.file)
                     if line:
@@ -238,6 +242,7 @@ class Live:
             self.reload_tools()
             sample = self.sample(t0)
             events = self.engine.step(sample)
+            self.log.tick(t0, events)
             codes = sorted({key[0] for key in self.engine._active})
             if codes != active_codes:
                 active_codes = codes
@@ -292,12 +297,15 @@ class Live:
             self.set_stock(c.get("line"))
         elif name == "stock_reset":
             self.engine.reset_stock()
+            self.log.reset(self.log.program)
         elif name == "machine":
             self.load_machine(str(c.get("path", "")))
         elif name == "tools":
             self.reload_tools(force=True)
         elif name == "export_stl":
             self.export_stl(str(c.get("path", "")))
+        elif name == "export_report":
+            self.export_report(str(c.get("path", "")))
         elif name == "recovery":
             self.recovery = self.virtual and bool(c.get("on", False))
         elif name == "estop":
@@ -318,6 +326,18 @@ class Live:
             emit(ev="error", text=f"eksport STL: {exc}")
             return
         emit(ev="stl", path=path, triangles=n)
+
+    def export_report(self, path: str) -> None:
+        if not path:
+            emit(ev="error", text="raport symulacji: brak ścieżki")
+            return
+        try:
+            write_report(path, self.engine, self.log,
+                         title=f"Raport symulacji {self.log.program}".strip())
+        except OSError as exc:
+            emit(ev="error", text=f"raport symulacji: {exc}")
+            return
+        emit(ev="report", path=path, events=len(self.log.events))
 
     def close(self) -> None:
         if self.map_file is not None:
