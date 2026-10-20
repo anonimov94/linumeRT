@@ -287,7 +287,7 @@ def run_linuxcnc(scen: Scenario, port: int | None = None) -> ScenarioResult:
         ini = _prepare(work, port)
         (work / "driver.py").write_text(DRIVER, encoding="utf-8")
         report = work / "plant_report.json"
-        with rip.installed_modules(root, work, ("lrt_net", "lrt_cia402")):
+        with rip.installed_modules(root, work, ("lrt_net", "lrt_cia402", "lrt_estop2")):
             plant = _Plant(scen, port, report)
             env = {**os.environ, "PATH": f"{ini.parent}:{os.environ.get('PATH', '')}"}
             cnc = rip.start_linuxcnc(root, ini, env)

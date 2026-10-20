@@ -62,6 +62,6 @@ probe:
   tip_length: 60
   target: {type: box, min: [250, 350, -110], max: [350, 450, -90]}
 io:
-  inputs: {estop: 0, lim_x_min: 1, lim_x_max: 2, lim_y_min: 3, lim_y_max: 4, lim_z_max: 5, toolsetter: 6, probe: 7}
+  inputs: {estop: 0, lim_x_min: 1, lim_x_max: 2, lim_y_min: 3, lim_y_max: 4, lim_z_max: 5, toolsetter: 6, probe: 7, estop_b: 15}
   outputs: {spindle_on: 0, coolant: 1}
   estop: {input: estop, contact: NC}

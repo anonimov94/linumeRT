@@ -21,9 +21,16 @@ Tryb AUTO i poprawiony run-from-line.
 1. Start/Pauza/Stop, pojedynczy blok, opcjonalny stop, override posuwu/szybkiego/wrzeciona, postęp i czas.
 2. Wznowienie od linii: przed startem okno z podsumowaniem stanu modalnego w tej linii (narzędzie, układ, wrzeciono, posuw) i opcją „uruchom wrzeciono i potwierdź narzędzie” — odpowiedź na znane ograniczenie QtDragon. Użyj mechanizmów LinuxCNC (sprawdź dokumentację run-from-line / `task_plan_synch`), opisz ograniczenia.
 3. Scenariusz Plant `auto_pause_resume` i `run_from_line`.
+4. **Wycofanie i powrót do obróbki (D38, `docs/design/WZNOWIENIE.md`)**: w pauzie — external offsets HAL
+   (Wycofaj / Powrót / Wznów); po przerwaniu programu — prolog generowany przez ekran: zejście po helisie,
+   dojazd łukiem stycznym w XY (z Z), wejście na ścieżkę z zakładką przed punktem przerwania (bez naddatku),
+   parametry `[LINUMERT]RESUME_*` w ustawieniach maszyny; sprawdzenie prologu w `linumert_sim` przed startem,
+   podgląd w widoku Symulacja, potwierdzenie operatora. Logika w `core/linumert/programs/resume.py` z testami.
 
 ## Kryteria akceptacji
 - [ ] scenariusze przechodzą
+- [ ] wznowienie w kieszeni: materiał po przerwaniu i wznowieniu = materiał bez przerwy (różnica ≤ 0,05 mm, mapa wysokości)
+- [ ] helisa i łuk z parametrów maszyny; odmowa przy G33/G76, środku cyklu stałego i nieustalonej korekcji G41/G42
 - [ ] `make lint test` przechodzi (oraz `make test-c` / `make test-linuxcnc`, jeśli dotyczy i są dostępne)
 - [ ] `tests/test_ip_guard.py` przechodzi; nowe zasoby w `docs/PROVENANCE.md`
 - [ ] nowe zależności wpisane do `docs/LICENCJE.md`

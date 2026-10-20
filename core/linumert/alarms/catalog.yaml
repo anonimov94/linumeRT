@@ -445,3 +445,29 @@
   params: [tool]
   pl: "Narzędzia T{tool} nie ma w bazie."
   en: "Tool T{tool} is not in the database."
+# ---- Generatory a baza narzędzi (sesja 040 p.2) -----------------------------
+- code: P-5207
+  clear: ack
+  params: [step, tool, type, allowed]
+  pl: "Krok {step}: narzędzie T{tool} typu {type} nie pasuje do operacji (dozwolone: {allowed})."
+  en: "Step {step}: tool T{tool} of type {type} does not fit the operation (allowed: {allowed})."
+- code: P-5208
+  clear: ack
+  params: [step, tool, field, value, expected]
+  pl: "Krok {step}: {field} = {value} nie zgadza się z narzędziem T{tool} ({expected})."
+  en: "Step {step}: {field} = {value} does not match tool T{tool} ({expected})."
+- code: P-5209
+  clear: ack
+  params: [step, tool, field, value, limit]
+  pl: "Krok {step}: {field} = {value} mm przekracza długość roboczą narzędzia T{tool} ({limit} mm)."
+  en: "Step {step}: {field} = {value} mm exceeds the cutting length of tool T{tool} ({limit} mm)."
+- code: P-5210
+  clear: ack
+  params: [step, tool, rpm, limit]
+  pl: "Krok {step}: obroty S{rpm} przekraczają maksimum narzędzia T{tool} ({limit} obr/min)."
+  en: "Step {step}: spindle speed S{rpm} exceeds the maximum of tool T{tool} ({limit} rpm)."
+- code: P-5211
+  clear: ack
+  params: [step, tool, direction, expected]
+  pl: "Krok {step}: kierunek {direction} nie pasuje do narzędzia T{tool} (oczekiwano {expected})."
+  en: "Step {step}: direction {direction} does not match tool T{tool} (expected {expected})."

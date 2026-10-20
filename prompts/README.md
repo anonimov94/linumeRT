@@ -50,7 +50,7 @@ wymagały ekranu ani LinuxCNC. Bieżący stan i następny krok: [`docs/NASTEPNA_
 | [028](sesja-028.md) | M2 | Kompozycja ekranu głównego |  |
 | [029](sesja-029.md) | M2 | Tryby, JOG i pulpit MPG |  |
 | [030](sesja-030.md) | M2 | MDI i klawiatura ekranowa |  |
-| [031](sesja-031.md) | M2 | AUTO i wznowienie od linii |  |
+| [031](sesja-031.md) | M2 | AUTO i wznowienie od linii (+ D38: wycofanie, helisa, łuk, zakładka) |  |
 | [032](sesja-032.md) | M2 | Baza narzędzi z typami | zrobiona |
 | [033](sesja-033.md) | M2 | Zerowanie detalu i sonda |  |
 | [034](sesja-034.md) | M2 | Ręczna zmiana narzędzia |  |
@@ -59,26 +59,26 @@ wymagały ekranu ani LinuxCNC. Bieżący stan i następny krok: [`docs/NASTEPNA_
 | [037](sesja-037.md) | M2 | Język polski i angielski |  |
 | [038](sesja-038.md) | M2 | Bufor i bramka G2 (prototyp v0.1) |  |
 | [039](sesja-039.md) | M3 | Format .lnx i BaseMacroGenerator | zrobiona |
-| [040](sesja-040.md) | M3 | Generatory: nagłówek, koniec, narzędzie, planowanie |  |
+| [040](sesja-040.md) | M3 | Generatory: nagłówek, koniec, narzędzie, planowanie | zrobiona (panel dialogowy: 045) |
 | [041](sesja-041.md) | M3 | Generatory: kieszenie |  |
-| [042](sesja-042.md) | M3 | Generatory: wiercenie i gwintowanie |  |
+| [042](sesja-042.md) | M3 | Generatory: wiercenie i gwintowanie | częściowo (generator gotowy, bez UI) |
 | [043](sesja-043.md) | M3 | Generatory: rowki, czopy, kontur |  |
 | [044](sesja-044.md) | M3 | Lekser G-code i walidacja w edytorze | zrobiona |
 | [045](sesja-045.md) | M3 | Panel programu dialogowego |  |
 | [046](sesja-046.md) | M3 | Podglądy 2D w formularzach |  |
 | [047](sesja-047.md) | M3 | Menedżer programów i pliki .lnx |  |
-| [048](sesja-048.md) | M3 | Biblioteka podprogramów o-word |  |
+| [048](sesja-048.md) | M3 | Biblioteka podprogramów o-word | częściowo (planowanie i wiercenie; kieszenie i rowki po 041/043) |
 | [049](sesja-049.md) | M3 | Test technologiczny na Plant |  |
 | [050](sesja-050.md) | M3 | Bufor i bramka G3 (prototyp v0.2) |  |
 | [051](sesja-051.md) | M4 | Ścieżka z programu |  |
 | [052](sesja-052.md) | M4 | Proces symulacji |  |
-| [053](sesja-053.md) | M4 | Czas obróbki i porównanie z Plant |  |
-| [054](sesja-054.md) | M4 | Przygotówka |  |
-| [055](sesja-055.md) | M4 | Materiał 2.5D |  |
-| [056](sesja-056.md) | M4 | Reguły kolizji lite |  |
-| [057](sesja-057.md) | M4 | Widok 3D symulacji |  |
-| [058](sesja-058.md) | M4 | Typy narzędzi w symulacji |  |
-| [059](sesja-059.md) | M4 | Raport symulacji i eksport STL |  |
+| [053](sesja-053.md) | M4 | Czas obróbki i porównanie z Plant | częściowo (estymator z rs274 i INI; ekran i porównanie z Plant później) |
+| [054](sesja-054.md) | M4 | Przygotówka | zrobiona (`;@STOCK`, dialog Symulacja, K-321, cel sondy Plant: `tools/stock_probe.py`) |
+| [055](sesja-055.md) | M4 | Materiał 2.5D | częściowo (symulacja HMI na żywo) |
+| [056](sesja-056.md) | M4 | Reguły kolizji lite | częściowo (na żywo; brak trybu offline) |
+| [057](sesja-057.md) | M4 | Widok 3D symulacji | częściowo (widok Symulacja, bez osi czasu) |
+| [058](sesja-058.md) | M4 | Typy narzędzi w symulacji | częściowo (profile; STL = walec) |
+| [059](sesja-059.md) | M4 | Raport symulacji i eksport STL | częściowo (raport HTML i STL gotowe; „Symuluj” w panelu dialogowym: 045) |
 | [060](sesja-060.md) | M4 | Bufor i bramka G4 (prototyp v0.3) |  |
 | [061](sesja-061.md) | M5 | machine.yaml: napędy i wejścia rzeczywiste |  |
 | [062](sesja-062.md) | M5 | Generator INI/HAL: sim, Plant, step/dir |  |
@@ -96,7 +96,7 @@ wymagały ekranu ani LinuxCNC. Bieżący stan i następny krok: [`docs/NASTEPNA_
 | [074](sesja-074.md) | M6 | Menedżer wtyczek |  |
 | [075](sesja-075.md) | M6 | Panel cykli i skryptów |  |
 | [076](sesja-076.md) | M6 | Repozytorium społeczności i przykłady |  |
-| [077](sesja-077.md) | M6 | Instalator dla Debiana 12 + LinuxCNC 2.9 |  |
+| [077](sesja-077.md) | M6 | Instalator dla Debiana 12 + LinuxCNC 2.9 (+ obraz live USB / ISO) |  |
 | [078](sesja-078.md) | M6 | Pierwsze uruchomienie i linumert doctor |  |
 | [079](sesja-079.md) | M6 | Dokumentacja użytkownika |  |
 | [080](sesja-080.md) | M6 | Przegląd IP przed wydaniem |  |

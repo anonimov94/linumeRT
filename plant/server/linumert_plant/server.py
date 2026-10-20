@@ -255,6 +255,8 @@ class PlantServer:
         self.spindle = SpindleModel.from_machine(mcfg, spindle_template)
         self.vfd_faults = VfdFaults()
         self._estop = self._estop_input()
+        # drugi kanał E-STOP (NC, ten sam grzyb, druga linia przewodów; hal/lrt_estop2.comp)
+        self._estop_b = self.machine.model.inputs.get("estop_b")
         self._lock = threading.Lock()
         self._stop = threading.Event()
         # panel (sesja 022): parametry live, telemetria, pulpit
@@ -515,7 +517,10 @@ class PlantServer:
         if self.desk is not None:  # wirtualny pulpit (sesja 022)
             mask, value = self.desk.inputs()
             inputs = (inputs & ~mask) | value
-        if self.fault_state.forced:  # awarie limit / atc_sensor (sesja 024)
+        if self._estop is not None and self._estop_b is not None:  # kanał B = kanał A
+            a = inputs >> self._estop[0] & 1
+            inputs = (inputs & ~(1 << self._estop_b)) | (a << self._estop_b)
+        if self.fault_state.forced:  # awarie limit / atc_sensor / estop_channel (sesja 024)
             mask, value = self.fault_state.inputs()
             inputs = (inputs & ~mask) | value
         flags = FLAG_FAULT if fault else 0
@@ -563,7 +568,7 @@ class PlantServer:
         self.faults.clear_all()
         with self._lock:
             for name in ("machine", "oracle", "atc", "toolsetter", "collisions", "_tool_len",
-                         "spindle", "live", "live_base", "scale", "_letters", "_estop",
+                         "spindle", "live", "live_base", "scale", "_letters", "_estop", "_estop_b",
                          "_extra_inputs"):
                 setattr(self, name, getattr(fresh, name))
             self._mode = {d: None for d in self.drives}

@@ -63,7 +63,7 @@ def _run(master: Master, n: int) -> None:
 def test_catalog_lists_all_faults(core) -> None:
     kinds = [f["kind"] for f in Faults.catalog()]
     assert kinds == ["estop", "drive_fault", "frame_loss", "delay", "limit", "axis_jam",
-                     "vfd_loss", "atc_sensor"]
+                     "vfd_loss", "atc_sensor", "estop_channel"]
     server = _server(core)
     for kind, params, fragment in (("brak", {}, "nieznana awaria"),
                                    ("drive_fault", {}, "brak parametru drive"),
@@ -245,3 +245,22 @@ def test_atc_sensor_stuck(core) -> None:
     server.faults.clear_all()
     _run(master, 2)
     assert _bit(master, bit) == normal and server.faults.active() == []
+
+
+def test_estop_two_channels_mirror_and_stuck_channel(core) -> None:
+    """Kanał B (estop_b) = kanał A tego samego grzyba; awaria estop_channel blokuje B."""
+    server = _server(core)
+    master = _master(server)
+    a, b = server.machine.model.inputs["estop"], server.machine.model.inputs["estop_b"]
+    _run(master, 2)
+    assert (_bit(master, a), _bit(master, b)) == (1, 1)
+    server.faults.inject("estop")
+    _run(master, 2)
+    assert (_bit(master, a), _bit(master, b)) == (0, 0)  # grzyb: oba kanały otwarte
+    server.faults.clear("estop")
+    server.faults.inject("estop_channel", closed=False)
+    _run(master, 2)
+    assert (_bit(master, a), _bit(master, b)) == (1, 0)  # rozbieżność → lrt_estop2.fault
+    server.faults.clear("estop_channel")
+    _run(master, 2)
+    assert _bit(master, b) == 1

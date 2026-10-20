@@ -2,17 +2,47 @@
 
 ![linumeRT](docs/design/marka/baner.png)
 
-Otwarty ekran operatora i zestaw narzędzi dla **LinuxCNC**, przeznaczony dla hobbystycznych maszyn CNC:
-frezarek 3, 4 i 5 osi, silników krokowych, serw krokowych i serw, ręcznej zmiany narzędzia i ATC,
-napędów EtherCAT (CiA 402) i step/dir oraz wrzecion sterowanych przez RS485.
+### Przemysłowy sposób pracy na Twojej frezarce CNC. Otwarty, na LinuxCNC, gotowy do testu jednym poleceniem.
 
-Ekran używa **QtVCP** i bazy QtDragon (LinuxCNC), z własnymi widokami operatora: Start, Bazowanie,
-Zero detalu 3D, Narzędzia, Program, Symulacja, Produkcja i Diagnostyka. Do testów służy **Plant**, czyli
-wirtualna frezarka w osobnej maszynie wirtualnej. Symuluje bezwładność, ograniczenia momentu i przyspieszenia,
-napędy, krańcówki, sondę, falownik i magazyn narzędzi.
+**linumeRT** to ekran operatora i zestaw narzędzi dla **LinuxCNC**, zbudowany przez ludzi, którzy znają
+robotę przy maszynie: od bazowania i zera detalu, przez narzędzia i program, po symulację i produkcję.
+Każdy widok prowadzi operatora w kolejności, w jakiej naprawdę pracuje się na obrabiarce.
 
-> **Status:** działające HMI i wirtualny bliźniak; rozwój i testy na Debianie 12 / LinuxCNC 2.9.
-> Sprzęt fizyczny pozostaje niezweryfikowany. [Obsługa operatora](docs/OBSLUGA_OPERATORA.md).
+- 🛑 **Bezpieczeństwo na pierwszym miejscu** — grzyb E-STOP w HMI szeregowo w łańcuchu HAL, watchdog ekranu,
+  **dwukanałowy E-STOP NC z kontrolą rozbieżności**; reset tylko świadomym potwierdzeniem.
+- 🧱 **Symulacja obróbki na żywo** — materiał przygotówki ubywa tam, gdzie przejechało wirujące ostrze;
+  frez palcowy, kulowy, torusowy, teowy, lizak, fazownik, wiertła, głowica, gwintownik.
+- 💥 **Kolizje i przeciążenia wykrywane bezwzględnie** — kontakt bez obrotów, G0 w materiał, szyjka i oprawka,
+  stół i dociski, przeciążenie wrzeciona i napędów osi z granic napędów → natychmiastowy E-STOP.
+- 🧰 **Tabela narzędzi z prawdziwą geometrią** — typ, D, korekcja ±1 mm, długość, ostrza, maks. obroty,
+  kierunek skrawania M3/M4, oprawka.
+- 🧭 **Workflow operatora** — Start, Bazowanie, Zero detalu 3D (prostopadłościan, walec, rura, odlew),
+  Program ze sprawdzaniem składni i edycją, **Cykle** (planowanie, otwory: siatka, okrąg, łuk, G81–G83/G73),
+  Produkcja ze startem od linii, Diagnostyka napędów CiA 402.
+- 🤖 **Wirtualny bliźniak maszyny (Plant)** — dynamika osi w C, napędy CiA 402 i krokowe, krańcówki, zderzaki,
+  falownik RS485, magazyn narzędzi, wstrzykiwanie awarii. Testujesz bez ryzyka, zanim kupisz sprzęt.
+- 🔁 **Jakość jak w przemyśle** — ponad 700 testów automatycznych, testy w prawdziwym HAL LinuxCNC,
+  test end-to-end ekranu pod Xvfb, CI na każdym pull requeście.
+
+> **Status:** działające HMI i wirtualny bliźniak na Debianie 12 / LinuxCNC 2.9.
+> Wszystko, co dotyczy prawdziwego sprzętu, jest **NIEZWERYFIKOWANE NA SPRZĘCIE** — mówimy wprost, co sprawdziliśmy.
+> [Obsługa operatora](docs/OBSLUGA_OPERATORA.md) · [Symulacja w HMI](docs/HMI_SYMULACJA.md).
+
+![Symulacja: materiał po obróbce programu demo](docs/raporty/hmi_sym/demo_po_obrobce.png)
+
+## Obraz live USB / ISO (komputer maszyny)
+
+Gotowy system do wypalenia na pendrive: **Debian 12 + jądro PREEMPT_RT + LinuxCNC 2.9 + linumeRT**.
+Uruchom bez instalacji (tryb live: ekran linumeRT na symulatorze, „linumeRT + Plant” z wirtualną
+obrabiarką) albo zainstaluj na dysk komputera maszyny (Calamares).
+
+- Pobierz z [Releases](https://github.com/anonimov94/linumeRT/releases): wydania `v*` oraz obrazy robocze
+  `iso-RRRRMMDD-<commit>` (pre-release, zostają na stałe). Nowy obraz na żądanie:
+  [Actions → ISO live USB](https://github.com/anonimov94/linumeRT/actions/workflows/iso.yml) → **Run workflow** (ok. 30–60 min).
+- Sprawdź sumę: `sha256sum -c linumert-*.iso.sha256`.
+- Wypal: `sudo dd if=linumert-*.iso of=/dev/sdX bs=4M status=progress conv=fsync` albo Etcher / Ventoy.
+- Przed pracą na maszynie: test latencji (`latency-histogram`) — nie każdy komputer nadaje się do RT.
+  NIEZWERYFIKOWANE NA SPRZĘCIE.
 
 ## Szybki start (Linux z podmanem, np. EndeavourOS)
 
@@ -56,8 +86,22 @@ To podgląd offline z zapisami tymczasowymi. [Zero detalu](docs/ZERO_DETALU.md).
 | Rdzeń (Python) | model stanu maszyny, katalog alarmów PL/EN, `machine.yaml`, baza narzędzi, format `.lnx` i kompilator do `.ngc`, lekser G-code | `core/linumert/` |
 | Ekran HMI linumeRT (D32, D34) | własne widoki workflow, trzy alarmy i Reset, JOG/MDI, wrzeciono, wymiana M6, tryb specjalisty, Zero detalu 3D i konfiguracja przygotówki | `screens/linumert/`, [`docs/design/HMI_WORKFLOW.md`](docs/design/HMI_WORKFLOW.md) |
 | Uruchomienie jednym poleceniem | `tools/linumert-start.sh` (podman, Debian 12, LinuxCNC 2.9) | „Szybki start” wyżej |
-| Symulacja materiału i kolizji | działający proces, obciążenia i zdarzenia, wirtualne wycofanie po kolizji | `simulation/` |
-| Edytor G-code w HMI, programy dialogowe, kreator konfiguracji | kolejne etapy | [`prompts/README.md`](prompts/README.md) |
+| Symulacja materiału i kolizji | materiał 2.5D na żywo, 11 typów narzędzi, kolizje K-301…K-309, przeciążenia z granic napędów, eksport STL, wirtualne wycofanie po kolizji | `simulation/`, [`docs/HMI_SYMULACJA.md`](docs/HMI_SYMULACJA.md) |
+| Bezpieczeństwo | grzyb HMI w łańcuchu E-STOP (D35), watchdog ekranu, dwukanałowy E-STOP NC `lrt_estop2` | `config/hal/`, `hal/lrt_estop2.comp` |
+| Program i cykle | wybór, podgląd, sprawdzanie składni, edycja; generatory: nagłówek, narzędzie, planowanie, otwory, koniec | `screens/linumert/`, `core/linumert/generators/` |
+
+## Co dalej (najbliższe zadania)
+
+1. **Wznowienie obróbki (D38)** — wycofanie w pauzie, powrót po helisie i łuku stycznym z zakładką,
+   bez naddatku ([`docs/design/WZNOWIENIE.md`](docs/design/WZNOWIENIE.md), sesja 031).
+2. Raport symulacji HTML i oś czasu zdarzeń (059, 057); symulacja programu offline przed startem (051–056).
+3. Programy dialogowe: kieszenie, rowki, kontur, pliki `.lnx`, walidacja z bazą narzędzi (040–047).
+4. Tryby, MDI, alarmy, poziomy dostępu, PL/EN na ekranie (029–037).
+5. Generator konfiguracji: step/dir, EtherCAT, RS485, 4/5 osi, ATC, kreator maszyny (061–067).
+6. Wtyczki, instalator Debian 12 i **obraz live USB / ISO** do wypalenia (Debian 12 + RT + LinuxCNC + linumeRT),
+   dokumentacja użytkownika, wydanie v0.5.0-alpha (073–083).
+
+Pełny plan sesji: [`prompts/README.md`](prompts/README.md).
 
 ## Kierunek rozwoju
 

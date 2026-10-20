@@ -25,7 +25,7 @@ class DiagnosticSimulationTest(unittest.TestCase):
                                            spindle=[], motion_type=2, motion_line=1,
                                            current_line=1, tool_in_spindle=0)
                     cnc = SimpleNamespace(stat=Mock(return_value=stat),
-                                          command=Mock(side_effect=AssertionError("CNC")),
+                                          command=Mock(side_effect=AssertionError("no CNC commands")),
                                           error=RuntimeError)
                     live = module.Live(str(ini), None, cnc)
                     event = Event("K-305", kind, 1, 0, (0, 0, 0))
@@ -49,6 +49,7 @@ class DiagnosticSimulationTest(unittest.TestCase):
     def test_reset_changes_only_simulated_material(self):
         live = module.Live.__new__(module.Live)
         live.engine = SimpleNamespace(reset_stock=Mock())
+        live.log = module.SimLog()
         self.assertTrue(live.command({"cmd": "stock_reset"}))
         live.engine.reset_stock.assert_called_once_with()
         self.assertFalse(live.command({"cmd": "quit"}))
@@ -75,3 +76,4 @@ class DiagnosticSimulationTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
