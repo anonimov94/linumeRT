@@ -25,7 +25,7 @@ class DiagnosticSimulationTest(unittest.TestCase):
                                            spindle=[], motion_type=2, motion_line=1,
                                            current_line=1, tool_in_spindle=0)
                     cnc = SimpleNamespace(stat=Mock(return_value=stat),
-                                          command=Mock(side_effect=AssertionError("no CNC commands")),
+                                          command=Mock(side_effect=AssertionError("CNC")),
                                           error=RuntimeError)
                     live = module.Live(str(ini), None, cnc)
                     event = Event("K-305", kind, 1, 0, (0, 0, 0))
