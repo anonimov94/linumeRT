@@ -40,3 +40,14 @@ Nie uznawaj otwartego podglądu offline za uruchomione pełne HMI.
 2. Edycja i sprawdzanie G-code w widoku Program; tłumaczenia i pozostałe widoki workflow.
 3. Weryfikacja fizycznej maszyny, safety/STO i napędów pozostaje osobnym zadaniem właściciela.
 4. Pozostały plan sesji i bramki: `prompts/README.md`, `docs/raporty/G0.md`.
+
+## Audyt safety — 2026-10-20, PR #48 (Codex, sesja chmurowa)
+
+Polecenie właściciela: PC w torze zezwolenia; symulacja bez safety. Audyt:
+[bezpieczenstwo/README.md](bezpieczenstwo/README.md). Etap 1 na codex/safety-separation:
+kontrakt wypchnięty c528144, proces symulacji bez komend CNC d8d5fda; 3 unittest lokalnie OK.
+Dla Claude: przejrzeć #48 i CI; nie przywracać E-STOP z procesu materiału/kolizji przy integracji #47.
+Zakres usunięcia emulacji w Plant czeka na odpowiedź właściciela; nie zmieniono jego łańcucha.
+Następnie jawny profil sprzętowy i kontrakt I/O/nadzoru PC; brak gotowej konfiguracji hardware.
+Stan zatrzymania: dokumentacja i pierwszy krok kodu wypchnięte, pełny odbiór Debian 12/GUI przez CI
+oraz środowisko lokalne. LOCK pusty; bez lokalnej instancji LinuxCNC.

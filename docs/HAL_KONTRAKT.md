@@ -127,3 +127,14 @@ NIEZWERYFIKOWANE NA SPRZĘCIE. Test: `tests/test_hal_lrt_net.py` (halrun + serwe
 Obsługa D37: grzyb i podwójny Reset korzystają z impulsu `linumert.hmi-ack`;
 żaden nie zamyka fizycznego wejścia safety. W konfiguracji wirtualnej handshake
 `io.tool-change` → `sim_toolchange` → `io.tool-changed` zastępuje fizyczną wymianę narzędzia.
+
+## Aktualizacja 2026-10-20 — tor PC a symulacja
+
+PC ma być dodatkowym warunkiem zezwolenia fizycznej maszyny; niezależny sprzętowy nadzór
+sygnału PC ma odbierać zgodę po jego zaniku/zatrzymaniu. Watchdog HAL nadzoruje HMI,
+nie dowodzi działania po awarii całego PC. Wyjście PC nie może obejść fizycznego obwodu
+ani resetować urządzeń safety. Nie jest to jeszcze gotowy profil sprzętowy.
+Proces symulacji materiału i kolizji tylko raportuje: nie wystawia E-STOP/STO/resetu.
+Istniejący tor HAL operatora i Plant pozostaje aktywny do osobnej migracji;
+zakres Plant wymaga doprecyzowania właściciela. Audyt: [bezpieczenstwo/README.md](bezpieczenstwo/README.md).
+Model-Author: Codex. NIEZWERYFIKOWANE NA SPRZĘCIE.

@@ -3,7 +3,7 @@
 # Model-Author: Claude · 2026-10-19.
 # Test end-to-end symulacji HMI w obrazie startera (linumert-app, tools/linumert-start.sh) pod Xvfb:
 # LinuxCNC + ekran linumeRT (obszar Symulacja) + proces linumert_sim.live; bazowanie, program demo,
-# program kolizji (oczekiwane K-302 i E-STOP). Kopia konfiguracji w /tmp z HMI_ESTOP_BYPASS = 1
+# program kolizji (oczekiwane K-302 bez zmiany stanu LinuxCNC). Kopia konfiguracji w /tmp z HMI_ESTOP_BYPASS = 1
 # (bez operatora nie ma kto zwolnić grzyba). Zrzuty i dziennik zdarzeń: build/sim-e2e/.
 #   tools/dev/sim-e2e.sh
 set -euo pipefail

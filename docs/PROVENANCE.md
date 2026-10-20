@@ -120,3 +120,11 @@ Codex, własny kod GPL-2.0-or-later: `linumert_alarm_panel.py`, `linumert_operat
 `linumert_virtual_session.py`, testy operatora i integracja z powłoką. Projekt według wymagań właściciela D37.
 HAL symulatora wykorzystuje standardowy komponent LinuxCNC `timedelay` (GPL-2) do handshake M6;
 bez kopiowania kodu komponentu i bez zmian w konfiguracji fizycznej maszyny.
+
+## Rozdział safety i symulacji — 2026-10-20
+
+Model-Author: Codex. Własna analiza i implementacja GPL-2.0-or-later na polecenie właściciela:
+`docs/bezpieczenstwo/README.md`, diagnostyczny proces `simulation/linumert_sim/live.py`,
+komunikaty strony Symulacja, `tests/test_sim_diagnostics.py`, aktualizacja testów i e2e.
+Audyt Groka przekazany w czacie był wejściem do krytycznej oceny; bez kopiowania jego schematu
+jako zweryfikowanego projektu sprzętowego. Brak nowych zależności i zasobów zewnętrznych.

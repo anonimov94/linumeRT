@@ -387,3 +387,13 @@ Specjalista nie omija fizycznego safety ani limitów. Testy wykryły i poprawion
 przeciążenia po zatrzymaniu wrzeciona oraz brak sygnałów kontraktu HAL wymiany wirtualnej.
 Samotest GUI rozszerzony do 42 kroków; pełne CI w toku. Dokumentacja i README ujednolicone.
 Model-Author: Codex.
+
+## Bezpieczeństwo — audyt i rozdział symulacji od toru PC · 2026-10-20 · Codex
+- Model-Author: Codex. PR #48, gałąź codex/safety-separation; założenia właściciela w CLAUDE/DECYZJE.
+- Audyt main 7ad6313: poprawki względem Groka, niezależny nadzór PC, bez przypisywania kategorii/PL.
+- Proces symulacji bez kanału komend LinuxCNC; kolizje/przeciążenia nadal raportowane; komunikat diagnostyczny.
+- Zastąpiony test obejścia geometrii testem braku możliwości przywrócenia sterowania; e2e oczekuje diagnostyki.
+- Testy lokalne Debian 13: 3 unittest (w tym 6 wariantów zdarzeń/profilu) i compileall OK; bez Qt/LinuxCNC.
+- Debian 12 i pełny LinuxCNC: CI PR, nie deklaruję lokalnego odbioru GUI ani sprzętu.
+- Zakres Plant oczekuje doprecyzowania; jego łańcuch, watchdogi i testy usterek zachowane.
+- Autokontrola, bez niezależnego przeglądu. NIEZWERYFIKOWANE NA SPRZĘCIE.
