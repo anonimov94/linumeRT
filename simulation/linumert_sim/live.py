@@ -12,7 +12,8 @@ prowadzi materiał przygotówki i reguły `SimEngine`. Kolizja albo przeciążen
 Protokół z ekranem: polecenia JSON na stdin (po jednym w linii), zdarzenia JSON na stdout.
 Mapa wysokości przygotówki: plik `float32` (np.memmap), ścieżka w zdarzeniu `stock`.
 Polecenia: {"cmd": "stock", "line": ";@STOCK ..."} | {"cmd": "stock_reset"} |
-{"cmd": "machine", "path": ...} | {"cmd": "tools"} | {"cmd": "estop", "on": bool} | {"cmd": "quit"}.
+{"cmd": "machine", "path": ...} | {"cmd": "tools"} | {"cmd": "estop", "on": bool} |
+{"cmd": "export_stl", "path": ...} | {"cmd": "quit"}.
 Zdarzenia: ready, stock, machine, tools, pos (≤ 30 Hz), map (zmiana materiału, ≤ 10 Hz),
 event (K-3xx), error.
 """
@@ -295,6 +296,8 @@ class Live:
             self.load_machine(str(c.get("path", "")))
         elif name == "tools":
             self.reload_tools(force=True)
+        elif name == "export_stl":
+            self.export_stl(str(c.get("path", "")))
         elif name == "recovery":
             self.recovery = self.virtual and bool(c.get("on", False))
         elif name == "estop":
@@ -302,6 +305,19 @@ class Live:
         else:
             emit(ev="error", text=f"nieznane polecenie {name!r}")
         return True
+
+    def export_stl(self, path: str) -> None:
+        if self.engine.stock is None or not path:
+            emit(ev="error", text="eksport STL: brak przygotówki albo ścieżki")
+            return
+        from .stl import write_stl
+
+        try:
+            n = write_stl(self.engine.stock, path)
+        except OSError as exc:
+            emit(ev="error", text=f"eksport STL: {exc}")
+            return
+        emit(ev="stl", path=path, triangles=n)
 
     def close(self) -> None:
         if self.map_file is not None:

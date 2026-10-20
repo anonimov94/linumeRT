@@ -396,6 +396,10 @@ class SimPage(QtWidgets.QWidget):
         btn.setToolTip("Ustawia materiał w bieżącym układzie detalu (bez ruchu maszyny)")
         btn.clicked.connect(self.apply_stock)
         row.addWidget(btn)
+        btn = QtWidgets.QPushButton("Eksport STL")
+        btn.setToolTip("Zapis bieżącego materiału przygotówki do pliku STL")
+        btn.clicked.connect(self.export_stl)
+        row.addWidget(btn)
         btn = QtWidgets.QPushButton("Odnów materiał")
         btn.setToolTip("Przywraca pełną przygotówkę i czyści ślad ruchu")
         btn.clicked.connect(self.reset_stock)
@@ -425,6 +429,16 @@ class SimPage(QtWidgets.QWidget):
 
     def apply_stock(self) -> None:
         self.client.send(cmd="stock", line=self.stock_line())
+
+    def export_stl(self) -> None:
+        start = os.path.join(os.path.expanduser("~"), "material.stl")
+        path, _f = QtWidgets.QFileDialog.getSaveFileName(self, "Eksport STL", start,
+                                                         "STL (*.stl)")
+        if path:
+            self.client.send(cmd="export_stl", path=path)
+
+    def _on_stl(self, msg) -> None:
+        self._add_event("info", f"STL zapisany: {msg.get('path')} ({msg.get('triangles')} trójkątów)")
 
     def reset_stock(self) -> None:
         self.client.send(cmd="stock_reset")

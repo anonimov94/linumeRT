@@ -3,6 +3,7 @@
 # Wejścia Plant (machine.yaml io.inputs) = stan elektryczny: 1 = obwód zamknięty.
 #   din-00 estop (NC)  din-01 lim_x_min (NC)  din-02 lim_x_max (NC)  din-03 lim_y_min (NC)
 #   din-04 lim_y_max (NC)  din-05 lim_z_max (NC)  din-06 toolsetter  din-07 probe (NO)
+#   din-15 estop_b (NC, drugi kanał tego samego grzyba — hal/lrt_estop2.comp)
 # Wyjścia: dout-00 spindle_on, dout-01 coolant, dout-31 = wszystkie osie zbazowane (wyrocznia).
 # Model-Author: Claude · sesja 018. NIEZWERYFIKOWANE NA SPRZĘCIE.
 
@@ -14,6 +15,8 @@ loadrt not names=nc_x_min,nc_x_max,nc_y_min,nc_y_max,nc_z_max
 # łańcuch E-STOP: (din-00 ∧ łącze) ∧ grzyb HMI — dwa and2 (logic ładuje już plik HMI, D35)
 loadrt and2 names=estop_chain,estop_chain_hmi
 loadrt estop_latch names=estop_latch
+# dwukanałowy E-STOP NC z kontrolą rozbieżności (zalecenie właściciela, 2026-10-19)
+loadrt lrt_estop2
 
 addf motion-command-handler servo-thread
 addf motion-controller servo-thread
@@ -27,6 +30,7 @@ addf nc_x_max servo-thread
 addf nc_y_min servo-thread
 addf nc_y_max servo-thread
 addf nc_z_max servo-thread
+addf lrt-estop2.0 servo-thread
 addf estop_chain servo-thread
 addf estop_chain_hmi servo-thread
 addf estop_latch servo-thread
@@ -94,14 +98,20 @@ net linumert.io.toolsetter   lrt-net.0.din-06
 # Sesja 024: fault napędu nie wchodzi do łańcucha E-STOP (wcześniej przez not amp_ok): napęd w
 # FAULT (np. STO po E-STOP) blokował reset, a bez włączenia lrt_cia402 nie kasuje faultu —
 # zakleszczenie. Fault napędu obsługuje joint.N.amp-fault-in (maszyna OFF, komunikat LinuxCNC).
-net linumert.io.estop-button lrt-net.0.din-00 => estop_chain.in0
+# kanały A (din-00) i B (din-15): oba zamknięte i bez błędu rozbieżności (> 0,1 s) → in0 łańcucha;
+# błąd kasuje test obwodu (oba otwarte, oba zamknięte) i Reset (user-request-enable)
+net linumert.io.estop-button lrt-net.0.din-00 => lrt-estop2.0.ch-a
+net linumert.io.estop-b      lrt-net.0.din-15 => lrt-estop2.0.ch-b
+setp lrt-estop2.0.discrepancy-time 0.1
+net linumert.io.estop-2ch    lrt-estop2.0.ok => estop_chain.in0
+net linumert.io.estop-fault  lrt-estop2.0.fault
 net lrt.connected            lrt-net.0.connected => estop_chain.in1
 # D35: grzyb HMI z sygnałem życia szeregowo (config/hal/linumert_hmi_estop.hal); reset tylko grzybem
 net lrt.estop-hw-ok          estop_chain.out => estop_chain_hmi.in0
 net linumert.hmi.estop-ok    => estop_chain_hmi.in1
 net lrt.estop-ok-in          estop_chain_hmi.out => estop_latch.ok-in
 net lrt.drive-fault          lrt-net.0.drive-fault
-net lrt.estop-reset          iocontrol.0.user-request-enable => estop_latch.reset
+net lrt.estop-reset          iocontrol.0.user-request-enable => estop_latch.reset lrt-estop2.0.reset
 net linumert.io.estop-ok     estop_latch.ok-out => iocontrol.0.emc-enable-in
 # fault napędu po włączeniu kasuje lrt_cia402; nie blokuje resetu (fault-in = 0)
 

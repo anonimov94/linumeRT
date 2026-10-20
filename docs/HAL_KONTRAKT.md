@@ -42,6 +42,10 @@ obr/s do `speed-in`), `linumert.spindle.enable` (`motion.motion-enabled` → `vf
 | Sygnał | Typ | Kierunek | Pin LinuxCNC | Znaczenie |
 |---|---|---|---|---|
 | `linumert.io.estop-ok` | bit | → | `iocontrol.0.emc-enable-in` | zezwolenie z zatrzasku `estop_latch` (reset: `linumert.io.estop-reset` = `iocontrol.0.user-request-enable`). Wejście zatrzasku = łańcuch AND: obwód sprzętowy maszyny (Plant: `din-00` i łącze LRT-NET) ∧ `linumert.hmi.estop-ok` (D35, CLAUDE.md §6); w symulatorze tylko grzyb HMI |
+| `linumert.io.estop-button` | bit | ← | `lrt-net.0.din-00` → `lrt-estop2.0.ch-a` | kanał A E-STOP (NC, 1 = zamknięty) |
+| `linumert.io.estop-b` | bit | ← | `lrt-net.0.din-15` → `lrt-estop2.0.ch-b` | kanał B E-STOP (NC, druga linia przewodów tego samego grzyba) |
+| `linumert.io.estop-2ch` | bit | → | `estop_chain.in0` | oba kanały zamknięte i brak błędu rozbieżności (`hal/lrt_estop2.comp`) |
+| `linumert.io.estop-fault` | bit | → | (ekran, diagnostyka) | rozbieżność kanałów > `discrepancy-time` (0,1 s), zatrzask; kasuje test obwodu (oba otwarte → oba zamknięte) + Reset |
 | `linumert.hmi.estop-ok` | bit | → łańcuch | `lrt_hmi_bypass.out` | grzyb HMI zwolniony ∧ HMI żyje ∧ E-STOP potwierdzony w HMI po ostatnim zdarzeniu (`config/hal/linumert_hmi_estop.hal`); 0 przed startem ekranu |
 | `linumert.hmi.ack` | bit | ← ekran | `linumert.hmi-ack` → `lrt_ack_edge.in` | impuls potwierdzenia (zwolnienie grzyba; w `--classic` żądanie resetu z ekranu); zbocze narastające ustawia zatrzask `lrt_hmi_ack` |
 | `linumert.io.user-enable`, `linumert.hmi.estop-event`, `linumert.hmi.acked` | bit | wewn. | `iocontrol.0.user-enable-out` → `lrt_estop_edge` → `lrt_hmi_ack.reset`, `lrt_hmi_ack.out` | każde wejście LinuxCNC w E-STOP (zbocze opadające) kasuje potwierdzenie HMI — reset inną drogą nie zamknie łańcucha (przegląd Codexa P1) |
