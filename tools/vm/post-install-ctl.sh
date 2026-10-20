@@ -42,7 +42,7 @@ fetch_repo "$repo"
 make_venv "" --system-site-packages
 
 log "komponenty HAL (halcompile --install)"
-for comp in lrt_net lrt_cia402 lrt_hardstop_home; do
+for comp in lrt_net lrt_cia402 lrt_hardstop_home lrt_estop2; do
     (cd "$REPO_DIR/hal" && halcompile --install "$comp.comp" >/dev/null) || die "halcompile $comp.comp"
 done
 

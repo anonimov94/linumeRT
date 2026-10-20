@@ -387,6 +387,17 @@ Specjalista nie omija fizycznego safety ani limitów. Testy wykryły i poprawion
 przeciążenia po zatrzymaniu wrzeciona oraz brak sygnałów kontraktu HAL wymiany wirtualnej.
 Samotest GUI rozszerzony do 42 kroków; pełne CI w toku. Dokumentacja i README ujednolicone.
 Model-Author: Codex.
+## Organizacja — punkty roadmapy na szybko: 040, 042, 059 (części) · 2026-10-19 · Claude (Opus 5.5)
+- 040: generatory `header`, `program_end`, `tool_change`, `face_mill` (zygzak / jednokierunkowo, warstwy, wybieg, podgląd 2D) — `core/linumert/generators/basic.py`; poprawka `fmt(x, 0)` (obcinało zera: S8000 → S8).
+- 042: generator `drill_holes` — wzory pojedynczy/lista/rząd/siatka/okrąg/łuk, G81/G82/G83/G73, G33.1 tylko przy `spindle_sync` (G84 nie istnieje w LinuxCNC 2.9), walidacja, podgląd 2D.
+- 059: eksport STL materiału z mapy wysokości (bryła szczelna, objętość zgodna) + przycisk „Eksport STL” w widoku Symulacja.
+- Brak: walidacja z ToolDB (040 p.2), raport HTML symulacji (059 p.1), panel dialogowy (045). Testy: `test_gen_basic.py`, `test_gen_drilling.py`, `test_sim_engine.py::test_stl_*`; pytest 684 OK.
+
+## Organizacja — domknięcie pracy z 2026-10-19: #46 scalony, Program, E-STOP dwukanałowy · Claude (Opus 5.5)
+- #46 Codexa (Bazowanie, Program, Zero detalu, D36/D37) scalony po zielonym CI; wcześniej poprawka `INFO.JOINT_SEQUENCE` (lista w LinuxCNC 2.9 — ekran nie wstawał).
+- Program: przyciski Sprawdź (lekser, kursor na pierwszym błędzie) i Edytuj/Zapisz (zapis atomowy, blokada w trakcie programu, „wczytaj ponownie” dla aktywnego pliku).
+- E-STOP dwukanałowy NC (zalecenie właściciela): `hal/lrt_estop2.comp` + model `core/linumert/diag/estop2.py` — oba kanały zamknięte = ok; rozbieżność > 0,1 s = błąd zatrzaśnięty; kasowanie: test obwodu (oba otwarte → oba zamknięte) + Reset. Plant: `io.inputs.estop_b` (bit 15) = kopia kanału A, awaria `estop_channel` (kanał B zablokowany). Konfiguracja Plant: łańcuch przez `lrt_estop2`; ekran podaje przyczynę „rozbieżność kanałów”. Testy: model, `halrun`, Plant. NIEZWERYFIKOWANE NA SPRZĘCIE.
+- D38 (PROPOZYCJA, wznowienie z helisą i łukiem) w sesji 031; stan częściowy sesji 040, 042, 055–059 w `prompts/README.md`.
 
 ## 2026-10-20 · Granica procesu interpretera · Codex
 
@@ -396,8 +407,46 @@ Niezerowy kod procesu blokuje sukces także po PROGRAM_END. Cztery testy bez Lin
 uruchamiają atrapę procesu (RIP/system, znaki powłoki, błąd procesu, timeout): OK.
 Pełne testy i lint przez CI; NIEZWERYFIKOWANE NA SPRZĘCIE.
 
-## 2026-10-20 · CI: pokrycie zmian runtime · Codex
 
-Model-Author: Codex. Workflow LinuxCNC obejmuje core, hal, config, simulation, plant i tests.
-Concurrency anuluje starsze przebiegi tego samego PR/ref; różne PR mają osobne grupy.
-Lokalnie parsowanie YAML i reprezentatywne ścieżki OK. CI w toku; bez deklaracji sprzętowych.
+## 040 — Generatory: walidacja z bazą narzędzi (p.2) · 2026-10-20 · Claude
+- Zrobione: `core/linumert/generators/tooling.py` — `tool_change` wybiera narzędzie z bazy, następne kroki
+  `face_mill` i `drill_holes` sprawdzane z jego danymi: typ do operacji (P-5207; narzędzie bez typu przepuszczane,
+  symulacja i tak zgłasza K-320), średnica i skok gwintu (P-5208), głębokość przejścia vs długość ostrza / wysokość
+  głowicy (P-5209), `max_rpm` (P-5210), kierunek M3/M4 vs `hand` (P-5211), brak w bazie (P-5206). Program w calach
+  przeliczany na mm. `compile_program(..., tools=ToolDB.get)`; bez `tools` zachowanie bez zmian.
+- Testy: `tests/test_gen_tooling.py` (11). Decyzje: tolerancja średnicy 0,01 mm.
+- Do sprawdzenia ręcznie: podpięcie `tools=` w panelu dialogowym (sesja 045). Długi: brak.
+
+## 059 — Raport symulacji HTML (p.1) · 2026-10-20 · Claude
+- Zrobione: `simulation/linumert_sim/report.py` — statyczny HTML (kolory z tokenów, bez JS i zasobów zewnętrznych):
+  program, czas symulacji, długość ruchów roboczych i G0, objętość materiału i usuniętego, zdarzenia K-3xx z czasem,
+  linią, narzędziem i pozycją G53, widok z góry (mapa wysokości PNG zapisywana biblioteką standardową + ślad
+  narzędzia SVG), opcjonalny zrzut widoku. Proces `linumert_sim.live`: polecenie `export_report`, zdarzenie `report`;
+  przebieg liczony od wczytania programu albo odnowienia materiału. Strona Symulacja: przycisk „Raport”.
+- Testy: `tests/test_sim_report.py` (7). Do sprawdzenia ręcznie: przycisk „Raport” w działającym HMI (CI: samotest GUI).
+- Długi: przycisk „Symuluj” w panelu dialogowym (045) i plikach; zrzut widoku 3D z ekranu do raportu.
+
+## 054 — Przygotówka: cel sondy Plant (p.2) · 2026-10-20 · Claude
+- Zrobione: `tools/stock_probe.py` — linia `;@STOCK` (z programu albo podana) + zero układu detalu (plik .var
+  LinuxCNC albo `--origin`) → `probe.target` w machine.yaml (układ maszyny, liczone jak w symulacji HMI,
+  `stock_bounds`); walec jako prostopadłościan opisany (Plant zna tylko box/plate). `--write` zmienia jedną linię
+  `target:` atomowo, komentarze zostają. p.1 (parser, dialog) i p.3 (K-321) były już zrobione.
+- Testy: `tests/test_stock_probe.py` (6; wynik wczytywany schematem machine.yaml). NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## 048 — Biblioteka podprogramów o-word (część) · 2026-10-20 · Claude
+- Zrobione: `core/linumert/generators/subroutines.py` — `o<lrt_face_mill>`, `o<lrt_drill_grid>`, `o<lrt_drill_circle>`
+  (cykle 81/82/83/73, G98/G99) z nagłówkiem NgcGui; eksport `python -m linumert.generators.subroutines <user_macros>`;
+  dokumentacja `docs/user/PODPROGRAMY.md`.
+- Testy: `tests/test_subroutines.py` — nagłówek NgcGui, lekser, eksport, dokumentacja; z markerem `linuxcnc`
+  zgodność ruchu (STRAIGHT_TRAVERSE/FEED z rs274) podprogramu i generatora Pythona dla 8 zestawów parametrów
+  (sprawdzone lokalnie na LinuxCNC 2.9 RIP).
+- Długi: kieszenie i rowki (po sesjach 041/043); zakładka NgcGui w ekranie nie sprawdzona ręcznie.
+
+## 053 — Estymator czasu obróbki (część) · 2026-10-20 · Claude
+- Zrobione: `core/linumert/programs/estimate.py` — ruch z wywołań kanonicznych `rs274` (podprogramy, pętle i cykle
+  rozwinięte przez LinuxCNC), profil trapezowy od zera do zera na odcinek i łuk (górne oszacowanie względem G64),
+  limity `[AXIS_*]` i `[TRAJ]` z INI wzdłuż kierunku ruchu, posuw F, przyspieszenie dośrodkowe na łukach, DWELL,
+  stały czas wymiany `[LINUMERT]TOOL_CHANGE_TIME` (domyślnie 10 s); wynik całkowity, G0/G1/postoje/wymiany, na
+  narzędzie i na krok `.lnx`. Jednostki calowe przeliczane.
+- Testy: `tests/test_estimate.py` (7, w tym rs274 z pętlą `repeat`).
+- Długi: „czas pozostały” na ekranie, tabela odchyłek względem Plant w `docs/SYMULACJA.md` i strojenie modelu.

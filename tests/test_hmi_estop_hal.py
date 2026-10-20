@@ -59,7 +59,8 @@ def test_chains_take_hmi_in_series() -> None:
     plant = (ROOT / "config/plant/linumert_plant_xyz/linumert_plant.hal").read_text(
         encoding="utf-8")
     assert "loadrt and2 names=estop_chain,estop_chain_hmi" in plant  # (din ∧ łącze) ∧ HMI
-    for line in ("lrt-net.0.din-00 => estop_chain.in0", "lrt-net.0.connected => estop_chain.in1",
+    for line in ("lrt-net.0.din-00 => lrt-estop2.0.ch-a", "lrt-estop2.0.ok => estop_chain.in0",
+                 "lrt-net.0.connected => estop_chain.in1",
                  "estop_chain.out => estop_chain_hmi.in0",
                  "net linumert.hmi.estop-ok    => estop_chain_hmi.in1",
                  "estop_chain_hmi.out => estop_latch.ok-in"):

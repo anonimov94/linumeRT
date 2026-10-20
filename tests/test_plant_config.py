@@ -79,7 +79,10 @@ def test_hal_uses_inputs_from_machine_yaml():
     inputs = _machine()["io"]["inputs"]
     for name in ("lim_x_min", "lim_x_max", "lim_y_min", "lim_y_max", "lim_z_max"):
         assert re.search(rf"lrt-net\.0\.din-{inputs[name]:02d} => nc_{name[4:]}\.in", hal), name
-    assert f"lrt-net.0.din-{inputs['estop']:02d} => estop_chain.in0" in hal
+    # dwukanałowy E-STOP NC: kanały A i B z machine.yaml do lrt_estop2, jego ok do łańcucha
+    assert f"lrt-net.0.din-{inputs['estop']:02d} => lrt-estop2.0.ch-a" in hal
+    assert f"lrt-net.0.din-{inputs['estop_b']:02d} => lrt-estop2.0.ch-b" in hal
+    assert "lrt-estop2.0.ok => estop_chain.in0" in hal
     assert f"lrt-net.0.din-{inputs['probe']:02d} => motion.probe-input" in hal
     assert "loadrt lrt_net personality=[PLANT]AXES ip=[PLANT]IP port=[PLANT]PORT" in hal
 

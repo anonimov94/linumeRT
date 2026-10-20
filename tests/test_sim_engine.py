@@ -291,3 +291,30 @@ def test_stock_reset_restores_material_and_discards_previous_swept_move():
     assert not engine._active and not engine.path and engine._prev is None
     engine.step(Sample(0.2, (200, 200, 100), tool=1, rpm=0))
     assert engine.stock.volume() == original  # brak starego odcinka do nowego HOME
+
+
+# ---- eksport STL (sesja 059) --------------------------------------------------------------------
+
+def _signed_volume(tris):
+    a, b, c = tris[:, 0], tris[:, 1], tris[:, 2]
+    return float(np.sum(np.einsum("ij,ij->i", a, np.cross(b, c)))) / 6
+
+
+def test_stl_closed_solid_matches_volume(tmp_path):
+    from linumert_sim.stl import mesh, write_stl
+
+    s = StockMap("BOX", 0, 0, 40, 30, -10, 0, cell=1.0)
+    flat = make_cutter(1, 80, 8, "flat", {"d": 8, "l": 40, "flute_length": 20})
+    s.cut(flat, (10, 15, -3), (30, 15, -3))
+    tris = mesh(s)
+    assert _signed_volume(tris) == pytest.approx(s.volume(), rel=1e-6)
+    # szczelność: każda krawędź skierowana ma parę przeciwną
+    edges = {}
+    for t in np.round(tris, 6):
+        for i in range(3):
+            key = (tuple(t[i]), tuple(t[(i + 1) % 3]))
+            edges[key] = edges.get(key, 0) + 1
+    assert all(edges.get((b, a), 0) == n for (a, b), n in edges.items())
+    path = tmp_path / "m.stl"
+    n = write_stl(s, path)
+    assert path.stat().st_size == 84 + 50 * n

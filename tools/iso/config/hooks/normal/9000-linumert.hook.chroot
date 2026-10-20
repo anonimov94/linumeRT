@@ -1,0 +1,22 @@
+#!/bin/sh
+# linumeRT · konfiguracja obrazu w chroot: venv rdzenia/Plant, komponenty HAL, skróty.
+# Model-Author: Claude · 2026-10-19. NIEZWERYFIKOWANE NA SPRZĘCIE.
+set -e
+R=/opt/linumeRT
+python3 -m venv --system-site-packages /opt/linumert
+/opt/linumert/bin/pip install -q "pydantic>=2" "fastapi>=0.100" "uvicorn>=0.23" "websockets>=11"
+T=$(mktemp -d)
+cp "$R"/hal/*.comp "$R"/hal/*.h "$T"/
+# halcompile szuka Makefile.modinc względem własnej ścieżki: wywołany jako /bin/halcompile
+# (Debian 12: /bin -> usr/bin, PATH w chroot) szukałby w /share/linuxcnc — stąd pełna ścieżka.
+test -f /usr/share/linuxcnc/Makefile.modinc || { dpkg -l 'linuxcnc*' >&2; exit 1; }
+for c in lrt_net lrt_cia402 lrt_hardstop_home lrt_estop2; do
+    (cd "$T" && /usr/bin/halcompile --install "$c.comp" >/dev/null)
+done
+rm -rf "$T"
+make -s -C "$R/plant/core" shared
+cp -n "$R/config/sim/linumert_xyz/linumert.var.default" "$R/config/sim/linumert_xyz/linumert.var"
+# Urządzenie do jednej pracy: konfiguracje i bazy narzędzi zapisywalne dla operatora
+chmod -R a+rwX "$R/config" "$R/screens"
+sed -i 's/^#\?\s*autologin-user=.*/autologin-user=operator/' /etc/lightdm/lightdm.conf || true
+echo "linumeRT $(cat "$R/VERSION" 2>/dev/null)" > /etc/linumert-release
