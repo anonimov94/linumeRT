@@ -40,3 +40,10 @@ Nie uznawaj otwartego podglądu offline za uruchomione pełne HMI.
 2. Edycja i sprawdzanie G-code w widoku Program; tłumaczenia i pozostałe widoki workflow.
 3. Weryfikacja fizycznej maszyny, safety/STO i napędów pozostaje osobnym zadaniem właściciela.
 4. Pozostały plan sesji i bramki: `prompts/README.md`, `docs/raporty/G0.md`.
+
+## Stan zatrzymania — Program, PR #50 · 2026-10-20
+
+Model-Author: Codex. `6beec3d`: kontrola składni w GUI bez LinuxCNC, lista i nawigacja.
+Cztery funkcje testowe widoku Program na rzeczywistym Qt offscreen OK; screenshot obejrzany.
+Limit 64 KiB/100 wyników jawny w GUI. CI w toku. Następny etap: edycja/zapis programu.
+Osobne PR: #48 safety/symulacja; #49 granica procesu rs274. Wszystkie wymagają zakończenia CI.

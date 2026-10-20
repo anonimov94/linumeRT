@@ -34,5 +34,11 @@ porównuje werdykt leksera z interpreterem `rs274` LinuxCNC 2.9 (`linuxcnc_check
 albo `rs274` w PATH, dodatkowo sprawdza semantykę. rs274 zawsze kończy się kodem 0 i drukuje
 menu, więc błąd = linia spoza menu i wywołań kanonicznych. Komunikaty po angielsku (LinuxCNC).
 
-**Ekran** (przycisk „Sprawdź”, lista błędów, klik → linia, ostrzeżenie przy edycji `.ngc`
-z `.lnx`) czeka na kopię ekranu QtDragon (sesja 005, Codex) — API jest gotowe.
+**Ekran — Program** (Model-Author: Codex): wybierz plik, naciśnij „Sprawdź składnię”.
+Lista podaje kod P-51xx, linię i kolumnę; kliknięcie przenosi podgląd do wskazanej linii,
+także poza pierwszymi 2000 liniami. Przycisk ponownie odczytuje plik z dysku.
+Kontrola działa bez LinuxCNC, dla plików do 64 KiB; pokazuje do 100 błędów wraz z pełną liczbą.
+Większy plik pozostaje dostępny do podglądu/wczytania, ale otrzymuje komunikat „nie sprawdzony”.
+Brak błędów składni nie oznacza poprawnej semantyki ani sprawdzenia ruchu.
+Kontrola niczego nie uruchamia i nie jest warunkiem dopuszczenia maszyny do ruchu.
+Edycja i zapisywanie programu oraz kontrola semantyki w GUI pozostają kolejnymi etapami.
