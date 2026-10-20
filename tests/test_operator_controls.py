@@ -101,22 +101,11 @@ def test_virtual_reset_requires_explicit_config_and_closed_safety(app, tmp_path,
     shell.sim.client.send.assert_called_with(cmd="recovery", on=False)
 
 
-def test_recovery_only_suppresses_virtual_geometry_in_manual():
+def test_legacy_simulation_commands_cannot_enable_safety_control():
     from linumert_sim.live import Live
+
     live = Live.__new__(Live)
-    live.virtual = False
-    live.recovery = False
-    live.engine = SimpleNamespace(_active={("K-305",)})
-    live.stat = SimpleNamespace(task_mode=1)
-    live.lc = SimpleNamespace(MODE_MANUAL=1)
-    live.estop_on_event, live.latched = True, None
-    live.command({"cmd": "recovery", "on": True})
-    assert not live.recovery and live.stop_required([])
-    live.virtual = True
-    live.command({"cmd": "recovery", "on": True})
-    assert live.recovery and not live.stop_required([])
-    live.stat.task_mode = 2  # AUTO nie może korzystać z obejścia geometrii
-    assert live.stop_required([])
-    live.stat.task_mode = 1
-    live.command({"cmd": "recovery", "on": False})
-    assert live.stop_required([])  # wyjście ze specjalisty ponownie sprawdza aktywne kolizje
+    for cmd in ("recovery", "estop"):
+        assert live.command({"cmd": cmd, "on": True})
+    # Starszy ekran nie może odtworzyć usuniętego kanału sterowania.
+    assert not vars(live)
