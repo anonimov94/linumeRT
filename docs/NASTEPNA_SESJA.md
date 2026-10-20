@@ -63,3 +63,6 @@ Dalej: odbiór CI, kontrola niezapisanych zmian i integracja pełnego HMI. Linux
 Integracja PR #50 z main 1987f28 (#47/#53): zachowane zmiany Claude i przekazanie.
 Jeden przycisk kontroli; zapis kopii zamiast nadpisania. Osiem testów Program Qt offscreen OK,
 także bez rdzenia na początkowym PYTHONPATH. CI ponowione po usunięciu importów blokujących start.
+
+Regresja startu Program: osobny proces Qt blokuje import rdzenia przy tworzeniu widoku,
+sprawdza komunikat o braku i udaną kontrolę po odblokowaniu. Test lokalny OK.

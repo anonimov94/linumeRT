@@ -6,7 +6,6 @@ from pathlib import Path
 from PyQt5 import QtWidgets
 
 
-
 class ProgramEditor(QtWidgets.QDialog):
     def __init__(self, path, text, parent=None):
         super().__init__(parent)
