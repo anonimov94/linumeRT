@@ -167,6 +167,23 @@ def render(engine: SimEngine, log: SimLog, title: str = "Raport symulacji",
            view_png: bytes | None = None) -> str:
     """HTML raportu symulacji (podsumowanie, zdarzenia, widok z góry, opcjonalny zrzut)."""
     smap = engine.stock
+    # Jeden odczyt katalogu na raport, również przy 500 zdarzeniach. Osobny
+    # proces musi wrócić do próbkowania zamiast parsować YAML dla każdego wiersza.
+    try:
+        from linumert.alarms.catalog import load_catalog
+
+        catalog = load_catalog()
+    except Exception:  # noqa: BLE001 - raport działa także bez katalogu rdzenia
+        catalog = None
+
+    def description(event):
+        if catalog is not None:
+            try:
+                return catalog.format(event.code, "pl", **event.params)
+            except (KeyError, ValueError, TypeError):
+                pass
+        return f"{event.code} {event.params}"
+
     lengths = path_lengths(engine.path)
     stops = [e for _t, e in log.events if e.stop]
     ok = not stops
@@ -185,7 +202,7 @@ def render(engine: SimEngine, log: SimLog, title: str = "Raport symulacji",
     events = "".join(
         f'<tr id="event-{i}" data-time="{t:.6f}"><td class="mono">{t:.2f} s</td>'
         f'<td class="mono">{html.escape(e.code)}</td>'
-        f"<td>{html.escape(e.text())}</td><td class=\"mono\">{e.line}</td>"
+        f"<td>{html.escape(description(e))}</td><td class=\"mono\">{e.line}</td>"
         f'<td class="mono">T{e.tool}</td><td class="mono">'
         f'{" ".join(f"{v:.2f}" for v in e.pos)}</td></tr>'
         for i, (t, e) in enumerate(log.events))
