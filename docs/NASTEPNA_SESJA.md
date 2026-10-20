@@ -49,11 +49,17 @@ Model-Author: Codex. Właściciel zlecił kontynuację niezależnych zadań w ch
 `03591cf`: cytowanie ścieżek RIP/G-code, exec i kontrola kodu procesu; 4 testy lokalne OK.
 CI w toku; osobna gałąź od main, niezależna od safety PR #48. Następny krok: odbiór CI.
 
-## Stan zatrzymania — CI runtime, PR #51 · 2026-10-20
 
-Model-Author: Codex. bb7374d: szersze filtry LinuxCNC i anulowanie starszych przebiegów PR.
-YAML/ścieżki sprawdzone lokalnie. Następny krok: wynik obu workflow dla końcowego SHA.
-PR #48 i #50 prowadzone osobno; nie nadpisywać ich przekazań przy scalaniu dokumentów.
+## Stan zatrzymania — Doctor offline, PR #52 · 2026-10-20
 
-Integracja PR #51 z main 1987f28 (#47/#53): zachowane zmiany Claude i przekazanie.
-YAML i reguły bez zmian względem zielonego SHA; połączona dokumentacja main.
+Model-Author: Codex. 1b438e5: inwentaryzacja środowiska w Diagnostyce i CLI; część sesji 078.
+Cztery testy lokalne (w tym Qt offscreen) OK; CI w toku. Bez wykonania CNC/HAL i bez sieci.
+Następny krok: odbiór CI, potem pomiary/runtime i kreator jako kolejne osobne zakresy.
+Równoległe gałęzie tego samego Codexa: #48, #50, #51; zachować ich przekazania przy scalaniu.
+
+Integracja PR #52 z main 1987f28 (#47/#53): zachowane zmiany Claude i przekazanie.
+Raport ładuje rdzeń przy otwarciu; test Qt bez rdzenia na początkowym PYTHONPATH OK.
+
+PR #52 scalony. PR #51: po błędzie Xlib.BadWindow proces LinuxCNC pozostawał żywy,
+psując kolejne testy Plant. Sprzątanie w finally i obsługa znikających okien; 3 regresje offline OK.
+Następny krok: ponowne CI, bez maskowania nieudanego zamknięcia QtDragon.
