@@ -125,3 +125,9 @@ bez kopiowania kodu komponentu i bez zmian w konfiguracji fizycznej maszyny.
 
 Model-Author: Codex. Własne poprawki `linuxcnc_check.py` i testy `test_interpreter_process.py`,
 GPL-2.0-or-later, biblioteka standardowa; bez nowych zależności i kodu zewnętrznego.
+
+## Raport środowiska — 2026-10-20
+
+Model-Author: Codex. Własny kod GPL-2.0-or-later: `core/linumert/diag/doctor.py`,
+`linumert_doctor_dialog.py`, integracja Diagnostyki, testy `test_doctor_offline.py`
+i `test_doctor_gui.py`. Biblioteka standardowa i istniejący PyQt5; bez nowych zasobów zewnętrznych.

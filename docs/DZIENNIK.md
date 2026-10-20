@@ -395,3 +395,11 @@ Model-Author: Codex. Część sesji 081, bez deklarowania całej sesji jako uko�
 Niezerowy kod procesu blokuje sukces także po PROGRAM_END. Cztery testy bez LinuxCNC
 uruchamiają atrapę procesu (RIP/system, znaki powłoki, błąd procesu, timeout): OK.
 Pełne testy i lint przez CI; NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## 2026-10-20 · Doctor: raport środowiska offline · Codex
+
+Model-Author: Codex. Część sesji 078, widoczna od razu w Diagnostyce; CLI tekst/JSON.
+Odczyt Python/system/moduły/PATH/flaga RT; bez procesów CNC/HAL, sieci i zapisu konfiguracji.
+Braki i niewykonane kontrole jawne; bez deklaracji kwalifikacji sprzętu.
+Testy lokalne: 3 jednostkowe + 1 osobny proces Qt offscreen OK; screenshot obejrzany.
+CI w toku; dalszy doctor/kreator i weryfikacja runtime pozostają. NIEZWERYFIKOWANE NA SPRZĘCIE.
