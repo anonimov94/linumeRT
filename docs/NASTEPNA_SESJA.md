@@ -1,6 +1,6 @@
 # Stan projektu i przekazanie
 
-Tura: Claude · od 2026-10-19 · stan: oddana (koniec dnia)
+Tura: Codex · od 2026-10-20 · stan: w toku
 
 Model-Author: Codex, aktualizacja Claude (koniec 2026-10-19). Bieżący stan jest w tym pliku; historia w DZIENNIK.md.
 Zasady: [WSPOLPRACA_MODELI.md](WSPOLPRACA_MODELI.md), kontrakt operatora:
@@ -48,3 +48,13 @@ Nie uznawaj otwartego podglądu offline za uruchomione pełne HMI.
 Model-Author: Codex. Właściciel zlecił kontynuację niezależnych zadań w chmurze bez PC.
 `03591cf`: cytowanie ścieżek RIP/G-code, exec i kontrola kodu procesu; 4 testy lokalne OK.
 CI w toku; osobna gałąź od main, niezależna od safety PR #48. Następny krok: odbiór CI.
+
+## Stan zatrzymania — Doctor offline, PR #52 · 2026-10-20
+
+Model-Author: Codex. 1b438e5: inwentaryzacja środowiska w Diagnostyce i CLI; część sesji 078.
+Cztery testy lokalne (w tym Qt offscreen) OK; CI w toku. Bez wykonania CNC/HAL i bez sieci.
+Następny krok: odbiór CI, potem pomiary/runtime i kreator jako kolejne osobne zakresy.
+Równoległe gałęzie tego samego Codexa: #48, #50, #51; zachować ich przekazania przy scalaniu.
+
+Integracja PR #52 z main 1987f28 (#47/#53): zachowane zmiany Claude i przekazanie.
+Raport ładuje rdzeń przy otwarciu; test Qt bez rdzenia na początkowym PYTHONPATH OK.

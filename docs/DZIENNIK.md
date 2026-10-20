@@ -407,6 +407,7 @@ Niezerowy kod procesu blokuje sukces także po PROGRAM_END. Cztery testy bez Lin
 uruchamiają atrapę procesu (RIP/system, znaki powłoki, błąd procesu, timeout): OK.
 Pełne testy i lint przez CI; NIEZWERYFIKOWANE NA SPRZĘCIE.
 
+
 ## 040 — Generatory: walidacja z bazą narzędzi (p.2) · 2026-10-20 · Claude
 - Zrobione: `core/linumert/generators/tooling.py` — `tool_change` wybiera narzędzie z bazy, następne kroki
   `face_mill` i `drill_holes` sprawdzane z jego danymi: typ do operacji (P-5207; narzędzie bez typu przepuszczane,
