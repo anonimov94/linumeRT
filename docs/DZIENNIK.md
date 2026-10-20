@@ -554,3 +554,9 @@ Brak komend ruchu przy kontroli; screenshot wykonany lokalnie. CI oraz odbiór w
 - Estymator uwzględnia limit Z helisy; jawnie odmawia nieobsługiwanej płaszczyzny/trybu posuwu i brakujących limitów XYZ.
 - Lokalnie 40 testów czasu/widgetów/złożenia HMI PASS. Pomiar czasu obu kieszeni LinuxCNC + Plant oraz błąd modelu w pocket_calibration.json — odbiór CI wymagany.
 - Wynik jest przybliżeniem, nie gwarancją czasu cyklu; start od XYZ=0 i oczekiwania operatora opisane w planie. Bez niezależnego przeglądu.
+
+## Plan 26.10 — bieżący widok i oś czasu raportu · Codex
+- Model-Author: Codex. Zrzut bufora OpenGL / zastępczego widoku 2D osadzony w HTML przez istniejący parametr view_png.
+- Wspólny czas względny zdarzeń HMI/tabeli/osi SVG, odnośniki do wierszy i jawne pominięcia ponad limit 500. Usunięto sugestię, że diagnostyka zatrzymuje CNC.
+- Test faktycznego kliknięcia Raport zapisuje HTML z obrazem Qt; test 3D/kamery przez Xvfb/Mesa wymagany w CI. Pyqtgraph już w runtime, dodany do CI.
+- Brak dodatkowych zależności/licencji; autokontrola, bez niezależnego przeglądu. Odbiór ręczny na pulpicie nadal otwarty.

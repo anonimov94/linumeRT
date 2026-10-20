@@ -71,3 +71,13 @@ Nie gwarantuje czasu całego cyklu: start XYZ=0, uproszczony G64, pominięte ocz
 operatora i rozpędzanie wrzeciona. Test LinuxCNC + Plant zapisuje czas oszacowany,
 zmierzony i błąd względny dwóch kieszeni w `pocket_calibration.json` w artefaktach CI.
 To porównanie kontrolne, bez uniwersalnego współczynnika kalibracyjnego dla wszystkich maszyn.
+
+Realizacja 26.10: Raport pobiera bieżący obraz widoku 3D przez
+[Qt grabFramebuffer](https://doc.qt.io/archives/qt-5.15/qopenglwidget.html#grabFramebuffer)
+(przy zastępczym 2D — obraz tego widoku) i osadza PNG w samodzielnym HTML.
+Oś czasu SVG prowadzi do tych samych zdarzeń i czasów co tabela; HMI otrzymuje ten sam
+czas względny procesu symulacji. Limit 500 zdarzeń raportu pokazuje liczbę pominiętych.
+Etykiety kolizji są diagnostyczne, bez sugerowania zatrzymania CNC.
+Test kliknięcia Raport obejmuje rzeczywisty obraz Qt, protokół i plik HTML; osobny test
+LinuxCNC CI sprawdza prawdziwy widok 3D i zmianę obrazu po obrocie kamery. Pakiet pyqtgraph
+był już zależnością launchera; dodano go do środowiska testów CI.

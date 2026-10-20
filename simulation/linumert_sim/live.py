@@ -22,6 +22,7 @@ programu albo odnowienia materiału.
 from __future__ import annotations
 
 import argparse
+import base64
 import json
 import math
 import os
@@ -248,7 +249,7 @@ class Live:
                 emit(ev="alarms", active=codes)
             for e in events:
                 # Pole stop jest wskazaniem modelu, nigdy komendą do maszyny.
-                emit(ev="event", **e.to_dict())
+                emit(ev="event", sim_time=t0 - self.log.t0, **e.to_dict())
             smap = self.engine.stock
             if smap is not None and self.map is not None and smap.version != self.map_version \
                     and t0 - last_map >= MAP_PERIOD:
@@ -292,7 +293,7 @@ class Live:
         elif name == "export_stl":
             self.export_stl(str(c.get("path", "")))
         elif name == "export_report":
-            self.export_report(str(c.get("path", "")))
+            self.export_report(str(c.get("path", "")), c.get("view_png"))
         elif name == "resume_preview":
             self.resume_preview()
         else:
@@ -361,14 +362,21 @@ class Live:
             return
         emit(ev="stl", path=path, triangles=n)
 
-    def export_report(self, path: str) -> None:
+    def export_report(self, path: str, view_png=None) -> None:
         if not path:
             emit(ev="error", text="raport symulacji: brak ścieżki")
             return
         try:
+            png = None
+            if view_png is not None:
+                if not isinstance(view_png, str) or len(view_png) > 12 * 1024 * 1024:
+                    raise ValueError("Niepoprawny rozmiar zrzutu widoku.")
+                png = base64.b64decode(view_png, validate=True)
+                if not png.startswith(b"\x89PNG\r\n\x1a\n"):
+                    raise ValueError("Zrzut widoku nie jest obrazem PNG.")
             write_report(path, self.engine, self.log,
-                         title=f"Raport symulacji {self.log.program}".strip())
-        except OSError as exc:
+                         title=f"Raport symulacji {self.log.program}".strip(), view_png=png)
+        except (OSError, ValueError) as exc:
             emit(ev="error", text=f"raport symulacji: {exc}")
             return
         emit(ev="report", path=path, events=len(self.log.events))

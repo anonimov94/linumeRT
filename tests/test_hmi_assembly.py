@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
 """Składanie i układ całego HMI bez CNC; ruch sprawdza osobny test RIP. Model-Author: Codex."""
+import base64
 import os
 import subprocess
 import sys
@@ -88,6 +89,33 @@ def smoke(snapshot):
     assert shell.sim._resume_dialog.isVisible()
     assert shell.sim._resume_dialog.grab().save(str(Path(snapshot).with_name("resume-preview.png")))
     shell.sim._resume_dialog.close()
+    # Rzeczywiste kliknięcie → zrzut Qt → protokół → rzeczywisty zapis HTML.
+    from linumert_sim.engine import Event, SimEngine
+    from linumert_sim.live import Live
+    from linumert_sim.report import SimLog
+    from linumert_sim.zmap import StockMap
+
+    live = Live.__new__(Live)
+    live.engine, live.log = SimEngine(), SimLog()
+    stock = StockMap("BOX", 0, 0, 10, 10, -5, 0, cell=1)
+    live.engine.set_stock(stock)
+    live.log.tick(100)
+    live.log.tick(101, [Event("K-305", "collision", 42, 1, (1, 2, 3))])
+    shell.sim.view.set_stock({"x0": 0, "y0": 0, "x1": 10, "y1": 10,
+                              "z0": -5, "z1": 0}, stock.h)
+    report = Path(snapshot).with_name("clicked-report.html")
+    original_dialog = QtWidgets.QFileDialog.getSaveFileName
+    QtWidgets.QFileDialog.getSaveFileName = staticmethod(lambda *a, **k: (str(report), ""))
+    shell.sim.client.send = Mock(side_effect=lambda **command: live.command(command))
+    next(b for b in shell.sim.findChildren(QtWidgets.QPushButton) if b.text() == "Raport").click()
+    QtWidgets.QFileDialog.getSaveFileName = original_dialog
+    payload = shell.sim.client.send.call_args.kwargs["view_png"]
+    assert base64.b64decode(payload).startswith(b"\x89PNG")
+    html = report.read_text()
+    assert payload in html and 'id="event-0" data-time="1.000000"' in html
+    shell.sim.on_message({"ev": "event", "sim_time": 1, "code": "K-305", "kind": "collision",
+                          "text": "kolizja", "line": 42, "pos": [1, 2, 3], "stop": False})
+    assert shell.sim.events.item(0).text().startswith("1.00 s")
     assert not action.mock_calls, action.mock_calls
     assert window.grab().save(snapshot)
     window.close()

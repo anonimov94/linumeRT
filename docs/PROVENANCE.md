@@ -202,3 +202,10 @@ i maszyny Claude. Dokumentacja external offsets wskazana w planie, implementacja
 Model-Author: Codex. Własna integracja estymatora Claude z Produkcją (Qt/wątek tła),
 walidacja zakresu modelu, limit Z helisy i porównanie czasów z LinuxCNC + Plant.
 GPL-2.0-or-later, bez nowych zależności. Kalibracja nie zmienia parametrów sterowania.
+
+## Raport widoku i oś czasu — 2026-10-21
+
+Model-Author: Codex. Własna integracja obrazu Qt i transportu JSON z istniejącym raportem
+Claude; SVG osi czasu i synchronizacja czasów. GPL-2.0-or-later. Użyte istniejące Qt
+(LGPL/GPL) i pyqtgraph (MIT), bez kopiowania kodu; dokumentacja Qt wskazana w planie.
+Test rzeczywistej kamery 3D pod Xvfb/Mesa i test kliknięcia/HTML.
