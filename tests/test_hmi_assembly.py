@@ -77,6 +77,17 @@ def smoke(snapshot):
     shell.s.estop = True
     shell.reset_alarms(True)
     shell.acknowledge_estop.assert_called_once()
+    shell.sim.client.send = Mock()
+    shell.sim.resume_preview.click()
+    shell.sim.client.send.assert_called_once_with(cmd="resume_preview")
+    shell.sim.on_message({"ev": "resume_preview", "ok": True, "text": "Podgląd bez wykonania",
+                          "overlap": 2, "feed": 200, "entry": (0, 0, -2),
+                          "points": [(0, 0, 1, "rapid"), (1, 0, -2, "feed"),
+                                     (2, 0, -2, "feed")]})
+    app.processEvents()
+    assert shell.sim._resume_dialog.isVisible()
+    assert shell.sim._resume_dialog.grab().save(str(Path(snapshot).with_name("resume-preview.png")))
+    shell.sim._resume_dialog.close()
     assert not action.mock_calls, action.mock_calls
     assert window.grab().save(snapshot)
     window.close()

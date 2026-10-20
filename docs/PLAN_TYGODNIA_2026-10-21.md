@@ -47,3 +47,17 @@ Zapis atomowy, bez utraty komentarzy, przygotówki, jednostek, wyłączonych kro
 Nieznany generator/wersja, błędny JSON albo parametry odrzucają otwarcie bez naruszenia
 bieżącego programu. Edycja ponawia kontrolę narzędzi i unieważnia czas; eksport .ngc
 używa wspólnego kompilatora. Testy przycisków Qt i roundtrip wykonywane automatycznie.
+
+Realizacja 24.10 — pierwsza porcja: przycisk „Podgląd powrotu po helisie (D38)” w Symulacji.
+Zakładka jest liczona po zmierzonym śladzie XY na stałej głębokości. Podgląd obejmuje
+wycofanie Z, helisę i ćwierćokrąg styczny do odcinka śladu; nie interpretuje programu.
+Próbowane są obie strony i dwa promienie. Kopia bieżącego materiału i model maszyny
+odrzucają kolizje, wejście w nieusunięty materiał i przekroczenie zakresów; stan symulacji
+pozostaje nietknięty. Brak danych, ruch programu, korekcja promienia i cykle dają odmowę.
+Ustawienia INI: RESUME_OVERLAP, RESUME_CLEARANCE, RESUME_HELIX_PITCH i RESUME_FEED (mm/min).
+
+**Nadal do wykonania w D38:** rzeczywiste external offsets w pauzie, odtworzenie pełnego
+stanu modalnego i dokładnej ścieżki z interpretera oraz automatyczne wznowienie programu.
+Pierwsza porcja nie wysyła komend ruchu i nie eksportuje programu do wykonania. Wyświetlony
+podgląd nie jest zgodą na automatyczny start. Obsługa HAL musi uwzględnić zachowanie
+[external offsets LinuxCNC](https://linuxcnc.org/docs/2.9/html/motion/external-offsets.html).

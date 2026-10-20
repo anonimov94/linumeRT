@@ -23,6 +23,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import os
 import queue
 import sys
@@ -86,6 +87,9 @@ class Live:
         self.table_key = None
         self.db = None
         self.tbl = None
+        self._resume_trace = []
+        self._resume_key = None
+        self._resume_time = None
         machine_path = machine_path or ini_value(self.ini, "LINUMERT", "MACHINE_YAML")
         if machine_path:
             self.load_machine(str(self._rel(machine_path)))
@@ -236,6 +240,7 @@ class Live:
             self.reload_tools()
             sample = self.sample(t0)
             events = self.engine.step(sample)
+            self.record_resume_sample(sample)
             self.log.tick(t0, events)
             codes = sorted({key[0] for key in self.engine._active})
             if codes != active_codes:
@@ -288,9 +293,60 @@ class Live:
             self.export_stl(str(c.get("path", "")))
         elif name == "export_report":
             self.export_report(str(c.get("path", "")))
+        elif name == "resume_preview":
+            self.resume_preview()
         else:
             emit(ev="error", text=f"nieznane polecenie {name!r}")
         return True
+
+    def resume_preview(self) -> None:
+        from linumert.programs.resume import ResumeRefused, ResumeSettings
+
+        from .resume import preview_reentry
+
+        try:
+            self.stat.poll()
+            if self.stat.interp_state not in (self.lc.INTERP_IDLE, self.lc.INTERP_PAUSED):
+                raise ResumeRefused("Najpierw wstrzymaj program.")
+            blocked = {180, 190, 330, 331, 410, 420, 730, 760, *range(810, 900, 10)}
+            if blocked.intersection(self.stat.gcodes):
+                raise ResumeRefused("Płaszczyzna, korekcja lub cykl poza zakresem podglądu D38.")
+            sample = self.sample(time.monotonic())
+            cutter = self.engine.tools.get(sample.tool)
+            if cutter is None:
+                raise ResumeRefused("Brak zdefiniowanego narzędzia.")
+            tip = (*sample.nose[:2], sample.nose[2] - cutter.gauge)
+            path = list(self._resume_trace)
+            if not path or math.dist(path[-1], tip) > 0.25:
+                raise ResumeRefused("Brak aktualnego śladu cięcia w punkcie zatrzymania.")
+            path.append(tip)
+            settings = ResumeSettings(**{key: float(ini_value(
+                self.ini, "LINUMERT", setting, str(default))) for key, setting, default in (
+                    ("overlap", "RESUME_OVERLAP", 2), ("clearance", "RESUME_CLEARANCE", 1),
+                    ("pitch", "RESUME_HELIX_PITCH", 1), ("feed", "RESUME_FEED", 200))})
+            plan = preview_reentry(self.engine, path, sample.tool, settings)
+        except (ResumeRefused, ValueError) as exc:
+            emit(ev="resume_preview", ok=False, text=str(exc))
+            return
+        emit(ev="resume_preview", ok=True, points=plan.points, entry=plan.entry,
+             overlap=plan.overlap, feed=settings.feed,
+             text="Podgląd w układzie maszyny, sprawdzony na kopii materiału. "
+                  "Nie odtwarza programu ani stanu modalnego; automatyczne wykonanie wyłączone.")
+
+    def record_resume_sample(self, sample) -> None:
+        cutter = self.engine.tools.get(sample.tool)
+        key = (self.file, sample.tool, cutter.diameter, cutter.gauge) if cutter else None
+        if key != self._resume_key or (self._resume_time is not None and
+                                       sample.t - self._resume_time > 1):
+            self._resume_trace.clear()
+        self._resume_key, self._resume_time = key, sample.t
+        if cutter is None or sample.motion != "feed":
+            self._resume_trace.clear()
+            return
+        tip = (*sample.nose[:2], sample.nose[2] - cutter.gauge)
+        if not self._resume_trace or math.dist(self._resume_trace[-1], tip) >= 0.05:
+            self._resume_trace.append(tip)
+            del self._resume_trace[:-5000]
 
     def export_stl(self, path: str) -> None:
         if self.engine.stock is None or not path:

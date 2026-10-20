@@ -542,3 +542,9 @@ Brak komend ruchu przy kontroli; screenshot wykonany lokalnie. CI oraz odbiór w
 - Otwieranie i atomowy zapis .lnx przez istniejący model; zachowane jednostki, przygotówka, komentarze, włączenie kroków i wersje generatorów, także kieszenie v1.
 - Niepoprawny plik nie zmienia bieżącego programu. Niezapisane zmiany wymagają świadomego odrzucenia w HMI. G-code pochodzi ze wspólnego kompilatora.
 - Testy rzeczywistych kliknięć Qt offscreen, roundtrip i odrzucenia błędnego pliku; pełny odbiór CI przed scaleniem. Autokontrola, bez niezależnego przeglądu.
+
+## Plan 24.10 — podgląd geometrii D38 · Codex
+- Model-Author: Codex. Pierwsza działająca porcja: zakładka po zmierzonym śladzie XY, wycofanie Z, helisa i łuk styczny; okno podglądu z przycisku Symulacji.
+- Sprawdzenie kopii materiału i modelu maszyny; obie strony/dwa promienie, odmowa przy naruszeniu materiału, kolizji, braku danych, ruchu, korekcji lub cyklu.
+- Lokalnie 21 testów PASS i 6 subtestów; kliknięcie w złożonym HMI i zrzut okna, bez kanału komend CNC.
+- Otwarte: external offsets w pauzie, dokładny stan/ścieżka interpretera, wznowienie wykonania. Podgląd nie eksportuje programu i nie wykonuje ruchu. Autokontrola, bez niezależnego przeglądu.

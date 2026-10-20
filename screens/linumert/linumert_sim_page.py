@@ -342,6 +342,11 @@ class SimPage(QtWidgets.QWidget):
         self.reset_twin.setToolTip("Tylko konfiguracja VIRTUAL_MODE=1; odnawia materiał i bazuje osie")
         self.reset_twin.clicked.connect(shell.virtual_session.start)
         left_layout.addWidget(self.reset_twin)
+        self.resume_preview = QtWidgets.QPushButton("Podgląd powrotu po helisie (D38)")
+        self.resume_preview.setToolTip("Po zatrzymaniu: sprawdzenie geometrii na kopii materiału; "
+                                       "bez ruchu maszyny i bez automatycznego wznowienia")
+        self.resume_preview.clicked.connect(lambda: self.client.send(cmd="resume_preview"))
+        left_layout.addWidget(self.resume_preview)
         grid.addWidget(left, 0, 0)
         right = QtWidgets.QWidget()
         right_layout = QtWidgets.QVBoxLayout(right)
@@ -454,6 +459,33 @@ class SimPage(QtWidgets.QWidget):
     def _on_report(self, msg) -> None:
         self._add_event("info", f"Raport zapisany: {msg.get('path')} "
                                 f"({msg.get('events')} zdarzeń)")
+
+    def _on_resume_preview(self, msg) -> None:
+        if not msg.get("ok"):
+            self._add_event("warn", f"Powrót D38: {msg.get('text')}")
+            return
+        from linumert_cycles_page import Preview2D
+
+        dialog = QtWidgets.QDialog(self)
+        dialog.setWindowTitle("Podgląd powrotu D38 — bez wykonania")
+        dialog.resize(760, 520)
+        layout = QtWidgets.QVBoxLayout(dialog)
+        label = QtWidgets.QLabel(msg["text"] +
+                                f" Zakładka {msg['overlap']:g} mm, posuw {msg['feed']:g} mm/min.")
+        label.setWordWrap(True)
+        layout.addWidget(label)
+        view = Preview2D(self.c)
+        view.set_lines([[(p[0], p[1]) for p in msg["points"]]])
+        layout.addWidget(view, 1)
+        z = [p[2] for p in msg["points"]]
+        layout.addWidget(QtWidgets.QLabel(f"Z: {min(z):g}…{max(z):g} mm · "
+                                         f"{len(z)} próbek geometrii. "
+                                         "Styczność do zmierzonego śladu XY."))
+        button = QtWidgets.QPushButton("Zamknij podgląd")
+        button.clicked.connect(dialog.close)
+        layout.addWidget(button)
+        self._resume_dialog = dialog
+        dialog.show()
 
     def reset_stock(self) -> None:
         self.client.send(cmd="stock_reset")
