@@ -511,3 +511,9 @@ Brak komend ruchu przy kontroli; screenshot wykonany lokalnie. CI oraz odbiór w
 - Szablon routera: brakujący drugi czujnik bazy Y; pierwotna usterka odtworzona testem i usunięta.
 - Starszy D33 z codex/hmi-01 miał kolidującą numerację; zachowana historia i treść zasad bez nadpisania obecnego D33.
 - Pełny lokalny pytest: 816 PASS; 13 błędów testów sieci to EPERM sandboxa; wiążące testy Debian/LinuxCNC w CI.
+
+## 026 — Odbiór automatyczny P0/G1 · 2026-10-20 · Codex
+- Model-Author: Codex. Kod 4ca3f57: pełny runner Debian 12/LinuxCNC PASS, 81 testów CNC i 42 kroki HMI.
+- Ogólne CI: 823 PASS; C: 108 PASS, sanitizery Debian PASS; scenariusze 9 + matrix 5 PASS, REQ bez błędów.
+- Raport: docs/raporty/prototypy/P0-2026-10-20.md; MACIERZ zielona dla 21 bieżących REQ, REQ-VD-06 nadal planowane.
+- Odbiór ręczny i sprzęt oddzielnie w G1.md; sesja 041 pozostaje częściowa. Autokontrola, bez niezależnego przeglądu.

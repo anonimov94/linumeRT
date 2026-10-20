@@ -45,7 +45,7 @@ wymagały ekranu ani LinuxCNC. Bieżący stan i następny krok: [`docs/NASTEPNA_
 | [023](sesja-023.md) | M1 | Edytor wirtualnej obrabiarki w panelu Plant | zrobiona |
 | [024](sesja-024.md) | M1 | Plant: scenariusze i raport prototypu | zrobiona |
 | [025](sesja-025.md) | M1 | Skrypty maszyn wirtualnych (VirtualBox) | zrobiona |
-| [026](sesja-026.md) | M1 | Bufor i bramka G1 (prototyp P0) | **następna** |
+| [026](sesja-026.md) | M1 | Bufor i bramka G1 (prototyp P0) | zrobione (odbiór automatyczny, PR #56) |
 | [027](sesja-027.md) | M2 | Własny system projektowy ekranu |  |
 | [028](sesja-028.md) | M2 | Kompozycja ekranu głównego |  |
 | [029](sesja-029.md) | M2 | Tryby, JOG i pulpit MPG |  |
@@ -60,7 +60,7 @@ wymagały ekranu ani LinuxCNC. Bieżący stan i następny krok: [`docs/NASTEPNA_
 | [038](sesja-038.md) | M2 | Bufor i bramka G2 (prototyp v0.1) |  |
 | [039](sesja-039.md) | M3 | Format .lnx i BaseMacroGenerator | zrobiona |
 | [040](sesja-040.md) | M3 | Generatory: nagłówek, koniec, narzędzie, planowanie | zrobiona (panel dialogowy: 045) |
-| [041](sesja-041.md) | M3 | Generatory: kieszenie |  |
+| [041](sesja-041.md) | M3 | Generatory: kieszenie | częściowo (prototyp wejścia pionowego, PR #56) |
 | [042](sesja-042.md) | M3 | Generatory: wiercenie i gwintowanie | częściowo (generator gotowy, bez UI) |
 | [043](sesja-043.md) | M3 | Generatory: rowki, czopy, kontur |  |
 | [044](sesja-044.md) | M3 | Lekser G-code i walidacja w edytorze | zrobiona |

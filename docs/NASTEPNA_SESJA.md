@@ -2,72 +2,30 @@
 
 Tura: Codex · od 2026-10-20 · stan: w toku
 
-Model-Author: Codex, aktualizacja Claude (koniec 2026-10-19). Bieżący stan jest w tym pliku; historia w DZIENNIK.md.
-Zasady: [WSPOLPRACA_MODELI.md](WSPOLPRACA_MODELI.md), kontrakt operatora:
-[OBSLUGA_OPERATORA.md](OBSLUGA_OPERATORA.md), D36/D37.
+Model-Author: Codex. Bieżące polecenie właściciela: dokończyć rozpoczęte prace,
+bez rozpoczynania nowych sesji roadmapy; po scaleniu launcher i lista usterek na tydzień.
 
-## Wykonane HMI
+## Odbiór integracji
 
-Start, Maszyna, Bazowanie, Zero detalu 3D (prostopadłościan, walec, rura, odlew 360°),
-Narzędzia, Program (wybór/podgląd/wczytanie), Symulacja, Produkcja, Diagnostyka.
-Trzy ostatnie alarmy u góry; Reset zachowuje aktywne przyczyny, podwójny potwierdza zatrzask HAL.
-Pola wymiarów: 4 miejsca po przecinku, wpis ręczny. JOG/MDI, M3/M4/M5,
-wybór T i WYMIANA M6 w Maszyna i Symulacja. Wirtualna wymiana potwierdza handshake HAL.
-Specjalista: wolny JOG, maks. 100 mm/s; klawiatura 10 mm/s bez przyspieszania Shiftem.
-Wycofanie z kolizji geometrycznej tylko w jawnym bliźniaku i trybie MANUAL.
-Reset symulacji odnawia materiał i bazuje do HOME z INI. Fizyczne safety i limity pozostają aktywne.
+PR #56 łączy #48, #50, #54, #55 i #56 oraz niescalone Cykle Claude (7a71581).
+Zachowana historia wszystkich gałęzi, również historyczna aktualizacja codex/hmi-01.
+Kod 4ca3f57: pełne CI PASS — Debian 12: 849 testów + 81 LinuxCNC, C: 108 także z ASan/UBSan,
+42 kroki HMI, scenariusze 9 + matrix 5, wymagania bez błędów. Raport: [P0](raporty/prototypy/P0-2026-10-20.md).
+Ostatni commit uzupełnia wyłącznie dokumentację wynikami; scalenie w toku.
 
-## Git i testy
+Działają: ekrany HMI, edycja kopii G-code, diagnostyczna symulacja bez komend safety,
+audyt deklaracji/HAL offline, generatory, raport HTML, narzędzia/czas/NgcGui w Cyklach.
+Kieszenie są prototypem wejścia pionowego; sesja 041 pozostaje częściowa.
+Nie deklarować odbioru sprzętu ani ręcznych prób na pulpicie właściciela.
 
-PR #44 scalony; #45: integracja Symulacji/Narzędzi Claude. #46: zintegrowany zakres HMI Codex.
-Zmiany #46 wypychane po małych testowanych krokach, z zachowaniem poprawki Claude 8b2bc17.
-Testy Debian 12: widgety, geometria, model, symulacja, kontrakt HAL, IP i wymagania przechodzą.
-Pełny lokalny pytest ograniczony blokadą gniazd sieciowych (EPERM); wynik sieci/LinuxCNC daje CI.
-Samotest pełnego HMI ma 42 kroki, w tym MDI/M3/M5/M6 w Symulacji. Przed merge sprawdź oba workflow.
-Nie uznawaj otwartego podglądu offline za uruchomione pełne HMI.
+## Następny dozwolony krok
 
-## Uruchomienie
+Launcher HMI + QtDragon + LinuxCNC, test uruchamiania, lista braków na 21–27.10.2026.
+Nie zaczynać nowych sesji 027…084. Porządkowy job usuwa tylko gałęzie zawarte w main,
+z lease dla ich SHA, po zielonym CI main. Autokontrola, bez niezależnego przeglądu.
 
-- Pełny bliźniak: `tools/linumert-start.sh` (Debian 12 w Podmanie, LinuxCNC).
-- Edytor offline: `bash tools/dev/preview-zero.sh` — bez CNC, zapis tylko tymczasowy.
-- Lokalnie Codex: `/home/dell/Projekty/linumeRT-codex-hmi`; Claude: osobny checkout.
-- Sandbox Codexa blokuje sieć i dostęp do pulpitu; nie omijaj ograniczeń. GUI podglądu sprawdzamy offscreen.
-- Testy: `tools/dev/debian-container.sh make lint test test-c test-san`; pełne CNC przez CI/środowisko Claude.
+## Środowisko
 
-## Dalej
-
-1. Scalić PR #47 po zielonym CI (Cykle, Program: Sprawdź/Edytuj, E-STOP dwukanałowy NC, generatory, STL, D38).
-2. **D38 wznowienie obróbki**: `core/linumert/programs/resume.py` (punkt wejścia z zakładką, helisa, łuk),
-   sprawdzenie w `linumert_sim`, external offsets dla pauzy, przyciski w HMI ([`design/WZNOWIENIE.md`](design/WZNOWIENIE.md)).
-3. Raport HTML symulacji i oś czasu zdarzeń (059, 057); walidacja generatorów z bazą narzędzi (040).
-4. Usunąć scalone gałęzie (limit właściciela: 5 gałęzi, 2 PR; Claude ma usuwanie zablokowane).
-5. Dalszy plan: `prompts/README.md` (stan częściowy 040, 042, 055–059 oznaczony); weryfikacja sprzętu — właściciel.
-
-## Stan zatrzymania — interpreter, PR #49 · 2026-10-20
-
-Model-Author: Codex. Właściciel zlecił kontynuację niezależnych zadań w chmurze bez PC.
-`03591cf`: cytowanie ścieżek RIP/G-code, exec i kontrola kodu procesu; 4 testy lokalne OK.
-CI w toku; osobna gałąź od main, niezależna od safety PR #48. Następny krok: odbiór CI.
-
-
-## Stan zatrzymania — Doctor offline, PR #52 · 2026-10-20
-
-Model-Author: Codex. 1b438e5: inwentaryzacja środowiska w Diagnostyce i CLI; część sesji 078.
-Cztery testy lokalne (w tym Qt offscreen) OK; CI w toku. Bez wykonania CNC/HAL i bez sieci.
-Następny krok: odbiór CI, potem pomiary/runtime i kreator jako kolejne osobne zakresy.
-Równoległe gałęzie tego samego Codexa: #48, #50, #51; zachować ich przekazania przy scalaniu.
-
-Integracja PR #52 z main 1987f28 (#47/#53): zachowane zmiany Claude i przekazanie.
-Raport ładuje rdzeń przy otwarciu; test Qt bez rdzenia na początkowym PYTHONPATH OK.
-
-PR #52 scalony. PR #51: po błędzie Xlib.BadWindow proces LinuxCNC pozostawał żywy,
-psując kolejne testy Plant. Sprzątanie w finally i obsługa znikających okien; 3 regresje offline OK.
-Następny krok: ponowne CI, bez maskowania nieudanego zamknięcia QtDragon.
-
-## Bieżące polecenie właściciela — 2026-10-20
-
-Model-Author: Codex. Dokończyć rozpoczęte PR #48/#50/#54/#55/#56, bez nowych sesji.
-Kod połączony w PR #56 z zachowaniem historii pozostałych gałęzi; konflikty tylko w dokumentacji.
-54 testy zakresu lokalnie OK (Arch/Python 3.14, wynik pomocniczy); wiążący Debian 12/LinuxCNC w CI.
-Kieszenie pozostają jawnym prototypem wejścia pionowego, bez deklarowania zakończenia sesji 041.
-Następny krok: pełne CI, raport P0, scalenie; potem odbiór launchera i lista usterek na tydzień.
+Pełny bliźniak: tools/linumert-start.sh; QtDragon: --classic; Plant: --plant.
+Ta sesja lokalna blokuje sieć, pulpit, Podman i LeakSanitizer; wynik runtime pochodzi z CI.
+Podgląd Qt offscreen działa. Lokalna tabela narzędzi /home/dell/linumeRT pozostawiona użytkownikowi.
