@@ -506,8 +506,8 @@ def test_cycles_close_cleans_pending_estimate_file(page_env, monkeypatch, tmp_pa
         assert started.wait(5)
         page.close()
         assert Path(path).exists()
+        future.add_done_callback(lambda _future: finished.set())
     finally:
         release.set()
     future.result(timeout=5)
-    future.add_done_callback(lambda _future: finished.set())
     assert finished.wait(5) and not Path(path).exists()
