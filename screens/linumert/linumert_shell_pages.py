@@ -131,6 +131,15 @@ class DiagPage(QtWidgets.QWidget):
         grid.setColumnStretch(0, 2)
         grid.setColumnStretch(1, 3)
         grid.setRowStretch(2, 1)
+        self.doctor_button = QtWidgets.QPushButton("Raport środowiska…")
+        self.doctor_button.setMinimumHeight(44)
+        self.doctor_button.clicked.connect(self.show_environment)
+        grid.addWidget(self.doctor_button, 3, 0, 1, 2)
+
+    def show_environment(self):
+        from linumert_doctor_dialog import DoctorDialog
+
+        DoctorDialog(self).exec_()
 
     # ---- karty ----------------------------------------------------------------------------
     def _link_card(self) -> QtWidgets.QWidget:

@@ -134,6 +134,9 @@ Bez nowych zależności ani zewnętrznych zasobów.
 Model-Author: Codex. Własne poprawki `linuxcnc_check.py` i testy `test_interpreter_process.py`,
 GPL-2.0-or-later, biblioteka standardowa; bez nowych zależności i kodu zewnętrznego.
 
-Edytor Program (Codex, 2026-10-20): własny kod GPL-2.0-or-later,
-`core/linumert/programs/files.py`, `linumert_program_editor.py`, `test_program_files.py`.
-Biblioteka standardowa i istniejący Qt; bez nowych zależności.
+
+## Raport środowiska — 2026-10-20
+
+Model-Author: Codex. Własny kod GPL-2.0-or-later: `core/linumert/diag/doctor.py`,
+`linumert_doctor_dialog.py`, integracja Diagnostyki, testy `test_doctor_offline.py`
+i `test_doctor_gui.py`. Biblioteka standardowa i istniejący PyQt5; bez nowych zasobów zewnętrznych.

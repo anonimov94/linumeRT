@@ -56,13 +56,15 @@ Model-Author: Codex. Właściciel zlecił kontynuację niezależnych zadań w ch
 `03591cf`: cytowanie ścieżek RIP/G-code, exec i kontrola kodu procesu; 4 testy lokalne OK.
 CI w toku; osobna gałąź od main, niezależna od safety PR #48. Następny krok: odbiór CI.
 
-Aktualizacja PR #50: 90cea5f — edycja pełnego pliku i zapis nowej kopii (do 256 KiB).
-4 testy plików + 6 funkcji widoku Qt offscreen OK. CI w toku. PR #49 scalony, main włączony.
-Dalej: odbiór CI, kontrola niezapisanych zmian i integracja pełnego HMI. LinuxCNC lokalnie brak.
 
-Integracja PR #50 z main 1987f28 (#47/#53): zachowane zmiany Claude i przekazanie.
-Jeden przycisk kontroli; zapis kopii zamiast nadpisania. Osiem testów Program Qt offscreen OK,
-także bez rdzenia na początkowym PYTHONPATH. CI ponowione po usunięciu importów blokujących start.
+## Stan zatrzymania — Doctor offline, PR #52 · 2026-10-20
 
-Regresja startu Program: osobny proces Qt blokuje import rdzenia przy tworzeniu widoku,
-sprawdza komunikat o braku i udaną kontrolę po odblokowaniu. Test lokalny OK.
+Model-Author: Codex. 1b438e5: inwentaryzacja środowiska w Diagnostyce i CLI; część sesji 078.
+Cztery testy lokalne (w tym Qt offscreen) OK; CI w toku. Bez wykonania CNC/HAL i bez sieci.
+Następny krok: odbiór CI, potem pomiary/runtime i kreator jako kolejne osobne zakresy.
+Równoległe gałęzie tego samego Codexa: #48, #50, #51; zachować ich przekazania przy scalaniu.
+
+Integracja PR #52 z main 1987f28 (#47/#53): zachowane zmiany Claude i przekazanie.
+Raport ładuje rdzeń przy otwarciu; test Qt bez rdzenia na początkowym PYTHONPATH OK.
+
+PR #52 scalony (0edbef2), CI 370/LinuxCNC 114 OK. Połączono dokumentację bez usuwania wpisów.
