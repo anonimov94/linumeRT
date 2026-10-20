@@ -5,7 +5,7 @@ linię dopiero po spełnieniu kryteriów akceptacji sesji i wstawia ją we wła�
 najniższy numer, którego tu nie ma (teraz: **027**). Szczegóły każdej sesji: [`docs/DZIENNIK.md`](../docs/DZIENNIK.md),
 stan scalania PR: [`docs/NASTEPNA_SESJA.md`](../docs/NASTEPNA_SESJA.md).
 
-Wykonane: 32 z 84.
+Wykonane: 33 z 84.
 
 001 | 2026-10-17 | Szkielet monorepo: pyproject, katalogi z README, Makefile, CI, LICENSE (GPL-2), LICENCJE, PROVENANCE, testy licencji/IP/układu; Claude
 002 | 2026-10-17 | Proces IP, słownik, rejestr pochodzenia (52 wpisy), lista przed wydaniem, rozszerzony strażnik IP; Claude
@@ -36,6 +36,7 @@ Wykonane: 32 z 84.
 032 | 2026-10-18 | Baza narzędzi (rdzeń): 10 typów z walidacją, SQLite z migracjami i historią, tool.tbl bez strat (sprawdzone w rs274 LinuxCNC 2.9), CSV; ekran w sesji ekranu; PR #16; Claude
 039 | 2026-10-18 | Format .lnx (Pydantic + lnx_schema.json), ;@STOCK, BaseMacroGenerator, deterministyczny kompilator .lnx → .ngc (golden, rs274), alarmy P-5011…P-5015; PR #14; Claude
 040 | 2026-10-20 | Generatory header/program_end/tool_change/face_mill (#47) + walidacja kroków z bazą narzędzi (typ, średnica, skok, długość ostrza, obroty, kierunek; P-5207…P-5211, compile_program(tools=…)); Claude
+041 | 2026-10-21 | Kieszenie v2: pionowo/rampa/helisa, naroża, obrót, CW/CCW, naddatki i wykańczanie; v1 niezmienne; golden, materiał bez wysp, rs274 i wykonanie na LinuxCNC + Plant; 882 + 94 LinuxCNC PASS; PR #58; Codex
 044 | 2026-10-18 | Lekser G-code LinuxCNC (P-5101…P-5111, linia/kolumna, słowa O), kontrola w rs274; 44 próbki zgodne z LinuxCNC 2.9; przycisk Sprawdź w sesji ekranu; PR #15; Claude
 048 | 2026-10-20 | Podprogramy o<lrt_face_mill>, o<lrt_drill_grid>, o<lrt_drill_circle> (NgcGui), eksport do user_macros, PODPROGRAMY.md; ruch zgodny z generatorami w rs274 (część: kieszenie/rowki później); Claude
 054 | 2026-10-20 | Przygotówka: ;@STOCK, dialog Symulacja, K-321 (wcześniej) + cel sondy Plant z przygotówki (tools/stock_probe.py); Claude
