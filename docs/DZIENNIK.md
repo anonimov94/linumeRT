@@ -398,3 +398,11 @@ Model-Author: Codex.
 - Program: przyciski Sprawdź (lekser, kursor na pierwszym błędzie) i Edytuj/Zapisz (zapis atomowy, blokada w trakcie programu, „wczytaj ponownie” dla aktywnego pliku).
 - E-STOP dwukanałowy NC (zalecenie właściciela): `hal/lrt_estop2.comp` + model `core/linumert/diag/estop2.py` — oba kanały zamknięte = ok; rozbieżność > 0,1 s = błąd zatrzaśnięty; kasowanie: test obwodu (oba otwarte → oba zamknięte) + Reset. Plant: `io.inputs.estop_b` (bit 15) = kopia kanału A, awaria `estop_channel` (kanał B zablokowany). Konfiguracja Plant: łańcuch przez `lrt_estop2`; ekran podaje przyczynę „rozbieżność kanałów”. Testy: model, `halrun`, Plant. NIEZWERYFIKOWANE NA SPRZĘCIE.
 - D38 (PROPOZYCJA, wznowienie z helisą i łukiem) w sesji 031; stan częściowy sesji 040, 042, 055–059 w `prompts/README.md`.
+
+## 2026-10-20 · Granica procesu interpretera · Codex
+
+Model-Author: Codex. Część sesji 081, bez deklarowania całej sesji jako ukończonej.
+Ścieżki RIP i G-code są cytowane jako dane; exec wiąże limit czasu z procesem rs274.
+Niezerowy kod procesu blokuje sukces także po PROGRAM_END. Cztery testy bez LinuxCNC
+uruchamiają atrapę procesu (RIP/system, znaki powłoki, błąd procesu, timeout): OK.
+Pełne testy i lint przez CI; NIEZWERYFIKOWANE NA SPRZĘCIE.

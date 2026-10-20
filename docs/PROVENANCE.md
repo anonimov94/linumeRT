@@ -122,3 +122,8 @@ HAL symulatora wykorzystuje standardowy komponent LinuxCNC `timedelay` (GPL-2) d
 bez kopiowania kodu komponentu i bez zmian w konfiguracji fizycznej maszyny.
 | Koncepcja wycofania i powrotu do obróbki (D38) | dokument projektowy | model językowy Claude na zlecenie właściciela | 2026-10-19 | własny opis; mechanizmy LinuxCNC (external offsets, G2/G3 z Z) opisane bez kopiowania dokumentacji | GPL-2.0-or-later | plan ekranu | `docs/design/WZNOWIENIE.md` |
 | Obraz live USB / ISO (live-build) | konfiguracja, skrypty, workflow | model językowy Claude na zlecenie właściciela | 2026-10-19 | własna konfiguracja live-build (Debian), pakiety z Debiana i linuxcnc.org instalowane w czasie budowy, bez kopiowania cudzych konfiguracji | GPL-2.0-or-later | dystrybucja | `tools/iso/`, `.github/workflows/iso.yml`, `tests/test_iso.py` |
+
+## Kontrola procesu interpretera — 2026-10-20
+
+Model-Author: Codex. Własne poprawki `linuxcnc_check.py` i testy `test_interpreter_process.py`,
+GPL-2.0-or-later, biblioteka standardowa; bez nowych zależności i kodu zewnętrznego.

@@ -42,3 +42,9 @@ Nie uznawaj otwartego podglądu offline za uruchomione pełne HMI.
 3. Raport HTML symulacji i oś czasu zdarzeń (059, 057); walidacja generatorów z bazą narzędzi (040).
 4. Usunąć scalone gałęzie (limit właściciela: 5 gałęzi, 2 PR; Claude ma usuwanie zablokowane).
 5. Dalszy plan: `prompts/README.md` (stan częściowy 040, 042, 055–059 oznaczony); weryfikacja sprzętu — właściciel.
+
+## Stan zatrzymania — interpreter, PR #49 · 2026-10-20
+
+Model-Author: Codex. Właściciel zlecił kontynuację niezależnych zadań w chmurze bez PC.
+`03591cf`: cytowanie ścieżek RIP/G-code, exec i kontrola kodu procesu; 4 testy lokalne OK.
+CI w toku; osobna gałąź od main, niezależna od safety PR #48. Następny krok: odbiór CI.
