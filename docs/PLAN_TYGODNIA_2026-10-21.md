@@ -61,3 +61,13 @@ stanu modalnego i dokładnej ścieżki z interpretera oraz automatyczne wznowien
 Pierwsza porcja nie wysyła komend ruchu i nie eksportuje programu do wykonania. Wyświetlony
 podgląd nie jest zgodą na automatyczny start. Obsługa HAL musi uwzględnić zachowanie
 [external offsets LinuxCNC](https://linuxcnc.org/docs/2.9/html/motion/external-offsets.html).
+
+Realizacja 25.10: Produkcja → „Szacuj czas programu”, a podczas pracy/pauzy widoczny
+orientacyjny czas pozostały. Liczenie działa w tle; zmiana programu lub INI unieważnia
+wynik. Pauza nie zużywa czasu modelu. ETA jest niedostępne przy korekcjach F/G0 innych
+niż 100% i po starcie od linii. Przekroczenie czasu modelu daje jawny komunikat.
+Model łuków wymaga G17/G94, uwzględnia limit Z helisy i odmawia niekompletnych limitów XYZ.
+Nie gwarantuje czasu całego cyklu: start XYZ=0, uproszczony G64, pominięte oczekiwanie
+operatora i rozpędzanie wrzeciona. Test LinuxCNC + Plant zapisuje czas oszacowany,
+zmierzony i błąd względny dwóch kieszeni w `pocket_calibration.json` w artefaktach CI.
+To porównanie kontrolne, bez uniwersalnego współczynnika kalibracyjnego dla wszystkich maszyn.

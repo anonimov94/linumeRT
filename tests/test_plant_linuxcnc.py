@@ -99,11 +99,13 @@ out["pockets"] = []
 for path in sys.argv[1:]:
     c.mode(linuxcnc.MODE_AUTO); c.wait_complete()
     c.program_open(path); c.wait_complete()
+    started_at = time.monotonic()
     c.auto(linuxcnc.AUTO_RUN, 0); c.wait_complete()
     started = wait(lambda: s.interp_state != linuxcnc.INTERP_IDLE, 5)
     done = started and wait(lambda: s.interp_state == linuxcnc.INTERP_IDLE, 120)
     time.sleep(0.3); s.poll()
     out["pockets"].append({"started": started, "done": done,
+        "seconds": time.monotonic() - started_at,
         "task_state": s.task_state, "errors": list(out["errors"]),
         "ferror": max(abs(s.joint[i]["ferror_highmark"]) for i in range(4))})
     out["errors"] = []
@@ -184,6 +186,16 @@ def session(tmp_path_factory):
     res = json.loads(line[len("RESULT "):])
     res["hal"] = hal
     res["plant"] = json.loads(report.read_text(encoding="utf-8"))
+    from linumert.programs.estimate import estimate_ngc
+
+    calibration = []
+    for path, result in zip(programs, res["pockets"], strict=True):
+        estimated = estimate_ngc(path, ini, root).total
+        measured = result["seconds"]
+        calibration.append({"program": Path(path).name, "estimate_s": estimated,
+                            "plant_s": measured, "relative_error": estimated / measured - 1})
+    (tmp_path / "pocket_calibration.json").write_text(json.dumps(calibration, indent=2) + "\n")
+    res["calibration"] = calibration
     return res
 
 
@@ -211,6 +223,15 @@ def test_pocket_helix_and_finishing_on_real_linuxcnc_plant(session):
         assert result["task_state"] == session["task_state"], result
         assert not result["errors"], result
         assert result["ferror"] < 0.5, result
+
+
+def test_time_model_calibrated_against_linuxcnc_plant(session):
+    # Kontrola rozsądku, nie deklaracja dokładności modelu G64. Dowód liczbowy
+    # i błąd względny obu programów zapisane w pocket_calibration.json artefaktu CI.
+    assert len(session["calibration"]) == 2
+    for result in session["calibration"]:
+        assert result["estimate_s"] > 0 and result["plant_s"] > 0
+        assert 0.5 < result["estimate_s"] / result["plant_s"] < 3, result
 
 
 def test_softlimit_oracle(session):  # REQ-VM-06: scenariusz softlimit_oracle

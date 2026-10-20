@@ -11,7 +11,9 @@ podprogramy, pętle i cykle wiercenia są już rozwinięte. Model czasu jest cel
   `[TRAJ]MAX_LINEAR_VELOCITY`; ruch roboczy dodatkowo posuw F, łuk przyspieszenie dośrodkowe,
 - DWELL dodaje czas postoju, CHANGE_TOOL stały czas `[LINUMERT]TOOL_CHANGE_TIME` (domyślnie 10 s).
 Wynik: całość, ruchy szybkie / robocze / postoje / wymiany, czas na narzędzie i na krok `.lnx`
-(komentarze `( krok N: ... )` z kompilatora). Porównanie z Plant: `docs/SYMULACJA.md` (później).
+(komentarze `( krok N: ... )` z kompilatora). Model nie gwarantuje górnej granicy czasu
+całego cyklu: startuje od XYZ=0, pomija oczekiwanie operatora i rozpędzanie wrzeciona.
+Porównanie z Plant: pocket_calibration.json w artefaktach CI (plan 25.10).
 """
 
 from __future__ import annotations
@@ -51,7 +53,8 @@ class Limits:
 
 def limits_from_ini(path: Path | str) -> Limits:
     ini = configparser.ConfigParser(strict=False, interpolation=None)
-    ini.read(path, encoding="utf-8")
+    if not ini.read(path, encoding="utf-8"):
+        raise ValueError("Brak pliku INI maszyny.")
 
     def num(section: str, key: str, default: float) -> float:
         try:
@@ -61,8 +64,13 @@ def limits_from_ini(path: Path | str) -> Limits:
 
     vel = {a: num(f"AXIS_{a}", "MAX_VELOCITY", math.inf) for a in AXES}
     acc = {a: num(f"AXIS_{a}", "MAX_ACCELERATION", math.inf) for a in AXES}
-    return Limits(vel, acc, num("TRAJ", "MAX_LINEAR_VELOCITY", math.inf),
-                  num("LINUMERT", "TOOL_CHANGE_TIME", 10.0))
+    if any(not math.isfinite(v) or v <= 0 for v in (*vel.values(), *acc.values())):
+        raise ValueError("Wymagane dodatnie limity prędkości i przyspieszenia XYZ w INI.")
+    linear = num("TRAJ", "MAX_LINEAR_VELOCITY", math.inf)
+    change = num("LINUMERT", "TOOL_CHANGE_TIME", 10.0)
+    if linear <= 0 or math.isnan(linear) or not math.isfinite(change) or change < 0:
+        raise ValueError("Niepoprawny limit TRAJ lub czas wymiany narzędzia w INI.")
+    return Limits(vel, acc, linear, change)
 
 
 def trapezoid(length: float, v: float, a: float) -> float:
@@ -125,6 +133,7 @@ def estimate_canon(text: str, limits: Limits) -> Estimate:
     est = Estimate()
     pos = (0.0, 0.0, 0.0)
     scale, feed, tool, step = 1.0, 0.0, 0, None
+    plane = "CANON_PLANE_XY"
     for line in text.splitlines():
         m = _CALL.match(line)
         if m is None:
@@ -132,6 +141,10 @@ def estimate_canon(text: str, limits: Limits) -> Estimate:
         name, args = m.groups()
         if name == "USE_LENGTH_UNITS":
             scale = INCH if "INCHES" in args else 1.0
+        elif name == "SELECT_PLANE":
+            plane = args.strip()
+        elif name == "SET_FEED_MODE" and _floats(args)[-1] != 0:
+            raise ValueError("Model czasu obsługuje wyłącznie posuw G94 (mm/min).")
         elif name == "SET_FEED_RATE":
             feed = _floats(args)[0] * scale / 60.0
         elif name == "COMMENT":
@@ -155,12 +168,18 @@ def estimate_canon(text: str, limits: Limits) -> Estimate:
                 est.add(kind, trapezoid(length, v, a), tool, step, length)
             pos = end
         elif name == "ARC_FEED":
+            if plane != "CANON_PLANE_XY":
+                raise ValueError("Model czasu łuków obsługuje wyłącznie płaszczyznę G17.")
             vals = _floats(args)
             vals = [v * scale if i != 4 else v for i, v in enumerate(vals)]
             length, r = _arc(pos, vals)
             plane_v, plane_a = limits.along((1.0, 0.0, 0.0))
             v2, a2 = limits.along((0.0, 1.0, 0.0))
             v, a = min(plane_v, v2, feed if feed > 0 else math.inf), min(plane_a, a2)
+            dz = abs(vals[5] - pos[2])
+            if dz > 0 and length > 0:
+                vz, az = limits.along((0.0, 0.0, dz / length))
+                v, a = min(v, vz), min(a, az)
             if r > 0 and math.isfinite(a):
                 v = min(v, math.sqrt(0.5 * a * r))  # połowa przyspieszenia na dośrodkowe
             est.add("feed", trapezoid(length, v, a), tool, step, length)

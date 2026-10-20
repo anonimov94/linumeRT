@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import os
 import time
+from concurrent.futures import ThreadPoolExecutor
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 from qtvcp.core import Action, Info, Status
@@ -286,6 +287,11 @@ class ProductionPage(QtWidgets.QWidget):
         self.shell = shell
         self.clock = model.RunClock()
         self._last_interp = "idle"
+        self._estimate_pool = ThreadPoolExecutor(max_workers=1)
+        self._estimate_job = None
+        self._estimate_value = None
+        self._estimate_key = None
+        self._partial_run = False
         grid = QtWidgets.QGridLayout(self)
         grid.setContentsMargins(16, 16, 16, 16)
         grid.setSpacing(16)
@@ -311,6 +317,12 @@ class ProductionPage(QtWidgets.QWidget):
             stats.addLayout(box)
             stats.addStretch(1)
         lay.addLayout(stats)
+        self.lbl_remaining = _label("Pozostały czas: oszacuj program.", "lrtMuted")
+        self.lbl_remaining.setWordWrap(True)
+        lay.addWidget(self.lbl_remaining)
+        self.btn_estimate = QtWidgets.QPushButton("Szacuj czas programu")
+        self.btn_estimate.clicked.connect(self.estimate_time)
+        lay.addWidget(self.btn_estimate)
         self.bar = QtWidgets.QProgressBar()
         self.bar.setTextVisible(False)
         lay.addWidget(self.bar)
@@ -416,15 +428,78 @@ class ProductionPage(QtWidgets.QWidget):
                                         self)
             if box.exec_() != QtWidgets.QMessageBox.Ok:
                 return
+        self._partial_run = line > 1
         ACTION.RUN(line)
         self.shell.h.add_status(f"Start programu od linii {line}")
 
     # ---- dane -----------------------------------------------------------------------------
+    def _time_key(self):
+        path = self.shell.s.file
+        ini = os.environ.get("INI_FILE_NAME") or getattr(INFO, "INIPATH", "")
+        try:
+            values = [os.stat(p) for p in (path, ini)]
+        except OSError:
+            return None
+        return (path, ini, *((s.st_mtime_ns, s.st_size) for s in values))
+
+    def estimate_time(self) -> None:
+        from linumert.programs.estimate import estimate_ngc
+
+        if self._estimate_job is not None:
+            return
+        key = self._time_key()
+        if key is None:
+            self.lbl_remaining.setText("Czas niedostępny: brak programu albo INI maszyny.")
+            return
+        self._estimate_value = None
+        self._estimate_job = (self._estimate_pool.submit(estimate_ngc, key[0], key[1]), key)
+        self.lbl_remaining.setText("Liczenie czasu programu…")
+        self.btn_estimate.setEnabled(False)
+
+    def _remaining_time(self, now):
+        key = self._time_key()
+        if self._estimate_value is not None and key != self._estimate_key:
+            self._estimate_value = None
+            self.lbl_remaining.setText("Program lub INI zmienione: oszacuj czas ponownie.")
+        if self._estimate_job is not None:
+            future, submitted = self._estimate_job
+            if not future.done():
+                return
+            self._estimate_job = None
+            self.btn_estimate.setEnabled(True)
+            if key != submitted:
+                self.lbl_remaining.setText("Program lub INI zmienione: oszacuj czas ponownie.")
+                return
+            try:
+                self._estimate_value = future.result()
+                self._estimate_key = submitted
+            except Exception as exc:  # noqa: BLE001 - błąd interpretera do operatora
+                self.lbl_remaining.setText(f"Czas niedostępny: {exc}")
+                return
+        estimate = self._estimate_value
+        if estimate is None:
+            return
+        s = self.shell.s
+        if self._partial_run and s.running:
+            self.lbl_remaining.setText("Pozostały czas niedostępny po starcie od linii.")
+        elif s.feed_override != 1 or s.rapid_override != 1:
+            self.lbl_remaining.setText("Pozostały czas niedostępny dla korekcji F/G0 innych niż 100%.")
+        elif s.running:
+            remaining = estimate.total - self.clock.value(now)
+            self.lbl_remaining.setText(
+                f"Pozostało około {model.fmt_duration(remaining)} (model z zatrzymaniem w narożach)."
+                if remaining > 0 else "Czas modelu przekroczony; program nadal w toku.")
+        else:
+            self.lbl_remaining.setText(f"Szacowany czas programu: {model.fmt_duration(estimate.total)} "
+                                       "(bez czasu oczekiwania na operatora).")
+
     def on_state(self) -> None:
         """Woła powłoka przy każdej zmianie stanu (także gdy strona niewidoczna)."""
         s, now = self.shell.s, time.monotonic()
         if s.interp == "run" and self._last_interp == "idle":
             self.clock.reset()
+        if s.interp == "idle" and self._last_interp != "idle":
+            self._partial_run = False
         self.clock.update(s.interp, now)
         self._last_interp = s.interp
         for key, attr in (("feed", "feed_override"), ("rapid", "rapid_override"),
@@ -443,6 +518,7 @@ class ProductionPage(QtWidgets.QWidget):
         total = max(s.total_lines, 1)
         self.lbl_line.setText(f"{s.line} / {s.total_lines}" if s.file else "—")
         self.lbl_time.setText(model.fmt_duration(self.clock.value(now)))
+        self._remaining_time(now)
         pct = round(100 * min(s.line, total) / total) if s.file else 0
         self.lbl_pct.setText(f"{pct} %")
         self.bar.setRange(0, total)
@@ -460,6 +536,10 @@ class ProductionPage(QtWidgets.QWidget):
         self.btn_from_line.setEnabled(gate.enabled)
         self.lbl_from_line.setText(gate.reason if not gate.enabled else
                                    "Uruchomienie wymaga potwierdzenia (pomija wcześniejsze bloki).")
+
+    def closeEvent(self, event) -> None:  # noqa: N802 - Qt
+        self._estimate_pool.shutdown(wait=False, cancel_futures=True)
+        super().closeEvent(event)
 
 
 class StartPage(QtWidgets.QWidget):

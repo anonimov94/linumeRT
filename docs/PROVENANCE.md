@@ -196,3 +196,9 @@ Model-Author: Codex. Własne funkcje `programs/resume.py`, kontrola kopii materi
 `linumert_sim/resume.py`, protokół procesu i okno podglądu Qt. GPL-2.0-or-later.
 Bez nowych zależności i bez kodu zewnętrznego; użyte dotychczasowe modele materiału
 i maszyny Claude. Dokumentacja external offsets wskazana w planie, implementacja HAL otwarta.
+
+## Czas pozostały — 2026-10-21
+
+Model-Author: Codex. Własna integracja estymatora Claude z Produkcją (Qt/wątek tła),
+walidacja zakresu modelu, limit Z helisy i porównanie czasów z LinuxCNC + Plant.
+GPL-2.0-or-later, bez nowych zależności. Kalibracja nie zmienia parametrów sterowania.
