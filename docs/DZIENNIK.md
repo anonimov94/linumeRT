@@ -440,6 +440,7 @@ Pełne testy i lint przez CI; NIEZWERYFIKOWANE NA SPRZĘCIE.
   zgodność ruchu (STRAIGHT_TRAVERSE/FEED z rs274) podprogramu i generatora Pythona dla 8 zestawów parametrów
   (sprawdzone lokalnie na LinuxCNC 2.9 RIP).
 - Długi: kieszenie i rowki (po sesjach 041/043); zakładka NgcGui w ekranie nie sprawdzona ręcznie.
+
 ## 053 — Estymator czasu obróbki (część) · 2026-10-20 · Claude
 - Zrobione: `core/linumert/programs/estimate.py` — ruch z wywołań kanonicznych `rs274` (podprogramy, pętle i cykle
   rozwinięte przez LinuxCNC), profil trapezowy od zera do zera na odcinek i łuk (górne oszacowanie względem G64),
