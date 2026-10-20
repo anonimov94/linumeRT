@@ -7,8 +7,11 @@ python3 -m venv --system-site-packages /opt/linumert
 /opt/linumert/bin/pip install -q "pydantic>=2" "fastapi>=0.100" "uvicorn>=0.23" "websockets>=11"
 T=$(mktemp -d)
 cp "$R"/hal/*.comp "$R"/hal/*.h "$T"/
+# halcompile szuka Makefile.modinc względem własnej ścieżki: wywołany jako /bin/halcompile
+# (Debian 12: /bin -> usr/bin, PATH w chroot) szukałby w /share/linuxcnc — stąd pełna ścieżka.
+test -f /usr/share/linuxcnc/Makefile.modinc || { dpkg -l 'linuxcnc*' >&2; exit 1; }
 for c in lrt_net lrt_cia402 lrt_hardstop_home lrt_estop2; do
-    (cd "$T" && halcompile --install "$c.comp" >/dev/null)
+    (cd "$T" && /usr/bin/halcompile --install "$c.comp" >/dev/null)
 done
 rm -rf "$T"
 make -s -C "$R/plant/core" shared

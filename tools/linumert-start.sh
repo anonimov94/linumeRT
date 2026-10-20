@@ -80,7 +80,7 @@ if [ "$update" = 1 ]; then
         say "UWAGA: nie udało się zaktualizować (lokalne zmiany albo brak sieci): uruchamiam bieżącą wersję"
     fi
 fi
-say "wersja: $(git log -1 --format='%h %s' | cut -c1-80)"
+say "wersja: $(git log -1 --format='%h %<(70,trunc)%s' | sed 's/ *$//')"  # git obcina po znakach, nie bajtach (UTF-8)
 
 # ---- 3. skróty w menu aplikacji -------------------------------------------------------------------
 install_desktop() {
