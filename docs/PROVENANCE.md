@@ -161,5 +161,3 @@ i `test_doctor_gui.py`. Biblioteka standardowa i istniejący PyQt5; bez nowych z
 Model-Author: Codex. Własna integracja istniejącego leksera, lista i nawigacja Qt,
 `linumert_program_page.py`, testy `test_hmi_workflow_widgets.py`; GPL-2.0-or-later.
 Bez nowych zależności ani zewnętrznych zasobów.
-
-

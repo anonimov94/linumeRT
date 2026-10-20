@@ -18,7 +18,7 @@ COMMON = (
     Field("cx", "float", "Środek X", "mm", default=0.0),
     Field("cy", "float", "Środek Y", "mm", default=0.0),
     Field("z_top", "float", "Powierzchnia Z", "mm", default=0.0),
-    Field("depth", "float", "Głębokość", "mm", minimum=0, exclusive_minimum=True, maximum=100),
+    Field("depth", "float", "Głębokość", "mm", minimum=0.0001, maximum=100),
     Field("step_down", "float", "Krok Z", "mm", default=1.0, minimum=0.0001),
     Field("tool_d", "float", "Średnica frezu", "mm", minimum=0.001),
     Field("stepover", "float", "Krok boczny", "% D", default=50.0, minimum=5, maximum=90),
@@ -47,7 +47,7 @@ def _check(v: dict[str, Any], step: int, clearance: float) -> list[Issue]:
     if blocks > 20000:
         issues.append(Issue("P-5003", {"name": "liczba bloków", "value": str(blocks),
                                       "limit": "<= 20000"}, "step_down"))
-    if clearance <= 0:
+    if round(clearance / 2, 4) <= 0:
         issues.append(Issue("P-5007", {"tool": 0, "what":
                                       "średnica frezu nie mieści się w kieszeni"}, "tool_d"))
     return issues

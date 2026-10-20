@@ -83,6 +83,11 @@ def main():
         ("pytest", [sys.executable, "-m", "pytest", "-v"]),
     ]
     if args.linuxcnc:
+        commands.extend([
+            ("requirements", [sys.executable, "tools/check_requirements.py"]),
+            ("plant", ["make", "test-c", "test-san", "plant-matrix",
+                       f"PYTHON={sys.executable}"]),
+        ])
         commands.append(("linuxcnc", ["make", "test-linuxcnc", f"PYTHON={sys.executable}"]))
     return run_checks(REPO, args.model, output, commands)
 

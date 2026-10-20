@@ -330,6 +330,17 @@ def test_cycles_page_builds_program(page_env, tmp_path, monkeypatch):
     monkeypatch.delitem(sys.modules, "linumert_cycles_page", raising=False)
     module = importlib.import_module("linumert_cycles_page")
     page = module.CyclesPage(shell)
+    for cls, dimensions in ((module.pockets.PocketRect, {"width": "40", "height": "30"}),
+                            (module.pockets.PocketCircle, {"diameter": "40"})):
+        page.cmb.setCurrentIndex(page.cmb.findText(cls.title))
+        for name, value in {"tool_d": "8", "depth": "2", **dimensions}.items():
+            page.inputs[name].setText(value)
+        assert page.preview() and page.view2d.lines
+        assert "frez" in page.lbl_issue.text() and not action.mock_calls
+    page.resize(1100, 750)
+    page.show()
+    module.QtWidgets.QApplication.processEvents()
+    assert page.grab().save(str(tmp_path / "cycles-pocket.png"))
     page.cmb.setCurrentIndex(page.cmb.findText("Planowanie"))
     assert page.preview() is None and "brak wymaganego pola" in page.lbl_issue.text()
     for name, value in (("x1", "100"), ("y1", "50"), ("depth", "1"), ("tool_d", "50")):

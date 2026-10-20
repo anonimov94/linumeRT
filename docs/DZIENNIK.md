@@ -494,4 +494,3 @@ Kontrola ponownie czyta plik, obejmuje tekst poza pierwszymi 2000 liniami; limit
 lista do 100 błędów. Komunikat odróżnia składnię od semantyki i ruchu LinuxCNC.
 Cztery funkcje testowe Program uruchomione na rzeczywistym Qt offscreen w chmurze: OK.
 Brak komend ruchu przy kontroli; screenshot wykonany lokalnie. CI oraz odbiór w pełnym HMI pozostają.
-
