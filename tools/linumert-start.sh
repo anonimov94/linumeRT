@@ -96,8 +96,8 @@ desktop_quote() {
     for ((i=0; i<${#value}; i++)); do
         char=${value:i:1}
         case "$char" in
-            \\) result+='\\\\' ;;
-            '"'|'$'|'`') result+='\\'; result+=$char ;;
+            \\) result+="\\\\\\\\" ;;
+            '"'|'$'|'`') result+="\\\\"; result+=$char ;;
             '%') result+='%%' ;;
             $'\n'|$'\r'|$'\t') die "ścieżka skrótu zawiera znak sterujący" ;;
             *) result+=$char ;;
