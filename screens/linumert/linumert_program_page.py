@@ -7,7 +7,9 @@ from pathlib import Path
 from PyQt5 import QtCore, QtGui, QtWidgets
 from qtvcp.core import Action, Info
 
+from linumert.programs.files import read_editable
 from linumert.programs.lexer import check
+from linumert_program_editor import ProgramEditor
 from linumert_shell_pages import _label, card
 
 ACTION, INFO = Action(), Info()
@@ -55,7 +57,9 @@ class ProgramPage(QtWidgets.QWidget):
         self.load.clicked.connect(self.load_program)
         self.check_button = QtWidgets.QPushButton("Sprawdź składnię")
         self.check_button.clicked.connect(self.check_program)
-        for button in (self.choose, self.check_button, self.load):
+        self.edit_button = QtWidgets.QPushButton("Edytuj kopię…")
+        self.edit_button.clicked.connect(self.edit_program)
+        for button in (self.choose, self.edit_button, self.check_button, self.load):
             button.setMinimumHeight(44)
             buttons.addWidget(button)
         body.addLayout(buttons)
@@ -93,6 +97,18 @@ class ProgramPage(QtWidgets.QWidget):
         self.message.setText(note + "Wczytanie wymaga przycisku „Wczytaj do LinuxCNC”.")
         self.refresh()
         return True
+
+    def edit_program(self):
+        if self.path is None or self.shell.s.running:
+            return
+        try:
+            text = read_editable(self.path)
+        except (OSError, ValueError) as exc:
+            self.message.setText(f"Nie można edytować programu: {exc}")
+            return
+        editor = ProgramEditor(self.path, text, self)
+        if editor.exec_() == QtWidgets.QDialog.Accepted and editor.saved_path is not None:
+            self.show_file(editor.saved_path)
 
     def check_program(self):
         # Re-read the file: a previous result must not describe an older disk version.
@@ -146,6 +162,7 @@ class ProgramPage(QtWidgets.QWidget):
         running = self.shell.s.running
         self.load.setEnabled(self.path is not None and not running)
         self.check_button.setEnabled(self.path is not None and not running)
+        self.edit_button.setEnabled(self.path is not None and not running)
         self.load.setToolTip("Najpierw zatrzymaj program" if running else "Nie uruchamia cyklu")
         self.active.setText(f"aktywny: {Path(self.shell.s.file).name}" if self.shell.s.file else
                             "brak aktywnego programu")

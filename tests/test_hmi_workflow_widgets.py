@@ -120,6 +120,40 @@ def test_program_syntax_limits_and_failed_reread(page_env, tmp_path):
     page.close()
 
 
+def test_program_editor_saves_full_copy_without_cnc(page_env, tmp_path):
+    _home, _shell, _status, action = page_env
+    module = importlib.import_module("linumert_program_editor")
+    source = tmp_path / "source.ngc"
+    text = "; line\n" * 3000 + "M2\n"
+    source.write_text(text, encoding="utf-8")
+    editor = module.ProgramEditor(source, text)
+    editor.editor.appendPlainText("; changed")
+    assert not editor.save_to(source)
+    assert source.read_text(encoding="utf-8") == text
+    target = tmp_path / "copy.ngc"
+    assert editor.save_to(target)
+    assert target.read_text(encoding="utf-8").endswith("M2\n\n; changed")
+    assert editor.saved_path == target and not action.mock_calls
+    editor.close()
+
+
+def test_program_editor_declines_bad_encoding_and_running(page_env, tmp_path):
+    _home, shell, _status, action = page_env
+    module = importlib.import_module("linumert_program_page")
+    page = module.ProgramPage(shell)
+    source = tmp_path / "broken.ngc"
+    source.write_bytes(b"\xff\nM2\n")
+    assert page.show_file(source)
+    page.edit_button.click()
+    assert "Nie można edytować" in page.message.text()
+    shell.s.interp = "run"
+    page.refresh()
+    assert not page.edit_button.isEnabled()
+    page.edit_program()
+    assert not action.mock_calls
+    page.close()
+
+
 def test_homing_blocks_commands_during_program_and_homing(page_env):
     page, shell, status, action = page_env
     for state in ("run", "paused"):
