@@ -95,3 +95,10 @@ AUTO, także z G41/G42 i G43. [Odbiór Debian/LinuxCNC PASS](https://github.com/
 narzędzia i wykonanie helisy z zakładką pozostają otwarte. Punkt 27 wymaga pulpitu właściciela.
 Nie dopisano nowych sesji roadmapy ani nie zaliczono niewykonanych prób ręcznych.
 Model-Author: Codex. Autokontrola, bez niezależnego przeglądu.
+
+## Dopracowanie punktu 25 — 2026-10-21
+
+ETA zapamiętuje użycie korekcji F/G0 innych niż 100% do końca bieżącego przebiegu,
+także przed obliczeniem oszacowania. Przywrócenie 100% nie przywraca mylącego wyniku;
+dostępność wraca przy następnym pełnym uruchomieniu. Całkowite oszacowanie programu
+pozostaje dostępne po zakończeniu. Lokalnie: 41 testów czasu i widgetów PASS, lint PASS.
