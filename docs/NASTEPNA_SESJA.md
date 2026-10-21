@@ -8,6 +8,11 @@ Bez otwierania kolejnych etapów roadmapy.
 
 ## Stan scalania
 
+Audyt pętli: właściciel wpisał `while [1]` i wybrał szacowanie czasu; journal wskazuje
+SIGBUS w libtooldata. Trwa naprawa `codex/bounded-offline-interpreter`, checkout
+`~/Projekty/linumeRT-interpreter-fix`: limity danych/czasu oraz prywatna tabela narzędzi
+rs274, aby analiza offline nie dotykała działającej sesji LinuxCNC.
+
 Odbiór pulpitu ujawnił brak `sim_toolchange.in` przy starcie Plant z pełnym QtVCP.
 Naprawa: `codex/plant-hmi-toolchange`, checkout `~/Projekty/linumeRT-plant-hmi-fix`.
 Minimalną poprawkę HAL zastosowano także lokalnie w `~/linumeRT`, aby właściciel mógł
