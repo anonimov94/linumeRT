@@ -8,6 +8,13 @@ Bez otwierania kolejnych etapów roadmapy.
 
 ## Stan scalania
 
+Dodatkowy audyt pól: właściciel nie mógł wpisywać liczb, działały tylko strzałki.
+Gałąź `codex/numeric-keyboard-entry`, checkout `~/Projekty/linumeRT-numeric-fix`,
+startuje z kodu PR #66. Router QtVCP rozpoznaje teraz QAbstractSpinBox i edytowalne
+listy; krok JOG przyjmuje własną wartość. 42 testy lokalne PASS; następnie próba
+w faktycznym QtVCP i pełne CI. F1/F2/Esc oraz zwolnienie JOG pozostają obsługiwane.
+
+
 Audyt pętli: właściciel wpisał `while [1]` i wybrał szacowanie czasu; journal wskazuje
 SIGBUS w libtooldata. Trwa naprawa `codex/bounded-offline-interpreter`, checkout
 `~/Projekty/linumeRT-interpreter-fix`: limity danych/czasu oraz prywatna tabela narzędzi

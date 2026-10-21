@@ -617,3 +617,7 @@ Brak komend ruchu przy kontroli; screenshot wykonany lokalnie. CI oraz odbiór w
 - Ręczny odbiór pozostaje otwarty. Autokontrola, bez niezależnego przeglądu.
 
 Izolacja obejmuje teraz szacowanie i kontrolę semantyczną: prywatne HOME/TMPDIR/cwd, bez zapisu do wspólnego sim.var; 20 s/8 MiB, bez częściowego wyniku czasu. 108 testów lokalnych PASS (3 subtesty), w tym regresja starego rs274 uszkadzającego mmap oraz kliknięcie GUI i nadal dostępna kontrola składni. Autokontrola; PR #66 czeka na pełne CI. Model-Author: Codex.
+
+## Audyt — wpisywanie liczb z klawiatury (2026-10-21)
+
+Właściciel zgłosił pola działające tylko przez +/−. QtVCP kierował zdarzenia QAbstractSpinBox do skrótów maszyny; nakładka rozpoznaje edytory liczbowe i nie pozwala ich klawiszom propagować do skrótów. Krok JOG jest edytowalny, walidowany przed ruchem; zwolnienie zawsze zatrzymuje. 42 testy PASS: wpis, zaznaczenie, wklejenie, F1/F2/Esc i zwolnienie JOG po zmianie fokusu. Gałąź codex/numeric-keyboard-entry, kolejny krok: prawdziwy QtVCP. Autokontrola, Model-Author: Codex.
