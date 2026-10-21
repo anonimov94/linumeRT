@@ -56,24 +56,27 @@ assert len(seen) == 2, 'GUI heartbeat is not running'
                                              ("lrt_net", "lrt_cia402", "lrt_estop2")))
         stack.enter_context(plant_server(CFG / "plant.yaml", 47825, "--seed", "5"))
         cnc = start_linuxcnc(root, ini, env)
+        ready, diagnostic = False, ""
         try:
             deadline = time.monotonic() + 60
             while time.monotonic() < deadline and cnc.poll() is None:
                 probe = rip_run(root, "python3 -c " + shlex.quote(probe_code), work,
                                 timeout=10, env=env)
                 if probe.returncode == 0:
+                    ready = True
                     break
+                diagnostic = probe.stdout + probe.stderr
                 time.sleep(0.25)
-            else:
-                pytest.fail("Plant display/postgui did not become ready")
-            shot_path = str(tmp_path / "screen.png")
-            capture = ("from PyQt5.QtWidgets import QApplication; a=QApplication([]); "
-                       f"assert a.primaryScreen().grabWindow(0).save({shot_path!r})")
-            shot = rip_run(root, "python3 -c " + shlex.quote(capture), work, env=env)
-            assert shot.returncode == 0, shot.stdout + shot.stderr
-            assert cnc.poll() is None
+            if ready:
+                shot_path = str(tmp_path / "screen.png")
+                capture = ("from PyQt5.QtWidgets import QApplication; a=QApplication([]); "
+                           f"assert a.primaryScreen().grabWindow(0).save({shot_path!r})")
+                shot = rip_run(root, "python3 -c " + shlex.quote(capture), work, env=env)
+                assert shot.returncode == 0, shot.stdout + shot.stderr
+                assert cnc.poll() is None
         finally:
             stop_linuxcnc(cnc, root, work)
             log = cnc.stdout.read()
             (tmp_path / "linuxcnc.log").write_text(log)
+    assert ready, "Plant display/postgui did not become ready:\n" + diagnostic + log[-12000:]
     assert "Pin 'sim_toolchange.in' does not exist" not in log, log

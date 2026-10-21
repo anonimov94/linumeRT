@@ -607,3 +607,5 @@ Brak komend ruchu przy kontroli; screenshot wykonany lokalnie. CI oraz odbiór w
 - Sprawdza kompletne połączenia po starcie, działający sygnał życia GUI i zapisuje zrzut oraz log.
 - Lokalnie 20 testów PASS, 1 pominięcie (shellcheck), lint PASS; odbiór runtime w CI wymagany przed scaleniem.
 - Ręczny audyt pulpitu trwa. Autokontrola, bez niezależnego przeglądu; NIEZWERYFIKOWANE NA SPRZĘCIE.
+- Pierwsze CI: 926 PASS; w CNC 97 PASS i 3 porażki. Dodano pełny log odmowy startu i wczesny test ekranu przed długą regresją.
+- Test D38 czeka na ustalenie rzeczywistych napędów z zapasem przed kliknięciem powrotu; próg blokady produkcyjnej pozostaje 0,005 mm.
