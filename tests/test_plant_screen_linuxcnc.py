@@ -40,6 +40,8 @@ def test_plant_opens_actual_screen_with_postgui(tmp_path, shell):
     env = {**os.environ, "LINUMERT_SHELL": shell, "INI_FILE_NAME": str(ini)}
     probe_code = """
 import time, hal
+component = hal.component('linumert_screen_probe')
+component.ready()
 assert hal.get_value('lrt-net.0.connected')
 for pin in ('sim_toolchange.in', 'iocontrol.0.tool-changed', 'lrt_ack_edge.in'):
     assert hal.pin_has_writer(pin), pin
@@ -50,6 +52,7 @@ while time.monotonic() < end and len(seen) < 2:
     seen.add(bool(hal.get_value('linumert.hmi-heartbeat')))
     time.sleep(0.025)
 assert len(seen) == 2, 'GUI heartbeat is not running'
+component.exit()
 """
     with contextlib.ExitStack() as stack:
         stack.enter_context(installed_modules(root, tmp_path,
