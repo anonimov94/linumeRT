@@ -75,6 +75,8 @@ component.exit()
                 # Recheck heartbeat and toolchange pins after both bounded failures.
                 loop = work / "infinite.ngc"
                 loop.write_text("o100 while [1]\nG4 P0.1\no100 endwhile\nM2\n")
+                finite = work / "finite.ngc"
+                finite.write_text("G21\nG4 P1\nM2\n")
                 analysis = f"""
 import sys
 sys.path.insert(0, {str(ROOT / 'core')!r})
@@ -88,6 +90,10 @@ except ValueError as exc:
     assert 'limit' in str(exc), str(exc)
 else:
     raise AssertionError('infinite program received a runtime estimate')
+valid = check_with_linuxcnc({str(finite)!r}, {str(root)!r})
+assert valid.ok, valid
+estimate = estimate_ngc({str(finite)!r}, {str(ini)!r}, {str(root)!r})
+assert estimate.total == 1, estimate
 """
                 checked = rip_run(root, "python3 -c " + shlex.quote(analysis), work, env=env)
                 assert checked.returncode == 0, checked.stdout + checked.stderr
