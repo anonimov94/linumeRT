@@ -43,3 +43,7 @@ Gałąź codex/pause-retract: pauza AUTO bez Abort, Z przez external offsets; in
 zachowuje kolejkę, modalność i G41/G42. Przyciski w Produkcji; powrót czeka na rzeczywiste zero.
 Pięć testów lokalnych (model i widgety Qt) OK. Integracja LinuxCNC/Plant i odbiór CI do wykonania.
 Nie deklarować obsługi powrotu po Abort/E-STOP ani odbioru sprzętu. Model-Author: Codex.
+
+Następny krok wypchnięty: rzeczywisty QtVCP + LinuxCNC, pętla zwrotna i Plant,
+G40/G41/G42 oraz G20/G21. Testy zapisują pozycje i zrzuty; runtime do odbioru w CI.
+Dostępność obejmuje G17/G94 i aktywną korekcję posuwu; bez obsługi gwintowania/cykli.

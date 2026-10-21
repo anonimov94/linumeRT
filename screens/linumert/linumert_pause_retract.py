@@ -85,13 +85,20 @@ class RetractControl(QtCore.QObject):
         frame = (s.file, (stamp.st_mtime_ns, stamp.st_size) if stamp else None,
                  s.task_mode, s.tool_in_spindle, tuple(s.tool_offset), tuple(s.g5x_offset),
                  tuple(s.g92_offset), s.g5x_index, s.rotation_xy, tuple(s.gcodes[1:]),
-                 tuple(s.mcodes[1:]), xyz, tuple((key, spindle.get(key)) for key in
+                 tuple(s.mcodes[1:]), bool(s.feed_override_enabled), xyz,
+                 tuple((key, spindle.get(key)) for key in
                      ("enabled", "direction", "speed", "override")),
                  tuple((t.id, t.diameter, t.zoffset) for t in s.tool_table if t.id > 0))
         ready = (s.task_mode == linuxcnc.MODE_AUTO and bool(s.file)
                  and all(s.homed[j] for j in self.shell.info.AVAILABLE_JOINTS)
                  and spindle.get("enabled") and spindle.get("direction")
                  and abs(spindle.get("speed", 0)) > 0
+                 and bool(s.feed_override_enabled)
+                 and 170 in s.gcodes and 940 in s.gcodes
+                 and hal.pin_has_writer("lrt_retract_select.sel")
+                 and hal.pin_has_writer("lrt_retract_select.in1")
+                 and value("axis.z.eoffset-enable")
+                 and self.config.getfloat("AXIS_Z", "OFFSET_AV_RATIO") > 0
                  and not value("spindle.0.inhibit")
                  and value("linumert.eoffset-spindle-count") == 0
                  and abs(value("axis.z.eoffset-scale") - 0.001) < 1e-12
@@ -110,15 +117,15 @@ class RetractControl(QtCore.QObject):
         try:
             self.model.start(self.snapshot(), height * self.native, feed * self.native)
             self.write()
-        except (RetractRefused, OSError, ValueError, RuntimeError) as exc:
-            self.model.message = str(exc)
+        except Exception as exc:  # noqa: BLE001 - show errors without escaping a Qt slot
+            self.model.fail(str(exc))
         self.changed.emit()
 
     def return_to_path(self, resume=False):
         try:
             self.model.return_to_path(self.snapshot(), resume)
-        except (RetractRefused, OSError, ValueError, RuntimeError) as exc:
-            self.model.message = str(exc)
+        except Exception as exc:  # noqa: BLE001 - show errors without escaping a Qt slot
+            self.model.fail(str(exc))
         self.changed.emit()
 
     def write(self):
@@ -143,7 +150,7 @@ class RetractControl(QtCore.QObject):
             if self.model.tick(self.last, now - old):
                 self._pending = self.last.frame  # Release HAL inhibit before the next timer tick.
             self.write()
-        except (OSError, ValueError, RuntimeError, AttributeError) as exc:
+        except Exception as exc:  # noqa: BLE001 - loss of feedback must freeze the last offset
             self.model.fail(f"D38: brak wiarygodnego stanu: {exc}")
             # Preserve the last offset on loss of feedback; never command a blind return.
         self.changed.emit()
