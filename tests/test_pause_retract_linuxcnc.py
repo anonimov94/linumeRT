@@ -25,7 +25,7 @@ pytestmark = pytest.mark.linuxcnc
 
 
 @pytest.mark.parametrize("plant", [False, True], ids=["sim", "plant"])
-def test_retract_returns_to_compensated_path(tmp_path, plant):
+def test_retract_returns_to_compensated_path(tmp_path, plant, request):
     root = rip_root()
     source = ROOT / "config" / ("plant/linumert_plant_xyz" if plant else "sim/linumert_xyz")
     work = tmp_path / "cfg"
@@ -43,7 +43,7 @@ def test_retract_returns_to_compensated_path(tmp_path, plant):
     display = work / "retract_headless"
     display.write_text("#!/bin/sh\nexec sleep 3600\n")
     display.chmod(0o755)
-    env = {**os.environ, "INI_FILE_NAME": str(ini),
+    env = {**os.environ, "INI_FILE_NAME": str(ini), "CONFIG_DIR": str(work),
            "PATH": str(work) + os.pathsep + os.environ.get("PATH", "")}
     joint_count = 4 if plant else 3
     with contextlib.ExitStack() as stack:
@@ -75,6 +75,10 @@ def test_retract_returns_to_compensated_path(tmp_path, plant):
             stop_linuxcnc(cnc, root, work)
             (tmp_path / "linuxcnc.log").write_text(cnc.stdout.read())
     assert run.returncode == 0, run.stdout + run.stderr
+    reporter = request.config.pluginmanager.get_plugin("terminalreporter")
+    for line in run.stdout.splitlines():
+        if line.startswith("D38_RESULT "):
+            reporter.write_line(("PLANT " if plant else "SIM ") + line)
     rows = json.loads((tmp_path / "retract-results.json").read_text())
     assert [(r["correction"], r["inch"]) for r in rows] == [
         (40, False), (41, False), (42, False), (41, True), (42, True)]
