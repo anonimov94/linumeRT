@@ -7,9 +7,10 @@ import time
 from pathlib import Path
 from types import SimpleNamespace
 
-import hal
 import linuxcnc
 from PyQt5 import QtCore, QtWidgets
+
+import hal
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "screens/linumert"))
@@ -102,7 +103,7 @@ def run(ini, joint_count, output):
     for side, inch in ((40, False), (41, False), (42, False), (41, True), (42, True)):
         scale = 25.4 if inch else 1
         path = output / f"g{side}-{'inch' if inch else 'mm'}.ngc"
-        def f(x):
+        def f(x, scale=scale):
             return f"{x / scale:.8f}"
         compensation = f"G{side} D1 " if side != 40 else ""
         path.write_text("G21 G17 G90 G94 G40 G49 G54\nM61 Q1\nS3000 M3\n"
@@ -117,7 +118,7 @@ def run(ini, joint_count, output):
         c.wait_complete()
         expected_y = {40: 100, 41: 102, 42: 98}[side]
         c.auto(linuxcnc.AUTO_RUN, 0)
-        wait(lambda: 145 < position()[0] < 210
+        wait(lambda expected_y=expected_y: 145 < position()[0] < 210
              and abs(position()[1] - expected_y) < 0.01
              and abs(position()[2] + 20) < 0.01
              and s.interp_state != linuxcnc.INTERP_IDLE)
@@ -130,7 +131,7 @@ def run(ini, joint_count, output):
         panel.withdraw.click()
         assert control.model.active, control.model.message
         wait(lambda: control.model.phase == "retracted", control=control)
-        wait(lambda: abs(feedback_z() - z_before - 2) < 0.005, control=control)
+        wait(lambda z_before=z_before: abs(feedback_z() - z_before - 2) < 0.005, control=control)
         assert position() == before, ("planner changed", before, position())
         assert s.paused and control.last.frame == frame
         shell.action.PAUSE()  # Original QtVCP resume must be blocked.
@@ -141,7 +142,7 @@ def run(ini, joint_count, output):
         wait(lambda: not control.model.active and not s.paused, control=control)
         assert abs(hal.get_value("axis.z.eoffset")) < 1e-6
         assert abs(hal.get_value("axis.z.eoffset-request")) < 1e-6
-        wait(lambda: position()[0] > before[0] + 0.2, control=control)
+        wait(lambda before=before: position()[0] > before[0] + 0.2, control=control)
         assert abs(position()[1] - expected_y) < 0.01, ("compensation lost", position())
         wait(lambda: s.interp_state == linuxcnc.INTERP_IDLE, control=control)
         assert s.task_state == linuxcnc.STATE_ON

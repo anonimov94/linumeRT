@@ -209,3 +209,11 @@ Model-Author: Codex. Własna integracja obrazu Qt i transportu JSON z istniejąc
 Claude; SVG osi czasu i synchronizacja czasów. GPL-2.0-or-later. Użyte istniejące Qt
 (LGPL/GPL) i pyqtgraph (MIT), bez kopiowania kodu; dokumentacja Qt wskazana w planie.
 Test rzeczywistej kamery 3D pod Xvfb/Mesa i test kliknięcia/HTML.
+
+## Wycofanie w pauzie D38 — 2026-10-21
+
+Model-Author: Codex. Własny kod GPL-2.0-or-later: pause_retract.py, kontroler i panel Qt,
+HAL połączeń i testy. Bez nowych bibliotek; użyto standardowych komponentów LinuxCNC.
+Interfejs external offsets z dokumentacji LinuxCNC 2.9:
+https://linuxcnc.org/docs/2.9/html/motion/external-offsets.html .
+Nie skopiowano kodu upstream; bazowy handler QtDragon pozostaje bez zmian.

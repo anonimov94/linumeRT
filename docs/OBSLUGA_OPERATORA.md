@@ -49,3 +49,27 @@ Zakresy osi LinuxCNC nadal obowiązują, również w symulacji. Klawiatura w spe
 
 `[LINUMERT] VIRTUAL_MODE=1` oznacza konfigurację bez fizycznych wyjść napędów.
 Nie ustawiaj tej flagi w konfiguracji podłączonej maszyny. Brak flagi oznacza tryb fizyczny.
+
+## D38 — wycofanie i powrót w pauzie
+
+Produkcja → „Wycofaj Z w pauzie”, „Powrót do ścieżki”, „Powrót i wznów”.
+Najpierw wstrzymaj program i poczekaj na zatrzymanie. Wybierz wysokość dodatniego ruchu Z
+oraz posuw w mm/min. Wrzeciono pozostaje włączone; to nie jest tryb wymiany narzędzia.
+Wycofanie musi mieścić się w zakresie Z. Funkcja jest podłączona w wirtualnym sim/Plant.
+
+Program pozostaje w pauzie AUTO; nie ma Abort, MDI, G40 ani ponownego włączania korekcji.
+External offset przesuwa oś Z poza torem interpretera, więc G41/G42 i kolejka ruchu
+pozostają zachowane. Powrót prowadzi w Z do tego samego skorygowanego punktu, po czym
+„Powrót i wznów” wznawia oryginalny program. Sam „Powrót” pozostawia pauzę.
+Nie wykonuje helisy ani zakładki i nie zastępuje podglądu helisy w Symulacji.
+
+Wymagane: zbazowane XYZ/trivkins, G17/G94, stabilna pauza, aktywna korekcja posuwu,
+niezmienione narzędzie/układy i włączone wrzeciono. Gwintowanie i cykle są poza zakresem.
+Polecenia ruchu QtVCP są blokowane podczas wycofania; wznowienie jest możliwe dopiero,
+gdy rzeczywisty i żądany offset Z wynoszą zero. Zmiana programu, narzędzia, modalności,
+utrata pauzy lub sprzężenia zwrotnego wstrzymuje operację bez ślepego opuszczania.
+Po takim błędzie wyłącz maszynę; poprzednie wznowienie jest anulowane.
+
+Przerwanie programu przez Abort/E-STOP, wymiana narzędzia i odzyskiwanie po wyłączeniu
+nie są obsługiwane przez ten mechanizm. NIEZWERYFIKOWANE NA SPRZĘCIE.
+Model-Author: Codex.

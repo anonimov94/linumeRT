@@ -78,3 +78,14 @@ Wartości narzędziowe (D, typ) z bazy narzędzi; dla wierteł i gwintowników h
 4. Ekran: przyciski Wycofaj / Powrót / Wznów od miejsca przerwania, podgląd w Symulacji, ustawienia.
 5. Scenariusz e2e: przerwanie w kieszeni, wznowienie, porównanie materiału z przebiegiem bez przerwy
    (różnica ≤ 0,05 mm).
+
+## Realizacja A — 2026-10-21, PR #62
+
+Model-Author: Codex. Pauza AUTO pozostaje w interpreterze LinuxCNC; własny tor Z external
+offsets korzysta z jego ograniczeń prędkości/przyspieszenia. G41/G42 nie są wyłączane ani
+wyliczane powtórnie; powrót trafia w skorygowany punkt pauzy i dopiero potem odblokowuje
+wznowienie. Ruch ograniczony do Z, wrzeciono pozostaje włączone. Sterowanie w Produkcji.
+To realizacja A, nie realizacja B po Abort. Stary podgląd helisy nie jest wykonywany.
+Kod/testy: pause_retract.py, linumert_pause_retract.py, linumert_pause_retract.hal,
+test_pause_retract_linuxcnc.py. Odbiór LinuxCNC/Plant i ograniczenia: opis PR oraz
+OBSLUGA_OPERATORA.md. NIEZWERYFIKOWANE NA SPRZĘCIE.
