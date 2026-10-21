@@ -615,3 +615,5 @@ Brak komend ruchu przy kontroli; screenshot wykonany lokalnie. CI oraz odbiór w
 - Journal: SIGBUS w libtooldata, 21:20:50; rs274 w 2.9.10 współdzieli `$HOME/.tool.mmap` z sesją CNC.
 - Gałąź `codex/bounded-offline-interpreter`: ograniczenie czasu/danych i zamykanie wyłącznie grupy procesu analizy; izolacja tabeli narzędzi w kolejnym kroku.
 - Ręczny odbiór pozostaje otwarty. Autokontrola, bez niezależnego przeglądu.
+
+Izolacja obejmuje teraz szacowanie i kontrolę semantyczną: prywatne HOME/TMPDIR/cwd, bez zapisu do wspólnego sim.var; 20 s/8 MiB, bez częściowego wyniku czasu. 108 testów lokalnych PASS (3 subtesty), w tym regresja starego rs274 uszkadzającego mmap oraz kliknięcie GUI i nadal dostępna kontrola składni. Autokontrola; PR #66 czeka na pełne CI. Model-Author: Codex.

@@ -21,12 +21,13 @@ from __future__ import annotations
 import configparser
 import math
 import re
-import shlex
 import subprocess
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from .linuxcnc_check import InterpreterUnavailable, find_linuxcnc
+from ._interpreter_process import InterpreterOutputLimit
+from .linuxcnc_check import InterpreterUnavailable as InterpreterUnavailable
+from .linuxcnc_check import run_interpreter
 
 AXES = "XYZ"
 INCH = 25.4
@@ -188,18 +189,17 @@ def estimate_canon(text: str, limits: Limits) -> Estimate:
 
 
 def estimate_ngc(ngc: Path | str, ini: Path | str, root: Path | str | None = None,
-                 timeout: float = 60.0) -> Estimate:
+                 timeout: float = 20.0) -> Estimate:
     """Uruchamia rs274 na programie i liczy czas z limitami z `ini` (InterpreterUnavailable)."""
-    prefix, sim = find_linuxcnc(root)
-    ngc = Path(ngc).resolve()
-    options = "-i axis.ini -t sim.tbl " if sim is not None and (sim / "axis.ini").exists() else ""
-    command = " ".join(prefix + [f"exec rs274 {options}-n 0 {shlex.quote(str(ngc))} </dev/null"])
     try:
-        run = subprocess.run(["bash", "-c", command], cwd=sim, capture_output=True, text=True,
-                             timeout=timeout, check=False)
+        run = run_interpreter(ngc, root, timeout)
     except subprocess.TimeoutExpired as exc:
-        raise InterpreterUnavailable("przekroczony czas interpretera") from exc
-    if "PROGRAM_END()" not in run.stdout:
+        raise ValueError("Przekroczono limit czasu analizy (możliwa pętla bez końca). "
+                         "Nie wyliczono czasu całego programu; sprawdź składnię i warunek "
+                         "wyjścia z pętli.") from exc
+    except InterpreterOutputLimit as exc:
+        raise ValueError(str(exc) + " Nie wyliczono czasu całego programu.") from exc
+    if run.returncode or "PROGRAM_END()" not in run.stdout:
         raise ValueError("interpreter nie doszedł do końca programu: "
                          + (run.stderr or run.stdout)[-500:])
     return estimate_canon(run.stdout, limits_from_ini(ini))
