@@ -80,3 +80,15 @@ class PauseRetractTests(unittest.TestCase):
         self.assertFalse(c.active)
         self.assertEqual(c.target, 0)
         self.assertFalse(c.resume)
+
+    def test_validate_quantized_height_before_taking_ownership(self):
+        # 0.01 mm on a native inch machine would silently round to zero.
+        for height, z in ((0.01 / 25.4, -20), (1.0006, -1.0108)):
+            c = PauseRetract()
+            with self.assertRaises(RetractRefused):
+                c.start(snapshot(z=z), height, 60)
+            self.assertFalse(c.active)
+            self.assertEqual(c.target, 0)
+        c = PauseRetract()
+        c.start(snapshot(), 1.2346, 60)
+        self.assertEqual(c.height, 1.235)

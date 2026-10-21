@@ -589,3 +589,9 @@ Brak komend ruchu przy kontroli; screenshot wykonany lokalnie. CI oraz odbiór w
 - Powrót do 100% nie przywraca wyniku opartego na niepoprawnym czasie; nowy pełny start resetuje historię.
 - Lokalnie 41 testów czasu/widgetów PASS; lint PASS. Autokontrola, bez niezależnego przeglądu.
 - Osobny checkout; tabela narzędzi i pliki właściciela zachowane. Odbiór pulpitu nadal otwarty.
+
+## Dopracowanie planu 21–27 — D38-A · 2026-10-21 · Codex
+- Model-Author: Codex. Ustawienia wysokości/posuwu z INI, jawna odmowa błędnej konfiguracji.
+- Kontrola limitu po zaokrągleniu do rozdzielczości HAL, odmowa zerowego wycofania i pokazanie wysokości zadanej.
+- Lokalnie 7 testów PASS i 10 subtestów; rzeczywiste kliknięcia Qt i błędne INI.
+- Abort/E-STOP, wymiana narzędzia i wykonanie helisy nadal otwarte. Autokontrola, bez niezależnego przeglądu.
