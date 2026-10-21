@@ -567,3 +567,11 @@ Brak komend ruchu przy kontroli; screenshot wykonany lokalnie. CI oraz odbiór w
 - Raport zawiera pomiar czasu trzech programów, granice D38 i niezaliczony protokół pulpitu.
 - PR #61 domyka rejestr sesji 041 i dokumentację; bez nowych sesji i bez zmian kodu.
 - Punkt 27 ręcznie niewykonany. Autokontrola, bez niezależnego przeglądu; NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## D38 — wykonanie wycofania w pauzie · 2026-10-21 · Codex
+- Model-Author: Codex. PR #62: Z przez external offsets, powrót i opcjonalne wznowienie.
+- Kolejka i G41/G42 pozostają w LinuxCNC; brak Abort, MDI i kasowania korekcji.
+- Blokada komend ruchu i HAL inhibit; zmiana kontekstu zamraża powrót, aż do wyłączenia.
+- Lokalnie sześć testów modelu/widgetów Qt PASS; wyniki runtime i SHA w [PR #62](https://github.com/anonimov94/linumeRT/pull/62).
+- Obejmuje pauzę bez wymiany narzędzia, nie powrót po Abort ani helisę z zakładką.
+- Autokontrola, bez niezależnego przeglądu. NIEZWERYFIKOWANE NA SPRZĘCIE.

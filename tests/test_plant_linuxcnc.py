@@ -110,14 +110,19 @@ for path in sys.argv[1:]:
         "ferror": max(abs(s.joint[i]["ferror_highmark"]) for i in range(4))})
     out["errors"] = []
 c.mode(linuxcnc.MODE_MDI); c.wait_complete()
-c.mdi("G90 G1 X100 Y200 Z-20 F3000"); c.wait_complete(60)
-wait(lambda: s.interp_state == linuxcnc.INTERP_IDLE, 60)
+# G61 before the oracle: pocket programs leave G64 active, allowing a stop short of X100.
+# Model-Author: Codex — establish and record a settled position before the rejected move.
+c.mdi("G61 G90 G1 X100 Y200 Z-20 F3000"); c.wait_complete(60)
+assert wait(lambda: s.interp_state == linuxcnc.INTERP_IDLE and abs(s.current_vel) < 1e-7
+            and abs(s.actual_position[0] - 100) < 0.005, 60)
+out["before_softlimit"] = list(s.position[:3])
 # softlimit_oracle: MDI poza soft limit X (599) — LinuxCNC powinien odrzucić
 c.mdi("G90 G0 X700"); c.wait_complete(30)
 wait(lambda: s.interp_state == linuxcnc.INTERP_IDLE, 30)
 time.sleep(0.3); s.poll()
 out["softlimit_errors"] = list(out["errors"]); out["errors"] = []
 out["after_softlimit"] = [round(v, 3) for v in s.actual_position[:3]]
+out["after_softlimit_command"] = list(s.position[:3])
 c.state(linuxcnc.STATE_ON); c.mode(linuxcnc.MODE_MDI); c.wait_complete()
 # forbidden_zone_oracle: wjazd w strefę magazynu (LinuxCNC jej nie zna)
 c.mdi("G53 G0 Z-5"); c.wait_complete(30)
@@ -247,7 +252,9 @@ def test_time_model_calibrated_against_linuxcnc_plant(session, request):
 def test_softlimit_oracle(session):  # REQ-VM-06: scenariusz softlimit_oracle
     res = session
     assert res["softlimit_errors"], "LinuxCNC powinien odrzucić G0 X700 (soft limit 599)"
-    assert res["after_softlimit"][0] == pytest.approx(100.0, abs=0.01)  # bez ruchu
+    assert res["after_softlimit"][0] == pytest.approx(100.0, abs=0.01)
+    assert res["after_softlimit_command"] == pytest.approx(
+        res["before_softlimit"], abs=1e-6)  # planner nie zadał odrzuconego ruchu
     assert _violations(res, "soft_limit") == []  # wyrocznia: żadna pozycja zadana poza zakresem
     assert res["plant"]["oracle"]["frames_checked"] > 1000  # uzbrojona po bazowaniu
 

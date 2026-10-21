@@ -301,6 +301,11 @@ class ProductionPage(QtWidgets.QWidget):
         grid.setColumnStretch(0, 3)
         grid.setColumnStretch(1, 2)
         grid.setRowStretch(1, 1)
+        if hasattr(shell, "retract"):
+            from linumert_pause_retract import RetractPanel
+
+            self.retract_panel = RetractPanel(shell.retract, self)
+            grid.addWidget(self.retract_panel, 2, 0, 1, 2)
 
     # ---- karty ----------------------------------------------------------------------------
     def _program_card(self) -> QtWidgets.QWidget:
