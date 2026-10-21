@@ -11,7 +11,10 @@ Bez otwierania kolejnych etapów roadmapy.
 Dopracowanie planu 21–27: [PR #64](https://github.com/anonimov94/linumeRT/pull/64),
 osobny checkout `~/Projekty/linumeRT-plan-21-27`. ETA zapamiętuje korekcję F/G0 do końca
 przebiegu; D38-A odczytuje ustawienia INI i sprawdza wysokość po zaokrągleniu HAL.
-Lokalnie testy funkcji PASS; pełna regresja i CI w toku. Punkt 27 pozostaje otwarty.
+Lokalnie 50 testów funkcji PASS + 10 subtestów, złożenie HMI PASS, 108 testów C PASS,
+lint i kontrola wymagań PASS. Pełna próba lokalna ujawniła blokadę gniazd sieciowych;
+wynik odbioru Debian/LinuxCNC należy sprawdzić w kontrolach PR #64 przed scaleniem.
+Punkt 27 pozostaje otwarty: ponownie potwierdzono blokadę Podmana przez `/run/user/1000`.
 
 W main są #56 (integracja), #57 (launcher), #58 (kieszenie v2), #59 (.lnx),
 #60 (podgląd D38, ETA i raport), #61 (odbiór) oraz

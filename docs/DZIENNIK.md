@@ -595,3 +595,6 @@ Brak komend ruchu przy kontroli; screenshot wykonany lokalnie. CI oraz odbiór w
 - Kontrola limitu po zaokrągleniu do rozdzielczości HAL, odmowa zerowego wycofania i pokazanie wysokości zadanej.
 - Lokalnie 7 testów PASS i 10 subtestów; rzeczywiste kliknięcia Qt i błędne INI.
 - Abort/E-STOP, wymiana narzędzia i wykonanie helisy nadal otwarte. Autokontrola, bez niezależnego przeglądu.
+- Łącznie 50 testów funkcji PASS + 10 subtestów; złożenie HMI PASS; lint, C 108 i wymagania PASS.
+- Próba pełna: 895 PASS; 8 porażek i 5 błędów przez zakaz gniazd; błąd środowiska pytest w procesie potomnym usunięto i złożenie HMI ponowiono z PASS.
+- Odbiór runtime w kontrolach PR #64; ponowny `podman info` potwierdza blokadę `/run/user/1000`, więc pkt 27 niezaliczony.
