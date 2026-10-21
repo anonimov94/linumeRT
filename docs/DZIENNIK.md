@@ -583,3 +583,9 @@ Brak komend ruchu przy kontroli; screenshot wykonany lokalnie. CI oraz odbiór w
 - Lokalny main zaktualizowany z weryfikacją SHA obiektów; T12 i stare kopie robocze zachowane; skróty odświeżone.
 - Pełne okno niewykonane: sandbox blokuje Podmana; ręczny odbiór pulpitu nadal wymagany.
 - Zmiany wyłącznie dokumentacyjne. Autokontrola, bez niezależnego przeglądu. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## Dopracowanie planu 21–27 — ETA · 2026-10-21 · Codex
+- Model-Author: Codex. Korekcja F/G0 unieważnia ETA całego przebiegu, także przed szacowaniem.
+- Powrót do 100% nie przywraca wyniku opartego na niepoprawnym czasie; nowy pełny start resetuje historię.
+- Lokalnie 41 testów czasu/widgetów PASS; lint PASS. Autokontrola, bez niezależnego przeglądu.
+- Osobny checkout; tabela narzędzi i pliki właściciela zachowane. Odbiór pulpitu nadal otwarty.
