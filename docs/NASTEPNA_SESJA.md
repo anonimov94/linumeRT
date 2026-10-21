@@ -1,55 +1,58 @@
 # Stan projektu i przekazanie
 
-Tura: Codex · od 2026-10-21 · stan: D38-A, odbiór w PR #62
+Tura: Codex · od 2026-10-21 · stan: oddana po synchronizacji EndeavourOS
 
-Model-Author: Codex. Bieżące polecenie: wykonać retract i powrót do toru z zachowaniem G41/G42.
+Model-Author: Codex. Bieżące polecenie właściciela: sprawdzić rozpoczęte prace,
+dokończyć, wypchnąć i scalić zmiany oraz zaktualizować kopię na EndeavourOS.
 Bez otwierania kolejnych etapów roadmapy.
 
 ## Stan scalania
 
-W main są #56 (integracja rozpoczętych prac), #57 (launcher), #58 (kieszenie v2),
-#59 (pliki .lnx/edycja kroków) i #60 (podgląd D38, ETA, raport z bieżącym widokiem).
-Kod #60: 5f290103, merge 4ba90a0. #61 scalony do main (f4b7552f).
-Bieżąca realizacja pauzy D38-A: [PR #62](https://github.com/anonimov94/linumeRT/pull/62).
-Stan scalenia, sprawdzony SHA i końcowe wyniki CI są w tym PR.
+W main są #56 (integracja), #57 (launcher), #58 (kieszenie v2), #59 (.lnx),
+#60 (podgląd D38, ETA i raport), #61 (odbiór) oraz
+[scalony PR #62](https://github.com/anonimov94/linumeRT/pull/62)
+(D38-A: wycofanie Z i powrót w pauzie z zachowaniem G41/G42 oraz G43).
+Merge #62: `979c6725d8cb682a9e841fe571d4eedbc6cbb22a`.
+Przy kontroli GitHuba 2026-10-21 brak otwartych PR i zgłoszeń; jedyna gałąź to main.
 
 ## Wynik i granice odbioru
 
-[Raport planu](raporty/prototypy/PLAN-21-27-2026-10-21.md):
-Debian 12/LinuxCNC CI 39510750194 PASS — 915 testów + 96 LinuxCNC,
-12 subtestów PASS, 9 pominięć. Ogólne CI 39510750346 PASS.
-Kieszenie, .lnx, ETA i raport odebrane automatycznie; D38 odebrane wyłącznie jako podgląd.
-Raport opisuje stan przed PR #62: external offsets i wznowienie w pauzie dodaje D38-A.
-Odzyskiwanie po Abort/E-STOP i wykonanie helisy z zakładką nadal pozostają niewdrożone.
-Punkt 27 — próby na pulpicie właściciela — nadal OTWARTY; protokół jest w raporcie.
+Kod #62 `400eb8fac3540ed735d7aacd20feae5ff9a44e5b`:
+[Debian 12/LinuxCNC PASS](https://github.com/anonimov94/linumeRT/actions/runs/39626463088)
+— 921 testów, 22 subtesty, 9 pominięć; osobno 98 testów LinuxCNC PASS.
+10 wariantów wycofania/powrotu obejmuje sim/Plant, G40/G41/G42, G20/G21 i G43.
+[Ogólne CI main PASS](https://github.com/anonimov94/linumeRT/actions/runs/39629276081).
+Wcześniejsze wyniki i protokół pulpitu: [raport planu](raporty/prototypy/PLAN-21-27-2026-10-21.md).
+
+D38-A zachowuje kolejkę i modalność przy pauzie AUTO bez Abort. Wznowienie wymaga
+rzeczywistego i żądanego offsetu zero oraz błędu nadążania <=0,005 mm.
+Odzyskiwanie po Abort/E-STOP, powrót po wymianie narzędzia i wykonanie helisy z zakładką
+pozostają niewdrożone. Podgląd helisy nie wykonuje ruchu.
+Punkt 27 — ręczny odbiór pulpitu — nadal OTWARTY; odbiór sprzętowy również niewykonany.
 Nie utożsamiać wyników CI z ręcznym odbiorem pulpitu lub fizycznej obrabiarki.
 
-## Uruchomienie
+## Uruchomienie na EndeavourOS
 
-Pełny bliźniak: `tools/linumert-start.sh`; QtDragon: `--classic`; Plant: `--plant`.
-Podgląd offline nie zastępuje pełnego HMI. Skróty i launcher są już scalone.
-Nie uruchamiać równocześnie kilku konfiguracji na jednej instancji LinuxCNC.
+Kopia właściciela: `~/linumeRT` (main). Zachowano lokalne T12 w `tool.tbl`.
+Menu aplikacji: linumeRT / linumeRT + Plant / linumeRT — QtDragon.
 
-## Środowisko tej sesji
+```sh
+~/linumeRT/tools/linumert-start.sh
+~/linumeRT/tools/linumert-start.sh --plant
+~/linumeRT/tools/linumert-start.sh --classic
+```
 
-Chmura, bez pulpitu właściciela i bez lokalnego LinuxCNC. Repo lokalne z poprzednich tur
-jest niepełną kopią plików, nie checkoutem Git. Zwykły Git nie łączy się przez proxy;
-odczyt i zapis GitHub działają konektorem. Nie ponawiać blokujących prób udostępniania sieci.
-Wyniki runtime powyżej pochodzą ze sprawdzonego CI.
+Pierwsze polecenie uruchamia HMI na symulatorze LinuxCNC; `--plant` dodaje wirtualną
+obrabiarkę. Uruchamiać kolejno, po zamknięciu poprzedniej instancji.
+Skrypt korzysta z Podmana i kontenera Debian 12; nie wymaga instalacji LinuxCNC na hoście Arch.
+
+## Środowisko i pozostałe prace
+
+Lokalny EndeavourOS, sesja agenta z ograniczeniami sandboxa. Zwykły Git nie rozwiązuje
+nazwy GitHuba, konektor GitHub działa. Obiekty pobrano konektorem, zweryfikowano ich SHA
+i zaktualizowano main przez fast-forward z zachowaniem historii. Skróty odświeżono.
+Podman nie może utworzyć katalogu w `/run/user/1000`; pełnego okna nie uruchomiono.
+Wyniki runtime pochodzą z CI. Następny krok: ręczny protokół pulpitu z raportu planu.
+Stare kopie robocze w `~/Projekty` i ich nieśledzone dokumenty pozostawiono bez zmian;
+zawierają historyczne wyniki oczekujące na CI, które zastąpił raport w main.
 Autokontrola, bez niezależnego przeglądu. NIEZWERYFIKOWANE NA SPRZĘCIE.
-
-## Bieżące zlecenie — D38 retract/powrót z G41/G42
-
-Właściciel zlecił wykonanie wycofania i powrotu z zachowaniem korekcji narzędzia.
-Gałąź codex/pause-retract: pauza AUTO bez Abort, Z przez external offsets; interpreter
-zachowuje kolejkę, modalność i G41/G42. Przyciski w Produkcji; powrót czeka na rzeczywiste zero.
-Sześć testów lokalnych (model i rzeczywiste widgety Qt) PASS. Testy runtime używają
-prawdziwego QtVCP/LinuxCNC, sim i Plant oraz G40/G41/G42 w G20/G21 z G43.
-Wyniki, pozycje i zrzuty są w CI wskazanym w PR #62; nie utożsamiać obecności testu z jego PASS.
-Nie deklarować obsługi powrotu po Abort/E-STOP ani odbioru sprzętu. Model-Author: Codex.
-
-Przed pierwszą zmianą counts kontroler czeka na potwierdzenie enable z pętli HAL.
-Wznowienie wymaga rzeczywistego i żądanego offsetu zero oraz błędu nadążania <=0,005 mm.
-Dostępność: zbazowane XYZ/trivkins, G17/G94, aktywna korekcja posuwu i wrzeciono włączone.
-W Plant test najpierw czeka na łącze i ustalenie sprzężenia przed bazowaniem.
-Scalanie dopiero po zielonym CI; końcowy wynik odbioru utrzymywać w opisie PR #62.

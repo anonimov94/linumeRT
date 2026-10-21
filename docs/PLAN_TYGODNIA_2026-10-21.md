@@ -56,8 +56,8 @@ odrzucają kolizje, wejście w nieusunięty materiał i przekroczenie zakresów;
 pozostaje nietknięty. Brak danych, ruch programu, korekcja promienia i cykle dają odmowę.
 Ustawienia INI: RESUME_OVERLAP, RESUME_CLEARANCE, RESUME_HELIX_PITCH i RESUME_FEED (mm/min).
 
-**Nadal do wykonania w D38:** rzeczywiste external offsets w pauzie, odtworzenie pełnego
-stanu modalnego i dokładnej ścieżki z interpretera oraz automatyczne wznowienie programu.
+**Stan pierwszej porcji przed #62:** external offsets i wykonanie powrotu były otwarte.
+PR #62 dodał wycofanie Z, powrót i wznowienie w pauzie z zachowaniem kolejki i modalności.
 Pierwsza porcja nie wysyła komend ruchu i nie eksportuje programu do wykonania. Wyświetlony
 podgląd nie jest zgodą na automatyczny start. Obsługa HAL musi uwzględnić zachowanie
 [external offsets LinuxCNC](https://linuxcnc.org/docs/2.9/html/motion/external-offsets.html).
@@ -84,12 +84,14 @@ był już zależnością launchera; dodano go do środowiska testów CI.
 
 ## Stan odbioru — 2026-10-21
 
-Wszystkie porcje implementacji z punktów 21–26 są scalone (#58, #59, #60).
+Porcje implementacji z punktów 21–26 są scalone (#58, #59, #60); #62 dodaje wykonanie D38-A.
 Końcowy kod 5f290103: [Debian/LinuxCNC PASS](https://github.com/anonimov94/linumeRT/actions/runs/39510750194),
 915 testów + 96 LinuxCNC, 12 subtestów PASS; 9 pominięć nie zaliczono jako wykonane.
 [Raport z wynikami i protokołem pulpitu](raporty/prototypy/PLAN-21-27-2026-10-21.md).
 
-D38 spełnia zakres pierwszej porcji podglądu; wykonanie ruchu przez external offsets
-i automatyczne wznowienie pozostają otwarte. Punkt 27 nadal wymaga pulpitu właściciela.
+D38-A (#62, merge `979c672`) wykonuje wycofanie Z przez external offsets i powrót w pauzie
+AUTO, także z G41/G42 i G43. [Odbiór Debian/LinuxCNC PASS](https://github.com/anonimov94/linumeRT/actions/runs/39626463088):
+921 testów + 98 LinuxCNC, 22 subtesty; 9 pominięć. Powrót po Abort/E-STOP, wymianie
+narzędzia i wykonanie helisy z zakładką pozostają otwarte. Punkt 27 wymaga pulpitu właściciela.
 Nie dopisano nowych sesji roadmapy ani nie zaliczono niewykonanych prób ręcznych.
 Model-Author: Codex. Autokontrola, bez niezależnego przeglądu.
