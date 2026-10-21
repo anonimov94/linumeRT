@@ -57,6 +57,7 @@ dojeżdża prostą).
 | Klucz | Domyślnie | Znaczenie |
 |---|---|---|
 | `RESUME_RETRACT_HEIGHT` | 10 mm | wycofanie w pauzie (eoffset Z) |
+| `RESUME_RETRACT_FEED` | 200 mm/min | posuw wycofania i powrotu Z w realizacji A |
 | `RESUME_RETRACT_XY` | 0 mm | odsunięcie w XY w pauzie (0 = tylko Z) |
 | `RESUME_SPINDLE_STOP` | 1 | zatrzymać wrzeciono po wycofaniu |
 | `RESUME_CLEARANCE` | 1 mm | wysokość startu helisy nad materiałem |
@@ -89,3 +90,10 @@ To realizacja A, nie realizacja B po Abort. Stary podgląd helisy nie jest wykon
 Kod/testy: pause_retract.py, linumert_pause_retract.py, linumert_pause_retract.hal,
 test_pause_retract_linuxcnc.py. Odbiór LinuxCNC/Plant i ograniczenia: opis PR oraz
 OBSLUGA_OPERATORA.md. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+Dopracowanie A: panel odczytuje `RESUME_RETRACT_HEIGHT` (0,01–100 mm) oraz
+`RESUME_RETRACT_FEED` (1–500 mm/min) z INI; błędne wartości blokują wycofanie
+z jawnym komunikatem. Pola umożliwiają zmianę przed wykonaniem. `RESUME_FEED` pozostaje
+ustawieniem osobnego podglądu helisy. Tor HAL ma rozdzielczość 0,001 jednostki maszyny
+(0,001 mm albo 0,0254 mm); limit Z sprawdzany jest po zaokrągleniu wysokości.
+Wysokość zaokrąglona do zera jest odrzucana, a rzeczywista zadana wysokość widoczna w panelu.

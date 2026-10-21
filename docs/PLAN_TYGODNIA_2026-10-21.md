@@ -102,3 +102,11 @@ ETA zapamiętuje użycie korekcji F/G0 innych niż 100% do końca bieżącego pr
 także przed obliczeniem oszacowania. Przywrócenie 100% nie przywraca mylącego wyniku;
 dostępność wraca przy następnym pełnym uruchomieniu. Całkowite oszacowanie programu
 pozostaje dostępne po zakończeniu. Lokalnie: 41 testów czasu i widgetów PASS, lint PASS.
+
+## Dopracowanie punktu 24 — 2026-10-21
+
+D38-A odczytuje wysokość i posuw z `RESUME_RETRACT_HEIGHT` i `RESUME_RETRACT_FEED`
+w INI. Błędna konfiguracja blokuje operację z komunikatem. Wysokość jest sprawdzana
+po zaokrągleniu do rozdzielczości HAL; zerowe wycofanie i przekroczenie limitu przez
+zaokrąglenie są odrzucane. Panel pokazuje zadaną wysokość po zaokrągleniu także na
+maszynie calowej. Lokalnie 7 testów PASS i 10 subtestów, w tym kliknięcia Qt oraz INI.
