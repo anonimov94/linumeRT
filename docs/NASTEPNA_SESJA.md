@@ -1,6 +1,6 @@
 # Stan projektu i przekazanie
 
-Tura: Codex · od 2026-10-21 · stan: oddana
+Tura: Codex · od 2026-10-21 · stan: D38 w toku
 
 Model-Author: Codex. Ostatnie polecenie: sprawdzić stan i dokończyć plan 21–27;
 pozostała roadmapa bez nowych sesji.
@@ -35,3 +35,11 @@ jest niepełną kopią plików, nie checkoutem Git. Zwykły Git nie łączy się
 odczyt i zapis GitHub działają konektorem. Nie ponawiać blokujących prób udostępniania sieci.
 Wyniki runtime powyżej pochodzą ze sprawdzonego CI.
 Autokontrola, bez niezależnego przeglądu. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## Bieżące zlecenie — D38 retract/powrót z G41/G42
+
+Właściciel zlecił wykonanie wycofania i powrotu z zachowaniem korekcji narzędzia.
+Gałąź codex/pause-retract: pauza AUTO bez Abort, Z przez external offsets; interpreter
+zachowuje kolejkę, modalność i G41/G42. Przyciski w Produkcji; powrót czeka na rzeczywiste zero.
+Pięć testów lokalnych (model i widgety Qt) OK. Integracja LinuxCNC/Plant i odbiór CI do wykonania.
+Nie deklarować obsługi powrotu po Abort/E-STOP ani odbioru sprzętu. Model-Author: Codex.

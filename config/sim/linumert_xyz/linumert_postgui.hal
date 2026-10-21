@@ -11,11 +11,12 @@ net linumert.io.tool-changed sim_toolchange.out => iocontrol.0.tool-changed
 net linumert.io.tool-number iocontrol.0.tool-prep-number => hal_manualtoolchange.number
 
 net linumert.spindle.inhibit    linumert.spindle-inhibit => spindle.0.inhibit
-net linumert.z.eoffset-clear    linumert.eoffset-clear => axis.z.eoffset-clear
-net linumert.z.eoffset-counts   linumert.eoffset-spindle-count => axis.z.eoffset-counts
+net linumert.z.eoffset-clear    linumert.eoffset-clear => lrt_retract_clear.in-0
+net linumert.z.eoffset-counts   linumert.eoffset-spindle-count => lrt_retract_legacy.in
 net linumert.z.eoffset          linumert.eoffset-value <= axis.z.eoffset
 setp axis.z.eoffset-enable 1
-setp axis.z.eoffset-scale 1.0
+net linumert.retract.own linumert.retract-own
+net linumert.retract.target linumert.retract-target => lrt_retract_select.in1
 
 # D35: grzyb E-STOP w HMI i sygnał życia ekranu (config/hal/linumert_hmi_estop.hal)
 net linumert.hmi.button         linumert.hmi-estop-ok   => lrt_hmi_ok.in-00

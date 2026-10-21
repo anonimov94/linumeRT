@@ -43,6 +43,8 @@ class HandlerClass(_upstream.HandlerClass):
         pins = {key: qhal.newpin(name, qhal.HAL_BIT, qhal.HAL_OUT) for key, name in
                 (("ok", "hmi-estop-ok"), ("hb", "hmi-heartbeat"), ("wd", "hmi-wd-enable"),
                  ("ack", "hmi-ack"))}
+        pins["retract_own"] = qhal.newpin("retract-own", qhal.HAL_BIT, qhal.HAL_OUT)
+        pins["retract_target"] = qhal.newpin("retract-target", qhal.HAL_FLOAT, qhal.HAL_OUT)
         if os.environ.get("LINUMERT_SHELL", "1") == "0":
             self._classic_heartbeat(pins)
         else:

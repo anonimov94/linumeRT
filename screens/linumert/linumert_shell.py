@@ -148,6 +148,9 @@ class LinumertShell(QtCore.QObject):
         self.sim_cause = ""  # ostatnia kolizja/przeciążenie z symulacji (przyczyna E-STOP)
         self.buttons: dict[str, QtWidgets.QPushButton] = {}
         self.operator_panels = []
+        from linumert_pause_retract import RetractControl
+
+        self.retract = RetractControl(self)
 
     # ---- budowa ---------------------------------------------------------------------------
     def install(self) -> LinumertShell:
