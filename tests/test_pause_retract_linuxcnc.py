@@ -59,10 +59,13 @@ def test_retract_returns_to_compensated_path(tmp_path, plant, request):
                     break
                 probe_code = "import linuxcnc; s=linuxcnc.stat(); s.poll(); "
                 probe_code += f"assert s.joints == {joint_count}"
-                if plant:
-                    probe_code += "; import hal; assert hal.get_value('lrt-net.0.connected')"
                 probe = rip_run(root, "python3 -c " + shlex.quote(probe_code), work, env=env)
                 if probe.returncode == 0:
+                    if plant:
+                        link = rip_run(root, "halcmd getp lrt-net.0.connected", work, env=env)
+                        if link.stdout.strip() != "TRUE":
+                            time.sleep(0.25)
+                            continue
                     ready = True
                     break
                 time.sleep(0.25)

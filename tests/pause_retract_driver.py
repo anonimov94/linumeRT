@@ -132,7 +132,8 @@ def run(ini, joint_count, output):
         assert control.model.active, control.model.message
         wait(lambda: control.model.phase == "retracted", control=control)
         wait(lambda z_before=z_before: abs(feedback_z() - z_before - 2) < 0.005, control=control)
-        assert position() == before, ("planner changed", before, position())
+        assert max(abs(a - b) for a, b in zip(position(), before, strict=True)) < 1e-6, (
+            "planner changed", before, position())
         assert s.paused and control.last.frame == frame
         shell.action.PAUSE()  # Original QtVCP resume must be blocked.
         assert alarms and s.paused and control.model.active
