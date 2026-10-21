@@ -1,38 +1,37 @@
 # Stan projektu i przekazanie
 
-Tura: Codex · od 2026-10-21 · stan: praca nad planem 21–27
+Tura: Codex · od 2026-10-21 · stan: oddana
 
-Model-Author: Codex. Bieżące polecenie właściciela: dokończyć rozpoczęte prace,
-bez rozpoczynania nowych sesji roadmapy; po scaleniu launcher i lista usterek na tydzień.
-Następnie właściciel polecił kontynuować realizację planu 21–27, także bez odpowiedzi,
-aż do wyraźnego „stop”. Zakres tej listy jest autoryzowany; pozostała roadmapa pozostaje zamrożona.
+Model-Author: Codex. Ostatnie polecenie: sprawdzić stan i dokończyć plan 21–27;
+pozostała roadmapa bez nowych sesji.
 
-## Odbiór integracji
+## Stan scalania
 
-PR #56 łączy #48, #50, #54, #55 i #56 oraz niescalone Cykle Claude (7a71581).
-Zachowana historia wszystkich gałęzi, również historyczna aktualizacja codex/hmi-01.
-Kod 4ca3f57: pełne CI PASS — Debian 12: 849 testów + 81 LinuxCNC, C: 108 także z ASan/UBSan,
-42 kroki HMI, scenariusze 9 + matrix 5, wymagania bez błędów. Raport: [P0](raporty/prototypy/P0-2026-10-20.md).
-PR #56 scalony do main (e3c7bab); wcześniejsze PR automatycznie oznaczone jako scalone.
+W main są #56 (integracja rozpoczętych prac), #57 (launcher), #58 (kieszenie v2),
+#59 (pliki .lnx/edycja kroków) i #60 (podgląd D38, ETA, raport z bieżącym widokiem).
+Kod #60: 5f290103, merge 4ba90a0. PR #61 domyka dokumentację odbioru i rejestr sesji 041.
+Bieżący wynik scalenia #61 sprawdzać w GitHub; dokument nie deklaruje scalenia przed jego wykonaniem.
 
-Działają: ekrany HMI, edycja kopii G-code, diagnostyczna symulacja bez komend safety,
-audyt deklaracji/HAL offline, generatory, raport HTML, narzędzia/czas/NgcGui w Cyklach.
-Kieszenie: rozwijane wejście rampą i helisą w ramach 21.10; sesja 041 pozostaje częściowa.
-Nie deklarować odbioru sprzętu ani ręcznych prób na pulpicie właściciela.
+## Wynik i granice odbioru
 
-## Następny dozwolony krok
+[Raport planu](raporty/prototypy/PLAN-21-27-2026-10-21.md):
+Debian 12/LinuxCNC CI 39510750194 PASS — 915 testów + 96 LinuxCNC,
+12 subtestów PASS, 9 pominięć. Ogólne CI 39510750346 PASS.
+Kieszenie, .lnx, ETA i raport odebrane automatycznie; D38 odebrane wyłącznie jako podgląd.
+Rzeczywiste external offsets i automatyczne wznowienie D38 pozostają niewdrożone.
+Punkt 27 — próby na pulpicie właściciela — nadal OTWARTY; protokół jest w raporcie.
+Nie utożsamiać wyników CI z ręcznym odbiorem pulpitu lub fizycznej obrabiarki.
 
-Launcher HMI + QtDragon + LinuxCNC gotowy; testy uruchamiania przechodzą, skróty zainstalowane.
-Launcher #57 scalony (1fd6f3e), Debian PASS: 853 + 81 LinuxCNC. Kieszenie 21–22 w #58,
-.lnx/edycja 23 w #59 — odbiór CI w toku. Lokalnie przygotowano podgląd D38 (24, wykonanie
-nadal otwarte) oraz ETA i pomiar Plant (25); kolejne: raport 26 i odbiór 27. Każdą zakończoną porcję
-testować i scalać do main; nie deklarować niewykonanego odbioru ręcznego jako zaliczonego.
-Lista i kryteria: [21–27.10.2026](PLAN_TYGODNIA_2026-10-21.md). Odbiór pulpitu pozostaje otwarty.
-Nie zaczynać nowych sesji 027…084. Porządkowy job usuwa tylko gałęzie zawarte w main,
-z lease dla ich SHA, po zielonym CI main. Autokontrola, bez niezależnego przeglądu.
+## Uruchomienie
 
-## Środowisko
+Pełny bliźniak: `tools/linumert-start.sh`; QtDragon: `--classic`; Plant: `--plant`.
+Podgląd offline nie zastępuje pełnego HMI. Skróty i launcher są już scalone.
+Nie uruchamiać równocześnie kilku konfiguracji na jednej instancji LinuxCNC.
 
-Pełny bliźniak: tools/linumert-start.sh; QtDragon: --classic; Plant: --plant.
-Ta sesja lokalna blokuje sieć, pulpit, Podman i LeakSanitizer; wynik runtime pochodzi z CI.
-Podgląd Qt offscreen działa. Lokalna tabela narzędzi /home/dell/linumeRT pozostawiona użytkownikowi.
+## Środowisko tej sesji
+
+Chmura, bez pulpitu właściciela i bez lokalnego LinuxCNC. Repo lokalne z poprzednich tur
+jest niepełną kopią plików, nie checkoutem Git. Zwykły Git nie łączy się przez proxy;
+odczyt i zapis GitHub działają konektorem. Nie ponawiać blokujących prób udostępniania sieci.
+Wyniki runtime powyżej pochodzą ze sprawdzonego CI.
+Autokontrola, bez niezależnego przeglądu. NIEZWERYFIKOWANE NA SPRZĘCIE.

@@ -560,3 +560,10 @@ Brak komend ruchu przy kontroli; screenshot wykonany lokalnie. CI oraz odbiór w
 - Wspólny czas względny zdarzeń HMI/tabeli/osi SVG, odnośniki do wierszy i jawne pominięcia ponad limit 500. Usunięto sugestię, że diagnostyka zatrzymuje CNC.
 - Test faktycznego kliknięcia Raport zapisuje HTML z obrazem Qt; test 3D/kamery przez Xvfb/Mesa wymagany w CI. Pyqtgraph już w runtime, dodany do CI.
 - Brak dodatkowych zależności/licencji; autokontrola, bez niezależnego przeglądu. Odbiór ręczny na pulpicie nadal otwarty.
+
+## Odbiór planu 21–27 — 2026-10-21 · Codex
+- Model-Author: Codex. Zweryfikowano scalone #58/#59/#60 i końcowe CI 5f290103.
+- Debian: 915 PASS + 96 LinuxCNC PASS, 12 subtestów PASS, 9 pominięć; ogólne CI PASS.
+- Raport zawiera pomiar czasu trzech programów, granice D38 i niezaliczony protokół pulpitu.
+- PR #61 domyka rejestr sesji 041 i dokumentację; bez nowych sesji i bez zmian kodu.
+- Punkt 27 ręcznie niewykonany. Autokontrola, bez niezależnego przeglądu; NIEZWERYFIKOWANE NA SPRZĘCIE.

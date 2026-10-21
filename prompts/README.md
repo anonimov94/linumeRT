@@ -60,7 +60,7 @@ wymagały ekranu ani LinuxCNC. Bieżący stan i następny krok: [`docs/NASTEPNA_
 | [038](sesja-038.md) | M2 | Bufor i bramka G2 (prototyp v0.1) |  |
 | [039](sesja-039.md) | M3 | Format .lnx i BaseMacroGenerator | zrobiona |
 | [040](sesja-040.md) | M3 | Generatory: nagłówek, koniec, narzędzie, planowanie | zrobiona (panel dialogowy: 045) |
-| [041](sesja-041.md) | M3 | Generatory: kieszenie | częściowo (prototyp wejścia pionowego, PR #56) |
+| [041](sesja-041.md) | M3 | Generatory: kieszenie | zrobiona (v2, rampa/helisa, geometria i wykańczanie; PR #58; v1 zachowane) |
 | [042](sesja-042.md) | M3 | Generatory: wiercenie i gwintowanie | częściowo (generator gotowy, bez UI) |
 | [043](sesja-043.md) | M3 | Generatory: rowki, czopy, kontur |  |
 | [044](sesja-044.md) | M3 | Lekser G-code i walidacja w edytorze | zrobiona |

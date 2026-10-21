@@ -81,3 +81,15 @@ Etykiety kolizji są diagnostyczne, bez sugerowania zatrzymania CNC.
 Test kliknięcia Raport obejmuje rzeczywisty obraz Qt, protokół i plik HTML; osobny test
 LinuxCNC CI sprawdza prawdziwy widok 3D i zmianę obrazu po obrocie kamery. Pakiet pyqtgraph
 był już zależnością launchera; dodano go do środowiska testów CI.
+
+## Stan odbioru — 2026-10-21
+
+Wszystkie porcje implementacji z punktów 21–26 są scalone (#58, #59, #60).
+Końcowy kod 5f290103: [Debian/LinuxCNC PASS](https://github.com/anonimov94/linumeRT/actions/runs/39510750194),
+915 testów + 96 LinuxCNC, 12 subtestów PASS; 9 pominięć nie zaliczono jako wykonane.
+[Raport z wynikami i protokołem pulpitu](raporty/prototypy/PLAN-21-27-2026-10-21.md).
+
+D38 spełnia zakres pierwszej porcji podglądu; wykonanie ruchu przez external offsets
+i automatyczne wznowienie pozostają otwarte. Punkt 27 nadal wymaga pulpitu właściciela.
+Nie dopisano nowych sesji roadmapy ani nie zaliczono niewykonanych prób ręcznych.
+Model-Author: Codex. Autokontrola, bez niezależnego przeglądu.
