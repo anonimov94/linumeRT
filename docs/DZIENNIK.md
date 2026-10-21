@@ -617,3 +617,5 @@ Brak komend ruchu przy kontroli; screenshot wykonany lokalnie. CI oraz odbiór w
 - Ręczny odbiór pozostaje otwarty. Autokontrola, bez niezależnego przeglądu.
 
 Izolacja obejmuje teraz szacowanie i kontrolę semantyczną: prywatne HOME/TMPDIR/cwd, bez zapisu do wspólnego sim.var; 20 s/8 MiB, bez częściowego wyniku czasu. 108 testów lokalnych PASS (3 subtesty), w tym regresja starego rs274 uszkadzającego mmap oraz kliknięcie GUI i nadal dostępna kontrola składni. Autokontrola; PR #66 czeka na pełne CI. Model-Author: Codex.
+
+Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących prywatnych parametrów, interpretowane jako błąd poprawnego programu. Inicjalizujemy plik i nadpisujemy także PARAMETER_FILE w prywatnej kopii INI (INI ma pierwszeństwo przed -v). Nowa regresja chroni absolutną ścieżkę parametrów sterowania; wczesny test Plant sprawdza również poprawny skończony program. 109 testów lokalnych PASS, autokontrola, Model-Author: Codex.

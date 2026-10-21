@@ -47,8 +47,9 @@ class InterpreterProcessTests(unittest.TestCase):
         result = check_with_linuxcnc(self.program, self.root)
         self.assertTrue(result.ok, result.messages)
         args = json.loads(self.record.read_text())
-        self.assertEqual(args[:4], ["-i", str(self.root / "configs/sim/axis/axis.ini"),
-                                    "-t", str(self.root / "configs/sim/axis/sim.tbl")])
+        self.assertEqual(args[0], "-i")
+        self.assertEqual(Path(args[1]).name, "analysis.ini")
+        self.assertEqual(args[2:4], ["-t", str(self.root / "configs/sim/axis/sim.tbl")])
         self.assertEqual(args[4], "-v")
         self.assertEqual(args[6:], ["-n", "0", str(self.program)])
         self.assertFalse((self.root / "configs/sim/axis/INJECTED").exists())
@@ -118,6 +119,27 @@ class InterpreterProcessTests(unittest.TestCase):
         self.assertFalse(result.ok)
         self.assertFalse(result.completed)
         self.assertIn("limit danych", result.messages[0])
+
+    def test_parameter_file_exists_before_first_save_and_ini_cannot_share_it(self):
+        shared = self.base / "controller.var"
+        shared.write_text("live parameters\n")
+        (self.root / "configs/sim/axis/axis.ini").write_text(
+            f"[RS274NGC]\nPARAMETER_FILE = {shared}\n")
+        self.executable(
+            "import configparser,sys,os\nfrom pathlib import Path\n"
+            "args=sys.argv[1:]\n"
+            "cli=Path(args[args.index('-v')+1])\n"
+            "assert cli.is_file(), 'first save would emit missing-backup warning'\n"
+            "config=configparser.ConfigParser()\n"
+            "config.read(args[args.index('-i')+1])\n"
+            "actual=Path(config['RS274NGC']['PARAMETER_FILE']).resolve()\n"
+            "assert actual == cli and actual.parent == Path(os.environ['HOME'])\n"
+            "actual.write_text('offline changes')\n"
+            "print('    1 N..... PROGRAM_END()')\n"
+        )
+        result = check_with_linuxcnc(self.program, self.root)
+        self.assertTrue(result.ok, result.messages)
+        self.assertEqual(shared.read_text(), "live parameters\n")
 
     def test_estimate_never_returns_partial_or_nonzero_exit_result(self):
         from linumert.programs.estimate import estimate_ngc
