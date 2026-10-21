@@ -8,6 +8,12 @@ Bez otwierania kolejnych etapów roadmapy.
 
 ## Stan scalania
 
+Odbiór pulpitu ujawnił brak `sim_toolchange.in` przy starcie Plant z pełnym QtVCP.
+Naprawa: `codex/plant-hmi-toolchange`, checkout `~/Projekty/linumeRT-plant-hmi-fix`.
+Minimalną poprawkę HAL zastosowano także lokalnie w `~/linumeRT`, aby właściciel mógł
+ponowić start z `--plant --no-update`. Nowy test uruchamia faktyczny ekran Plant
+(HMI i klasyczny) z niezmienionym postgui oraz bez obejścia E-STOP; odbiór w kontrolach PR.
+
 Dopracowanie planu 21–27: [PR #64](https://github.com/anonimov94/linumeRT/pull/64),
 osobny checkout `~/Projekty/linumeRT-plan-21-27`. ETA zapamiętuje korekcję F/G0 do końca
 przebiegu; D38-A odczytuje ustawienia INI i sprawdza wysokość po zaokrągleniu HAL.

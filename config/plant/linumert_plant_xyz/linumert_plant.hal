@@ -11,6 +11,8 @@ loadrt [KINS]KINEMATICS
 loadrt [EMCMOT]EMCMOT servo_period_nsec=[EMCMOT]SERVO_PERIOD num_joints=[KINS]JOINTS
 loadrt lrt_net personality=[PLANT]AXES ip=[PLANT]IP port=[PLANT]PORT
 loadrt lrt_cia402 count=4
+# Shared postgui expects this virtual M6 acknowledgement, also used by sim.
+loadrt timedelay names=sim_toolchange
 loadrt not names=nc_x_min,nc_x_max,nc_y_min,nc_y_max,nc_z_max
 # łańcuch E-STOP: (din-00 ∧ łącze) ∧ grzyb HMI — dwa and2 (logic ładuje już plik HMI, D35)
 loadrt and2 names=estop_chain,estop_chain_hmi
@@ -25,6 +27,7 @@ addf lrt-cia402.1 servo-thread
 addf lrt-cia402.2 servo-thread
 addf lrt-cia402.3 servo-thread
 addf lrt-net.0 servo-thread
+addf sim_toolchange servo-thread
 addf nc_x_min servo-thread
 addf nc_x_max servo-thread
 addf nc_y_min servo-thread
