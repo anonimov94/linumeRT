@@ -509,7 +509,7 @@ class ProductionPage(QtWidgets.QWidget):
     def on_state(self) -> None:
         """Woła powłoka przy każdej zmianie stanu (także gdy strona niewidoczna)."""
         s, now = self.shell.s, time.monotonic()
-        if s.interp == "run" and self._last_interp == "idle":
+        if s.running and self._last_interp == "idle":
             self.clock.reset()
             self._eta_overridden = False
         if s.interp == "idle" and self._last_interp != "idle":

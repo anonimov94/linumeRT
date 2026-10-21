@@ -654,8 +654,9 @@ def test_production_remaining_time_pauses_and_invalidates_changed_program(
 
 
 @pytest.mark.parametrize("override", ["feed_override", "rapid_override"])
+@pytest.mark.parametrize("first_state", ["run", "paused"])
 def test_eta_override_history_survives_estimation_and_resets_for_next_run(
-        page_env, monkeypatch, tmp_path, override):
+        page_env, monkeypatch, tmp_path, override, first_state):
     from linumert.programs.estimate import Estimate
 
     _home, shell, _status, _action = page_env
@@ -685,7 +686,7 @@ def test_eta_override_history_survives_estimation_and_resets_for_next_run(
     page.on_state()
     page.refresh()
     assert "Szacowany czas programu" in page.lbl_remaining.text()
-    shell.s.interp = "run"
+    shell.s.interp = first_state
     page.on_state()
     page.refresh()
     assert "Pozostało około" in page.lbl_remaining.text()
