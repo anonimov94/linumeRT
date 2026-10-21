@@ -65,6 +65,8 @@ def test_retract_returns_to_compensated_path(tmp_path, plant):
                     break
                 time.sleep(0.25)
             assert ready, "LinuxCNC startup failed"
+            enabled = rip_run(root, "halcmd getp axis.z.eoffset-enable", work, env=env)
+            assert enabled.stdout.strip() in ("FALSE", "0"), enabled.stdout
             args = [str(ROOT / "tests/pause_retract_driver.py"), str(ini),
                     str(joint_count), str(tmp_path)]
             run = rip_run(root, "python3 " + " ".join(map(shlex.quote, args)), work,

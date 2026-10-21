@@ -47,3 +47,7 @@ Nie deklarować obsługi powrotu po Abort/E-STOP ani odbioru sprzętu. Model-Aut
 Następny krok wypchnięty: rzeczywisty QtVCP + LinuxCNC, pętla zwrotna i Plant,
 G40/G41/G42 oraz G20/G21. Testy zapisują pozycje i zrzuty; runtime do odbioru w CI.
 Dostępność obejmuje G17/G94 i aktywną korekcję posuwu; bez obsługi gwintowania/cykli.
+
+Poprawka po CI: headless nie włącza external offsets przy nieaktywnym D38 (regresja softlimit).
+Wznowienie czeka także na błąd nadążania napędów <=0,005 mm. Testy lokalne nadal PASS;
+końcowe testy LinuxCNC/Plant muszą przejść przed scaleniem.

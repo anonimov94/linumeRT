@@ -29,6 +29,8 @@ class PauseRetractTests(unittest.TestCase):
                     self.assertFalse(c.tick(replace(s, offset=2, requested=2), 0.01))
                 self.assertEqual(c.phase, "returning")  # Request zero is not actual zero.
                 self.assertFalse(c.tick(replace(s, offset=0.0001), 0.01))
+                self.assertFalse(c.tick(replace(s, settled=False), 0.01))
+                self.assertTrue(c.active)
                 self.assertTrue(c.tick(s, 0.01))
                 self.assertFalse(c.active)
                 self.assertFalse(c.tick(s, 0.01))
@@ -50,7 +52,8 @@ class PauseRetractTests(unittest.TestCase):
 
     def test_refuse_invalid_start_without_moving(self):
         for s in (snapshot(paused=False), snapshot(still=False), snapshot(offset=1),
-                  snapshot(requested=1), snapshot(z=-5), snapshot(z=float("nan"))):
+                  snapshot(requested=1), snapshot(z=-5), snapshot(z=float("nan")),
+                  snapshot(settled=False)):
             c = PauseRetract()
             with self.assertRaises(RetractRefused):
                 c.start(s, 10, 200)

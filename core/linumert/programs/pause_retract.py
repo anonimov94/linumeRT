@@ -25,6 +25,7 @@ class PauseSnapshot:
     lower: float
     upper: float
     limited: bool = False
+    settled: bool = True
 
 
 class PauseRetract:
@@ -63,6 +64,8 @@ class PauseRetract:
         if self.active:
             raise RetractRefused("Najpierw zakończ poprzednie wycofanie.")
         self._check(s)
+        if not s.settled:
+            raise RetractRefused("Poczekaj na dotrzymanie pozycji przez napędy.")
         if not all(math.isfinite(x) and x > 0 for x in (height, feed)):
             raise RetractRefused("Wysokość i posuw muszą być dodatnie i skończone.")
         if max(abs(s.offset), abs(s.requested)) > self.tolerance:
@@ -77,6 +80,8 @@ class PauseRetract:
         if self.phase != "retracted":
             raise RetractRefused("Najpierw poczekaj na zakończenie wycofania.")
         self._check(s)
+        if not s.settled:
+            raise RetractRefused("Poczekaj na dotrzymanie pozycji przez napędy.")
         self.phase, self.resume = "returning", resume
         self.message = "Powrót w Z do skorygowanego punktu pauzy."
 
@@ -102,12 +107,14 @@ class PauseRetract:
         step = self.speed * min(max(dt, 0), 0.1)
         if self.phase == "retracting":
             self.target = min(self.height, self.target + step)
-            if abs(s.offset - self.height) <= self.tolerance and self.target == self.height:
+            if (abs(s.offset - self.height) <= self.tolerance
+                    and self.target == self.height and s.settled):
                 self.phase = "retracted"
                 self.message = "Wycofano. Powrót zachowa G41/G42 i kolejkę programu."
         elif self.phase == "returning":
             self.target = max(0.0, self.target - step)
-            if self.target == 0 and max(abs(s.offset), abs(s.requested)) <= self.tolerance:
+            if (self.target == 0 and s.settled
+                    and max(abs(s.offset), abs(s.requested)) <= self.tolerance):
                 resume = self.resume
                 self.phase, self.frame, self.resume = "idle", None, False
                 self.message = "Powrót zakończony; korekcja narzędzia bez zmian."

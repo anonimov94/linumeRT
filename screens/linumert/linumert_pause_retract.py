@@ -2,6 +2,7 @@
 """D38 pause controls: HAL offsets, commands only through QtVCP. Model-Author: Codex."""
 
 import configparser
+import math
 import os
 import sys
 import time
@@ -97,7 +98,7 @@ class RetractControl(QtCore.QObject):
                  and 170 in s.gcodes and 940 in s.gcodes
                  and hal.pin_has_writer("lrt_retract_select.sel")
                  and hal.pin_has_writer("lrt_retract_select.in1")
-                 and value("axis.z.eoffset-enable")
+                 and (not self.model.active or value("axis.z.eoffset-enable"))
                  and self.config.getfloat("AXIS_Z", "OFFSET_AV_RATIO") > 0
                  and not value("spindle.0.inhibit")
                  and value("linumert.eoffset-spindle-count") == 0
@@ -111,7 +112,10 @@ class RetractControl(QtCore.QObject):
                              float(value("axis.z.eoffset")), float(value("axis.z.eoffset-request")),
                              self.config.getfloat("AXIS_Z", "MIN_LIMIT"),
                              self.config.getfloat("AXIS_Z", "MAX_LIMIT"),
-                             bool(value("motion.eoffset-limited")))
+                             bool(value("motion.eoffset-limited")),
+                             all(math.isfinite(j["ferror_current"])
+                                 and abs(j["ferror_current"]) <= 0.005 * self.native
+                                 for j in s.joint))
 
     def withdraw(self, height, feed):
         try:
@@ -142,7 +146,8 @@ class RetractControl(QtCore.QObject):
             if self._pending is not None:
                 frame, self._pending = self._pending, None
                 if (self.last.powered and self.last.ready and self.last.paused and self.last.still
-                        and self.last.frame == frame and not self.model.active
+                        and self.last.frame == frame and self.last.settled
+                        and not self.model.active
                         and max(abs(self.last.offset), abs(self.last.requested)) < 1e-6):
                     self.shell.action.PAUSE()
                 else:
@@ -190,7 +195,8 @@ class RetractPanel(QtWidgets.QWidget):
 
     def refresh(self):
         c, s = self.control, self.control.last
-        ready = bool(c.available and s and s.powered and s.ready and s.paused and s.still)
+        ready = bool(c.available and s and s.powered and s.ready
+                     and s.paused and s.still and s.settled)
         self.withdraw.setEnabled(ready and not c.model.active)
         for button in (self.return_button, self.resume_button):
             button.setEnabled(ready and c.model.phase == "retracted")
