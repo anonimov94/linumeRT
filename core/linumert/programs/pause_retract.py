@@ -26,6 +26,7 @@ class PauseSnapshot:
     upper: float
     limited: bool = False
     settled: bool = True
+    offset_enabled: bool = True
 
 
 class PauseRetract:
@@ -56,6 +57,8 @@ class PauseRetract:
             raise RetractRefused("Brak poprawnego odczytu pozycji i limitów.")
         if s.limited:
             raise RetractRefused("Zadziałało ograniczenie external offsets.")
+        if self.phase in ("retracting", "retracted", "returning") and not s.offset_enabled:
+            raise RetractRefused("Utracono potwierdzenie external offsets z HAL.")
         if self.frame is not None and self.frame != s.frame:
             raise RetractRefused(
                 "Zmieniono program, narzędzie, układ lub stan modalny; zatrzymaj maszynę.")
@@ -73,8 +76,8 @@ class PauseRetract:
         if not s.lower + 0.01 < s.z < s.z + height < s.upper - 0.01:
             raise RetractRefused("Wycofanie przekroczyłoby limit Z; zmniejsz wysokość.")
         self.frame, self.height, self.speed = s.frame, round(height, 3), feed / 60
-        self.target, self.resume, self.phase = 0.0, False, "retracting"
-        self.message = "Wycofywanie Z. Program i G41/G42 pozostają w pauzie."
+        self.target, self.resume, self.phase = 0.0, False, "arming"
+        self.message = "Oczekiwanie na potwierdzenie external offsets z HAL."
 
     def return_to_path(self, s, resume=False):
         if self.phase != "retracted":
@@ -105,6 +108,11 @@ class PauseRetract:
             self.fail(str(exc))
             return False
         step = self.speed * min(max(dt, 0), 0.1)
+        if self.phase == "arming":
+            if not s.offset_enabled:
+                return False  # Own first; wait for the servo thread before changing counts.
+            self.phase = "retracting"
+            self.message = "Wycofywanie Z. Program i G41/G42 pozostają w pauzie."
         if self.phase == "retracting":
             self.target = min(self.height, self.target + step)
             if (abs(s.offset - self.height) <= self.tolerance

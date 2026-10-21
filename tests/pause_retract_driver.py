@@ -138,7 +138,13 @@ def run(ini, joint_count, output):
         assert alarms and s.paused and control.model.active
         app.processEvents()
         panel.grab().save(str(output / f"retract-g{side}.png"))
-        panel.resume_button.click()
+        if side == 40:
+            panel.return_button.click()
+            wait(lambda: not control.model.active, control=control)
+            assert s.paused  # Plain return must leave the original program paused.
+            shell.action.PAUSE()
+        else:
+            panel.resume_button.click()
         wait(lambda: not control.model.active and not s.paused, control=control)
         assert abs(hal.get_value("axis.z.eoffset")) < 1e-6
         assert abs(hal.get_value("axis.z.eoffset-request")) < 1e-6

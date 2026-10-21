@@ -98,7 +98,6 @@ class RetractControl(QtCore.QObject):
                  and 170 in s.gcodes and 940 in s.gcodes
                  and hal.pin_has_writer("lrt_retract_select.sel")
                  and hal.pin_has_writer("lrt_retract_select.in1")
-                 and (not self.model.active or value("axis.z.eoffset-enable"))
                  and self.config.getfloat("AXIS_Z", "OFFSET_AV_RATIO") > 0
                  and not value("spindle.0.inhibit")
                  and value("linumert.eoffset-spindle-count") == 0
@@ -115,7 +114,7 @@ class RetractControl(QtCore.QObject):
                              bool(value("motion.eoffset-limited")),
                              all(math.isfinite(j["ferror_current"])
                                  and abs(j["ferror_current"]) <= 0.005 * self.native
-                                 for j in s.joint))
+                                 for j in s.joint), bool(value("axis.z.eoffset-enable")))
 
     def withdraw(self, height, feed):
         try:

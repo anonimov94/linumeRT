@@ -59,12 +59,16 @@ def test_retract_returns_to_compensated_path(tmp_path, plant, request):
                     break
                 probe_code = "import linuxcnc; s=linuxcnc.stat(); s.poll(); "
                 probe_code += f"assert s.joints == {joint_count}"
+                if plant:
+                    probe_code += "; import hal; assert hal.get_value('lrt-net.0.connected')"
                 probe = rip_run(root, "python3 -c " + shlex.quote(probe_code), work, env=env)
                 if probe.returncode == 0:
                     ready = True
                     break
                 time.sleep(0.25)
             assert ready, "LinuxCNC startup failed"
+            if plant:
+                time.sleep(1)  # Let initial Plant feedback settle before enabling/homing drives.
             enabled = rip_run(root, "halcmd getp axis.z.eoffset-enable", work, env=env)
             assert enabled.stdout.strip() in ("FALSE", "0"), enabled.stdout
             args = [str(ROOT / "tests/pause_retract_driver.py"), str(ini),

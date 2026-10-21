@@ -14,6 +14,18 @@ def snapshot(correction=410, **changes):
 
 
 class PauseRetractTests(unittest.TestCase):
+    def test_wait_for_servo_enable_before_changing_counts_and_latch_its_loss(self):
+        c, s = PauseRetract(), snapshot(offset_enabled=False)
+        c.start(s, 2, 60)
+        for _ in range(10):
+            c.tick(s, 0.02)
+        self.assertEqual(c.phase, "arming")
+        self.assertEqual(c.target, 0)
+        c.tick(replace(s, offset_enabled=True), 0.02)
+        self.assertGreater(c.target, 0)
+        c.tick(s, 0.02)
+        self.assertEqual(c.phase, "fault")
+
     def test_g40_g41_g42_keep_frame_and_resume_only_at_zero(self):
         for correction in (400, 410, 420, 411, 421):
             with self.subTest(correction=correction):

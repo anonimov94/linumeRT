@@ -572,6 +572,6 @@ Brak komend ruchu przy kontroli; screenshot wykonany lokalnie. CI oraz odbiór w
 - Model-Author: Codex. PR #62: Z przez external offsets, powrót i opcjonalne wznowienie.
 - Kolejka i G41/G42 pozostają w LinuxCNC; brak Abort, MDI i kasowania korekcji.
 - Blokada komend ruchu i HAL inhibit; zmiana kontekstu zamraża powrót, aż do wyłączenia.
-- Lokalnie pięć testów modelu/widgetów Qt PASS; pełne próby LinuxCNC/Plant w CI.
+- Lokalnie sześć testów modelu/widgetów Qt PASS; wyniki runtime i SHA w [PR #62](https://github.com/anonimov94/linumeRT/pull/62).
 - Obejmuje pauzę bez wymiany narzędzia, nie powrót po Abort ani helisę z zakładką.
 - Autokontrola, bez niezależnego przeglądu. NIEZWERYFIKOWANE NA SPRZĘCIE.
