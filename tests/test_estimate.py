@@ -88,6 +88,30 @@ def test_time_per_lnx_step():
     assert est.per_step[1] == 8 and est.per_step[2] == pytest.approx(trapezoid(50, 100, 800))
 
 
+def test_steep_helix_respects_z_velocity_and_acceleration():
+    limits = Limits({"X": 100, "Y": 100, "Z": 1}, {"X": 800, "Y": 800, "Z": 2}, 100)
+    result = estimate_canon(_canon("SET_FEED_RATE(6000)",
+        "STRAIGHT_TRAVERSE(1, 0, 0, 0, 0, 0)",
+        "ARC_FEED(1, 0, 0, 0, 1, -20, 0, 0, 0)"), limits)
+    assert result.feed >= 20  # sama oś Z wymaga minimum 20 s przy 1 mm/s
+
+
+@pytest.mark.parametrize("call", ["SELECT_PLANE(CANON_PLANE_XZ)", "SET_FEED_MODE(0, 1)"])
+def test_refuses_unsupported_time_model(call):
+    with pytest.raises(ValueError):
+        estimate_canon(_canon(call, "SET_FEED_RATE(600)",
+                              "ARC_FEED(1, 0, 0, 0, 1, -20, 0, 0, 0)"), LIM)
+
+
+def test_refuses_missing_axis_limits(tmp_path):
+    path = tmp_path / "missing.ini"
+    with pytest.raises(ValueError):
+        limits_from_ini(path)
+    path.write_text("[TRAJ]\nMAX_LINEAR_VELOCITY=100\n")
+    with pytest.raises(ValueError):
+        limits_from_ini(path)
+
+
 @pytest.mark.linuxcnc
 def test_estimate_compiled_program_in_rs274(tmp_path):
     root = Path(os.environ.get("LINUXCNC_DIR", Path.home() / ".cache" / "linuxcnc-2.9"))

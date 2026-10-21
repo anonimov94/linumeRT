@@ -43,7 +43,7 @@ class DiagnosticSimulationTest(unittest.TestCase):
                         live.run(100, commands)
                     cnc.command.assert_not_called()
                     messages = [call.kwargs for call in emit.call_args_list]
-                    self.assertIn({"ev": "event", **event.to_dict()}, messages)
+                    self.assertIn({"ev": "event", "sim_time": 0, **event.to_dict()}, messages)
                     self.assertIn({"ev": "alarms", "active": ["K-305"]}, messages)
 
     def test_reset_changes_only_simulated_material(self):

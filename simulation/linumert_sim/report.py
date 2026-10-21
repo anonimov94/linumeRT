@@ -55,10 +55,12 @@ class SimLog:
     t0: float | None = None
     t1: float | None = None
     events: list[tuple[float, Event]] = field(default_factory=list)
+    dropped_events: int = 0
 
     def reset(self, program: str = "") -> None:
         self.program, self.t0, self.t1 = program, None, None
         self.events.clear()
+        self.dropped_events = 0
 
     def tick(self, t: float, events: list[Event] = ()) -> None:
         if self.t0 is None:
@@ -67,6 +69,8 @@ class SimLog:
         for e in events:
             if len(self.events) < MAX_EVENTS:
                 self.events.append((t - self.t0, e))
+            else:
+                self.dropped_events += 1
 
     @property
     def duration(self) -> float:
@@ -129,6 +133,25 @@ def _row(label: str, value: str) -> str:
     return f"<tr><th>{html.escape(label)}</th><td>{html.escape(value)}</td></tr>"
 
 
+def _timeline(log: SimLog) -> str:
+    duration = max(log.duration, 0.001)
+    points = []
+    for i, (t, event) in enumerate(log.events):
+        x = 20 + min(max(t / duration, 0), 1) * 960
+        color = C["err"] if event.stop else C["amber"]
+        title = html.escape(f"{t:.2f} s · {event.code} · linia {event.line} · T{event.tool}")
+        points.append(f'<a href="#event-{i}"><circle cx="{x:.3f}" cy="30" r="5" '
+                      f'fill="{color}"><title>{title}</title></circle></a>')
+    return ('<h2>Oś czasu zdarzeń</h2><div class="card">'
+            '<svg viewBox="0 0 1000 65" role="img" aria-label="Oś czasu zdarzeń">'
+            f'<path d="M20 30H980" stroke="{C["fg3"]}"/>{"".join(points)}'
+            f'<text x="20" y="60" fill="{C["fg2"]}">0 s</text>'
+            f'<text x="980" y="60" text-anchor="end" fill="{C["fg2"]}">'
+            f'{log.duration:.2f} s</text></svg>'
+            '<p class="sub">Czas od początku tej symulacji; znacznik prowadzi do zdarzenia. '
+            f'Pominięte zdarzenia po limicie {MAX_EVENTS}: {log.dropped_events}.</p></div>')
+
+
 def initial_volume(smap: StockMap) -> float:
     """Objętość nietkniętej przygotówki [mm³] (jak `StockMap.reset`: walec = komórki w kole)."""
     cells = smap.nx * smap.ny
@@ -144,6 +167,23 @@ def render(engine: SimEngine, log: SimLog, title: str = "Raport symulacji",
            view_png: bytes | None = None) -> str:
     """HTML raportu symulacji (podsumowanie, zdarzenia, widok z góry, opcjonalny zrzut)."""
     smap = engine.stock
+    # Jeden odczyt katalogu na raport, również przy 500 zdarzeniach. Osobny
+    # proces musi wrócić do próbkowania zamiast parsować YAML dla każdego wiersza.
+    try:
+        from linumert.alarms.catalog import load_catalog
+
+        catalog = load_catalog()
+    except Exception:  # noqa: BLE001 - raport działa także bez katalogu rdzenia
+        catalog = None
+
+    def description(event):
+        if catalog is not None:
+            try:
+                return catalog.format(event.code, "pl", **event.params)
+            except (KeyError, ValueError, TypeError):
+                pass
+        return f"{event.code} {event.params}"
+
     lengths = path_lengths(engine.path)
     stops = [e for _t, e in log.events if e.stop]
     ok = not stops
@@ -151,7 +191,7 @@ def render(engine: SimEngine, log: SimLog, title: str = "Raport symulacji",
             _row("Czas symulacji", f"{log.duration:.1f} s"),
             _row("Ruchy robocze (G1/G2/G3)", f"{lengths['feed']:.1f} mm"),
             _row("Ruchy szybkie (G0)", f"{lengths['rapid']:.1f} mm"),
-            _row("Zdarzenia zatrzymujące", str(len(stops))),
+            _row("Kolizje i przeciążenia (diagnostyka)", str(len(stops))),
             _row("Ostrzeżenia", str(len(log.events) - len(stops)))]
     if smap is not None:
         volume = smap.volume()
@@ -160,16 +200,19 @@ def render(engine: SimEngine, log: SimLog, title: str = "Raport symulacji",
         removed = max(initial_volume(smap) - volume, 0.0)
         rows.append(_row("Usunięto", f"{removed / 1000:.2f} cm³"))
     events = "".join(
-        f'<tr><td class="mono">{t:.2f} s</td><td class="mono">{html.escape(e.code)}</td>'
-        f"<td>{html.escape(e.text())}</td><td class=\"mono\">{e.line}</td>"
+        f'<tr id="event-{i}" data-time="{t:.6f}"><td class="mono">{t:.2f} s</td>'
+        f'<td class="mono">{html.escape(e.code)}</td>'
+        f"<td>{html.escape(description(e))}</td><td class=\"mono\">{e.line}</td>"
         f'<td class="mono">T{e.tool}</td><td class="mono">'
-        f'{" ".join(f"{v:.2f}" for v in e.pos)}</td></tr>' for t, e in log.events)
+        f'{" ".join(f"{v:.2f}" for v in e.pos)}</td></tr>'
+        for i, (t, e) in enumerate(log.events))
     badge = (f'<span class="badge {"pass" if ok else "fail"}">'
-             f'{"bez kolizji i przeciążeń" if ok else "ZATRZYMANIE"}</span>')
+             f'{"bez kolizji i przeciążeń" if ok else "wykryto kolizje / przeciążenia"}</span>')
     parts = [f"<h1>{html.escape(title)}</h1>",
              '<p class="sub">linumeRT · symulacja materiału 2.5D i reguł kolizji; '
              f"nie zastępuje próby na maszynie. {badge}</p>",
              f'<div class="card"><table>{"".join(rows)}</table></div>',
+             _timeline(log),
              "<h2>Zdarzenia</h2>",
              '<div class="card">' + (
                  "<table><tr><th>Czas</th><th>Kod</th><th>Opis</th><th>Linia</th>"

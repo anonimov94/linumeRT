@@ -602,3 +602,50 @@ def test_cycles_lnx_open_cancel_keeps_unsaved_changes(page_env, monkeypatch, tmp
                         staticmethod(lambda *a, **k: module.QtWidgets.QMessageBox.No))
     assert not page.open_lnx() and page.text() == previous
     page.close()
+
+
+def test_production_remaining_time_pauses_and_invalidates_changed_program(
+        page_env, monkeypatch, tmp_path):
+    from linumert.programs.estimate import Estimate
+
+    _home, shell, _status, action = page_env
+    module = importlib.import_module("linumert_shell_pages")
+    monkeypatch.setattr(module, "INFO", SimpleNamespace(MAX_FEED_OVERRIDE=120,
+                        MIN_SPINDLE_OVERRIDE=50, MAX_SPINDLE_OVERRIDE=120))
+    monkeypatch.setattr(module.STATUS, "connect", Mock(), raising=False)
+    ini, program = tmp_path / "m.ini", tmp_path / "p.ngc"
+    ini.write_text("[TRAJ]\n")
+    program.write_text("G21\nM2\n")
+    shell.s.file, shell.s.total_lines = str(program), 2
+    shell.program_lines = program.read_text().splitlines()
+    monkeypatch.setenv("INI_FILE_NAME", str(ini))
+    monkeypatch.setattr("linumert.programs.estimate.estimate_ngc", lambda *_: Estimate(total=120))
+    now = [100]
+    monkeypatch.setattr(module.time, "monotonic", lambda: now[0])
+    page = module.ProductionPage(shell)
+    page.btn_estimate.click()
+    page._estimate_job[0].result(timeout=5)
+    page.refresh()
+    assert "02:00" in page.lbl_remaining.text()
+    shell.s.interp = "run"
+    page.on_state()
+    now[0] = 120
+    page.refresh()
+    assert "01:40" in page.lbl_remaining.text()
+    shell.s.interp = "paused"
+    page.on_state()
+    now[0] = 180
+    page.refresh()
+    assert "01:40" in page.lbl_remaining.text()
+    shell.s.feed_override = 0.5
+    page.refresh()
+    assert "100%" in page.lbl_remaining.text()
+    shell.s.feed_override = 1
+    page._partial_run = True
+    page.refresh()
+    assert "od linii" in page.lbl_remaining.text()
+    program.write_text("G21\nG0 X0\nM2\n")
+    page.refresh()
+    assert page._estimate_value is None and "zmienione" in page.lbl_remaining.text()
+    assert not action.mock_calls
+    page.close()

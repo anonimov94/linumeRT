@@ -42,6 +42,7 @@ jobs:
       - name: Install build and GUI dependencies
         run: |
           bash tools/ci/build-linuxcnc.sh --install-deps
+          apt-get install -y --no-install-recommends python3-pyqtgraph
           useradd -m -s /bin/bash codex
           chown -R codex:codex "$GITHUB_WORKSPACE"
       - name: Resolve upstream revision

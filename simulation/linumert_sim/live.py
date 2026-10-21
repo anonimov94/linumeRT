@@ -22,7 +22,9 @@ programu albo odnowienia materiału.
 from __future__ import annotations
 
 import argparse
+import base64
 import json
+import math
 import os
 import queue
 import sys
@@ -86,6 +88,9 @@ class Live:
         self.table_key = None
         self.db = None
         self.tbl = None
+        self._resume_trace = []
+        self._resume_key = None
+        self._resume_time = None
         machine_path = machine_path or ini_value(self.ini, "LINUMERT", "MACHINE_YAML")
         if machine_path:
             self.load_machine(str(self._rel(machine_path)))
@@ -236,6 +241,7 @@ class Live:
             self.reload_tools()
             sample = self.sample(t0)
             events = self.engine.step(sample)
+            self.record_resume_sample(sample)
             self.log.tick(t0, events)
             codes = sorted({key[0] for key in self.engine._active})
             if codes != active_codes:
@@ -243,7 +249,7 @@ class Live:
                 emit(ev="alarms", active=codes)
             for e in events:
                 # Pole stop jest wskazaniem modelu, nigdy komendą do maszyny.
-                emit(ev="event", **e.to_dict())
+                emit(ev="event", sim_time=t0 - self.log.t0, **e.to_dict())
             smap = self.engine.stock
             if smap is not None and self.map is not None and smap.version != self.map_version \
                     and t0 - last_map >= MAP_PERIOD:
@@ -287,10 +293,61 @@ class Live:
         elif name == "export_stl":
             self.export_stl(str(c.get("path", "")))
         elif name == "export_report":
-            self.export_report(str(c.get("path", "")))
+            self.export_report(str(c.get("path", "")), c.get("view_png"))
+        elif name == "resume_preview":
+            self.resume_preview()
         else:
             emit(ev="error", text=f"nieznane polecenie {name!r}")
         return True
+
+    def resume_preview(self) -> None:
+        from linumert.programs.resume import ResumeRefused, ResumeSettings
+
+        from .resume import preview_reentry
+
+        try:
+            self.stat.poll()
+            if self.stat.interp_state not in (self.lc.INTERP_IDLE, self.lc.INTERP_PAUSED):
+                raise ResumeRefused("Najpierw wstrzymaj program.")
+            blocked = {180, 190, 330, 331, 410, 420, 730, 760, *range(810, 900, 10)}
+            if blocked.intersection(self.stat.gcodes):
+                raise ResumeRefused("Płaszczyzna, korekcja lub cykl poza zakresem podglądu D38.")
+            sample = self.sample(time.monotonic())
+            cutter = self.engine.tools.get(sample.tool)
+            if cutter is None:
+                raise ResumeRefused("Brak zdefiniowanego narzędzia.")
+            tip = (*sample.nose[:2], sample.nose[2] - cutter.gauge)
+            path = list(self._resume_trace)
+            if not path or math.dist(path[-1], tip) > 0.25:
+                raise ResumeRefused("Brak aktualnego śladu cięcia w punkcie zatrzymania.")
+            path.append(tip)
+            settings = ResumeSettings(**{key: float(ini_value(
+                self.ini, "LINUMERT", setting, str(default))) for key, setting, default in (
+                    ("overlap", "RESUME_OVERLAP", 2), ("clearance", "RESUME_CLEARANCE", 1),
+                    ("pitch", "RESUME_HELIX_PITCH", 1), ("feed", "RESUME_FEED", 200))})
+            plan = preview_reentry(self.engine, path, sample.tool, settings)
+        except (ResumeRefused, ValueError) as exc:
+            emit(ev="resume_preview", ok=False, text=str(exc))
+            return
+        emit(ev="resume_preview", ok=True, points=plan.points, entry=plan.entry,
+             overlap=plan.overlap, feed=settings.feed,
+             text="Podgląd w układzie maszyny, sprawdzony na kopii materiału. "
+                  "Nie odtwarza programu ani stanu modalnego; automatyczne wykonanie wyłączone.")
+
+    def record_resume_sample(self, sample) -> None:
+        cutter = self.engine.tools.get(sample.tool)
+        key = (self.file, sample.tool, cutter.diameter, cutter.gauge) if cutter else None
+        if key != self._resume_key or (self._resume_time is not None and
+                                       sample.t - self._resume_time > 1):
+            self._resume_trace.clear()
+        self._resume_key, self._resume_time = key, sample.t
+        if cutter is None or sample.motion != "feed":
+            self._resume_trace.clear()
+            return
+        tip = (*sample.nose[:2], sample.nose[2] - cutter.gauge)
+        if not self._resume_trace or math.dist(self._resume_trace[-1], tip) >= 0.05:
+            self._resume_trace.append(tip)
+            del self._resume_trace[:-5000]
 
     def export_stl(self, path: str) -> None:
         if self.engine.stock is None or not path:
@@ -305,14 +362,21 @@ class Live:
             return
         emit(ev="stl", path=path, triangles=n)
 
-    def export_report(self, path: str) -> None:
+    def export_report(self, path: str, view_png=None) -> None:
         if not path:
             emit(ev="error", text="raport symulacji: brak ścieżki")
             return
         try:
+            png = None
+            if view_png is not None:
+                if not isinstance(view_png, str) or len(view_png) > 12 * 1024 * 1024:
+                    raise ValueError("Niepoprawny rozmiar zrzutu widoku.")
+                png = base64.b64decode(view_png, validate=True)
+                if not png.startswith(b"\x89PNG\r\n\x1a\n"):
+                    raise ValueError("Zrzut widoku nie jest obrazem PNG.")
             write_report(path, self.engine, self.log,
-                         title=f"Raport symulacji {self.log.program}".strip())
-        except OSError as exc:
+                         title=f"Raport symulacji {self.log.program}".strip(), view_png=png)
+        except (OSError, ValueError) as exc:
             emit(ev="error", text=f"raport symulacji: {exc}")
             return
         emit(ev="report", path=path, events=len(self.log.events))

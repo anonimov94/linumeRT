@@ -60,7 +60,7 @@ def test_summary_and_clean_run():
 def test_events_listed_with_time_and_line():
     eng, log = _run(True)
     page = render(eng, log)
-    assert "ZATRZYMANIE" in page and "K-302" in page
+    assert "wykryto kolizje / przeciążenia" in page and "K-302" in page
     t, e = next((t, e) for t, e in log.events if e.code == "K-302")
     assert t > 3 and e.line >= 79 and f'<td class="mono">{e.line}</td>' in page
 
@@ -112,3 +112,36 @@ def test_live_export_report_command(tmp_path, capsys):
     live.engine.stock = eng.stock
     live.command({"cmd": "stock_reset"})
     assert log.events == [] and log.program == "plyta.ngc"
+
+
+def test_timeline_links_and_table_share_times_and_truncation_is_visible(monkeypatch):
+    from unittest.mock import Mock
+
+    import linumert.alarms.catalog as catalog
+    from linumert_sim.engine import Event
+    from linumert_sim.report import MAX_EVENTS
+
+    engine, log = _run(False)
+    loader = Mock(wraps=catalog.load_catalog)
+    monkeypatch.setattr(catalog, "load_catalog", loader)
+    log.tick(log.t0 + 10, [Event("K-305", "collision", 42, 1, (1, 2, 3))] * (MAX_EVENTS + 1))
+    page = render(engine, log)
+    loader.assert_called_once_with()
+    assert log.dropped_events == 1 and "po limicie 500: 1" in page
+    assert 'href="#event-0"' in page and 'id="event-0" data-time="10.000000"' in page
+    assert "10.00 s · K-305 · linia 42 · T1" in page
+    assert "ZATRZYMANIE" not in page and "Zdarzenia zatrzymujące" not in page
+    log.reset()
+    assert log.dropped_events == 0 and not log.events
+
+
+@pytest.mark.parametrize("png", ["not base64!", "bm90IHBuZw==", 123])
+def test_live_rejects_invalid_snapshot_without_overwriting_report(tmp_path, capsys, png):
+    from linumert_sim.live import Live
+
+    live = Live.__new__(Live)
+    live.engine, live.log = _run(False)
+    target = tmp_path / "existing.html"
+    target.write_text("preserve")
+    live.command({"cmd": "export_report", "path": str(target), "view_png": png})
+    assert target.read_text() == "preserve" and '"ev": "error"' in capsys.readouterr().out
