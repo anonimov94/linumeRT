@@ -88,7 +88,8 @@ def run(ini, joint_count, output):
     control = RetractControl(shell)
     control.timer.stop()
     panel = RetractPanel(control)
-    panel.height.setValue(2)
+    height = 1.001  # Regression: binary float * 1000 used to truncate to 1000 counts.
+    panel.height.setValue(height)
     panel.feed.setValue(300)
     panel.resize(1200, 150)
     panel.show()
@@ -131,7 +132,9 @@ def run(ini, joint_count, output):
         panel.withdraw.click()
         assert control.model.active, control.model.message
         wait(lambda: control.model.phase == "retracted", control=control)
-        wait(lambda z_before=z_before: abs(feedback_z() - z_before - 2) < 0.005, control=control)
+        wait(lambda z_before=z_before: abs(feedback_z() - z_before - height) < 0.005,
+             control=control)
+        assert abs(hal.get_value("axis.z.eoffset-request") - height) < 1e-6
         assert max(abs(a - b) for a, b in zip(position(), before, strict=True)) < 1e-6, (
             "planner changed", before, position())
         assert s.paused and control.last.frame == frame

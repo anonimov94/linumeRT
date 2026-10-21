@@ -23,6 +23,7 @@ from PyQt5 import QtCore, QtWidgets
 from linumert_pause_retract import RetractControl, RetractPanel, PauseSnapshot
 
 class Pin:
+    value = 0.0
     def set(self, value): self.value = value
 
 class Action:
@@ -48,12 +49,16 @@ with tempfile.TemporaryDirectory() as d:
         c = RetractControl(shell)
         c.timer.stop()
         base = PauseSnapshot(True, True, True, True, ("part.ngc", side), -20, 0, 0, -120, 0)
-        c.snapshot = lambda: replace(base, offset=c.model.target, requested=c.model.target)
+        def snapshot():
+            # Real HAL scales and truncates, rather than returning the model target.
+            offset = int(shell.hmi_pins["retract_target"].value * 1000) * 0.001
+            return replace(base, offset=offset, requested=offset)
+        c.snapshot = snapshot
         c.last = base
         panel = RetractPanel(c)
         assert panel.height.value() == 3.1234
         assert panel.feed.value() == 123
-        panel.height.setValue(2)
+        panel.height.setValue(1.001)
         panel.withdraw.click()
         assert c.model.active and shell.hmi_pins["retract_own"].value
         Action().PAUSE()

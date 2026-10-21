@@ -598,3 +598,4 @@ Brak komend ruchu przy kontroli; screenshot wykonany lokalnie. CI oraz odbiór w
 - Łącznie 50 testów funkcji PASS + 10 subtestów; złożenie HMI PASS; lint, C 108 i wymagania PASS.
 - Próba pełna: 895 PASS; 8 porażek i 5 błędów przez zakaz gniazd; błąd środowiska pytest w procesie potomnym usunięto i złożenie HMI ponowiono z PASS.
 - Odbiór runtime w kontrolach PR #64; ponowny `podman info` potwierdza blokadę `/run/user/1000`, więc pkt 27 niezaliczony.
+- Regresja ułamkowej wysokości 1,001 mm: uwzględniono obcięcie float→s32 w HAL; testy GUI i LinuxCNC/Plant sprawdzają osiągnięcie pełnej liczby impulsów bez utknięcia.
