@@ -76,6 +76,8 @@ component.exit()
                 loop = work / "infinite.ngc"
                 loop.write_text("o100 while [1]\nG4 P0.1\no100 endwhile\nM2\n")
                 analysis = f"""
+import sys
+sys.path.insert(0, {str(ROOT / 'core')!r})
 from linumert.programs.estimate import estimate_ngc
 from linumert.programs.linuxcnc_check import check_with_linuxcnc
 result = check_with_linuxcnc({str(loop)!r}, {str(root)!r}, timeout=0.2)
