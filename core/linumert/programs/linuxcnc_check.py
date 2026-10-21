@@ -76,13 +76,25 @@ def run_interpreter(ngc: Path | str, root: Path | str | None = None,
         private = Path(directory)
         env = os.environ.copy()
         env.update(HOME=directory, TMPDIR=directory)
+        parameters = private / "analysis.var"
+        parameters.touch()  # rs274 links the original before saving its first backup.
         options = []
         if sim is not None and (sim / "axis.ini").exists():
-            options = ["-i", str((sim / "axis.ini").resolve()),
+            config = (sim / "axis.ini").read_text()
+            # INI loading overrides -v. Enforce private parameters there as well,
+            # including samples which name an absolute/shared parameter file.
+            config = re.sub(r"(?im)^[ \t]*PARAMETER_FILE[ \t]*=.*(?:\n|$)", "", config)
+            config, count = re.subn(r"(?im)^(\[RS274NGC\][ \t]*)$",
+                                    r"\g<1>\nPARAMETER_FILE = analysis.var", config, count=1)
+            if not count:
+                config += "\n[RS274NGC]\nPARAMETER_FILE = analysis.var\n"
+            ini = private / "analysis.ini"
+            ini.write_text(config)
+            options = ["-i", str(ini),
                        "-t", str((sim / "sim.tbl").resolve())]
             if (sim / "sim.var").exists():
-                shutil.copyfile(sim / "sim.var", private / "sim.var")
-        options += ["-v", str(private / "analysis.var"), "-n", "0", str(ngc)]
+                shutil.copyfile(sim / "sim.var", parameters)
+        options += ["-v", str(parameters), "-n", "0", str(ngc)]
         command = " ".join(prefix + ["exec rs274 " + shlex.join(options)])
         return run_bounded(["bash", "-c", command], cwd=directory, env=env, timeout=timeout)
 
