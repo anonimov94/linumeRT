@@ -14,6 +14,7 @@ bezpieczeństwa.
 from __future__ import annotations
 
 import json
+import base64
 import math
 import os
 import sys
@@ -239,6 +240,10 @@ class View3D(QtWidgets.QWidget):
         self.colors.clear()
         self._dirty.add("path")
 
+    def snapshot_png(self) -> bytes:
+        self._render()
+        return _image_png(self.view.grabFramebuffer())
+
     def _render(self) -> None:
         if not self._dirty or not self.isVisible():
             return
@@ -285,6 +290,10 @@ class View2D(QtWidgets.QLabel):
     def clear_path(self):
         pass
 
+    def snapshot_png(self) -> bytes:
+        self._draw()
+        return _image_png(self.grab().toImage())
+
     def _draw(self):
         if self.heights is None or not self.isVisible():
             return
@@ -304,6 +313,16 @@ class View2D(QtWidgets.QLabel):
             p.drawEllipse(QtCore.QPointF(x, y), 5, 5)
             p.end()
         self.setPixmap(pix)
+
+
+def _image_png(image) -> bytes:
+    if image.isNull():
+        raise ValueError("Nie można pobrać obrazu bieżącego widoku.")
+    buffer = QtCore.QBuffer()
+    buffer.open(QtCore.QIODevice.WriteOnly)
+    if not image.save(buffer, "PNG"):
+        raise ValueError("Nie można zakodować zrzutu PNG.")
+    return bytes(buffer.data())
 
 
 # ---- strona ----------------------------------------------------------------------------------
@@ -342,6 +361,11 @@ class SimPage(QtWidgets.QWidget):
         self.reset_twin.setToolTip("Tylko konfiguracja VIRTUAL_MODE=1; odnawia materiał i bazuje osie")
         self.reset_twin.clicked.connect(shell.virtual_session.start)
         left_layout.addWidget(self.reset_twin)
+        self.resume_preview = QtWidgets.QPushButton("Podgląd powrotu po helisie (D38)")
+        self.resume_preview.setToolTip("Po zatrzymaniu: sprawdzenie geometrii na kopii materiału; "
+                                       "bez ruchu maszyny i bez automatycznego wznowienia")
+        self.resume_preview.clicked.connect(lambda: self.client.send(cmd="resume_preview"))
+        left_layout.addWidget(self.resume_preview)
         grid.addWidget(left, 0, 0)
         right = QtWidgets.QWidget()
         right_layout = QtWidgets.QVBoxLayout(right)
@@ -401,7 +425,7 @@ class SimPage(QtWidgets.QWidget):
         btn.clicked.connect(self.export_stl)
         row.addWidget(btn)
         btn = QtWidgets.QPushButton("Raport")
-        btn.setToolTip("Raport HTML: program, czas, zdarzenia i widok materiału z góry")
+        btn.setToolTip("Raport HTML: program, oś czasu, materiał i zrzut bieżącego widoku")
         btn.clicked.connect(self.export_report)
         row.addWidget(btn)
         btn = QtWidgets.QPushButton("Odnów materiał")
@@ -449,11 +473,44 @@ class SimPage(QtWidgets.QWidget):
         path, _f = QtWidgets.QFileDialog.getSaveFileName(self, "Raport symulacji", start,
                                                          "HTML (*.html)")
         if path:
-            self.client.send(cmd="export_report", path=path)
+            try:
+                png = self.view.snapshot_png()
+            except ValueError as exc:
+                self._add_event("warn", f"Raport nie został zapisany: {exc}")
+                return
+            self.client.send(cmd="export_report", path=path,
+                             view_png=base64.b64encode(png).decode("ascii"))
 
     def _on_report(self, msg) -> None:
         self._add_event("info", f"Raport zapisany: {msg.get('path')} "
                                 f"({msg.get('events')} zdarzeń)")
+
+    def _on_resume_preview(self, msg) -> None:
+        if not msg.get("ok"):
+            self._add_event("warn", f"Powrót D38: {msg.get('text')}")
+            return
+        from linumert_cycles_page import Preview2D
+
+        dialog = QtWidgets.QDialog(self)
+        dialog.setWindowTitle("Podgląd powrotu D38 — bez wykonania")
+        dialog.resize(760, 520)
+        layout = QtWidgets.QVBoxLayout(dialog)
+        label = QtWidgets.QLabel(msg["text"] +
+                                f" Zakładka {msg['overlap']:g} mm, posuw {msg['feed']:g} mm/min.")
+        label.setWordWrap(True)
+        layout.addWidget(label)
+        view = Preview2D(self.c)
+        view.set_lines([[(p[0], p[1]) for p in msg["points"]]])
+        layout.addWidget(view, 1)
+        z = [p[2] for p in msg["points"]]
+        layout.addWidget(QtWidgets.QLabel(f"Z: {min(z):g}…{max(z):g} mm · "
+                                         f"{len(z)} próbek geometrii. "
+                                         "Styczność do zmierzonego śladu XY."))
+        button = QtWidgets.QPushButton("Zamknij podgląd")
+        button.clicked.connect(dialog.close)
+        layout.addWidget(button)
+        self._resume_dialog = dialog
+        dialog.show()
 
     def reset_stock(self) -> None:
         self.client.send(cmd="stock_reset")
@@ -598,6 +655,8 @@ class SimPage(QtWidgets.QWidget):
         level = KIND_LEVEL.get(msg.get("kind"), "info")
         pos = msg.get("pos", [0, 0, 0])
         text = f"{msg.get('code')} · {msg.get('text', '')}"
+        if "sim_time" in msg:
+            text = f"{msg['sim_time']:.2f} s · {text}"
         if msg.get("stop"):
             text += f" (X{pos[0]:.1f} Y{pos[1]:.1f} Z{pos[2]:.1f}) · diagnostyka symulacji"
             self.shell.show_alarm("err", text, msg.get("code", ""))

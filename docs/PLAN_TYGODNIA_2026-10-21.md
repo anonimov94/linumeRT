@@ -47,3 +47,49 @@ Zapis atomowy, bez utraty komentarzy, przygotówki, jednostek, wyłączonych kro
 Nieznany generator/wersja, błędny JSON albo parametry odrzucają otwarcie bez naruszenia
 bieżącego programu. Edycja ponawia kontrolę narzędzi i unieważnia czas; eksport .ngc
 używa wspólnego kompilatora. Testy przycisków Qt i roundtrip wykonywane automatycznie.
+
+Realizacja 24.10 — pierwsza porcja: przycisk „Podgląd powrotu po helisie (D38)” w Symulacji.
+Zakładka jest liczona po zmierzonym śladzie XY na stałej głębokości. Podgląd obejmuje
+wycofanie Z, helisę i ćwierćokrąg styczny do odcinka śladu; nie interpretuje programu.
+Próbowane są obie strony i dwa promienie. Kopia bieżącego materiału i model maszyny
+odrzucają kolizje, wejście w nieusunięty materiał i przekroczenie zakresów; stan symulacji
+pozostaje nietknięty. Brak danych, ruch programu, korekcja promienia i cykle dają odmowę.
+Ustawienia INI: RESUME_OVERLAP, RESUME_CLEARANCE, RESUME_HELIX_PITCH i RESUME_FEED (mm/min).
+
+**Nadal do wykonania w D38:** rzeczywiste external offsets w pauzie, odtworzenie pełnego
+stanu modalnego i dokładnej ścieżki z interpretera oraz automatyczne wznowienie programu.
+Pierwsza porcja nie wysyła komend ruchu i nie eksportuje programu do wykonania. Wyświetlony
+podgląd nie jest zgodą na automatyczny start. Obsługa HAL musi uwzględnić zachowanie
+[external offsets LinuxCNC](https://linuxcnc.org/docs/2.9/html/motion/external-offsets.html).
+
+Realizacja 25.10: Produkcja → „Szacuj czas programu”, a podczas pracy/pauzy widoczny
+orientacyjny czas pozostały. Liczenie działa w tle; zmiana programu lub INI unieważnia
+wynik. Pauza nie zużywa czasu modelu. ETA jest niedostępne przy korekcjach F/G0 innych
+niż 100% i po starcie od linii. Przekroczenie czasu modelu daje jawny komunikat.
+Model łuków wymaga G17/G94, uwzględnia limit Z helisy i odmawia niekompletnych limitów XYZ.
+Nie gwarantuje czasu całego cyklu: start XYZ=0, uproszczony G64, pominięte oczekiwanie
+operatora i rozpędzanie wrzeciona. Test LinuxCNC + Plant zapisuje czas oszacowany,
+zmierzony i błąd względny dwóch kieszeni i planowania w `pocket_calibration.json` w artefaktach CI.
+To porównanie kontrolne, bez uniwersalnego współczynnika kalibracyjnego dla wszystkich maszyn.
+
+Realizacja 26.10: Raport pobiera bieżący obraz widoku 3D przez
+[Qt grabFramebuffer](https://doc.qt.io/archives/qt-5.15/qopenglwidget.html#grabFramebuffer)
+(przy zastępczym 2D — obraz tego widoku) i osadza PNG w samodzielnym HTML.
+Oś czasu SVG prowadzi do tych samych zdarzeń i czasów co tabela; HMI otrzymuje ten sam
+czas względny procesu symulacji. Limit 500 zdarzeń raportu pokazuje liczbę pominiętych.
+Etykiety kolizji są diagnostyczne, bez sugerowania zatrzymania CNC.
+Test kliknięcia Raport obejmuje rzeczywisty obraz Qt, protokół i plik HTML; osobny test
+LinuxCNC CI sprawdza prawdziwy widok 3D i zmianę obrazu po obrocie kamery. Pakiet pyqtgraph
+był już zależnością launchera; dodano go do środowiska testów CI.
+
+## Stan odbioru — 2026-10-21
+
+Wszystkie porcje implementacji z punktów 21–26 są scalone (#58, #59, #60).
+Końcowy kod 5f290103: [Debian/LinuxCNC PASS](https://github.com/anonimov94/linumeRT/actions/runs/39510750194),
+915 testów + 96 LinuxCNC, 12 subtestów PASS; 9 pominięć nie zaliczono jako wykonane.
+[Raport z wynikami i protokołem pulpitu](raporty/prototypy/PLAN-21-27-2026-10-21.md).
+
+D38 spełnia zakres pierwszej porcji podglądu; wykonanie ruchu przez external offsets
+i automatyczne wznowienie pozostają otwarte. Punkt 27 nadal wymaga pulpitu właściciela.
+Nie dopisano nowych sesji roadmapy ani nie zaliczono niewykonanych prób ręcznych.
+Model-Author: Codex. Autokontrola, bez niezależnego przeglądu.

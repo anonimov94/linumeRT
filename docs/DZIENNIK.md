@@ -542,3 +542,28 @@ Brak komend ruchu przy kontroli; screenshot wykonany lokalnie. CI oraz odbiór w
 - Otwieranie i atomowy zapis .lnx przez istniejący model; zachowane jednostki, przygotówka, komentarze, włączenie kroków i wersje generatorów, także kieszenie v1.
 - Niepoprawny plik nie zmienia bieżącego programu. Niezapisane zmiany wymagają świadomego odrzucenia w HMI. G-code pochodzi ze wspólnego kompilatora.
 - Testy rzeczywistych kliknięć Qt offscreen, roundtrip i odrzucenia błędnego pliku; pełny odbiór CI przed scaleniem. Autokontrola, bez niezależnego przeglądu.
+
+## Plan 24.10 — podgląd geometrii D38 · Codex
+- Model-Author: Codex. Pierwsza działająca porcja: zakładka po zmierzonym śladzie XY, wycofanie Z, helisa i łuk styczny; okno podglądu z przycisku Symulacji.
+- Sprawdzenie kopii materiału i modelu maszyny; obie strony/dwa promienie, odmowa przy naruszeniu materiału, kolizji, braku danych, ruchu, korekcji lub cyklu.
+- Lokalnie 21 testów PASS i 6 subtestów; kliknięcie w złożonym HMI i zrzut okna, bez kanału komend CNC.
+- Otwarte: external offsets w pauzie, dokładny stan/ścieżka interpretera, wznowienie wykonania. Podgląd nie eksportuje programu i nie wykonuje ruchu. Autokontrola, bez niezależnego przeglądu.
+
+## Plan 25.10 — czas pozostały i porównanie z Plant · Codex
+- Model-Author: Codex. Produkcja: szacowanie w tle, ETA podczas pracy i pauzy, unieważnienie po zmianie programu/INI, ograniczenia korekcji i startu od linii.
+- Estymator uwzględnia limit Z helisy; jawnie odmawia nieobsługiwanej płaszczyzny/trybu posuwu i brakujących limitów XYZ.
+- Lokalnie 40 testów czasu/widgetów/złożenia HMI PASS. Pomiar czasu dwóch kieszeni i planowania LinuxCNC + Plant oraz błąd modelu w pocket_calibration.json — odbiór CI wymagany.
+- Wynik jest przybliżeniem, nie gwarancją czasu cyklu; start od XYZ=0 i oczekiwania operatora opisane w planie. Bez niezależnego przeglądu.
+
+## Plan 26.10 — bieżący widok i oś czasu raportu · Codex
+- Model-Author: Codex. Zrzut bufora OpenGL / zastępczego widoku 2D osadzony w HTML przez istniejący parametr view_png.
+- Wspólny czas względny zdarzeń HMI/tabeli/osi SVG, odnośniki do wierszy i jawne pominięcia ponad limit 500. Usunięto sugestię, że diagnostyka zatrzymuje CNC.
+- Test faktycznego kliknięcia Raport zapisuje HTML z obrazem Qt; test 3D/kamery przez Xvfb/Mesa wymagany w CI. Pyqtgraph już w runtime, dodany do CI.
+- Brak dodatkowych zależności/licencji; autokontrola, bez niezależnego przeglądu. Odbiór ręczny na pulpicie nadal otwarty.
+
+## Odbiór planu 21–27 — 2026-10-21 · Codex
+- Model-Author: Codex. Zweryfikowano scalone #58/#59/#60 i końcowe CI 5f290103.
+- Debian: 915 PASS + 96 LinuxCNC PASS, 12 subtestów PASS, 9 pominięć; ogólne CI PASS.
+- Raport zawiera pomiar czasu trzech programów, granice D38 i niezaliczony protokół pulpitu.
+- PR #61 domyka rejestr sesji 041 i dokumentację; bez nowych sesji i bez zmian kodu.
+- Punkt 27 ręcznie niewykonany. Autokontrola, bez niezależnego przeglądu; NIEZWERYFIKOWANE NA SPRZĘCIE.

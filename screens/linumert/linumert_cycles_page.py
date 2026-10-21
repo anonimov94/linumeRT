@@ -403,7 +403,7 @@ class CyclesPage(QtWidgets.QWidget):
         self.lbl_time.setText(
             f"Szacowany czas: {_mmss(est.total)} (G0 {_mmss(est.rapid)}, obróbka "
             f"{_mmss(est.feed)}, postoje {_mmss(est.dwell)}, wymiany {_mmss(est.tool_change)}) "
-            "— górne oszacowanie z zatrzymaniem w narożach.")
+            "— model z zatrzymaniem w narożach; bez oczekiwania na operatora.")
 
     def subroutine_dir(self) -> str:
         """Domyślny katalog: wpis SUBROUTINE_PATH z „user_macros”, inaczej pierwszy wpis."""
