@@ -143,7 +143,10 @@ class RetractControl(QtCore.QObject):
         self.changed.emit()
 
     def write(self):
-        self.shell.hmi_pins["retract_target"].set(self.model.target)
+        # conv_float_s32 truncates. A decimal endpoint such as 1.001 can
+        # multiply to 1000.9999999999999; keep it on its intended count.
+        target = math.nextafter(self.model.target, math.inf) if self.model.target > 0 else 0.0
+        self.shell.hmi_pins["retract_target"].set(target)
         self.shell.hmi_pins["retract_own"].set(self.model.active)
 
     def tick(self):

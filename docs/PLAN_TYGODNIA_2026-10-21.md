@@ -110,6 +110,9 @@ w INI. Błędna konfiguracja blokuje operację z komunikatem. Wysokość jest sp
 po zaokrągleniu do rozdzielczości HAL; zerowe wycofanie i przekroczenie limitu przez
 zaokrąglenie są odrzucane. Panel pokazuje zadaną wysokość po zaokrągleniu także na
 maszynie calowej. Lokalnie 7 testów PASS i 10 subtestów, w tym kliknięcia Qt oraz INI.
+Uwzględniono też obcięcie float→s32 w HAL: zadanie 1,001 mm nie może stracić impulsu
+przez reprezentację binarną i utknąć w oczekiwaniu. GUI modeluje rzeczywistą konwersję,
+a test LinuxCNC/Plant sprawdza żądany offset z dokładnością 0,000001 jednostki maszyny.
 
 Wspólna autokontrola dopracowania: 50 testów funkcji PASS i 10 subtestów, osobno
 złożenie HMI z eksportem raportu PASS; lint, 108 testów C i kontrola wymagań PASS.
