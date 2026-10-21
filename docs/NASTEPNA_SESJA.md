@@ -8,21 +8,19 @@ Bez otwierania kolejnych etapów roadmapy.
 
 ## Stan scalania
 
-Dodatkowy audyt pól: właściciel nie mógł wpisywać liczb, działały tylko strzałki.
-Gałąź `codex/numeric-keyboard-entry`, checkout `~/Projekty/linumeRT-numeric-fix`,
-startuje z kodu PR #66. Router QtVCP rozpoznaje teraz QAbstractSpinBox i edytowalne
-listy; krok JOG przyjmuje własną wartość. 97 testów lokalnych PASS; PR #67.
-Korekcje F/G0/S mają edytowalne pola, odświeżanie nie kasuje wpisu. Samotest
-faktycznego QtVCP wpisuje posuw, obroty, narzędzie, krok, pozycję i korekcję F; wynik w CI. F1/F2/Esc oraz zwolnienie JOG pozostają obsługiwane.
-
-
-Audyt pętli: właściciel wpisał `while [1]` i wybrał szacowanie czasu; journal wskazuje
-SIGBUS w libtooldata. Trwa naprawa `codex/bounded-offline-interpreter`, checkout
-`~/Projekty/linumeRT-interpreter-fix`: limity danych/czasu oraz prywatna tabela narzędzi
-rs274, aby analiza offline nie dotykała działającej sesji LinuxCNC.
-PR #66: izolacja obu ścieżek (czas i kontrola), 20 s/8 MiB, sprzątanie grupy procesów;
-108 testów lokalnych PASS, w tym kliknięcie przycisku przy zalewaniu wyjścia. Dodano próby obu analiz na pętli bez końca przy działającym pełnym QtVCP/Plant
-oraz skończony WHILE i WHILE [1] z BREAK; następnie CI LinuxCNC.
+Najnowsze poprawki audytu właściciela:
+- [PR #66](https://github.com/anonimov94/linumeRT/pull/66): prywatne HOME/TMPDIR/cwd
+  obu analiz rs274, limity 20 s/8 MiB i brak częściowego czasu po przerwaniu pętli.
+  Journal awarii wskazał SIGBUS w libtooldata (wspólne `.tool.mmap` starego rs274).
+- [PR #67](https://github.com/anonimov94/linumeRT/pull/67): wpisywanie liczb przez
+  router QtVCP, własny krok JOG i edytowalne korekcje F/G0/S. Status nie kasuje wpisu;
+  F1/F2/Esc i zwolnienie rozpoczętego JOG zachowują obsługę maszyny.
+- Odbiór lokalny klawiatury: 97 testów PASS. Samotest faktycznego QtVCP wpisuje
+  posuw, obroty, narzędzie, krok, pozycję, korekcję F i linię; zapisuje stany i zrzuty.
+  Pełne wyniki odbioru automatycznego są w kontrolach obu PR, autokontrola autora.
+- Checkouty `~/Projekty/linumeRT-interpreter-fix` i `~/Projekty/linumeRT-numeric-fix`.
+  Kopia operatora `~/linumeRT` wymaga ponownego otwarcia aplikacji po aktualizacji.
+  Ręczny odbiór pulpitu (punkt 27) i odbiór sprzętowy pozostają otwarte.
 
 Odbiór pulpitu ujawnił brak `sim_toolchange.in` przy starcie Plant z pełnym QtVCP.
 Naprawa: `codex/plant-hmi-toolchange`, checkout `~/Projekty/linumeRT-plant-hmi-fix`.

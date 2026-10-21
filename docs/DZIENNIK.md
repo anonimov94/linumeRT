@@ -621,3 +621,5 @@ Izolacja obejmuje teraz szacowanie i kontrolę semantyczną: prywatne HOME/TMPDI
 ## Audyt — wpisywanie liczb z klawiatury (2026-10-21)
 
 Właściciel zgłosił pola działające tylko przez +/−. QtVCP kierował zdarzenia QAbstractSpinBox do skrótów maszyny; nakładka rozpoznaje edytory liczbowe i nie pozwala ich klawiszom propagować do skrótów. Krok JOG jest edytowalny, walidowany przed ruchem; zwolnienie zawsze zatrzymuje. 42 testy PASS: wpis, zaznaczenie, wklejenie, F1/F2/Esc i zwolnienie JOG po zmianie fokusu. Gałąź codex/numeric-keyboard-entry, kolejny krok: prawdziwy QtVCP. Autokontrola, Model-Author: Codex.
+
+PR #67 rozszerza wpis na korekcje F/G0/S, synchronizuje suwaki i chroni rozpoczęty wpis przed odświeżaniem. 97 lokalnych testów PASS; samotest pełnego QtVCP wpisuje sześć rodzajów wartości i linię programu, zapisuje stany/zrzuty. Pełny wynik w kontrolach PR #66/#67; manualny punkt 27 otwarty. Autokontrola, Model-Author: Codex.
