@@ -575,3 +575,11 @@ Brak komend ruchu przy kontroli; screenshot wykonany lokalnie. CI oraz odbiór w
 - Lokalnie sześć testów modelu/widgetów Qt PASS; wyniki runtime i SHA w [PR #62](https://github.com/anonimov94/linumeRT/pull/62).
 - Obejmuje pauzę bez wymiany narzędzia, nie powrót po Abort ani helisę z zakładką.
 - Autokontrola, bez niezależnego przeglądu. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## Kontrola GitHuba i synchronizacja EndeavourOS · 2026-10-21 · Codex
+- Model-Author: Codex. #62 scalony jako 979c672; brak otwartych PR/zgłoszeń i niescalonych gałęzi GitHuba.
+- Poprawiono nieaktualne przekazanie i status D38: wycofanie/powrót w pauzie działa; Abort/E-STOP i helisa pozostają otwarte.
+- Potwierdzono CI #62: 921 testów + 98 LinuxCNC PASS; ogólne CI main PASS.
+- Lokalny main zaktualizowany z weryfikacją SHA obiektów; T12 i stare kopie robocze zachowane; skróty odświeżone.
+- Pełne okno niewykonane: sandbox blokuje Podmana; ręczny odbiór pulpitu nadal wymagany.
+- Zmiany wyłącznie dokumentacyjne. Autokontrola, bez niezależnego przeglądu. NIEZWERYFIKOWANE NA SPRZĘCIE.
