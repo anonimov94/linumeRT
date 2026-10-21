@@ -60,6 +60,11 @@ jobs:
         run: |
           runuser -u codex -- python3 -m venv --system-site-packages .venv
           runuser -u codex -- .venv/bin/python -m pip install -e '.[dev]'
+      - name: Start Plant with the actual QtVCP display
+        run: >-
+          runuser -u codex -- env HOME=/home/codex PYTHON=.venv/bin/python
+          xvfb-run -a -s '-screen 0 1440x1100x24'
+          bash tools/ci/test-linuxcnc.sh tests/test_plant_screen_linuxcnc.py -x
       - name: Shared runner with real LinuxCNC
         env:
           LINUXCNC_SCREENSHOT: ${{ github.workspace }}/state/spike_qtdragon.png
