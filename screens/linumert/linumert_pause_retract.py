@@ -29,20 +29,29 @@ class RetractControl(QtCore.QObject):
         self.model = PauseRetract()
         self.last = None
         self.available = False
+        self.unavailable_reason = "brak skonfigurowanego toru external offsets."
+        self.height_mm, self.feed_mm = 10.0, 200.0
         self._time = time.monotonic()
         self._pending = None
         self.config = configparser.ConfigParser(strict=False, interpolation=None)
         ini = os.environ.get("INI_FILE_NAME") or getattr(shell.info, "INIPATH", "")
         try:
             self.config.read(ini, encoding="utf-8")
+            height = self.config.getfloat("LINUMERT", "RESUME_RETRACT_HEIGHT", fallback=10)
+            feed = self.config.getfloat("LINUMERT", "RESUME_RETRACT_FEED", fallback=200)
+            if not (math.isfinite(height) and 0.01 <= height <= 100
+                    and math.isfinite(feed) and 1 <= feed <= 500):
+                raise ValueError("RESUME_RETRACT_HEIGHT: 0,01–100 mm; "
+                                 "RESUME_RETRACT_FEED: 1–500 mm/min.")
+            self.height_mm, self.feed_mm = height, feed
             self.available = (all(k in shell.hmi_pins for k in ("retract_own", "retract_target"))
                               and (self.config.getboolean(
                                   "LINUMERT", "VIRTUAL_MODE", fallback=False)
                                    or self.config.has_section("PLANT"))
                               and self.config.get("KINS", "KINEMATICS").split()[0] == "trivkins"
                               and set(shell.s.axes) == set("XYZ"))
-        except (configparser.Error, OSError, ValueError):
-            pass
+        except (configparser.Error, OSError, ValueError) as exc:
+            self.unavailable_reason = f"błędna konfiguracja D38: {exc}"
         self.native = 1 if getattr(shell.info, "MACHINE_IS_METRIC", True) else 1 / 25.4
         if self.available:
             self._guard_actions()
@@ -118,6 +127,8 @@ class RetractControl(QtCore.QObject):
 
     def withdraw(self, height, feed):
         try:
+            if not self.available:
+                raise RetractRefused(self.unavailable_reason)
             self.model.start(self.snapshot(), height * self.native, feed * self.native)
             self.write()
         except Exception as exc:  # noqa: BLE001 - show errors without escaping a Qt slot
@@ -132,7 +143,10 @@ class RetractControl(QtCore.QObject):
         self.changed.emit()
 
     def write(self):
-        self.shell.hmi_pins["retract_target"].set(self.model.target)
+        # conv_float_s32 truncates. A decimal endpoint such as 1.001 can
+        # multiply to 1000.9999999999999; keep it on its intended count.
+        target = math.nextafter(self.model.target, math.inf) if self.model.target > 0 else 0.0
+        self.shell.hmi_pins["retract_target"].set(target)
         self.shell.hmi_pins["retract_own"].set(self.model.active)
 
     def tick(self):
@@ -170,12 +184,13 @@ class RetractPanel(QtWidgets.QWidget):
         layout.addWidget(self.message)
         row = QtWidgets.QHBoxLayout()
         self.height = QtWidgets.QDoubleSpinBox()
+        self.height.setDecimals(4)
         self.height.setRange(0.01, 100)
-        self.height.setValue(10)
+        self.height.setValue(control.height_mm)
         self.height.setSuffix(" mm Z")
         self.feed = QtWidgets.QDoubleSpinBox()
         self.feed.setRange(1, 500)
-        self.feed.setValue(200)
+        self.feed.setValue(control.feed_mm)
         self.feed.setSuffix(" mm/min")
         self.withdraw = QtWidgets.QPushButton("Wycofaj Z w pauzie")
         self.return_button = QtWidgets.QPushButton("Powrót do ścieżki")
@@ -200,5 +215,7 @@ class RetractPanel(QtWidgets.QWidget):
         for button in (self.return_button, self.resume_button):
             button.setEnabled(ready and c.model.phase == "retracted")
         self.message.setText("D38: " + (c.model.message if c.available else
-                             "brak skonfigurowanego toru external offsets.") +
+                             c.unavailable_reason) +
+                             (f" Wysokość po zaokrągleniu HAL: {c.model.height / c.native:.4f} mm."
+                              if c.model.active else "") +
                              " Wrzeciono pozostaje włączone. G41/G42 pozostają w interpreterze.")

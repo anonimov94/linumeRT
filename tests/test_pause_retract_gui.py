@@ -23,6 +23,7 @@ from PyQt5 import QtCore, QtWidgets
 from linumert_pause_retract import RetractControl, RetractPanel, PauseSnapshot
 
 class Pin:
+    value = 0.0
     def set(self, value): self.value = value
 
 class Action:
@@ -35,7 +36,8 @@ class Action:
 app = QtWidgets.QApplication([])
 with tempfile.TemporaryDirectory() as d:
     ini = Path(d) / "test.ini"
-    ini.write_text("[LINUMERT]\nVIRTUAL_MODE=1\n[KINS]\nKINEMATICS=trivkins coordinates=XYZ\n")
+    ini.write_text("[LINUMERT]\nVIRTUAL_MODE=1\nRESUME_RETRACT_HEIGHT=3.1234\n"
+                   "RESUME_RETRACT_FEED=123\n[KINS]\nKINEMATICS=trivkins coordinates=XYZ\n")
     for side in (410, 420):
         shell = QtCore.QObject()
         shell.info = NS(INIPATH=str(ini), MACHINE_IS_METRIC=True)
@@ -47,10 +49,16 @@ with tempfile.TemporaryDirectory() as d:
         c = RetractControl(shell)
         c.timer.stop()
         base = PauseSnapshot(True, True, True, True, ("part.ngc", side), -20, 0, 0, -120, 0)
-        c.snapshot = lambda: replace(base, offset=c.model.target, requested=c.model.target)
+        def snapshot():
+            # Real HAL scales and truncates, rather than returning the model target.
+            offset = int(shell.hmi_pins["retract_target"].value * 1000) * 0.001
+            return replace(base, offset=offset, requested=offset)
+        c.snapshot = snapshot
         c.last = base
         panel = RetractPanel(c)
-        panel.height.setValue(2)
+        assert panel.height.value() == 3.1234
+        assert panel.feed.value() == 123
+        panel.height.setValue(1.001)
         panel.withdraw.click()
         assert c.model.active and shell.hmi_pins["retract_own"].value
         Action().PAUSE()
@@ -69,6 +77,29 @@ with tempfile.TemporaryDirectory() as d:
         assert shell.hmi_pins["retract_target"].value == 0
         Action.calls.clear()
         panel.close()
+    for key, value in (("RESUME_RETRACT_HEIGHT", "nan"),
+                       ("RESUME_RETRACT_HEIGHT", "100.01"),
+                       ("RESUME_RETRACT_HEIGHT", "0"),
+                       ("RESUME_RETRACT_FEED", "inf"),
+                       ("RESUME_RETRACT_FEED", "501"),
+                       ("RESUME_RETRACT_FEED", "bad")):
+        ini.write_text(f"[LINUMERT]\nVIRTUAL_MODE=1\n{key}={value}\n"
+                       "[KINS]\nKINEMATICS=trivkins coordinates=XYZ\n")
+        c = RetractControl(shell)
+        c.timer.stop()
+        c.last = base
+        panel = RetractPanel(c)
+        assert not c.available and not panel.withdraw.isEnabled()
+        assert "błędna konfiguracja D38" in panel.message.text()
+        c.withdraw(2, 60)
+        assert not c.model.active and "błędna konfiguracja D38" in c.model.message
+        panel.close()
+    ini.write_text("[LINUMERT]\nVIRTUAL_MODE=1\n[KINS]\nKINEMATICS=trivkins coordinates=XYZ\n")
+    c = RetractControl(shell)
+    c.timer.stop()
+    panel = RetractPanel(c)
+    assert c.available and panel.height.value() == 10 and panel.feed.value() == 200
+    panel.close()
 '''
         env = dict(os.environ, QT_QPA_PLATFORM="offscreen",
                    PYTHONPATH=str(root / "screens/linumert"))

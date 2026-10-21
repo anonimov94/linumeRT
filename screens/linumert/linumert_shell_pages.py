@@ -292,6 +292,7 @@ class ProductionPage(QtWidgets.QWidget):
         self._estimate_value = None
         self._estimate_key = None
         self._partial_run = False
+        self._eta_overridden = False
         grid = QtWidgets.QGridLayout(self)
         grid.setContentsMargins(16, 16, 16, 16)
         grid.setSpacing(16)
@@ -462,6 +463,7 @@ class ProductionPage(QtWidgets.QWidget):
         self.btn_estimate.setEnabled(False)
 
     def _remaining_time(self, now):
+        self._track_time_overrides()
         key = self._time_key()
         if self._estimate_value is not None and key != self._estimate_key:
             self._estimate_value = None
@@ -487,8 +489,9 @@ class ProductionPage(QtWidgets.QWidget):
         s = self.shell.s
         if self._partial_run and s.running:
             self.lbl_remaining.setText("Pozostały czas niedostępny po starcie od linii.")
-        elif s.feed_override != 1 or s.rapid_override != 1:
-            self.lbl_remaining.setText("Pozostały czas niedostępny dla korekcji F/G0 innych niż 100%.")
+        elif s.running and self._eta_overridden:
+            self.lbl_remaining.setText(
+                "Pozostały czas niedostępny: korekcja F/G0 odbiegała od 100% w tym przebiegu.")
         elif s.running:
             remaining = estimate.total - self.clock.value(now)
             self.lbl_remaining.setText(
@@ -498,14 +501,21 @@ class ProductionPage(QtWidgets.QWidget):
             self.lbl_remaining.setText(f"Szacowany czas programu: {model.fmt_duration(estimate.total)} "
                                        "(bez czasu oczekiwania na operatora).")
 
+    def _track_time_overrides(self):
+        s = self.shell.s
+        if s.running and (s.feed_override != 1 or s.rapid_override != 1):
+            self._eta_overridden = True
+
     def on_state(self) -> None:
         """Woła powłoka przy każdej zmianie stanu (także gdy strona niewidoczna)."""
         s, now = self.shell.s, time.monotonic()
-        if s.interp == "run" and self._last_interp == "idle":
+        if s.running and self._last_interp == "idle":
             self.clock.reset()
+            self._eta_overridden = False
         if s.interp == "idle" and self._last_interp != "idle":
             self._partial_run = False
         self.clock.update(s.interp, now)
+        self._track_time_overrides()
         self._last_interp = s.interp
         for key, attr in (("feed", "feed_override"), ("rapid", "rapid_override"),
                           ("spindle", "spindle_override")):

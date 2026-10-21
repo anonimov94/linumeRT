@@ -641,6 +641,8 @@ def test_production_remaining_time_pauses_and_invalidates_changed_program(
     page.refresh()
     assert "100%" in page.lbl_remaining.text()
     shell.s.feed_override = 1
+    page.refresh()
+    assert "100%" in page.lbl_remaining.text()
     page._partial_run = True
     page.refresh()
     assert "od linii" in page.lbl_remaining.text()
@@ -648,4 +650,44 @@ def test_production_remaining_time_pauses_and_invalidates_changed_program(
     page.refresh()
     assert page._estimate_value is None and "zmienione" in page.lbl_remaining.text()
     assert not action.mock_calls
+    page.close()
+
+
+@pytest.mark.parametrize("override", ["feed_override", "rapid_override"])
+@pytest.mark.parametrize("first_state", ["run", "paused"])
+def test_eta_override_history_survives_estimation_and_resets_for_next_run(
+        page_env, monkeypatch, tmp_path, override, first_state):
+    from linumert.programs.estimate import Estimate
+
+    _home, shell, _status, _action = page_env
+    module = importlib.import_module("linumert_shell_pages")
+    monkeypatch.setattr(module, "INFO", SimpleNamespace(MAX_FEED_OVERRIDE=120,
+                        MIN_SPINDLE_OVERRIDE=50, MAX_SPINDLE_OVERRIDE=120))
+    monkeypatch.setattr(module.STATUS, "connect", Mock(), raising=False)
+    ini, program = tmp_path / "m.ini", tmp_path / "p.ngc"
+    ini.write_text("[TRAJ]\n")
+    program.write_text("G21\nM2\n")
+    shell.s.file = str(program)
+    shell.program_lines = program.read_text().splitlines()
+    monkeypatch.setenv("INI_FILE_NAME", str(ini))
+    monkeypatch.setattr("linumert.programs.estimate.estimate_ngc", lambda *_: Estimate(total=120))
+    page = module.ProductionPage(shell)
+    shell.s.interp = "run"
+    page.on_state()
+    setattr(shell.s, override, 0.5)
+    page.on_state()  # Status events must latch this even before estimating or refreshing.
+    setattr(shell.s, override, 1)
+    page.on_state()
+    page.btn_estimate.click()
+    page._estimate_job[0].result(timeout=5)
+    page.refresh()
+    assert "100%" in page.lbl_remaining.text()
+    shell.s.interp = "idle"
+    page.on_state()
+    page.refresh()
+    assert "Szacowany czas programu" in page.lbl_remaining.text()
+    shell.s.interp = first_state
+    page.on_state()
+    page.refresh()
+    assert "Pozostało około" in page.lbl_remaining.text()
     page.close()

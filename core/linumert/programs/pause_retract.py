@@ -71,11 +71,16 @@ class PauseRetract:
             raise RetractRefused("Poczekaj na dotrzymanie pozycji przez napędy.")
         if not all(math.isfinite(x) and x > 0 for x in (height, feed)):
             raise RetractRefused("Wysokość i posuw muszą być dodatnie i skończone.")
+        # HAL accepts whole counts at 0.001 native units. Validate the height
+        # that will actually be sent, especially on an inch machine.
+        height = round(height, 3)
+        if height <= 0:
+            raise RetractRefused("Wysokość jest mniejsza niż rozdzielczość external offsets.")
         if max(abs(s.offset), abs(s.requested)) > self.tolerance:
             raise RetractRefused("Inna funkcja używa już przesunięcia Z.")
         if not s.lower + 0.01 < s.z < s.z + height < s.upper - 0.01:
             raise RetractRefused("Wycofanie przekroczyłoby limit Z; zmniejsz wysokość.")
-        self.frame, self.height, self.speed = s.frame, round(height, 3), feed / 60
+        self.frame, self.height, self.speed = s.frame, height, feed / 60
         self.target, self.resume, self.phase = 0.0, False, "arming"
         self.message = "Oczekiwanie na potwierdzenie external offsets z HAL."
 

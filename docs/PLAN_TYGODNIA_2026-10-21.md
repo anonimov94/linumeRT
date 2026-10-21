@@ -95,3 +95,36 @@ AUTO, także z G41/G42 i G43. [Odbiór Debian/LinuxCNC PASS](https://github.com/
 narzędzia i wykonanie helisy z zakładką pozostają otwarte. Punkt 27 wymaga pulpitu właściciela.
 Nie dopisano nowych sesji roadmapy ani nie zaliczono niewykonanych prób ręcznych.
 Model-Author: Codex. Autokontrola, bez niezależnego przeglądu.
+
+## Dopracowanie punktu 25 — 2026-10-21
+
+ETA zapamiętuje użycie korekcji F/G0 innych niż 100% do końca bieżącego przebiegu,
+także przed obliczeniem oszacowania. Przywrócenie 100% nie przywraca mylącego wyniku;
+dostępność wraca przy następnym pełnym uruchomieniu. Całkowite oszacowanie programu
+pozostaje dostępne po zakończeniu. Lokalnie: 41 testów czasu i widgetów PASS, lint PASS.
+
+## Dopracowanie punktu 24 — 2026-10-21
+
+D38-A odczytuje wysokość i posuw z `RESUME_RETRACT_HEIGHT` i `RESUME_RETRACT_FEED`
+w INI. Błędna konfiguracja blokuje operację z komunikatem. Wysokość jest sprawdzana
+po zaokrągleniu do rozdzielczości HAL; zerowe wycofanie i przekroczenie limitu przez
+zaokrąglenie są odrzucane. Panel pokazuje zadaną wysokość po zaokrągleniu także na
+maszynie calowej. Lokalnie 7 testów PASS i 10 subtestów, w tym kliknięcia Qt oraz INI.
+Uwzględniono też obcięcie float→s32 w HAL: zadanie 1,001 mm nie może stracić impulsu
+przez reprezentację binarną i utknąć w oczekiwaniu. GUI modeluje rzeczywistą konwersję,
+a test LinuxCNC/Plant sprawdza żądany offset z dokładnością 0,000001 jednostki maszyny.
+
+Wspólna autokontrola dopracowania: 50 testów funkcji PASS i 10 subtestów, osobno
+złożenie HMI z eksportem raportu PASS; lint, 108 testów C i kontrola wymagań PASS.
+Pełna próba lokalna: 895 PASS, 10 pominięć, 98 wyłączonych testów LinuxCNC,
+22 subtesty PASS; 8 porażek i 5 błędów z zakazu tworzenia gniazd sieciowych.
+Dodatkowa porażka złożenia HMI wynikała z niewidocznego pytest w procesie potomnym;
+po poprawieniu środowiska bez zmiany kodu ten test przeszedł. Dwie dodatkowe
+parametryzacje startu od stanu pauzy objęto późniejszym wynikiem 50 testów funkcji.
+To nie jest pełny lokalny PASS. Wymagany odbiór runtime: kontrole
+[PR #64](https://github.com/anonimov94/linumeRT/pull/64).
+
+Punkt 27 ponownie sprawdzono tylko do granicy dostępnego środowiska:
+`podman info` kończy się `mkdir /run/user/1000/libpod: read-only file system`.
+Ręcznego protokołu pulpitu nie zaliczono. Powrót po Abort/E-STOP, wymianie narzędzia
+i wykonanie helisy pozostają poza wdrożonym D38-A.

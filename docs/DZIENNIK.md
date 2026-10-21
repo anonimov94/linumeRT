@@ -583,3 +583,19 @@ Brak komend ruchu przy kontroli; screenshot wykonany lokalnie. CI oraz odbiór w
 - Lokalny main zaktualizowany z weryfikacją SHA obiektów; T12 i stare kopie robocze zachowane; skróty odświeżone.
 - Pełne okno niewykonane: sandbox blokuje Podmana; ręczny odbiór pulpitu nadal wymagany.
 - Zmiany wyłącznie dokumentacyjne. Autokontrola, bez niezależnego przeglądu. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## Dopracowanie planu 21–27 — ETA · 2026-10-21 · Codex
+- Model-Author: Codex. Korekcja F/G0 unieważnia ETA całego przebiegu, także przed szacowaniem.
+- Powrót do 100% nie przywraca wyniku opartego na niepoprawnym czasie; nowy pełny start resetuje historię.
+- Lokalnie 41 testów czasu/widgetów PASS; lint PASS. Autokontrola, bez niezależnego przeglądu.
+- Osobny checkout; tabela narzędzi i pliki właściciela zachowane. Odbiór pulpitu nadal otwarty.
+
+## Dopracowanie planu 21–27 — D38-A · 2026-10-21 · Codex
+- Model-Author: Codex. Ustawienia wysokości/posuwu z INI, jawna odmowa błędnej konfiguracji.
+- Kontrola limitu po zaokrągleniu do rozdzielczości HAL, odmowa zerowego wycofania i pokazanie wysokości zadanej.
+- Lokalnie 7 testów PASS i 10 subtestów; rzeczywiste kliknięcia Qt i błędne INI.
+- Abort/E-STOP, wymiana narzędzia i wykonanie helisy nadal otwarte. Autokontrola, bez niezależnego przeglądu.
+- Łącznie 50 testów funkcji PASS + 10 subtestów; złożenie HMI PASS; lint, C 108 i wymagania PASS.
+- Próba pełna: 895 PASS; 8 porażek i 5 błędów przez zakaz gniazd; błąd środowiska pytest w procesie potomnym usunięto i złożenie HMI ponowiono z PASS.
+- Odbiór runtime w kontrolach PR #64; ponowny `podman info` potwierdza blokadę `/run/user/1000`, więc pkt 27 niezaliczony.
+- Regresja ułamkowej wysokości 1,001 mm: uwzględniono obcięcie float→s32 w HAL; testy GUI i LinuxCNC/Plant sprawdzają osiągnięcie pełnej liczby impulsów bez utknięcia.
