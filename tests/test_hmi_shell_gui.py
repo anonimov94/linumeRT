@@ -84,7 +84,10 @@ def test_shell_selftest_in_gui(tmp_path) -> None:
     data = _run_selftest(tmp_path, out)
     steps = {s["step"]: s for s in data["steps"]}
     assert data["errors"] == [], data["errors"]
-    assert len(steps) == 42 and all(s["ok"] for s in steps.values())
+    assert len(steps) == 45 and all(s["ok"] for s in steps.values())
+    assert steps["04d_wpis_liczb"]["typed_jog_speed"] == 12.3456
+    assert steps["04d_wpis_liczb"]["typed_jog_step"] == "2.5"
+    assert steps["04e_wpis_pozycji"]["typed_position_x"] == -12.3456
     assert steps["04b_widok_bazowania"]["page"] == "homing"
     assert steps["01_start"]["page"] == "start"  # po uruchomieniu widok Start
     assert steps["04b_start_gotowosc"]["ready"] == "wymaga działań"  # brak programu

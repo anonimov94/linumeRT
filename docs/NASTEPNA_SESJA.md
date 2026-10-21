@@ -11,8 +11,9 @@ Bez otwierania kolejnych etapów roadmapy.
 Dodatkowy audyt pól: właściciel nie mógł wpisywać liczb, działały tylko strzałki.
 Gałąź `codex/numeric-keyboard-entry`, checkout `~/Projekty/linumeRT-numeric-fix`,
 startuje z kodu PR #66. Router QtVCP rozpoznaje teraz QAbstractSpinBox i edytowalne
-listy; krok JOG przyjmuje własną wartość. 42 testy lokalne PASS; następnie próba
-w faktycznym QtVCP i pełne CI. F1/F2/Esc oraz zwolnienie JOG pozostają obsługiwane.
+listy; krok JOG przyjmuje własną wartość. 97 testów lokalnych PASS; PR #67.
+Korekcje F/G0/S mają edytowalne pola, odświeżanie nie kasuje wpisu. Samotest
+faktycznego QtVCP wpisuje posuw, obroty, narzędzie, krok, pozycję i korekcję F; wynik w CI. F1/F2/Esc oraz zwolnienie JOG pozostają obsługiwane.
 
 
 Audyt pętli: właściciel wpisał `while [1]` i wybrał szacowanie czasu; journal wskazuje
