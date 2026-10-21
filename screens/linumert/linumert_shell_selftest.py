@@ -92,6 +92,9 @@ class SelfTest(QtCore.QObject):
             ("04b_start_gotowosc", None, None, 1),
             ("04b_widok_bazowania", lambda: click(self.shell.areas["homing"]), None, 1),
             ("04c_maszyna", lambda: click(self.shell.areas["machine"]), None, 1),
+            ("04d_wpis_liczb", self._numeric_controls, None, 1),
+            ("04e_wpis_pozycji", self._numeric_position, None, 1),
+            ("04f_powrot_maszyna", lambda: click(self.shell.areas["machine"]), None, 1),
             ("05_tryb_mdi", lambda: click(b["mode_mdi"]), lambda: s.mode == "mdi", 5),
             ("06_mdi_g0", self._mdi, lambda: self._settled(), 30),
             ("07_program", lambda: ACTION.OPEN_PROGRAM(self.program),
@@ -118,7 +121,8 @@ class SelfTest(QtCore.QObject):
             ("19_diagnostyka", lambda: click(self.shell.areas["diag"]),
              lambda: self.shell.diag.joints.rowCount() >= len(s.axes), 5),
             ("20_produkcja", lambda: click(self.shell.areas["production"]), None, 1),
-            ("21_korekcja_posuwu_80", lambda: self.shell.production.sliders["feed"][0].setValue(80),
+            ("21_korekcja_posuwu_80", lambda: self._type_number(
+                self.shell.production.sliders["feed"][1], "80"),
              lambda: round(s.feed_override * 100) == 80, 5),
             ("22_tryb_auto", lambda: click(b["mode_auto"]), lambda: s.mode == "auto", 5),
             ("23_start_od_linii", self._from_line,
@@ -165,11 +169,40 @@ class SelfTest(QtCore.QObject):
 
     def _from_line(self) -> None:
         page = self.shell.production
-        page.spin_line.setValue(6)
+        self._type_number(page.spin_line, "6")
         page.refresh()
         if not page.btn_from_line.isEnabled():
             raise RuntimeError(f"start od linii nieaktywny: {page.lbl_from_line.text()}")
         page.run_from_line(confirm=False)  # okno potwierdzenia pomija tylko samotest
+
+    @staticmethod
+    def _type_number(field, text):
+        from PyQt5 import QtTest
+
+        field.setFocus()
+        editor = field.lineEdit()
+        editor.selectAll()
+        QtTest.QTest.keyClicks(field, text)
+        QtTest.QTest.keyClick(field, QtCore.Qt.Key_Return)
+
+    def _numeric_controls(self):
+        panel = self.shell.operator_panels[0]
+        self._type_number(panel.speed, "12.3456")
+        self._type_number(panel.rpm, "1234")
+        self._type_number(panel.tool, "12")
+        self._type_number(panel.increment, "2.5")
+        assert panel.speed.value() == 12.3456, panel.speed.text()
+        assert panel.rpm.value() == 1234, panel.rpm.text()
+        assert panel.tool.value() == 12, panel.tool.text()
+        assert panel.increment.currentText() == "2.5", panel.increment.currentText()
+        assert self.shell.s.interp == "idle" and self.shell.s.spindle_dir == 0
+
+    def _numeric_position(self):
+        self._click(self.shell.areas["offsets"])
+        field = self.shell.offsets.position[0]
+        self._type_number(field, "-12.3456")
+        assert field.value() == -12.3456, field.text()
+        assert self.shell.s.interp == "idle"
 
     def _reset_feed(self):
         return self.shell.production.reset_buttons["feed"]
@@ -192,6 +225,9 @@ class SelfTest(QtCore.QObject):
         self._start_pos = None
 
     def _jog(self) -> None:
+        # Retain the original continuous-motion scenario after the entry audit.
+        self.shell.operator_panels[0].speed.setValue(10)
+        self.shell.operator_panels[0].increment.setCurrentIndex(0)
         btn = self.shell.buttons["jog_X1"]
         if not btn.isEnabled():
             raise RuntimeError(f"JOG nieaktywny: {btn.toolTip()}")
@@ -260,6 +296,9 @@ class SelfTest(QtCore.QObject):
             "log": self.shell.diag.log.count(),
             "feed_override": round(s.feed_override * 100),
             "run_time": self.shell.production.lbl_time.text(),
+            "typed_jog_speed": self.shell.operator_panels[0].speed.value(),
+            "typed_jog_step": self.shell.operator_panels[0].increment.currentText(),
+            "typed_position_x": self.shell.offsets.position[0].value(),
         })
 
     def _finish(self) -> None:
