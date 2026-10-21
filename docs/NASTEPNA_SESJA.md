@@ -13,7 +13,8 @@ SIGBUS w libtooldata. Trwa naprawa `codex/bounded-offline-interpreter`, checkout
 `~/Projekty/linumeRT-interpreter-fix`: limity danych/czasu oraz prywatna tabela narzędzi
 rs274, aby analiza offline nie dotykała działającej sesji LinuxCNC.
 PR #66: izolacja obu ścieżek (czas i kontrola), 20 s/8 MiB, sprzątanie grupy procesów;
-108 testów lokalnych PASS, w tym kliknięcie przycisku przy zalewaniu wyjścia. Następnie CI LinuxCNC.
+108 testów lokalnych PASS, w tym kliknięcie przycisku przy zalewaniu wyjścia. Dodano próby obu analiz na pętli bez końca przy działającym pełnym QtVCP/Plant
+oraz skończony WHILE i WHILE [1] z BREAK; następnie CI LinuxCNC.
 
 Odbiór pulpitu ujawnił brak `sim_toolchange.in` przy starcie Plant z pełnym QtVCP.
 Naprawa: `codex/plant-hmi-toolchange`, checkout `~/Projekty/linumeRT-plant-hmi-fix`.

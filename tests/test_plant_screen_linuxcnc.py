@@ -71,6 +71,26 @@ component.exit()
                 diagnostic = probe.stdout + probe.stderr
                 time.sleep(0.25)
             if ready:
+                # Exercise offline analysis while the actual QtVCP/tool mmap is live.
+                # Recheck heartbeat and toolchange pins after both bounded failures.
+                loop = work / "infinite.ngc"
+                loop.write_text("o100 while [1]\nG4 P0.1\no100 endwhile\nM2\n")
+                analysis = f"""
+from linumert.programs.estimate import estimate_ngc
+from linumert.programs.linuxcnc_check import check_with_linuxcnc
+result = check_with_linuxcnc({str(loop)!r}, {str(root)!r}, timeout=0.2)
+assert not result.ok and not result.completed, result
+try:
+    estimate_ngc({str(loop)!r}, {str(ini)!r}, {str(root)!r}, timeout=0.2)
+except ValueError as exc:
+    assert 'limit' in str(exc), str(exc)
+else:
+    raise AssertionError('infinite program received a runtime estimate')
+"""
+                checked = rip_run(root, "python3 -c " + shlex.quote(analysis), work, env=env)
+                assert checked.returncode == 0, checked.stdout + checked.stderr
+                alive = rip_run(root, "python3 -c " + shlex.quote(probe_code), work, env=env)
+                assert alive.returncode == 0, alive.stdout + alive.stderr
                 shot_path = str(tmp_path / "screen.png")
                 capture = ("from PyQt5.QtWidgets import QApplication; a=QApplication([]); "
                            f"assert a.primaryScreen().grabWindow(0).save({shot_path!r})")

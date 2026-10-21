@@ -73,3 +73,21 @@ Po takim błędzie wyłącz maszynę; poprzednie wznowienie jest anulowane.
 Przerwanie programu przez Abort/E-STOP, wymiana narzędzia i odzyskiwanie po wyłączeniu
 nie są obsługiwane przez ten mechanizm. NIEZWERYFIKOWANE NA SPRZĘCIE.
 Model-Author: Codex.
+
+## Kontrola pętli i szacowanie czasu
+
+„Program” → „Sprawdź składnię” sprawdza zapis G-code, wyrażenia oraz parowanie
+`WHILE/ENDWHILE`, `REPEAT/ENDREPEAT`, `IF/ENDIF` bez wykonywania pętli.
+Poprawna składnia nie potwierdza zakończenia programu. Porównania w LinuxCNC mają
+operatory `EQ`, `NE`, `LT`, `LE`, `GT`, `GE` (np. `[#1 LT 10]`, nie `[#1<10]`).
+
+`o100 while [1]` jest poprawne i może kończyć się przez `o100 break`.
+Bez osiągalnego wyjścia pełny czas programu jest nieokreślony. Nie da się rozstrzygnąć
+zakończenia każdej pętli na podstawie samego tekstu programu.
+
+„Produkcja” → szacowanie czasu i szacowanie w „Cyklach” analizują program poza wątkiem
+ekranu. Analiza ma limit 20 sekund i 8 MiB danych; po przekroczeniu limitu pokazuje
+komunikat, bez częściowego czasu i bez potwierdzenia poprawności całego programu.
+Limit może też osiągnąć duży, skończony program. Pętle skończone są dozwolone.
+Samodzielny interpreter ma osobne pliki robocze i nie współdzieli tabeli narzędzi
+z działającym sterowaniem. Model-Author: Codex.
