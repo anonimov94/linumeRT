@@ -142,6 +142,20 @@ def run(ini, joint_count, output):
         assert alarms and s.paused and control.model.active
         app.processEvents()
         panel.grab().save(str(output / f"retract-g{side}.png"))
+        # Crossing the 0.005 guard once can precede the next servo oscillation.
+        # Wait for actual drives to settle with margin before clicking return.
+        stable_since = None
+
+        def settled_for_return():
+            nonlocal stable_since
+            if max(abs(j["ferror_current"]) for j in s.joint) >= 0.001:
+                stable_since = None
+                return False
+            if stable_since is None:
+                stable_since = time.monotonic()
+            return time.monotonic() - stable_since >= 0.2
+
+        wait(settled_for_return, control=control)
         if side == 40:
             panel.return_button.click()
             wait(lambda: not control.model.active, control=control)

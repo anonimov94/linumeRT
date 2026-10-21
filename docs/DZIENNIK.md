@@ -599,3 +599,13 @@ Brak komend ruchu przy kontroli; screenshot wykonany lokalnie. CI oraz odbiór w
 - Próba pełna: 895 PASS; 8 porażek i 5 błędów przez zakaz gniazd; błąd środowiska pytest w procesie potomnym usunięto i złożenie HMI ponowiono z PASS.
 - Odbiór runtime w kontrolach PR #64; ponowny `podman info` potwierdza blokadę `/run/user/1000`, więc pkt 27 niezaliczony.
 - Regresja ułamkowej wysokości 1,001 mm: uwzględniono obcięcie float→s32 w HAL; testy GUI i LinuxCNC/Plant sprawdzają osiągnięcie pełnej liczby impulsów bez utknięcia.
+
+## Odbiór pulpitu — start Plant z QtVCP · 2026-10-21 · Codex
+- Model-Author: Codex. Właściciel odtworzył przerwanie startu: brak `sim_toolchange.in` w postgui.
+- Plant ładuje teraz ten sam wirtualny komponent potwierdzenia M6 co symulator; obie odmiany wrzeciona korzystają ze wspólnego HAL.
+- Nowa regresja uruchamia prawdziwy ekran HMI/klasyczny z Plant i nie usuwa POSTGUI ani nie włącza obejścia E-STOP.
+- Sprawdza kompletne połączenia po starcie, działający sygnał życia GUI i zapisuje zrzut oraz log.
+- Lokalnie 20 testów PASS, 1 pominięcie (shellcheck), lint PASS; odbiór runtime w CI wymagany przed scaleniem.
+- Ręczny audyt pulpitu trwa. Autokontrola, bez niezależnego przeglądu; NIEZWERYFIKOWANE NA SPRZĘCIE.
+- Pierwsze CI: 926 PASS; w CNC 97 PASS i 3 porażki. Dodano pełny log odmowy startu i wczesny test ekranu przed długą regresją.
+- Test D38 czeka na ustalenie rzeczywistych napędów z zapasem przed kliknięciem powrotu; próg blokady produkcyjnej pozostaje 0,005 mm.
