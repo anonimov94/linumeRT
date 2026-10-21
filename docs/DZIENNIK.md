@@ -609,3 +609,9 @@ Brak komend ruchu przy kontroli; screenshot wykonany lokalnie. CI oraz odbiór w
 - Ręczny audyt pulpitu trwa. Autokontrola, bez niezależnego przeglądu; NIEZWERYFIKOWANE NA SPRZĘCIE.
 - Pierwsze CI: 926 PASS; w CNC 97 PASS i 3 porażki. Dodano pełny log odmowy startu i wczesny test ekranu przed długą regresją.
 - Test D38 czeka na ustalenie rzeczywistych napędów z zapasem przed kliknięciem powrotu; próg blokady produkcyjnej pozostaje 0,005 mm.
+
+## Audyt — szacowanie pętli i izolacja rs274 · 2026-10-21 · Codex
+- Model-Author: Codex. Właściciel odtworzył zamknięcie HMI po szacowaniu programu `while [1]`.
+- Journal: SIGBUS w libtooldata, 21:20:50; rs274 w 2.9.10 współdzieli `$HOME/.tool.mmap` z sesją CNC.
+- Gałąź `codex/bounded-offline-interpreter`: ograniczenie czasu/danych i zamykanie wyłącznie grupy procesu analizy; izolacja tabeli narzędzi w kolejnym kroku.
+- Ręczny odbiór pozostaje otwarty. Autokontrola, bez niezależnego przeglądu.
