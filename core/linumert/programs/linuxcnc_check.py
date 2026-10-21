@@ -20,8 +20,11 @@ import re
 import shlex
 import shutil
 import subprocess
+import tempfile
 from dataclasses import dataclass
 from pathlib import Path
+
+from ._interpreter_process import InterpreterOutputLimit, run_bounded
 
 _CANON = re.compile(r"^\s*\d+ N[.\d]+\s")
 _MENU = ("enter a number:", "1 = ", "2 = ", "3 = ", "4 = ", "5 = ", "enter choice")
@@ -59,20 +62,53 @@ def find_linuxcnc(root: Path | str | None = None) -> tuple[list[str], Path | Non
     raise InterpreterUnavailable("brak rs274 (ustaw LINUXCNC_DIR na budowę RIP LinuxCNC 2.9)")
 
 
-def check_with_linuxcnc(ngc: Path | str, root: Path | str | None = None,
-                        timeout: float = 20.0) -> InterpreterResult:
-    """Uruchamia rs274 na pliku; InterpreterUnavailable, gdy nie ma LinuxCNC."""
+def run_interpreter(ngc: Path | str, root: Path | str | None = None,
+                    timeout: float = 20.0) -> subprocess.CompletedProcess:
+    """Offline only: private HOME/tool mmap, parameters and cwd for every invocation.
+
+    LinuxCNC 2.9.10 rs274 truncates $HOME/.tool.mmap even before reading its options.
+    Sharing HOME with the live controller can therefore crash QtVCP with SIGBUS.
+    Never invoke the standalone interpreter with the controller's HOME.
+    """
     prefix, sim = find_linuxcnc(root)
     ngc = Path(ngc).resolve()
-    options = "-i axis.ini -t sim.tbl " if sim is not None and (sim / "axis.ini").exists() else ""
-    # exec keeps the timeout attached to rs274, not a shell waiting for its child.
-    command = " ".join(prefix + [f"exec rs274 {options}-n 0 {shlex.quote(str(ngc))} </dev/null"])
+    with tempfile.TemporaryDirectory(prefix="linumert-analysis-") as directory:
+        private = Path(directory)
+        env = os.environ.copy()
+        env.update(HOME=directory, TMPDIR=directory)
+        parameters = private / "analysis.var"
+        parameters.touch()  # rs274 links the original before saving its first backup.
+        options = []
+        if sim is not None and (sim / "axis.ini").exists():
+            config = (sim / "axis.ini").read_text()
+            # INI loading overrides -v. Enforce private parameters there as well,
+            # including samples which name an absolute/shared parameter file.
+            config = re.sub(r"(?im)^[ \t]*PARAMETER_FILE[ \t]*=.*(?:\n|$)", "", config)
+            config, count = re.subn(r"(?im)^(\[RS274NGC\][ \t]*)$",
+                                    r"\g<1>\nPARAMETER_FILE = analysis.var", config, count=1)
+            if not count:
+                config += "\n[RS274NGC]\nPARAMETER_FILE = analysis.var\n"
+            ini = private / "analysis.ini"
+            ini.write_text(config)
+            options = ["-i", str(ini),
+                       "-t", str((sim / "sim.tbl").resolve())]
+            if (sim / "sim.var").exists():
+                shutil.copyfile(sim / "sim.var", parameters)
+        options += ["-v", str(parameters), "-n", "0", str(ngc)]
+        command = " ".join(prefix + ["exec rs274 " + shlex.join(options)])
+        return run_bounded(["bash", "-c", command], cwd=directory, env=env, timeout=timeout)
+
+
+def check_with_linuxcnc(ngc: Path | str, root: Path | str | None = None,
+                        timeout: float = 20.0) -> InterpreterResult:
+    """Uruchamia izolowane rs274; limit analizy nie jest pozytywnym wynikiem kontroli."""
     try:
-        run = subprocess.run(["bash", "-c", command], cwd=sim, capture_output=True, text=True,
-                             timeout=timeout, check=False)
+        run = run_interpreter(ngc, root, timeout)
     except subprocess.TimeoutExpired:
         return InterpreterResult(["przekroczony czas interpretera (pętla bez końca?)"], False,
                                  timed_out=True)
+    except InterpreterOutputLimit as exc:
+        return InterpreterResult([str(exc)], False)
     output = run.stdout + run.stderr
     messages = []
     for line in output.splitlines():

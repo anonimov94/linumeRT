@@ -604,6 +604,52 @@ def test_cycles_lnx_open_cancel_keeps_unsaved_changes(page_env, monkeypatch, tmp
     page.close()
 
 
+def test_loop_estimate_failure_keeps_screen_and_syntax_check_available(
+        page_env, monkeypatch, tmp_path):
+    """Click the real estimate action; emulate the legacy rs274 mmap side effect."""
+    from PyQt5.QtWidgets import QApplication
+
+    _home, shell, _status, action = page_env
+    module = importlib.import_module("linumert_shell_pages")
+    monkeypatch.setattr(module, "INFO", SimpleNamespace(MAX_FEED_OVERRIDE=120,
+                        MIN_SPINDLE_OVERRIDE=50, MAX_SPINDLE_OVERRIDE=120))
+    monkeypatch.setattr(module.STATUS, "connect", Mock(), raising=False)
+    program, ini = tmp_path / "loop.ngc", tmp_path / "m.ini"
+    program.write_text("o100 while [1]\nG4 P0.1\no100 endwhile\nM2\n")
+    ini.write_text("[TRAJ]\n")
+    binary = tmp_path / "rs274"
+    binary.write_text(f"#!{sys.executable}\nimport os\nfrom pathlib import Path\n"
+                      "(Path.home()/'.tool.mmap').write_bytes(b'')\n"
+                      "while True: os.write(1,b'x'*65536)\n")
+    binary.chmod(0o755)
+    live = tmp_path / "live"
+    live.mkdir()
+    (live / ".tool.mmap").write_bytes(b"live tools")
+    monkeypatch.setenv("HOME", str(live))
+    monkeypatch.setenv("PATH", str(tmp_path) + ":/usr/bin:/bin")
+    monkeypatch.setenv("INI_FILE_NAME", str(ini))
+    monkeypatch.setattr("linumert.programs.linuxcnc_check.find_linuxcnc",
+                        lambda *_: ([], None))
+    shell.s.file = str(program)
+    shell.program_lines = program.read_text().splitlines()
+    page = module.ProductionPage(shell)
+    page.btn_estimate.click()
+    assert page._estimate_job is not None
+    assert isinstance(page._estimate_job[0].exception(timeout=5), ValueError)
+    page.refresh()
+    QApplication.processEvents()
+    assert "limit danych" in page.lbl_remaining.text()
+    assert page.btn_estimate.isEnabled() and page._estimate_value is None
+    assert (live / ".tool.mmap").read_bytes() == b"live tools"
+    editor = importlib.import_module("linumert_program_page").ProgramPage(shell)
+    assert editor.show_file(program)
+    editor.check_button.click()
+    assert "Nie wykryto błędów składni" in editor.message.text()
+    assert not action.mock_calls
+    editor.close()
+    page.close()
+
+
 def test_production_remaining_time_pauses_and_invalidates_changed_program(
         page_env, monkeypatch, tmp_path):
     from linumert.programs.estimate import Estimate

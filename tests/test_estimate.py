@@ -124,3 +124,15 @@ def test_estimate_compiled_program_in_rs274(tmp_path):
     assert est.feed_length == pytest.approx(50 + 6, abs=1e-6) and est.dwell == 2
     assert est.rapid_length == pytest.approx(100, abs=1e-6)
     assert est.per_step[1] == pytest.approx(est.total)
+
+
+@pytest.mark.linuxcnc
+def test_estimate_accepts_finite_while_and_exit_from_constant_true_loop(tmp_path):
+    from rip_support import rip_root
+
+    ngc = tmp_path / "finite.ngc"
+    ngc.write_text("G21 G90 G17\n#1=0\no100 while [#1 LT 3]\n"
+                   "G4 P1\n#1=[#1+1]\no100 endwhile\n"
+                   "o200 while [1]\nG4 P2\no200 break\no200 endwhile\nM2\n")
+    estimate = estimate_ngc(ngc, SIM_INI, rip_root())
+    assert estimate.total == pytest.approx(5)
