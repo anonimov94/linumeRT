@@ -110,3 +110,18 @@ w INI. Błędna konfiguracja blokuje operację z komunikatem. Wysokość jest sp
 po zaokrągleniu do rozdzielczości HAL; zerowe wycofanie i przekroczenie limitu przez
 zaokrąglenie są odrzucane. Panel pokazuje zadaną wysokość po zaokrągleniu także na
 maszynie calowej. Lokalnie 7 testów PASS i 10 subtestów, w tym kliknięcia Qt oraz INI.
+
+Wspólna autokontrola dopracowania: 50 testów funkcji PASS i 10 subtestów, osobno
+złożenie HMI z eksportem raportu PASS; lint, 108 testów C i kontrola wymagań PASS.
+Pełna próba lokalna: 895 PASS, 10 pominięć, 98 wyłączonych testów LinuxCNC,
+22 subtesty PASS; 8 porażek i 5 błędów z zakazu tworzenia gniazd sieciowych.
+Dodatkowa porażka złożenia HMI wynikała z niewidocznego pytest w procesie potomnym;
+po poprawieniu środowiska bez zmiany kodu ten test przeszedł. Dwie dodatkowe
+parametryzacje startu od stanu pauzy objęto późniejszym wynikiem 50 testów funkcji.
+To nie jest pełny lokalny PASS. Wymagany odbiór runtime: kontrole
+[PR #64](https://github.com/anonimov94/linumeRT/pull/64).
+
+Punkt 27 ponownie sprawdzono tylko do granicy dostępnego środowiska:
+`podman info` kończy się `mkdir /run/user/1000/libpod: read-only file system`.
+Ręcznego protokołu pulpitu nie zaliczono. Powrót po Abort/E-STOP, wymianie narzędzia
+i wykonanie helisy pozostają poza wdrożonym D38-A.
