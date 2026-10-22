@@ -40,6 +40,14 @@ class LogView(QtWidgets.QWidget):
         self.search.setClearButtonEnabled(True)
         self.search.setAccessibleName("Szukaj w historii komunikatów")
         self.export = QtWidgets.QPushButton("Eksport CSV…")
+        for widget in (self.level, self.search):
+            palette = widget.palette()
+            for role, key in ((QtGui.QPalette.Base, "bg2"), (QtGui.QPalette.Text, "fg"),
+                              (QtGui.QPalette.Button, "raise"),
+                              (QtGui.QPalette.ButtonText, "fg")):
+                if key in colors:
+                    palette.setColor(role, QtGui.QColor(colors[key]))
+            widget.setPalette(palette)
         for widget in (self.level, self.search, self.export):
             widget.setMinimumHeight(44)
             filters.addWidget(widget, 1 if widget is self.search else 0)
