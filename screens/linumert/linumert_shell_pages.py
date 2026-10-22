@@ -186,20 +186,17 @@ class DiagPage(QtWidgets.QWidget):
         return frame
 
     def _log_card(self) -> QtWidgets.QWidget:
-        frame, lay, _side = card("Historia komunikatów", "ostatnie 200")
-        self.log = QtWidgets.QListWidget()
-        self.log.setObjectName("lrtLog")
-        lay.addWidget(self.log)
+        from linumert_log_view import LogView
+
+        frame, lay, _side = card("Historia komunikatów")
+        self.log_view = LogView(self.c, frame)
+        self.log = self.log_view.list
+        lay.addWidget(self.log_view)
         return frame
 
     # ---- dane -----------------------------------------------------------------------------
     def add_log(self, level: str, text: str) -> None:
-        item = QtWidgets.QListWidgetItem(f"{time.strftime('%H:%M:%S')}  {text}")
-        item.setForeground(QtGui.QColor(
-            {"err": self.c["err"], "warn": self.c["amber"]}.get(level, self.c["fg2"])))
-        self.log.insertItem(0, item)
-        while self.log.count() > 200:
-            self.log.takeItem(self.log.count() - 1)
+        self.log_view.add(level, text)
 
     def refresh(self) -> None:
         plant = _hal("lrt-net.0.connected")

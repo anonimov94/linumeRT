@@ -78,3 +78,12 @@ Wyniki runtime pochodzą z CI. Następny krok: ręczny protokół pulpitu z rapo
 Stare kopie robocze w `~/Projekty` i ich nieśledzone dokumenty pozostawiono bez zmian;
 zawierają historyczne wyniki oczekujące na CI, które zastąpił raport w main.
 Autokontrola, bez niezależnego przeglądu. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## Codex — historia diagnostyczna, 2026-10-22
+
+Nowe polecenie właściciela: rozwijać najprostsze lub nierozpoczęte obszary.
+Gałąź `codex/diagnostic-history`: trwała historia komunikatów Diagnostyki (SQLite),
+filtr poziomu, wyszukiwanie i eksport CSV. Odrębna baza dla każdej konfiguracji INI;
+1000 wpisów, widok do 200 pasujących; błędy zapisu dają jawny tryb tylko w pamięci.
+Pierwsza próba zapisu/ponownego odczytu i kliknięcia Qt PASS; kolejny krok: regresje,
+dokumentacja i pełne CI. PR #67 (pola liczbowe) pozostawiony bez zmian. Model-Author: Codex.
