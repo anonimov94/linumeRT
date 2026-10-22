@@ -91,3 +91,12 @@ Wynik odbioru i sprawdzony SHA utrzymywać w opisie PR #68. PR #67 (pola liczbow
 
 Uzupełnienie kroku: pola filtrów korzystają z palety tokenów; siedem testów lokalnych
 ponownie PASS. Kod i dokumentacja są wypchnięte do PR #68; końcowy odbiór przez CI.
+
+## Codex — kolejne małe tematy, 2026-10-22
+
+Właściciel zlecił ciąg: wdrożenie → testy → push/scalenie → następny temat, aż do stop.
+Historia diagnostyczna #68 scalona jako 2abeae7; odbiór Debian 944 + 101 LinuxCNC PASS.
+Gałąź codex/tool-filters: wyszukiwanie T/P/opis/dane i filtr typu w widoku Narzędzia.
+Pierwszy test Qt z rzeczywistą bazą SQLite PASS: filtry nie zapisują bazy/tool.tbl,
+nie wysyłają komend CNC i nie przełączają edytowanego narzędzia. Następny krok:
+odbiory CI i scalenie; wynik oraz SHA w opisie PR. Model-Author: Codex.

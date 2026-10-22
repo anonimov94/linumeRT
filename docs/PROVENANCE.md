@@ -223,3 +223,9 @@ Nie skopiowano kodu upstream; bazowy handler QtDragon pozostaje bez zmian.
 Model-Author: Codex. Własny kod GPL-2.0-or-later: diag/journal.py, linumert_log_view.py
 oraz testy; integracja istniejącej Diagnostyki. SQLite i CSV ze standardowej biblioteki
 Python, istniejące PyQt5 i tokeny wyglądu. Bez nowych zależności ani zasobów zewnętrznych.
+
+## Filtry narzędzi — 2026-10-22
+
+Model-Author: Codex. Własna zmiana linumert_tools_page.py i test rzeczywistych widgetów
+Qt/SQLite, GPL-2.0-or-later. Użyto istniejących typów narzędzi i tokenów wyglądu;
+bez nowych bibliotek ani zasobów zewnętrznych.

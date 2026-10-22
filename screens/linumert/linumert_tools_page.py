@@ -15,7 +15,7 @@ import os
 import sys
 
 import linuxcnc
-from PyQt5 import QtCore, QtWidgets
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 import linumert_shell_pages as pages
 from linumert_sim_page import ROOT
@@ -51,6 +51,30 @@ class ToolsPage(QtWidgets.QWidget):
         grid.setContentsMargins(16, 16, 16, 16)
         grid.setSpacing(16)
         frame, lay, self.lbl_count = pages.card("Tabela narzędzi", "")
+        # Model-Author: Codex. Read-only filters; never select or load another tool.
+        filters = QtWidgets.QHBoxLayout()
+        self.search = QtWidgets.QLineEdit()
+        self.search.setPlaceholderText("Szukaj: T12, P3, opis, średnica…")
+        self.search.setClearButtonEnabled(True)
+        self.search.setAccessibleName("Szukaj narzędzia")
+        self.filter_type = QtWidgets.QComboBox()
+        self.filter_type.addItem("Wszystkie typy", "")
+        self.filter_type.addItem("Bez typu", None)
+        for tid, definition in TYPES.items():
+            self.filter_type.addItem(definition.label, tid)
+        for widget in (self.search, self.filter_type):
+            widget.setMinimumHeight(44)
+            palette = widget.palette()
+            for role, key in ((QtGui.QPalette.Base, "bg2"), (QtGui.QPalette.Text, "fg"),
+                              (QtGui.QPalette.Button, "raise"),
+                              (QtGui.QPalette.ButtonText, "fg")):
+                if key in shell.c:
+                    palette.setColor(role, QtGui.QColor(shell.c[key]))
+            widget.setPalette(palette)
+            filters.addWidget(widget, 1 if widget is self.search else 0)
+        self.search.textChanged.connect(self._filter)
+        self.filter_type.currentIndexChanged.connect(self._filter)
+        lay.addLayout(filters)
         self.table = QtWidgets.QTableWidget(0, len(COLUMNS))
         self.table.setObjectName("lrtTable")
         self.table.setHorizontalHeaderLabels(COLUMNS)
@@ -179,7 +203,19 @@ class ToolsPage(QtWidgets.QWidget):
                 item.setText(value)
                 item.setData(QtCore.Qt.UserRole, t.number)
                 self.table.setItem(row, col, item)
-        self.lbl_count.setText(f"{len(tools)} narzędzi · {self.tbl}")
+        self._filter()
+
+    def _filter(self) -> None:
+        query = self.search.text().strip().casefold()
+        kind = self.filter_type.currentData()
+        visible = 0
+        for row, tool in enumerate(getattr(self, "_shown", [])):
+            words = [f"T{tool.number}", f"P{tool.pocket}"] + [
+                self.table.item(row, col).text() for col in range(self.table.columnCount())]
+            match = (kind == "" or tool.type == kind) and query in " ".join(words).casefold()
+            self.table.setRowHidden(row, not match)
+            visible += int(match)
+        self.lbl_count.setText(f"{visible} z {self.table.rowCount()} narzędzi · {self.tbl or ''}")
 
     def _selected(self) -> None:
         items = self.table.selectedItems()
