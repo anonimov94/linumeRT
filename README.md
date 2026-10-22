@@ -1,35 +1,162 @@
-# linumeRT
+<div align="center">
 
-![linumeRT](docs/design/marka/baner.png)
+<img src="docs/design/marka/baner.png" alt="linumeRT — CNC Control System" width="100%">
 
-### Przemysłowy sposób pracy na Twojej frezarce CNC. Otwarty, na LinuxCNC, gotowy do testu jednym poleceniem.
+# THE NEXT FACE OF CNC CONTROL
 
-**linumeRT** to ekran operatora i zestaw narzędzi dla **LinuxCNC**, zbudowany przez ludzi, którzy znają
-robotę przy maszynie: od bazowania i zera detalu, przez narzędzia i program, po symulację i produkcję.
-Każdy widok prowadzi operatora w kolejności, w jakiej naprawdę pracuje się na obrabiarce.
+### One machine. Four interfaces. Your way to work.
 
-- 🛑 **Bezpieczeństwo na pierwszym miejscu** — grzyb E-STOP w HMI szeregowo w łańcuchu HAL, watchdog ekranu,
-  **dwukanałowy E-STOP NC z kontrolą rozbieżności**; reset tylko świadomym potwierdzeniem.
-- 🧱 **Symulacja obróbki na żywo** — materiał przygotówki ubywa tam, gdzie przejechało wirujące ostrze;
-  frez palcowy, kulowy, torusowy, teowy, lizak, fazownik, wiertła, głowica, gwintownik.
-- 💥 **Kolizje i przeciążenia wykrywane bezwzględnie** — kontakt bez obrotów, G0 w materiał, szyjka i oprawka,
-  stół i dociski, przeciążenie wrzeciona i napędów osi z granic napędów; zdarzenia diagnostyczne K-3xx.
-  Proces symulacji nie wysyła E-STOP ani STO (aktualizacja właściciela 2026-10-20).
-- 🧰 **Tabela narzędzi z prawdziwą geometrią** — typ, D, korekcja ±1 mm, długość, ostrza, maks. obroty,
-  kierunek skrawania M3/M4, oprawka.
-- 🧭 **Workflow operatora** — Start, Bazowanie, Zero detalu 3D (prostopadłościan, walec, rura, odlew),
-  Program ze sprawdzaniem składni i edycją, **Cykle** (planowanie, otwory: siatka, okrąg, łuk, G81–G83/G73),
-  Produkcja ze startem od linii, Diagnostyka napędów CiA 402.
-- 🤖 **Wirtualny bliźniak maszyny (Plant)** — dynamika osi w C, napędy CiA 402 i krokowe, krańcówki, zderzaki,
-  falownik RS485, magazyn narzędzi, wstrzykiwanie awarii. Testujesz bez ryzyka, zanim kupisz sprzęt.
-- 🔁 **Jakość jak w przemyśle** — ponad 700 testów automatycznych, testy w prawdziwym HAL LinuxCNC,
-  test end-to-end ekranu pod Xvfb, CI na każdym pull requeście.
+**An open-source CNC operator environment built on LinuxCNC.**  
+From machining and toolpaths to machine simulation, diagnostics and digital twins.
 
-> **Status:** działające HMI i wirtualny bliźniak na Debianie 12 / LinuxCNC 2.9.
-> Wszystko, co dotyczy prawdziwego sprzętu, jest **NIEZWERYFIKOWANE NA SPRZĘCIE** — mówimy wprost, co sprawdziliśmy.
-> [Obsługa operatora](docs/OBSLUGA_OPERATORA.md) · [Symulacja w HMI](docs/HMI_SYMULACJA.md).
+[**⚡ Quick Start**](#szybki-start-linux-z-podmanem-np-endeavouros) · [**🎛️ Skin System Vision**](#four-original-interface-concepts) · [**🧩 Project Roadmap**](docs/design/SKIN_SYSTEM_ROADMAP.md) · [**💻 Source Code**](https://github.com/anonimov94/linumeRT)
 
-![Symulacja: materiał po obróbce programu demo](docs/raporty/hmi_sym/demo_po_obrobce.png)
+![LinuxCNC](https://img.shields.io/badge/CONTROL-LinuxCNC%202.9-1a2130?style=for-the-badge&labelColor=111822)
+![Platform](https://img.shields.io/badge/PLATFORM-Debian%2012-2dd4bf?style=for-the-badge&labelColor=111822)
+![License](https://img.shields.io/badge/LICENSE-GPL--2.0--or--later-58646f?style=for-the-badge&labelColor=111822)
+![Status](https://img.shields.io/badge/NEW%20GUI-IN%20ROADMAP-fbbf24?style=for-the-badge&labelColor=111822)
+
+</div>
+
+---
+
+## CONTROL HAS A NEW FACE
+
+> **Design goal — completely new operator interfaces, not reskins of the existing QtDragon layout.**
+> Each skin will define its own panels, controls, visual hierarchy and placement of the 3D machine, workpiece and toolpath views. A shared CNC core remains underneath.
+
+<table>
+<tr>
+<td width="50%" valign="top">
+
+### 01 · CLASSIC DIGITAL
+
+**Retro precision. Digital clarity.**
+
+Large seven-segment-inspired DRO readouts, compact rectangular controls and a toolpath-first workspace. Vintage digital instrument aesthetics redesigned as an original CNC interface.
+
+**Layout:** axis readouts on the left · toolpath in the central viewport · machine view on the right.
+
+</td>
+<td width="50%" valign="top">
+
+### 02 · INDUSTRIAL PRO
+
+**Built for the shop floor.**
+
+Dense technical information, clear alarms, machine geometry and robust large-format controls. Inspired by the general language of industrial instrumentation, without reproducing another manufacturer's interface.
+
+**Layout:** machine and workpiece views alongside the trajectory, plus a dedicated action console.
+
+</td>
+</tr>
+<tr>
+<td width="50%" valign="top">
+
+### 03 · CYBERDECK
+
+**Operator cockpit of tomorrow.**
+
+Angular frames, illuminated readouts and spacecraft-inspired toggle controls. Modular arrangement of status, G-code, machine simulation and path analysis.
+
+**Layout:** asymmetric cockpit with a large trajectory viewport and secondary machine viewport.
+
+</td>
+<td width="50%" valign="top">
+
+### 04 · ORGANIC VECTOR
+
+**Fluid form. Sharp control.**
+
+A futuristic blend of flowing rounded frames, pointed elements, circular indicators and luminous switches. Sci-fi aesthetics with legible technical information.
+
+**Layout:** adaptable floating panels and prominent independent views for machine and toolpath.
+
+</td>
+</tr>
+</table>
+
+<div align="center">
+
+### FOUR COLOR CONFIGURATIONS — FOR EVERY SKIN
+
+![Classic Turquoise](https://img.shields.io/badge/CLASSIC-TURQUOISE-2DD4BF?style=for-the-badge&labelColor=252d34)
+![Graphite Gray](https://img.shields.io/badge/GRAPHITE-GRAY-777777?style=for-the-badge&labelColor=404040)
+![Reactor Green](https://img.shields.io/badge/REACTOR-GREEN-A2E758?style=for-the-badge&labelColor=292e2a)
+![Ion Blue](https://img.shields.io/badge/ION-BLUE-55B9FF?style=for-the-badge&labelColor=29313b)
+
+**4 independent GUI layouts × 4 palettes × English / Polski**
+
+[**Explore the complete skin-system design specification →**](docs/design/SKIN_SYSTEM_ROADMAP.md)
+
+</div>
+
+> **Concept status:** the four redesigned skins, palette switching and the replacement 3D renderer are planned features — not screenshots of shipping software. The original concept artwork is being prepared for publication in the repository.
+
+---
+
+## BUILT AROUND REAL MACHINING WORKFLOWS
+
+<table>
+<tr>
+<td width="50%" valign="top">
+
+#### ◈ CNC OPERATOR EXPERIENCE
+Start → homing → work offsets → tools → G-code → simulation → production. Consistent operator feedback, clear machine states and alarm visibility.
+
+#### ◈ DIGITAL TWIN
+An independently simulated machine (Plant), axis drives, end stops, spindle and virtual machining scenarios — useful for testing before connecting real hardware.
+
+</td>
+<td width="50%" valign="top">
+
+#### ◈ MACHINING SIMULATION
+Stock-removal previews, tool geometry, diagnostics and toolpath visualization. A new shared 3D renderer is planned to address reported triangle-visibility and surface-orientation artifacts.
+
+#### ◈ OPEN ENGINEERING
+LinuxCNC 2.9, HAL, Python and QtVCP integration, reproducible tests, and the GPL-2.0-or-later source code.
+
+</td>
+</tr>
+</table>
+
+<div align="center">
+
+### CURRENT PROJECT PREVIEWS
+
+<img src="docs/raporty/hmi_sym/demo_po_obrobce.png" alt="Current linumeRT machining simulation preview" width="80%">
+
+<sub>Current implementation — simulation preview, not a new-skin render.</sub>
+
+<img src="docs/raporty/zero_detalu/offline.png" alt="Current linumeRT workpiece setup tool" width="80%">
+
+<sub>Current implementation — workpiece setup preview.</sub>
+
+</div>
+
+---
+
+## NEXT MILESTONE: A MODULAR OPERATOR COCKPIT
+
+| Phase | Engineering objective |
+|:--|:--|
+| **SKIN-00** | Confirm architecture and compatibility constraints |
+| **SKIN-01** | Prototype and verify a corrected shared 3D renderer |
+| **SKIN-02** | Build modular skin API, manifests and safe layout selection |
+| **SKIN-03** | Implement four palettes and English/Polski localization |
+| **SKIN-04** | Deliver Classic Digital and Industrial Pro |
+| **SKIN-05** | Deliver Cyberdeck and Organic Vector |
+| **SKIN-06** | Validate the full 16-combination matrix and LinuxCNC/Plant integration |
+
+**Safety:** the graphical interface does not replace a hardware E-STOP or certified safety chain. New layouts must preserve visible alarm states and follow LinuxCNC/HAL interlocks. Hardware operation remains **unverified**.
+
+**[Full skin-engineering roadmap →](docs/design/SKIN_SYSTEM_ROADMAP.md)**
+
+---
+
+## RUN THE CURRENT linumeRT
+
+The existing LinuxCNC/QtDragon-based HMI and Plant simulator remain available during research and development of the replacement GUI. Below are the current launch instructions, project status and technical details.
 
 ## Obraz live USB / ISO (komputer maszyny)
 
