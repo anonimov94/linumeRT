@@ -1,10 +1,11 @@
 # Stan projektu i przekazanie
 
-Tura: Codex · od 2026-10-21 · stan: oddana po synchronizacji EndeavourOS
+Tura: Codex · 2026-10-22 · stan: realizacja ciągła w chmurze.
 
-Model-Author: Codex. Bieżące polecenie właściciela: sprawdzić rozpoczęte prace,
-dokończyć, wypchnąć i scalić zmiany oraz zaktualizować kopię na EndeavourOS.
-Bez otwierania kolejnych etapów roadmapy.
+Model-Author: Codex. Bieżące polecenie właściciela: małe użyteczne tematy możliwe
+w chmurze → testy → push → scalenie po zielonym CI → kolejny temat, aż do „stop”.
+Każdy temat ma osobną gałąź i PR. Dawne ograniczenie do zamykania rozpoczętych prac
+zostało zastąpione tym poleceniem. Odbiór pulpitu właściciela pozostaje oddzielny.
 
 ## Stan scalania
 
@@ -117,3 +118,11 @@ Codex: codex/tool-integer-format naprawia obcinanie zer w liczbie ostrzy i maksy
 obrotach tabeli (12000→12, 10→1). Zera usuwane tylko po kropce dziesiętnej.
 Test starego kodu FAIL; trzy testy Qt lokalnie PASS po poprawce. Szkic następuje po #71;
 scalanie kolejno, po pełnym CI. Wynik i SHA w opisie PR. Model-Author: Codex.
+
+PR #70 scalony jako 37d78f6: 945 + 101 LinuxCNC PASS, 25 subtestów, 9 pominięć.
+#71 (eksport CSV) i #72 (format liczb) mają zielone CI ogólne; trwa LinuxCNC.
+Codex: codex/tool-preserve-metadata chroni dane nieedytowane przez formularz:
+oprawkę, trwałość, STL, parametry tokarskie i korekcje inne niż Z. Zmiana tworzy
+rekord na podstawie bieżącego T w bazie; nowe T ma własne wartości domyślne.
+Regresja starego kodu FAIL; cztery testy Qt/SQLite lokalnie PASS. Szkic następuje po #72.
+Scalić kolejno po pełnym CI; wynik i sprawdzony SHA w PR. NIEZWERYFIKOWANE NA SPRZĘCIE.

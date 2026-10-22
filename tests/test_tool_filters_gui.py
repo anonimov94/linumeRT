@@ -46,6 +46,44 @@ db.add(Tool(50, 20, description="Bez geometrii", diameter=5))
 
 @unittest.skipUnless(importlib.util.find_spec("PyQt5"), "PyQt5 unavailable")
 class ToolFilterGuiTests(unittest.TestCase):
+    def test_editor_preserves_fields_it_does_not_edit(self):
+        script = GUI_SETUP + r'''
+from dataclasses import replace
+
+original = Tool(12, 3, type="flat", description="Przed edycją", holder="Oprawka ER32",
+                params={"d":6, "l":30, "flute_length":15},
+                offsets={"Z":42, "X":1.25, "Y":-2.5, "A":3},
+                diameter=6, lathe={"I":80, "J":20, "Q":3}, life_min=120, used_min=7)
+db.update(original)
+page = ToolsPage(SimpleNamespace(c=model.load_tokens()["kolory"]), str(work / "test.ini"))
+page.db, page.tbl = db, work / "tool.tbl"
+page.load(db.get(12))
+history = db.history()
+page.txt_desc.setText("Po edycji")
+page.spin_z.setValue(43)
+edited = page.current()
+assert edited.holder == original.holder
+assert edited.life_min == 120 and edited.used_min == 7
+assert edited.lathe == original.lathe
+assert edited.offsets == {**original.offsets, "Z":43}
+assert edited.description == "Po edycji" and not edited.validate()
+special = Tool(70, 70, type="special_stl", stl="narzedzia/żółć.stl",
+               params={"d":4, "l":20}, offsets={"Z":25})
+db.add(special)
+page.load(db.get(70))
+assert page.current().stl == special.stl and not page.current().validate()
+page.load(replace(original, number=99, pocket=99))  # A new T must not inherit hidden data.
+new = page.current()
+assert new.number == 99 and new.holder == "" and new.stl is None
+assert new.life_min is None and new.used_min == 0 and new.lathe == {}
+assert new.offsets == {"Z":42}
+assert len(db.history()) == len(history) + 1  # Only the explicit STL fixture was added.
+assert db.get(12) == original and db.get(99) is None
+assert not page.tbl.exists() and not cnc.command.called and not tooldata.save_tool.called
+db.close()
+'''
+        self.run_gui(script)
+
     def test_integer_columns_preserve_trailing_zeroes(self):
         script = GUI_SETUP + r'''
 from linumert_tools_page import _fmt

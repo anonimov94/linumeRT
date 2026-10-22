@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import os
 import sys
+from dataclasses import replace
 
 import linuxcnc
 from PyQt5 import QtCore, QtGui, QtWidgets
@@ -302,10 +303,14 @@ class ToolsPage(QtWidgets.QWidget):
             elif spin.value() != spin.minimum():
                 params[name] = round(spin.value(), 4)
         params["hand"] = float(self.cmb_hand.currentData())
-        return Tool(number=self.spin_t.value(), pocket=self.spin_p.value(),
-                    type=self.cmb_type.currentData(), description=self.txt_desc.text().strip(),
-                    params=params, offsets={"Z": self.spin_z.value()},
-                    diameter=params.get("d"))
+        number = self.spin_t.value()
+        original = self.db.get(number) if self.db is not None else None
+        original = original or Tool(number=number, pocket=self.spin_p.value())
+        # Model-Author: Codex. Keep metadata and axes absent from this editor.
+        return replace(original, pocket=self.spin_p.value(), type=self.cmb_type.currentData(),
+                       description=self.txt_desc.text().strip(), params=params,
+                       offsets={**original.offsets, "Z": self.spin_z.value()},
+                       diameter=params.get("d"))
 
     def _busy(self) -> bool:
         s = linuxcnc.stat()

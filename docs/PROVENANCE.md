@@ -244,3 +244,8 @@ oraz QSaveFile i testy Qt/SQLite, GPL-2.0-or-later. Bez nowych bibliotek ani zas
 
 Model-Author: Codex. Własna poprawka formatowania i regresja Qt, GPL-2.0-or-later.
 Bez zależności i zasobów zewnętrznych.
+
+## Zachowanie metadanych narzędzia — 2026-10-22
+
+Model-Author: Codex. Własna poprawka budowania rekordu edytora oraz regresja Qt/SQLite,
+GPL-2.0-or-later. Standardowe dataclasses.replace; bez nowych bibliotek i zasobów.
