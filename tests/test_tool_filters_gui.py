@@ -100,5 +100,6 @@ db.close()
                        PYTHONPATH=os.pathsep.join((str(root / "screens/linumert"),
                                                   str(root / "core"))))
             result = subprocess.run([sys.executable, "-c", script, str(root), folder],
-                                    env=env, capture_output=True, text=True, timeout=20, check=False)
+                                    env=env, capture_output=True, text=True, timeout=20,
+                                    check=False)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
