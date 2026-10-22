@@ -156,3 +156,11 @@ w minutach. Brak automatycznego naliczania i blokady po przekroczeniu planu.
 Core odrzuca błędne/nieskończone czasy również przy CSV. Trzynaście testów lokalnie PASS;
 podgląd i obsługa operatora zaktualizowane. Szkic następuje po #76.
 Wynik pełnego CI i sprawdzony SHA w PR. Model-Author: Codex.
+
+#75 scalony jako feded36: 950 + 101 LinuxCNC PASS, 25 subtestów i 9 pominięć.
+#76 i #77 mają zielone CI ogólne, trwa LinuxCNC. Codex: codex/tool-numeric-validation
+odrzuca niepoprawne średnice/korekcje, orientację Q i struktury JSON przed zapisem;
+eksport sprawdza również istniejące rekordy przed podmianą tool.tbl. Dwie regresje
+na starym kodzie FAIL; 17 testów lokalnie PASS. Odmowa walidacji w HMI ma obsługę,
+bez komend przeładowania. Szkic następuje po #77; wynik i sprawdzony SHA w PR.
+Model-Author: Codex. NIEZWERYFIKOWANE NA SPRZĘCIE.
