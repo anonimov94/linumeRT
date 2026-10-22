@@ -167,3 +167,16 @@ Dotyczy to również usunięcia rekordu. Przed dalszą pracą sprawdź bazę i `
 usuń przyczynę błędu i uzgodnij tabelę z LinuxCNC. Komunikat błędu nie potwierdza
 wycofania zmiany ani synchronizacji z CNC. Model-Author: Codex.
 NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## Historia zmian narzędzia
+
+Narzędzia → „Historia T…” otwiera historię numeru T widocznego w edytorze.
+Działa również po usunięciu narzędzia z bazy. Lista pokazuje do 100 ostatnich wpisów,
+najnowsze na górze: czas UTC, dodanie/zmianę/usunięcie/import i źródło.
+Wybór wpisu pokazuje wyłącznie zmienione pola w kolumnach „Przed” i „Po”.
+„—” oznacza brak wartości. Zamknij i otwórz ponownie, aby odświeżyć podgląd.
+
+Jest to historia bazy, nie potwierdzenie zapisania `tool.tbl` ani wczytania tabeli
+przez LinuxCNC. Pomaga porównać dane po błędzie zapisu, ale nie przywraca zmian
+i nie wysyła komend CNC. Nieznany T pokazuje pustą historię, a błąd odczytu lub
+uszkodzony wpis — komunikat. Model-Author: Codex.

@@ -685,3 +685,11 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
 - Dwie regresje na starym kodzie FAIL; sześć testów Qt/SQLite PASS, w tym blokada SQLite i częściowy zapis.
 - Własny podgląd błędu; pełne CI do odbioru w PR. Autokontrola, bez niezależnego przeglądu.
 - NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## Narzędzia — podgląd historii zmian przed/po · 2026-10-22 · Codex
+- Model-Author: Codex. Historia T… pokazuje do 100 najnowszych zmian dla T z edytora, także usuniętego.
+- Pola przed/po z nazwami parametrów i jednostkami, czas UTC, rodzaj zmiany i źródło.
+- Odczyt ograniczony w SQL; API historii bez limitu zachowuje dotychczasowe działanie.
+- Bez przywracania danych i komend CNC; historia bazy nie potwierdza wczytania tabeli przez CNC.
+- Dziewięć testów core/Qt/SQLite PASS: kolejność/limit, kliknięcie, pusta historia i błędne dane.
+- Własny podgląd Qt i dokumentacja; pełne CI do odbioru w PR. Autokontrola, bez niezależnego przeglądu.

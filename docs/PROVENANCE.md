@@ -259,3 +259,9 @@ GPL-2.0-or-later. QScrollArea i QFormLayout z istniejącego PyQt5; bez nowych za
 
 Model-Author: Codex. Własna obsługa wyjątków i regresje rzeczywistych przycisków Qt/SQLite,
 GPL-2.0-or-later. Standardowe sqlite3 i istniejące API LinuxCNC; bez nowych zależności.
+
+## Podgląd historii narzędzia — 2026-10-22
+
+Model-Author: Codex. Własny linumert_tool_history.py, integracja widoku, ograniczenie
+ToolDB.history i testy, GPL-2.0-or-later. Istniejące PyQt5, standardowe json/datetime/SQLite;
+bez nowych zależności ani zasobów zewnętrznych.
