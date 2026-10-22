@@ -729,3 +729,13 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
 - Próby G41/G42 w rs274 rozszerzone o tabelę calową; lokalnie niewykonane, odbiór przez CI.
 - Oddzielny dług przeliczenia pozycji/WCS/narzędzi Live zapisany; brak deklaracji pełnej symulacji calowej.
 - Autokontrola, bez niezależnego przeglądu. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## Symulacja — wspólne jednostki mm procesu Live · 2026-10-22 · Codex
+- Model-Author: Codex. XYZ, WCS z parametrów/statusu i Z/D tabeli przeliczane z jednostek INI na mm.
+- Silnik, komunikaty położenia i ślad końcówki otrzymują te same fizyczne długości dla mm/inch.
+- Nieznane jednostki raportowane zdarzeniem error przed startem odczytu i wątku poleceń.
+- Odtworzono regresję starego kodu FAIL; 30 testów lokalnie PASS (21 core/sim oraz 9 rzeczywistego Qt).
+- Testy obejmują WCS, narzędzie zastępcze i typowane, identyczną mapę materiału oraz ślad końcówki.
+- Atrapa statusu nie udostępnia komend CNC; bez zmian toru ruchu/safety. Fixture podglądu jawnie mm.
+- Wymagane pełne CI, ręcznego odbioru calowego HMI/obrabiarki nie zaliczono.
+- Autokontrola, bez niezależnego przeglądu. NIEZWERYFIKOWANE NA SPRZĘCIE.

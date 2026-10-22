@@ -184,3 +184,13 @@ w mm; kąty bez skalowania, nieznane jednostki blokują operację przed zapisem.
 Znany osobny dług: Live.sample/WCS/reload_tools czytają wartości CNC bez przeliczenia
 na mm. Pełnej symulacji calowej jeszcze nie zaliczono. Szkic następuje po #79.
 Wynik i sprawdzony SHA w PR. Model-Author: Codex. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+#79 scalony jako bba7b02: 965 + 105 LinuxCNC PASS, 71 subtestów, 9 pominięć;
+wszystkie cztery nowe G41/G42 z korekcją PASS. #80 ma zielone CI ogólne; trwa LinuxCNC.
+Codex: codex/sim-live-units przelicza XYZ, WCS i Z/D narzędzi z jednostek maszyny
+na mm używane przez silnik, widok i ślad końcówki. Błędne jednostki dają zdarzenie
+error przed uruchomieniem odczytu i wątku poleceń. 30 lokalnych testów PASS (21 core/sim
+na Pythonie 3.12 i 9 Qt na 3.13), w tym identyczne usunięcie materiału mm/inch.
+Regresja starego kodu FAIL. Szkic następuje po #80; pełny wynik CI i SHA w PR.
+Pełnego ręcznego odbioru calowego HMI/obrabiarki nie zaliczono. Model-Author: Codex.
+NIEZWERYFIKOWANE NA SPRZĘCIE.

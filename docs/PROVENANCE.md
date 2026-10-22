@@ -286,3 +286,11 @@ LinuxCNC; bez nowych bibliotek. Reguła D tabeli i G41/G42 zgodna z dokumentacj�
 
 Model-Author: Codex. Własna integracja jednostek INI w tooldata/ToolsPage i regresje
 Qt/SQLite/rs274, GPL-2.0-or-later. Istniejące przeliczniki ToolDB, bez nowych zależności.
+
+## Normalizacja jednostek procesu Live — 2026-10-22
+
+Model-Author: Codex. Własne przeliczenie wartości statusu i narzędzi oraz testy
+rzeczywistego silnika/mapy materiału, GPL-2.0-or-later. Bez nowych zależności.
+Semantykę parametrów WCS sprawdzono w LinuxCNC 2.9, convert_coordinate_system
+(USER_TO_PROGRAM_LEN); nie kopiowano kodu:
+https://github.com/LinuxCNC/linuxcnc/blob/2.9/src/emc/rs274ngc/interp_convert.cc .

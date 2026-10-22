@@ -92,6 +92,7 @@ def test_live_preview_dispatch_has_no_command_channel(capsys, state, codes, ok):
 
     live = Live.__new__(Live)
     live.engine = _engine()
+    live.to_mm = 1.0  # This fixture constructs a metric instance without __init__.
     live._resume_trace = [(-5, 0, -2), (5, 0, -2)]
     live.stat = SimpleNamespace(poll=Mock(), interp_state=state, gcodes=codes,
                                 actual_position=(5, 0, 38), spindle=[], motion_type=2,
@@ -124,3 +125,4 @@ def test_resume_history_resets_on_tool_file_rapid_or_sampling_gap():
     assert live._resume_trace == []
     live.record_resume_sample(Sample(2.2, (9, 0, 38), 0))
     assert live._resume_trace == []
+

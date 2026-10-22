@@ -230,6 +230,19 @@ Przykład: D0.25 i Z2 w tabeli calowej odpowiadają D=6,35 mm i Z=50,8 mm w bazi
 
 Nieznane jednostki powodują odmowę przed zapisem, zamiast założenia mm.
 Przy braku ustawienia jednostek pozostaje dotychczasowy domyślny mm.
-To poprawka obsługi pliku tabeli; pełny odbiór przeliczenia pozycji, WCS i narzędzi
-w symulacji calowej pozostaje osobnym punktem. Model-Author: Codex.
+Proces symulacji również normalizuje długości do mm, zgodnie z opisem poniżej.
+Pełny ręczny odbiór maszyny calowej pozostaje osobnym punktem. Model-Author: Codex.
 NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## Jednostki procesu symulacji na żywo
+
+Pozycja XYZ, początek przygotówki z WCS oraz długość i średnica narzędzia z tabeli
+LinuxCNC są przeliczane z jednostek maszyny na mm. Modele maszyny, przygotówka,
+widok i ślad końcówki używają wspólnych wartości fizycznych; 1 cal odpowiada 25,4 mm.
+Nie trzeba zmieniać wymiarów modelu ani przygotówki po zmianie profilu mm/inch.
+Jednostkę określa `TRAJ/LINEAR_UNITS`, a nie bieżące G20/G21 programu.
+
+Nieznane jednostki zatrzymują uruchomienie procesu symulacji z komunikatem błędu.
+Nie jest to blokada ruchu ani polecenie E-STOP. Testy porównują geometrię i usuwany
+materiał, lecz nie zastępują ręcznego odbioru calowego HMI/obrabiarki.
+Model-Author: Codex. NIEZWERYFIKOWANE NA SPRZĘCIE.
