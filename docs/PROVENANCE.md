@@ -229,3 +229,8 @@ Python, istniejące PyQt5 i tokeny wyglądu. Bez nowych zależności ani zasobó
 Model-Author: Codex. Własna zmiana linumert_tools_page.py i test rzeczywistych widgetów
 Qt/SQLite, GPL-2.0-or-later. Użyto istniejących typów narzędzi i tokenów wyglądu;
 bez nowych bibliotek ani zasobów zewnętrznych.
+
+## Odświeżanie listy narzędzi — 2026-10-22
+
+Model-Author: Codex. Własna poprawka linumert_tools_page.py i regresja Qt/SQLite,
+GPL-2.0-or-later. Istniejące QSignalBlocker i model zaznaczenia Qt; bez nowych zależności.

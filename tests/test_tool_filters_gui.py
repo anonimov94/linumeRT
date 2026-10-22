@@ -19,7 +19,7 @@ import sys
 from pathlib import Path
 from types import ModuleType, SimpleNamespace
 from unittest.mock import Mock
-from PyQt5 import QtWidgets
+from PyQt5 import QtCore, QtWidgets
 
 root, work = Path(sys.argv[1]), Path(sys.argv[2])
 core = ModuleType("qtvcp.core")
@@ -77,11 +77,31 @@ assert visible() == ["27"]
 page.table.selectRow(1)
 assert page.spin_t.value() == 27
 page.search.clear()
+page.filter_type.setCurrentIndex(0)
+page.table.selectRow(2)
+page.table.setCurrentCell(2, 3)
+assert page.spin_t.value() == 50
+page.txt_desc.setText("Niezapisana edycja T50")
 page.filter_type.setCurrentIndex(page.filter_type.findData("ball"))
+warnings = []
+previous = QtCore.qInstallMessageHandler(lambda kind, context, text: warnings.append(text))
 db.add(Tool(30, 30, type="ball", params={"d":10, "l":50}))
 page.refresh()
 assert visible() == ["27", "30"]
-assert len(db.history()) == len(history) + 1  # Only the explicit fixture change wrote data.
+assert page.table.selectionModel().selectedRows()[0].data(QtCore.Qt.UserRole) == 50
+assert page.table.currentColumn() == 3
+assert page.spin_t.value() == 50 and page.txt_desc.text() == "Niezapisana edycja T50"
+db.update(Tool(50, 20, description="Zmiana zewnętrzna", diameter=5))
+page.refresh()
+assert page.table.selectionModel().selectedRows()[0].data(QtCore.Qt.UserRole) == 50
+assert page.txt_desc.text() == "Niezapisana edycja T50"
+db.remove(50)
+page.refresh()
+assert not page.table.selectedItems() and page.table.currentRow() == -1
+assert page.spin_t.value() == 50 and page.txt_desc.text() == "Niezapisana edycja T50"
+QtCore.qInstallMessageHandler(previous)
+assert not any("already owned" in text for text in warnings), warnings
+assert len(db.history()) == len(history) + 3  # Only explicit fixture changes wrote data.
 assert db.tools()[:2] == before[:2]
 assert not page.tbl.exists()
 assert not cnc.command.called and not tooldata.save_tool.called

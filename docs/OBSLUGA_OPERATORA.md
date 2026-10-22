@@ -118,3 +118,8 @@ narzędzi względem całej bazy. „Wszystkie typy” i puste wyszukiwanie odsł
 Filtrowanie nie wybiera innego narzędzia, nie zmienia danych w edytorze i nie zapisuje tabeli.
 Wybrane narzędzie może zostać ukryte przez filtr; edytor nadal pokazuje jego numer T.
 Model-Author: Codex.
+
+Odświeżenie listy po zmianie bazy zachowuje zaznaczenie według numeru T i nie przełącza
+edytora na narzędzie, które zajęło poprzedni numer wiersza. Nie nadpisuje niezapisanych
+pól, również gdy wybrane T jest ukryte przez filtr. Jeśli T usunięto z bazy, zaznaczenie
+znika; pola edytora pozostają do decyzji operatora. Samo odświeżanie niczego nie zapisuje.

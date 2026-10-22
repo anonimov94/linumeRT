@@ -189,21 +189,34 @@ class ToolsPage(QtWidgets.QWidget):
         tools = self.db.tools()
         if tools == getattr(self, "_shown", None):
             return  # odświeżanie co 0,5 s: tabela bez zmian, zaznaczenie zostaje
+        selected = self.table.selectionModel().selectedRows()
+        number = selected[0].data(QtCore.Qt.UserRole) if selected else None
+        column = self.table.currentColumn()
         self._shown = tools
-        self.table.setRowCount(len(tools))
-        for row, t in enumerate(tools):
-            p = t.params
-            values = [str(t.number), str(t.pocket), TYPES[t.type].label if t.type in TYPES
-                      else "bez typu", t.description, _fmt(p.get("d", t.diameter)),
-                      _fmt(p.get("d_wear", 0.0)), _fmt(t.offsets.get("Z")),
-                      _fmt(p.get("flutes"), 0), _fmt(p.get("max_rpm"), 0),
-                      "lewe M4" if p.get("hand", 1) < 0 else "prawe M3"]
-            for col, value in enumerate(values):
-                item = self.table.item(row, col) or QtWidgets.QTableWidgetItem()
-                item.setText(value)
-                item.setData(QtCore.Qt.UserRole, t.number)
-                self.table.setItem(row, col, item)
-        self._filter()
+        # Model-Author: Codex. Repainting data must not load a different tool into the editor.
+        with QtCore.QSignalBlocker(self.table):
+            self.table.setRowCount(len(tools))
+            for row, t in enumerate(tools):
+                p = t.params
+                values = [str(t.number), str(t.pocket), TYPES[t.type].label if t.type in TYPES
+                          else "bez typu", t.description, _fmt(p.get("d", t.diameter)),
+                          _fmt(p.get("d_wear", 0.0)), _fmt(t.offsets.get("Z")),
+                          _fmt(p.get("flutes"), 0), _fmt(p.get("max_rpm"), 0),
+                          "lewe M4" if p.get("hand", 1) < 0 else "prawe M3"]
+                for col, value in enumerate(values):
+                    item = self.table.item(row, col)
+                    if item is None:
+                        item = QtWidgets.QTableWidgetItem()
+                        self.table.setItem(row, col, item)
+                    item.setText(value)
+                    item.setData(QtCore.Qt.UserRole, t.number)
+            self.table.clearSelection()
+            self.table.setCurrentCell(-1, -1)
+            for row, tool in enumerate(tools):
+                if tool.number == number:
+                    self.table.setCurrentCell(row, max(column, 0))
+                    break
+            self._filter()
 
     def _filter(self) -> None:
         query = self.search.text().strip().casefold()
@@ -314,3 +327,4 @@ class ToolsPage(QtWidgets.QWidget):
         sim = getattr(self.shell, "sim", None)
         if sim is not None:
             QtCore.QTimer.singleShot(500, lambda: sim.client.send(cmd="tools"))
+
