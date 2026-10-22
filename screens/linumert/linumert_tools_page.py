@@ -86,6 +86,12 @@ class ToolsPage(QtWidgets.QWidget):
         self.table.horizontalHeader().setStretchLastSection(True)
         self.table.itemSelectionChanged.connect(self._selected)
         lay.addWidget(self.table, 1)
+        self.export = QtWidgets.QPushButton("Eksport całej bazy CSV…")
+        self.export.setMinimumHeight(44)
+        self.export.setToolTip("Zapisuje wszystkie narzędzia z bazy, niezależnie od filtrów. "
+                               "Nie obejmuje niezapisanych zmian w edytorze.")
+        self.export.clicked.connect(self.export_csv)
+        lay.addWidget(self.export)
         grid.addWidget(frame, 0, 0)
         grid.addWidget(self._editor(), 0, 1)
         grid.setColumnStretch(0, 3)
@@ -173,6 +179,25 @@ class ToolsPage(QtWidgets.QWidget):
             label.setText(PARAMS[name].label + (" *" if name in required else ""))
 
     # ---- dane ---------------------------------------------------------------------------
+    def export_csv(self) -> None:
+        """Model-Author: Codex. Read-only backup; no tool.tbl or CNC commands."""
+        if not self._open():
+            return
+        filename, _ = QtWidgets.QFileDialog.getSaveFileName(
+            self, "Eksport całej bazy narzędzi", "narzedzia.csv", "CSV (*.csv)")
+        if not filename:
+            return
+        try:
+            data = self.db.export_csv().encode("utf-8")
+        except Exception as exc:  # noqa: BLE001 - report database errors in the HMI
+            QtWidgets.QMessageBox.warning(self, "Eksport nieudany", str(exc))
+            return
+        target = QtCore.QSaveFile(filename)
+        if (not target.open(QtCore.QIODevice.WriteOnly) or target.write(data) != len(data)
+                or not target.commit()):
+            target.cancelWriting()
+            QtWidgets.QMessageBox.warning(self, "Eksport nieudany", target.errorString())
+
     def _open(self) -> bool:
         if self.db is not None:
             return True

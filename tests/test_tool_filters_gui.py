@@ -10,11 +10,7 @@ import unittest
 from pathlib import Path
 
 
-@unittest.skipUnless(importlib.util.find_spec("PyQt5"), "PyQt5 unavailable")
-class ToolFilterGuiTests(unittest.TestCase):
-    def test_search_type_refresh_and_selection_do_not_write_or_command_cnc(self):
-        root = Path(__file__).resolve().parents[1]
-        script = r'''
+GUI_SETUP = r'''
 import sys
 from pathlib import Path
 from types import ModuleType, SimpleNamespace
@@ -46,6 +42,13 @@ db.add(Tool(12, 3, type="flat", params={"d":6, "l":30, "flute_length":15},
             description="Frez ŻÓŁĆ"))
 db.add(Tool(27, 9, type="ball", params={"d":8, "l":40}, description="Kulowy"))
 db.add(Tool(50, 20, description="Bez geometrii", diameter=5))
+'''
+
+
+@unittest.skipUnless(importlib.util.find_spec("PyQt5"), "PyQt5 unavailable")
+class ToolFilterGuiTests(unittest.TestCase):
+    def test_search_type_refresh_and_selection_do_not_write_or_command_cnc(self):
+        script = GUI_SETUP + r'''
 before, history = db.tools(), db.history()
 tokens = model.load_tokens()
 page = ToolsPage(SimpleNamespace(c=tokens["kolory"]), str(work / "test.ini"))
@@ -115,6 +118,57 @@ app.processEvents()
 assert window.grab().save(str(work / "tool-filters.png"))
 db.close()
 '''
+        self.run_gui(script)
+
+    def test_export_whole_database_cancel_and_write_error(self):
+        script = GUI_SETUP + r'''
+from unittest.mock import patch
+
+db.update(Tool(12, 3, type="flat", description='Frez ŻÓŁĆ, "lewy"', holder="Oprawka Ł",
+               params={"d":6, "l":30, "flute_length":15, "hand":-1, "d_wear":-0.02},
+               offsets={"Z":42.1234, "X":-0.001}, diameter=6, life_min=120, used_min=7))
+before, history = db.tools(), db.history()
+page = ToolsPage(SimpleNamespace(c=model.load_tokens()["kolory"]), str(work / "test.ini"))
+page.db, page.tbl = db, work / "tool.tbl"
+page.refresh()
+page.table.selectRow(0)
+page.txt_desc.setText("Niezapisany opis")
+page.search.setText("T27")
+target = work / "narzedzia.csv"
+with patch.object(QtWidgets.QFileDialog, "getSaveFileName", return_value=(str(target), "")), \
+        patch.object(QtWidgets.QMessageBox, "warning") as warning:
+    page.export.click()
+    warning.assert_not_called()
+text = target.read_text(encoding="utf-8")
+assert text == db.export_csv() and "Niezapisany opis" not in text
+restored = ToolDB(work / "restored.db")
+restored.import_csv(text)
+assert restored.tools() == before  # Includes hidden rows, Unicode and complete geometry.
+restored.close()
+original = target.read_bytes()
+with patch.object(QtWidgets.QFileDialog, "getSaveFileName", return_value=("", "")):
+    page.export.click()
+assert target.read_bytes() == original
+with patch.object(QtWidgets.QFileDialog, "getSaveFileName", return_value=(str(work), "")), \
+        patch.object(QtWidgets.QMessageBox, "warning") as warning:
+    page.export.click()  # A directory cannot be replaced by a CSV file.
+    warning.assert_called_once()
+assert target.read_bytes() == original
+with patch.object(QtWidgets.QFileDialog, "getSaveFileName", return_value=(str(target), "")), \
+        patch.object(db, "export_csv", side_effect=RuntimeError("Baza niedostępna")), \
+        patch.object(QtWidgets.QMessageBox, "warning") as warning:
+    page.export.click()
+    warning.assert_called_once()
+assert target.read_bytes() == original
+assert db.tools() == before and db.history() == history
+assert page.spin_t.value() == 12 and page.txt_desc.text() == "Niezapisany opis"
+assert not page.tbl.exists() and not cnc.command.called and not tooldata.save_tool.called
+db.close()
+'''
+        self.run_gui(script)
+
+    def run_gui(self, script):
+        root = Path(__file__).resolve().parents[1]
         with tempfile.TemporaryDirectory() as folder:
             env = dict(os.environ, QT_QPA_PLATFORM="offscreen",
                        PYTHONPATH=os.pathsep.join((str(root / "screens/linumert"),
