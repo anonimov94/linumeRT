@@ -38,7 +38,7 @@ from linumert.tools.tbl import INCH
 
 from .engine import Sample, SimEngine
 from .machine import Machine, load_machine
-from .placement import find_stock_line, place_stock, read_var_offsets
+from .placement import OFFSET_INDEX, find_stock_line, place_stock, read_var_offsets
 from .report import SimLog, write_report
 from .tooldata import cutters, ini_value, open_db, read_ini, table_units
 
@@ -135,12 +135,20 @@ class Live:
         except StockError as exc:
             emit(ev="error", text=f"przygotówka: {exc}")
             return
-        var = ini_value(self.ini, "RS274NGC", "PARAMETER_FILE", "linuxcnc.var")
-        offsets = read_var_offsets(self._rel(var))
-        origin = offsets.get(stock.offset)
-        if origin is None:
+        try:
             self.stat.poll()
+        except self.lc.error as exc:
+            emit(ev="error", text=f"położenie przygotówki: brak statusu LinuxCNC: {exc}")
+            return
+        if getattr(self.stat, "g5x_index", None) == OFFSET_INDEX[stock.offset]:
             origin = tuple(self.stat.g5x_offset[:3])
+        else:
+            var = ini_value(self.ini, "RS274NGC", "PARAMETER_FILE", "linuxcnc.var")
+            origin = read_var_offsets(self._rel(var)).get(stock.offset)
+            if origin is None:
+                emit(ev="error", text=f"położenie przygotówki: brak danych {stock.offset}; "
+                     "wybierz ten układ w LinuxCNC albo udostępnij zapisane parametry")
+                return
         origin = self._xyz_mm(origin)
         smap = place_stock(stock, origin)
         self.engine.set_stock(smap, stock.material)

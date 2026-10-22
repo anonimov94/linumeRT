@@ -246,3 +246,17 @@ Nieznane jednostki zatrzymują uruchomienie procesu symulacji z komunikatem bł�
 Nie jest to blokada ruchu ani polecenie E-STOP. Testy porównują geometrię i usuwany
 materiał, lecz nie zastępują ręcznego odbioru calowego HMI/obrabiarki.
 Model-Author: Codex. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## Początek przygotówki a aktywny WCS
+
+Przy definiowaniu przygotówki z `OFFSET=G54` (analogicznie inne WCS) aktywny układ
+jest odczytywany z bieżącego statusu LinuxCNC. Starszy zapis w pliku parametrów
+nie zastępuje jego aktualnej wartości po zerowaniu/przesunięciu detalu.
+
+Dla nieaktywnego WCS używany jest zapis w pliku parametrów; może nie obejmować
+najnowszych zmian trwającej sesji. Aby użyć bieżącego odczytu przy ręcznym
+przygotowaniu, wybierz docelowy WCS w LinuxCNC i ponów definicję przygotówki.
+Brak danych żądanego układu albo błąd odczytu statusu daje komunikat. Nowa definicja
+nie jest wtedy stosowana; poprzednia mapa i definicja pozostają. Ekran nie wybiera
+WCS ani nie wysyła polecenia ruchu w imieniu operatora. Model-Author: Codex.
+NIEZWERYFIKOWANE NA SPRZĘCIE.

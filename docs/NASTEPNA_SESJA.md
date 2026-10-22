@@ -194,3 +194,12 @@ na Pythonie 3.12 i 9 Qt na 3.13), w tym identyczne usunięcie materiału mm/inch
 Regresja starego kodu FAIL. Szkic następuje po #80; pełny wynik CI i SHA w PR.
 Pełnego ręcznego odbioru calowego HMI/obrabiarki nie zaliczono. Model-Author: Codex.
 NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+#80 scalony jako f5c04f4: 970 + 109 LinuxCNC PASS, 75 subtestów i 9 pominięć;
+osiem prób G41/G42 mm/inch PASS. #81 ma zielone CI ogólne; trwa LinuxCNC.
+Codex: codex/sim-stock-wcs wybiera świeży status dla aktywnego układu przygotówki,
+zamiast starych parametrów z pliku. Inny WCS korzysta z zapisanych parametrów;
+brak jego danych lub błąd poll daje error bez zastąpienia dotychczasowego materiału.
+Regresja starego kodu FAIL; 32 lokalne testy PASS (23 core/sim, 9 Qt).
+Szkic następuje po #81; pełny wynik CI i SHA w PR. Model-Author: Codex.
+NIEZWERYFIKOWANE NA SPRZĘCIE.
