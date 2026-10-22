@@ -217,3 +217,9 @@ HAL połączeń i testy. Bez nowych bibliotek; użyto standardowych komponentów
 Interfejs external offsets z dokumentacji LinuxCNC 2.9:
 https://linuxcnc.org/docs/2.9/html/motion/external-offsets.html .
 Nie skopiowano kodu upstream; bazowy handler QtDragon pozostaje bez zmian.
+
+## Historia diagnostyczna — 2026-10-22
+
+Model-Author: Codex. Własny kod GPL-2.0-or-later: diag/journal.py, linumert_log_view.py
+oraz testy; integracja istniejącej Diagnostyki. SQLite i CSV ze standardowej biblioteki
+Python, istniejące PyQt5 i tokeny wyglądu. Bez nowych zależności ani zasobów zewnętrznych.
