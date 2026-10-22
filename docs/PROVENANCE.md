@@ -249,3 +249,8 @@ Bez zależności i zasobów zewnętrznych.
 
 Model-Author: Codex. Własna poprawka budowania rekordu edytora oraz regresja Qt/SQLite,
 GPL-2.0-or-later. Standardowe dataclasses.replace; bez nowych bibliotek i zasobów.
+
+## Wybór ścieżki STL narzędzia — 2026-10-22
+
+Model-Author: Codex. Własny formularz, QFileDialog i testy widgetów Qt/SQLite,
+GPL-2.0-or-later. QScrollArea i QFormLayout z istniejącego PyQt5; bez nowych zależności.

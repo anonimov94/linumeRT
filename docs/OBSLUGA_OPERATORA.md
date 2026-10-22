@@ -142,3 +142,16 @@ osi inne niż Z. Zmieniane są pola widoczne w edytorze i geometria wybranego ty
 Nowy numer T zaczyna z wartościami domyślnymi tych danych; nie dziedziczy ich po
 poprzednio oglądanym narzędziu. Dotychczasowe zasady użycia przycisku „Zapisz”
 pozostają w mocy. Model-Author: Codex. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## Narzędzie specjalne STL
+
+Po wybraniu typu „Specjalne (STL)” pojawia się wymagane pole „Model STL” i przycisk
+„Wybierz…”. Można też wpisać ścieżkę ręcznie. Anulowanie wyboru nie czyści pola;
+„Nowe” zaczyna bez ścieżki poprzedniego narzędzia. „Zapisz” korzysta z dotychczasowej
+walidacji oraz bazy narzędzi. Zapisywana jest ścieżka, bez kopiowania pliku i bez
+sprawdzania poprawności siatki. Model powinien mieć oś Z i czoło w 0.
+
+Obecna symulacja nadal używa walca zastępczego, również po wskazaniu STL.
+Nie potwierdza to zgodności kolizji z rzeczywistą bryłą pliku. Przy małym oknie
+edytor można przewijać pionowo; długie wiersze formularza zawijają się.
+Model-Author: Codex.

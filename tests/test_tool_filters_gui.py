@@ -46,6 +46,68 @@ db.add(Tool(50, 20, description="Bez geometrii", diameter=5))
 
 @unittest.skipUnless(importlib.util.find_spec("PyQt5"), "PyQt5 unavailable")
 class ToolFilterGuiTests(unittest.TestCase):
+    def test_stl_picker_required_path_cancel_and_reload(self):
+        script = GUI_SETUP + r'''
+from unittest.mock import patch
+
+page = ToolsPage(SimpleNamespace(c=model.load_tokens()["kolory"]), str(work / "test.ini"))
+page.db, page.tbl = db, work / "tool.tbl"
+page.load(Tool(70, 70, type="special_stl", params={"d":8, "l":40}))
+assert not page.stl_row.isHidden() and not page.lbl_stl.isHidden()
+assert any(issue.field == "stl" for issue in page.current().validate())
+model_path = work / "żółć.stl"
+model_bytes = b"solid test\nendsolid test\n"
+model_path.write_bytes(model_bytes)
+with patch.object(QtWidgets.QFileDialog, "getOpenFileName",
+                  return_value=(str(model_path), "")) as dialog:
+    page.btn_stl.click()
+    dialog.assert_called_once()
+tool = page.current()
+assert tool.stl == str(model_path) and not tool.validate()
+with patch.object(QtWidgets.QFileDialog, "getOpenFileName", return_value=("", "")):
+    page.btn_stl.click()
+assert page.txt_stl.text() == str(model_path)
+db.add(tool)
+page.load(db.get(12))
+assert page.stl_row.isHidden() and page.lbl_stl.isHidden()
+page.load(db.get(70))
+assert page.current().stl == str(model_path)
+window = QtWidgets.QWidget()
+window.setObjectName("lrtRoot")
+window.setStyleSheet(model.shell_qss(model.load_tokens()))
+QtWidgets.QVBoxLayout(window).addWidget(page)
+window.resize(1200, 600)
+window.show()
+app.processEvents()
+assert window.height() == 600  # The editor must scroll instead of forcing a taller screen.
+assert page.editor_scroll.horizontalScrollBar().maximum() == 0
+page.editor_scroll.ensureWidgetVisible(page.stl_row)
+app.processEvents()
+hint = page.stl_row.findChild(QtWidgets.QLabel)
+assert hint.fontMetrics().boundingRect(
+    QtCore.QRect(0, 0, hint.width(), 10000), QtCore.Qt.TextWordWrap,
+    hint.text()).height() <= hint.height()
+field_rect = QtCore.QRect(page.txt_stl.mapToGlobal(QtCore.QPoint()), page.txt_stl.size())
+hint_rect = QtCore.QRect(hint.mapToGlobal(QtCore.QPoint()), hint.size())
+assert not field_rect.intersects(hint_rect)
+save = next(button for button in page.findChildren(QtWidgets.QPushButton)
+            if button.text() == "Zapisz")
+page.editor_scroll.ensureWidgetVisible(save)
+app.processEvents()
+assert page.editor_scroll.viewport().rect().contains(
+    save.mapTo(page.editor_scroll.viewport(), save.rect().center()))
+page.txt_stl.setText("  narzedzia/wlasne.stl  ")
+assert page.current().stl == "narzedzia/wlasne.stl"
+page.txt_stl.clear()
+assert any(issue.field == "stl" for issue in page.current().validate())
+page.new_tool()
+assert page.txt_stl.text() == "" and page.stl_row.isHidden()
+assert db.get(70).stl == str(model_path) and model_path.read_bytes() == model_bytes
+assert not page.tbl.exists() and not cnc.command.called and not tooldata.save_tool.called
+db.close()
+'''
+        self.run_gui(script)
+
     def test_editor_preserves_fields_it_does_not_edit(self):
         script = GUI_SETUP + r'''
 from dataclasses import replace

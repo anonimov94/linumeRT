@@ -95,7 +95,11 @@ class ToolsPage(QtWidgets.QWidget):
         self.export.clicked.connect(self.export_csv)
         lay.addWidget(self.export)
         grid.addWidget(frame, 0, 0)
-        grid.addWidget(self._editor(), 0, 1)
+        self.editor_scroll = QtWidgets.QScrollArea()
+        self.editor_scroll.setWidgetResizable(True)
+        self.editor_scroll.setFrameShape(QtWidgets.QFrame.NoFrame)
+        self.editor_scroll.setWidget(self._editor())
+        grid.addWidget(self.editor_scroll, 0, 1)
         grid.setColumnStretch(0, 3)
         grid.setColumnStretch(1, 2)
 
@@ -104,6 +108,7 @@ class ToolsPage(QtWidgets.QWidget):
         frame, lay, self.lbl_edit = pages.card("Narzędzie", "")
         form = QtWidgets.QFormLayout()
         form.setLabelAlignment(QtCore.Qt.AlignRight)
+        form.setRowWrapPolicy(QtWidgets.QFormLayout.WrapLongRows)
         self.spin_t = QtWidgets.QSpinBox()
         self.spin_t.setRange(1, 99999)
         self.spin_p = QtWidgets.QSpinBox()
@@ -122,6 +127,26 @@ class ToolsPage(QtWidgets.QWidget):
         form.addRow("Gniazdo P", self.spin_p)
         form.addRow("Typ", self.cmb_type)
         form.addRow("Opis", self.txt_desc)
+        self.lbl_stl = QtWidgets.QLabel("Model STL *")
+        self.stl_row = QtWidgets.QWidget()
+        stl_layout = QtWidgets.QVBoxLayout(self.stl_row)
+        stl_layout.setContentsMargins(0, 0, 0, 0)
+        stl_layout.setSpacing(8)
+        stl_picker = QtWidgets.QHBoxLayout()
+        self.txt_stl = QtWidgets.QLineEdit()
+        self.txt_stl.setMinimumWidth(180)
+        self.txt_stl.setAccessibleName("Ścieżka modelu STL narzędzia")
+        self.btn_stl = QtWidgets.QPushButton("Wybierz…")
+        for widget in (self.txt_stl, self.btn_stl):
+            widget.setMinimumHeight(44)
+            stl_picker.addWidget(widget)
+        self.btn_stl.clicked.connect(self._choose_stl)
+        stl_layout.addLayout(stl_picker)
+        hint = pages._label("Oś Z, czoło w 0. Symulacja używa walca zastępczego.", "lrtMuted")
+        hint.setWordWrap(True)
+        hint.setMinimumHeight(36)
+        stl_layout.addWidget(hint)
+        form.addRow(self.lbl_stl, self.stl_row)
         form.addRow("Długość Z (do nosa)", self.spin_z)
         form.addRow("Kierunek skrawania", self.cmb_hand)
         self.rows: dict[str, tuple[QtWidgets.QLabel, QtWidgets.QDoubleSpinBox]] = {}
@@ -173,12 +198,20 @@ class ToolsPage(QtWidgets.QWidget):
     def _type_changed(self) -> None:
         allowed = self._allowed()
         tid = self.cmb_type.currentData()
+        self.lbl_stl.setVisible(tid == "special_stl")
+        self.stl_row.setVisible(tid == "special_stl")
         required = set(TYPES[tid].required) if tid else set()
         for name, (label, spin) in self.rows.items():
             show = name in allowed
             label.setVisible(show)
             spin.setVisible(show)
             label.setText(PARAMS[name].label + (" *" if name in required else ""))
+
+    def _choose_stl(self) -> None:
+        filename, _ = QtWidgets.QFileDialog.getOpenFileName(
+            self, "Model narzędzia STL", self.txt_stl.text(), "STL (*.stl *.STL)")
+        if filename:
+            self.txt_stl.setText(filename)
 
     # ---- dane ---------------------------------------------------------------------------
     def export_csv(self) -> None:
@@ -270,6 +303,7 @@ class ToolsPage(QtWidgets.QWidget):
         self.spin_p.setValue(t.pocket)
         self.cmb_type.setCurrentIndex(max(self.cmb_type.findData(t.type), 0))
         self.txt_desc.setText(t.description)
+        self.txt_stl.setText(t.stl or "")
         self.spin_z.setValue(t.offsets.get("Z", 0.0))
         self.cmb_hand.setCurrentIndex(1 if t.params.get("hand", 1) < 0 else 0)
         for name, (_label, spin) in self.rows.items():
@@ -309,6 +343,7 @@ class ToolsPage(QtWidgets.QWidget):
         # Model-Author: Codex. Keep metadata and axes absent from this editor.
         return replace(original, pocket=self.spin_p.value(), type=self.cmb_type.currentData(),
                        description=self.txt_desc.text().strip(), params=params,
+                       stl=self.txt_stl.text().strip() or None,
                        offsets={**original.offsets, "Z": self.spin_z.value()},
                        diameter=params.get("d"))
 
