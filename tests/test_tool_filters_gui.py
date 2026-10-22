@@ -9,7 +9,6 @@ import tempfile
 import unittest
 from pathlib import Path
 
-
 GUI_SETUP = r'''
 import sys
 from pathlib import Path
