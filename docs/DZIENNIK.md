@@ -635,3 +635,11 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
 - Bez zapisu bazy/tool.tbl, bez komend CNC i bez automatycznego przełączenia edytora.
 - Test klika rzeczywiste Qt i używa prawdziwej SQLite: lokalnie PASS; pełne CI do odbioru w PR.
 - Własny podgląd z danymi testowymi; autokontrola, bez niezależnego przeglądu.
+
+## Narzędzia — zachowanie zaznaczenia przy odświeżaniu · 2026-10-22 · Codex
+- Model-Author: Codex. Odtworzono przeskok zaznaczenia T50→T30 po dodaniu rekordu.
+- Odświeżanie zachowuje T i kolumnę, również dla ukrytego wiersza; nie ładuje innego narzędzia.
+- Niezapisane pola edytora pozostają; po usunięciu T z bazy zaznaczenie jest czyszczone.
+- Istniejące komórki aktualizowane bez ponownego setItem; brak ostrzeżeń Qt o własności.
+- Regresja Qt/SQLite: przed poprawką FAIL, po poprawce PASS; brak komend CNC/zapisów z odświeżania.
+- Dokumentacja i podgląd GUI; pełne CI do odbioru w PR. Autokontrola, bez niezależnego przeglądu.

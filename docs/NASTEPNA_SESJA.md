@@ -100,3 +100,9 @@ Gałąź codex/tool-filters: wyszukiwanie T/P/opis/dane i filtr typu w widoku Na
 Pierwszy test Qt z rzeczywistą bazą SQLite PASS: filtry nie zapisują bazy/tool.tbl,
 nie wysyłają komend CNC i nie przełączają edytowanego narzędzia. Następny krok:
 odbiory CI i scalenie; wynik oraz SHA w opisie PR. Model-Author: Codex.
+
+PR #69 scalony jako cb60edb: filtry narzędzi, Debian 945 + 101 LinuxCNC PASS.
+Kolejny temat: codex/tool-refresh — zaznaczenie według T przy zmianie listy, bez
+nadpisywania niezapisanych pól; usunięty T czyści zaznaczenie. Zlikwidowano ostrzeżenia
+Qt o ponownym wstawianiu istniejących komórek. Test regresyjny odtworzył błąd na starym
+kodzie, po poprawce lokalnie PASS. Kolejny krok: pełne CI i scalenie; wynik i SHA w PR.
