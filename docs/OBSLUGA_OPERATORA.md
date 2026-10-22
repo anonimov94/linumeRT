@@ -260,3 +260,15 @@ Brak danych żądanego układu albo błąd odczytu statusu daje komunikat. Nowa 
 nie jest wtedy stosowana; poprzednia mapa i definicja pozostają. Ekran nie wybiera
 WCS ani nie wysyła polecenia ruchu w imieniu operatora. Model-Author: Codex.
 NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## Niezapisane zmiany w formularzu narzędzia
+
+Bursztynowe „T… · niezapisane” oznacza edycję od ostatniego wczytania lub udanego
+zapisu. Pojawia się już podczas wpisywania liczby, przed Enterem. Filtrowanie i
+odświeżanie listy go nie usuwają. „Zapisz” czyści wskaźnik po zapisie bazy i pliku;
+potwierdzenie wczytania przez CNC pozostaje odrębną sprawą. „Nowe” jest niezapisane.
+
+Kolejna edycja usuwa poprzedni komunikat sukcesu, lecz nie ukrywa błędu zapisu.
+Usunięcie jest potwierdzane jako „usunięte”, bez wcześniejszego napisu „zapisane”.
+Wybór innego T lub „Nowe” nadal przełącza formularz bez pytania o porzucenie zmian;
+zapisz potrzebną edycję przed przełączeniem. Model-Author: Codex.

@@ -203,3 +203,12 @@ brak jego danych lub błąd poll daje error bez zastąpienia dotychczasowego mat
 Regresja starego kodu FAIL; 32 lokalne testy PASS (23 core/sim, 9 Qt).
 Szkic następuje po #81; pełny wynik CI i SHA w PR. Model-Author: Codex.
 NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+#81 i #82 mają zielone CI ogólne, trwa LinuxCNC. Codex: codex/tool-unsaved-state
+pokazuje bursztynowy napis „niezapisane” po edycji, także liczby przed zatwierdzeniem.
+Load/Zapis czyszczą wskaźnik, Nowe oznacza nowy formularz; filtry/refresh go zachowują.
+Kolejna edycja usuwa poprzednie potwierdzenie sukcesu, ale zachowuje błąd zapisu.
+Usunięcie ma własne potwierdzenie zamiast starego „zapisane”. 33 testy lokalnie PASS,
+w tym rzeczywiste kliknięcia Qt/zapis SQLite, klawiatura i podgląd. Szkic po #82.
+Nie dodano jeszcze potwierdzenia porzucenia edycji przy wyborze innego T lub Nowe.
+Wynik pełnego CI i sprawdzony SHA w PR. Model-Author: Codex.

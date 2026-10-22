@@ -50,6 +50,8 @@ class ToolsPage(QtWidgets.QWidget):
         self.db = None
         self.tbl = None
         self.tbl_units = "mm"
+        self._loading = False
+        self._last_success = False
         self.fields: dict[str, QtWidgets.QWidget] = {}
         grid = QtWidgets.QGridLayout(self)
         grid.setContentsMargins(16, 16, 16, 16)
@@ -110,6 +112,26 @@ class ToolsPage(QtWidgets.QWidget):
         grid.addWidget(self.editor_scroll, 0, 1)
         grid.setColumnStretch(0, 3)
         grid.setColumnStretch(1, 2)
+        for widget in (self.spin_t, self.spin_p, self.spin_z, self.spin_life, self.spin_used,
+                       *(spin for _label, spin in self.rows.values())):
+            widget.valueChanged.connect(self._edited)
+            widget.lineEdit().textEdited.connect(self._edited)
+        for widget in (self.cmb_type, self.cmb_hand):
+            widget.currentIndexChanged.connect(self._edited)
+        for widget in (self.txt_desc, self.txt_holder, self.txt_stl):
+            widget.textChanged.connect(self._edited)
+
+    def _edit_state(self, dirty):
+        self.lbl_edit.setText(f"T{self.spin_t.value()}" + (" · niezapisane" if dirty else ""))
+        pages._restyle(self.lbl_edit, dirty=dirty)
+
+    def _edited(self):
+        if self._loading:
+            return
+        self._edit_state(True)
+        if self._last_success:
+            self.lbl_issue.clear()
+            self._last_success = False
 
     # ---- edytor -------------------------------------------------------------------------
     def _editor(self):
@@ -332,6 +354,15 @@ class ToolsPage(QtWidgets.QWidget):
             self.load(tool)
 
     def load(self, t: Tool) -> None:
+        self._loading = True
+        self._last_success = False
+        try:
+            self._load_fields(t)
+        finally:
+            self._loading = False
+        self._edit_state(False)
+
+    def _load_fields(self, t: Tool) -> None:
         self.spin_t.setValue(t.number)
         self.spin_p.setValue(t.pocket)
         self.cmb_type.setCurrentIndex(max(self.cmb_type.findData(t.type), 0))
@@ -349,7 +380,6 @@ class ToolsPage(QtWidgets.QWidget):
             if value is None:
                 value = 0.0 if name == "d_wear" else spin.minimum()
             spin.setValue(value)
-        self.lbl_edit.setText(f"T{t.number}")
         self.lbl_issue.setText("")
 
     def new_tool(self) -> None:
@@ -361,6 +391,7 @@ class ToolsPage(QtWidgets.QWidget):
         p = next(i for i in range(1, 100000) if i not in pockets)
         self.load(Tool(number=n, pocket=p, type="flat", params={"d": 6, "l": 30,
                                                                "flute_length": 15}))
+        self._edit_state(True)
 
     def current(self) -> Tool:
         allowed = self._allowed()
@@ -396,6 +427,7 @@ class ToolsPage(QtWidgets.QWidget):
                 return False
             message = "Tabela narzędzi: zmiana niedostępna w trakcie programu"
         self.lbl_issue.setText(message)
+        self._last_success = False
         self.shell.show_alarm("warn", message)
         return True
 
@@ -403,6 +435,7 @@ class ToolsPage(QtWidgets.QWidget):
         message = (f"Zapis tabeli nie powiódł się: {exc}. Baza mogła się zmienić; "
                    "sprawdź bazę i tool.tbl przed pracą.")
         self.lbl_issue.setText(message)
+        self._last_success = False
         self.shell.show_alarm("err", message)
 
     def save(self) -> None:
@@ -418,6 +451,8 @@ class ToolsPage(QtWidgets.QWidget):
             return
         self._reload_linuxcnc()
         self.lbl_issue.setText(f"T{tool.number} zapisane w bazie i w {os.path.basename(self.tbl)}")
+        self._last_success = True
+        self._edit_state(False)
         self.refresh()
 
     def remove(self) -> None:
@@ -436,6 +471,10 @@ class ToolsPage(QtWidgets.QWidget):
             self._write_failed(exc)
             return
         self._reload_linuxcnc()
+        self.lbl_issue.setText(f"T{n} usunięte z bazy i z {os.path.basename(self.tbl)}")
+        self._last_success = True
+        self._edit_state(False)
+        self.lbl_edit.setText(f"T{n} · usunięte")
         self.refresh()
 
     def _reload_linuxcnc(self) -> None:

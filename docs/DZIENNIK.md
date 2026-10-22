@@ -748,3 +748,12 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
 - Regresja starego kodu FAIL; 32 testy lokalnie PASS, także przeliczenie zapisanego nieaktywnego WCS.
 - Dokumentacja opisuje świeżość statusu i ograniczenie pliku parametrów; pełne CI do odbioru w PR.
 - Autokontrola, bez niezależnego przeglądu. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## Narzędzia — wskaźnik niezapisanych zmian · 2026-10-22 · Codex
+- Model-Author: Codex. Bursztynowy napis przy T po edycji, także liczby przed Enterem.
+- Programowe wczytanie i udany Zapis czyszczą wskaźnik; Nowe oznacza niezapisany formularz.
+- Filtry/refresh zachowują stan; kolejna edycja czyści stare potwierdzenie sukcesu, nie błąd zapisu.
+- Usunięcie ma własny komunikat i nagłówek; bez automatycznego zapisu i zmiany komend CNC.
+- 33 testy lokalnie PASS, w tym rzeczywista klawiatura/przyciski Qt, SQLite i obsługa błędu.
+- Podgląd Qt i dokumentacja; potwierdzenie porzucenia edycji pozostaje osobnym zakresem.
+- Pełne CI do odbioru w PR. Autokontrola, bez niezależnego przeglądu.
