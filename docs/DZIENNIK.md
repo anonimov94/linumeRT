@@ -659,3 +659,12 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
 - Regresja rzeczywistego Qt: stary kod FAIL, poprawka PASS; łącznie trzy testy GUI PASS.
 - Własny podgląd tabeli/edytora; bez zmiany bazy i komend CNC. Pełne CI do odbioru w PR.
 - Autokontrola, bez niezależnego przeglądu.
+
+## Narzędzia — zachowanie danych poza formularzem · 2026-10-22 · Codex
+- Model-Author: Codex. Odtworzono utratę oprawki, trwałości i korekcji innych osi przy edycji.
+- Formularz aktualizuje edytowane pola istniejącego T; zachowuje pozostałe dane, w tym STL.
+- Nowy numer T nie dziedziczy ukrytych pól poprzednio oglądanego narzędzia.
+- Regresja starego kodu FAIL; cztery testy Qt/SQLite PASS, walidacja specjalnego STL i nowego T.
+- Samo budowanie rekordu nie zapisuje bazy ani nie wysyła CNC; istniejąca ścieżka zapisu zachowana.
+- Dokumentacja i przekazanie; pełne CI do odbioru w PR. Autokontrola, bez niezależnego przeglądu.
+- NIEZWERYFIKOWANE NA SPRZĘCIE.

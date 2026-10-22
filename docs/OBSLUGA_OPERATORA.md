@@ -133,3 +133,12 @@ w formacie zgodnym z `ToolDB.import_csv`. Nie zawiera historii edycji ani samych
 plików STL (tylko ich zapisane ścieżki). Nie jest kopią całej konfiguracji maszyny.
 Anulowanie pozostawia dane bez zmian; błąd eksportu wyświetla komunikat.
 Operacja nie zmienia tabeli LinuxCNC ani aktywnego narzędzia. Model-Author: Codex.
+
+## Dane narzędzia poza formularzem
+
+Edycja istniejącego T zachowuje zapisane dane, których formularz nie udostępnia:
+nazwę oprawki, trwałość i zużycie, ścieżkę STL, parametry tokarskie oraz korekcje
+osi inne niż Z. Zmieniane są pola widoczne w edytorze i geometria wybranego typu.
+Nowy numer T zaczyna z wartościami domyślnymi tych danych; nie dziedziczy ich po
+poprzednio oglądanym narzędziu. Dotychczasowe zasady użycia przycisku „Zapisz”
+pozostają w mocy. Model-Author: Codex. NIEZWERYFIKOWANE NA SPRZĘCIE.
