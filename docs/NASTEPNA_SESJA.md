@@ -88,3 +88,6 @@ filtr poziomu, wyszukiwanie i eksport CSV. Odrębna baza dla każdej konfiguracj
 Lokalnie 7 testów trwałości/filtrów/awarii/Qt PASS; dodano próbę złożonej Diagnostyki
 na małym ekranie, przewijanie i dokumentację. PR #68: pełne CI wymagane przed scaleniem.
 Wynik odbioru i sprawdzony SHA utrzymywać w opisie PR #68. PR #67 (pola liczbowe) pozostawiony bez zmian. Model-Author: Codex.
+
+Uzupełnienie kroku: pola filtrów korzystają z palety tokenów; siedem testów lokalnych
+ponownie PASS. Kod i dokumentacja są wypchnięte do PR #68; końcowy odbiór przez CI.
