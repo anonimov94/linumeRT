@@ -254,3 +254,8 @@ GPL-2.0-or-later. Standardowe dataclasses.replace; bez nowych bibliotek i zasob�
 
 Model-Author: Codex. Własny formularz, QFileDialog i testy widgetów Qt/SQLite,
 GPL-2.0-or-later. QScrollArea i QFormLayout z istniejącego PyQt5; bez nowych zależności.
+
+## Błędy zapisu tabeli narzędzi — 2026-10-22
+
+Model-Author: Codex. Własna obsługa wyjątków i regresje rzeczywistych przycisków Qt/SQLite,
+GPL-2.0-or-later. Standardowe sqlite3 i istniejące API LinuxCNC; bez nowych zależności.

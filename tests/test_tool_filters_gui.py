@@ -46,6 +46,67 @@ db.add(Tool(50, 20, description="Bez geometrii", diameter=5))
 
 @unittest.skipUnless(importlib.util.find_spec("PyQt5"), "PyQt5 unavailable")
 class ToolFilterGuiTests(unittest.TestCase):
+    def test_write_errors_and_unavailable_cnc_status_are_reported(self):
+        script = GUI_SETUP + r'''
+import sqlite3
+from unittest.mock import patch
+
+cnc.error, cnc.INTERP_IDLE = RuntimeError, 1
+page = ToolsPage(SimpleNamespace(c=model.load_tokens()["kolory"], show_alarm=Mock()),
+                 str(work / "test.ini"))
+page.db, page.tbl = db, work / "tool.tbl"
+page.load(db.get(12))
+before, history = db.tools(), db.history()
+save = next(button for button in page.findChildren(QtWidgets.QPushButton)
+            if button.text() == "Zapisz")
+remove = next(button for button in page.findChildren(QtWidgets.QPushButton)
+              if button.text() == "Usuń")
+uncaught = []
+previous_hook = sys.excepthook
+def collect(*exc):
+    uncaught.append(exc)
+    previous_hook(*exc)
+sys.excepthook = collect
+status = SimpleNamespace(poll=Mock(), interp_state=cnc.INTERP_IDLE)
+for failed in (Mock(side_effect=cnc.error("Brak połączenia")),
+               Mock(return_value=SimpleNamespace(poll=Mock(side_effect=cnc.error("Brak danych"))))):
+    cnc.stat = failed
+    for button in (save, remove):
+        page.lbl_issue.clear()
+        button.click()
+        assert page.lbl_issue.text() and not uncaught
+assert db.tools() == before and db.history() == history
+assert not tooldata.save_tool.called and not page.tbl.exists()
+cnc.stat = Mock(return_value=status)
+status.interp_state = 2  # A running/paused program still blocks edits.
+save.click()
+remove.click()
+assert db.tools() == before and not tooldata.save_tool.called
+status.interp_state = cnc.INTERP_IDLE
+def failed_save(db, tool, tbl):
+    db.update(tool)  # Reproduce the existing backend's partial write before file failure.
+    raise OSError("Brak miejsca na tool.tbl")
+page.txt_desc.setText("Zmiana w bazie przed błędem pliku")
+with patch("linumert_tools_page.save_tool", side_effect=failed_save):
+    save.click()
+assert not uncaught and "baza" in page.lbl_issue.text().casefold()
+assert db.get(12).description == "Zmiana w bazie przed błędem pliku"
+assert not cnc.command.called and not page.tbl.exists()
+with patch.object(QtWidgets.QMessageBox, "question", return_value=QtWidgets.QMessageBox.Yes), \
+        patch.object(db, "export_tbl", side_effect=OSError("Tylko do odczytu")):
+    remove.click()
+assert db.get(12) is None and not uncaught
+assert "baza" in page.lbl_issue.text().casefold() and not cnc.command.called
+with patch.object(db, "get", side_effect=sqlite3.OperationalError("database is locked")):
+    save.click()
+    remove.click()
+assert not uncaught and "database is locked" in page.lbl_issue.text()
+assert not cnc.command.called
+assert page.shell.show_alarm.called
+db.close()
+'''
+        self.run_gui(script)
+
     def test_stl_picker_required_path_cancel_and_reload(self):
         script = GUI_SETUP + r'''
 from unittest.mock import patch

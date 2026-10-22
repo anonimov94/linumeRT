@@ -155,3 +155,15 @@ Obecna symulacja nadal używa walca zastępczego, również po wskazaniu STL.
 Nie potwierdza to zgodności kolizji z rzeczywistą bryłą pliku. Przy małym oknie
 edytor można przewijać pionowo; długie wiersze formularza zawijają się.
 Model-Author: Codex.
+
+## Gdy tabela narzędzi nie daje się zapisać
+
+Brak statusu LinuxCNC blokuje „Zapisz” i „Usuń”, tak samo jak trwający program.
+Powód pojawia się w edytorze i alarmach. Błąd zapisu pliku lub bazy również jest
+pokazywany; po nim ekran nie wysyła przeładowania tabeli do CNC.
+
+Baza narzędzi może już zawierać zmianę, mimo że zapis `tool.tbl` nie powiódł się.
+Dotyczy to również usunięcia rekordu. Przed dalszą pracą sprawdź bazę i `tool.tbl`,
+usuń przyczynę błędu i uzgodnij tabelę z LinuxCNC. Komunikat błędu nie potwierdza
+wycofania zmiany ani synchronizacji z CNC. Model-Author: Codex.
+NIEZWERYFIKOWANE NA SPRZĘCIE.
