@@ -239,3 +239,8 @@ GPL-2.0-or-later. Istniejące QSignalBlocker i model zaznaczenia Qt; bez nowych 
 
 Model-Author: Codex. Własna integracja istniejącego ToolDB.export_csv z QFileDialog
 oraz QSaveFile i testy Qt/SQLite, GPL-2.0-or-later. Bez nowych bibliotek ani zasobów.
+
+## Format liczb całkowitych tabeli narzędzi — 2026-10-22
+
+Model-Author: Codex. Własna poprawka formatowania i regresja Qt, GPL-2.0-or-later.
+Bez zależności i zasobów zewnętrznych.

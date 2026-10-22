@@ -35,7 +35,8 @@ COLUMNS = ["T", "P", "Typ", "Opis", "D", "Korekcja D", "Długość Z", "Ostrza",
 def _fmt(value, digits=3) -> str:
     if value is None:
         return "—"
-    return f"{value:.{digits}f}".rstrip("0").rstrip(".")
+    text = f"{value:.{digits}f}"
+    return text.rstrip("0").rstrip(".") if "." in text else text
 
 
 class ToolsPage(QtWidgets.QWidget):
