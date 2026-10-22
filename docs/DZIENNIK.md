@@ -710,3 +710,12 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
 - Odmowa walidacji w Zapisz/Usuń jest obsłużona w HMI, bez przeładowania CNC.
 - Dwie regresje starego kodu FAIL; 17 testów core/Qt/SQLite PASS, także atomowość wsadu CSV.
 - Pełne CI do odbioru w PR. Autokontrola, bez niezależnego przeglądu. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## Narzędzia — korekcja średnicy w tabeli LinuxCNC · 2026-10-22 · Codex
+- Model-Author: Codex. Odtworzono pominięcie d_wear: nominalne 6 i −0,02 dawało D6 zamiast D5.98.
+- D tabeli = nominalne d + d_wear; zwykły wpis bez geometrii zachowuje surowe D tabeli.
+- Import efektywnego D zachowuje korekcję i wylicza nominalne d, bez ponownego dodawania zużycia.
+- Odrzucenie D po korekcji <= 0 oraz niezerowej korekcji bez nominalnego d.
+- Regresje starego kodu FAIL; 21 testów lokalnie PASS, także rzeczywisty Cutter i import mm/cale.
+- Cztery próby G41/G42 z ± korekcją w rzeczywistym rs274 dodane do CI; lokalnie niewykonane.
+- Pełne CI do odbioru w PR. Autokontrola, bez niezależnego przeglądu. NIEZWERYFIKOWANE NA SPRZĘCIE.
