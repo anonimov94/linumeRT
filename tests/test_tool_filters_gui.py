@@ -1,0 +1,105 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+"""Read-only tool searches through real Qt widgets/SQLite. Model-Author: Codex."""
+
+import importlib.util
+import os
+import subprocess
+import sys
+import tempfile
+import unittest
+from pathlib import Path
+
+
+@unittest.skipUnless(importlib.util.find_spec("PyQt5"), "PyQt5 unavailable")
+class ToolFilterGuiTests(unittest.TestCase):
+    def test_search_type_refresh_and_selection_do_not_write_or_command_cnc(self):
+        root = Path(__file__).resolve().parents[1]
+        script = r'''
+import sys
+from pathlib import Path
+from types import ModuleType, SimpleNamespace
+from unittest.mock import Mock
+from PyQt5 import QtWidgets
+
+root, work = Path(sys.argv[1]), Path(sys.argv[2])
+core = ModuleType("qtvcp.core")
+core.Action = core.Info = core.Status = lambda: SimpleNamespace()
+sys.modules["qtvcp"] = ModuleType("qtvcp")
+sys.modules["qtvcp.core"] = core
+cnc = ModuleType("linuxcnc")
+cnc.stat = cnc.command = Mock(side_effect=AssertionError("unexpected CNC command"))
+sys.modules["linuxcnc"] = cnc
+sim_page = ModuleType("linumert_sim_page")
+sim_page.ROOT = str(root)
+sys.modules["linumert_sim_page"] = sim_page
+tooldata = ModuleType("linumert_sim.tooldata")
+tooldata.open_db = tooldata.save_tool = Mock(side_effect=AssertionError("unexpected write"))
+sys.modules["linumert_sim"] = ModuleType("linumert_sim")
+sys.modules["linumert_sim.tooldata"] = tooldata
+from linumert_tools_page import ToolsPage
+from linumert.tools.db import Tool, ToolDB
+import linumert_shell_model as model
+
+app = QtWidgets.QApplication([])
+db = ToolDB(work / "tools.db")
+db.add(Tool(12, 3, type="flat", params={"d":6, "l":30, "flute_length":15},
+            description="Frez ŻÓŁĆ"))
+db.add(Tool(27, 9, type="ball", params={"d":8, "l":40}, description="Kulowy"))
+db.add(Tool(50, 20, description="Bez geometrii", diameter=5))
+before, history = db.tools(), db.history()
+tokens = model.load_tokens()
+page = ToolsPage(SimpleNamespace(c=tokens["kolory"]), str(work / "test.ini"))
+page.db, page.tbl = db, work / "tool.tbl"
+page.refresh()
+visible = lambda: [page.table.item(row, 0).text() for row in range(page.table.rowCount())
+                   if not page.table.isRowHidden(row)]
+page.table.selectRow(0)
+assert page.spin_t.value() == 12
+for query, expected in (("t12", ["12"]), ("P9", ["27"]), ("żółć", ["12"]),
+                        ("nie ma", []), ("", ["12", "27", "50"])):
+    page.search.setText(query)
+    assert visible() == expected, (query, visible())
+    assert page.spin_t.value() == 12  # No automatic selection/change of the editor.
+page.filter_type.setCurrentIndex(page.filter_type.findData("ball"))
+assert visible() == ["27"]
+page.search.setText("T12")
+assert visible() == []
+page.search.clear()
+page.refresh()  # The unchanged-table optimization must preserve active filters.
+assert visible() == ["27"]
+page.filter_type.setCurrentIndex(page.filter_type.findData(None))
+assert visible() == ["50"]
+page.filter_type.setCurrentIndex(0)
+page.search.setText("Kulový")
+assert visible() == []
+page.search.setText("Kulowy")
+assert visible() == ["27"]
+page.table.selectRow(1)
+assert page.spin_t.value() == 27
+page.search.clear()
+page.filter_type.setCurrentIndex(page.filter_type.findData("ball"))
+db.add(Tool(30, 30, type="ball", params={"d":10, "l":50}))
+page.refresh()
+assert visible() == ["27", "30"]
+assert len(db.history()) == len(history) + 1  # Only the explicit fixture change wrote data.
+assert db.tools()[:2] == before[:2]
+assert not page.tbl.exists()
+assert not cnc.command.called and not tooldata.save_tool.called
+window = QtWidgets.QWidget()
+window.setObjectName("lrtRoot")
+window.setStyleSheet(model.shell_qss(tokens))
+QtWidgets.QVBoxLayout(window).addWidget(page)
+window.resize(1200, 720)
+window.show()
+app.processEvents()
+assert window.grab().save(str(work / "tool-filters.png"))
+db.close()
+'''
+        with tempfile.TemporaryDirectory() as folder:
+            env = dict(os.environ, QT_QPA_PLATFORM="offscreen",
+                       PYTHONPATH=os.pathsep.join((str(root / "screens/linumert"),
+                                                  str(root / "core"))))
+            result = subprocess.run([sys.executable, "-c", script, str(root), folder],
+                                    env=env, capture_output=True, text=True, timeout=20,
+                                    check=False)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)

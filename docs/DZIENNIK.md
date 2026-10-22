@@ -628,3 +628,10 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
 - Lokalnie 7 testów PASS: restart, retencja, filtry, awarie zapisu i faktyczne kliknięcia Qt/CSV.
 - Próba złożonej Diagnostyki i zrzut Qt; pełne CI do odbioru w PR #68.
 - Autokontrola, bez niezależnego przeglądu. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## Narzędzia — wyszukiwanie i filtr typu · 2026-10-22 · Codex
+- Model-Author: Codex. Wyszukiwanie po T/P, opisie i wyświetlonych danych; filtr typu / bez typu.
+- Filtry łączone, licznik widocznych/wszystkich; pozostają po odświeżeniu listy.
+- Bez zapisu bazy/tool.tbl, bez komend CNC i bez automatycznego przełączenia edytora.
+- Test klika rzeczywiste Qt i używa prawdziwej SQLite: lokalnie PASS; pełne CI do odbioru w PR.
+- Własny podgląd z danymi testowymi; autokontrola, bez niezależnego przeglądu.

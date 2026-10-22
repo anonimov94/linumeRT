@@ -108,3 +108,13 @@ zapisu. Nie oznacza to zachowania nowych wpisów po zamknięciu ekranu.
 
 Historia opisuje zdarzenia, a nie bieżący stan alarmów ani potwierdzenie usunięcia
 awarii. Na małym ekranie Diagnostykę można przewijać. Model-Author: Codex.
+
+## Szukanie narzędzi
+
+Narzędzia → pole wyszukiwania przyjmuje fragment opisu lub danych tabeli, np. `T12`,
+`P3`, średnicę albo nazwę typu. Wielkość liter nie ma znaczenia. Obok można wybrać
+typ lub „Bez typu”; oba filtry działają razem. Licznik pokazuje liczbę widocznych
+narzędzi względem całej bazy. „Wszystkie typy” i puste wyszukiwanie odsłaniają całą listę.
+Filtrowanie nie wybiera innego narzędzia, nie zmienia danych w edytorze i nie zapisuje tabeli.
+Wybrane narzędzie może zostać ukryte przez filtr; edytor nadal pokazuje jego numer T.
+Model-Author: Codex.
