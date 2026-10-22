@@ -34,12 +34,13 @@ import time
 from pathlib import Path
 
 import numpy as np
+from linumert.tools.tbl import INCH
 
 from .engine import Sample, SimEngine
 from .machine import Machine, load_machine
 from .placement import find_stock_line, place_stock, read_var_offsets
 from .report import SimLog, write_report
-from .tooldata import cutters, ini_value, open_db, read_ini
+from .tooldata import cutters, ini_value, open_db, read_ini, table_units
 
 POS_PERIOD = 1 / 30
 MAP_PERIOD = 0.1
@@ -77,6 +78,7 @@ class Live:
         self.lc = linuxcnc_mod
         self.ini_path = Path(ini_path).resolve()
         self.ini = read_ini(self.ini_path)
+        self.to_mm = INCH if table_units(self.ini_path) == "inch" else 1.0
         self.stat = self.lc.stat()
         self.engine = SimEngine()
         self.log = SimLog()
@@ -98,6 +100,9 @@ class Live:
     def _rel(self, value: str) -> Path:
         p = Path(value).expanduser()
         return p if p.is_absolute() else self.ini_path.parent / p
+
+    def _xyz_mm(self, values):
+        return tuple(float(value) * self.to_mm for value in values[:3])
 
     # ---- polecenia ------------------------------------------------------------------------
     def load_machine(self, path: str) -> None:
@@ -136,6 +141,7 @@ class Live:
         if origin is None:
             self.stat.poll()
             origin = tuple(self.stat.g5x_offset[:3])
+        origin = self._xyz_mm(origin)
         smap = place_stock(stock, origin)
         self.engine.set_stock(smap, stock.material)
         self.stock_line = line
@@ -165,7 +171,8 @@ class Live:
 
     def reload_tools(self, force: bool = False) -> None:
         self.stat.poll()
-        table = [(t.id, float(t.zoffset), float(t.diameter)) for t in self.stat.tool_table
+        table = [(t.id, float(t.zoffset) * self.to_mm, float(t.diameter) * self.to_mm)
+                 for t in self.stat.tool_table
                  if t.id > 0]
         key = tuple(table)
         if key == self.table_key and not force:
@@ -199,7 +206,7 @@ class Live:
     # ---- pętla ----------------------------------------------------------------------------
     def sample(self, now: float) -> Sample:
         s = self.stat
-        nose = tuple(float(v) for v in s.actual_position[:3])
+        nose = self._xyz_mm(s.actual_position)
         sp = s.spindle[0] if s.spindle else {}
         rpm = 0.0
         if sp and sp.get("enabled") and sp.get("direction"):
@@ -404,9 +411,13 @@ def main(argv: list[str] | None = None) -> int:
     except ImportError:
         emit(ev="error", text="brak modułu linuxcnc (uruchom w środowisku LinuxCNC)")
         return 2
+    try:
+        live = Live(args.ini, args.machine, linuxcnc)
+    except ValueError as exc:
+        emit(ev="error", text=f"konfiguracja symulacji: {exc}")
+        return 2
     commands: queue.Queue = queue.Queue()
     threading.Thread(target=_stdin_reader, args=(commands,), daemon=True).start()
-    live = Live(args.ini, args.machine, linuxcnc)
     try:
         live.run(args.rate, commands)
     finally:
@@ -419,3 +430,4 @@ if __name__ == "__main__":
 
 
 __all__ = ["Live", "Machine", "main"]
+
