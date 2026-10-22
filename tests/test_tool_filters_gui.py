@@ -46,6 +46,24 @@ db.add(Tool(50, 20, description="Bez geometrii", diameter=5))
 
 @unittest.skipUnless(importlib.util.find_spec("PyQt5"), "PyQt5 unavailable")
 class ToolFilterGuiTests(unittest.TestCase):
+    def test_integer_columns_preserve_trailing_zeroes(self):
+        script = GUI_SETUP + r'''
+from linumert_tools_page import _fmt
+
+for value in (0, 10, 100, 12000, 12340):
+    assert _fmt(value, 0) == str(value), (value, _fmt(value, 0))
+assert _fmt(None) == "—" and _fmt(12.500) == "12.5" and _fmt(0.0) == "0"
+db.update(Tool(12, 3, type="flat", params={"d":6, "l":30, "flute_length":15,
+                                        "flutes":10, "max_rpm":12000}))
+page = ToolsPage(SimpleNamespace(c=model.load_tokens()["kolory"]), str(work / "test.ini"))
+page.db, page.tbl = db, work / "tool.tbl"
+page.refresh()
+assert page.table.item(0, 7).text() == "10"
+assert page.table.item(0, 8).text() == "12000"
+db.close()
+'''
+        self.run_gui(script)
+
     def test_search_type_refresh_and_selection_do_not_write_or_command_cnc(self):
         script = GUI_SETUP + r'''
 before, history = db.tools(), db.history()

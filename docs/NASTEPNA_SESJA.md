@@ -112,3 +112,8 @@ z widoku Narzędzia, niezależnie od filtrów. Bez zapisów bazy/tool.tbl i kome
 Dwa testy Qt/SQLite PASS, obejmują odtworzenie geometrii/korekcji, anulowanie i błędy.
 Szkic PR zależy od poprawki odświeżania #70; scalić dopiero po niej i pełnym CI.
 Wynik i sprawdzony SHA utrzymywać w opisie PR. Model-Author: Codex.
+
+Codex: codex/tool-integer-format naprawia obcinanie zer w liczbie ostrzy i maksymalnych
+obrotach tabeli (12000→12, 10→1). Zera usuwane tylko po kropce dziesiętnej.
+Test starego kodu FAIL; trzy testy Qt lokalnie PASS po poprawce. Szkic następuje po #71;
+scalanie kolejno, po pełnym CI. Wynik i SHA w opisie PR. Model-Author: Codex.

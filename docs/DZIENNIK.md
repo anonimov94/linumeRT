@@ -651,3 +651,11 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
 - Bez komend CNC, przeładowania tool.tbl i zapisywania pól edytora; opis zakresu w podpowiedzi.
 - Dwa testy Qt/SQLite PASS, w tym ponowny import CSV, Unicode, anulowanie i błędy.
 - Własny podgląd Qt; pełne CI do odbioru w PR. Autokontrola, bez niezależnego przeglądu.
+
+## Narzędzia — pełne wartości obrotów i liczby ostrzy · 2026-10-22 · Codex
+- Model-Author: Codex. Usuwanie końcowych zer dotyczy tylko części ułamkowej liczby.
+- Przy formacie całkowitym 12000 obr/min i 10 ostrzy nie są już pokazywane jako 12 i 1.
+- Zero pozostaje zerem; format wymiarów i oznaczenie braku danych zachowane.
+- Regresja rzeczywistego Qt: stary kod FAIL, poprawka PASS; łącznie trzy testy GUI PASS.
+- Własny podgląd tabeli/edytora; bez zmiany bazy i komend CNC. Pełne CI do odbioru w PR.
+- Autokontrola, bez niezależnego przeglądu.
