@@ -305,3 +305,8 @@ parametrów LinuxCNC; bez nowych zależności ani zasobów.
 
 Model-Author: Codex. Własny stan edycji, reguła QSS z istniejącym tokenem amber i test
 klawiatury/przycisków Qt/SQLite, GPL-2.0-or-later. Bez nowych bibliotek i zasobów.
+
+## Potwierdzenie porzucenia formularza narzędzia — 2026-10-22
+
+Model-Author: Codex. Własny dialog, przywrócenie zaznaczenia i testy rzeczywistych
+okien/klawiszy Qt/SQLite, GPL-2.0-or-later. Istniejące komponenty PyQt5; bez nowych zasobów.

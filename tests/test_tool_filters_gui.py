@@ -13,7 +13,7 @@ GUI_SETUP = r'''
 import sys
 from pathlib import Path
 from types import ModuleType, SimpleNamespace
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 from PyQt5 import QtCore, QtWidgets
 
 root, work = Path(sys.argv[1]), Path(sys.argv[2])
@@ -47,6 +47,103 @@ db.add(Tool(50, 20, description="Bez geometrii", diameter=5))
 
 @unittest.skipUnless(importlib.util.find_spec("PyQt5"), "PyQt5 unavailable")
 class ToolFilterGuiTests(unittest.TestCase):
+    def test_saved_clone_remains_selected_after_cancelled_navigation(self):
+        script = GUI_SETUP + r'''
+del sys.modules["linumert_sim"]
+del sys.modules["linumert_sim.tooldata"]
+from linumert_sim.tooldata import save_tool as real_save_tool
+
+cnc.error, cnc.INTERP_IDLE = RuntimeError, 1
+cnc.stat = Mock(return_value=SimpleNamespace(poll=Mock(), interp_state=1))
+page = ToolsPage(SimpleNamespace(c=model.load_tokens()["kolory"], show_alarm=Mock()),
+                 str(work / "test.ini"))
+page.db, page.tbl = db, work / "tool.tbl"
+page._reload_linuxcnc = Mock()
+page.refresh()
+page.table.selectRow(0)
+page.spin_t.setValue(99)
+page.spin_p.setValue(99)
+with patch("linumert_tools_page.save_tool", real_save_tool):
+    next(button for button in page.findChildren(QtWidgets.QPushButton)
+         if button.text() == "Zapisz").click()
+assert page.table.selectionModel().selectedRows()[0].data(QtCore.Qt.UserRole) == 99
+page.txt_desc.setText("Niezapisany klon")
+QtCore.QTimer.singleShot(0, lambda: app.activeModalWidget().reject())
+page.table.selectRow(0)
+assert page.spin_t.value() == 99 and page.txt_desc.text() == "Niezapisany klon"
+assert page.table.selectionModel().selectedRows()[0].data(QtCore.Qt.UserRole) == 99
+assert db.get(12).description == "Frez ŻÓŁĆ" and db.get(99).description == "Frez ŻÓŁĆ"
+assert not cnc.command.called
+db.close()
+'''
+        self.run_gui(script)
+
+    def test_discard_dialog_preserves_drafts_unless_explicitly_discarded(self):
+        script = GUI_SETUP + r'''
+import sqlite3
+from PyQt5.QtTest import QTest
+
+page = ToolsPage(SimpleNamespace(c=model.load_tokens()["kolory"]), str(work / "test.ini"))
+page.db, page.tbl = db, work / "tool.tbl"
+page.refresh()
+page.table.selectRow(0)
+page.txt_desc.setText("Niezapisany T12")
+before, history = db.tools(), db.history()
+errors = []
+def answer(action):
+    def respond():
+        box = app.activeModalWidget()
+        try:
+            assert isinstance(box, QtWidgets.QMessageBox)
+            assert box.defaultButton().text() == "Zostań"
+            action(box)
+        except Exception as exc:
+            errors.append(str(exc))
+            if box is not None:
+                box.reject()
+    QtCore.QTimer.singleShot(0, respond)
+def discard(box):
+    next(button for button in box.buttons() if button.text() == "Odrzuć zmiany").click()
+for key in (QtCore.Qt.Key_Escape, QtCore.Qt.Key_Return):
+    page.search.setText("T27" if key == QtCore.Qt.Key_Escape else "")
+    answer(lambda box, key=key: QTest.keyClick(box, key))
+    page.table.selectRow(1)
+    assert not errors and page.spin_t.value() == 12 and page.txt_desc.text() == "Niezapisany T12"
+    assert page.table.selectionModel().selectedRows()[0].data(QtCore.Qt.UserRole) == 12
+page.search.clear()
+answer(discard)
+page.table.selectRow(1)
+assert not errors and page.spin_t.value() == 27 and page.lbl_edit.property("dirty") is False
+assert db.tools() == before and db.history() == history
+page.txt_desc.setText("Niezapisany T27")
+new = next(button for button in page.findChildren(QtWidgets.QPushButton) if button.text() == "Nowe")
+answer(lambda box: QTest.keyClick(box, QtCore.Qt.Key_Escape))
+new.click()
+assert page.spin_t.value() == 27 and page.txt_desc.text() == "Niezapisany T27"
+answer(discard)
+new.click()
+assert not errors and page.spin_t.value() == 1 and page.lbl_edit.property("dirty") is True
+assert not page.table.selectionModel().selectedRows()
+answer(lambda box: QTest.keyClick(box, QtCore.Qt.Key_Escape))
+page.table.selectRow(2)
+assert page.spin_t.value() == 1 and not page.table.selectionModel().selectedRows()
+def remove_target(box):
+    db.remove(27)  # A record can disappear while the operator reads the dialog.
+    discard(box)
+answer(remove_target)
+page.table.selectRow(1)
+assert not errors and page.spin_t.value() == 1 and page.lbl_edit.property("dirty") is True
+assert "T27" in page.lbl_issue.text() and not page.table.selectionModel().selectedRows()
+answer(discard)
+with patch.object(db, "get", side_effect=sqlite3.OperationalError("database is locked")):
+    page.table.selectRow(2)
+assert not errors and page.spin_t.value() == 1 and "database is locked" in page.lbl_issue.text()
+assert db.tools() == [before[0], before[2]] and len(db.history()) == len(history) + 1
+assert not page.tbl.exists() and not cnc.command.called and not tooldata.save_tool.called
+db.close()
+'''
+        self.run_gui(script)
+
     def test_unsaved_indicator_follows_edits_persistence_and_errors(self):
         script = GUI_SETUP + r'''
 from unittest.mock import patch
@@ -91,7 +188,8 @@ error = page.lbl_issue.text()
 page.txt_desc.setText("Poprawiona edycja po błędzie")
 assert page.lbl_edit.property("dirty") is True and page.lbl_issue.text() == error
 assert db.get(12).description == "Zmieniony opis"
-page.new_tool()
+with patch.object(page, "_discard_edits", return_value=True):
+    page.new_tool()
 assert page.lbl_edit.property("dirty") is True
 page.load(db.get(12))
 assert page.lbl_edit.property("dirty") is False
@@ -181,7 +279,8 @@ page.load(db.get(12))
 assert page.txt_holder.text() == "SK40" and page.spin_used.value() == 8.25
 page.spin_life.setValue(0)
 assert page.current().life_min is None
-page.new_tool()
+with patch.object(page, "_discard_edits", return_value=True):
+    page.new_tool()
 assert page.txt_holder.text() == "" and page.spin_life.value() == 0
 assert page.current().life_min is None and page.current().used_min == 0
 assert db.get(12) == edited and not page.tbl.exists()
@@ -375,7 +474,8 @@ page.txt_stl.setText("  narzedzia/wlasne.stl  ")
 assert page.current().stl == "narzedzia/wlasne.stl"
 page.txt_stl.clear()
 assert any(issue.field == "stl" for issue in page.current().validate())
-page.new_tool()
+with patch.object(page, "_discard_edits", return_value=True):
+    page.new_tool()
 assert page.txt_stl.text() == "" and page.stl_row.isHidden()
 assert db.get(70).stl == str(model_path) and model_path.read_bytes() == model_bytes
 assert not page.tbl.exists() and not cnc.command.called and not tooldata.save_tool.called

@@ -757,3 +757,11 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
 - 33 testy lokalnie PASS, w tym rzeczywista klawiatura/przyciski Qt, SQLite i obsługa błędu.
 - Podgląd Qt i dokumentacja; potwierdzenie porzucenia edycji pozostaje osobnym zakresem.
 - Pełne CI do odbioru w PR. Autokontrola, bez niezależnego przeglądu.
+
+## Narzędzia — ochrona porzucenia edycji · 2026-10-22 · Codex
+- Model-Author: Codex. Inny T/Nowe pyta o odrzucenie niezapisanych pól; Zostań jest domyślne i pod Escape.
+- Anulowanie odtwarza poprzednie zaznaczenie, również ukryte lub brak zaznaczenia dla nowego T.
+- Docelowy rekord czytany po dialogu; jego zniknięcie/błąd odczytu zachowuje formularz z komunikatem.
+- Zapis klonu/nowego T zaznacza zapisany numer; odrzucenie nie zapisuje danych ani nie cofa bazy.
+- Regresja starego kodu FAIL; 35 testów lokalnie PASS, w tym prawdziwe okna/klawisze Qt i SQLite.
+- Podgląd i dokumentacja; pełne CI do odbioru w PR. Autokontrola, bez niezależnego przeglądu.
