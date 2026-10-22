@@ -164,3 +164,13 @@ eksport sprawdza również istniejące rekordy przed podmianą tool.tbl. Dwie re
 na starym kodzie FAIL; 17 testów lokalnie PASS. Odmowa walidacji w HMI ma obsługę,
 bez komend przeładowania. Szkic następuje po #77; wynik i sprawdzony SHA w PR.
 Model-Author: Codex. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+#76 scalony jako 11b413b (953 + 101 LinuxCNC PASS, 30 subtestów), #77 jako dfa3d51
+(957 + 101 PASS, 45 subtestów); po 9 pominięć. #78 ma zielone CI ogólne; trwa LinuxCNC.
+Codex: codex/tool-diameter-wear stosuje d_wear do D eksportowanego do tool.tbl.
+Import D odejmuje zachowaną korekcję przy wyliczaniu nominalnego d, bez kumulowania
+zużycia; wartości zerowe/ujemne po korekcji i korekcja bez nominalnego d są odrzucane.
+21 testów lokalnie PASS, zgodność z rzeczywistym Cutter i powtarzany import mm/cale.
+Dodano cztery próby G41/G42 z rzeczywistym rs274 do odbioru w CI (lokalnie niewykonane).
+Szkic następuje po #78; wynik i sprawdzony SHA w PR. Model-Author: Codex.
+NIEZWERYFIKOWANE NA SPRZĘCIE.

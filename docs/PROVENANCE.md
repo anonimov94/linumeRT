@@ -275,3 +275,9 @@ core/Qt/SQLite, GPL-2.0-or-later. Standardowe math oraz istniejące PyQt5; bez n
 
 Model-Author: Codex. Własne reguły Tool.validate, wspólne finite_number, bramka eksportu
 oraz regresje core/Qt/SQLite, GPL-2.0-or-later. Bez nowych zależności i zasobów.
+
+## Korekcja średnicy w eksporcie tabeli — 2026-10-22
+
+Model-Author: Codex. Własna poprawka Tool.tool_diameter, importu i walidacji oraz
+regresje core/symulacji/rs274, GPL-2.0-or-later. Użyto istniejącego Cutter i interpretera
+LinuxCNC; bez nowych bibliotek. Reguła D tabeli i G41/G42 zgodna z dokumentacją LinuxCNC 2.9.

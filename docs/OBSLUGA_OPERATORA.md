@@ -205,3 +205,17 @@ rekordy już istniejące w bazie; odmowa walidacji pozostawia dotychczasowy plik
 bez zmian. Przy odmowie z HMI nie następuje przeładowanie tabeli CNC; odczytaj
 komunikat i popraw dane przed dalszą pracą. Model-Author: Codex.
 NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## Korekcja średnicy a tabela LinuxCNC
+
+Dla narzędzia z nominalnym parametrem d eksportowana średnica D wynosi d + korekcja
+średnicy (`d_wear`). Przykład: 6 mm i −0,02 mm dają D=5,98 mm, czyli promień 2,99 mm
+używany przez G41/G42. Korekcja dotyczy średnicy, więc zmiana promienia jest dwukrotnie
+mniejsza. Bez nominalnej geometrii zwykłe pole D pozostaje wartością tabeli.
+
+Niezerowa korekcja wymaga nominalnego d; średnica po korekcji musi być dodatnia.
+Przy imporcie `tool.tbl` D jest już wartością po korekcji: zachowana korekcja jest
+odejmowana, aby wyliczyć nominalne d. Powtarzanie importu nie dolicza jej ponownie.
+Eksport/import tabeli dla maszyny calowej przelicza wartości z bazy w mm; dokładność
+zapisu to sześć miejsc po przecinku w jednostce tabeli. Model-Author: Codex.
+NIEZWERYFIKOWANE NA SPRZĘCIE.
