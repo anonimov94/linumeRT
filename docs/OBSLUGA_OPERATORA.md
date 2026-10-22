@@ -123,3 +123,13 @@ Odświeżenie listy po zmianie bazy zachowuje zaznaczenie według numeru T i nie
 edytora na narzędzie, które zajęło poprzedni numer wiersza. Nie nadpisuje niezapisanych
 pól, również gdy wybrane T jest ukryte przez filtr. Jeśli T usunięto z bazy, zaznaczenie
 znika; pola edytora pozostają do decyzji operatora. Samo odświeżanie niczego nie zapisuje.
+
+## Eksport bazy narzędzi
+
+Narzędzia → „Eksport całej bazy CSV…” zapisuje wszystkie narzędzia z bazy,
+również ukryte przez filtry. Niezapisane pola edytora nie trafiają do pliku.
+CSV w UTF-8 zawiera parametry geometrii, korekcje, kierunek, oprawki i dane trwałości
+w formacie zgodnym z `ToolDB.import_csv`. Nie zawiera historii edycji ani samych
+plików STL (tylko ich zapisane ścieżki). Nie jest kopią całej konfiguracji maszyny.
+Anulowanie pozostawia dane bez zmian; błąd eksportu wyświetla komunikat.
+Operacja nie zmienia tabeli LinuxCNC ani aktywnego narzędzia. Model-Author: Codex.

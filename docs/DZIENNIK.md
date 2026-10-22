@@ -643,3 +643,11 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
 - Istniejące komórki aktualizowane bez ponownego setItem; brak ostrzeżeń Qt o własności.
 - Regresja Qt/SQLite: przed poprawką FAIL, po poprawce PASS; brak komend CNC/zapisów z odświeżania.
 - Dokumentacja i podgląd GUI; pełne CI do odbioru w PR. Autokontrola, bez niezależnego przeglądu.
+
+## Narzędzia — eksport całej bazy CSV · 2026-10-22 · Codex
+- Model-Author: Codex. Przycisk eksportuje wszystkie zapisane narzędzia, niezależnie od filtrów.
+- Istniejący format ToolDB zachowuje geometrię, korekcje, kierunek, oprawkę i dane trwałości.
+- QSaveFile zapisuje atomowo; anulowanie i błędy odczytu/zapisu nie zmieniają danych.
+- Bez komend CNC, przeładowania tool.tbl i zapisywania pól edytora; opis zakresu w podpowiedzi.
+- Dwa testy Qt/SQLite PASS, w tym ponowny import CSV, Unicode, anulowanie i błędy.
+- Własny podgląd Qt; pełne CI do odbioru w PR. Autokontrola, bez niezależnego przeglądu.

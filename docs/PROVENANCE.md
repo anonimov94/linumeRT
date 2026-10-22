@@ -234,3 +234,8 @@ bez nowych bibliotek ani zasobów zewnętrznych.
 
 Model-Author: Codex. Własna poprawka linumert_tools_page.py i regresja Qt/SQLite,
 GPL-2.0-or-later. Istniejące QSignalBlocker i model zaznaczenia Qt; bez nowych zależności.
+
+## Eksport narzędzi CSV — 2026-10-22
+
+Model-Author: Codex. Własna integracja istniejącego ToolDB.export_csv z QFileDialog
+oraz QSaveFile i testy Qt/SQLite, GPL-2.0-or-later. Bez nowych bibliotek ani zasobów.

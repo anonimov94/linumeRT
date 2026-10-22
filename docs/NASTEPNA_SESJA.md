@@ -106,3 +106,9 @@ Kolejny temat: codex/tool-refresh — zaznaczenie według T przy zmianie listy, 
 nadpisywania niezapisanych pól; usunięty T czyści zaznaczenie. Zlikwidowano ostrzeżenia
 Qt o ponownym wstawianiu istniejących komórek. Test regresyjny odtworzył błąd na starym
 kodzie, po poprawce lokalnie PASS. Kolejny krok: pełne CI i scalenie; wynik i SHA w PR.
+
+Kolejny mały temat: codex/tool-export — eksport wszystkich zapisanych narzędzi do CSV
+z widoku Narzędzia, niezależnie od filtrów. Bez zapisów bazy/tool.tbl i komend CNC.
+Dwa testy Qt/SQLite PASS, obejmują odtworzenie geometrii/korekcji, anulowanie i błędy.
+Szkic PR zależy od poprawki odświeżania #70; scalić dopiero po niej i pełnym CI.
+Wynik i sprawdzony SHA utrzymywać w opisie PR. Model-Author: Codex.
