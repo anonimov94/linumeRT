@@ -126,6 +126,10 @@ class ToolsPage(QtWidgets.QWidget):
             self.cmb_type.addItem(t.label, tid)
         self.cmb_type.currentIndexChanged.connect(self._type_changed)
         self.txt_desc = QtWidgets.QLineEdit()
+        self.txt_holder = QtWidgets.QLineEdit()
+        self.spin_life = self._spin(0, 1e9, " min")
+        self.spin_used = self._spin(0, 1e9, " min")
+        self.spin_used.setSpecialValueText("")  # Zero is a value, not an unset usage counter.
         self.spin_z = self._spin(0, 1000, " mm")
         self.cmb_hand = QtWidgets.QComboBox()
         self.cmb_hand.addItem("prawe (M3)", 1)
@@ -134,6 +138,9 @@ class ToolsPage(QtWidgets.QWidget):
         form.addRow("Gniazdo P", self.spin_p)
         form.addRow("Typ", self.cmb_type)
         form.addRow("Opis", self.txt_desc)
+        form.addRow("Oprawka (nazwa/typ)", self.txt_holder)
+        form.addRow("Trwałość planowana", self.spin_life)
+        form.addRow("Zużycie (ręcznie)", self.spin_used)
         self.lbl_stl = QtWidgets.QLabel("Model STL *")
         self.stl_row = QtWidgets.QWidget()
         stl_layout = QtWidgets.QVBoxLayout(self.stl_row)
@@ -326,6 +333,9 @@ class ToolsPage(QtWidgets.QWidget):
         self.spin_p.setValue(t.pocket)
         self.cmb_type.setCurrentIndex(max(self.cmb_type.findData(t.type), 0))
         self.txt_desc.setText(t.description)
+        self.txt_holder.setText(t.holder)
+        self.spin_life.setValue(t.life_min or 0)
+        self.spin_used.setValue(t.used_min)
         self.txt_stl.setText(t.stl or "")
         self.spin_z.setValue(t.offsets.get("Z", 0.0))
         self.cmb_hand.setCurrentIndex(1 if t.params.get("hand", 1) < 0 else 0)
@@ -366,6 +376,8 @@ class ToolsPage(QtWidgets.QWidget):
         # Model-Author: Codex. Keep metadata and axes absent from this editor.
         return replace(original, pocket=self.spin_p.value(), type=self.cmb_type.currentData(),
                        description=self.txt_desc.text().strip(), params=params,
+                       holder=self.txt_holder.text().strip(),
+                       life_min=self.spin_life.value() or None, used_min=self.spin_used.value(),
                        stl=self.txt_stl.text().strip() or None,
                        offsets={**original.offsets, "Z": self.spin_z.value()},
                        diameter=params.get("d"))

@@ -693,3 +693,11 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
 - Bez przywracania danych i komend CNC; historia bazy nie potwierdza wczytania tabeli przez CNC.
 - Dziewięć testów core/Qt/SQLite PASS: kolejność/limit, kliknięcie, pusta historia i błędne dane.
 - Własny podgląd Qt i dokumentacja; pełne CI do odbioru w PR. Autokontrola, bez niezależnego przeglądu.
+
+## Narzędzia — oprawka i ręczne dane trwałości · 2026-10-22 · Codex
+- Model-Author: Codex. Formularz odczytuje/zapisuje nazwę oprawki, planowaną trwałość i ręczne zużycie.
+- Brak planu = pusta trwałość; zużycie 0 poprawne. Nowe zeruje wartości, sama edycja nie zapisuje.
+- Brak automatycznego naliczania i blokady po przekroczeniu planu; dopuszczone zużycie większe od planu.
+- Core odrzuca ujemne/nieskończone/błędnie typowane czasy; próby zapisu/importu nie zmieniają rekordu.
+- Trzynaście testów core/Qt/SQLite PASS, w tym roundtrip pól i błędny CSV; własny podgląd Qt.
+- Dokumentacja poprawiona do bieżących pól; pełne CI do odbioru w PR. Autokontrola, bez niezależnego przeglądu.

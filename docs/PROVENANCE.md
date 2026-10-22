@@ -265,3 +265,8 @@ GPL-2.0-or-later. Standardowe sqlite3 i istniejące API LinuxCNC; bez nowych zal
 Model-Author: Codex. Własny linumert_tool_history.py, integracja widoku, ograniczenie
 ToolDB.history i testy, GPL-2.0-or-later. Istniejące PyQt5, standardowe json/datetime/SQLite;
 bez nowych zależności ani zasobów zewnętrznych.
+
+## Pola oprawki i trwałości narzędzia — 2026-10-22
+
+Model-Author: Codex. Własne pola formularza, walidacja skończonych czasów i testy
+core/Qt/SQLite, GPL-2.0-or-later. Standardowe math oraz istniejące PyQt5; bez nowych zależności.

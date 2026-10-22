@@ -20,6 +20,7 @@ from __future__ import annotations
 import csv
 import io
 import json
+import math
 import os
 import sqlite3
 import time
@@ -109,9 +110,16 @@ class Tool:
         if self.diameter is not None and self.diameter < 0:
             issues.append(ToolIssue("P-5201", {"tool": n, "field": "diameter",
                                                "expected": ">= 0"}, "diameter"))
-        if self.life_min is not None and self.life_min <= 0:
-            issues.append(ToolIssue("P-5201", {"tool": n, "field": "life_min",
-                                               "expected": "> 0 minut"}, "life_min"))
+        for name, value in (("life_min", self.life_min), ("used_min", self.used_min)):
+            if name == "life_min" and value is None:
+                continue
+            if (isinstance(value, bool) or not isinstance(value, (int, float))
+                    or not math.isfinite(value) or value < 0
+                    or (name == "life_min" and value == 0)):
+                expected = "skończona liczba > 0 minut albo brak" if name == "life_min" else \
+                    "skończona liczba >= 0 minut"
+                issues.append(ToolIssue("P-5201", {"tool": n, "field": name,
+                                                   "expected": expected}, name))
         for text, name in ((self.description, "description"), (self.holder, "holder")):
             if "\n" in text or ";" in text:
                 issues.append(ToolIssue("P-5201", {"tool": n, "field": name,
