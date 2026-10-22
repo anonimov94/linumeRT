@@ -136,12 +136,12 @@ Operacja nie zmienia tabeli LinuxCNC ani aktywnego narzędzia. Model-Author: Cod
 
 ## Dane narzędzia poza formularzem
 
-Edycja istniejącego T zachowuje zapisane dane, których formularz nie udostępnia:
-nazwę oprawki, trwałość i zużycie, ścieżkę STL, parametry tokarskie oraz korekcje
-osi inne niż Z. Zmieniane są pola widoczne w edytorze i geometria wybranego typu.
-Nowy numer T zaczyna z wartościami domyślnymi tych danych; nie dziedziczy ich po
-poprzednio oglądanym narzędziu. Dotychczasowe zasady użycia przycisku „Zapisz”
-pozostają w mocy. Model-Author: Codex. NIEZWERYFIKOWANE NA SPRZĘCIE.
+Edycja istniejącego T zachowuje parametry tokarskie i korekcje osi inne niż Z,
+których formularz nie udostępnia. Oprawka, trwałość i zużycie mają własne pola;
+ścieżka STL jest dostępna dla typu specjalnego. „Nowe” zeruje formularz.
+Zmiana numeru T przy wypełnionym formularzu używa widocznych wartości. Nowy T
+nie przejmuje niewidocznych parametrów tokarskich ani korekcji pozostałych osi.
+Model-Author: Codex. NIEZWERYFIKOWANE NA SPRZĘCIE.
 
 ## Narzędzie specjalne STL
 
@@ -180,3 +180,15 @@ Jest to historia bazy, nie potwierdzenie zapisania `tool.tbl` ani wczytania tabe
 przez LinuxCNC. Pomaga porównać dane po błędzie zapisu, ale nie przywraca zmian
 i nie wysyła komend CNC. Nieznany T pokazuje pustą historię, a błąd odczytu lub
 uszkodzony wpis — komunikat. Model-Author: Codex.
+
+## Oprawka i ręczne dane trwałości
+
+W edytorze narzędzia można podać nazwę/typ oprawki, planowaną trwałość oraz zużycie
+w minutach. W „Trwałość planowana” wartość 0/„—” oznacza brak ustalonego planu.
+Zużycie 0 jest poprawną wartością. Dane odczytują się z bazy; dopiero „Zapisz” je utrwala.
+„Nowe” zaczyna bez oprawki i planu, z zużyciem 0.
+
+Zużycie jest wpisem ręcznym: ten widok nie nalicza automatycznie minut obróbki.
+Przekroczenie planowanej trwałości nie blokuje programu. W bazie i imporcie CSV
+trwałość musi być dodatnią skończoną liczbą albo pusta, a zużycie skończoną liczbą
+nieujemną. Nieprawidłowe dane są odrzucane bez zmiany rekordu. Model-Author: Codex.

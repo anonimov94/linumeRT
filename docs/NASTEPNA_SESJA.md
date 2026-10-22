@@ -149,3 +149,10 @@ Dialog pokazuje zmienione pola przed/po, czas UTC i źródło. Bez przywracania 
 ani potwierdzania synchronizacji z CNC. ToolDB.history ma opcjonalny limit w SQL,
 z zachowaniem dotychczasowej kolejności i API bez limitu. Dziewięć testów lokalnie PASS;
 szkic następuje po #75. Wynik pełnego CI i sprawdzony SHA w PR. Model-Author: Codex.
+
+#76 (historia narzędzia) ma zielone CI ogólne; trwa LinuxCNC. Codex:
+codex/tool-life-fields udostępnia nazwę oprawki, planowaną trwałość i ręczne zużycie
+w minutach. Brak automatycznego naliczania i blokady po przekroczeniu planu.
+Core odrzuca błędne/nieskończone czasy również przy CSV. Trzynaście testów lokalnie PASS;
+podgląd i obsługa operatora zaktualizowane. Szkic następuje po #76.
+Wynik pełnego CI i sprawdzony SHA w PR. Model-Author: Codex.

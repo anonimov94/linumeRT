@@ -46,6 +46,40 @@ db.add(Tool(50, 20, description="Bez geometrii", diameter=5))
 
 @unittest.skipUnless(importlib.util.find_spec("PyQt5"), "PyQt5 unavailable")
 class ToolFilterGuiTests(unittest.TestCase):
+    def test_holder_life_and_manual_usage_roundtrip(self):
+        script = GUI_SETUP + r'''
+from dataclasses import replace
+
+original = db.get(12)
+original = replace(original, holder="ER32", life_min=120.25, used_min=7.125,
+                   offsets={"X":1.25, "Z":42})
+db.update(original)
+page = ToolsPage(SimpleNamespace(c=model.load_tokens()["kolory"]), str(work / "test.ini"))
+page.db, page.tbl = db, work / "tool.tbl"
+page.load(db.get(12))
+assert page.txt_holder.text() == "ER32"
+assert page.spin_life.value() == 120.25 and page.spin_used.value() == 7.125
+page.txt_holder.setText("  SK40  ")
+page.spin_life.setValue(240.5)
+page.spin_used.setValue(8.25)
+edited = page.current()
+assert edited.holder == "SK40" and edited.life_min == 240.5 and edited.used_min == 8.25
+assert edited.offsets == original.offsets and not edited.validate()
+assert db.get(12) == original  # Editing fields alone must not write data.
+db.update(edited)
+page.load(db.get(12))
+assert page.txt_holder.text() == "SK40" and page.spin_used.value() == 8.25
+page.spin_life.setValue(0)
+assert page.current().life_min is None
+page.new_tool()
+assert page.txt_holder.text() == "" and page.spin_life.value() == 0
+assert page.current().life_min is None and page.current().used_min == 0
+assert db.get(12) == edited and not page.tbl.exists()
+assert not cnc.command.called and not tooldata.save_tool.called
+db.close()
+'''
+        self.run_gui(script)
+
     def test_history_button_shows_changes_without_writes_or_cnc(self):
         script = GUI_SETUP + r'''
 from dataclasses import replace
@@ -256,8 +290,9 @@ page.load(db.get(70))
 assert page.current().stl == special.stl and not page.current().validate()
 page.load(replace(original, number=99, pocket=99))  # A new T must not inherit hidden data.
 new = page.current()
-assert new.number == 99 and new.holder == "" and new.stl is None
-assert new.life_min is None and new.used_min == 0 and new.lathe == {}
+assert new.number == 99 and new.holder == original.holder and new.stl is None
+assert new.life_min == original.life_min and new.used_min == original.used_min
+assert new.lathe == {}  # Visible metadata was explicitly loaded; hidden data is not inherited.
 assert new.offsets == {"Z":42}
 assert len(db.history()) == len(history) + 1  # Only the explicit STL fixture was added.
 assert db.get(12) == original and db.get(99) is None
