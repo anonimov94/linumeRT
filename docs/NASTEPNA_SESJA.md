@@ -174,3 +174,13 @@ zużycia; wartości zerowe/ujemne po korekcji i korekcja bez nominalnego d są o
 Dodano cztery próby G41/G42 z rzeczywistym rs274 do odbioru w CI (lokalnie niewykonane).
 Szkic następuje po #78; wynik i sprawdzony SHA w PR. Model-Author: Codex.
 NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+#78 scalony jako f6de5c9: 961 + 101 LinuxCNC PASS, 67 subtestów i 9 pominięć.
+#79 ma zielone CI ogólne; trwa LinuxCNC, w tym nowe G41/G42. Codex:
+codex/tool-table-units uwzględnia TRAJ/LINEAR_UNITS przy pierwszym imporcie tabeli,
+eksporcie danych startowych oraz Zapisz/Usuń w HMI. Baza i pola długości pozostają
+w mm; kąty bez skalowania, nieznane jednostki blokują operację przed zapisem.
+26 testów lokalnie PASS; próby rs274 rozszerzone o maszynę calową (do odbioru w CI).
+Znany osobny dług: Live.sample/WCS/reload_tools czytają wartości CNC bez przeliczenia
+na mm. Pełnej symulacji calowej jeszcze nie zaliczono. Szkic następuje po #79.
+Wynik i sprawdzony SHA w PR. Model-Author: Codex. NIEZWERYFIKOWANE NA SPRZĘCIE.

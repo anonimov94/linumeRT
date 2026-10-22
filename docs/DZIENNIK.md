@@ -719,3 +719,13 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
 - Regresje starego kodu FAIL; 21 testów lokalnie PASS, także rzeczywisty Cutter i import mm/cale.
 - Cztery próby G41/G42 z ± korekcją w rzeczywistym rs274 dodane do CI; lokalnie niewykonane.
 - Pełne CI do odbioru w PR. Autokontrola, bez niezależnego przeglądu. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## Narzędzia — jednostki tabeli zgodne z INI · 2026-10-22 · Codex
+- Model-Author: Codex. Odtworzono import D0.25/Z2 z profilu calowego jako mm zamiast 6,35/50,8 mm.
+- Odczyt TRAJ/LINEAR_UNITS; import tabeli i eksport danych startowych z jednostkami maszyny.
+- Zapisz/Usuń w HMI przekazują jednostki tabeli, baza i pola długości pozostają w mm; kąty bez skali.
+- Nieznane jednostki odrzucone przed zapisem; przy braku ustawienia zachowany domyślny mm.
+- 26 testów lokalnie PASS, także rzeczywiste przyciski Qt, dane startowe i brak mutacji przy błędzie.
+- Próby G41/G42 w rs274 rozszerzone o tabelę calową; lokalnie niewykonane, odbiór przez CI.
+- Oddzielny dług przeliczenia pozycji/WCS/narzędzi Live zapisany; brak deklaracji pełnej symulacji calowej.
+- Autokontrola, bez niezależnego przeglądu. NIEZWERYFIKOWANE NA SPRZĘCIE.

@@ -281,3 +281,8 @@ oraz regresje core/Qt/SQLite, GPL-2.0-or-later. Bez nowych zależności i zasob�
 Model-Author: Codex. Własna poprawka Tool.tool_diameter, importu i walidacji oraz
 regresje core/symulacji/rs274, GPL-2.0-or-later. Użyto istniejącego Cutter i interpretera
 LinuxCNC; bez nowych bibliotek. Reguła D tabeli i G41/G42 zgodna z dokumentacją LinuxCNC 2.9.
+
+## Jednostki tabeli narzędzi w HMI — 2026-10-22
+
+Model-Author: Codex. Własna integracja jednostek INI w tooldata/ToolsPage i regresje
+Qt/SQLite/rs274, GPL-2.0-or-later. Istniejące przeliczniki ToolDB, bez nowych zależności.

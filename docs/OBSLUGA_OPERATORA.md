@@ -219,3 +219,17 @@ odejmowana, aby wyliczyć nominalne d. Powtarzanie importu nie dolicza jej ponow
 Eksport/import tabeli dla maszyny calowej przelicza wartości z bazy w mm; dokładność
 zapisu to sześć miejsc po przecinku w jednostce tabeli. Model-Author: Codex.
 NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## Jednostki bazy i tabeli narzędzi
+
+Baza narzędzi i pola długości edytora są w mm. Plik `tool.tbl` jest odczytywany
+i zapisywany w jednostkach `[TRAJ]LINEAR_UNITS` z INI: mm albo inch. Dotyczy to
+pierwszego importu, utworzenia tabeli z danych startowych oraz „Zapisz” i „Usuń”.
+Kąty A/B/C i I/J nie są skalowane. Podpowiedź licznika tabeli podaje jej jednostkę.
+Przykład: D0.25 i Z2 w tabeli calowej odpowiadają D=6,35 mm i Z=50,8 mm w bazie.
+
+Nieznane jednostki powodują odmowę przed zapisem, zamiast założenia mm.
+Przy braku ustawienia jednostek pozostaje dotychczasowy domyślny mm.
+To poprawka obsługi pliku tabeli; pełny odbiór przeliczenia pozycji, WCS i narzędzi
+w symulacji calowej pozostaje osobnym punktem. Model-Author: Codex.
+NIEZWERYFIKOWANE NA SPRZĘCIE.
