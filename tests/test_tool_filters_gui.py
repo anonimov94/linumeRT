@@ -47,6 +47,64 @@ db.add(Tool(50, 20, description="Bez geometrii", diameter=5))
 
 @unittest.skipUnless(importlib.util.find_spec("PyQt5"), "PyQt5 unavailable")
 class ToolFilterGuiTests(unittest.TestCase):
+    def test_unsaved_indicator_follows_edits_persistence_and_errors(self):
+        script = GUI_SETUP + r'''
+from unittest.mock import patch
+from PyQt5.QtTest import QTest
+
+del sys.modules["linumert_sim"]
+del sys.modules["linumert_sim.tooldata"]
+from linumert_sim.tooldata import save_tool as real_save_tool
+cnc.error, cnc.INTERP_IDLE = RuntimeError, 1
+cnc.stat = Mock(return_value=SimpleNamespace(poll=Mock(), interp_state=1))
+page = ToolsPage(SimpleNamespace(c=model.load_tokens()["kolory"], show_alarm=Mock()),
+                 str(work / "test.ini"))
+page.db, page.tbl = db, work / "tool.tbl"
+page._reload_linuxcnc = Mock()
+page.refresh()
+page.table.selectRow(0)
+assert page.lbl_edit.property("dirty") is False
+line = page.spin_z.lineEdit()
+line.selectAll()
+QTest.keyClicks(line, "43.2")
+assert page.spin_z.value() == 0  # Keyboard tracking is off; the value is not committed yet.
+assert page.lbl_edit.property("dirty") is True
+page.load(db.get(12))
+assert page.lbl_edit.property("dirty") is False
+page.txt_desc.setText("Zmieniony opis")
+assert page.lbl_edit.property("dirty") is True and "niezapisane" in page.lbl_edit.text()
+page.search.setText("T12")
+db.add(Tool(30, 30))
+page.refresh()
+assert page.lbl_edit.property("dirty") is True and page.txt_desc.text() == "Zmieniony opis"
+save = next(button for button in page.findChildren(QtWidgets.QPushButton)
+            if button.text() == "Zapisz")
+with patch("linumert_tools_page.save_tool", real_save_tool):
+    save.click()
+assert db.get(12).description == "Zmieniony opis" and page.tbl.exists()
+assert page.lbl_edit.property("dirty") is False and "zapisane" in page.lbl_issue.text()
+page.txt_desc.setText("Kolejna edycja")
+assert page.lbl_edit.property("dirty") is True and page.lbl_issue.text() == ""
+with patch("linumert_tools_page.save_tool", side_effect=OSError("Brak miejsca")):
+    save.click()
+error = page.lbl_issue.text()
+page.txt_desc.setText("Poprawiona edycja po błędzie")
+assert page.lbl_edit.property("dirty") is True and page.lbl_issue.text() == error
+assert db.get(12).description == "Zmieniony opis"
+page.new_tool()
+assert page.lbl_edit.property("dirty") is True
+page.load(db.get(12))
+assert page.lbl_edit.property("dirty") is False
+with patch.object(QtWidgets.QMessageBox, "question", return_value=QtWidgets.QMessageBox.Yes):
+    next(button for button in page.findChildren(QtWidgets.QPushButton)
+         if button.text() == "Usuń").click()
+assert db.get(12) is None and "usunięte" in page.lbl_edit.text()
+assert "usunięte" in page.lbl_issue.text() and "zapisane" not in page.lbl_issue.text()
+assert not cnc.command.called
+db.close()
+'''
+        self.run_gui(script)
+
     def test_inch_profile_uses_machine_units_on_save_and_remove(self):
         script = GUI_SETUP + r'''
 from unittest.mock import patch
