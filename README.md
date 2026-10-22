@@ -179,3 +179,9 @@ GPL-2.0-or-later dla własnego kodu. Części pochodzące z LinuxCNC/QtDragon: G
 na GPL-2.0 (pełny tekst w [`LICENSE`](LICENSE), zależności w [`docs/LICENCJE.md`](docs/LICENCJE.md), pochodzenie
 zasobów w [`docs/PROVENANCE.md`](docs/PROVENANCE.md)). Licencja z katalogu nadrzędnego (`PythonProjects/LICENSE`)
 nie dotyczy tego projektu.
+
+## Plan rozwoju: nowe skórki operatora
+
+Planowany jest **zupełnie nowy, wymienny interfejs HMI** z czterema autorskimi rodzinami skórek: Classic Digital, Industrial Pro, Cyberdeck i Organic Vector. Każda będzie obsługiwać cztery niezależne palety (turkusowa, grafitowa, zielona, niebieska), języki English/Polski oraz konfigurowalne rozmieszczenie widoków maszyny 3D, detalu i ścieżki. Etap wymaga nowego, zweryfikowanego renderera 3D i zachowania bezpieczeństwa LinuxCNC/HAL.
+
+**Status: roadmapa i wytyczne — jeszcze nie wdrożono.** Szczegóły: [SKIN_SYSTEM_ROADMAP.md](docs/design/SKIN_SYSTEM_ROADMAP.md).
