@@ -121,7 +121,16 @@ class DiagPage(QtWidgets.QWidget):
                 self.texts = model.catalog_texts(yaml.safe_load(fh))
         except (OSError, ImportError, ValueError):
             self.texts = {}
-        grid = QtWidgets.QGridLayout(self)
+        layout = QtWidgets.QVBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+        self.scroll = QtWidgets.QScrollArea()
+        self.scroll.setWidgetResizable(True)
+        self.scroll.setFrameShape(QtWidgets.QFrame.NoFrame)
+        content = QtWidgets.QWidget()
+        content.setObjectName("lrtPage")
+        self.scroll.setWidget(content)
+        layout.addWidget(self.scroll)
+        grid = QtWidgets.QGridLayout(content)
         grid.setContentsMargins(16, 16, 16, 16)
         grid.setSpacing(16)
         grid.addWidget(self._link_card(), 0, 0)

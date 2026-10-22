@@ -91,3 +91,20 @@ komunikat, bez częściowego czasu i bez potwierdzenia poprawności całego prog
 Limit może też osiągnąć duży, skończony program. Pętle skończone są dozwolone.
 Samodzielny interpreter ma osobne pliki robocze i nie współdzieli tabeli narzędzi
 z działającym sterowaniem. Model-Author: Codex.
+
+## Historia komunikatów w Diagnostyce
+
+W Diagnostyce filtr poziomu oraz pole wyszukiwania zawężają historię po treści,
+kodzie lub dacie. Lista pokazuje do 200 najnowszych pasujących komunikatów;
+„Eksport CSV…” zapisuje wszystkie pasujące wpisy (UTF-8, separator średnik).
+Czas zawiera datę i strefę czasową komputera. Reset alarmów nie usuwa historii.
+
+Historia zachowuje ostatnie 1000 komunikatów między uruchomieniami. Każdy plik INI
+ma osobną bazę w katalogu danych użytkownika: zwykle
+`~/.local/share/linumert/diagnostic-<identyfikator>.sqlite3`; dokładna ścieżka jest
+w podpowiedzi pod licznikiem wpisów. Przy braku miejsca, uszkodzeniu lub blokadzie
+bazy komunikaty pozostają widoczne w pamięci i pojawia się jawna informacja o braku
+zapisu. Nie oznacza to zachowania nowych wpisów po zamknięciu ekranu.
+
+Historia opisuje zdarzenia, a nie bieżący stan alarmów ani potwierdzenie usunięcia
+awarii. Na małym ekranie Diagnostykę można przewijać. Model-Author: Codex.

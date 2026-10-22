@@ -619,3 +619,12 @@ Brak komend ruchu przy kontroli; screenshot wykonany lokalnie. CI oraz odbiór w
 Izolacja obejmuje teraz szacowanie i kontrolę semantyczną: prywatne HOME/TMPDIR/cwd, bez zapisu do wspólnego sim.var; 20 s/8 MiB, bez częściowego wyniku czasu. 108 testów lokalnych PASS (3 subtesty), w tym regresja starego rs274 uszkadzającego mmap oraz kliknięcie GUI i nadal dostępna kontrola składni. Autokontrola; PR #66 czeka na pełne CI. Model-Author: Codex.
 
 Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących prywatnych parametrów, interpretowane jako błąd poprawnego programu. Inicjalizujemy plik i nadpisujemy także PARAMETER_FILE w prywatnej kopii INI (INI ma pierwszeństwo przed -v). Nowa regresja chroni absolutną ścieżkę parametrów sterowania; wczesny test Plant sprawdza również poprawny skończony program. 109 testów lokalnych PASS, autokontrola, Model-Author: Codex.
+
+## Diagnostyka — trwała historia komunikatów · 2026-10-22 · Codex
+- Model-Author: Codex. PR #68: ostatnie 1000 wpisów SQLite, oddzielnie dla konfiguracji INI.
+- Filtr poziomu i wyszukiwanie; widok do 200, eksport CSV wszystkich pasujących wpisów.
+- Błąd bazy nie usuwa komunikatu z widoku: jawny tryb pamięciowy, bez nadpisania uszkodzonego pliku.
+- Diagnostyka przewijana na mniejszym ekranie; bez komend CNC i bez zmiany Resetu alarmów.
+- Lokalnie 7 testów PASS: restart, retencja, filtry, awarie zapisu i faktyczne kliknięcia Qt/CSV.
+- Próba złożonej Diagnostyki i zrzut Qt; pełne CI do odbioru w PR #68.
+- Autokontrola, bez niezależnego przeglądu. NIEZWERYFIKOWANE NA SPRZĘCIE.

@@ -85,5 +85,6 @@ Nowe polecenie właściciela: rozwijać najprostsze lub nierozpoczęte obszary.
 Gałąź `codex/diagnostic-history`: trwała historia komunikatów Diagnostyki (SQLite),
 filtr poziomu, wyszukiwanie i eksport CSV. Odrębna baza dla każdej konfiguracji INI;
 1000 wpisów, widok do 200 pasujących; błędy zapisu dają jawny tryb tylko w pamięci.
-Pierwsza próba zapisu/ponownego odczytu i kliknięcia Qt PASS; kolejny krok: regresje,
-dokumentacja i pełne CI. PR #67 (pola liczbowe) pozostawiony bez zmian. Model-Author: Codex.
+Lokalnie 7 testów trwałości/filtrów/awarii/Qt PASS; dodano próbę złożonej Diagnostyki
+na małym ekranie, przewijanie i dokumentację. PR #68: pełne CI wymagane przed scaleniem.
+Wynik odbioru i sprawdzony SHA utrzymywać w opisie PR #68. PR #67 (pola liczbowe) pozostawiony bez zmian. Model-Author: Codex.

@@ -48,6 +48,7 @@ class LogView(QtWidgets.QWidget):
         self.list.setObjectName("lrtLog")
         layout.addWidget(self.list)
         self.summary = QtWidgets.QLabel()
+        self.summary.setObjectName("lrtMuted")
         self.summary.setTextFormat(QtCore.Qt.PlainText)
         self.summary.setWordWrap(True)
         self.summary.setToolTip(str(self.path))
