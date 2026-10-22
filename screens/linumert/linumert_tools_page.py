@@ -12,6 +12,7 @@ podczas pracy programu (zmiana tabeli w trakcie obróbki).
 from __future__ import annotations
 
 import os
+import sqlite3
 import sys
 from dataclasses import replace
 
@@ -348,24 +349,38 @@ class ToolsPage(QtWidgets.QWidget):
                        diameter=params.get("d"))
 
     def _busy(self) -> bool:
-        s = linuxcnc.stat()
         try:
+            s = linuxcnc.stat()
             s.poll()
-        except linuxcnc.error:
-            return False
-        return s.interp_state != linuxcnc.INTERP_IDLE
+        except linuxcnc.error as exc:
+            message = f"Status LinuxCNC niedostępny: {exc}. Zmiana tabeli zablokowana."
+        else:
+            if s.interp_state == linuxcnc.INTERP_IDLE:
+                return False
+            message = "Tabela narzędzi: zmiana niedostępna w trakcie programu"
+        self.lbl_issue.setText(message)
+        self.shell.show_alarm("warn", message)
+        return True
+
+    def _write_failed(self, exc) -> None:
+        message = (f"Zapis tabeli nie powiódł się: {exc}. Baza mogła się zmienić; "
+                   "sprawdź bazę i tool.tbl przed pracą.")
+        self.lbl_issue.setText(message)
+        self.shell.show_alarm("err", message)
 
     def save(self) -> None:
         if not self._open():
             return
         if self._busy():
-            self.shell.show_alarm("warn", "Tabela narzędzi: zapis niedostępny w trakcie programu")
             return
-        tool = self.current()
         try:
+            tool = self.current()
             save_tool(self.db, tool, self.tbl)
         except ToolDBError as exc:
             self.lbl_issue.setText(str(exc))
+            return
+        except (OSError, sqlite3.Error) as exc:
+            self._write_failed(exc)
             return
         self._reload_linuxcnc()
         self.lbl_issue.setText(f"T{tool.number} zapisane w bazie i w {os.path.basename(self.tbl)}")
@@ -375,13 +390,17 @@ class ToolsPage(QtWidgets.QWidget):
         if not self._open() or self._busy():
             return
         n = self.spin_t.value()
-        if self.db.get(n) is None:
+        try:
+            if self.db.get(n) is None:
+                return
+            if QtWidgets.QMessageBox.question(self, "Narzędzia", f"Usunąć T{n} z tabeli?") != \
+                    QtWidgets.QMessageBox.Yes:
+                return
+            self.db.remove(n)
+            self.db.export_tbl(self.tbl)
+        except (OSError, sqlite3.Error) as exc:
+            self._write_failed(exc)
             return
-        if QtWidgets.QMessageBox.question(self, "Narzędzia", f"Usunąć T{n} z tabeli?") != \
-                QtWidgets.QMessageBox.Yes:
-            return
-        self.db.remove(n)
-        self.db.export_tbl(self.tbl)
         self._reload_linuxcnc()
         self.refresh()
 

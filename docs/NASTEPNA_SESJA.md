@@ -133,3 +133,11 @@ symulacja nadal używa walca zastępczego, bez analizy siatki STL.
 Edytor przewijany, długie wiersze zawijane; pięć testów Qt/SQLite lokalnie PASS,
 w tym okno 1200×600, dostęp do zapisu i brak obcięcia etykiet. Szkic następuje po #73.
 Wynik pełnego CI i sprawdzony SHA w PR. Model-Author: Codex.
+
+#71 scalony jako 8cf3508 (946 + 101 LinuxCNC PASS), #72 jako 4c9d16e (947 + 101),
+#73 jako 88855a0 (948 + 101); każdy z 25 subtestami i 9 pominięciami. #74 ma zielone
+CI ogólne, trwa LinuxCNC. Codex: codex/tool-write-errors obsługuje błędy pliku/SQLite
+przy zapisie/usuwaniu i blokuje edycję przy braku statusu CNC (konstruktor lub poll).
+Baza może być zmieniona przed błędem tool.tbl; komunikat wymaga sprawdzenia obu,
+bez udawania rollbacku. Sześć testów Qt/SQLite lokalnie PASS; szkic następuje po #74.
+Wynik pełnego CI i sprawdzony SHA w PR. Model-Author: Codex. NIEZWERYFIKOWANE NA SPRZĘCIE.

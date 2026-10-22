@@ -676,3 +676,12 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
 - Edytor przewijany, długie wiersze zawijane; podgląd i próba rzeczywistego Qt w 1200×600.
 - Pięć testów Qt/SQLite PASS: wybór/anulowanie, wymagane pole, reload, brak zmian pliku/CNC.
 - Pełne CI do odbioru w PR. Autokontrola, bez niezależnego przeglądu.
+
+## Narzędzia — błędy zapisu i brak statusu CNC · 2026-10-22 · Codex
+- Model-Author: Codex. Brak statusu (utworzenie stat/poll) blokuje zapis i usunięcie; program nadal blokuje.
+- Błędy pliku i SQLite pokazane w edytorze/alarmie, bez nieobsłużonego wyjątku z przycisku Qt.
+- Po błędzie nie wysyła się przeładowania tabeli CNC; baza mogła już się zmienić, co mówi komunikat.
+- Bez pozornego rollbacku ani zapewnienia atomowości bazy i pliku; operator sprawdza oba przed pracą.
+- Dwie regresje na starym kodzie FAIL; sześć testów Qt/SQLite PASS, w tym blokada SQLite i częściowy zapis.
+- Własny podgląd błędu; pełne CI do odbioru w PR. Autokontrola, bez niezależnego przeglądu.
+- NIEZWERYFIKOWANE NA SPRZĘCIE.
