@@ -701,3 +701,12 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
 - Core odrzuca ujemne/nieskończone/błędnie typowane czasy; próby zapisu/importu nie zmieniają rekordu.
 - Trzynaście testów core/Qt/SQLite PASS, w tym roundtrip pól i błędny CSV; własny podgląd Qt.
 - Dokumentacja poprawiona do bieżących pól; pełne CI do odbioru w PR. Autokontrola, bez niezależnego przeglądu.
+
+## Narzędzia — walidacja liczb i odmowa niepoprawnego eksportu · 2026-10-22 · Codex
+- Model-Author: Codex. Odtworzono eksport Dinf/Zinf i ciche obcięcie Q2.5→Q2.
+- Skończone liczby w średnicy, korekcjach i I/J; Q całkowite 0…9, bez bool i nieznanych pól tokarki.
+- params/offsets/lathe muszą być obiektami; wspólne sprawdzenie liczb obsługuje też zbyt duże int.
+- Eksport waliduje stare rekordy przed zapisem pliku; błąd pozostawia poprzedni tool.tbl.
+- Odmowa walidacji w Zapisz/Usuń jest obsłużona w HMI, bez przeładowania CNC.
+- Dwie regresje starego kodu FAIL; 17 testów core/Qt/SQLite PASS, także atomowość wsadu CSV.
+- Pełne CI do odbioru w PR. Autokontrola, bez niezależnego przeglądu. NIEZWERYFIKOWANE NA SPRZĘCIE.

@@ -192,3 +192,16 @@ Zużycie jest wpisem ręcznym: ten widok nie nalicza automatycznie minut obróbk
 Przekroczenie planowanej trwałości nie blokuje programu. W bazie i imporcie CSV
 trwałość musi być dodatnią skończoną liczbą albo pusta, a zużycie skończoną liczbą
 nieujemną. Nieprawidłowe dane są odrzucane bez zmiany rekordu. Model-Author: Codex.
+
+## Niepoprawne dane przy imporcie i eksporcie narzędzi
+
+Średnica i korekcje muszą być skończonymi liczbami, a średnica nieujemna.
+Parametry tokarskie I/J są liczbami skończonymi; orientacja Q musi być całkowita
+w zakresie 0…9. Wartość Q2.5 jest odrzucana, nie zaokrąglana. Pola JSON parametrów,
+korekcji i tokarki muszą zawierać obiekty z nazwami pól, nie listy ani wartości null.
+
+Błędny import CSV nie zapisuje części wsadu. Eksport `tool.tbl` sprawdza również
+rekordy już istniejące w bazie; odmowa walidacji pozostawia dotychczasowy plik
+bez zmian. Przy odmowie z HMI nie następuje przeładowanie tabeli CNC; odczytaj
+komunikat i popraw dane przed dalszą pracą. Model-Author: Codex.
+NIEZWERYFIKOWANE NA SPRZĘCIE.

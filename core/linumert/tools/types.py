@@ -108,6 +108,16 @@ def _bad(tool: int, name: str, expected: str) -> ToolIssue:
     return ToolIssue("P-5201", {"tool": tool, "field": name, "expected": expected}, name)
 
 
+def finite_number(value: Any) -> bool:
+    """Real, finite tool value, excluding bool. Model-Author: Codex."""
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        return False
+    try:
+        return math.isfinite(value)
+    except OverflowError:
+        return False
+
+
 def validate_geometry(number: int, type_id: str | None, params: dict[str, Any],
                       stl: str | None) -> list[ToolIssue]:
     """Parametry narzędzia wobec typu: wymagane, zakresy, reguły między polami."""
@@ -117,8 +127,7 @@ def validate_geometry(number: int, type_id: str | None, params: dict[str, Any],
         if spec is None:
             issues.append(_bad(number, name, "parametr znany typom narzędzi"))
             continue
-        if isinstance(value, bool) or not isinstance(value, (int, float)) or \
-                not math.isfinite(value):
+        if not finite_number(value):
             issues.append(_bad(number, name, f"liczba [{spec.unit}]".replace(" []", "")))
             continue
         low_ok = value > spec.minimum if spec.exclusive_minimum else value >= spec.minimum
@@ -153,3 +162,4 @@ def validate_geometry(number: int, type_id: str | None, params: dict[str, Any],
     if type_id in ("chamfer",) and p["angle"] >= 180:
         issues.append(_bad(number, "angle", "< 180° dla fazownika"))
     return issues
+

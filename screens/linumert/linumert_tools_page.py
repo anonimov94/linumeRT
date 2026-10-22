@@ -410,10 +410,7 @@ class ToolsPage(QtWidgets.QWidget):
         try:
             tool = self.current()
             save_tool(self.db, tool, self.tbl)
-        except ToolDBError as exc:
-            self.lbl_issue.setText(str(exc))
-            return
-        except (OSError, sqlite3.Error) as exc:
+        except (ToolDBError, OSError, sqlite3.Error) as exc:
             self._write_failed(exc)
             return
         self._reload_linuxcnc()
@@ -432,7 +429,7 @@ class ToolsPage(QtWidgets.QWidget):
                 return
             self.db.remove(n)
             self.db.export_tbl(self.tbl)
-        except (OSError, sqlite3.Error) as exc:
+        except (ToolDBError, OSError, sqlite3.Error) as exc:
             self._write_failed(exc)
             return
         self._reload_linuxcnc()

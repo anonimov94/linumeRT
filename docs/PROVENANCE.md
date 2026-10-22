@@ -270,3 +270,8 @@ bez nowych zależności ani zasobów zewnętrznych.
 
 Model-Author: Codex. Własne pola formularza, walidacja skończonych czasów i testy
 core/Qt/SQLite, GPL-2.0-or-later. Standardowe math oraz istniejące PyQt5; bez nowych zależności.
+
+## Walidacja liczb tabeli narzędzi — 2026-10-22
+
+Model-Author: Codex. Własne reguły Tool.validate, wspólne finite_number, bramka eksportu
+oraz regresje core/Qt/SQLite, GPL-2.0-or-later. Bez nowych zależności i zasobów.

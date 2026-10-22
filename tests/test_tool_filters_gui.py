@@ -143,6 +143,8 @@ db.close()
         script = GUI_SETUP + r'''
 import sqlite3
 from unittest.mock import patch
+from linumert.tools.db import ToolDBError
+from linumert.tools.types import ToolIssue
 
 cnc.error, cnc.INTERP_IDLE = RuntimeError, 1
 page = ToolsPage(SimpleNamespace(c=model.load_tokens()["kolory"], show_alarm=Mock()),
@@ -195,6 +197,15 @@ with patch.object(db, "get", side_effect=sqlite3.OperationalError("database is l
     remove.click()
 assert not uncaught and "database is locked" in page.lbl_issue.text()
 assert not cnc.command.called
+invalid = ToolDBError([ToolIssue("P-5206", {"tool":12})])
+with patch("linumert_tools_page.save_tool", side_effect=invalid):
+    save.click()
+assert not uncaught and "baza" in page.lbl_issue.text().casefold()
+with patch.object(db, "get", return_value=Tool(12, 3)), \
+        patch.object(db, "remove", side_effect=invalid), \
+        patch.object(QtWidgets.QMessageBox, "question", return_value=QtWidgets.QMessageBox.Yes):
+    remove.click()
+assert not uncaught and str(invalid) in page.lbl_issue.text() and not cnc.command.called
 assert page.shell.show_alarm.called
 db.close()
 '''
