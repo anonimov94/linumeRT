@@ -739,3 +739,12 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
 - Atrapa statusu nie udostępnia komend CNC; bez zmian toru ruchu/safety. Fixture podglądu jawnie mm.
 - Wymagane pełne CI, ręcznego odbioru calowego HMI/obrabiarki nie zaliczono.
 - Autokontrola, bez niezależnego przeglądu. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## Symulacja — aktualny WCS początku przygotówki · 2026-10-22 · Codex
+- Model-Author: Codex. Odtworzono użycie starego X1 z pliku zamiast bieżącego X20 z G54.
+- Aktywny WCS bierze początek ze świeżo odczytanego statusu; inny z zapisanych parametrów.
+- Nie podstawia się przesunięcia aktywnego układu pod brakujący nieaktywny WCS.
+- Brak danych lub błąd poll daje error i zachowuje poprzednią mapę/definicję, bez komend CNC.
+- Regresja starego kodu FAIL; 32 testy lokalnie PASS, także przeliczenie zapisanego nieaktywnego WCS.
+- Dokumentacja opisuje świeżość statusu i ograniczenie pliku parametrów; pełne CI do odbioru w PR.
+- Autokontrola, bez niezależnego przeglądu. NIEZWERYFIKOWANE NA SPRZĘCIE.

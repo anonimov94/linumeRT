@@ -294,3 +294,9 @@ rzeczywistego silnika/mapy materiału, GPL-2.0-or-later. Bez nowych zależności
 Semantykę parametrów WCS sprawdzono w LinuxCNC 2.9, convert_coordinate_system
 (USER_TO_PROGRAM_LEN); nie kopiowano kodu:
 https://github.com/LinuxCNC/linuxcnc/blob/2.9/src/emc/rs274ngc/interp_convert.cc .
+
+## Wybór WCS przygotówki w Live — 2026-10-22
+
+Model-Author: Codex. Własna reguła wyboru aktualnego/zapisanego WCS i regresje
+silnika symulacji, GPL-2.0-or-later. Istniejące status.g5x_index/g5x_offset i parser
+parametrów LinuxCNC; bez nowych zależności ani zasobów.

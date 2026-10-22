@@ -12,6 +12,37 @@ from linumert_sim.live import Live, main
 
 
 class LiveUnitsTests(unittest.TestCase):
+    def test_current_wcs_uses_fresh_status_instead_of_saved_parameters(self):
+        live, status, _cnc = self.make_live("mm")
+        status.g5x_index = 1
+        status.g5x_offset[:3] = (20, 30, 40)
+        (live.ini_path.parent / "machine.var").write_text("5221 1\n5222 2\n5223 3\n")
+        live.set_stock(";@STOCK BOX X10 Y20 Z5 ORIGIN=TOP_FRONT_LEFT OFFSET=G54 TOP=0")
+        self.assertEqual(live.engine.stock.x0, 20)
+        self.assertEqual(live.engine.stock.y0, 30)
+        self.assertEqual(live.engine.stock.z_top, 40)
+
+    def test_missing_inactive_wcs_or_poll_failure_preserves_existing_stock(self):
+        live, status, cnc = self.make_live("mm")
+        cnc.error = RuntimeError
+        status.g5x_index = 1
+        status.g5x_offset[:3] = (20, 30, 40)
+        current = ";@STOCK BOX X10 Y20 Z5 ORIGIN=TOP_FRONT_LEFT OFFSET=G54 TOP=0"
+        live.set_stock(current)
+        before = live.engine.stock
+        self.output.reset_mock()
+        live.set_stock(current.replace("G54", "G55"))
+        self.assertIs(live.engine.stock, before)
+        self.assertEqual(live.stock_line, current)
+        self.assertEqual(self.output.call_args.kwargs["ev"], "error")
+        self.assertIn("G55", self.output.call_args.kwargs["text"])
+        (live.ini_path.parent / "machine.var").write_text("5221 1\n5222 2\n5223 3\n")
+        status.poll.side_effect = RuntimeError("Brak statusu")
+        live.set_stock(current)
+        self.assertIs(live.engine.stock, before)
+        self.assertEqual(self.output.call_args.kwargs["ev"], "error")
+        self.assertFalse(cnc.command.called)
+
     def setUp(self):
         self.work = tempfile.TemporaryDirectory()
         self.instances = []
@@ -40,11 +71,11 @@ class LiveUnitsTests(unittest.TestCase):
                 "  params: {d: 6, l: 8, flute_length: 8}\n")
         factor = 25.4 if units == "inch" else 1.0
         status = SimpleNamespace(
-            poll=Mock(), actual_position=[0.0] * 9, g5x_offset=[0.0] * 9,
+            poll=Mock(), actual_position=[0.0] * 9, g5x_offset=[0.0] * 9, g5x_index=1,
             spindle=[{"enabled":True, "direction":1, "speed":1200}], motion_type=2,
             motion_line=4, current_line=4, tool_in_spindle=1,
             tool_table=[SimpleNamespace(id=1, zoffset=10 / factor, diameter=6 / factor)])
-        cnc = SimpleNamespace(stat=lambda: status,
+        cnc = SimpleNamespace(stat=lambda: status, error=RuntimeError,
                               command=Mock(side_effect=AssertionError("unexpected CNC command")))
         live = Live(str(ini), None, cnc)
         live.map_file = root / "material.f32"
@@ -70,6 +101,7 @@ class LiveUnitsTests(unittest.TestCase):
             with self.subTest(saved=saved):
                 live, status, _cnc = self.make_live("inch")
                 status.g5x_offset[:3] = (1, -2, 0.5)
+                status.g5x_index = 2 if saved else 1  # Saved G54 is inactive; status G54 is live.
                 if saved:
                     (live.ini_path.parent / "machine.var").write_text("5221 1\n5222 -2\n5223 0.5\n")
                 live.set_stock(";@STOCK BOX X10 Y20 Z5 ORIGIN=TOP_FRONT_LEFT OFFSET=G54 TOP=0")
