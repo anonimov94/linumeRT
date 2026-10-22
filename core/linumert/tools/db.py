@@ -204,9 +204,18 @@ class ToolDB:
         return [Tool.from_row(r) for r in
                 self.db.execute("SELECT * FROM tools ORDER BY number").fetchall()]
 
-    def history(self, number: int | None = None) -> list[dict[str, Any]]:
+    def history(self, number: int | None = None, *,
+                limit: int | None = None) -> list[dict[str, Any]]:
+        """Chronological entries; limit selects the most recent entries. Model-Author: Codex."""
+        if limit is not None and (not isinstance(limit, int) or isinstance(limit, bool)
+                                  or limit < 1):
+            raise ValueError("limit historii musi być dodatnią liczbą całkowitą")
         query = "SELECT * FROM history" + (" WHERE number = ?" if number is not None else "")
-        rows = self.db.execute(query + " ORDER BY id", () if number is None else (number,))
+        args = () if number is None else (number,)
+        query += " ORDER BY id" if limit is None else " ORDER BY id DESC LIMIT ?"
+        rows = self.db.execute(query, args if limit is None else (*args, limit)).fetchall()
+        if limit is not None:
+            rows.reverse()
         return [{"time": r["time"], "number": r["number"], "action": r["action"],
                  "source": r["source"],
                  "before": json.loads(r["before"]) if r["before"] else None,
@@ -381,3 +390,4 @@ def _merge(old: Tool | None, entry: TblEntry) -> Tool:
 
 
 __all__ = ["TYPES", "Tool", "ToolDB", "ToolDBError"]
+

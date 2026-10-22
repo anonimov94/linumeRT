@@ -94,7 +94,13 @@ class ToolsPage(QtWidgets.QWidget):
         self.export.setToolTip("Zapisuje wszystkie narzędzia z bazy, niezależnie od filtrów. "
                                "Nie obejmuje niezapisanych zmian w edytorze.")
         self.export.clicked.connect(self.export_csv)
-        lay.addWidget(self.export)
+        self.history_button = QtWidgets.QPushButton("Historia T…")
+        self.history_button.setMinimumHeight(44)
+        self.history_button.clicked.connect(self.show_history)
+        actions = QtWidgets.QHBoxLayout()
+        actions.addWidget(self.history_button)
+        actions.addWidget(self.export, 1)
+        lay.addLayout(actions)
         grid.addWidget(frame, 0, 0)
         self.editor_scroll = QtWidgets.QScrollArea()
         self.editor_scroll.setWidgetResizable(True)
@@ -215,6 +221,22 @@ class ToolsPage(QtWidgets.QWidget):
             self.txt_stl.setText(filename)
 
     # ---- dane ---------------------------------------------------------------------------
+    def show_history(self) -> None:
+        if not self._open():
+            return
+        try:
+            from linumert_tool_history import ToolHistoryDialog
+
+            number = self.spin_t.value()
+            records = self.db.history(number, limit=100)
+            dialog = ToolHistoryDialog(self, number, records)
+            try:
+                dialog.exec_()
+            finally:
+                dialog.deleteLater()
+        except Exception as exc:  # noqa: BLE001 - database/record errors stay within this dialog
+            QtWidgets.QMessageBox.warning(self, "Historia niedostępna", str(exc))
+
     def export_csv(self) -> None:
         """Model-Author: Codex. Read-only backup; no tool.tbl or CNC commands."""
         if not self._open():

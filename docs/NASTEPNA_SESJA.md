@@ -141,3 +141,11 @@ przy zapisie/usuwaniu i blokuje edycję przy braku statusu CNC (konstruktor lub 
 Baza może być zmieniona przed błędem tool.tbl; komunikat wymaga sprawdzenia obu,
 bez udawania rollbacku. Sześć testów Qt/SQLite lokalnie PASS; szkic następuje po #74.
 Wynik pełnego CI i sprawdzony SHA w PR. Model-Author: Codex. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+#74 scalony jako 519dbca: 949 + 101 LinuxCNC PASS, 25 subtestów, 9 pominięć.
+#75 ma zielone CI ogólne; trwa LinuxCNC. Codex: codex/tool-history udostępnia
+historię bazy dla numeru T z edytora (także usuniętego), do 100 najnowszych wpisów.
+Dialog pokazuje zmienione pola przed/po, czas UTC i źródło. Bez przywracania danych
+ani potwierdzania synchronizacji z CNC. ToolDB.history ma opcjonalny limit w SQL,
+z zachowaniem dotychczasowej kolejności i API bez limitu. Dziewięć testów lokalnie PASS;
+szkic następuje po #75. Wynik pełnego CI i sprawdzony SHA w PR. Model-Author: Codex.

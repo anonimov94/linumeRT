@@ -46,6 +46,65 @@ db.add(Tool(50, 20, description="Bez geometrii", diameter=5))
 
 @unittest.skipUnless(importlib.util.find_spec("PyQt5"), "PyQt5 unavailable")
 class ToolFilterGuiTests(unittest.TestCase):
+    def test_history_button_shows_changes_without_writes_or_cnc(self):
+        script = GUI_SETUP + r'''
+from dataclasses import replace
+from unittest.mock import patch
+from linumert_tool_history import ToolHistoryDialog
+
+original = db.get(12)
+db.update(replace(original, description="Nowy opis", offsets={"Z":42.1234}))
+db.remove(12)
+page = ToolsPage(SimpleNamespace(c=model.load_tokens()["kolory"]), str(work / "test.ini"))
+page.db, page.tbl = db, work / "tool.tbl"
+page.setStyleSheet(model.shell_qss(model.load_tokens()))
+page.spin_t.setValue(12)  # History must also be available for a removed T.
+before, history = db.tools(), db.history()
+def inspect(dialog):
+    assert dialog.events.count() == 3 and dialog.records[0]["action"] == "remove"
+    rows = lambda: {dialog.details.item(row, 0).text():
+                    (dialog.details.item(row, 1).text(), dialog.details.item(row, 2).text())
+                    for row in range(dialog.details.rowCount())}
+    assert rows()["Opis"] == ("Nowy opis", "—")
+    dialog.events.setCurrentRow(1)
+    assert rows()["Opis"] == ("Frez ŻÓŁĆ", "Nowy opis")
+    assert rows()["Korekcja Z [mm]"] == ("—", "42.1234")
+    assert "Numer T" not in rows()  # Show differences rather than unchanged fields.
+    dialog.events.setCurrentRow(2)
+    assert dialog.records[2]["action"] == "add" and rows()["Numer T"] == ("—", "12")
+    dialog.show()
+    app.processEvents()
+    assert dialog.grab().save(str(work / "tool-history.png"))
+    close = dialog.findChild(QtWidgets.QDialogButtonBox)
+    close.button(QtWidgets.QDialogButtonBox.Close).click()
+with patch.object(ToolHistoryDialog, "exec_", inspect), \
+        patch.object(QtWidgets.QMessageBox, "warning") as warning:
+    page.history_button.click()
+    warning.assert_not_called()
+page.spin_t.setValue(99)
+def inspect_empty(dialog):
+    assert not dialog.records and dialog.details.rowCount() == 0
+    assert "Brak wpisów" in dialog.events.item(0).text()
+with patch.object(ToolHistoryDialog, "exec_", inspect_empty), \
+        patch.object(QtWidgets.QMessageBox, "warning") as warning:
+    page.history_button.click()
+    warning.assert_not_called()
+with patch.object(db, "history", side_effect=RuntimeError("Baza niedostępna")), \
+        patch.object(QtWidgets.QMessageBox, "warning") as warning:
+    page.history_button.click()
+    warning.assert_called_once()
+damaged = db.history(12)
+damaged[-1]["before"]["params"] = "invalid json"
+with patch.object(db, "history", return_value=damaged), \
+        patch.object(QtWidgets.QMessageBox, "warning") as warning:
+    page.history_button.click()
+    warning.assert_called_once()
+assert db.tools() == before and db.history() == history
+assert not page.tbl.exists() and not cnc.command.called and not tooldata.save_tool.called
+db.close()
+'''
+        self.run_gui(script)
+
     def test_write_errors_and_unavailable_cnc_status_are_reported(self):
         script = GUI_SETUP + r'''
 import sqlite3
