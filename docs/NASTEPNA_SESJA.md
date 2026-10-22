@@ -126,3 +126,10 @@ oprawkę, trwałość, STL, parametry tokarskie i korekcje inne niż Z. Zmiana t
 rekord na podstawie bieżącego T w bazie; nowe T ma własne wartości domyślne.
 Regresja starego kodu FAIL; cztery testy Qt/SQLite lokalnie PASS. Szkic następuje po #72.
 Scalić kolejno po pełnym CI; wynik i sprawdzony SHA w PR. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+Codex: codex/tool-stl-picker udostępnia pole i wybór pliku dla typu Specjalne STL.
+Formularz odczytuje/zapisuje ścieżkę, oznacza wymagane pole i wyświetla ograniczenie:
+symulacja nadal używa walca zastępczego, bez analizy siatki STL.
+Edytor przewijany, długie wiersze zawijane; pięć testów Qt/SQLite lokalnie PASS,
+w tym okno 1200×600, dostęp do zapisu i brak obcięcia etykiet. Szkic następuje po #73.
+Wynik pełnego CI i sprawdzony SHA w PR. Model-Author: Codex.

@@ -668,3 +668,11 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
 - Samo budowanie rekordu nie zapisuje bazy ani nie wysyła CNC; istniejąca ścieżka zapisu zachowana.
 - Dokumentacja i przekazanie; pełne CI do odbioru w PR. Autokontrola, bez niezależnego przeglądu.
 - NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## Narzędzia — wskazanie modelu specjalnego STL · 2026-10-22 · Codex
+- Model-Author: Codex. Pole ścieżki i Wybierz… tylko dla typu Specjalne STL; anulowanie zachowuje pole.
+- Odczyt/zapis ścieżki przez istniejący rekord Tool i walidację; Nowe nie przejmuje ścieżki.
+- Jawna informacja o walcu zastępczym w symulacji; brak ładowania ani analizy siatki.
+- Edytor przewijany, długie wiersze zawijane; podgląd i próba rzeczywistego Qt w 1200×600.
+- Pięć testów Qt/SQLite PASS: wybór/anulowanie, wymagane pole, reload, brak zmian pliku/CNC.
+- Pełne CI do odbioru w PR. Autokontrola, bez niezależnego przeglądu.
