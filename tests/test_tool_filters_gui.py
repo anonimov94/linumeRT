@@ -29,6 +29,7 @@ sim_page.ROOT = str(root)
 sys.modules["linumert_sim_page"] = sim_page
 tooldata = ModuleType("linumert_sim.tooldata")
 tooldata.open_db = tooldata.save_tool = Mock(side_effect=AssertionError("unexpected write"))
+tooldata.table_units = lambda _: "mm"
 sys.modules["linumert_sim"] = ModuleType("linumert_sim")
 sys.modules["linumert_sim.tooldata"] = tooldata
 from linumert_tools_page import ToolsPage
@@ -46,6 +47,57 @@ db.add(Tool(50, 20, description="Bez geometrii", diameter=5))
 
 @unittest.skipUnless(importlib.util.find_spec("PyQt5"), "PyQt5 unavailable")
 class ToolFilterGuiTests(unittest.TestCase):
+    def test_inch_profile_uses_machine_units_on_save_and_remove(self):
+        script = GUI_SETUP + r'''
+from unittest.mock import patch
+from linumert.tools.tbl import parse_tbl
+
+del sys.modules["linumert_sim"]
+del sys.modules["linumert_sim.tooldata"]
+from linumert_sim import tooldata as real_tooldata
+import linumert_tools_page as view
+view.open_db, view.save_tool = real_tooldata.open_db, real_tooldata.save_tool
+view.table_units = real_tooldata.table_units
+cnc.error, cnc.INTERP_IDLE = RuntimeError, 1
+cnc.stat = Mock(return_value=SimpleNamespace(poll=Mock(), interp_state=cnc.INTERP_IDLE))
+ini, table = work / "inch.ini", work / "inch.tbl"
+ini.write_text("[TRAJ]\nLINEAR_UNITS = inch\n[EMCIO]\nTOOL_TABLE = inch.tbl\n"
+               "[LINUMERT]\nTOOL_DB = inch.db\n")
+table.write_text("T1 P1 Z2 A90 D0.25\n")
+page = ToolsPage(SimpleNamespace(c=model.load_tokens()["kolory"], show_alarm=Mock()), str(ini))
+page._reload_linuxcnc = Mock()  # Verify the handoff, with no actual CNC commands.
+page.refresh()
+assert page.tbl_units == "inch" and page.db.get(1).offsets["Z"] == 50.8
+assert "mm" in page.lbl_count.toolTip() and "inch" in page.lbl_count.toolTip()
+page.table.selectRow(0)
+assert page.rows["d"][1].value() == 6.35
+page.spin_z.setValue(51.054)
+page.rows["d_wear"][1].setValue(-0.0254)
+next(button for button in page.findChildren(QtWidgets.QPushButton)
+     if button.text() == "Zapisz").click()
+entry = parse_tbl(table.read_text())[0]
+assert entry.values["Z"] == 2.01 and entry.values["D"] == 0.249
+assert entry.values["A"] == 90 and page.db.get(1).offsets["Z"] == 51.054
+page._reload_linuxcnc.assert_called_once()
+page.db.add(Tool(2, 2, diameter=12.7, offsets={"Z":25.4}))
+with patch.object(QtWidgets.QMessageBox, "question", return_value=QtWidgets.QMessageBox.Yes):
+    next(button for button in page.findChildren(QtWidgets.QPushButton)
+         if button.text() == "Usuń").click()
+remaining = parse_tbl(table.read_text())
+assert len(remaining) == 1 and remaining[0].number == 2
+assert remaining[0].values == {"Z":1, "D":0.5}
+assert page._reload_linuxcnc.call_count == 2 and not cnc.command.called
+page.db.close()
+bad_ini = work / "bad.ini"
+bad_ini.write_text("[TRAJ]\nLINEAR_UNITS = cm\n[LINUMERT]\nTOOL_DB = bad.db\n")
+bad = ToolsPage(SimpleNamespace(c=model.load_tokens()["kolory"]), str(bad_ini))
+bad.refresh()
+assert bad.db is None and "Jednostki" in bad.lbl_issue.text()
+assert not (work / "bad.db").exists()
+db.close()
+'''
+        self.run_gui(script)
+
     def test_holder_life_and_manual_usage_roundtrip(self):
         script = GUI_SETUP + r'''
 from dataclasses import replace
@@ -178,7 +230,7 @@ save.click()
 remove.click()
 assert db.tools() == before and not tooldata.save_tool.called
 status.interp_state = cnc.INTERP_IDLE
-def failed_save(db, tool, tbl):
+def failed_save(db, tool, tbl, **kwargs):
     db.update(tool)  # Reproduce the existing backend's partial write before file failure.
     raise OSError("Brak miejsca na tool.tbl")
 page.txt_desc.setText("Zmiana w bazie przed błędem pliku")

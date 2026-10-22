@@ -12,16 +12,17 @@ from linumert.tools.db import Tool, ToolDB
 
 
 @pytest.mark.linuxcnc
+@pytest.mark.parametrize("units,ini_name", [("mm", "axis_mm.ini"), ("inch", "axis.ini")])
 @pytest.mark.parametrize("code,sign", [("G41", 1), ("G42", -1)])
 @pytest.mark.parametrize("wear", [-0.02, 0.02])
-def test_cutter_compensation_uses_effective_diameter(tmp_path, code, sign, wear):
+def test_cutter_compensation_uses_effective_diameter(tmp_path, code, sign, wear, units, ini_name):
     root = Path(os.environ.get("LINUXCNC_DIR", Path.home() / ".cache/linuxcnc-2.9"))
     if not (root / "bin/rs274").exists():
         pytest.skip(f"brak rs274 w {root}")
     with ToolDB(":memory:") as db:
         db.add(Tool(1, 1, type="flat", params={"d":6, "l":30, "flute_length":15,
                                              "d_wear":wear}))
-        table = db.export_tbl(tmp_path / "tool.tbl")
+        table = db.export_tbl(tmp_path / "tool.tbl", units=units)
     program = tmp_path / "wear.ngc"
     program.write_text(
         "G21 G17 G90 G94 G40\nT1 M6\nG0 X-10 Y0 Z5\nG1 Z0 F100\n"
@@ -30,7 +31,7 @@ def test_cutter_compensation_uses_effective_diameter(tmp_path, code, sign, wear)
     private_home = tmp_path / "home"
     private_home.mkdir()
     command = (f"source {shlex.quote(str(root / 'scripts/rip-environment'))} >/dev/null && "
-               f"rs274 -i {shlex.quote(str(root / 'configs/sim/axis/axis_mm.ini'))} "
+               f"rs274 -i {shlex.quote(str(root / 'configs/sim/axis' / ini_name))} "
                f"-t {shlex.quote(str(table))} "
                f"-n 0 {shlex.quote(str(program))}")
     result = subprocess.run(

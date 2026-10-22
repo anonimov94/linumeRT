@@ -39,6 +39,20 @@ def ini_value(ini: configparser.ConfigParser, section: str, key: str,
         return default
 
 
+def _units(value: str) -> str:
+    units = {"mm": "mm", "metric": "mm", "inch": "inch", "in": "inch"}
+    try:
+        return units[value.strip().lower()]
+    except (KeyError, AttributeError):
+        raise ValueError(
+            f"Jednostki tabeli narzędzi: {value!r}; oczekiwano mm albo inch") from None
+
+
+def table_units(ini_path: str | Path) -> str:
+    """Machine units from INI; the database remains in mm. Model-Author: Codex."""
+    return _units(ini_value(read_ini(ini_path), "TRAJ", "LINEAR_UNITS", "mm"))
+
+
 def _rel(ini_path: Path, value: str) -> Path:
     p = Path(value).expanduser()
     return p if p.is_absolute() else ini_path.parent / p
@@ -72,18 +86,20 @@ def seed_tools(path: Path) -> list[Tool]:
 def open_db(ini_path: str | Path) -> tuple[ToolDB, Path]:
     """Otwiera bazę; pusta baza dostaje narzędzia z TOOL_SEED albo z tool.tbl."""
     db_path, tbl, seed = tool_paths(ini_path)
+    units = table_units(ini_path)
     db = ToolDB(db_path)
     if not db.tools():
         if seed is not None and seed.is_file():
             db._apply(seed_tools(seed), "seed")  # noqa: SLF001 - import wsadowy (całość albo nic)
-            db.export_tbl(tbl)
+            db.export_tbl(tbl, units=units)
         elif tbl.is_file():
-            db.import_tbl_file(tbl)
+            db.import_tbl_file(tbl, units=units)
     return db, tbl
 
 
-def save_tool(db: ToolDB, tool: Tool, tbl: Path) -> None:
-    """Dodaje albo zmienia narzędzie i zapisuje tool.tbl (D = d + korekcja)."""
+def save_tool(db: ToolDB, tool: Tool, tbl: Path, *, units: str = "mm") -> None:
+    """Dodaje/zmienia narzędzie w mm i zapisuje tool.tbl w `units` (D = d + korekcja)."""
+    units = _units(units)
     d = tool.params.get("d")
     if d is not None:
         tool.diameter = d + tool.params.get("d_wear", 0.0)
@@ -91,7 +107,7 @@ def save_tool(db: ToolDB, tool: Tool, tbl: Path) -> None:
         db.add(tool)
     else:
         db.update(tool)
-    db.export_tbl(tbl)
+    db.export_tbl(tbl, units=units)
 
 
 def cutters(db_tools: dict[int, Tool], table: list[tuple[int, float, float]]) -> dict[int, Cutter]:
@@ -108,3 +124,4 @@ def cutters(db_tools: dict[int, Tool], table: list[tuple[int, float, float]]) ->
         base_d = params.get("d", d) if params else d
         out[number] = make_cutter(number, z, base_d or d or 1.0, kind, params)
     return out
+

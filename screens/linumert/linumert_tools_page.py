@@ -28,7 +28,7 @@ for _p in (os.path.join(ROOT, "core"), os.path.join(ROOT, "simulation")):
 
 from linumert.tools.db import Tool, ToolDBError  # noqa: E402
 from linumert.tools.types import COMMON, PARAMS, TYPES  # noqa: E402
-from linumert_sim.tooldata import open_db, save_tool  # noqa: E402
+from linumert_sim.tooldata import open_db, save_tool, table_units  # noqa: E402
 
 COLUMNS = ["T", "P", "Typ", "Opis", "D", "Korekcja D", "Długość Z", "Ostrza", "Maks. obr",
            "Kierunek"]
@@ -49,6 +49,7 @@ class ToolsPage(QtWidgets.QWidget):
         self.ini = ini
         self.db = None
         self.tbl = None
+        self.tbl_units = "mm"
         self.fields: dict[str, QtWidgets.QWidget] = {}
         grid = QtWidgets.QGridLayout(self)
         grid.setContentsMargins(16, 16, 16, 16)
@@ -267,6 +268,7 @@ class ToolsPage(QtWidgets.QWidget):
         if self.db is not None:
             return True
         try:
+            self.tbl_units = table_units(self.ini)
             self.db, self.tbl = open_db(self.ini)
         except Exception as exc:  # noqa: BLE001 - komunikat w ekranie, reszta HMI działa
             self.lbl_issue.setText(f"Baza narzędzi niedostępna: {exc}")
@@ -319,6 +321,7 @@ class ToolsPage(QtWidgets.QWidget):
             self.table.setRowHidden(row, not match)
             visible += int(match)
         self.lbl_count.setText(f"{visible} z {self.table.rowCount()} narzędzi · {self.tbl or ''}")
+        self.lbl_count.setToolTip(f"Pola długości w mm. Tabela LinuxCNC: {self.tbl_units}.")
 
     def _selected(self) -> None:
         items = self.table.selectedItems()
@@ -409,7 +412,7 @@ class ToolsPage(QtWidgets.QWidget):
             return
         try:
             tool = self.current()
-            save_tool(self.db, tool, self.tbl)
+            save_tool(self.db, tool, self.tbl, units=self.tbl_units)
         except (ToolDBError, OSError, sqlite3.Error) as exc:
             self._write_failed(exc)
             return
@@ -428,7 +431,7 @@ class ToolsPage(QtWidgets.QWidget):
                     QtWidgets.QMessageBox.Yes:
                 return
             self.db.remove(n)
-            self.db.export_tbl(self.tbl)
+            self.db.export_tbl(self.tbl, units=self.tbl_units)
         except (ToolDBError, OSError, sqlite3.Error) as exc:
             self._write_failed(exc)
             return
