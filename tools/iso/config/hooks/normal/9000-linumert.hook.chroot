@@ -5,7 +5,7 @@ set -e
 R=/opt/linumeRT
 # Bez recommends live-config nie instaluje kreatora konta Live.
 test -x /usr/lib/user-setup/user-setup-apply || {
-    echo 'Brak user-setup: konto operator nie powstanie przy starcie Live' >&2
+    echo 'Brak user-setup: konto linumert nie powstanie przy starcie Live' >&2
     exit 1
 }
 command -v sudo >/dev/null
@@ -27,7 +27,7 @@ chmod -R a+rwX "$R/config" "$R/screens"
 mkdir -p /etc/lightdm/lightdm.conf.d
 cat > /etc/lightdm/lightdm.conf.d/90-linumert-live.conf <<'EOF'
 [Seat:*]
-autologin-user=operator
+autologin-user=linumert
 autologin-user-timeout=0
 EOF
 echo "linumeRT $(cat "$R/VERSION" 2>/dev/null)" > /etc/linumert-release

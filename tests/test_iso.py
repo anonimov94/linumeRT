@@ -16,7 +16,7 @@ import yaml
 ROOT = Path(__file__).resolve().parents[1]
 ISO = ROOT / "tools" / "iso"
 SCRIPTS = [ISO / "build.sh", ISO / "config/hooks/normal/9000-linumert.hook.chroot",
-           ISO / "config/includes.chroot/usr/local/bin/linumert"]
+           ISO / "config/includes.chroot/usr/local/bin/linumert", ISO / "test-live-login.sh"]
 
 
 @pytest.mark.parametrize("script", SCRIPTS, ids=lambda p: p.name)
@@ -43,9 +43,11 @@ def test_packages_cover_runtime() -> None:
 def test_live_login_configuration() -> None:
     build = SCRIPTS[0].read_text()
     hook = SCRIPTS[1].read_text()
-    assert "username=operator" in build
+    # Debian ma już grupę systemową operator; adduser odmawia utworzenia tego konta.
+    assert "username=linumert" in build
+    assert "username=operator" not in build
     assert "test -x /usr/lib/user-setup/user-setup-apply" in hook
-    assert "[Seat:*]\nautologin-user=operator\nautologin-user-timeout=0" in hook
+    assert "[Seat:*]\nautologin-user=linumert\nautologin-user-timeout=0" in hook
 
 
 def test_launcher_paths_exist() -> None:
