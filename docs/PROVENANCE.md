@@ -425,3 +425,17 @@ Aktualizacja czterech `docs/raporty/hmi_sym/skin_*.png`, Codex, 2026-10-23:
 rzeczywiste osobne ekrany Qt z kodu ea2fc39, 1920×1080, bez retuszu. Industrial
 w Reactor Green, Cyberdeck w Ion Blue, pozostałe w Classic Turquoise.
 Własne kształty rysowane przez QPainter i własne sceny 3D; GPL-2.0-or-later.
+
+## Odbiór stanowiska — konkurs 2 · 2026-10-23
+Model-Author: Codex. Własne procedury i szablon:
+`docs/raporty/ODBIOR_STANOWISKA.md`, `docs/raporty/SZABLON_ODBIORU.md` oraz raport
+`prompts/konkurs-2026-10/raporty/02.md`, GPL-2.0-or-later; oparte na dokumentach
+i narzędziach tego repozytorium, bez materiałów zewnętrznych i nowych zależności.
+`docs/raporty/odbior-2026-10-23-local.tar.gz`: własne logi, wyniki i zrzuty
+z uruchomienia kodu repozytorium w Debianie 12 i odtworzenia OD-01 na hoście,
+Codex, 2026-10-23, GPL-2.0-or-later. Dwa zrzuty ekranu bez retuszu;
+wejścia YAML z istniejącego repo (zachowane nagłówki autorów), manifest SHA-256.
+Wyłącznie dowody testów programowych; bez pomiarów fizycznego stanowiska.
+`docs/raporty/odbior-2026-10-23-ci.tar.gz`: pełny log i metadane własnego przebiegu
+GitHub Actions 40001235761 dla ffb7037, Codex, 2026-10-23, GPL-2.0-or-later;
+manifest SHA-256, bez binariów LinuxCNC i bez nowych zależności.
