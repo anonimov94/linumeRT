@@ -385,3 +385,10 @@ są rysowane kodem Qt; stan nieznany, bez wartości demonstracyjnych udających 
 
 `tools/dev/skin-check.py`: własny odbiór 64 wariantów osadzonych paneli OpenGL
 (zrzuty w build/skin-preview), Codex, 2026-10-23, GPL-2.0-or-later.
+
+## Aktualne zrzuty podglądu skórek — 2026-10-23
+Własne `docs/raporty/hmi_sym/skin_classic-digital.png`,
+`docs/raporty/hmi_sym/skin_industrial-pro.png`, `docs/raporty/hmi_sym/skin_cyberdeck.png`,
+`docs/raporty/hmi_sym/skin_organic-vector.png`: świeże zrzuty uruchomionej aplikacji Qt
+z main `8483b81`, wykonane przez Codex 2026-10-23 przez tools/dev/skin-check.py,
+Radeon/Mesa, 1920×1080. GPL-2.0-or-later; bez montażu bitmap referencyjnych.

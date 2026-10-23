@@ -14,7 +14,7 @@ From machining and toolpaths to machine simulation, diagnostics and digital twin
 ![LinuxCNC](https://img.shields.io/badge/CONTROL-LinuxCNC%202.9-1a2130?style=for-the-badge&labelColor=111822)
 ![Platform](https://img.shields.io/badge/PLATFORM-Debian%2012-2dd4bf?style=for-the-badge&labelColor=111822)
 ![License](https://img.shields.io/badge/LICENSE-GPL--2.0--or--later-58646f?style=for-the-badge&labelColor=111822)
-![Status](https://img.shields.io/badge/NEW%20GUI-IN%20ROADMAP-fbbf24?style=for-the-badge&labelColor=111822)
+![Status](https://img.shields.io/badge/NEW%20GUI-OFFLINE%20PROTOTYPE-fbbf24?style=for-the-badge&labelColor=111822)
 
 </div>
 
@@ -91,7 +91,23 @@ A futuristic blend of flowing rounded frames, pointed elements, circular indicat
 
 </div>
 
-> **Concept status:** the four redesigned skins, palette switching and the replacement 3D renderer are planned features — not screenshots of shipping software. The original concept artwork is being prepared for publication in the repository.
+> **Current status (2026-10-23):** four offline Qt layout prototypes now support four palettes, English/Polski and three interactive OpenGL panels. This is a separate preview, without CNC status or commands. Complete operator skins and QtVCP integration remain in development. [Original concept artwork](docs/design/referencje-skin/README.md) · [Current screenshots and capture report](docs/raporty/hmi_sym/README.md).
+
+### New skin previews — actual Qt screenshots
+
+| Classic Digital | Industrial Pro |
+|:--|:--|
+| ![Classic Digital offline preview](docs/raporty/hmi_sym/skin_classic-digital.png) | ![Industrial Pro offline preview](docs/raporty/hmi_sym/skin_industrial-pro.png) |
+| Cyberdeck | Organic Vector |
+| ![Cyberdeck offline preview](docs/raporty/hmi_sym/skin_cyberdeck.png) | ![Organic Vector offline preview](docs/raporty/hmi_sym/skin_organic-vector.png) |
+
+Captured at **1920×1080**, Classic Turquoise, English. All four palettes are available in each layout. The machine and part are illustrative models; unknown readouts and disabled cycle controls are intentional in the offline preview.
+
+```sh
+python3 tools/dev/skin-preview.py
+# Layouts without OpenGL dependencies:
+python3 tools/dev/skin-preview.py --layout-only
+```
 
 ---
 
@@ -111,7 +127,7 @@ An independently simulated machine (Plant), axis drives, end stops, spindle and 
 <td width="50%" valign="top">
 
 #### ◈ MACHINING SIMULATION
-Stock-removal previews, tool geometry, diagnostics and toolpath visualization. A new shared 3D renderer is planned to address reported triangle-visibility and surface-orientation artifacts.
+Stock-removal previews, tool geometry, diagnostics and toolpath visualization. A separate depth-buffer OpenGL prototype has passed geometry, visibility and embedded-layout checks on Radeon/Mesa and Debian/llvmpipe; production integration remains open.
 
 #### ◈ OPEN ENGINEERING
 LinuxCNC 2.9, HAL, Python and QtVCP integration, reproducible tests, and the GPL-2.0-or-later source code.
@@ -141,7 +157,7 @@ LinuxCNC 2.9, HAL, Python and QtVCP integration, reproducible tests, and the GPL
 | Phase | Engineering objective |
 |:--|:--|
 | **SKIN-00** | Confirm architecture and compatibility constraints |
-| **SKIN-01** | Prototype and verify a corrected shared 3D renderer |
+| **SKIN-01** | Offline renderer verified; production integration remains open |
 | **SKIN-02** | Build modular skin API, manifests and safe layout selection |
 | **SKIN-03** | Implement four palettes and English/Polski localization |
 | **SKIN-04** | Deliver Classic Digital and Industrial Pro |
