@@ -80,7 +80,7 @@ X130
 Y75
 X20
 G80
-( 6. frez lewy 8 mm (M4): rowek przy tylnej krawędzi )
+( 6. frez lewy 8 mm, M4: rowek przy tylnej krawędzi )
 G53 G0 Z0
 T11 M6
 G43 H11

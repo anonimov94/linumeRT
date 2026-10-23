@@ -392,3 +392,8 @@ Własne `docs/raporty/hmi_sym/skin_classic-digital.png`,
 `docs/raporty/hmi_sym/skin_organic-vector.png`: świeże zrzuty uruchomionej aplikacji Qt
 z main `8483b81`, wykonane przez Codex 2026-10-23 przez tools/dev/skin-check.py,
 Radeon/Mesa, 1920×1080. GPL-2.0-or-later; bez montażu bitmap referencyjnych.
+
+Odświeżenie demo 2026-10-23, Codex: usunięto zagnieżdżony komentarz w
+`config/sim/nc_files/linumert_demo.ngc`; `tools/dev/sim_e2e_driver.py` wymaga
+ukończenia z ostatnim narzędziem T11, aby przerwany program nie przechodził odbioru.
+Własne zmiany GPL-2.0-or-later, bez nowych zależności.
