@@ -9,8 +9,19 @@ class AxisReadout(QtWidgets.QWidget):
     def __init__(self, family, palette, axes="XYZA"):
         super().__init__()
         self.family, self.palette, self.axes = family, palette, axes
+        self.values = {}
         self.setMinimumSize(110, 120)
         self.setAccessibleName("DRO —")
+
+    def set_positions(self, values):
+        self.values = dict(values)
+        self.setAccessibleName("G53 " + " / ".join(
+            axis + " " + self.display_value(axis) for axis in self.axes))
+        self.update()
+
+    def display_value(self, axis):
+        value = self.values.get(axis)
+        return "—.———" if value is None else f"{value:.3f}"
 
     def paintEvent(self, event):
         p = QtGui.QPainter(self)
@@ -32,15 +43,16 @@ class AxisReadout(QtWidgets.QWidget):
             p.setPen(QtGui.QColor(c.accent if self.family != "industrial-pro" else c.text))
             digits = row.adjusted(badge.width()+12, 0, -28, 0)
             # Resize the font to keep the unknown value inside narrow panels.
-            while (QtGui.QFontMetricsF(font).horizontalAdvance("—.———") > digits.width()
+            value = self.display_value(axis)
+            while (QtGui.QFontMetricsF(font).horizontalAdvance(value) > digits.width()
                    and font.pixelSize() > 12):
                 font.setPixelSize(font.pixelSize()-1)
             p.setFont(font)
-            p.drawText(digits, QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter, "—.———")
+            p.drawText(digits, QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter, value)
             p.setFont(QtGui.QFont("DejaVu Sans", 7))
             p.setPen(QtGui.QColor(c.muted))
             p.drawText(row.adjusted(row.width()-24, 0, 0, 0), QtCore.Qt.AlignCenter,
-                       "mm" if axis in "XYZ" else "°")
+                       "°" if axis in "ABC" else "mm")
 
 
 class FeedReadout(QtWidgets.QWidget):

@@ -345,3 +345,11 @@ Zrzuty w docs/raporty/hmi_sym i README odświeżone, opisane jako offline.
 Błąd wysokości Industrial 815 px przy 1280×800 usunięty; cele 44 px zachowane.
 Końcowe kontrole i scalenie raportowane w PR #91. Dalszy zakres: szczegółowe modele,
  dopracowanie pozostałych detali wizji i bezpieczna integracja stanu/poleceń QtVCP.
+
+## Konkurs 04 — integracja read-only, 2026-10-23
+Model-Author: Codex. Osobny checkout /tmp/linumert-contest-04,
+gałąź codex/contest-2026-10-skins. Adapter stat.poll w jednorazowym procesie,
+typowany snapshot i osobny launcher tools/dev/skin-monitor.py; cztery skórki,
+G53 mm/°, E-STOP z NML, bez kanału komend i bez konsumpcji error_channel.
+Lokalnie 30 testów + 87 subtestów PASS. Następne: rzeczywisty LinuxCNC/Xvfb,
+utrata/odzyskanie statusu, pełne testy i raport raporty/04.md. Bez scalania konkursu.
