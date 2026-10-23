@@ -864,3 +864,11 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
 - Radeon i Debian/Mesa: 128 wariantów PASS; Debian 26 testów + 87 subtestów PASS.
 - Nowa galeria w README/raporcie; pełna integracja QtVCP i szczegółowe modele nadal otwarte.
 - Autokontrola, bez niezależnego przeglądu; wynik końcowego CI i scalenia w PR #91.
+
+## Konkurs 01 — bramka konfiguracji przed startem CNC · 2026-10-23 · Codex
+- Model-Author: Codex. PR #93; osobny worktree i gałąź, bez scalenia przed oceną.
+- Deklaracje hardware i ograniczony audyt HAL wymagane przed exec LinuxCNC.
+- Główny starter korzysta z bramki; trzy INI sim/Plant mają jawne profile; HAL bez zmian.
+- 40 testów bramki/deklaracji/HAL PASS; pełny make lint test: 1033 PASS, 11 skip; wymagania bez błędów.
+- Dokumentacja, macierz i raport `prompts/konkurs-2026-10/raporty/01.md` opisują granice.
+- Autokontrola, bez niezależnego przeglądu; NIEZWERYFIKOWANE NA SPRZĘCIE.

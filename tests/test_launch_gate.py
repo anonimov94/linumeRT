@@ -47,7 +47,8 @@ def test_complete_hardware_reaches_only_fake_cnc(hardware, tmp_path):
 @pytest.mark.parametrize("mutation", [
     "missing_declaration", "unknown_profile", "missing_profile", "missing_ini", "bad_utf8",
     "bypass", "missing_hal", "dynamic_path", "tcl", "inline_command", "loop",
-    "bad_source", "cycle", "duplicate", "include", "default", "invalid_hal", "section_comment",
+    "bad_source", "cycle", "duplicate", "include", "default", "invalid_hal",
+    "section_comment", "symlink_cycle",
 ])
 def test_refuses_before_exec(hardware, tmp_path, mutation):
     text = hardware.read_text()
@@ -83,6 +84,9 @@ def test_refuses_before_exec(hardware, tmp_path, mutation):
     hardware.write_text(text)
     if mutation == "missing_ini":
         hardware.unlink()
+    elif mutation == "symlink_cycle":
+        hardware.unlink()
+        hardware.symlink_to(hardware.name)
     elif mutation == "bad_utf8":
         hardware.write_bytes(b"\xff")
     elif mutation == "missing_hal":

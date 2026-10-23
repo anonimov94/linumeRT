@@ -96,9 +96,9 @@ Przykład do uzupełnienia: `config/hardware/safety-contract.ini.example`.
 Nie zawiera HAL ani konfiguracji napędów; puste piny celowo powodują odmowę.
 
 Wynik JSON zawsze ma `hardware_verified=false`; kod 2 oznacza błędną/niekompletną
- deklarację, kod 0 jedynie jej kompletność. Nie jest jeszcze podłączony do startu HMI
-ani do generatora/eksportu (sesje 061/062/070). Kolejny krok: integracja kontroli na granicy
-uruchomienia profilu hardware, kontrola rzeczywistych pinów/grafu HAL i testy odmowy startu.
+ deklarację, kod 0 jedynie jej kompletność. Wymuszenie przed startem przez launcher
+opisano poniżej (konkurs 01); generator/eksport pozostaje niewdrożony. Kolejny krok:
+kontrola rzeczywistych pinów/grafu HAL i odbiór fizycznego toru.
 Nie zmieniamy automatycznie istniejących konfiguracji sim/Plant.
 
 ## Etap 3 — audyt offline połączeń tekstowych HAL
@@ -120,7 +120,8 @@ Pole declaration_complete dotyczy tylko deklaracji INI. static_hal_checked/stati
 opisują ograniczony audyt połączeń. hardware_verified zawsze pozostaje false.
 Układ z logiką pośrednią wymaga osobnego przeglądu i może zostać odrzucony przez to narzędzie.
 Nie wykrywamy wszystkich możliwych pętli przez komponenty, kierunków pinów ani tego, co zrobi
-loadusr. Narzędzie niczego nie wykonuje i nie stanowi jeszcze obowiązkowej bramki startu CNC.
+loadusr. Samo narzędzie audytu niczego nie wykonuje. Opisana poniżej bramka launch wymusza
+tę kontrolę przed własnym uruchomieniem profilu hardware.
 Przykład hardware nadal jest niekompletny, bez HAL i bez zgody na uruchomienie napędów.
 
 Kolejny dokument do przygotowania bez LinuxCNC: [protokół odbioru](ODBIOR.md).
