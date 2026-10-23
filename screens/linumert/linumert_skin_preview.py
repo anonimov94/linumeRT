@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
 """Standalone Qt layout study. No LinuxCNC, HAL, file edits or machine commands.
 
-Model-Author: Codex. Viewports reserve space for the separately validated renderer.
+Model-Author: Codex. Optional interactive offline scenes use the SKIN-01 renderer.
 """
 
 from dataclasses import replace
@@ -35,9 +35,11 @@ LAYOUTS = {
 
 
 class SkinPreview(QtWidgets.QMainWindow):
-    def __init__(self, preferences=None):
+    def __init__(self, preferences=None, viewport_factory=None):
         super().__init__()
         self.preferences = preferences or PresentationPreferences()
+        self.viewport_factory = viewport_factory
+        self.viewports = {}
         self.setWindowTitle("linumeRT · GUI prototype")
         self.resize(1280, 800)
         central = QtWidgets.QWidget()
@@ -128,6 +130,7 @@ class SkinPreview(QtWidgets.QMainWindow):
         for column in range(5):
             self.grid.setColumnStretch(column, 0)
         self.cards = {}
+        self.viewports = {}
         for role, row, column, height, width in LAYOUTS[p.skin]:
             card = QtWidgets.QFrame()
             card.setProperty("card", True)
@@ -141,14 +144,21 @@ class SkinPreview(QtWidgets.QMainWindow):
             elif role == "program":
                 content = text("sample_program", p) + "\n\nG21 G90\nG0 X0 Y0\nM2"
             elif role in ("machine", "workpiece", "toolpath"):
-                content = text("renderer_pending", p)
+                content = text("offline_scene", p) if self.viewport_factory else text(
+                    "renderer_pending", p)
             else:
                 content = "T —  ·  D —  ·  Z —"
             body = QtWidgets.QLabel(content)
             body.setWordWrap(True)
             if role == "dro":
                 body.setObjectName("dro")
-            layout.addWidget(body, 1, QtCore.Qt.AlignCenter)
+            if role in ("machine", "workpiece", "toolpath") and self.viewport_factory:
+                viewport = self.viewport_factory(role, c)
+                layout.addWidget(viewport, 1)
+                self.viewports[role] = viewport
+                layout.addWidget(body)
+            else:
+                layout.addWidget(body, 1, QtCore.Qt.AlignCenter)
             self.grid.addWidget(card, row, column, height, width)
             self.cards[role] = card
             for index in range(column, column + width):
@@ -157,9 +167,9 @@ class SkinPreview(QtWidgets.QMainWindow):
             self.grid.setRowStretch(row, 1)
 
 
-def main():
+def main(viewport_factory=None):
     app = QtWidgets.QApplication.instance() or QtWidgets.QApplication([])
-    window = SkinPreview()
+    window = SkinPreview(viewport_factory=viewport_factory)
     window.show()
     return app.exec_()
 

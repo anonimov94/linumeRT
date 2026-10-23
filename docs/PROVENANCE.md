@@ -364,3 +364,9 @@ Zrzuty są dowodami testowymi w build/skin01 lub artefakcie CI, nie zasobami UI.
 
 `docs/design/SKIN_01_RENDERER.md` — Codex, 2026-10-23; opis i wyniki
 odbioru własnego prototypu SKIN-01, GPL-2.0-or-later.
+
+## Podgląd skórek z rendererem — 2026-10-23
+Model-Author: Codex. Własny `screens/linumert/linumert_skin_viewports.py`:
+sceny offline maszyny bramowej, ścieżki i detalu, GPL-2.0-or-later.
+Rozszerzenie własnych skin-preview.py / linumert_skin_preview.py / strings;
+bez nowych zależności ani zasobów zewnętrznych. Modele wyłącznie poglądowe.
