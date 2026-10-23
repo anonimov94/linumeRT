@@ -345,3 +345,13 @@ Zrzuty w docs/raporty/hmi_sym i README odświeżone, opisane jako offline.
 Błąd wysokości Industrial 815 px przy 1280×800 usunięty; cele 44 px zachowane.
 Końcowe kontrole i scalenie raportowane w PR #91. Dalszy zakres: szczegółowe modele,
  dopracowanie pozostałych detali wizji i bezpieczna integracja stanu/poleceń QtVCP.
+
+## Konkurs 2 — przekazanie odbioru stanowiska, 2026-10-23
+
+Model-Author: Codex. Osobna gałąź `codex/contest-2026-10-odbior`, PR #94;
+bez globalnej blokady tury i bez scalania przed oceną konkursu.
+Procedura i szablon w `docs/raporty/ODBIOR_STANOWISKA.md` / `SZABLON_ODBIORU.md`;
+raport, wyniki i dowody: `prompts/konkurs-2026-10/raporty/02.md`.
+Następny krok: usunąć OD-01 (router_atc_rack: CRASH/COVER_CRASH mimo kodu 0),
+powtórzyć A3 z kontrolą zdarzeń, potem ręczny pulpit i zatwierdzona kampania T1–T7.
+NIEZWERYFIKOWANE NA SPRZĘCIE. Nie zmieniano zakresu pozostałych sesji konkursu.

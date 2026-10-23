@@ -864,3 +864,11 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
 - Radeon i Debian/Mesa: 128 wariantów PASS; Debian 26 testów + 87 subtestów PASS.
 - Nowa galeria w README/raporcie; pełna integracja QtVCP i szczegółowe modele nadal otwarte.
 - Autokontrola, bez niezależnego przeglądu; wynik końcowego CI i scalenia w PR #91.
+
+## Konkurs 2 — odbiór stanowiska · 2026-10-23 · Codex
+- Model-Author: Codex. PR #94, osobny checkout; bez scalania przed oceną konkursu.
+- Procedura A–E/T1–T7, szablon PASS/FAIL/BLOCKED, powiązania G1/RT i surowe dowody.
+- Debian: 1024 pytest + 166 subtestów PASS; C/ASan/UBSan PASS; demo HMI T11/IDLE i K-302 PASS.
+- OD-01 odtworzone: macierz router_atc_rack ma kod 0 mimo CRASH/COVER_CRASH; odbiór A3 FAIL.
+- Raport i końcowy wynik CI: `prompts/konkurs-2026-10/raporty/02.md`.
+- Pulpit właściciela i T1–T7 niewykonane; NIEZWERYFIKOWANE NA SPRZĘCIE.

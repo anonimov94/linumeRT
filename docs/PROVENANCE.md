@@ -433,6 +433,9 @@ Model-Author: Codex. Własne procedury i szablon:
 i narzędziach tego repozytorium, bez materiałów zewnętrznych i nowych zależności.
 `docs/raporty/odbior-2026-10-23-local.tar.gz`: własne logi, wyniki i zrzuty
 z uruchomienia kodu repozytorium w Debianie 12 i odtworzenia OD-01 na hoście,
-Codex, 2026-10-23, GPL-2.0-or-later. Dwie fotografie ekranu bez retuszu;
+Codex, 2026-10-23, GPL-2.0-or-later. Dwa zrzuty ekranu bez retuszu;
 wejścia YAML z istniejącego repo (zachowane nagłówki autorów), manifest SHA-256.
 Wyłącznie dowody testów programowych; bez pomiarów fizycznego stanowiska.
+`docs/raporty/odbior-2026-10-23-ci.tar.gz`: pełny log i metadane własnego przebiegu
+GitHub Actions 40001235761 dla ffb7037, Codex, 2026-10-23, GPL-2.0-or-later;
+manifest SHA-256, bez binariów LinuxCNC i bez nowych zależności.

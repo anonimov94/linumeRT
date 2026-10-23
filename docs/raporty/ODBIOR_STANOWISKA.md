@@ -117,6 +117,17 @@ histogram, minimum/maksimum i licznik błędów przed/po. Histogram bez surowych
 lub liczników utraty danych nie wystarcza. Ustal granice koszyków przed próbą.
 Czas wykonania wątku i fazę wybudzenia mierz oddzielnie; pomiar userspace nie dowodzi RT.
 
+Minimalny eksport T2/T7: `sample_id, planned_start_ns, actual_start_ns, end_ns,
+execution_us, phase_us, deadline_miss_total, samples_lost_total`.
+`execution_us=(end_ns-actual_start_ns)/1000`,
+`phase_us=(actual_start_ns-planned_start_ns)/1000`; planowane terminy pochodzą
+z harmonogramu o stałym okresie, nie z poprzedniego rzeczywistego wybudzenia.
+Sprawdzaj maksimum `execution_us` i maksimum `abs(phase_us)` osobno.
+T3 dodaje dla każdej próbki stan każdego slave, WKC oczekiwany/rzeczywisty,
+błąd DC z jednostką i liczniki utraty PDO/synchronizacji. Zapisz sposób pozyskania
+i narzut pomiaru. Liczniki kumulacyjne zapisuj od stanu początkowego do końcowego;
+reset licznika w przebiegu wymaga wyjaśnienia i nie może ukryć błędu.
+
 Domyślna propozycja kampanii do zatwierdzenia: trzy powtórki po 60 min każdego
 wariantu T1/T2/T7, T3 60 min, T4 każdy przejazd trzy razy, T5 każda awaria trzy razy,
 T6 ciągłe 72 h (24 h tylko z uzasadnieniem osoby zatwierdzającej). Są to parametry
