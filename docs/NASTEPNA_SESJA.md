@@ -9,13 +9,19 @@ zostało zastąpione tym poleceniem. Odbiór pulpitu właściciela pozostaje odd
 
 ## Stan scalania
 
-Audyt pętli: właściciel wpisał `while [1]` i wybrał szacowanie czasu; journal wskazuje
-SIGBUS w libtooldata. Trwa naprawa `codex/bounded-offline-interpreter`, checkout
-`~/Projekty/linumeRT-interpreter-fix`: limity danych/czasu oraz prywatna tabela narzędzi
-rs274, aby analiza offline nie dotykała działającej sesji LinuxCNC.
-PR #66: izolacja obu ścieżek (czas i kontrola), 20 s/8 MiB, sprzątanie grupy procesów;
-108 testów lokalnych PASS, w tym kliknięcie przycisku przy zalewaniu wyjścia. Dodano próby obu analiz na pętli bez końca przy działającym pełnym QtVCP/Plant
-oraz skończony WHILE i WHILE [1] z BREAK; następnie CI LinuxCNC.
+Najnowsze poprawki audytu właściciela:
+- [PR #66](https://github.com/anonimov94/linumeRT/pull/66): prywatne HOME/TMPDIR/cwd
+  obu analiz rs274, limity 20 s/8 MiB i brak częściowego czasu po przerwaniu pętli.
+  Journal awarii wskazał SIGBUS w libtooldata (wspólne `.tool.mmap` starego rs274).
+- [PR #67](https://github.com/anonimov94/linumeRT/pull/67): wpisywanie liczb przez
+  router QtVCP, własny krok JOG i edytowalne korekcje F/G0/S. Status nie kasuje wpisu;
+  F1/F2/Esc i zwolnienie rozpoczętego JOG zachowują obsługę maszyny.
+- Odbiór lokalny klawiatury: 97 testów PASS. Samotest faktycznego QtVCP wpisuje
+  posuw, obroty, narzędzie, krok, pozycję, korekcję F i linię; zapisuje stany i zrzuty.
+  Pełne wyniki odbioru automatycznego są w kontrolach obu PR, autokontrola autora.
+- Checkouty `~/Projekty/linumeRT-interpreter-fix` i `~/Projekty/linumeRT-numeric-fix`.
+  Kopia operatora `~/linumeRT` wymaga ponownego otwarcia aplikacji po aktualizacji.
+  Ręczny odbiór pulpitu (punkt 27) i odbiór sprzętowy pozostają otwarte.
 
 Odbiór pulpitu ujawnił brak `sim_toolchange.in` przy starcie Plant z pełnym QtVCP.
 Naprawa: `codex/plant-hmi-toolchange`, checkout `~/Projekty/linumeRT-plant-hmi-fix`.
@@ -221,3 +227,14 @@ przełącza bez zapisywania. Rekord docelowy czytany po dialogu, brak/błąd zac
 Udany zapis nowego/klonowanego T wiąże zaznaczenie z zapisanym numerem.
 35 testów lokalnie PASS, rzeczywiste okna Qt i podgląd; regresja starego kodu FAIL.
 Szkic następuje po #83; wynik pełnego CI i sprawdzony SHA w PR. Model-Author: Codex.
+
+## Scalanie aktywnych gałęzi — 2026-10-23
+
+Model-Author: Codex. Właściciel ponownie zezwolił na scalanie wszystkich ukończonych,
+zweryfikowanych aktywnych gałęzi. Zastępuje wcześniejsze odłożenie scalania na jutro.
+PR #67 zaktualizowano main. Lokalny Qt ujawnił utratę separatora dziesiętnego przez
+QDoubleValidator z inną lokalizacją niż edytor; usunięto filtr zmieniający wpis,
+walidacja pozostaje przed komendą JOG. Separatory tysięcy są odrzucane; kropka
+presetrów i lokalny separator są obsługiwane. 13 testów klawiatury PASS.
+Następnie: pełne CI #67 → scalenie → aktualizacja i CI #86 → scalenie.
+Gałęzie tool-discard-edits i design/skin-system-roadmap-2026-10-22 już zawarte w main.

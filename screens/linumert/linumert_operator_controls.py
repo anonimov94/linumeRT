@@ -1,6 +1,8 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
 """JOG/MDI, wrzeciono i wybór narzędzia. Model-Author: Codex."""
-from PyQt5 import QtWidgets
+import math
+
+from PyQt5 import QtCore, QtWidgets
 
 import linumert_shell_model as model
 
@@ -25,6 +27,11 @@ class OperatorControls(QtWidgets.QWidget):
         row.addWidget(QtWidgets.QLabel("Krok mm"))
         self.increment = QtWidgets.QComboBox()
         self.increment.addItems(["ciągły", "10", "1", "0.1", "0.01", "0.001", "0.0001"])
+        self.increment.setEditable(True)
+        self.increment.setInsertPolicy(QtWidgets.QComboBox.NoInsert)
+        # Validate at command dispatch: a validator captures its own locale and can
+        # silently discard a decimal key when the editor's locale later changes.
+        self.increment.setToolTip("Wpisz własny krok w mm; 0 oznacza ruch ciągły.")
         row.addWidget(self.increment)
         layout.addLayout(row)
         jog = QtWidgets.QHBoxLayout()
@@ -76,12 +83,26 @@ class OperatorControls(QtWidgets.QWidget):
 
     def jog(self, axis, direction):
         s = self.shell
+        joint = "XYZABCUVW".index(axis)
+        if not direction:
+            s.action.JOG(joint, 0, 0, 0)
+            return
         if direction and not s._allowed("jog"):
             return
         metric = getattr(s.info, "MACHINE_IS_METRIC", True)
         scale = 1 if metric else 25.4
-        step = 0 if self.increment.currentIndex() == 0 else float(self.increment.currentText())
-        s.action.JOG("XYZABCUVW".index(axis), direction,
+        text = self.increment.currentText().strip()
+        locale = QtCore.QLocale(self.increment.locale())
+        locale.setNumberOptions(locale.numberOptions() | QtCore.QLocale.RejectGroupSeparator)
+        step, valid = (0, True) if text == "ciągły" else locale.toDouble(text)
+        if not valid:
+            preset_locale = QtCore.QLocale.c()
+            preset_locale.setNumberOptions(QtCore.QLocale.RejectGroupSeparator)
+            step, valid = preset_locale.toDouble(text)  # Existing preset decimal points.
+        if not valid or not math.isfinite(step) or not 0 <= step <= 100000:
+            self.reason.setText("Wpisz krok od 0 do 100000 mm albo wybierz „ciągły”.")
+            return
+        s.action.JOG(joint, direction,
                      min(self.speed.value(), 100) / scale, step / scale)
 
     def send_mdi(self):

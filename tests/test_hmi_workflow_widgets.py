@@ -650,6 +650,34 @@ def test_loop_estimate_failure_keeps_screen_and_syntax_check_available(
     page.close()
 
 
+def test_production_overrides_accept_typed_values_without_refresh_erasing_draft(
+        page_env, monkeypatch):
+    from PyQt5 import QtCore, QtTest, QtWidgets
+
+    _home, shell, _status, action = page_env
+    module = importlib.import_module("linumert_shell_pages")
+    monkeypatch.setattr(module, "INFO", SimpleNamespace(MAX_FEED_OVERRIDE=120,
+                        MIN_SPINDLE_OVERRIDE=50, MAX_SPINDLE_OVERRIDE=120))
+    monkeypatch.setattr(module.STATUS, "connect", Mock(), raising=False)
+    page = module.ProductionPage(shell)
+    page.show()
+    for key, text, call in (("feed", "85", action.SET_FEED_RATE),
+                            ("rapid", "25", action.SET_RAPID_RATE),
+                            ("spindle", "115", action.SET_SPINDLE_RATE)):
+        action.reset_mock()
+        field = page.sliders[key][1]
+        field.setFocus()
+        QtWidgets.QApplication.processEvents()
+        field.selectAll()
+        QtTest.QTest.keyClicks(field, text)
+        page.on_state()  # Periodic LinuxCNC status must not overwrite unfinished input.
+        assert field.cleanText() == text and not action.mock_calls
+        QtTest.QTest.keyClick(field, QtCore.Qt.Key_Return)
+        call.assert_called_once_with(int(text))
+        assert page.sliders[key][0].value() == int(text)
+    page.close()
+
+
 def test_production_remaining_time_pauses_and_invalidates_changed_program(
         page_env, monkeypatch, tmp_path):
     from linumert.programs.estimate import Estimate

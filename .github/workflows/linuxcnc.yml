@@ -65,6 +65,12 @@ jobs:
           runuser -u codex -- env HOME=/home/codex PYTHON=.venv/bin/python
           xvfb-run -a -s '-screen 0 1440x1100x24'
           bash tools/ci/test-linuxcnc.sh tests/test_plant_screen_linuxcnc.py -x
+      - name: Audit typed numeric values in the actual QtVCP screen
+        run: >-
+          runuser -u codex -- env HOME=/home/codex PYTHON=.venv/bin/python
+          xvfb-run -a -s '-screen 0 1440x1100x24'
+          bash tools/ci/test-linuxcnc.sh
+          tests/test_hmi_shell_gui.py::test_shell_selftest_in_gui -x
       - name: Shared runner with real LinuxCNC
         env:
           LINUXCNC_SCREENSHOT: ${{ github.workspace }}/state/spike_qtdragon.png

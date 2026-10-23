@@ -349,7 +349,7 @@ class ProductionPage(QtWidgets.QWidget):
 
     def _override_card(self) -> QtWidgets.QWidget:
         frame, lay, _side = card("Korekcje", "")
-        self.sliders: dict[str, tuple[QtWidgets.QSlider, QtWidgets.QLabel]] = {}
+        self.sliders: dict[str, tuple[QtWidgets.QSlider, QtWidgets.QSpinBox]] = {}
         self.reset_buttons: dict[str, QtWidgets.QPushButton] = {}
         spec = (
             ("feed", "Posuw F", 0, max(round(INFO.MAX_FEED_OVERRIDE), 100)),
@@ -361,7 +361,15 @@ class ProductionPage(QtWidgets.QWidget):
             head = QtWidgets.QHBoxLayout()
             head.addWidget(_label(title, "lrtMuted"))
             head.addStretch(1)
-            value = _label("100 %", "lrtValue")
+            value = QtWidgets.QSpinBox()
+            value.setObjectName("lrtSpin")
+            value.setRange(lo, hi)
+            value.setSuffix(" %")
+            value.setKeyboardTracking(False)
+            value.setValue(100)
+            value.setMinimumWidth(110)
+            value.setToolTip("Wpisz korekcję i zatwierdź Enterem albo przejdź do innego pola.")
+            value.valueChanged.connect(lambda v, k=key: self.set_override(k, v))
             head.addWidget(value)
             lay.addLayout(head)
             row = QtWidgets.QHBoxLayout()
@@ -424,6 +432,10 @@ class ProductionPage(QtWidgets.QWidget):
 
     # ---- akcje ----------------------------------------------------------------------------
     def set_override(self, key: str, value: int) -> None:
+        for widget in self.sliders[key]:
+            blocked = widget.blockSignals(True)
+            widget.setValue(value)
+            widget.blockSignals(blocked)
         {"feed": ACTION.SET_FEED_RATE, "rapid": ACTION.SET_RAPID_RATE,
          "spindle": ACTION.SET_SPINDLE_RATE}[key](value)
 
@@ -531,7 +543,10 @@ class ProductionPage(QtWidgets.QWidget):
                 slider.blockSignals(True)
                 slider.setValue(pct)
                 slider.blockSignals(False)
-            value.setText(f"{pct} %")
+            if not value.hasFocus() and not value.lineEdit().hasFocus():
+                value.blockSignals(True)
+                value.setValue(pct)
+                value.blockSignals(False)
 
     def refresh(self) -> None:
         s, now = self.shell.s, time.monotonic()

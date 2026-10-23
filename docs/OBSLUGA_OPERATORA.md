@@ -22,6 +22,12 @@ i limity LinuxCNC pozostają nadrzędne. Wirtualny bliźniak pozwala wyjść z k
 Wymiary mają cztery miejsca po przecinku (rozdzielczość 0,0001 mm), całkowite kroki
 nie dodają ułamkowych reszt. Pole przyjmuje wpis klawiaturą, zatwierdzany Enterem albo zmianą fokusu.
 Przecinek lub kropka dziesiętna zależy od ustawień języka systemu.
+Pola posuwu JOG, obrotów, numeru narzędzia, pozycji i wymiarów obsługują zaznaczanie
+oraz wklejanie; klawisze w polu nie uruchamiają JOG. F1/F2/Esc zachowują funkcje maszyny.
+Krok JOG można wybrać z listy albo wpisać samodzielnie (0 = ruch ciągły).
+Procentowe korekcje F, G0 i wrzeciona w Produkcji również przyjmują wpis klawiaturą;
+suwak oraz przyciski +/− nadal działają. Korekcja jest wysyłana po zatwierdzeniu wpisu,
+a odświeżanie statusu nie nadpisuje edytowanej wartości. Obowiązują zakresy konfiguracji.
 
 ## Symulacja i wirtualny bliźniak
 

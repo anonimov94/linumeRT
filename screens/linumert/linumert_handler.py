@@ -28,8 +28,10 @@ def _load_upstream():
 
 _upstream = _load_upstream()
 
+from linumert_keyboard import NumericKeyboardMixin
 
-class HandlerClass(_upstream.HandlerClass):
+
+class HandlerClass(NumericKeyboardMixin, _upstream.HandlerClass):
     """Ekran linumeRT: QtDragon w nakładce linumeRT (LINUMERT_SHELL=0 wyłącza nakładkę)."""
 
     shell = None

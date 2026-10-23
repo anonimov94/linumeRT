@@ -1,5 +1,9 @@
 # Rejestr pochodzenia zasobów
 
+- `docs/design/SKIN_SYSTEM_ROADMAP.md` — ChatGPT, 2026-10-22, własne wytyczne
+  projektu na polecenie właściciela; źródło: PR #85, GPL-2.0-or-later.
+  Uzupełnienie rejestru wymagane przez strażnik IP po aktualizacji main.
+
 Każdy zasób (ikona, font, grafika, biblioteka, kod z innego projektu) ma tu wpis: autor, data, źródło,
 licencja, zakres użycia, ścieżka. Zasady: `docs/prawne/PROCES.md` i `docs/prawne/WYTYCZNE_IP.md` §4 pkt 4.
 Test `tests/test_ip_guard.py` wymaga wpisu dla **każdego** pliku w `docs/design/` oraz dla każdego pliku
@@ -310,3 +314,7 @@ klawiatury/przycisków Qt/SQLite, GPL-2.0-or-later. Bez nowych bibliotek i zasob
 
 Model-Author: Codex. Własny dialog, przywrócenie zaznaczenia i testy rzeczywistych
 okien/klawiszy Qt/SQLite, GPL-2.0-or-later. Istniejące komponenty PyQt5; bez nowych zasobów.
+
+Poprawka lokalizacji kroku JOG przed scaleniem #67: własna walidacja QLocale,
+regresje klawiatury C/PL/DE, Model-Author: Codex, 2026-10-23, GPL-2.0-or-later.
+Bez nowych zasobów ani bibliotek.
