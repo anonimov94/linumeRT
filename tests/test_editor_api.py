@@ -90,6 +90,30 @@ def test_save_writes_history_and_file(env) -> None:  # REQ-VM-12
     assert client.get("/api/machine/history/..%2Fzly.yaml").status_code in (400, 404)
 
 
+def test_nonfinite_save_and_reload_preserve_model(env) -> None:  # REQ-VM-11, REQ-QA-03
+    server, client, path, _lib = env()
+    original_file = path.read_bytes()
+    original_model = server.machine
+    data = client.get("/api/machine").json()["data"]
+    # Tekst jest poprawnym JSON-em; odrzucenie musi nastąpić w schemacie maszyny.
+    data["axes"][0]["max_velocity"] = "inf"
+    res = client.post("/api/machine/save", json={"data": data})
+    assert res.status_code == 400
+    assert "axes[0].max_velocity: oczekiwano liczby skonczonej" in res.text
+    assert path.read_bytes() == original_file
+    assert client.get("/api/machine/history").json() == []
+    # Uszkodzenie pliku poza panelem również nie może zastąpić działającego modelu.
+    data["axes"][0]["max_velocity"] = float("nan")
+    path.write_text(yaml.safe_dump(data), encoding="utf-8")
+    res = client.post("/api/machine/reload")
+    assert res.status_code == 400
+    assert "axes[0].max_velocity: oczekiwano liczby skonczonej" in res.text
+    assert server.machine is original_model
+    master = Master(len(server.drives), transport=server.handle)
+    master.enable()
+    assert all(state == "OPERATION_ENABLED" for state in master.states())
+
+
 def test_reload_only_with_drives_disabled(env) -> None:  # REQ-VM-12
     server, client, _path, _lib = env()
     master = Master(len(server.drives), transport=server.handle)

@@ -2,6 +2,17 @@
 
 Tura: Codex · 2026-10-23 · stan: oddana; osobne ekrany offline, odbiór/scalenie PR #91.
 
+## Konkurs 3 — wymagania poza GUI, 2026-10-23
+
+Model-Author: Codex. Osobny checkout `/tmp/linumert-contest-03`, gałąź
+`codex/contest-2026-10-coverage`, PR #95; bez globalnego LOCK i przejmowania tury.
+Audyt 3 luk i dowody w `raporty/03.md`. Wdrożono odmowę NaN/inf we wspólnym
+schemacie maszyny; regresje YAML, pól zagnieżdżonych oraz zapisu/reload Plant.
+Kod: `2f60e05`; Debian: 1104 pytest PASS, 10 skip, 109 deselected; lint,
+check_requirements i po 108 testów C/ASan PASS. Wyniki CI i końcowy SHA w raporcie/PR.
+Nie scalać przed wspólną oceną konkursu. Pozostałe luki: real mapping napędów
+i kompletna walidacja osiągalności/stref pozycji ATC. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
 ## Wynik końcowy — SKIN-01
 
 Model-Author: Codex. Polecenie właściciela 2026-10-23: po scalonych #67/#86
@@ -355,3 +366,13 @@ obowiązkowe deklaracje/audyt hardware, integracja startera i jawne profile sim/
 `prompts/konkurs-2026-10/raporty/01.md`. Bez globalnego LOCK, bez zmian fizycznego safety.
 Nie scalać przed wspólną oceną konkursu — bieżące polecenie właściciela zastępuje
 historyczne automatyczne scalanie ukończonych etapów.
+
+## Konkurs 2 — przekazanie odbioru stanowiska, 2026-10-23
+
+Model-Author: Codex. Osobna gałąź `codex/contest-2026-10-odbior`, PR #94;
+bez globalnej blokady tury i bez scalania przed oceną konkursu.
+Procedura i szablon w `docs/raporty/ODBIOR_STANOWISKA.md` / `SZABLON_ODBIORU.md`;
+raport, wyniki i dowody: `prompts/konkurs-2026-10/raporty/02.md`.
+Następny krok: usunąć OD-01 (router_atc_rack: CRASH/COVER_CRASH mimo kodu 0),
+powtórzyć A3 z kontrolą zdarzeń, potem ręczny pulpit i zatwierdzona kampania T1–T7.
+NIEZWERYFIKOWANE NA SPRZĘCIE. Nie zmieniano zakresu pozostałych sesji konkursu.

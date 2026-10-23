@@ -47,3 +47,5 @@ Wykonane: 33 z 84.
 088 | 2026-10-23 | Cztery osobne ekrany offline, układy i kontrolki według wizji, launcher --skin, 128 wariantów GL, nowa galeria; nie kończy integracji CNC; PR #91; Codex
 
 Konkurs-01 | 2026-10-23 | Bramka przed exec LinuxCNC: deklaracje hardware + audyt HAL, integracja startera sim/Plant; 41 testów zakresu PASS, pełne lint/test 1033 PASS; PR #93 do oceny bez scalenia; Codex
+
+KONKURS-03 | 2026-10-23 | Audyt trzech luk poza GUI, odmowa NaN/inf w machine.yaml; Debian 1104 PASS, 108 C/ASan PASS, REQ bez błędów; PR #95 do wspólnej oceny, bez scalenia; Model-Author: Codex

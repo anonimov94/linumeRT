@@ -872,3 +872,21 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
 - 41 testów bramki/deklaracji/HAL PASS; pełny make lint test: 1033 PASS, 11 skip; wymagania bez błędów.
 - CI wykryło RuntimeError Path.resolve na Pythonie 3.11; poprawiono jawną odmowę; raport opisuje granice.
 - Autokontrola, bez niezależnego przeglądu; NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## Konkurs 3 — pokrycie wymagań poza GUI · 2026-10-23 · Codex
+- Model-Author: Codex. Osobna gałąź/worktree, PR #95; raport audytu `raporty/03.md`.
+- Ustalono luki: real mapping napędów, walidacja geometrii ATC i NaN/inf w schemacie.
+- Zamknięto lukę liczbową REQ-VM-11/REQ-QA-03; polskie błędy z pełną ścieżką pola.
+- Regresja starego kodu: 75 FAIL/4 PASS; po poprawce 167 testów wybranego zakresu PASS.
+- Debian: 1104 pytest PASS, 10 skip, 109 deselected; po 108 testów C i ASan/UBSan PASS.
+- Lint i wymagania PASS (21/22, 0 błędów); zapis/reload panelu zachowuje model po odmowie.
+- Autokontrola, bez niezależnego przeglądu. Bez zmian safety-profile, odbioru i skórek.
+- NIEZWERYFIKOWANE NA SPRZĘCIE. Bez scalenia do wspólnej oceny konkursu; dalszy etap w raporcie.
+
+## Konkurs 2 — odbiór stanowiska · 2026-10-23 · Codex
+- Model-Author: Codex. PR #94, osobny checkout; bez scalania przed oceną konkursu.
+- Procedura A–E/T1–T7, szablon PASS/FAIL/BLOCKED, powiązania G1/RT i surowe dowody.
+- Debian: 1024 pytest + 166 subtestów PASS; C/ASan/UBSan PASS; demo HMI T11/IDLE i K-302 PASS.
+- OD-01 odtworzone: macierz router_atc_rack ma kod 0 mimo CRASH/COVER_CRASH; odbiór A3 FAIL.
+- Raport i końcowy wynik CI: `prompts/konkurs-2026-10/raporty/02.md`.
+- Pulpit właściciela i T1–T7 niewykonane; NIEZWERYFIKOWANE NA SPRZĘCIE.

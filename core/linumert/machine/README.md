@@ -8,3 +8,11 @@ Model stanu maszyny, atrapa maszyny do testow oraz model machine.yaml.
 | `validate.py` | reguły spójności (24 reguły; błędy po polsku) |
 
 Przykładowe maszyny: `config/machines/`. Opis: `docs/PLANT.md`.
+
+Wspólny schemat odrzuca NaN oraz ±nieskończoność we wszystkich polach liczbowych
+typu float (także wektorach i polach opcjonalnych), przed walidacją spójności
+i budową Plant. Błędy wskazują ścieżkę pola po polsku. Obejmuje też liczby
+podane jako tekst i przepełnienie, np. `1e999`. Nadpisania napędów w `overrides`
+sprawdza osobno walidator szablonów, tymi samymi zakresami co bibliotekę.
+Testy regresyjne: `tests/test_machine_finite.py` oraz zapis/przeładowanie w
+`tests/test_editor_api.py` (REQ-VM-11, REQ-QA-03).

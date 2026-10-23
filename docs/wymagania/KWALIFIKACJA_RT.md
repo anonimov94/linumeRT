@@ -30,6 +30,12 @@ wersje LinuxCNC, IgH, bibliotek; ustawienia BIOS, przypisania CPU, zasilanie; wa
 histogram i maksima; błędy magistrali i napędów; liczba przekroczeń terminu; PASS/FAIL z uzasadnieniem.
 PASS tylko przy kryteriach ustalonych przed testem.
 
+Procedura wykonawcza T1–T7, warunki przerwania, oddzielny odbiór sim/Plant i pulpitu:
+[Odbiór stanowiska](../raporty/ODBIOR_STANOWISKA.md).
+Każdy przebieg zapisuj według [szablonu](../raporty/SZABLON_ODBIORU.md),
+z surowymi pomiarami. Brak stanowiska lub zatwierdzonych progów = BLOCKED;
+testy CI nie zastępują kwalifikacji fizycznej konfiguracji.
+
 ## 5. Kryteria wersji 1.0
 - osie CSP działają na opisanej konfiguracji sprzętowej, cykl 1 ms zakwalifikowany;
 - brak niewyjaśnionych przekroczeń terminu w przebiegu kwalifikacyjnym;
