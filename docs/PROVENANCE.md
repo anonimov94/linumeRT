@@ -353,3 +353,7 @@ Model-Author: Codex. Własny simulation/linumert_sim/render_mesh.py i
  tests/test_render_mesh.py, GPL-2.0-or-later. Scena przecinających się trójkątów
 oraz testy obrazu/geometrii opracowane w projekcie; bez zewnętrznych zasobów.
 Istniejący stos numpy/PyQt5/pyqtgraph/PyOpenGL, bez nowej zależności produktu.
+
+Własne simulation/linumert_sim/render_scene.py, render_view.py oraz
+tools/dev/renderer-preview.py: niezależny podgląd brył XYZ/mm i sterowanie kamerą,
+Codex, 2026-10-23, GPL-2.0-or-later. Bez nowych zależności i zasobów zewnętrznych.

@@ -10,8 +10,10 @@ etapy po zielonych testach. Zastępuje niższe historyczne „bez scalania”.
 Main operatora zaktualizowany do 2bfd473; wszystkie 11 lokalnych plików zachowane
 (sumy SHA-256 i kopia w /tmp/linumert-skin01-backup). Osobna gałąź
 codex/skin-01-renderer, checkout /tmp/linumert-skin01; bez globalnego LOCK.
-Krok 1: reprodukcja QPainter i degeneracji kapsli, walidacja wejścia siatki;
-13 lokalnych testów PASS, lint PASS. Następnie niezależny widok GL, zrzuty
+PR #87, pierwszy push 37fde1a. Krok 1: reprodukcja QPainter i degeneracji kapsli, walidacja wejścia siatki;
+23 lokalne testy (z IP) PASS, lint PASS. Widok GL i launcher gotowe;
+próba Radeon/Mesa PASS (24-bit depth, niezależność od kolejności, culling,
+3 kamery, wireframe, obrót, 9 klatek/350 ms). Następnie automatyzacja, zrzuty
 kilku kamer, test GPU Radeon 660M/Mesa oraz Debian/LinuxCNC i pełne CI.
 
 ## Aktualne polecenie — scalanie po zakończeniu
