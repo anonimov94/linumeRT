@@ -49,6 +49,8 @@ PASS na podstawie samego kodu wyjścia, jeśli część wymaganego zakresu pomin
 | T5 awarie stanowiska | BLOCKED | niewykonane |
 | T6 próba długa | BLOCKED | niewykonane |
 | T7 renderer i RT równolegle | BLOCKED | niewykonane |
+| E1 instalacja, aktualizacja i rollback | BLOCKED | niewykonane |
+| E2 komplet dowodów i audyt wydania | BLOCKED | niewykonane |
 
 ## Karta pojedynczej próby — powiel dla każdego ID i powtórki
 

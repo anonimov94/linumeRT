@@ -139,9 +139,10 @@ Wypełnij osobno bramki w szablonie. 1.0 pozostaje BLOCKED przy braku dowodów C
 na sprzęcie, pełnej kampanii RT/EtherCAT, odbioru toru fizycznego, pulpitu docelowego,
 reakcji na utratę telemetrii, powtarzalnej instalacji/aktualizacji/rollbacku oraz
 manifestu/licencji. Błąd któregokolwiek wymaganego kryterium daje FAIL wydania.
-Instalację sprawdź na odtwarzalnej kopii stanowiska bez wyjść: zapisz wersję bazową,
-zainstaluj kandydata, sprawdź start i zachowanie kopii danych, wykonaj rollback,
-porównaj dane z kopią początkową. Wersje, polecenia instalatora i kryteria migracji
-muszą być w planie przed próbą; brak wspieranej ścieżki daje BLOCKED.
+| ID | Warunki i dokładne kroki | Oczekiwanie i reguła przerwania |
+|---|---|---|
+| E1 | Odtwarzalna kopia stanowiska bez wyjść; zapisz wersję bazową i kopię danych z sumami, zainstaluj kandydata, sprawdź start i odczyt danych, wykonaj rollback, porównaj dane z kopią początkową. Wersje, polecenia instalatora i kryteria migracji wpisz do planu przed próbą | Start obu wersji i dane zgodne z przyjętymi kryteriami; logi i sumy przed/po. Błąd lub utrata danych: FAIL, przerwij i zachowaj kopię. Brak wspieranej ścieżki lub poleceń: BLOCKED |
+| E2 | Zebrane karty A–E1 i podpisany odbiór fizyczny; porównaj SHA każdego dowodu z manifestem kandydata, sprawdź dokumentację, `docs/LICENCJE.md`, `docs/PROVENANCE.md` i `docs/prawne/LISTA_PRZED_WYDANIEM.md` | Komplet dowodów dla tej konfiguracji i brak otwartych blokad licencji. Niezgodny SHA: przerwij ocenę, BLOCKED do powtórki; stwierdzona niezgodność licencji: FAIL |
+
 Brak nowego pomiaru pozostaje jawną blokadą; historyczne P0/G1 ani zielone CI
 nie potwierdzają gotowości fizycznej obrabiarki.
