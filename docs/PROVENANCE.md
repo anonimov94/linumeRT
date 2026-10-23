@@ -310,3 +310,7 @@ klawiatury/przycisków Qt/SQLite, GPL-2.0-or-later. Bez nowych bibliotek i zasob
 
 Model-Author: Codex. Własny dialog, przywrócenie zaznaczenia i testy rzeczywistych
 okien/klawiszy Qt/SQLite, GPL-2.0-or-later. Istniejące komponenty PyQt5; bez nowych zasobów.
+
+Poprawka lokalizacji kroku JOG przed scaleniem #67: własna walidacja QLocale,
+regresje klawiatury C/PL/DE, Model-Author: Codex, 2026-10-23, GPL-2.0-or-later.
+Bez nowych zasobów ani bibliotek.

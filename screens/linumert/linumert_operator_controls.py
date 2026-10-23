@@ -2,7 +2,7 @@
 """JOG/MDI, wrzeciono i wybór narzędzia. Model-Author: Codex."""
 import math
 
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtCore, QtWidgets
 
 import linumert_shell_model as model
 
@@ -29,7 +29,8 @@ class OperatorControls(QtWidgets.QWidget):
         self.increment.addItems(["ciągły", "10", "1", "0.1", "0.01", "0.001", "0.0001"])
         self.increment.setEditable(True)
         self.increment.setInsertPolicy(QtWidgets.QComboBox.NoInsert)
-        self.increment.setValidator(QtGui.QDoubleValidator(0, 100000, 4, self.increment))
+        # Validate at command dispatch: a validator captures its own locale and can
+        # silently discard a decimal key when the editor's locale later changes.
         self.increment.setToolTip("Wpisz własny krok w mm; 0 oznacza ruch ciągły.")
         row.addWidget(self.increment)
         layout.addLayout(row)
@@ -91,9 +92,13 @@ class OperatorControls(QtWidgets.QWidget):
         metric = getattr(s.info, "MACHINE_IS_METRIC", True)
         scale = 1 if metric else 25.4
         text = self.increment.currentText().strip()
-        step, valid = (0, True) if text == "ciągły" else self.increment.locale().toDouble(text)
+        locale = QtCore.QLocale(self.increment.locale())
+        locale.setNumberOptions(locale.numberOptions() | QtCore.QLocale.RejectGroupSeparator)
+        step, valid = (0, True) if text == "ciągły" else locale.toDouble(text)
         if not valid:
-            step, valid = QtCore.QLocale.c().toDouble(text)  # Existing preset decimal points.
+            preset_locale = QtCore.QLocale.c()
+            preset_locale.setNumberOptions(QtCore.QLocale.RejectGroupSeparator)
+            step, valid = preset_locale.toDouble(text)  # Existing preset decimal points.
         if not valid or not math.isfinite(step) or not 0 <= step <= 100000:
             self.reason.setText("Wpisz krok od 0 do 100000 mm albo wybierz „ciągły”.")
             return

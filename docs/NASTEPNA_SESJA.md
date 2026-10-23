@@ -227,3 +227,14 @@ przełącza bez zapisywania. Rekord docelowy czytany po dialogu, brak/błąd zac
 Udany zapis nowego/klonowanego T wiąże zaznaczenie z zapisanym numerem.
 35 testów lokalnie PASS, rzeczywiste okna Qt i podgląd; regresja starego kodu FAIL.
 Szkic następuje po #83; wynik pełnego CI i sprawdzony SHA w PR. Model-Author: Codex.
+
+## Scalanie aktywnych gałęzi — 2026-10-23
+
+Model-Author: Codex. Właściciel ponownie zezwolił na scalanie wszystkich ukończonych,
+zweryfikowanych aktywnych gałęzi. Zastępuje wcześniejsze odłożenie scalania na jutro.
+PR #67 zaktualizowano main. Lokalny Qt ujawnił utratę separatora dziesiętnego przez
+QDoubleValidator z inną lokalizacją niż edytor; usunięto filtr zmieniający wpis,
+walidacja pozostaje przed komendą JOG. Separatory tysięcy są odrzucane; kropka
+presetrów i lokalny separator są obsługiwane. 13 testów klawiatury PASS.
+Następnie: pełne CI #67 → scalenie → aktualizacja i CI #86 → scalenie.
+Gałęzie tool-discard-edits i design/skin-system-roadmap-2026-10-22 już zawarte w main.

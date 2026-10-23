@@ -770,3 +770,11 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
 - Zapis klonu/nowego T zaznacza zapisany numer; odrzucenie nie zapisuje danych ani nie cofa bazy.
 - Regresja starego kodu FAIL; 35 testów lokalnie PASS, w tym prawdziwe okna/klawisze Qt i SQLite.
 - Podgląd i dokumentacja; pełne CI do odbioru w PR. Autokontrola, bez niezależnego przeglądu.
+
+## PR #67 — lokalizacja kroku JOG przed scaleniem · 2026-10-23 · Codex
+
+- Właściciel zezwolił na scalanie ukończonych aktywnych gałęzi; #67 odświeżono main.
+- Qt/Windows odtworzył 2.5 → 25 przy rozbieżności lokalizacji walidatora i edytora.
+- Usunięto filtr klawiszy; wpis walidowany dopiero przed JOG, bez separatorów tysięcy.
+- 13 testów Qt PASS: C/PL/DE, kropka/przecinek, błędny wpis i zatrzymanie mimo błędu.
+- Model-Author: Codex. Pełne CI po poprawce wymagane przed scaleniem.
