@@ -405,3 +405,23 @@ Codex, 2026-10-23, GPL-2.0-or-later. Zrzuty uruchomionego HMI na Debianie 12,
 LinuxCNC 2.9.10/Xvfb, tools/dev/sim-e2e.sh, kod UI main 8483b81 i poprawione demo
 8675777. Okno 1920×1080; bez montażu grafik ani retuszu. Nowe regresje w
 tests/test_lexer.py sprawdzają rzeczywiste dostarczone programy demo/kolizji.
+
+## Osobne ekrany skórek — 2026-10-23
+Model-Author: Codex. Własny `screens/linumert/linumert_skin_controls.py`:
+rysowane kodem Qt prostokątne, ścięte i organiczne obudowy przycisków oraz
+poglądowe przełączniki. GPL-2.0-or-later, bez fragmentów bitmap i nowych zależności.
+Własny `screens/linumert/linumert_skin_readouts.py`: odczyty osi, F/S, poglądowy
+symbol narzędzia i czytelny program przykładowy, Codex, 2026-10-23, GPL-2.0-or-later.
+Własny `screens/linumert/linumert_skin_screen.py`: wspólne komponenty paneli
+odczytu, powiększania i nieaktywnych konsol; kompozycje należą do osobnych klas
+skórek. Codex, 2026-10-23, GPL-2.0-or-later. Bez zależności LinuxCNC/HAL.
+Własne osobne moduły ekranów: `screens/linumert/linumert_skin_classic.py`,
+`linumert_skin_industrial.py`, `linumert_skin_cyberdeck.py`, `linumert_skin_organic.py`
+oraz rejestr `linumert_skin_screens.py`. Codex, 2026-10-23, GPL-2.0-or-later.
+Osobne kompozycje i konsole według czterech wzorców właściciela; wspólne tylko
+komponenty odczytu i renderer. Bez zależności LinuxCNC/HAL.
+
+Aktualizacja czterech `docs/raporty/hmi_sym/skin_*.png`, Codex, 2026-10-23:
+rzeczywiste osobne ekrany Qt z kodu ea2fc39, 1920×1080, bez retuszu. Industrial
+w Reactor Green, Cyberdeck w Ion Blue, pozostałe w Classic Turquoise.
+Własne kształty rysowane przez QPainter i własne sceny 3D; GPL-2.0-or-later.

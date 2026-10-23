@@ -91,7 +91,7 @@ A futuristic blend of flowing rounded frames, pointed elements, circular indicat
 
 </div>
 
-> **Current status (2026-10-23):** four offline Qt layout prototypes now support four palettes, English/Polski and three interactive OpenGL panels. This is a separate preview, without CNC status or commands. Complete operator skins and QtVCP integration remain in development. [Original concept artwork](docs/design/referencje-skin/README.md) · [Current screenshots and capture report](docs/raporty/hmi_sym/README.md).
+> **Current status (2026-10-23):** four separately composed Qt screens now have their own panel layouts, physical controls, instruments and navigation, with four palettes, English/Polski and three interactive OpenGL panels. This is a separate preview, without CNC status or commands. Complete operator skins and QtVCP integration remain in development. [Original concept artwork](docs/design/referencje-skin/README.md) · [Current screenshots and capture report](docs/raporty/hmi_sym/README.md).
 
 ### New skin previews — actual Qt screenshots
 
@@ -101,12 +101,16 @@ A futuristic blend of flowing rounded frames, pointed elements, circular indicat
 | Cyberdeck | Organic Vector |
 | ![Cyberdeck offline preview](docs/raporty/hmi_sym/skin_cyberdeck.png) | ![Organic Vector offline preview](docs/raporty/hmi_sym/skin_organic-vector.png) |
 
-Captured at **1920×1080**, Classic Turquoise, English. All four palettes are available in each layout. The machine and part are illustrative models; unknown readouts and disabled cycle controls are intentional in the offline preview.
+Captured as separate screens at **1920×1080**, English: Classic/Organic in Classic Turquoise, Industrial in Reactor Green, Cyberdeck in Ion Blue. All four palettes remain available independently in every screen. The machine and part are illustrative models; unknown readouts and disabled cycle controls are intentional in the offline preview.
 
 ```sh
+python3 tools/dev/skin-preview.py --skin classic-digital
+python3 tools/dev/skin-preview.py --skin industrial-pro --theme reactor-green
+python3 tools/dev/skin-preview.py --skin cyberdeck --theme ion-blue
+python3 tools/dev/skin-preview.py --skin organic-vector
+# Browse all screens, or run without OpenGL dependencies:
 python3 tools/dev/skin-preview.py
-# Layouts without OpenGL dependencies:
-python3 tools/dev/skin-preview.py --layout-only
+python3 tools/dev/skin-preview.py --skin organic-vector --layout-only
 ```
 
 ---

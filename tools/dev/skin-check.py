@@ -40,8 +40,9 @@ def main():
     window.show()
     results = []
     try:
-        for size, skin, theme, language in itertools.product(
-                ((1280, 800), (1920, 1080)), SKIN_IDS, THEME_IDS, LANGUAGE_IDS):
+        for standalone, size, skin, theme, language in itertools.product(
+                (False, True), ((1280, 800), (1920, 1080)), SKIN_IDS, THEME_IDS, LANGUAGE_IDS):
+            window.selector_box.setVisible(not standalone)
             window.resize(*size)
             window.preferences = PresentationPreferences(skin=skin, theme=theme, language=language)
             for key, combo in window.selectors.items():
@@ -69,7 +70,10 @@ def main():
                 assert window.workspace.rect().contains(window.cards[role].geometry())
             assert window.status.isVisible()
             assert all(b.isVisible() and not b.isEnabled() for b in window.controls.values())
-            if theme == THEME_IDS[0] and language == "en":
+            reference_theme = {"industrial-pro": "reactor-green", "cyberdeck": "ion-blue"}.get(
+                skin, "classic-turquoise")
+            capture_theme = reference_theme if standalone else THEME_IDS[0]
+            if theme == capture_theme and language == "en":
                 for view in window.viewports.values():
                     view.update()
                 QtTest.QTest.qWait(100)
@@ -83,7 +87,8 @@ def main():
                     rgb = np.frombuffer(data, np.uint8).reshape(crop.height(), -1, 4)
                     assert np.unique(rgb[::4, ::4, :3].reshape(-1, 3), axis=0).shape[0] >= 3, (
                         "empty composed viewport", skin, role)
-                assert shot.save(str(args.output / f"{skin}-{size[0]}.png"))
+                name = f"{skin}-{size[0]}" + ("-standalone" if standalone else "")
+                assert shot.save(str(args.output / f"{name}.png"))
                 window.expand_buttons["machine"].click()
                 QtTest.QTest.qWait(50)
                 assert window.viewports["machine"].width() > window.workspace.width()-40
@@ -91,7 +96,7 @@ def main():
                 window.expand_buttons["machine"].click()
                 QtTest.QTest.qWait(50)
                 assert all(card.isVisible() for card in window.cards.values())
-            results.append({"size": size, "skin": skin, "theme": theme,
+            results.append({"standalone": standalone, "size": size, "skin": skin, "theme": theme,
                             "language": language, "contexts": reports})
         report = {"passed": True, "combinations": len(results), "results": results}
         (args.output / "report.json").write_text(json.dumps(report, indent=2) + "\n")

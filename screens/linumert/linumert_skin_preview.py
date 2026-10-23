@@ -4,6 +4,7 @@
 Model-Author: Codex. Optional interactive offline scenes use the SKIN-01 renderer.
 """
 
+import argparse
 from dataclasses import replace
 
 from linumert_skin_contract import (
@@ -13,30 +14,16 @@ from linumert_skin_contract import (
     PresentationPreferences,
     palette_for,
 )
-from linumert_skin_panel import SkinPanel, UnknownGauge
+from linumert_skin_controls import SkinButton
+from linumert_skin_panel import SkinPanel
+from linumert_skin_screens import LAYOUTS as LAYOUTS
+from linumert_skin_screens import SCREENS
 from linumert_skin_strings import text
 from PyQt5 import QtCore, QtWidgets
 
-# role, row, column, row span, column span. These are distinct compositions,
-# not a recoloring of the existing QtDragon shell.
-LAYOUTS = {
-    "classic-digital": (("dro", 0, 0, 2, 1), ("program", 2, 0, 2, 1),
-                        ("toolpath", 0, 1, 3, 2), ("machine", 0, 3, 3, 1),
-                        ("tools", 3, 1, 1, 2), ("workpiece", 3, 3, 1, 1)),
-    "industrial-pro": (("machine", 0, 0, 3, 2), ("dro", 0, 2, 2, 2),
-                       ("toolpath", 0, 4, 2, 2), ("tools", 2, 2, 2, 2),
-                       ("program", 2, 4, 2, 2), ("workpiece", 3, 0, 1, 2)),
-    "cyberdeck": (("dro", 0, 0, 2, 1), ("program", 0, 1, 2, 1),
-                  ("toolpath", 0, 2, 2, 2), ("machine", 2, 0, 2, 1),
-                  ("tools", 2, 1, 2, 2), ("workpiece", 2, 3, 2, 1)),
-    "organic-vector": (("dro", 0, 0, 2, 1), ("program", 2, 0, 2, 1),
-                       ("machine", 0, 1, 2, 1), ("toolpath", 0, 2, 2, 2),
-                       ("tools", 2, 1, 2, 2), ("workpiece", 2, 3, 2, 1)),
-}
-
 
 class SkinPreview(QtWidgets.QMainWindow):
-    def __init__(self, preferences=None, viewport_factory=None):
+    def __init__(self, preferences=None, viewport_factory=None, standalone=False):
         super().__init__()
         self.preferences = preferences or PresentationPreferences()
         self.viewport_factory = viewport_factory
@@ -46,8 +33,11 @@ class SkinPreview(QtWidgets.QMainWindow):
         central = QtWidgets.QWidget()
         self.setCentralWidget(central)
         root = QtWidgets.QVBoxLayout(central)
-        selectors = QtWidgets.QHBoxLayout()
-        root.addLayout(selectors)
+        self.selector_box = QtWidgets.QWidget()
+        selectors = QtWidgets.QHBoxLayout(self.selector_box)
+        selectors.setContentsMargins(0, 0, 0, 0)
+        root.addWidget(self.selector_box)
+        self.selector_box.setVisible(not standalone)
         self.selectors = {}
         self.selector_labels = {}
         for field, choices in (("skin", SKIN_IDS), ("theme", THEME_IDS),
@@ -68,6 +58,8 @@ class SkinPreview(QtWidgets.QMainWindow):
             selectors.addWidget(combo, 1)
             self.selectors[field] = combo
             self.selector_labels[field] = label
+        self.header = QtWidgets.QWidget()
+        root.addWidget(self.header)
         self.banner = QtWidgets.QLabel()
         self.banner.setObjectName("banner")
         root.addWidget(self.banner)
@@ -78,19 +70,8 @@ class SkinPreview(QtWidgets.QMainWindow):
         self.grid = QtWidgets.QGridLayout(self.workspace)
         self.grid.setContentsMargins(0, 0, 0, 0)
         root.addWidget(self.workspace, 1)
-        footer = QtWidgets.QHBoxLayout()
-        self.demo_label = QtWidgets.QLabel()
-        self.demo_label.setWordWrap(True)
-        footer.addWidget(self.demo_label, 1)
-        self.controls = {}
-        for key in ("start", "feed_hold", "stop"):
-            button = QtWidgets.QPushButton()
-            button.setObjectName(key)
-            button.setEnabled(False)
-            button.setMinimumSize(120, 64)
-            footer.addWidget(button)
-            self.controls[key] = button
-        root.addLayout(footer)
+        self.console = None
+        self.root = root
         self.refresh()
 
     def select(self, field, value):
@@ -101,13 +82,17 @@ class SkinPreview(QtWidgets.QMainWindow):
         p = self.preferences
         c = palette_for(p)
         radius = 22 if p.skin == "organic-vector" else 3
+        heading_font = ("DejaVu Sans Mono" if p.skin in ("classic-digital", "cyberdeck")
+                        else "DejaVu Sans")
+        heading_color = c.text if p.skin in ("industrial-pro", "organic-vector") else c.accent
         self.setStyleSheet(f"""
             QMainWindow, QWidget {{ background: {c.background}; color: {c.text};
                 font-family: 'IBM Plex Sans', 'DejaVu Sans'; font-size: 14px; }}
             QFrame[card="true"] {{ background: transparent; border: none; }}
             QFrame[card="true"] QLabel {{ background: transparent; border: none; }}
-            QLabel[heading="true"] {{ color: {c.accent}; font-size: 17px; }}
-            QLabel#banner {{ color: {c.warning}; padding: 8px; }}
+            QLabel[heading="true"] {{ color: {heading_color}; font-size: 14px;
+                font-family: '{heading_font}'; font-weight: bold; }}
+            QLabel#banner {{ color: {c.warning}; font-size: 11px; padding: 2px 8px; }}
             QLabel#dro {{ font-family: 'JetBrains Mono', 'DejaVu Sans Mono';
                 font-size: 28px; font-weight: bold; color: {c.accent}; }}
             QComboBox, QPushButton {{ min-height: 44px; padding: 0 10px;
@@ -122,102 +107,125 @@ class SkinPreview(QtWidgets.QMainWindow):
         """)
         for key, label in self.selector_labels.items():
             label.setText(text(key, p))
-        self.banner.setText("linumeRT  //  " + p.skin.replace("-", " ").upper()
-                            + "  ·  " + text("preview", p))
+        self.banner.setText(text("preview", p))
         self.status.setText(text("alarms", p) + " · " + text("status_unknown", p)
                             + " · E-STOP: — · " + text("mode_manual", p) + ": —")
-        self.demo_label.setText(text("demo_controls", p))
-        for key, button in self.controls.items():
-            button.setText({"start": "▶ ", "feed_hold": "Ⅱ ", "stop": "■ "}[key] + text(key, p))
-            button.setToolTip(text("demo_controls", p))
-        while self.grid.count():
-            self.grid.takeAt(0)
-        for card in getattr(self, "cards", {}).values():
-            card.hide()
-            card.deleteLater()
-        # Clear stretch from the previous composition before applying the next.
-        for column in range(6):
-            self.grid.setColumnStretch(column, 0)
-        self.cards = {}
-        self.maximized = None
-        self.expand_buttons = {}
-        self.viewports = {}
-        for role, row, column, height, width in LAYOUTS[p.skin]:
-            card = SkinPanel(p.skin, c)
-            card.setProperty("card", True)
-            card.setObjectName(role)
-            layout = QtWidgets.QVBoxLayout(card)
-            layout.setContentsMargins(16, 12, 16, 12)
-            heading = QtWidgets.QLabel(("DRO / XYZ · mm" if role == "dro" else text(role, p)).upper())
-            heading.setProperty("heading", True)
-            titlebar = QtWidgets.QHBoxLayout()
-            titlebar.addWidget(heading, 1)
-            if role in ("machine", "workpiece", "toolpath"):
-                expand = QtWidgets.QPushButton("↗")
-                expand.setFixedSize(44, 44)
-                expand.setToolTip(text("maximize", p))
-                expand.setAccessibleName(text("maximize", p))
-                expand.clicked.connect(lambda checked=False, key=role: self.toggle_panel(key))
-                titlebar.addWidget(expand)
-                self.expand_buttons[role] = expand
-            layout.addLayout(titlebar)
-            if role == "dro":
-                content = "X  —.———\nY  —.———\nZ  —.———"
-            elif role == "program":
-                content = text("sample_program", p) + "\n\n001  G21 G90\n002  G54\n003  G0 X0 Y0\n004  M2"
-            elif role in ("machine", "workpiece", "toolpath"):
-                content = text("offline_scene", p) if self.viewport_factory else text(
-                    "renderer_pending", p)
+        self._replace_header(c)
+        old_workspace = self.workspace
+        if self.console:
+            self.root.removeWidget(self.console)
+            self.console.hide()
+            self.console.deleteLater()
+        screen = SCREENS[p.skin](p, c, self.viewport_factory)
+        self.root.replaceWidget(old_workspace, screen)
+        old_workspace.hide()
+        old_workspace.deleteLater()
+        self.workspace = screen
+        self.grid, self.cards = screen.grid, screen.cards
+        self.expand_buttons, self.viewports = screen.expand_buttons, screen.viewports
+        self.controls = screen.controls
+        self.console = screen.console_widget
+        self.root.addWidget(self.console)
+        self.root.removeWidget(self.status)
+        if screen.STATUS_LOCATION == "footer":
+            self.root.addWidget(self.status)
+        else:
+            self.root.insertWidget(self.root.indexOf(self.workspace), self.status)
+        self.setWindowTitle("linumeRT · " + p.skin.replace("-", " ").title())
+
+    def _replace_header(self, palette):
+        old = self.header
+        self.header = SkinPanel(self.preferences.skin, palette)
+        row = QtWidgets.QHBoxLayout(self.header)
+        row.setContentsMargins(15, 7, 15, 7)
+        brand = QtWidgets.QLabel("linume<span style='color:" + palette.accent + "'>RT</span>")
+        brand.setStyleSheet("font-size:27px; font-weight:bold; background:transparent;")
+        row.addWidget(brand)
+        name = QtWidgets.QLabel(self.preferences.skin.replace("-", " ").upper())
+        name.setStyleSheet("font-size:15px; font-weight:bold; background:transparent;")
+        row.addWidget(name)
+        row.addStretch()
+        for key in ("machine", "program", "tools", "diagnostics", "settings"):
+            button = SkinButton(text(key, self.preferences), self.preferences.skin, palette)
+            button.setMinimumWidth(85)
+            if key == "settings":
+                button.clicked.connect(self.open_settings)
+            elif key == "diagnostics":
+                button.clicked.connect(self.open_diagnostics)
             else:
-                content = "T —  ·  D —  ·  Z —"
-            body = QtWidgets.QLabel(content)
-            body.setWordWrap(True)
-            if role == "dro":
-                body.setObjectName("dro")
-            if role in ("machine", "workpiece", "toolpath") and self.viewport_factory:
-                viewport = self.viewport_factory(role, c)
-                layout.addWidget(viewport, 1)
-                self.viewports[role] = viewport
-                layout.addWidget(body)
-            else:
-                layout.addWidget(body, 1, QtCore.Qt.AlignCenter)
-            if role == "tools":
-                instruments = QtWidgets.QHBoxLayout()
-                for label in ("F", "S", "G0"):
-                    instruments.addWidget(UnknownGauge(label, p.skin, c))
-                layout.addLayout(instruments, 1)
-            if role == "program":
-                body.setStyleSheet("font-family: monospace; font-size: 13px;")
-            self.grid.addWidget(card, row, column, height, width)
-            self.cards[role] = card
-            for index in range(column, column + width):
-                self.grid.setColumnStretch(index, 1)
-        for row in range(4):
-            self.grid.setRowStretch(row, 1)
+                button.setToolTip(text("maximize", self.preferences))
+                button.clicked.connect(lambda checked=False, role=key: self.toggle_panel(role))
+            row.addWidget(button)
+        self.root.replaceWidget(old, self.header)
+        old.hide()
+        old.deleteLater()
+
+    def open_diagnostics(self):
+        if "diagnostics" in self.cards:
+            self.toggle_panel("diagnostics")
+            return
+        lines = [text("preview", self.preferences)]
+        for role, view in self.viewports.items():
+            if hasattr(view, "context_report"):
+                try:
+                    report = view.context_report()
+                    lines.append(f"{role}: {report['renderer']} / depth {report['depth_bits']}")
+                except RuntimeError as error:
+                    lines.append(str(error))
+        QtWidgets.QMessageBox.information(self, text("diagnostics", self.preferences),
+                                          "\n".join(lines))
+
+    def open_settings(self):
+        dialog = QtWidgets.QDialog(self)
+        dialog.setWindowTitle(text("settings", self.preferences))
+        layout = QtWidgets.QFormLayout(dialog)
+        choices = {}
+        for key, source in self.selectors.items():
+            combo = QtWidgets.QComboBox()
+            combo.setObjectName(key)
+            for index in range(source.count()):
+                combo.addItem(source.itemText(index), source.itemData(index))
+            combo.setCurrentIndex(combo.findData(getattr(self.preferences, key)))
+            layout.addRow(text(key, self.preferences), combo)
+            choices[key] = combo
+        buttons = QtWidgets.QDialogButtonBox(
+            QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel)
+        buttons.button(QtWidgets.QDialogButtonBox.Ok).setText(text("apply", self.preferences))
+        buttons.button(QtWidgets.QDialogButtonBox.Cancel).setText(text("cancel", self.preferences))
+        buttons.accepted.connect(dialog.accept)
+        buttons.rejected.connect(dialog.reject)
+        layout.addRow(buttons)
+        if dialog.exec_() == QtWidgets.QDialog.Accepted:
+            selected = {key: combo.currentData() for key, combo in choices.items()}
+            self.preferences = replace(self.preferences, **selected)
+            for key, value in selected.items():
+                self.selectors[key].blockSignals(True)
+                self.selectors[key].setCurrentIndex(self.selectors[key].findData(value))
+                self.selectors[key].blockSignals(False)
+            self.refresh()
+        dialog.deleteLater()
+
+    @property
+    def maximized(self):
+        return getattr(self.workspace, "maximized", None)
 
     def toggle_panel(self, role):
-        self.maximized = None if self.maximized == role else role
-        for card in self.cards.values():
-            self.grid.removeWidget(card)
-            card.hide()
-        if self.maximized:
-            card = self.cards[role]
-            self.grid.addWidget(card, 0, 0, 4, 6)
-            card.show()
-        else:
-            for key, row, column, height, width in LAYOUTS[self.preferences.skin]:
-                card = self.cards[key]
-                self.grid.addWidget(card, row, column, height, width)
-                card.show()
-        for key, button in self.expand_buttons.items():
-            button.setText("↙" if key == self.maximized else "↗")
+        self.workspace.toggle_panel(role)
 
 
 def main(viewport_factory=None):
+    parser = argparse.ArgumentParser(description="linumeRT · separate offline skin screens")
+    parser.add_argument("--skin", choices=SKIN_IDS)
+    parser.add_argument("--theme", choices=THEME_IDS, default=THEME_IDS[0])
+    parser.add_argument("--language", choices=LANGUAGE_IDS, default="en")
+    parser.add_argument("--layout-only", action="store_true")
+    args = parser.parse_args()
     if QtWidgets.QApplication.instance() is None:
         QtCore.QCoreApplication.setAttribute(QtCore.Qt.AA_ShareOpenGLContexts)
     app = QtWidgets.QApplication.instance() or QtWidgets.QApplication([])
-    window = SkinPreview(viewport_factory=viewport_factory)
+    preferences = PresentationPreferences(args.skin or SKIN_IDS[0], args.theme, args.language)
+    window = SkinPreview(preferences, viewport_factory=viewport_factory,
+                         standalone=args.skin is not None)
     window.show()
     return app.exec_()
 

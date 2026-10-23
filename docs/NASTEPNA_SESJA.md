@@ -1,6 +1,6 @@
 # Stan projektu i przekazanie
 
-Tura: Codex · 2026-10-23 · stan: oddana; podgląd #89 scalony, aktualizacja zrzutów w PR #90.
+Tura: Codex · 2026-10-23 · stan: oddana; osobne ekrany offline, odbiór/scalenie PR #91.
 
 ## Wynik końcowy — SKIN-01
 
@@ -330,3 +330,18 @@ Przy wykonywaniu zdjęć wykryto błąd zagnieżdżonego komentarza M4 w demo.
 8675777 usuwa go i wymaga finalnego T11 + idle w odbiorze E2E; dodano regresje
 leksera dla obu programów. Końcowe kontrole i scalenie raportowane w PR #90.
 Dalszy zakres skórek: szczegółowe kontrolki według makiet, pełne strony i adapter QtVCP.
+
+## Osobne ekrany według wizji — PR #91, 2026-10-23
+Model-Author: Codex. Polecenie właściciela: wyraźnie odrębne ekrany, układy
+ i przyciski maksymalnie zgodne z czterema obrazami pierwotnych wizji.
+Osobny checkout /tmp/linumert-distinct-skins, gałąź codex/distinct-skin-screens.
+Kod ekranów ea2fc39: osobne klasy/moduły Classic/Industrial/Cyberdeck/Organic,
+ własne konsole, DRO, F/S, program, ramki i typografia. Native przyciski, selektor
+ obrotowy, przełączniki, wskaźniki, ostrokątne i płynne metalowe obudowy.
+`--skin <id>` uruchamia samodzielny ekran; Ustawienia zmieniają lokalny wygląd.
+Nawigacja i powiększanie działają; kontrolki CNC nieaktywne, E-STOP nieinteraktywny.
+Radeon/Mesa i Debian/llvmpipe: 128 wariantów PASS; Debian 26 testów + 87 subtestów PASS.
+Zrzuty w docs/raporty/hmi_sym i README odświeżone, opisane jako offline.
+Błąd wysokości Industrial 815 px przy 1280×800 usunięty; cele 44 px zachowane.
+Końcowe kontrole i scalenie raportowane w PR #91. Dalszy zakres: szczegółowe modele,
+ dopracowanie pozostałych detali wizji i bezpieczna integracja stanu/poleceń QtVCP.
