@@ -1,0 +1,46 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+"""Shared strings for the skin prototype, independent of palette and layout.
+
+Model-Author: Codex. Alarm identifiers remain outside the translation catalog.
+This is not a translation of every existing QtDragon/linumeRT page.
+"""
+
+from types import MappingProxyType
+
+from linumert_skin_contract import PresentationPreferences
+
+
+_EN = {
+    "preview": "Presentation prototype — no machine connection",
+    "skin": "Skin", "theme": "Color theme", "language": "Language",
+    "start": "Start", "homing": "Homing", "work_offset": "Work offset",
+    "tools": "Tools", "program": "Program", "simulation": "Simulation",
+    "production": "Production", "diagnostics": "Diagnostics", "settings": "Settings",
+    "machine": "Machine", "toolpath": "Toolpath", "workpiece": "Workpiece",
+    "alarms": "Alarms", "stop": "Stop", "feed_hold": "Feed hold",
+    "mode_manual": "Manual / JOG", "mode_mdi": "MDI", "mode_auto": "AUTO",
+    "estop_active": "E-STOP active", "estop_clear": "E-STOP circuit closed",
+    "status_unknown": "Machine status unavailable",
+    "homed": "Homed", "not_homed": "Not homed",
+    "machine_on": "Machine enabled", "machine_off": "Machine disabled",
+}
+_PL = {
+    "preview": "Prototyp prezentacji — bez połączenia z maszyną",
+    "skin": "Skórka", "theme": "Motyw kolorystyczny", "language": "Język",
+    "start": "Start", "homing": "Bazowanie", "work_offset": "Zero detalu",
+    "tools": "Narzędzia", "program": "Program", "simulation": "Symulacja",
+    "production": "Produkcja", "diagnostics": "Diagnostyka", "settings": "Ustawienia",
+    "machine": "Maszyna", "toolpath": "Ścieżka", "workpiece": "Detal",
+    "alarms": "Alarmy", "stop": "Stop", "feed_hold": "Wstrzymanie posuwu",
+    "mode_manual": "Ręczne / JOG", "mode_mdi": "MDI", "mode_auto": "AUTO",
+    "estop_active": "E-STOP aktywny", "estop_clear": "Obwód E-STOP zamknięty",
+    "status_unknown": "Stan maszyny niedostępny",
+    "homed": "Zbazowana", "not_homed": "Niezbazowana",
+    "machine_on": "Maszyna włączona", "machine_off": "Maszyna wyłączona",
+}
+STRINGS = MappingProxyType({"en": MappingProxyType(_EN), "pl": MappingProxyType(_PL)})
+
+
+def text(key: str, preferences: PresentationPreferences) -> str:
+    """Unknown keys raise KeyError rather than silently mixing languages."""
+    return STRINGS[preferences.language][key]

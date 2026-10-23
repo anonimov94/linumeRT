@@ -13,6 +13,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "screens" / "linumert"))
 import linumert_skin_contract as skin  # noqa: E402
+import linumert_skin_strings as strings  # noqa: E402
 
 
 def contrast(first, second):
@@ -31,7 +32,8 @@ class SkinContractTests(unittest.TestCase):
                 skin.SKIN_IDS, skin.THEME_IDS, skin.LANGUAGE_IDS):
             with self.subTest(skin=family, theme=theme, language=language):
                 original = skin.PresentationPreferences(family, theme, language)
-                self.assertEqual(skin.PresentationPreferences.from_json(original.to_json()), original)
+                restored = skin.PresentationPreferences.from_json(original.to_json())
+                self.assertEqual(restored, original)
                 self.assertIs(skin.palette_for(original), skin.PALETTES[theme])
                 changed = replace(original, language="pl" if language == "en" else "en")
                 self.assertEqual((changed.skin, changed.theme), (family, theme))
@@ -61,6 +63,29 @@ class SkinContractTests(unittest.TestCase):
             for role in ("text", "muted", "accent", "warning", "error", "success"):
                 with self.subTest(theme=name, role=role):
                     self.assertGreaterEqual(contrast(getattr(palette, role), palette.panel), 4.5)
+
+    def test_languages_have_complete_shared_keys(self):
+        self.assertEqual(set(strings.STRINGS), set(skin.LANGUAGE_IDS))
+        self.assertEqual(set(strings.STRINGS["en"]), set(strings.STRINGS["pl"]))
+        for family, theme, language in itertools.product(
+                skin.SKIN_IDS, skin.THEME_IDS, skin.LANGUAGE_IDS):
+            preferences = skin.PresentationPreferences(family, theme, language)
+            for key, expected in strings.STRINGS[language].items():
+                self.assertTrue(expected.strip())
+                self.assertEqual(strings.text(key, preferences), expected)
+            with self.assertRaises(KeyError):
+                strings.text("nonexistent", preferences)
+
+    def test_different_statuses_keep_different_labels(self):
+        for language in skin.LANGUAGE_IDS:
+            preferences = skin.PresentationPreferences(language=language)
+            labels = [strings.text(key, preferences) for key in
+                      ("estop_active", "estop_clear", "status_unknown",
+                       "machine_on", "machine_off", "homed", "not_homed")]
+            self.assertEqual(len(labels), len(set(labels)))
+            for code in ("E-4200", "W-1000"):
+                with self.assertRaises(KeyError):
+                    strings.text(code, preferences)
 
 
 if __name__ == "__main__":

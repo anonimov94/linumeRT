@@ -233,3 +233,9 @@ przełącza bez zapisywania. Rekord docelowy czytany po dialogu, brak/błąd zac
 Udany zapis nowego/klonowanego T wiąże zaznaczenie z zapisanym numerem.
 35 testów lokalnie PASS, rzeczywiste okna Qt i podgląd; regresja starego kodu FAIL.
 Szkic następuje po #83; wynik pełnego CI i sprawdzony SHA w PR. Model-Author: Codex.
+
+Uzupełnienie GUI 2026-10-23: katalog wspólnych napisów EN/PL dla nawigacji,
+trybów i stanów prototypu, niezależny od palety i układu. Nie tłumaczy jeszcze
+wszystkich stron starego HMI. Kody alarmów pozostają identyfikatorami katalogu.
+Aktualny wynik lokalny: 6 testów unittest PASS, komplet kluczy w obu językach
+we wszystkich 32 kombinacjach. Bez scalania. Model-Author: Codex.

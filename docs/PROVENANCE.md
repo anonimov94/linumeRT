@@ -317,3 +317,7 @@ Model-Author: Codex. Własny moduł preferencji, palety prototypowe i testy unit
 GPL-2.0-or-later. Turkus z istniejącego docs/design/tokens.yaml; kierunek z
 SKIN_SYSTEM_ROADMAP.md (Model-Author: ChatGPT, 2026-10-22). Bez nowych bibliotek,
 fontów, grafik i kodu producentów. Palety nie stanowią gotowych skórek GUI.
+
+Wspólne napisy prototypu EN/PL: własny katalog i regresje kompletności oraz
+rozróżnienia stanów, Model-Author: Codex, 2026-10-23, GPL-2.0-or-later.
+Bez zewnętrznych tłumaczeń ani bibliotek.

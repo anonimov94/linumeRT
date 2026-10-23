@@ -774,3 +774,10 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
 - Grafit wymaga jaśniejszego tekstu błędu; obecna prezentacja pozostaje bez zmian.
 - Pełny Qt/LinuxCNC i GPU/Mesa niewykonane lokalnie. Bez scalania na życzenie właściciela.
 - Model-Author: Codex. Następne kroki: docs/design/SKIN_AUDIT.md.
+
+## GUI — wspólne napisy prototypu EN/PL · 2026-10-23 · Codex
+
+- Dodano katalog nawigacji, trybów i stanów, niezależny od skórki oraz palety.
+- Brakujące klucze dają jawny błąd; identyfikatory alarmów nie są tłumaczone.
+- 6 testów unittest PASS, 32 kombinacje; pełne tłumaczenie obecnych stron poza zakresem.
+- Model-Author: Codex. Bez scalania.
