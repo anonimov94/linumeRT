@@ -14,6 +14,7 @@ from linumert_skin_contract import (
     palette_for,
 )
 from linumert_skin_panel import SkinPanel, UnknownGauge
+from linumert_skin_controls import SkinButton
 from linumert_skin_strings import text
 from PyQt5 import QtCore, QtWidgets
 
@@ -79,6 +80,7 @@ class SkinPreview(QtWidgets.QMainWindow):
         self.grid.setContentsMargins(0, 0, 0, 0)
         root.addWidget(self.workspace, 1)
         footer = QtWidgets.QHBoxLayout()
+        self.footer = footer
         self.demo_label = QtWidgets.QLabel()
         self.demo_label.setWordWrap(True)
         footer.addWidget(self.demo_label, 1)
@@ -128,7 +130,18 @@ class SkinPreview(QtWidgets.QMainWindow):
                             + " · E-STOP: — · " + text("mode_manual", p) + ": —")
         self.demo_label.setText(text("demo_controls", p))
         for key, button in self.controls.items():
-            button.setText({"start": "▶ ", "feed_hold": "Ⅱ ", "stop": "■ "}[key] + text(key, p))
+            index = self.controls[key]
+            replacement = SkinButton(text(key, p), p.skin, c, symbol=key,
+                                     signal={"start": c.success, "feed_hold": c.warning,
+                                             "stop": c.error}[key])
+            replacement.setObjectName(key)
+            replacement.setEnabled(False)
+            replacement.setMinimumSize(120, 76)
+            self.footer.replaceWidget(index, replacement)
+            index.hide()
+            index.deleteLater()
+            self.controls[key] = replacement
+            button = replacement
             button.setToolTip(text("demo_controls", p))
         while self.grid.count():
             self.grid.takeAt(0)

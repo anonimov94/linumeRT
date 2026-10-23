@@ -330,3 +330,10 @@ Przy wykonywaniu zdjęć wykryto błąd zagnieżdżonego komentarza M4 w demo.
 8675777 usuwa go i wymaga finalnego T11 + idle w odbiorze E2E; dodano regresje
 leksera dla obu programów. Końcowe kontrole i scalenie raportowane w PR #90.
 Dalszy zakres skórek: szczegółowe kontrolki według makiet, pełne strony i adapter QtVCP.
+
+## Osobne ekrany według wizji — bieżący krok, 2026-10-23
+Model-Author: Codex. Właściciel ponownie zlecił wyraźnie odrębne ekrany,
+układy i kontrolki maksymalnie odpowiadające czterem wzorcom graficznym.
+Osobny checkout /tmp/linumert-distinct-skins, gałąź codex/distinct-skin-screens.
+Pierwszy krok: fizyczne obudowy kontrolek cyklu, testy 64 układów PASS.
+Następnie: cztery osobne klasy ekranów, instrumenty i konsole dla każdej rodziny.

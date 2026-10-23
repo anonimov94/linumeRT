@@ -405,3 +405,8 @@ Codex, 2026-10-23, GPL-2.0-or-later. Zrzuty uruchomionego HMI na Debianie 12,
 LinuxCNC 2.9.10/Xvfb, tools/dev/sim-e2e.sh, kod UI main 8483b81 i poprawione demo
 8675777. Okno 1920×1080; bez montażu grafik ani retuszu. Nowe regresje w
 tests/test_lexer.py sprawdzają rzeczywiste dostarczone programy demo/kolizji.
+
+## Osobne ekrany skórek — 2026-10-23
+Model-Author: Codex. Własny `screens/linumert/linumert_skin_controls.py`:
+rysowane kodem Qt prostokątne, ścięte i organiczne obudowy przycisków oraz
+poglądowe przełączniki. GPL-2.0-or-later, bez fragmentów bitmap i nowych zależności.
