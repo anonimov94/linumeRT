@@ -38,7 +38,9 @@ class MachineConfigError(Exception):
 
 
 class Strict(BaseModel):
-    model_config = ConfigDict(extra="forbid")
+    # Wspólna granica Plant/generatora: NaN omija porównania zakresów, a inf
+    # nie jest poprawną prędkością, pozycją ani wymiarem modelu fizycznego.
+    model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
 
 
 class MachineInfo(Strict):
@@ -327,6 +329,7 @@ _MESSAGES = {
     "too_long": "za duzo elementow",
     "float_parsing": "oczekiwano liczby",
     "float_type": "oczekiwano liczby",
+    "finite_number": "oczekiwano liczby skonczonej",
     "int_parsing": "oczekiwano liczby calkowitej",
     "int_type": "oczekiwano liczby calkowitej",
     "string_type": "oczekiwano tekstu",
