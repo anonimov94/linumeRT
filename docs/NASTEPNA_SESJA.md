@@ -2,6 +2,17 @@
 
 Tura: Codex · 2026-10-23 · stan: oddana; osobne ekrany offline, odbiór/scalenie PR #91.
 
+## Konkurs 3 — wymagania poza GUI, 2026-10-23
+
+Model-Author: Codex. Osobny checkout `/tmp/linumert-contest-03`, gałąź
+`codex/contest-2026-10-coverage`, PR #95; bez globalnego LOCK i przejmowania tury.
+Audyt 3 luk i dowody w `raporty/03.md`. Wdrożono odmowę NaN/inf we wspólnym
+schemacie maszyny; regresje YAML, pól zagnieżdżonych oraz zapisu/reload Plant.
+Kod: `2f60e05`; Debian: 1104 pytest PASS, 10 skip, 109 deselected; lint,
+check_requirements i po 108 testów C/ASan PASS. Wyniki CI i końcowy SHA w raporcie/PR.
+Nie scalać przed wspólną oceną konkursu. Pozostałe luki: real mapping napędów
+i kompletna walidacja osiągalności/stref pozycji ATC. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
 ## Wynik końcowy — SKIN-01
 
 Model-Author: Codex. Polecenie właściciela 2026-10-23: po scalonych #67/#86
