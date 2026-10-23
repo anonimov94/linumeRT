@@ -9,7 +9,7 @@
 **An open-source CNC operator environment built on LinuxCNC.**  
 From machining and toolpaths to machine simulation, diagnostics and digital twins.
 
-[**⚡ Quick Start**](#szybki-start-linux-z-podmanem-np-endeavouros) · [**🎛️ Skin System Vision**](#four-original-interface-concepts) · [**🧩 Project Roadmap**](docs/design/SKIN_SYSTEM_ROADMAP.md) · [**💻 Source Code**](https://github.com/anonimov94/linumeRT)
+[**⚡ Quick Start**](#szybki-start-linux-z-podmanem-np-endeavouros) · [**🎛️ Skin System Vision**](#control-has-a-new-face) · [**🧩 Project Roadmap**](docs/design/SKIN_SYSTEM_ROADMAP.md) · [**💻 Source Code**](https://github.com/anonimov94/linumeRT)
 
 ![LinuxCNC](https://img.shields.io/badge/CONTROL-LinuxCNC%202.9-1a2130?style=for-the-badge&labelColor=111822)
 ![Platform](https://img.shields.io/badge/PLATFORM-Debian%2012-2dd4bf?style=for-the-badge&labelColor=111822)
@@ -142,7 +142,7 @@ LinuxCNC 2.9, HAL, Python and QtVCP integration, reproducible tests, and the GPL
 
 <img src="docs/raporty/hmi_sym/demo_po_obrobce.png" alt="Current linumeRT machining simulation preview" width="80%">
 
-<sub>Current implementation — simulation preview, not a new-skin render.</sub>
+<sub>Actual LinuxCNC HMI · fresh capture 2026-10-23 · <a href="docs/raporty/hmi_sym/README.md">capture report</a>. This is separate from the new offline skin previews above.</sub>
 
 <img src="docs/raporty/zero_detalu/offline.png" alt="Current linumeRT workpiece setup tool" width="80%">
 

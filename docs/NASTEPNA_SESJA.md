@@ -1,6 +1,6 @@
 # Stan projektu i przekazanie
 
-Tura: Codex · 2026-10-23 · stan: oddana; podgląd skórek gotowy, odbiór/scalenie w PR #89.
+Tura: Codex · 2026-10-23 · stan: oddana; podgląd #89 scalony, aktualizacja zrzutów w PR #90.
 
 ## Wynik końcowy — SKIN-01
 
@@ -320,3 +320,13 @@ Końcowy Debian llvmpipe: 64 kombinacje PASS; testy zmienionego kodu 23 PASS
 + 87 subtestów. Stan końcowych kontroli i scalenia utrzymywany w PR #89.
 To podgląd offline, bez poleceń CNC; pełna zgodność z makietami i SKIN-02…06 otwarte.
 Następny krok: szczegółowe kontrolki rodzin i adapter statusu w osobnym hoście QtVCP.
+
+## Aktualizacja raportu i README — 2026-10-23
+Model-Author: Codex. Polecenie właściciela: nowe zrzuty w docs/raporty/hmi_sym
+ i głównym README. PR #89 scalony jako 8483b81; main operatora zaktualizowany,
+ lokalne pliki zachowane. PR #90: cztery świeże zrzuty podglądu Qt, odnowione
+ ujęcia prawdziwego HMI/symulacji i wynik JSON. Nowy raport rozróżnia oba launchery.
+Przy wykonywaniu zdjęć wykryto błąd zagnieżdżonego komentarza M4 w demo.
+8675777 usuwa go i wymaga finalnego T11 + idle w odbiorze E2E; dodano regresje
+leksera dla obu programów. Końcowe kontrole i scalenie raportowane w PR #90.
+Dalszy zakres skórek: szczegółowe kontrolki według makiet, pełne strony i adapter QtVCP.

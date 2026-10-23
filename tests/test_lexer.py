@@ -118,3 +118,11 @@ def test_verdict_matches_linuxcnc(sample, tmp_path):
         assert not lexer_ok
     else:  # semantic: składnia poprawna, błąd zgłasza interpreter
         assert lexer_ok and not result.ok
+
+
+@pytest.mark.parametrize("name", ["linumert_demo.ngc", "linumert_kolizja.ngc"])
+def test_shipped_simulation_programs_have_no_lexical_errors(name):
+    # The nested M4 comment formerly aborted the demo before its final tool.
+    program = Path(__file__).parents[1] / "config/sim/nc_files" / name
+    issues = check(program.read_text(encoding="utf-8"))
+    assert not issues, [issue.message() for issue in issues]

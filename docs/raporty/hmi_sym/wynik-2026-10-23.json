@@ -1,0 +1,43 @@
+{
+ "steps": [
+  {
+   "step": "reset E-STOP i maszyna WŁ.",
+   "ok": true
+  },
+  {
+   "step": "bazowanie na krańcówkach",
+   "ok": true,
+   "pos": [
+    5.0,
+    5.0,
+    -5.0
+   ]
+  },
+  {
+   "step": "proces symulacji",
+   "ok": true,
+   "stock": []
+  },
+  {
+   "step": "program demo ukończony bez kolizji",
+   "ok": true,
+   "czas_s": 306,
+   "zdarzenia": [],
+   "narzedzie_koncowe": 11,
+   "interpreter_idle": true
+  },
+  {
+   "step": "materiał usunięty",
+   "ok": true,
+   "objetosc_cm3": 639.1
+  },
+  {
+   "step": "kolizja G0 → K-302 diagnostycznie, bez E-STOP",
+   "ok": true,
+   "zdarzenia": [
+    "K-302"
+   ],
+   "stan": 4
+  }
+ ]
+}
