@@ -127,3 +127,14 @@ def test_cnc_unavailable_is_explicit_failure(hardware, monkeypatch, capsys):
     monkeypatch.setenv("PATH", str(hardware.parent / "absent"))
     assert main([str(hardware)]) == 2
     assert "Nie uruchomiono LinuxCNC" in capsys.readouterr().err
+
+
+def test_resolve_failure_is_structured_refusal(hardware, monkeypatch, capsys):
+    def fail_resolve(self):
+        raise RuntimeError("Symlink loop (Python 3.11)")
+
+    monkeypatch.setattr(Path, "resolve", fail_resolve)
+    assert main([str(hardware)]) == 2
+    report = json.loads(capsys.readouterr().err)
+    assert report["errors"] == ["Symlink loop (Python 3.11)"]
+    assert report["hardware_verified"] is False

@@ -22,6 +22,7 @@ def preflight(path: Path, expected_profile: str | None = None) -> dict:
               "static_hal_passed": None, "hardware_verified": False, "errors": [],
               "note": "NIEZWERYFIKOWANE NA SPRZĘCIE; kontrola konfiguracji, bez zgody na ruch"}
     try:
+        path = path.resolve()
         cfg = read_deployment(path)
         profile = cfg.get("LINUMERT", "MACHINE_PROFILE", fallback="").strip()
         report["profile"] = profile
@@ -34,7 +35,7 @@ def preflight(path: Path, expected_profile: str | None = None) -> dict:
             errors += audit_hal(hal_files_from_ini(path), cfg, path.resolve().parent)
             report["static_hal_passed"] = not errors
         report["errors"] = errors
-    except (OSError, UnicodeError, ValueError, configparser.Error) as exc:
+    except (OSError, UnicodeError, ValueError, RuntimeError, configparser.Error) as exc:
         report["errors"] = [str(exc)]
         if report["static_hal_checked"]:
             report["static_hal_passed"] = False
@@ -47,7 +48,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--expect-profile", choices=PROFILES)
     parser.add_argument("--check-only", action="store_true", help="bez uruchomienia LinuxCNC")
     args = parser.parse_args(argv)
-    path = args.ini.resolve()
+    path = args.ini.absolute()
     report = preflight(path, args.expect_profile)
     print(json.dumps(report, ensure_ascii=False), file=sys.stderr, flush=True)
     if report["errors"]:
@@ -55,8 +56,8 @@ def main(argv: list[str] | None = None) -> int:
     if args.check_only:
         return 0
     try:
-        os.execvp("linuxcnc", ["linuxcnc", str(path)])
-    except OSError as exc:
+        os.execvp("linuxcnc", ["linuxcnc", str(path.resolve())])
+    except (OSError, RuntimeError) as exc:
         print(f"Nie uruchomiono LinuxCNC: {exc}", file=sys.stderr)
         return 2
 

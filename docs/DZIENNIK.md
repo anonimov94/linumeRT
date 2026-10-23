@@ -553,7 +553,7 @@ Brak komend ruchu przy kontroli; screenshot wykonany lokalnie. CI oraz odbiór w
 ## Plan 25.10 — czas pozostały i porównanie z Plant · Codex
 - Model-Author: Codex. Produkcja: szacowanie w tle, ETA podczas pracy i pauzy, unieważnienie po zmianie programu/INI, ograniczenia korekcji i startu od linii.
 - Estymator uwzględnia limit Z helisy; jawnie odmawia nieobsługiwanej płaszczyzny/trybu posuwu i brakujących limitów XYZ.
-- Lokalnie 40 testów czasu/widgetów/złożenia HMI PASS. Pomiar czasu dwóch kieszeni i planowania LinuxCNC + Plant oraz błąd modelu w pocket_calibration.json — odbiór CI wymagany.
+- Lokalnie 41 testów czasu/widgetów/złożenia HMI PASS. Pomiar czasu dwóch kieszeni i planowania LinuxCNC + Plant oraz błąd modelu w pocket_calibration.json — odbiór CI wymagany.
 - Wynik jest przybliżeniem, nie gwarancją czasu cyklu; start od XYZ=0 i oczekiwania operatora opisane w planie. Bez niezależnego przeglądu.
 
 ## Plan 26.10 — bieżący widok i oś czasu raportu · Codex
@@ -869,6 +869,6 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
 - Model-Author: Codex. PR #93; osobny worktree i gałąź, bez scalenia przed oceną.
 - Deklaracje hardware i ograniczony audyt HAL wymagane przed exec LinuxCNC.
 - Główny starter korzysta z bramki; trzy INI sim/Plant mają jawne profile; HAL bez zmian.
-- 40 testów bramki/deklaracji/HAL PASS; pełny make lint test: 1033 PASS, 11 skip; wymagania bez błędów.
-- Dokumentacja, macierz i raport `prompts/konkurs-2026-10/raporty/01.md` opisują granice.
+- 41 testów bramki/deklaracji/HAL PASS; pełny make lint test: 1033 PASS, 11 skip; wymagania bez błędów.
+- CI wykryło RuntimeError Path.resolve na Pythonie 3.11; poprawiono jawną odmowę; raport opisuje granice.
 - Autokontrola, bez niezależnego przeglądu; NIEZWERYFIKOWANE NA SPRZĘCIE.
