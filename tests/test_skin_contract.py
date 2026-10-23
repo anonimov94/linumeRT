@@ -21,7 +21,7 @@ def contrast(first, second):
         channels = [int(color[i:i + 2], 16) / 255 for i in (1, 3, 5)]
         linear = [c / 12.92 if c <= .04045 else ((c + .055) / 1.055) ** 2.4
                   for c in channels]
-        return sum(c * weight for c, weight in zip(linear, (.2126, .7152, .0722)))
+        return sum(c * weight for c, weight in zip(linear, (.2126, .7152, .0722), strict=True))
     a, b = sorted((luminance(first), luminance(second)))
     return (b + .05) / (a + .05)
 
