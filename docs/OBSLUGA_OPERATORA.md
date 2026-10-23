@@ -270,5 +270,16 @@ potwierdzenie wczytania przez CNC pozostaje odrębną sprawą. „Nowe” jest n
 
 Kolejna edycja usuwa poprzedni komunikat sukcesu, lecz nie ukrywa błędu zapisu.
 Usunięcie jest potwierdzane jako „usunięte”, bez wcześniejszego napisu „zapisane”.
-Wybór innego T lub „Nowe” nadal przełącza formularz bez pytania o porzucenie zmian;
-zapisz potrzebną edycję przed przełączeniem. Model-Author: Codex.
+Przy niezapisanej edycji wybór innego T lub „Nowe” wymaga decyzji w oknie opisanym poniżej. Model-Author: Codex.
+
+## Przełączenie niezapisanego formularza narzędzia
+
+Wybór innego T albo „Nowe” przy niezapisanych polach otwiera okno z decyzją.
+Domyślne „Zostań”, Enter i Escape zachowują pola oraz poprzednie zaznaczenie,
+również jeśli wiersz ukrył filtr. Dla nowego formularza pozostaje brak zaznaczenia.
+„Odrzuć zmiany” pozwala przełączyć formularz; nie zapisuje jego pól i nie cofa
+wcześniejszych zmian już zapisanych w bazie.
+
+Jeśli wybrany rekord zniknie z bazy podczas dialogu albo nie można go odczytać,
+ekran zachowuje dotychczasowy formularz i pokazuje powód. Po udanym zapisie klonu
+lub nowego T zaznaczenie dotyczy zapisanego numeru. Model-Author: Codex.

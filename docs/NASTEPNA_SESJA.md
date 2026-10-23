@@ -212,3 +212,12 @@ Usunięcie ma własne potwierdzenie zamiast starego „zapisane”. 33 testy lok
 w tym rzeczywiste kliknięcia Qt/zapis SQLite, klawiatura i podgląd. Szkic po #82.
 Nie dodano jeszcze potwierdzenia porzucenia edycji przy wyborze innego T lub Nowe.
 Wynik pełnego CI i sprawdzony SHA w PR. Model-Author: Codex.
+
+#81 scalony jako b0fdadf (974 + 109 LinuxCNC PASS), #82 jako e6c386d (976 + 109),
+oba 79 subtestów i 9 pominięć. #83 ma zielone CI ogólne, trwa LinuxCNC.
+Codex: codex/tool-discard-edits chroni niezapisany formularz przy wyborze innego T/Nowe.
+Domyślne Zostań (także Enter/Escape) zachowuje pola i poprzednie zaznaczenie; Odrzuć
+przełącza bez zapisywania. Rekord docelowy czytany po dialogu, brak/błąd zachowuje draft.
+Udany zapis nowego/klonowanego T wiąże zaznaczenie z zapisanym numerem.
+35 testów lokalnie PASS, rzeczywiste okna Qt i podgląd; regresja starego kodu FAIL.
+Szkic następuje po #83; wynik pełnego CI i sprawdzony SHA w PR. Model-Author: Codex.

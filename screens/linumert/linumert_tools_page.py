@@ -52,6 +52,8 @@ class ToolsPage(QtWidgets.QWidget):
         self.tbl_units = "mm"
         self._loading = False
         self._last_success = False
+        self._dirty = False
+        self._loaded_number = None
         self.fields: dict[str, QtWidgets.QWidget] = {}
         grid = QtWidgets.QGridLayout(self)
         grid.setContentsMargins(16, 16, 16, 16)
@@ -122,6 +124,7 @@ class ToolsPage(QtWidgets.QWidget):
             widget.textChanged.connect(self._edited)
 
     def _edit_state(self, dirty):
+        self._dirty = dirty
         self.lbl_edit.setText(f"T{self.spin_t.value()}" + (" · niezapisane" if dirty else ""))
         pages._restyle(self.lbl_edit, dirty=dirty)
 
@@ -132,6 +135,35 @@ class ToolsPage(QtWidgets.QWidget):
         if self._last_success:
             self.lbl_issue.clear()
             self._last_success = False
+
+    def _discard_edits(self):
+        if not self._dirty:
+            return True
+        box = QtWidgets.QMessageBox(self)
+        box.setObjectName("lrtRoot")
+        box.setWindowTitle("Niezapisane zmiany")
+        box.setText(f"Odrzucić niezapisane zmiany\nformularza T{self.spin_t.value()}?")
+        box.setInformativeText("Dotyczy tylko pól formularza. "
+                               "Nie cofa danych już zapisanych w bazie.")
+        discard = box.addButton("Odrzuć zmiany", QtWidgets.QMessageBox.DestructiveRole)
+        stay = box.addButton("Zostań", QtWidgets.QMessageBox.RejectRole)
+        stay.setStyleSheet("font-weight: 700;")
+        box.setDefaultButton(stay)
+        box.setEscapeButton(stay)
+        box.exec_()
+        result = box.clickedButton() is discard
+        box.deleteLater()
+        return result
+
+    def _restore_selection(self):
+        column = max(self.table.currentColumn(), 0)
+        with QtCore.QSignalBlocker(self.table):
+            self.table.clearSelection()
+            self.table.setCurrentCell(-1, -1)
+            for row in range(self.table.rowCount()):
+                if self.table.item(row, 0).data(QtCore.Qt.UserRole) == self._loaded_number:
+                    self.table.setCurrentCell(row, column)
+                    break
 
     # ---- edytor -------------------------------------------------------------------------
     def _editor(self):
@@ -349,9 +381,23 @@ class ToolsPage(QtWidgets.QWidget):
         items = self.table.selectedItems()
         if not items or not self._open():
             return
-        tool = self.db.get(items[0].data(QtCore.Qt.UserRole))
+        number = items[0].data(QtCore.Qt.UserRole)
+        if number == self._loaded_number:
+            return
+        if not self._discard_edits():
+            self._restore_selection()
+            return
+        try:
+            tool = self.db.get(number)
+        except (sqlite3.Error, ValueError) as exc:
+            self._restore_selection()
+            self.lbl_issue.setText(f"Nie można wczytać T{number}: {exc}")
+            return
         if tool is not None:
             self.load(tool)
+        else:
+            self._restore_selection()
+            self.lbl_issue.setText(f"T{number} nie jest już w bazie; formularz pozostaje bez zmian")
 
     def load(self, t: Tool) -> None:
         self._loading = True
@@ -361,6 +407,7 @@ class ToolsPage(QtWidgets.QWidget):
         finally:
             self._loading = False
         self._edit_state(False)
+        self._loaded_number = t.number
 
     def _load_fields(self, t: Tool) -> None:
         self.spin_t.setValue(t.number)
@@ -385,6 +432,8 @@ class ToolsPage(QtWidgets.QWidget):
     def new_tool(self) -> None:
         if not self._open():
             return
+        if not self._discard_edits():
+            return
         used = {t.number for t in self.db.tools()}
         pockets = {t.pocket for t in self.db.tools()}
         n = next(i for i in range(1, 100000) if i not in used)
@@ -392,6 +441,8 @@ class ToolsPage(QtWidgets.QWidget):
         self.load(Tool(number=n, pocket=p, type="flat", params={"d": 6, "l": 30,
                                                                "flute_length": 15}))
         self._edit_state(True)
+        self._loaded_number = None
+        self._restore_selection()
 
     def current(self) -> Tool:
         allowed = self._allowed()
@@ -453,7 +504,9 @@ class ToolsPage(QtWidgets.QWidget):
         self.lbl_issue.setText(f"T{tool.number} zapisane w bazie i w {os.path.basename(self.tbl)}")
         self._last_success = True
         self._edit_state(False)
+        self._loaded_number = tool.number
         self.refresh()
+        self._restore_selection()
 
     def remove(self) -> None:
         if not self._open() or self._busy():
@@ -475,6 +528,7 @@ class ToolsPage(QtWidgets.QWidget):
         self._last_success = True
         self._edit_state(False)
         self.lbl_edit.setText(f"T{n} · usunięte")
+        self._loaded_number = None
         self.refresh()
 
     def _reload_linuxcnc(self) -> None:
