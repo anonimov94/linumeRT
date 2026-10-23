@@ -66,3 +66,17 @@ Cztery faktycznie odrębne aplikacje GUI, po cztery palety, dwujęzyczne, z moż
 ## Makiety poglądowe
 
 W rozmowie z właścicielem wygenerowano cztery obrazy: Industrial Pro, Classic Digital, Cyberdeck, Organic Vector. **Grafiki nie są jeszcze załączone do repozytorium**; niniejszy opis zachowuje ich układ i wytyczne. Przed dodaniem plików graficznych: ustalić prawa i pochodzenie, wpisać je do `docs/PROVENANCE.md`, zweryfikować bezpieczeństwo oraz kontrakt IP. Nie kopiować ani nie brandować ekranów innych produktów.
+
+## Konkurs 04 — pionowy wycinek read-only (2026-10-23)
+
+Model-Author: Codex. `tools/dev/skin-monitor.py` jest osobnym hostem czterech
+skórek, obserwującym lokalne NML LinuxCNC 2.9. Pokazuje rzeczywiste pozycje
+trajektorii G53 w mm/° oraz tryb, stan task/interpretera i E-STOP raportowany
+przez NML. Nie jest zastępcą HMI; nie tworzy komend, pinów HAL ani heartbeat.
+Program, alarmy i 3D pozostają niepodłączone, bez poglądowych scen/programu.
+Raport i odtwarzalny odbiór: `../../raporty/04.md`.
+
+To część SKIN-02, nie zamknięcie SKIN-02 ani SKIN-04…06. Pozostają: host QtVCP
+ze stale dostępnymi globalnymi akcjami i alarmami, zweryfikowany kanał poleceń
+oraz kontrola świeżości producenta (API stat 2.9 nie udostępnia heartbeat).
+Monitor nie daje zgody na przełączanie produkcyjnego HMI ani na ruch.

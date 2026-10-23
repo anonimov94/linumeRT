@@ -132,6 +132,15 @@ produkcyjnego ani właściciela komend QtVCP. Współdzielone konteksty Qt są w
 przy wielokrotnym montażu paneli GL; odbiór sprawdza też cały złożony obraz okna.
 Pełna zgodność graficzna i SKIN-02…06 pozostają otwarte (PR #89).
 
+## Konkurs 04 — monitor NML · 2026-10-23 · Codex · PROPOZYCJA
+
+Pierwszy pionowy wycinek integracji skórek to osobny monitor tylko do odczytu,
+nie nowy właściciel ACTION/HAL ani zamiennik produkcyjnego ekranu. Odczyt NML
+w jednorazowych procesach izoluje błąd pierwszego tool mmap i restart LinuxCNC.
+Snapshot nie potwierdza świeżości producenta NML 2.9, nie dopuszcza ruchu ani
+przełączenia HMI; przyszły host QtVCP musi rozwiązać te warunki osobno.
+Raport: `../raporty/04.md`. Bez scalania przed wspólną oceną konkursu.
+
 - 2026-10-23 · konkurs 01 · Granica kontroli deployment to proces przed exec LinuxCNC,
   nie handler QtVCP (inicjalizowany po HAL). Główny starter korzysta z bramki i oczekuje
   profilu sim/plant; hardware wymaga deklaracji i ograniczonego audytu wszystkich plików HAL.

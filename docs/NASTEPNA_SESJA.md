@@ -357,6 +357,25 @@ Błąd wysokości Industrial 815 px przy 1280×800 usunięty; cele 44 px zachowa
 Końcowe kontrole i scalenie raportowane w PR #91. Dalszy zakres: szczegółowe modele,
  dopracowanie pozostałych detali wizji i bezpieczna integracja stanu/poleceń QtVCP.
 
+## Konkurs 04 — integracja read-only, 2026-10-23
+Model-Author: Codex. Osobny checkout /tmp/linumert-contest-04,
+gałąź codex/contest-2026-10-skins. Adapter stat.poll w jednorazowym procesie,
+typowany snapshot i osobny launcher tools/dev/skin-monitor.py; cztery skórki,
+G53 mm/°, E-STOP z NML, bez kanału komend i bez konsumpcji error_channel.
+Lokalnie 30 testów + 87 subtestów PASS. Następne: rzeczywisty LinuxCNC/Xvfb,
+utrata/odzyskanie statusu, pełne testy i raport raporty/04.md. Bez scalania konkursu.
+
+Konkurs 04 — wynik: PR #96, e1748c7 + ec78736; rzeczywisty LinuxCNC 2.9.10
+sim/Xvfb PASS (brak CNC → odczyt → utrata → restart), bez komend i resetu safety.
+Pełny Debian: 1039 PASS/10 skip, lint/wymagania/test-c/test-san PASS.
+Końcowa prezentacja: 41 PASS + 87 subtestów. Raport `../raporty/04.md`;
+świeżość producenta NML 2.9 nadal niepotwierdzona, brak kanału poleceń.
+Następny krok: ocena konkursu i host QtVCP/STATUS z globalnymi kontrolkami.
+Bez scalania przed wspólną oceną; końcowe kontrole i SHA utrzymywane w PR #96.
+
+Konkurs 04: domknięto wyścig spóźnionej odpowiedzi przed timerem; końcowy
+Debian Qt/IP 41 + 87 subtestów PASS, LinuxCNC/Xvfb ponownie PASS (3,67 s).
+
 ## Konkurs 01 — bezpieczeństwo, 2026-10-23
 
 Model-Author: Codex. Osobny checkout `/tmp/linumert-contest-safety`, gałąź

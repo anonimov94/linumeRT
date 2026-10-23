@@ -426,6 +426,17 @@ rzeczywiste osobne ekrany Qt z kodu ea2fc39, 1920×1080, bez retuszu. Industrial
 w Reactor Green, Cyberdeck w Ion Blue, pozostałe w Classic Turquoise.
 Własne kształty rysowane przez QPainter i własne sceny 3D; GPL-2.0-or-later.
 
+Konkurs 04 — własny adapter i host odczytu NML: Codex, 2026-10-23,
+GPL-2.0-or-later. `screens/linumert/linumert_skin_status.py`,
+`screens/linumert/linumert_skin_monitor.py`, `tools/dev/skin-monitor.py`,
+`tests/test_skin_status.py`, `tests/test_skin_monitor_linuxcnc.py`, `raporty/04.md`.
+Rozszerzenie własnego AxisReadout o pozycje G53, bez zapożyczeń grafiki/kodu.
+Kontrakt API sprawdzony w dokumentacji LinuxCNC 2.9 oraz emcmodule.cc gałęzi 2.9;
+korzystanie z API, bez kopiowania implementacji. Test używa konfiguracji sim/axis
+z zainstalowanego LinuxCNC (GPL-2.0-or-later), wyłącznie w katalogu tymczasowym.
+Aktualizacje własnych `docs/design/SKIN_SYSTEM_ROADMAP.md` i
+`docs/design/SKIN_AUDIT.md`; bez nowych zależności i zasobów graficznych.
+
 Konkurs 01, Codex, 2026-10-23: własny moduł
 `core/linumert/machine/launch.py` i test `tests/test_launch_gate.py` (GPL-2.0-or-later).
 Bramka przed exec LinuxCNC oraz atrapa procesu do prób offline; bez nowych zależności
