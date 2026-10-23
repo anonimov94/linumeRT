@@ -1,8 +1,8 @@
 # Stan projektu i przekazanie
 
-Tura: Codex · 2026-10-23 · stan: SKIN-01 gotowy do scalenia po zielonym CI.
+Tura: Codex · 2026-10-23 · stan: oddana po SKIN-01, PR #87 scalony.
 
-## Stan zatrzymania — SKIN-01
+## Wynik końcowy — SKIN-01
 
 Model-Author: Codex. Polecenie właściciela 2026-10-23: po scalonych #67/#86
 rozpocząć SKIN-01, testować lokalny GPU/Mesa i Debian/LinuxCNC, scalać ukończone
@@ -16,7 +16,7 @@ próba Radeon/Mesa PASS (24-bit depth, niezależność od kolejności, culling,
 3 kamery, wireframe, obrót, 9 klatek/350 ms).
 Push 894c68f: launcher/prototyp. Test Debian 12/LinuxCNC + llvmpipe/Mesa 22.3.6
 również PASS (pyqtgraph 0.13.1, 24-bit depth, 8 klatek/350 ms).
-Automatyczny probe i krok CI gotowe. Pierwszy pełny LinuxCNC job: ekran + 109 LinuxCNC PASS; runner zgłosił błąd provenance PNG w state/; poprawione na build/skin01. Aktualne CI i make lint/test/test-c/test-san ponowić i scalić po zielonym wyniku.
+Pełny lokalny Debian: 1018 pytest PASS, 10 skip, 109 deselected; check_requirements PASS (21/22 pokryte, bez błędów); lint, test-c i test-san PASS. Końcowe CI: Python, Plant matrix i LinuxCNC RIP PASS; 109 testów LinuxCNC PASS. Pierwszy CI wykrył PNG w state/, poprawiono artefakty na build/skin01 i końcowe CI jest zielone. PR #87 scalony 2026-10-23 jako b22689f. Odbiór sprzętu właściciela pozostaje niewykonany.
 
 ## Aktualne polecenie — scalanie po zakończeniu
 
