@@ -11,6 +11,7 @@ from linumert_skin_contract import PresentationPreferences
 
 _EN = {
     "preview": "Presentation prototype — no machine connection",
+    "maximize": "Maximize / restore panel",
     "skin": "Skin", "theme": "Color theme", "language": "Language",
     "start": "Start", "homing": "Homing", "work_offset": "Work offset",
     "tools": "Tools", "program": "Program", "simulation": "Simulation",
@@ -29,6 +30,7 @@ _EN = {
 }
 _PL = {
     "preview": "Prototyp prezentacji — bez połączenia z maszyną",
+    "maximize": "Powiększ / przywróć panel",
     "skin": "Skórka", "theme": "Motyw kolorystyczny", "language": "Język",
     "start": "Start", "homing": "Bazowanie", "work_offset": "Zero detalu",
     "tools": "Narzędzia", "program": "Program", "simulation": "Symulacja",

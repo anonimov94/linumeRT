@@ -57,3 +57,34 @@ class SkinPanel(QtWidgets.QFrame):
                     p.setBrush(QtGui.QColor(c.background))
                     p.drawEllipse(QtCore.QPointF(x, y), 2.5, 2.5)
         p.restore()
+
+
+class UnknownGauge(QtWidgets.QWidget):
+    """Read-only instrument with no invented telemetry or command binding."""
+    def __init__(self, label, family, palette):
+        super().__init__()
+        self.label, self.family, self.palette = label, family, palette
+        self.setMinimumSize(70, 80)
+        self.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+        self.setAccessibleName(label + " —")
+
+    def paintEvent(self, event):
+        p = QtGui.QPainter(self)
+        p.setRenderHint(QtGui.QPainter.Antialiasing)
+        c = self.palette
+        diameter = min(self.width()-12, self.height()-24, 110)
+        rect = QtCore.QRectF((self.width()-diameter)/2, 20, diameter, diameter)
+        p.setPen(QtGui.QColor(c.text))
+        p.drawText(QtCore.QRectF(0, 0, self.width(), 18), QtCore.Qt.AlignCenter, self.label)
+        p.setPen(QtGui.QPen(QtGui.QColor(c.muted), 4))
+        p.drawArc(rect.adjusted(3, 3, -3, -3), -45*16, 270*16)
+        face = rect.adjusted(10, 10, -10, -10)
+        metal = QtGui.QConicalGradient(face.center(), 40)
+        for stop, color in ((0, c.panel), (.25, c.muted), (.5, c.background),
+                            (.75, c.muted), (1, c.panel)):
+            metal.setColorAt(stop, QtGui.QColor(color))
+        p.setBrush(metal)
+        p.setPen(QtGui.QPen(QtGui.QColor(c.muted), 1))
+        p.drawEllipse(face)
+        p.setPen(QtGui.QColor(c.text))
+        p.drawText(rect, QtCore.Qt.AlignCenter, "— %")

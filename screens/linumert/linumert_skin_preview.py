@@ -13,7 +13,7 @@ from linumert_skin_contract import (
     PresentationPreferences,
     palette_for,
 )
-from linumert_skin_panel import SkinPanel
+from linumert_skin_panel import SkinPanel, UnknownGauge
 from linumert_skin_strings import text
 from PyQt5 import QtCore, QtWidgets
 
@@ -127,11 +127,16 @@ class SkinPreview(QtWidgets.QMainWindow):
             button.setText(text(key, p))
             button.setToolTip(text("demo_controls", p))
         while self.grid.count():
-            self.grid.takeAt(0).widget().deleteLater()
+            self.grid.takeAt(0)
+        for card in getattr(self, "cards", {}).values():
+            card.hide()
+            card.deleteLater()
         # Clear stretch from the previous composition before applying the next.
         for column in range(6):
             self.grid.setColumnStretch(column, 0)
         self.cards = {}
+        self.maximized = None
+        self.expand_buttons = {}
         self.viewports = {}
         for role, row, column, height, width in LAYOUTS[p.skin]:
             card = SkinPanel(p.skin, c)
@@ -141,7 +146,17 @@ class SkinPreview(QtWidgets.QMainWindow):
             layout.setContentsMargins(16, 12, 16, 12)
             heading = QtWidgets.QLabel(("DRO / XYZ · mm" if role == "dro" else text(role, p)).upper())
             heading.setProperty("heading", True)
-            layout.addWidget(heading)
+            titlebar = QtWidgets.QHBoxLayout()
+            titlebar.addWidget(heading, 1)
+            if role in ("machine", "workpiece", "toolpath"):
+                expand = QtWidgets.QPushButton("↗")
+                expand.setFixedSize(44, 44)
+                expand.setToolTip(text("maximize", p))
+                expand.setAccessibleName(text("maximize", p))
+                expand.clicked.connect(lambda checked=False, key=role: self.toggle_panel(key))
+                titlebar.addWidget(expand)
+                self.expand_buttons[role] = expand
+            layout.addLayout(titlebar)
             if role == "dro":
                 content = "X  —.———\nY  —.———\nZ  —.———"
             elif role == "program":
@@ -162,6 +177,11 @@ class SkinPreview(QtWidgets.QMainWindow):
                 layout.addWidget(body)
             else:
                 layout.addWidget(body, 1, QtCore.Qt.AlignCenter)
+            if role == "tools":
+                instruments = QtWidgets.QHBoxLayout()
+                for label in ("F", "S", "G0"):
+                    instruments.addWidget(UnknownGauge(label, p.skin, c))
+                layout.addLayout(instruments, 1)
             if role == "program":
                 body.setStyleSheet("font-family: monospace; font-size: 13px;")
             self.grid.addWidget(card, row, column, height, width)
@@ -170,6 +190,23 @@ class SkinPreview(QtWidgets.QMainWindow):
                 self.grid.setColumnStretch(index, 1)
         for row in range(4):
             self.grid.setRowStretch(row, 1)
+
+    def toggle_panel(self, role):
+        self.maximized = None if self.maximized == role else role
+        for card in self.cards.values():
+            self.grid.removeWidget(card)
+            card.hide()
+        if self.maximized:
+            card = self.cards[role]
+            self.grid.addWidget(card, 0, 0, 4, 6)
+            card.show()
+        else:
+            for key, row, column, height, width in LAYOUTS[self.preferences.skin]:
+                card = self.cards[key]
+                self.grid.addWidget(card, row, column, height, width)
+                card.show()
+        for key, button in self.expand_buttons.items():
+            button.setText("↙" if key == self.maximized else "↗")
 
 
 def main(viewport_factory=None):
