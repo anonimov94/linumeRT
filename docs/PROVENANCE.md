@@ -310,3 +310,10 @@ klawiatury/przycisków Qt/SQLite, GPL-2.0-or-later. Bez nowych bibliotek i zasob
 
 Model-Author: Codex. Własny dialog, przywrócenie zaznaczenia i testy rzeczywistych
 okien/klawiszy Qt/SQLite, GPL-2.0-or-later. Istniejące komponenty PyQt5; bez nowych zasobów.
+
+## Kontrakt prototypu skórek — 2026-10-23
+
+Model-Author: Codex. Własny moduł preferencji, palety prototypowe i testy unittest,
+GPL-2.0-or-later. Turkus z istniejącego docs/design/tokens.yaml; kierunek z
+SKIN_SYSTEM_ROADMAP.md (Model-Author: ChatGPT, 2026-10-22). Bez nowych bibliotek,
+fontów, grafik i kodu producentów. Palety nie stanowią gotowych skórek GUI.

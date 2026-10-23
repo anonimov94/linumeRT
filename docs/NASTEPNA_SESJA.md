@@ -1,6 +1,18 @@
 # Stan projektu i przekazanie
 
-Tura: Codex · 2026-10-22 · stan: realizacja ciągła w chmurze.
+Tura: Codex · 2026-10-23 · stan: praca na osobnej gałęzi GUI, bez scalania.
+
+## GUI — aktualne polecenie właściciela 2026-10-23
+
+Model-Author: Codex. Dziś bez scalania; poniższe dawne polecenia automatycznego
+scalania nie obowiązują tej sesji. Właściciel odkłada scalanie na 2026-10-24.
+Nie ustawiono automatycznego scalenia ani harmonogramu.
+Gałąź `codex/skin-foundation`: SKIN-00 i niezależny kontrakt preferencji/palet.
+Lokalnie 4 testy unittest PASS: 32 kombinacje, walidacja, niezmienność oraz kontrast
+tekstów/statusów na panelach. Pełnego Qt/LinuxCNC nie uruchomiono na Windows/Python
+3.15 (brak Qt i pytest); pełne CI pozostaje do odbioru w PR.
+Następnie katalog tłumaczeń i manifesty, prototyp renderera oraz osobny launcher
+kompozycji; bramki w `design/SKIN_AUDIT.md`. Aktualny ekran nie używa prototypu.
 
 Model-Author: Codex. Bieżące polecenie właściciela: małe użyteczne tematy możliwe
 w chmurze → testy → push → scalenie po zielonym CI → kolejny temat, aż do „stop”.

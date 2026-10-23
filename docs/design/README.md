@@ -1,5 +1,9 @@
 # Identyfikacja wizualna linumeRT (v1, 2026-10-17)
 
+Nowy kierunek GUI: [roadmapa skórek](SKIN_SYSTEM_ROADMAP.md) i
+[audyt SKIN-00](SKIN_AUDIT.md). Cztery kompozycje, cztery palety oraz EN/PL
+powstają w osobnym prototypie; poniższe zasady opisują aktualny ekran.
+
 - `marka/` — znak (`znak.svg`, `znak_bez_tla.svg`), logotyp (`logotyp.svg`), tablica marki, baner do README.
 - `tokens.yaml` — kolory, fonty, rozmiary. Jedyne źródło dla QSS ekranu i panelu Plant.
 - `ikony/` — 31 ikon liniowych 24 px (obrys 1.75), rysowanych od zera dla linumeRT.

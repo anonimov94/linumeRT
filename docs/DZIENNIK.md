@@ -765,3 +765,12 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
 - Zapis klonu/nowego T zaznacza zapisany numer; odrzucenie nie zapisuje danych ani nie cofa bazy.
 - Regresja starego kodu FAIL; 35 testów lokalnie PASS, w tym prawdziwe okna/klawisze Qt i SQLite.
 - Podgląd i dokumentacja; pełne CI do odbioru w PR. Autokontrola, bez niezależnego przeglądu.
+
+## GUI SKIN-00 — 2026-10-23 · Codex
+
+- Audyt QtVCP/QSS/renderera i kolejność zmian według nowych wytycznych.
+- Kontrakt prototypu: osobne skórka/motyw/język, wersjonowany JSON, cztery palety.
+- 4 testy unittest PASS: 32 kombinacje, walidacja, niezmienność, kontrast 4.5:1.
+- Grafit wymaga jaśniejszego tekstu błędu; obecna prezentacja pozostaje bez zmian.
+- Pełny Qt/LinuxCNC i GPU/Mesa niewykonane lokalnie. Bez scalania na życzenie właściciela.
+- Model-Author: Codex. Następne kroki: docs/design/SKIN_AUDIT.md.
