@@ -618,6 +618,11 @@ Brak komend ruchu przy kontroli; screenshot wykonany lokalnie. CI oraz odbiór w
 
 Izolacja obejmuje teraz szacowanie i kontrolę semantyczną: prywatne HOME/TMPDIR/cwd, bez zapisu do wspólnego sim.var; 20 s/8 MiB, bez częściowego wyniku czasu. 108 testów lokalnych PASS (3 subtesty), w tym regresja starego rs274 uszkadzającego mmap oraz kliknięcie GUI i nadal dostępna kontrola składni. Autokontrola; PR #66 czeka na pełne CI. Model-Author: Codex.
 
+## Audyt — wpisywanie liczb z klawiatury (2026-10-21)
+
+Właściciel zgłosił pola działające tylko przez +/−. QtVCP kierował zdarzenia QAbstractSpinBox do skrótów maszyny; nakładka rozpoznaje edytory liczbowe i nie pozwala ich klawiszom propagować do skrótów. Krok JOG jest edytowalny, walidowany przed ruchem; zwolnienie zawsze zatrzymuje. 42 testy PASS: wpis, zaznaczenie, wklejenie, F1/F2/Esc i zwolnienie JOG po zmianie fokusu. Gałąź codex/numeric-keyboard-entry, kolejny krok: prawdziwy QtVCP. Autokontrola, Model-Author: Codex.
+
+PR #67 rozszerza wpis na korekcje F/G0/S, synchronizuje suwaki i chroni rozpoczęty wpis przed odświeżaniem. 97 lokalnych testów PASS; samotest pełnego QtVCP wpisuje sześć rodzajów wartości i linię programu, zapisuje stany/zrzuty. Pełny wynik w kontrolach PR #66/#67; manualny punkt 27 otwarty. Autokontrola, Model-Author: Codex.
 Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących prywatnych parametrów, interpretowane jako błąd poprawnego programu. Inicjalizujemy plik i nadpisujemy także PARAMETER_FILE w prywatnej kopii INI (INI ma pierwszeństwo przed -v). Nowa regresja chroni absolutną ścieżkę parametrów sterowania; wczesny test Plant sprawdza również poprawny skończony program. 109 testów lokalnych PASS, autokontrola, Model-Author: Codex.
 
 ## Diagnostyka — trwała historia komunikatów · 2026-10-22 · Codex
@@ -801,3 +806,11 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
 - Ruff i diff-check PASS; wizualna kontrola zrzutów Windows/offscreen po dodaniu
   fontu systemowego (tryb offscreen nie wylicza fontów). Bez redystrybucji fontu.
 - Model-Author: Codex. Bez scalania; docelowy renderer/GPU oraz podłączenie CNC do wykonania.
+
+## PR #67 — lokalizacja kroku JOG przed scaleniem · 2026-10-23 · Codex
+
+- Właściciel zezwolił na scalanie ukończonych aktywnych gałęzi; #67 odświeżono main.
+- Qt/Windows odtworzył 2.5 → 25 przy rozbieżności lokalizacji walidatora i edytora.
+- Usunięto filtr klawiszy; wpis walidowany dopiero przed JOG, bez separatorów tysięcy.
+- 13 testów Qt PASS: C/PL/DE, kropka/przecinek, błędny wpis i zatrzymanie mimo błędu.
+- Model-Author: Codex. Pełne CI po poprawce wymagane przed scaleniem.

@@ -338,3 +338,7 @@ tools/dev/skin-preview.py i tests/test_skin_preview.py. Model-Author: Codex,
 bez nowej zależności projektu. Font systemowy użyty wyłącznie do testów Windows
 nie jest kopiowany ani redystrybuowany. Zrzuty w build/skin-preview/ są lokalnymi
 wynikami testów, nie nowymi zasobami produkcyjnymi.
+
+Poprawka lokalizacji kroku JOG przed scaleniem #67: własna walidacja QLocale,
+regresje klawiatury C/PL/DE, Model-Author: Codex, 2026-10-23, GPL-2.0-or-later.
+Bez nowych zasobów ani bibliotek.

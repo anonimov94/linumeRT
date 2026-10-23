@@ -1,6 +1,18 @@
 # Stan projektu i przekazanie
 
-Tura: Codex · 2026-10-23 · stan: praca na osobnej gałęzi GUI, bez scalania.
+Tura: Codex · 2026-10-23 · stan: integracja aktywnych gałęzi po testach.
+
+## Aktualne polecenie — scalanie po zakończeniu
+
+Właściciel zezwolił teraz na scalanie ukończonych aktywnych gałęzi po testach.
+To zastępuje wcześniejsze odłożenie scalania i wszystkie niższe historyczne zapisy
+„bez scalania”. PR #67 zawiera poprawkę lokalizacji kroku JOG; PR #86 obejmuje
+prototyp kompozycji Qt. Połączono je na gałęzi #86 do wspólnego odbioru CI;
+konflikty dotyczyły wyłącznie dopisywanych wpisów dokumentacji, zachowano obie strony.
+Kolejność scalenia do main: #67, następnie #86, po zielonym CI obu.
+Gałęzie tool-discard-edits i design/skin-system-roadmap-2026-10-22 są już zawarte
+w main (odpowiednio przodek main i PR #85); nie wymagają ponownego scalania.
+Model-Author: Codex.
 
 ## GUI — aktualne polecenie właściciela 2026-10-23
 
@@ -21,13 +33,19 @@ zostało zastąpione tym poleceniem. Odbiór pulpitu właściciela pozostaje odd
 
 ## Stan scalania
 
-Audyt pętli: właściciel wpisał `while [1]` i wybrał szacowanie czasu; journal wskazuje
-SIGBUS w libtooldata. Trwa naprawa `codex/bounded-offline-interpreter`, checkout
-`~/Projekty/linumeRT-interpreter-fix`: limity danych/czasu oraz prywatna tabela narzędzi
-rs274, aby analiza offline nie dotykała działającej sesji LinuxCNC.
-PR #66: izolacja obu ścieżek (czas i kontrola), 20 s/8 MiB, sprzątanie grupy procesów;
-108 testów lokalnych PASS, w tym kliknięcie przycisku przy zalewaniu wyjścia. Dodano próby obu analiz na pętli bez końca przy działającym pełnym QtVCP/Plant
-oraz skończony WHILE i WHILE [1] z BREAK; następnie CI LinuxCNC.
+Najnowsze poprawki audytu właściciela:
+- [PR #66](https://github.com/anonimov94/linumeRT/pull/66): prywatne HOME/TMPDIR/cwd
+  obu analiz rs274, limity 20 s/8 MiB i brak częściowego czasu po przerwaniu pętli.
+  Journal awarii wskazał SIGBUS w libtooldata (wspólne `.tool.mmap` starego rs274).
+- [PR #67](https://github.com/anonimov94/linumeRT/pull/67): wpisywanie liczb przez
+  router QtVCP, własny krok JOG i edytowalne korekcje F/G0/S. Status nie kasuje wpisu;
+  F1/F2/Esc i zwolnienie rozpoczętego JOG zachowują obsługę maszyny.
+- Odbiór lokalny klawiatury: 97 testów PASS. Samotest faktycznego QtVCP wpisuje
+  posuw, obroty, narzędzie, krok, pozycję, korekcję F i linię; zapisuje stany i zrzuty.
+  Pełne wyniki odbioru automatycznego są w kontrolach obu PR, autokontrola autora.
+- Checkouty `~/Projekty/linumeRT-interpreter-fix` i `~/Projekty/linumeRT-numeric-fix`.
+  Kopia operatora `~/linumeRT` wymaga ponownego otwarcia aplikacji po aktualizacji.
+  Ręczny odbiór pulpitu (punkt 27) i odbiór sprzętowy pozostają otwarte.
 
 Odbiór pulpitu ujawnił brak `sim_toolchange.in` przy starcie Plant z pełnym QtVCP.
 Naprawa: `codex/plant-hmi-toolchange`, checkout `~/Projekty/linumeRT-plant-hmi-fix`.
@@ -261,3 +279,14 @@ Zrzuty lokalne: build/skin-preview/ (nieśledzone pliki testowe).
 Obecny ekran operatora nadal bez zmian; brak renderera 3D i adaptera CNC w prototypie.
 Następnie: scena testowa renderera oraz adapter statusu do przyszłej integracji.
 Nie scalać. Pełne CI aktualnego SHA sprawdzić w PR #86.
+
+## Scalanie aktywnych gałęzi — 2026-10-23
+
+Model-Author: Codex. Właściciel ponownie zezwolił na scalanie wszystkich ukończonych,
+zweryfikowanych aktywnych gałęzi. Zastępuje wcześniejsze odłożenie scalania na jutro.
+PR #67 zaktualizowano main. Lokalny Qt ujawnił utratę separatora dziesiętnego przez
+QDoubleValidator z inną lokalizacją niż edytor; usunięto filtr zmieniający wpis,
+walidacja pozostaje przed komendą JOG. Separatory tysięcy są odrzucane; kropka
+presetrów i lokalny separator są obsługiwane. 13 testów klawiatury PASS.
+Następnie: pełne CI #67 → scalenie → aktualizacja i CI #86 → scalenie.
+Gałęzie tool-discard-edits i design/skin-system-roadmap-2026-10-22 już zawarte w main.
