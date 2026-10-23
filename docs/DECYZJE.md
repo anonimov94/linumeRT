@@ -131,3 +131,12 @@ Osobny host offline odwzorowuje układy dostarczonych makiet. Nie zmienia stosu
 produkcyjnego ani właściciela komend QtVCP. Współdzielone konteksty Qt są wymagane
 przy wielokrotnym montażu paneli GL; odbiór sprawdza też cały złożony obraz okna.
 Pełna zgodność graficzna i SKIN-02…06 pozostają otwarte (PR #89).
+
+## Konkurs 04 — monitor NML · 2026-10-23 · Codex · PROPOZYCJA
+
+Pierwszy pionowy wycinek integracji skórek to osobny monitor tylko do odczytu,
+nie nowy właściciel ACTION/HAL ani zamiennik produkcyjnego ekranu. Odczyt NML
+w jednorazowych procesach izoluje błąd pierwszego tool mmap i restart LinuxCNC.
+Snapshot nie potwierdza świeżości producenta NML 2.9, nie dopuszcza ruchu ani
+przełączenia HMI; przyszły host QtVCP musi rozwiązać te warunki osobno.
+Raport: `../raporty/04.md`. Bez scalania przed wspólną oceną konkursu.

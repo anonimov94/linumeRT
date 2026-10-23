@@ -138,3 +138,20 @@ nieaktywnych kontrolek, anulowanie/atomowe ustawienia oraz usuwanie starych pane
 Odbiór GL rozszerzony do 128 wariantów browser/standalone; wykrył przekroczenie
 800 px o 15 px w Industrial, usunięte bez zmniejszania celów 44 px.
 Aktualne obrazy: `docs/raporty/hmi_sym/README.md`, kod ekranów ea2fc39.
+
+## Konkurs 04 — odczyt rzeczywistego LinuxCNC
+
+Model-Author: Codex. Osobny launcher `tools/dev/skin-monitor.py`; dotychczasowy
+`skin-preview.py` pozostaje offline, produkcyjny handler QtVCP bez zmian.
+`linumert_skin_status.py`: typowany niezmienny snapshot, walidacja jednostek,
+osi i enumów, odczyt `linuxcnc.stat().poll()` w jednorazowym procesie pomocniczym.
+`linumert_skin_monitor.py`: QProcess bez powłoki, próba co 200 ms, limit 500 ms,
+kasowanie wartości po błędzie/wygaśnięciu, ponowne połączenie po restarcie CNC.
+Izolacja pozwala także odzyskać działanie po nieudanym pierwszym tool mmap.
+
+Czas nabycia próbki jest lokalny, monotoniczny; nie jest dowodem, że producent
+NML nadal aktualizuje dane. Brak heartbeat w API 2.9 jest jawną luką kontraktu
+produkcyjnego. Nie wykorzystujemy tego snapshotu do switch_gate ani interlocków.
+Nie konsumujemy error_channel: jego odczyt usuwa komunikaty głównego HMI.
+E-STOP z NML jest opisowym statusem, nie pomiarem niezależnego toru sprzętowego.
+Odbiór, ograniczenia i dalszy plan: `../../raporty/04.md`.

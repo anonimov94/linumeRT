@@ -5,6 +5,7 @@ import sys
 import time
 from pathlib import Path
 
+from linumert_skin_controls import EmergencyReadout
 from linumert_skin_preview import SkinPreview
 from linumert_skin_readouts import AxisReadout, ProgramView
 from linumert_skin_status import AXES, MAX_AGE, decode_sample
@@ -89,6 +90,22 @@ class SkinMonitor(SkinPreview):
         for label in self.workspace.findChildren(QtWidgets.QLabel):
             if label.property("heading") and label.text().startswith("DRO"):
                 label.setText("G53 / " + self.workspace.AXES + " · mm/°")
+        if "alarms" in self.cards:
+            labels = [label for label in self.cards["alarms"].findChildren(QtWidgets.QLabel)
+                      if not label.property("heading")]
+            for index, label in enumerate(labels):
+                label.setText(("Alarmy niepodłączone · główne HMI" if pl else
+                               "Alarms not connected · main HMI") if index == 0 else "")
+        self.estop_labels = []
+        # A live read-only host must not present a decorative red mushroom.
+        for indicator in self.console.findChildren(EmergencyReadout):
+            label = QtWidgets.QLabel("E-STOP: —")
+            label.setWordWrap(True)
+            label.setMinimumWidth(100)
+            self.console.layout().replaceWidget(indicator, label)
+            indicator.hide()
+            indicator.deleteLater()
+            self.estop_labels.append(label)
         self.present(self.sample, self.reason)
 
     def present(self, sample, reason):
@@ -107,6 +124,13 @@ class SkinMonitor(SkinPreview):
         else:
             self.status.setText(("Status niedostępny" if pl else "Status unavailable")
                                 + f" · {reason} · E-STOP: — · G53: —")
+        for label in self.estop_labels:
+            label.setText("E-STOP\nNML: " + (estop if sample else "—"))
+        if "status" in self.cards:
+            for label in self.cards["status"].findChildren(QtWidgets.QLabel):
+                if not label.property("heading"):
+                    label.setText(sample.task if sample else (
+                        "Status niedostępny" if pl else "Status unavailable"))
         values = dict(zip(AXES, sample.positions, strict=True)) if sample else {}
         for view in self.workspace.findChildren(AxisReadout):
             view.set_positions(values)

@@ -106,3 +106,33 @@ def test_all_skins_show_and_clear_real_data_without_commands():
         finally:
             window.close()
             app.processEvents()
+
+
+def test_reader_deadline_clears_a_previously_valid_sample():
+    pytest.importorskip('PyQt5')
+    from linumert_skin_monitor import StatusReader
+    from PyQt5 import QtCore, QtWidgets
+
+    app = QtWidgets.QApplication.instance() or QtWidgets.QApplication([])
+    reader = StatusReader()
+    reader.timer.stop()
+    seen = []
+    reader.changed.connect(lambda sample, reason: seen.append((sample, reason)))
+    status, api = fake_status()
+    reader.sample = decode_sample(json.dumps(read_status(status, api)).encode(), time.monotonic())
+    reader.process.start(sys.executable, ['-c', 'import time; time.sleep(10)'])
+    try:
+        assert reader.process.waitForStarted(1000)
+        reader.started = time.monotonic() - .6
+        reader.tick()
+        assert reader.sample is None
+        assert (None, 'reader-timeout') in seen
+        assert reader.process.waitForFinished(1000)
+        app.processEvents()
+        assert reader.process.state() == QtCore.QProcess.NotRunning
+        # A successful but malformed response must also clear old data.
+        reader.process.start(sys.executable, ['-c', 'print("{}")'])
+        assert reader.process.waitForFinished(1000)
+        assert (None, 'invalid-status') in seen
+    finally:
+        reader.stop()
