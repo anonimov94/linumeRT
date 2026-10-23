@@ -436,3 +436,17 @@ korzystanie z API, bez kopiowania implementacji. Test używa konfiguracji sim/ax
 z zainstalowanego LinuxCNC (GPL-2.0-or-later), wyłącznie w katalogu tymczasowym.
 Aktualizacje własnych `docs/design/SKIN_SYSTEM_ROADMAP.md` i
 `docs/design/SKIN_AUDIT.md`; bez nowych zależności i zasobów graficznych.
+
+## Odbiór stanowiska — konkurs 2 · 2026-10-23
+Model-Author: Codex. Własne procedury i szablon:
+`docs/raporty/ODBIOR_STANOWISKA.md`, `docs/raporty/SZABLON_ODBIORU.md` oraz raport
+`prompts/konkurs-2026-10/raporty/02.md`, GPL-2.0-or-later; oparte na dokumentach
+i narzędziach tego repozytorium, bez materiałów zewnętrznych i nowych zależności.
+`docs/raporty/odbior-2026-10-23-local.tar.gz`: własne logi, wyniki i zrzuty
+z uruchomienia kodu repozytorium w Debianie 12 i odtworzenia OD-01 na hoście,
+Codex, 2026-10-23, GPL-2.0-or-later. Dwa zrzuty ekranu bez retuszu;
+wejścia YAML z istniejącego repo (zachowane nagłówki autorów), manifest SHA-256.
+Wyłącznie dowody testów programowych; bez pomiarów fizycznego stanowiska.
+`docs/raporty/odbior-2026-10-23-ci.tar.gz`: pełny log i metadane własnego przebiegu
+GitHub Actions 40001235761 dla ffb7037, Codex, 2026-10-23, GPL-2.0-or-later;
+manifest SHA-256, bez binariów LinuxCNC i bez nowych zależności.

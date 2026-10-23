@@ -23,7 +23,7 @@ Tabela jest zgodna z wymaganiami (pilnuje tego `tests/test_plant_spec.py`).
 | REQ-VM-08 | 020 | `atc_rack_geometry`, `atc_carousel_index`, `atc_cover_timing` (`tests/test_atc.py`) | zielone |
 | REQ-VM-09 | 020 | `manual_change_position`, `toolsetter_measure` (`tests/test_atc.py`) | zielone |
 | REQ-VM-10 | 020 | `crash_head_magazine` (`tests/test_atc.py`) | zielone |
-| REQ-VM-11 | 010, 023 | `test_machine_validation_*` (≥ 15 przypadków) | zielone |
+| REQ-VM-11 | 010, 023 | `test_machine_validation_*` (≥ 15 przypadków); `tests/test_machine_finite.py`, `test_nonfinite_save_and_reload_preserve_model` — odrzucenie NaN/inf; audyt pozostałych luk geometrii: `raporty/03.md` | zielone |
 | REQ-VM-12 | 023 | `tests/test_editor_api.py`, scenariusz `edit_reload` | zielone |
 | REQ-QA-01 | 024 | `tools/check_requirements.py` w `make test`, `tests/test_requirements.py` | zielone |
 | REQ-QA-02 | 024, 082 | job `plant-matrix` (`run_scenario.py --matrix`), `test_matrix_smoke_on_every_machine` | zielone |
