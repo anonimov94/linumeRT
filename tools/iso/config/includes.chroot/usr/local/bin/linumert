@@ -2,20 +2,35 @@
 # linumeRT na obrazie live/zainstalowanym: symulator LinuxCNC + ekran linumeRT (natywnie, bez podmana).
 #   linumert            # symulator
 #   linumert --plant    # + wirtualna obrabiarka Plant (LRT-NET) i panel http://127.0.0.1:8080/
+#   linumert --monitor  # odrębny monitor skórek, read-only obok uruchomionego LinuxCNC
 # Model-Author: Claude · 2026-10-19. NIEZWERYFIKOWANE NA SPRZĘCIE.
 set -euo pipefail
 R=/opt/linumeRT
 cd "$R"
-if [ "${1:-}" = --plant ]; then
-    cfg=config/plant/linumert_plant_xyz
-    PYTHONPATH=$R/core:$R/plant/server /opt/linumert/bin/python -m linumert_plant serve \
-        --plant "$cfg/plant.yaml" --panel 8080 --state-dir "$HOME/.local/share/linumert/plant" \
-        > "$HOME/.linumert-plant.log" 2>&1 &
-    plant=$!
-    trap 'kill $plant 2>/dev/null' EXIT
-    sleep 3
-    (sleep 20; xdg-open http://127.0.0.1:8080/ >/dev/null 2>&1) &
-    linuxcnc "$R/$cfg/linumert_plant_xyz.ini"
-else
-    exec linuxcnc "$R/config/sim/linumert_xyz/linumert_xyz.ini"
-fi
+case "${1:-}" in
+    "")
+        PYTHONPATH="$R/core" exec /opt/linumert/bin/python -m linumert.machine.launch \
+            --expect-profile sim "$R/config/sim/linumert_xyz/linumert_xyz.ini"
+        ;;
+    --monitor)
+        exec env PYTHONPATH="$R/core" /opt/linumert/bin/python \
+            "$R/tools/dev/skin-monitor.py" --skin industrial-pro --theme reactor-green --language pl
+        ;;
+    --plant)
+        cfg=config/plant/linumert_plant_xyz
+        PYTHONPATH="$R/core:$R/plant/server" /opt/linumert/bin/python -m linumert_plant serve \
+            --plant "$cfg/plant.yaml" --panel 8080 --state-dir "$HOME/.local/share/linumert/plant" \
+            > "$HOME/.linumert-plant.log" 2>&1 &
+        plant=$!
+        trap 'kill "$plant" 2>/dev/null' EXIT
+        sleep 3
+        kill -0 "$plant" 2>/dev/null || { cat "$HOME/.linumert-plant.log" >&2; exit 1; }
+        (sleep 20; xdg-open http://127.0.0.1:8080/ >/dev/null 2>&1) &
+        PYTHONPATH="$R/core" /opt/linumert/bin/python -m linumert.machine.launch \
+            --expect-profile plant "$R/$cfg/linumert_plant_xyz.ini"
+        ;;
+    *)
+        printf 'Użycie: linumert [--plant|--monitor]\n' >&2
+        exit 2
+        ;;
+esac

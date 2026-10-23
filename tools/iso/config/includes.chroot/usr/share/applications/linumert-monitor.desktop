@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=linumeRT — monitor skórek (read-only)
+Comment=Osobny, tylko do odczytu widok stanu uruchomionego LinuxCNC
+Exec=/usr/local/bin/linumert --monitor
+Icon=/opt/linumeRT/docs/design/marka/znak.svg
+Terminal=false
+Categories=Utility;

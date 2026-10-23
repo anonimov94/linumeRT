@@ -900,3 +900,11 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
 - OD-01 odtworzone: macierz router_atc_rack ma kod 0 mimo CRASH/COVER_CRASH; odbiór A3 FAIL.
 - Raport i końcowy wynik CI: `prompts/konkurs-2026-10/raporty/02.md`.
 - Pulpit właściciela i T1–T7 niewykonane; NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## ISO — integracja funkcji · 2026-10-23 · Codex
+- Zmiany ISO na `codex/iso-integrated`: launcher obrazu używa bramki profilu `sim`/`plant` i kontroluje proces Plant.
+- Dodano menu osobnego monitora skórek read-only do statusu działającego LinuxCNC.
+- Workflow PR buduje i publikuje artifact testowy bez tworzenia Release; trwała publikacja wyłącznie z ręcznego `workflow_dispatch` (D39).
+- README i provenance opisują aktualny zakres obrazu. Budowa ISO i testy CI pozostają do zakończenia PR.
+- Uruchomienie i obraz: symulacja, NIEZWERYFIKOWANE NA SPRZĘCIE.
+- Model-Author: Codex.
