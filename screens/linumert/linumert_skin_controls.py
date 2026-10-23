@@ -116,10 +116,19 @@ class Lever(QtWidgets.QWidget):
         self.setMinimumSize(56, 68)
         self.setAccessibleName(label + " —")
 
+    def caption_font(self):
+        font = QtGui.QFont(self.font())
+        font.setPixelSize(14)
+        while (QtGui.QFontMetricsF(font).horizontalAdvance(self.label) > self.width()-4
+               and font.pixelSize() > 9):
+            font.setPixelSize(font.pixelSize()-1)
+        return font
+
     def paintEvent(self, event):
         p = QtGui.QPainter(self)
         p.setRenderHint(QtGui.QPainter.Antialiasing)
         c = self.palette
+        p.setFont(self.caption_font())
         p.setPen(QtGui.QColor(c.muted))
         p.drawText(QtCore.QRectF(0, 0, self.width(), 20), QtCore.Qt.AlignCenter, self.label)
         center = QtCore.QPointF(self.width()/2, self.height()/2+8)

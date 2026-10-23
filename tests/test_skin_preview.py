@@ -165,3 +165,20 @@ def test_presentation_dialog_applies_atomically_and_cancel_keeps_screen():
     window.close()
     window.deleteLater()
     app.sendPostedEvents(None, QtCore.QEvent.DeferredDelete)
+
+
+
+def test_switch_captions_fit_in_both_languages():
+    from linumert_skin_contract import PresentationPreferences
+    from linumert_skin_controls import Lever
+    app = QtWidgets.QApplication.instance() or QtWidgets.QApplication([])
+    for skin, language in itertools.product(SKIN_IDS, LANGUAGE_IDS):
+        window = SkinPreview(PresentationPreferences(skin=skin, language=language), standalone=True)
+        window.show()
+        app.processEvents()
+        for lever in window.findChildren(Lever):
+            width = QtGui.QFontMetricsF(lever.caption_font()).horizontalAdvance(lever.label)
+            assert width <= lever.width()-4, (skin, language, lever.label)
+        window.close()
+        window.deleteLater()
+        app.sendPostedEvents(None, QtCore.QEvent.DeferredDelete)

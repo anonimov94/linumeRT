@@ -340,7 +340,7 @@ Kod ekranów ea2fc39: osobne klasy/moduły Classic/Industrial/Cyberdeck/Organic,
  obrotowy, przełączniki, wskaźniki, ostrokątne i płynne metalowe obudowy.
 `--skin <id>` uruchamia samodzielny ekran; Ustawienia zmieniają lokalny wygląd.
 Nawigacja i powiększanie działają; kontrolki CNC nieaktywne, E-STOP nieinteraktywny.
-Radeon/Mesa i Debian/llvmpipe: 128 wariantów PASS; Debian 25 testów + 87 subtestów PASS.
+Radeon/Mesa i Debian/llvmpipe: 128 wariantów PASS; Debian 26 testów + 87 subtestów PASS.
 Zrzuty w docs/raporty/hmi_sym i README odświeżone, opisane jako offline.
 Błąd wysokości Industrial 815 px przy 1280×800 usunięty; cele 44 px zachowane.
 Końcowe kontrole i scalenie raportowane w PR #91. Dalszy zakres: szczegółowe modele,

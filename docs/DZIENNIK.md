@@ -859,8 +859,8 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
 - Model-Author: Codex. PR #91, osobny checkout; lokalne pliki operatora zachowane.
 - Cztery osobne klasy/moduły, układy paneli, konsole i typografia według obrazów właściciela.
 - Fizyczne klawisze, selektor obrotowy, przełączniki, ramki ścięte i płynne metalowe obudowy.
-- Samodzielny launcher --skin, lokalna nawigacja i atomowe ustawienia z anulowaniem.
+- Samodzielny launcher --skin, lokalna nawigacja, atomowe ustawienia; podpisy EN/PL bez obcięcia.
 - Komendy CNC nieaktywne; grzyb to nieinteraktywny wskaźnik stanu nieznanego.
-- Radeon i Debian/Mesa: 128 wariantów PASS; Debian 25 testów + 87 subtestów PASS.
+- Radeon i Debian/Mesa: 128 wariantów PASS; Debian 26 testów + 87 subtestów PASS.
 - Nowa galeria w README/raporcie; pełna integracja QtVCP i szczegółowe modele nadal otwarte.
 - Autokontrola, bez niezależnego przeglądu; wynik końcowego CI i scalenia w PR #91.
