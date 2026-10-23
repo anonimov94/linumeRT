@@ -321,3 +321,9 @@ fontów, grafik i kodu producentów. Palety nie stanowią gotowych skórek GUI.
 Wspólne napisy prototypu EN/PL: własny katalog i regresje kompletności oraz
 rozróżnienia stanów, Model-Author: Codex, 2026-10-23, GPL-2.0-or-later.
 Bez zewnętrznych tłumaczeń ani bibliotek.
+
+- `docs/design/SKIN_AUDIT.md` — Codex, 2026-10-23, własny audyt repozytorium
+  i plan wdrożenia nowych wytycznych, GPL-2.0-or-later.
+- `docs/design/SKIN_SYSTEM_ROADMAP.md` — ChatGPT, 2026-10-22, własna koncepcja
+  na polecenie właściciela; źródło: gałąź design/skin-system-roadmap-2026-10-22,
+  commit 32e8691. Dokument projektu, GPL-2.0-or-later; bez zewnętrznych grafik.
