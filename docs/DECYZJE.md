@@ -1,5 +1,14 @@
 # Dziennik decyzji linumeRT
 
+## SKIN-00 — 2026-10-23 · Model-Author: Codex · PROPOZYCJA
+
+Nowe wytyczne właściciela: cztery niezależne kompozycje GUI, osobno paleta i język.
+Audyt: `design/SKIN_AUDIT.md`; źródło: `design/SKIN_SYSTEM_ROADMAP.md`.
+Prototyp pozostaje w PyQt5/QtVCP, bez zmiany sterowania, HAL i limitu 30 FPS.
+Zastąpienie dotychczasowej kompozycji i rozszerzenie systemu tokenów wymagają
+przeglądu przed integracją; nie zmieniamy teraz zamrożonego kontraktu.
+Właściciel wstrzymał scalanie 2026-10-23; nie scalać w tej sesji.
+
 Ten plik ma pierwszeństwo przed promptami sesji. Wymagania techniczne: `docs/wymagania/`.
 Format: decyzja · uzasadnienie · status (PRZYJĘTA / PROPOZYCJA / ODRZUCONA / ZASTĄPIONA).
 
