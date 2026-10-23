@@ -864,3 +864,13 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
 - Radeon i Debian/Mesa: 128 wariantów PASS; Debian 26 testów + 87 subtestów PASS.
 - Nowa galeria w README/raporcie; pełna integracja QtVCP i szczegółowe modele nadal otwarte.
 - Autokontrola, bez niezależnego przeglądu; wynik końcowego CI i scalenia w PR #91.
+
+## Konkurs 3 — pokrycie wymagań poza GUI · 2026-10-23 · Codex
+- Model-Author: Codex. Osobna gałąź/worktree, PR #95; raport audytu `raporty/03.md`.
+- Ustalono luki: real mapping napędów, walidacja geometrii ATC i NaN/inf w schemacie.
+- Zamknięto lukę liczbową REQ-VM-11/REQ-QA-03; polskie błędy z pełną ścieżką pola.
+- Regresja starego kodu: 75 FAIL/4 PASS; po poprawce 167 testów wybranego zakresu PASS.
+- Debian: 1104 pytest PASS, 10 skip, 109 deselected; po 108 testów C i ASan/UBSan PASS.
+- Lint i wymagania PASS (21/22, 0 błędów); zapis/reload panelu zachowuje model po odmowie.
+- Autokontrola, bez niezależnego przeglądu. Bez zmian safety-profile, odbioru i skórek.
+- NIEZWERYFIKOWANE NA SPRZĘCIE. Bez scalenia do wspólnej oceny konkursu; dalszy etap w raporcie.
