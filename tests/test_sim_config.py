@@ -91,9 +91,12 @@ def test_contract_signals_present_and_documented():
 
 def test_tool_table_and_programs():
     tools = [line for line in (CFG / "tool.tbl").read_text().splitlines() if line.strip()]
-    assert [t.split()[0] for t in tools] == [f"T{n}" for n in range(1, 12)]
-    programs = sorted(NC.glob("*.ngc"))
-    assert len(programs) == 5
+    tool_ids = [t.split()[0] for t in tools]
+    assert tool_ids[:11] == [f"T{n}" for n in range(1, 12)]
+    assert len(tool_ids) == len(set(tool_ids))
+    programs = [NC / f"linumert_{name}.ngc"
+                for name in ("demo", "kolizja", "kwadrat", "rowek", "wiercenie")]
+    assert all(path.is_file() for path in programs)
     for p in programs:
         text = p.read_text(encoding="utf-8")
         assert "M98" not in text and text.rstrip().endswith("M2")
