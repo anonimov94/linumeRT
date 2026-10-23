@@ -831,6 +831,7 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
 - Model-Author: Codex. Osobny offline podgląd GL z trzema scenami, kamerami, cullingiem, wireframe i odświeżeniem ≤30/s.
 - Odtworzono przecinające się trójkąty QPainter oraz 48 zerowych ścian w starym `_revolve`.
 - Radeon 660M/Mesa 26.2 oraz Debian 12/LinuxCNC 2.9.10/llvmpipe Mesa 22.3: depth 24, order 0%, culling zamkniętych brył, 3 kamery, obrót i limit klatek PASS.
-- Pełny lokalny test z niezależnym checkoutem git wymaga ścieżki common `.git`; ponowienie w toku. LinuxCNC CI: 109 testów PASS.
-- Pełne CI pierwszego SHA ujawniło PNG w `state/`; przeniesiono artefakty do ignorowanego `build/skin01/`.
-- Granice odbioru: bez testu konkretnego GPU właściciela i sprzętu obrabiarki. Autokontrola, bez niezależnego przeglądu.
+- Debian 12 lokalnie: 1018 pytest PASS, 10 skip, 109 deselected; requirements (21/22, 0 błędów), lint, test-c i test-san PASS.
+- Końcowe CI Python + Plant matrix + LinuxCNC RIP PASS; 109 testów LinuxCNC PASS. Artefakty zrzutów w `build/skin01/`.
+- PR #87 scalony 2026-10-23 jako `b22689f`. Autokontrola, bez niezależnego przeglądu.
+- NIEZWERYFIKOWANE na konkretnym GPU właściciela ani na fizycznej obrabiarce.
