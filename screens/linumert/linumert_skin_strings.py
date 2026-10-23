@@ -22,6 +22,9 @@ _EN = {
     "status_unknown": "Machine status unavailable",
     "homed": "Homed", "not_homed": "Not homed",
     "machine_on": "Machine enabled", "machine_off": "Machine disabled",
+    "renderer_pending": "3D renderer not connected",
+    "sample_program": "Sample program — not loaded into CNC",
+    "demo_controls": "Preview only — machine commands disabled",
 }
 _PL = {
     "preview": "Prototyp prezentacji — bez połączenia z maszyną",
@@ -36,6 +39,9 @@ _PL = {
     "status_unknown": "Stan maszyny niedostępny",
     "homed": "Zbazowana", "not_homed": "Niezbazowana",
     "machine_on": "Maszyna włączona", "machine_off": "Maszyna wyłączona",
+    "renderer_pending": "Renderer 3D niepodłączony",
+    "sample_program": "Program przykładowy — niewczytany do CNC",
+    "demo_controls": "Tylko podgląd — komendy maszyny wyłączone",
 }
 STRINGS = MappingProxyType({"en": MappingProxyType(_EN), "pl": MappingProxyType(_PL)})
 

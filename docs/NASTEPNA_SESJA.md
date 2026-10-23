@@ -251,3 +251,13 @@ Poprzednie CI: 930 PASS, 63 skip, 109 deselected, jeden błąd rejestru pochodze
 brakujące dokładne ścieżki dokumentów poprawione i test strażnika IP lokalnie PASS.
 Następne: adapter statusu i osobny launcher prototypu; renderer wymaga próby GPU.
 Bez scalania; pozostałe dawne instrukcje scalania w tym dokumencie są historyczne.
+
+## GUI — działający podgląd offline 2026-10-23
+
+Model-Author: Codex. Uruchomienie: python3 tools/dev/skin-preview.py (PyQt5).
+Cztery kompozycje i 32 wybory skórka/paleta/język, bez sterowania maszyną.
+Lokalnie 22 testy + 87 subtestów PASS; test Qt obejmuje 64 warianty rozmiarów/wyborów.
+Zrzuty lokalne: build/skin-preview/ (nieśledzone pliki testowe).
+Obecny ekran operatora nadal bez zmian; brak renderera 3D i adaptera CNC w prototypie.
+Następnie: scena testowa renderera oraz adapter statusu do przyszłej integracji.
+Nie scalać. Pełne CI aktualnego SHA sprawdzić w PR #86.

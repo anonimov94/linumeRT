@@ -63,3 +63,24 @@ resetowania czy zmiany trybu maszyny. Nie jest jeszcze podłączona do powłoki.
 Przyszły host musi ponowić odczyt tuż przed wymianą widoku, obsłużyć awarię
 montażu i zachować globalne kontrolki przez całą operację. Sama zgoda z modelu
 nie eliminuje zmiany statusu między odczytem a montażem.
+
+## Osobny podgląd kompozycji Qt
+
+Uruchom z katalogu repozytorium w środowisku z PyQt5:
+
+```sh
+python3 tools/dev/skin-preview.py
+```
+
+Okno jest studium układu offline: cztery różne kompozycje, cztery palety i EN/PL.
+Przełączanie zmienia tylko lokalną prezentację; nie korzysta z adaptera statusu,
+LinuxCNC ani HAL. STOP/Hold są nieaktywne, a stan maszyny jest niedostępny.
+Wartości DRO/narzędzia to kreski; G-code jest podpisanym przykładem, nie programem
+wczytanym do sterowania. Panele 3D jawnie informują o braku renderera.
+To początek prac nad kompozycjami, bez docelowych kontrolek/animacji rodzin skórek.
+
+Test Qt sprawdza 64 warianty (4 × 4 × 2 przy dwóch rozdzielczościach), brak
+nakładania komórek, widoczność paneli i cele kontrolek co najmniej 44 px.
+Lokalny podgląd sprawdzono w Qt offscreen na Windows, nie na docelowym GPU/Mesa.
+W tym trybie Windows nie wylicza fontów: do zrzutów/testu zarejestrowano font
+systemowy bez kopiowania go do repo. Normalny launcher korzysta z fontów platformy.

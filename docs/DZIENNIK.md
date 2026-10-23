@@ -791,3 +791,13 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
 - Lokalnie 20 testów + 87 subtestów PASS (kontrakty i strażnik IP), ruff PASS.
 - Integracja powłoki i renderer pozostają do wykonania; bez scalania.
 - Model-Author: Codex. Szczegóły kontraktu w docs/design/SKIN_AUDIT.md.
+
+## GUI — osobny podgląd czterech kompozycji Qt · 2026-10-23 · Codex
+
+- Dodano tools/dev/skin-preview.py i niezależne okno PyQt5, bez LinuxCNC/HAL.
+- Cztery układy, cztery palety, EN/PL; status niedostępny, STOP/Hold nieaktywne.
+- Panele 3D oznaczone jako niepodłączone; to studium układu, nie kompletny HMI.
+- Lokalnie 22 testy + 87 subtestów PASS; Qt obejmuje 64 warianty i cele >=44 px.
+- Ruff i diff-check PASS; wizualna kontrola zrzutów Windows/offscreen po dodaniu
+  fontu systemowego (tryb offscreen nie wylicza fontów). Bez redystrybucji fontu.
+- Model-Author: Codex. Bez scalania; docelowy renderer/GPU oraz podłączenie CNC do wykonania.

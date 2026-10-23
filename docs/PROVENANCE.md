@@ -331,3 +331,10 @@ Bez zewnętrznych tłumaczeń ani bibliotek.
 Manifesty i reguła przełączania prezentacji: własny moduł
 screens/linumert/linumert_skin_runtime.py oraz testy test_skin_runtime.py,
 Model-Author: Codex, 2026-10-23, GPL-2.0-or-later. Bez kodu i zasobów zewnętrznych.
+
+Podgląd układów Qt: własne screens/linumert/linumert_skin_preview.py,
+tools/dev/skin-preview.py i tests/test_skin_preview.py. Model-Author: Codex,
+2026-10-23, GPL-2.0-or-later. Bez zewnętrznych grafik/kodu. Istniejące PyQt5,
+bez nowej zależności projektu. Font systemowy użyty wyłącznie do testów Windows
+nie jest kopiowany ani redystrybuowany. Zrzuty w build/skin-preview/ są lokalnymi
+wynikami testów, nie nowymi zasobami produkcyjnymi.
