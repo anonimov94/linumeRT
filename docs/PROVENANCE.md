@@ -346,3 +346,10 @@ wynikami testów, nie nowymi zasobami produkcyjnymi.
 Poprawka lokalizacji kroku JOG przed scaleniem #67: własna walidacja QLocale,
 regresje klawiatury C/PL/DE, Model-Author: Codex, 2026-10-23, GPL-2.0-or-later.
 Bez nowych zasobów ani bibliotek.
+
+## SKIN-01 — 2026-10-23
+
+Model-Author: Codex. Własny simulation/linumert_sim/render_mesh.py i
+ tests/test_render_mesh.py, GPL-2.0-or-later. Scena przecinających się trójkątów
+oraz testy obrazu/geometrii opracowane w projekcie; bez zewnętrznych zasobów.
+Istniejący stos numpy/PyQt5/pyqtgraph/PyOpenGL, bez nowej zależności produktu.

@@ -1,6 +1,18 @@
 # Stan projektu i przekazanie
 
-Tura: Codex · 2026-10-23 · stan: integracja aktywnych gałęzi po testach.
+Tura: Codex · 2026-10-23 · stan: SKIN-01 w toku, osobny checkout.
+
+## Stan zatrzymania — SKIN-01
+
+Model-Author: Codex. Polecenie właściciela 2026-10-23: po scalonych #67/#86
+rozpocząć SKIN-01, testować lokalny GPU/Mesa i Debian/LinuxCNC, scalać ukończone
+etapy po zielonych testach. Zastępuje niższe historyczne „bez scalania”.
+Main operatora zaktualizowany do 2bfd473; wszystkie 11 lokalnych plików zachowane
+(sumy SHA-256 i kopia w /tmp/linumert-skin01-backup). Osobna gałąź
+codex/skin-01-renderer, checkout /tmp/linumert-skin01; bez globalnego LOCK.
+Krok 1: reprodukcja QPainter i degeneracji kapsli, walidacja wejścia siatki;
+13 lokalnych testów PASS, lint PASS. Następnie niezależny widok GL, zrzuty
+kilku kamer, test GPU Radeon 660M/Mesa oraz Debian/LinuxCNC i pełne CI.
 
 ## Aktualne polecenie — scalanie po zakończeniu
 

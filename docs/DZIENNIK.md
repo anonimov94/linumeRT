@@ -814,3 +814,13 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
 - Usunięto filtr klawiszy; wpis walidowany dopiero przed JOG, bez separatorów tysięcy.
 - 13 testów Qt PASS: C/PL/DE, kropka/przecinek, błędny wpis i zatrzymanie mimo błędu.
 - Model-Author: Codex. Pełne CI po poprawce wymagane przed scaleniem.
+
+## SKIN-01 — reprodukcja geometrii · 2026-10-23 · Codex
+- Model-Author: Codex. Main po #67/#86, 11 lokalnych plików zachowanych bajt w bajt.
+- Osobny checkout/gałąź, bez przejmowania globalnej blokady i instancji CNC.
+- QPainter: rzeczywisty obraz przecinających się trójkątów potwierdza złe zasłanianie.
+- Stare _revolve: 48 zerowych trójkątów kapsli przy 24 segmentach.
+- Przygotówki box/cylinder/tube/casting i próbka STL mają poprawny winding/objętość.
+- Nowy kontrakt siatki odrzuca błędne indeksy/NaN i jawnie liczy degeneracje.
+- 13 lokalnych testów PASS, ruff PASS; prototyp GL i odbiór GPU/Debian jeszcze w toku.
+- Autokontrola, bez niezależnego przeglądu; bez zmian renderera produkcyjnego.
