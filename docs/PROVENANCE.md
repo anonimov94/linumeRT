@@ -370,3 +370,12 @@ Model-Author: Codex. Własny `screens/linumert/linumert_skin_viewports.py`:
 sceny offline maszyny bramowej, ścieżki i detalu, GPL-2.0-or-later.
 Rozszerzenie własnych skin-preview.py / linumert_skin_preview.py / strings;
 bez nowych zależności ani zasobów zewnętrznych. Modele wyłącznie poglądowe.
+
+Wzorce dostarczone przez właściciela: `docs/design/referencje-skin/classic-digital.webp`,
+`docs/design/referencje-skin/industrial-pro.webp`, `docs/design/referencje-skin/cyberdeck.webp`,
+`docs/design/referencje-skin/organic-vector.webp`. Pobrane 2026-10-23 z
+https://megawrzuta.pl/hdimgnec (`linumert-showcase.zip`); według roadmapy obrazy
+wygenerowane w rozmowie właściciela. Wyłącznie dokumentacja referencyjna, nie tekstury UI.
+Brak osobnej deklaracji licencji obrazów w paczce; nie przypisujemy im GPL kodu.
+Własny `screens/linumert/linumert_skin_panel.py`: obudowy rysowane kodem Qt,
+Codex, 2026-10-23, GPL-2.0-or-later, bez kopiowania fragmentów bitmap.

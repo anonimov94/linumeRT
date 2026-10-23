@@ -53,7 +53,7 @@ def test_all_preview_selections_and_resolutions():
             assert window.preferences.skin == family
             assert window.preferences.theme == theme
             assert window.preferences.language == language
-            assert window.banner.text() == text("preview", window.preferences)
+            assert text("preview", window.preferences) in window.banner.text()
             assert window.grid.count() == 6
             assert set(window.cards) == {item[0] for item in LAYOUTS[family]}
             for card in window.cards.values():

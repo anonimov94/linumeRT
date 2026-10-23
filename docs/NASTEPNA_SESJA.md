@@ -306,3 +306,13 @@ walidacja pozostaje przed komendą JOG. Separatory tysięcy są odrzucane; kropk
 presetrów i lokalny separator są obsługiwane. 13 testów klawiatury PASS.
 Następnie: pełne CI #67 → scalenie → aktualizacja i CI #86 → scalenie.
 Gałęzie tool-discard-edits i design/skin-system-roadmap-2026-10-22 już zawarte w main.
+
+## Stan zatrzymania — podgląd skórek, 2026-10-23
+Model-Author: Codex. Osobny checkout /tmp/linumert-skin-visual,
+gałąź codex/skin-visual-preview, draft PR #89. Push 123f5df: trzy sceny OpenGL
+w czterech kompozycjach; 25 testów + 87 subtestów PASS. Radeon/Mesa: 12 paneli
+z depth 24 PASS. Właściciel podał materiały tiny.pl/95g03y3r2; skracacz zwraca
+HTTP 403 Cloudflare, poproszono o pełny URL. Porównanie wyglądu oczekuje na materiały.
+Materiały otrzymane: https://megawrzuta.pl/hdimgnec, cztery makiety WEBP obejrzane
+ i zapisane w docs/design/referencje-skin/. Następny krok: odbiór zintegrowanego GL
+ i dopracowanie scen; zgodność całego HMI z makietami pozostaje otwarta.

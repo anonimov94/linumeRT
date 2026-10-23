@@ -13,24 +13,25 @@ from linumert_skin_contract import (
     PresentationPreferences,
     palette_for,
 )
+from linumert_skin_panel import SkinPanel
 from linumert_skin_strings import text
 from PyQt5 import QtCore, QtWidgets
 
 # role, row, column, row span, column span. These are distinct compositions,
 # not a recoloring of the existing QtDragon shell.
 LAYOUTS = {
-    "classic-digital": (("dro", 0, 0, 2, 1), ("toolpath", 0, 1, 2, 3),
-                        ("machine", 0, 4, 1, 1), ("workpiece", 1, 4, 1, 1),
-                        ("program", 2, 0, 1, 4), ("tools", 2, 4, 1, 1)),
-    "industrial-pro": (("dro", 0, 0, 1, 2), ("tools", 0, 2, 1, 1),
-                       ("machine", 1, 0, 2, 1), ("toolpath", 1, 1, 2, 1),
-                       ("workpiece", 1, 2, 1, 1), ("program", 2, 2, 1, 1)),
-    "cyberdeck": (("program", 0, 0, 1, 1), ("dro", 0, 1, 1, 1),
-                  ("toolpath", 0, 2, 2, 2), ("machine", 1, 0, 2, 2),
-                  ("workpiece", 2, 2, 1, 1), ("tools", 2, 3, 1, 1)),
-    "organic-vector": (("machine", 0, 0, 2, 2), ("dro", 0, 2, 1, 1),
-                       ("toolpath", 0, 3, 2, 2), ("tools", 1, 2, 1, 1),
-                       ("workpiece", 2, 0, 1, 2), ("program", 2, 2, 1, 3)),
+    "classic-digital": (("dro", 0, 0, 2, 1), ("program", 2, 0, 2, 1),
+                        ("toolpath", 0, 1, 3, 2), ("machine", 0, 3, 3, 1),
+                        ("tools", 3, 1, 1, 2), ("workpiece", 3, 3, 1, 1)),
+    "industrial-pro": (("machine", 0, 0, 3, 2), ("dro", 0, 2, 2, 2),
+                       ("toolpath", 0, 4, 2, 2), ("tools", 2, 2, 2, 2),
+                       ("program", 2, 4, 2, 2), ("workpiece", 3, 0, 1, 2)),
+    "cyberdeck": (("dro", 0, 0, 2, 1), ("program", 0, 1, 2, 1),
+                  ("toolpath", 0, 2, 2, 2), ("machine", 2, 0, 2, 1),
+                  ("tools", 2, 1, 2, 2), ("workpiece", 2, 3, 2, 1)),
+    "organic-vector": (("dro", 0, 0, 2, 1), ("program", 2, 0, 2, 1),
+                       ("machine", 0, 1, 2, 1), ("toolpath", 0, 2, 2, 2),
+                       ("tools", 2, 1, 2, 2), ("workpiece", 2, 3, 2, 1)),
 }
 
 
@@ -98,26 +99,27 @@ class SkinPreview(QtWidgets.QMainWindow):
     def refresh(self):
         p = self.preferences
         c = palette_for(p)
-        radius = {"classic-digital": 0, "industrial-pro": 4,
-                  "cyberdeck": 1, "organic-vector": 24}[p.skin]
+        radius = 22 if p.skin == "organic-vector" else 3
         self.setStyleSheet(f"""
             QMainWindow, QWidget {{ background: {c.background}; color: {c.text};
                 font-family: 'IBM Plex Sans', 'DejaVu Sans'; font-size: 14px; }}
-            QFrame[card="true"] {{ background: {c.panel}; border: 1px solid {c.muted};
-                border-radius: {radius}px; }}
+            QFrame[card="true"] {{ background: transparent; border: none; }}
             QFrame[card="true"] QLabel {{ background: transparent; border: none; }}
             QLabel[heading="true"] {{ color: {c.accent}; font-size: 17px; }}
             QLabel#banner {{ color: {c.warning}; padding: 8px; }}
             QLabel#dro {{ font-family: 'JetBrains Mono', 'DejaVu Sans Mono';
-                font-size: 32px; color: {c.accent}; }}
+                font-size: 28px; font-weight: bold; color: {c.accent}; }}
             QComboBox, QPushButton {{ min-height: 44px; padding: 0 10px;
-                background: {c.panel}; border: 1px solid {c.muted}; }}
+                background: qlineargradient(x1:0,y1:0,x2:0,y2:1,
+                    stop:0 {c.panel}, stop:1 {c.background});
+                border: 1px solid {c.muted}; border-radius: {radius}px; }}
             QPushButton:disabled {{ color: {c.muted}; }}
             QComboBox:focus {{ border: 2px solid {c.accent}; }}
         """)
         for key, label in self.selector_labels.items():
             label.setText(text(key, p))
-        self.banner.setText(text("preview", p))
+        self.banner.setText("linumeRT  //  " + p.skin.replace("-", " ").upper()
+                            + "  ·  " + text("preview", p))
         self.status.setText(text("alarms", p) + " · " + text("status_unknown", p)
                             + " · E-STOP: — · " + text("mode_manual", p) + ": —")
         self.demo_label.setText(text("demo_controls", p))
@@ -127,22 +129,23 @@ class SkinPreview(QtWidgets.QMainWindow):
         while self.grid.count():
             self.grid.takeAt(0).widget().deleteLater()
         # Clear stretch from the previous composition before applying the next.
-        for column in range(5):
+        for column in range(6):
             self.grid.setColumnStretch(column, 0)
         self.cards = {}
         self.viewports = {}
         for role, row, column, height, width in LAYOUTS[p.skin]:
-            card = QtWidgets.QFrame()
+            card = SkinPanel(p.skin, c)
             card.setProperty("card", True)
             card.setObjectName(role)
             layout = QtWidgets.QVBoxLayout(card)
-            heading = QtWidgets.QLabel("DRO" if role == "dro" else text(role, p))
+            layout.setContentsMargins(16, 12, 16, 12)
+            heading = QtWidgets.QLabel(("DRO / XYZ · mm" if role == "dro" else text(role, p)).upper())
             heading.setProperty("heading", True)
             layout.addWidget(heading)
             if role == "dro":
-                content = "X  —\nY  —\nZ  —"
+                content = "X  —.———\nY  —.———\nZ  —.———"
             elif role == "program":
-                content = text("sample_program", p) + "\n\nG21 G90\nG0 X0 Y0\nM2"
+                content = text("sample_program", p) + "\n\n001  G21 G90\n002  G54\n003  G0 X0 Y0\n004  M2"
             elif role in ("machine", "workpiece", "toolpath"):
                 content = text("offline_scene", p) if self.viewport_factory else text(
                     "renderer_pending", p)
@@ -159,11 +162,13 @@ class SkinPreview(QtWidgets.QMainWindow):
                 layout.addWidget(body)
             else:
                 layout.addWidget(body, 1, QtCore.Qt.AlignCenter)
+            if role == "program":
+                body.setStyleSheet("font-family: monospace; font-size: 13px;")
             self.grid.addWidget(card, row, column, height, width)
             self.cards[role] = card
             for index in range(column, column + width):
                 self.grid.setColumnStretch(index, 1)
-        for row in range(3):
+        for row in range(4):
             self.grid.setRowStretch(row, 1)
 
 
