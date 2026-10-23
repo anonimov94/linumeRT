@@ -131,3 +131,11 @@ Osobny host offline odwzorowuje układy dostarczonych makiet. Nie zmienia stosu
 produkcyjnego ani właściciela komend QtVCP. Współdzielone konteksty Qt są wymagane
 przy wielokrotnym montażu paneli GL; odbiór sprawdza też cały złożony obraz okna.
 Pełna zgodność graficzna i SKIN-02…06 pozostają otwarte (PR #89).
+
+- 2026-10-23 · konkurs 01 · Granica kontroli deployment to proces przed exec LinuxCNC,
+  nie handler QtVCP (inicjalizowany po HAL). Główny starter korzysta z bramki i oczekuje
+  profilu sim/plant; hardware wymaga deklaracji i ograniczonego audytu wszystkich plików HAL.
+  Bezpośredni LinuxCNC/launchery dev i przyszły eksport pozostają poza zakresem;
+  kontrola nie potwierdza fizycznego sprzętu. Raport: `prompts/konkurs-2026-10/raporty/01.md`.
+  Nie scalać PR #93 przed oceną konkursu (bieżące polecenie właściciela).
+  Model-Author: Codex · implementacja do oceny, NIEZWERYFIKOWANE NA SPRZĘCIE.

@@ -58,6 +58,10 @@ def read_deployment(path: Path) -> configparser.ConfigParser:
     with path.open(encoding="utf-8") as stream:
         for line in stream:
             text = line.strip()
+            if re.match(r"#\s*INCLUDE\b", text, re.IGNORECASE):
+                raise ValueError("INI #INCLUDE wymaga osobnej analizy")
+            if text.startswith("[") and not text.endswith("]"):
+                raise ValueError("niejednoznaczny nagłówek sekcji INI")
             if text.startswith("[") and text.endswith("]"):
                 section = text[1:-1].strip()
             elif section in ("SAFETY", "LINUMERT") and text and not text.startswith(("#", ";")):
@@ -69,6 +73,8 @@ def read_deployment(path: Path) -> configparser.ConfigParser:
                 seen.add(key)
         stream.seek(0)
         cfg.read_file(stream)
+    if cfg.defaults():
+        raise ValueError("INI DEFAULT wymaga osobnej analizy; deklaracje muszą być jawne")
     return cfg
 
 

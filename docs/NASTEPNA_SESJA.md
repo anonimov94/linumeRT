@@ -357,6 +357,16 @@ Błąd wysokości Industrial 815 px przy 1280×800 usunięty; cele 44 px zachowa
 Końcowe kontrole i scalenie raportowane w PR #91. Dalszy zakres: szczegółowe modele,
  dopracowanie pozostałych detali wizji i bezpieczna integracja stanu/poleceń QtVCP.
 
+## Konkurs 01 — bezpieczeństwo, 2026-10-23
+
+Model-Author: Codex. Osobny checkout `/tmp/linumert-contest-safety`, gałąź
+`codex/contest-2026-10-safety`, PR #93. Push 03e3d86: bramka przed exec CNC,
+obowiązkowe deklaracje/audyt hardware, integracja startera i jawne profile sim/Plant.
+41 testów bramki/deployment/HAL PASS; pełny lint/test: 1033 PASS, 11 skip. Odbiór i ograniczenia w
+`prompts/konkurs-2026-10/raporty/01.md`. Bez globalnego LOCK, bez zmian fizycznego safety.
+Nie scalać przed wspólną oceną konkursu — bieżące polecenie właściciela zastępuje
+historyczne automatyczne scalanie ukończonych etapów.
+
 ## Konkurs 2 — przekazanie odbioru stanowiska, 2026-10-23
 
 Model-Author: Codex. Osobna gałąź `codex/contest-2026-10-odbior`, PR #94;
