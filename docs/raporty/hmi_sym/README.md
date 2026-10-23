@@ -3,14 +3,14 @@
 Model-Author: Codex · 2026-10-23. Kod ekranu: main `8483b81` (PR #89).
 Obrazy są zrzutami uruchomionych aplikacji, bez montażu grafik koncepcyjnych.
 
-## Cztery skórki — osobny podgląd offline
+## Cztery osobne ekrany skórek — offline
 
-Świeże zrzuty 1920×1080, English, Classic Turquoise; każda skórka obsługuje także
-Graphite Gray, Reactor Green i Ion Blue oraz język polski. Własne sceny OpenGL
-pokazują poglądową maszynę bramową, detal z kieszenią i otworami oraz ścieżkę.
-Odczyty bez danych i nieaktywne Start/Hold/Stop: ten launcher nie łączy się z CNC.
-Pełna zgodność z [wzorcami właściciela](../../design/referencje-skin/README.md)
-i ukończone skórki operatora pozostają dalszym zakresem.
+Kod ekranów: `ea2fc39`, 2026-10-23. Osobne moduły i klasy: Classic Digital,
+Industrial Pro, Cyberdeck, Organic Vector. Każdy ma własną kompozycję paneli,
+konsolę i geometrię kontrolek. Wspólne są komponenty odczytu, palety i renderer.
+Zrzuty 1920×1080 / English, wykonane bez retuszu przez `tools/dev/skin-check.py`.
+Classic/Organic: Classic Turquoise; Industrial: Reactor Green; Cyberdeck: Ion Blue.
+Skórka, paleta i język pozostają niezależnymi ustawieniami.
 
 | Classic Digital | Industrial Pro |
 |:--|:--|
@@ -18,15 +18,35 @@ i ukończone skórki operatora pozostają dalszym zakresem.
 | Cyberdeck | Organic Vector |
 | ![Cyberdeck](skin_cyberdeck.png) | ![Organic Vector](skin_organic-vector.png) |
 
-Odtworzenie (PyQt5, pyqtgraph, PyOpenGL; X11/Xwayland):
+Uruchamiaj wybrany ekran osobno (PyQt5, pyqtgraph, PyOpenGL):
+
+```sh
+python3 tools/dev/skin-preview.py --skin classic-digital
+python3 tools/dev/skin-preview.py --skin industrial-pro --theme reactor-green
+python3 tools/dev/skin-preview.py --skin cyberdeck --theme ion-blue
+python3 tools/dev/skin-preview.py --skin organic-vector
+```
+
+Bez `--skin` launcher pokazuje także selektory do porównań; w osobnym ekranie
+wybory są dostępne w **Ustawienia**. Nawigacja powiększa panele programu, maszyny
+lub narzędzi. Diagnostyka pokazuje dane lokalnego renderera lub panel odczytu.
+Przyciski cyklu/JOG i przełączniki nie wysyłają poleceń CNC; dane są nieznane.
+Grzyb jest **nieinteraktywnym wskaźnikiem nieznanego stanu E-STOP**. To osobny
+host offline, nie zastępuje działającego HMI ani jego łańcucha bezpieczeństwa.
+Modele maszyny i materiału nadal są poglądowe.
+
+Odtworzenie galerii i odbioru na X11/Xwayland:
 
 ```sh
 python3 tools/dev/skin-check.py --output build/skin-docs
 ```
 
-Do galerii skopiowano pliki `*-1920.png`. Odbiór 64 wariantów przy obu rozmiarach
-przeszedł na Radeon/Mesa i Debian/llvmpipe. Pełne CI PR #89: 1019 pytest,
-166 subtestów oraz 109 prób LinuxCNC PASS; autokontrola autora.
+Pliki `*-1920-standalone.png` to powyższa galeria. Odbiór obejmuje **128 wariantów**:
+4 skórki × 4 palety × 2 języki × 2 rozmiary × browser/standalone. Sprawdza obrazy
+GL, 24-bitową głębię, rozmiary, powiększanie i globalne kontrolki. Wzorce:
+[oryginalne grafiki właściciela](../../design/referencje-skin/README.md).
+Pełna zgodność wszystkich szczegółów grafiki, modele zamiast schematu oraz
+integracja stanu i poleceń QtVCP pozostają dalszym etapem.
 
 ## Symulacja obróbki — aktualny ekran operatora
 

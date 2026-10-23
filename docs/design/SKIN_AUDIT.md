@@ -113,3 +113,28 @@ To ukończony krok podglądu, **nie ukończone SKIN-02…06 ani wierna realizacj
 całych makiet**. Otwarte: szczegółowe kontrolki/ikony/typografia, modele maszyny
 zamiast schematu, pełne strony oraz bezpieczny adapter stanu/poleceń QtVCP.
 Aktualny ekran operatora pozostaje osobną aplikacją. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## Osobne ekrany i kształty kontrolek — PR #91, 2026-10-23
+
+Model-Author: Codex. Właściciel zlecił osobne ekrany z układami i przyciskami
+maksymalnie odpowiadającymi pierwotnym obrazom. Cztery niezależne klasy w modułach
+linumert_skin_classic/industrial/cyberdeck/organic.py mają własne układy i konsole.
+Wspólna baza dostarcza komponenty, nie jeden układ przemalowywany przez QSS.
+
+Classic: pięć odczytów, duża ścieżka, metalowe prostokątne klawisze i przełączniki.
+Industrial: duża maszyna po lewej, środkowe DRO, prawa ścieżka/program, obrotowy
+selektor i osobna konsola. Cyberdeck: ścięte obrysy, moduły asymetryczne,
+podświetlane przyciski i dolny pokład JOG/wskaźników. Organic: asymetryczne krzywe
+obudów, okrągłe klawisze, obłe wyspy, status na dole. Typografia należy do rodziny.
+
+`--skin <id>` uruchamia osobny ekran bez stałego paska selektorów. Ustawienia
+zmieniają lokalną prezentację po Zastosuj; Anuluj zachowuje ekran. Nagłówki mają
+działającą lokalną nawigację i diagnostykę renderera. Kontrolki CNC są nieaktywne,
+grzyby E-STOP są nieinteraktywne i pokazują stan nieznany; bez ACTION/STATUS/HAL.
+Nie jest to jeszcze produkcyjny host CNC ani odbiór wszystkich szczegółów wizji.
+
+Testy sprawdzają cztery różne klasy/moduły, nawigację, brak emisji kliknięć
+nieaktywnych kontrolek, anulowanie/atomowe ustawienia oraz usuwanie starych paneli.
+Odbiór GL rozszerzony do 128 wariantów browser/standalone; wykrył przekroczenie
+800 px o 15 px w Industrial, usunięte bez zmniejszania celów 44 px.
+Aktualne obrazy: `docs/raporty/hmi_sym/README.md`, kod ekranów ea2fc39.

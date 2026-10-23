@@ -420,3 +420,8 @@ Własne osobne moduły ekranów: `screens/linumert/linumert_skin_classic.py`,
 oraz rejestr `linumert_skin_screens.py`. Codex, 2026-10-23, GPL-2.0-or-later.
 Osobne kompozycje i konsole według czterech wzorców właściciela; wspólne tylko
 komponenty odczytu i renderer. Bez zależności LinuxCNC/HAL.
+
+Aktualizacja czterech `docs/raporty/hmi_sym/skin_*.png`, Codex, 2026-10-23:
+rzeczywiste osobne ekrany Qt z kodu ea2fc39, 1920×1080, bez retuszu. Industrial
+w Reactor Green, Cyberdeck w Ion Blue, pozostałe w Classic Turquoise.
+Własne kształty rysowane przez QPainter i własne sceny 3D; GPL-2.0-or-later.

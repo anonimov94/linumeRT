@@ -1,6 +1,6 @@
 # Stan projektu i przekazanie
 
-Tura: Codex · 2026-10-23 · stan: oddana; podgląd #89 scalony, aktualizacja zrzutów w PR #90.
+Tura: Codex · 2026-10-23 · stan: oddana; osobne ekrany offline, odbiór/scalenie PR #91.
 
 ## Wynik końcowy — SKIN-01
 
@@ -331,15 +331,17 @@ Przy wykonywaniu zdjęć wykryto błąd zagnieżdżonego komentarza M4 w demo.
 leksera dla obu programów. Końcowe kontrole i scalenie raportowane w PR #90.
 Dalszy zakres skórek: szczegółowe kontrolki według makiet, pełne strony i adapter QtVCP.
 
-## Osobne ekrany według wizji — bieżący krok, 2026-10-23
-Model-Author: Codex. Właściciel ponownie zlecił wyraźnie odrębne ekrany,
-układy i kontrolki maksymalnie odpowiadające czterem wzorcom graficznym.
+## Osobne ekrany według wizji — PR #91, 2026-10-23
+Model-Author: Codex. Polecenie właściciela: wyraźnie odrębne ekrany, układy
+ i przyciski maksymalnie zgodne z czterema obrazami pierwotnych wizji.
 Osobny checkout /tmp/linumert-distinct-skins, gałąź codex/distinct-skin-screens.
-Pierwszy krok: fizyczne obudowy kontrolek cyklu, testy 64 układów PASS.
-Następnie: cztery osobne klasy ekranów, instrumenty i konsole dla każdej rodziny.
-Etap ekranów: osobne klasy Classic/Industrial/Cyberdeck/Organic, konsole, DRO,
-program, F/S, lokalna nawigacja i ustawienia; `--skin` uruchamia samodzielny ekran.
-Metalowe, ostrokątne i płynne obudowy oraz selektory i kontrolki rodzin.
-5 testów Qt PASS; 128 wariantów GL Radeon PASS (browser + standalone).
-Wcześniejszy błąd 815 px Industrial przy 1280×800 usunięty; 44 px zachowane.
-Następne: końcowy Debian, nowe zrzuty, dokumentacja i odbiór CI PR #91.
+Kod ekranów ea2fc39: osobne klasy/moduły Classic/Industrial/Cyberdeck/Organic,
+ własne konsole, DRO, F/S, program, ramki i typografia. Native przyciski, selektor
+ obrotowy, przełączniki, wskaźniki, ostrokątne i płynne metalowe obudowy.
+`--skin <id>` uruchamia samodzielny ekran; Ustawienia zmieniają lokalny wygląd.
+Nawigacja i powiększanie działają; kontrolki CNC nieaktywne, E-STOP nieinteraktywny.
+Radeon/Mesa i Debian/llvmpipe: 128 wariantów PASS; Debian 25 testów + 87 subtestów PASS.
+Zrzuty w docs/raporty/hmi_sym i README odświeżone, opisane jako offline.
+Błąd wysokości Industrial 815 px przy 1280×800 usunięty; cele 44 px zachowane.
+Końcowe kontrole i scalenie raportowane w PR #91. Dalszy zakres: szczegółowe modele,
+ dopracowanie pozostałych detali wizji i bezpieczna integracja stanu/poleceń QtVCP.
