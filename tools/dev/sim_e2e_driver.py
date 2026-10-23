@@ -3,10 +3,12 @@
 """Sterownik testu end-to-end symulacji HMI (wywołuje go tools/dev/sim-e2e.sh w kontenerze).
 
 Model-Author: Claude · 2026-10-19.
+Zmiany: Codex · 2026-10-23 — weryfikacja ukończenia demo.
 
 Reset E-STOP (konfiguracja testowa z HMI_ESTOP_BYPASS = 1), maszyna WŁ., bazowanie na krańcówkach,
 program demonstracyjny (wymiany narzędzi potwierdzane pinem okna ręcznej wymiany), potem program
-kolizji: oczekiwane zdarzenie K-302 i E-STOP. Zrzuty ekranu i podsumowanie w katalogu wyników.
+kolizji: oczekiwane zdarzenie K-302 bez zmiany stanu LinuxCNC.
+Zrzuty ekranu i podsumowanie w katalogu wyników.
 """
 
 import json
@@ -127,8 +129,12 @@ def main():
          stock=[e.get("line") for e in ev0 if e.get("ev") == "stock"][-1:])
     dt = run_program("linumert_demo.ngc", 900)
     stops = [e for e in events() if e.get("ev") == "event" and e.get("stop")]
-    step("program demo bez kolizji", s.task_state == linuxcnc.STATE_ON and not stops,
-         czas_s=round(dt), zdarzenia=[e["code"] for e in stops])
+    step("program demo ukończony bez kolizji",
+         s.task_state == linuxcnc.STATE_ON and not stops
+         and s.interp_state == linuxcnc.INTERP_IDLE and s.tool_in_spindle == 11,
+         czas_s=round(dt), zdarzenia=[e["code"] for e in stops],
+         narzedzie_koncowe=s.tool_in_spindle,
+         interpreter_idle=s.interp_state == linuxcnc.INTERP_IDLE)
     vols = [e.get("volume") for e in events() if e.get("ev") == "map"]
     step("materiał usunięty", bool(vols), objetosc_cm3=round((vols or [0])[-1] / 1000, 1))
     shot("02_po_demo")

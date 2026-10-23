@@ -43,3 +43,4 @@ Wykonane: 33 z 84.
 
 085 | 2026-10-23 | SKIN-01: reprodukcja zasłaniania i windingu brył, podgląd OpenGL na Radeon/Mesa i Debian/LinuxCNC; PR #87; Codex
 086 | 2026-10-23 | Podgląd skórek według czterech makiet właściciela, sceny 3D i powiększanie, odbiór GL 64 wariantów; nie kończy SKIN-02…06; PR #89; Codex
+087 | 2026-10-23 | Nowe zrzuty skórek i rzeczywistej symulacji w README/raporcie hmi_sym, poprawka komentarza demo i potwierdzenie T11; PR #90; Codex

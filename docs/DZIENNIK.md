@@ -845,3 +845,12 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
 - Radeon/Mesa i Debian llvmpipe: po końcowej poprawce 64 warianty PASS; 23 testy + 87 subtestów PASS.
 - Debian: lint PASS, 1018 pytest PASS, 11 skip, 109 deselected, wymagania bez błędów.
 - Autokontrola, bez niezależnego przeglądu. Offline; pełne skórki i CNC nadal otwarte.
+
+## 087 — nowe zrzuty i README · 2026-10-23 · Codex
+- Model-Author: Codex. PR #89 scalony (8483b81); lokalne main zaktualizowane.
+- Polecenie właściciela: odświeżyć docs/raporty/hmi_sym i README projektu, PR #90.
+- Cztery nowe zrzuty skórek Qt 1920×1080; osobny raport i rozróżnienie offline/CNC.
+- Przebieg obróbki ujawnił zagnieżdżony komentarz M4: stary odbiór zaliczał przerwane demo.
+- Poprawiono komentarz i kontrolę finału (T11 + idle), regresje leksera obu programów.
+- Świeże obrazy z rzeczywistego LinuxCNC i wynik JSON; K-302 wyłącznie diagnostycznie.
+- Autokontrola, bez niezależnego przeglądu; końcowy stan kontroli/scalenia w PR #90.

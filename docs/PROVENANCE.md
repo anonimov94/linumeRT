@@ -385,3 +385,23 @@ są rysowane kodem Qt; stan nieznany, bez wartości demonstracyjnych udających 
 
 `tools/dev/skin-check.py`: własny odbiór 64 wariantów osadzonych paneli OpenGL
 (zrzuty w build/skin-preview), Codex, 2026-10-23, GPL-2.0-or-later.
+
+## Aktualne zrzuty podglądu skórek — 2026-10-23
+Własne `docs/raporty/hmi_sym/skin_classic-digital.png`,
+`docs/raporty/hmi_sym/skin_industrial-pro.png`, `docs/raporty/hmi_sym/skin_cyberdeck.png`,
+`docs/raporty/hmi_sym/skin_organic-vector.png`: świeże zrzuty uruchomionej aplikacji Qt
+z main `8483b81`, wykonane przez Codex 2026-10-23 przez tools/dev/skin-check.py,
+Radeon/Mesa, 1920×1080. GPL-2.0-or-later; bez montażu bitmap referencyjnych.
+
+Odświeżenie demo 2026-10-23, Codex: usunięto zagnieżdżony komentarz w
+`config/sim/nc_files/linumert_demo.ngc`; `tools/dev/sim_e2e_driver.py` wymaga
+ukończenia z ostatnim narzędziem T11, aby przerwany program nie przechodził odbioru.
+Własne zmiany GPL-2.0-or-later, bez nowych zależności.
+
+Odświeżone `docs/raporty/hmi_sym/demo_w_trakcie.png`,
+`docs/raporty/hmi_sym/demo_po_obrobce.png`, `docs/raporty/hmi_sym/kolizja_k302.png`
+oraz własne `docs/raporty/hmi_sym/README.md`, `docs/raporty/hmi_sym/wynik-2026-10-23.json`:
+Codex, 2026-10-23, GPL-2.0-or-later. Zrzuty uruchomionego HMI na Debianie 12,
+LinuxCNC 2.9.10/Xvfb, tools/dev/sim-e2e.sh, kod UI main 8483b81 i poprawione demo
+8675777. Okno 1920×1080; bez montażu grafik ani retuszu. Nowe regresje w
+tests/test_lexer.py sprawdzają rzeczywiste dostarczone programy demo/kolizji.
