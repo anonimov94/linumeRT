@@ -131,8 +131,15 @@ def test_reader_deadline_clears_a_previously_valid_sample():
         app.processEvents()
         assert reader.process.state() == QtCore.QProcess.NotRunning
         # A successful but malformed response must also clear old data.
+        reader.started = time.monotonic()
         reader.process.start(sys.executable, ['-c', 'print("{}")'])
         assert reader.process.waitForFinished(1000)
         assert (None, 'invalid-status') in seen
+        # A successful process that completes beyond its deadline is rejected,
+        # even when the GUI has not delivered the timeout timer yet.
+        reader.started = time.monotonic() - .6
+        reader.process.start(sys.executable, ['-c', 'print("{}")'])
+        assert reader.process.waitForFinished(1000)
+        assert seen[-1] == (None, 'reader-timeout')
     finally:
         reader.stop()

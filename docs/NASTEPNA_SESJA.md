@@ -361,3 +361,6 @@ Końcowa prezentacja: 41 PASS + 87 subtestów. Raport `../raporty/04.md`;
 świeżość producenta NML 2.9 nadal niepotwierdzona, brak kanału poleceń.
 Następny krok: ocena konkursu i host QtVCP/STATUS z globalnymi kontrolkami.
 Bez scalania przed wspólną oceną; końcowe kontrole i SHA utrzymywane w PR #96.
+
+Konkurs 04: domknięto wyścig spóźnionej odpowiedzi przed timerem; końcowy
+Debian Qt/IP 41 + 87 subtestów PASS, LinuxCNC/Xvfb ponownie PASS (3,67 s).

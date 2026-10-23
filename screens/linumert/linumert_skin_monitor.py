@@ -37,6 +37,10 @@ class StatusReader(QtCore.QObject):
     def finished(self, code, exit_status):
         payload = bytes(self.process.readAllStandardOutput())
         self.process.readAllStandardError()  # Drain diagnostics, never show untrusted rich text.
+        # Completion can reach Qt before an overdue timer after a busy event loop.
+        if time.monotonic() - self.started > MAX_AGE:
+            self.clear("reader-timeout")
+            return
         if code or exit_status != QtCore.QProcess.NormalExit:
             self.clear("read-failed")
             return
