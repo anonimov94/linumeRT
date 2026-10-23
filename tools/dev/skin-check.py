@@ -32,6 +32,7 @@ def main():
     parser.add_argument("--output", type=Path, default=ROOT / "build/skin-preview")
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=True)
+    QtCore.QCoreApplication.setAttribute(QtCore.Qt.AA_ShareOpenGLContexts)
     app = QtWidgets.QApplication([])
     window = SkinPreview(viewport_factory=create_viewport)
     window.setWindowFlags(QtCore.Qt.Window | QtCore.Qt.FramelessWindowHint
@@ -69,7 +70,20 @@ def main():
             assert window.status.isVisible()
             assert all(b.isVisible() and not b.isEnabled() for b in window.controls.values())
             if theme == THEME_IDS[0] and language == "en":
-                assert window.grab().save(str(args.output / f"{skin}-{size[0]}.png"))
+                for view in window.viewports.values():
+                    view.update()
+                QtTest.QTest.qWait(100)
+                shot = window.grab()
+                for role, view in window.viewports.items():
+                    origin = view.mapTo(window, QtCore.QPoint(0, 0))
+                    crop = shot.copy(QtCore.QRect(origin, view.size())).toImage()
+                    crop = crop.convertToFormat(QtGui.QImage.Format_RGBA8888)
+                    data = crop.bits()
+                    data.setsize(crop.byteCount())
+                    rgb = np.frombuffer(data, np.uint8).reshape(crop.height(), -1, 4)
+                    assert np.unique(rgb[::4, ::4, :3].reshape(-1, 3), axis=0).shape[0] >= 3, (
+                        "empty composed viewport", skin, role)
+                assert shot.save(str(args.output / f"{skin}-{size[0]}.png"))
                 window.expand_buttons["machine"].click()
                 QtTest.QTest.qWait(50)
                 assert window.viewports["machine"].width() > window.workspace.width()-40

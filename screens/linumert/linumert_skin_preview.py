@@ -83,10 +83,11 @@ class SkinPreview(QtWidgets.QMainWindow):
         self.demo_label.setWordWrap(True)
         footer.addWidget(self.demo_label, 1)
         self.controls = {}
-        for key in ("feed_hold", "stop"):
+        for key in ("start", "feed_hold", "stop"):
             button = QtWidgets.QPushButton()
             button.setObjectName(key)
             button.setEnabled(False)
+            button.setMinimumSize(120, 64)
             footer.addWidget(button)
             self.controls[key] = button
         root.addLayout(footer)
@@ -115,6 +116,9 @@ class SkinPreview(QtWidgets.QMainWindow):
                 border: 1px solid {c.muted}; border-radius: {radius}px; }}
             QPushButton:disabled {{ color: {c.muted}; }}
             QComboBox:focus {{ border: 2px solid {c.accent}; }}
+            QPushButton#start {{ border-bottom: 4px solid {c.success}; }}
+            QPushButton#feed_hold {{ border-bottom: 4px solid {c.warning}; }}
+            QPushButton#stop {{ border-bottom: 4px solid {c.error}; }}
         """)
         for key, label in self.selector_labels.items():
             label.setText(text(key, p))
@@ -124,7 +128,7 @@ class SkinPreview(QtWidgets.QMainWindow):
                             + " · E-STOP: — · " + text("mode_manual", p) + ": —")
         self.demo_label.setText(text("demo_controls", p))
         for key, button in self.controls.items():
-            button.setText(text(key, p))
+            button.setText({"start": "▶ ", "feed_hold": "Ⅱ ", "stop": "■ "}[key] + text(key, p))
             button.setToolTip(text("demo_controls", p))
         while self.grid.count():
             self.grid.takeAt(0)
@@ -210,6 +214,8 @@ class SkinPreview(QtWidgets.QMainWindow):
 
 
 def main(viewport_factory=None):
+    if QtWidgets.QApplication.instance() is None:
+        QtCore.QCoreApplication.setAttribute(QtCore.Qt.AA_ShareOpenGLContexts)
     app = QtWidgets.QApplication.instance() or QtWidgets.QApplication([])
     window = SkinPreview(viewport_factory=viewport_factory)
     window.show()

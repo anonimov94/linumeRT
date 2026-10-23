@@ -835,3 +835,13 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
 - Końcowe CI Python + Plant matrix + LinuxCNC RIP PASS; 109 testów LinuxCNC PASS. Artefakty zrzutów w `build/skin01/`.
 - PR #87 scalony 2026-10-23 jako `b22689f`. Autokontrola, bez niezależnego przeglądu.
 - NIEZWERYFIKOWANE na konkretnym GPU właściciela ani na fizycznej obrabiarce.
+
+## 086 — podgląd skórek według materiałów właściciela · 2026-10-23 · Codex
+- Model-Author: Codex. PR #89, osobny checkout; lokalne pliki operatora nietknięte.
+- Pobrano/obejrzano cztery wzorce WEBP; zachowano pochodzenie i ograniczenia licencji.
+- Odrębne kompozycje i obudowy, wskaźniki, trzy sceny OpenGL i powiększanie paneli.
+- Test Qt obejmuje przywracanie układu oraz usuwanie ukrytych kart po przełączeniu.
+- Naprawiono puste złożone panele po przełączeniach przez współdzielenie kontekstów Qt.
+- Radeon/Mesa: 64 warianty PASS; Debian llvmpipe: 64 PASS przed końcową poprawką.
+- Debian: lint PASS, 1018 pytest PASS, 11 skip, 109 deselected, wymagania bez błędów.
+- Autokontrola, bez niezależnego przeglądu. Offline; pełne skórki i CNC nadal otwarte.

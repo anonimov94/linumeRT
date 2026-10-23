@@ -30,8 +30,10 @@ class SkinPanel(QtWidgets.QFrame):
         for stop, color in ((0, c.muted), (.13, c.panel), (.48, c.muted),
                             (.55, c.text), (.62, c.panel), (1, c.muted)):
             rim.setColorAt(stop, QtGui.QColor(color))
-        p.fillPath(path, QtGui.QBrush(rim))
-        p.setPen(QtGui.QPen(QtGui.QColor(c.muted), 1))
+        p.fillPath(path, QtGui.QBrush(
+            QtGui.QColor(c.raised) if self.family == "cyberdeck" else rim))
+        p.setPen(QtGui.QPen(QtGui.QColor(
+            c.accent if self.family == "cyberdeck" else c.muted), 1))
         p.drawPath(path)
         p.save()
         p.setClipPath(path)
@@ -49,7 +51,8 @@ class SkinPanel(QtWidgets.QFrame):
             p.drawLine(8, 28, 8, min(100, self.height()-28))
             p.drawLine(self.width()-70, self.height()-8, self.width()-24, self.height()-8)
         elif self.family == "organic-vector":
-            p.drawArc(inner.adjusted(4, 4, -4, -4), 115*16, 48*16)
+            p.drawArc(QtCore.QRectF(rect.right()-58, rect.bottom()-58, 54, 54),
+                      270*16, 85*16)
         else:
             for x in (9, self.width()-10):
                 for y in (9, self.height()-10):
@@ -83,8 +86,16 @@ class UnknownGauge(QtWidgets.QWidget):
         for stop, color in ((0, c.panel), (.25, c.muted), (.5, c.background),
                             (.75, c.muted), (1, c.panel)):
             metal.setColorAt(stop, QtGui.QColor(color))
-        p.setBrush(metal)
-        p.setPen(QtGui.QPen(QtGui.QColor(c.muted), 1))
-        p.drawEllipse(face)
+        if self.family == "classic-digital":
+            p.setBrush(metal)
+            p.setPen(QtGui.QPen(QtGui.QColor(c.muted), 1))
+            p.drawEllipse(face)
+        else:
+            p.setBrush(QtGui.QColor(c.background))
+            p.setPen(QtGui.QPen(QtGui.QColor(c.accent), 1))
+            if self.family == "cyberdeck":
+                p.drawRoundedRect(face, 3, 3)
+            else:
+                p.drawEllipse(face)
         p.setPen(QtGui.QColor(c.text))
         p.drawText(rect, QtCore.Qt.AlignCenter, "— %")

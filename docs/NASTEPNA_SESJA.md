@@ -1,6 +1,6 @@
 # Stan projektu i przekazanie
 
-Tura: Codex · 2026-10-23 · stan: oddana po SKIN-01, PR #87 scalony.
+Tura: Codex · 2026-10-23 · stan: w toku, odbiór PR #89.
 
 ## Wynik końcowy — SKIN-01
 
@@ -309,10 +309,12 @@ Gałęzie tool-discard-edits i design/skin-system-roadmap-2026-10-22 już zawart
 
 ## Stan zatrzymania — podgląd skórek, 2026-10-23
 Model-Author: Codex. Osobny checkout /tmp/linumert-skin-visual,
-gałąź codex/skin-visual-preview, draft PR #89. Push 123f5df: trzy sceny OpenGL
-w czterech kompozycjach; 25 testów + 87 subtestów PASS. Radeon/Mesa: 12 paneli
-z depth 24 PASS. Właściciel podał materiały tiny.pl/95g03y3r2; skracacz zwraca
-HTTP 403 Cloudflare, poproszono o pełny URL. Porównanie wyglądu oczekuje na materiały.
-Materiały otrzymane: https://megawrzuta.pl/hdimgnec, cztery makiety WEBP obejrzane
- i zapisane w docs/design/referencje-skin/. Następny krok: odbiór zintegrowanego GL
- i dopracowanie scen; zgodność całego HMI z makietami pozostaje otwarta.
+gałąź codex/skin-visual-preview, PR #89. Wzorce od właściciela zapisane w
+ docs/design/referencje-skin/; obejrzano cztery obrazy. Dopasowano hierarchię paneli,
+ rodziny ramek i wskaźniki; trzy sceny GL, powiększanie z zachowaniem statusu.
+Push 38b3af3: odbiór GL w CI. Lokalny Debian: lint PASS, 1018 pytest PASS,
+11 skip, 109 deselected, wymagania 21/22 bez błędów. Radeon i Debian llvmpipe:
+64 kombinacje PASS. Końcowy odbiór obejmuje poprawkę współdzielenia kontekstów:
+indywidualny framebuffer nie wystarczał do wykrycia pustych paneli w zrzucie okna.
+To podgląd offline, bez poleceń CNC; pełna zgodność z makietami i SKIN-02…06 otwarte.
+Następny krok: szczegółowe kontrolki rodzin i adapter statusu w osobnym hoście QtVCP.
