@@ -35,6 +35,7 @@ PASS na podstawie samego kodu wyjścia, jeśli część wymaganego zakresu pomin
 | A2 C i sanitizery | BLOCKED | niewykonane |
 | A3 scenariusze i macierz Plant | BLOCKED | niewykonane |
 | A4 rzeczywisty LinuxCNC + QtVCP (wirtualna maszyna) | BLOCKED | niewykonane |
+| A5 obróbka i diagnostyka kolizji w kontenerze | BLOCKED | niewykonane |
 | B1 trzy launchery i zamknięcie | BLOCKED | niewykonane |
 | B2 bazowanie, JOG, MDI | BLOCKED | niewykonane |
 | B3 liczby, wrzeciono, wymiana | BLOCKED | niewykonane |

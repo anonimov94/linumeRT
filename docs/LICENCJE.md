@@ -61,3 +61,8 @@ Model-Author: Codex. LinuxCNC 2.9 jest pobierany do cache z oficjalnego repozyto
 
 
 Środowisko Debian 12: bootstrap przez systemowy debootstrap i debian-archive-keyring, podpisy oficjalnego repo Debian sprawdzane przed eksportem rootfs. To lokalne narzędzia środowiska, bez dołączania kodu lub obrazu do Git; licencje konkretnych pakietów w /usr/share/doc/<pakiet>/copyright. Instalacja VNC: TigerVNC, XFCE, D-Bus i X11 jak w poprzednim pulpicie testowym.
+
+## Protokół odbioru stanowiska — 2026-10-23
+Model-Author: Codex. Własne procedury, szablon, raport konkursu i archiwum
+dowodów programowych: GPL-2.0-or-later; ścieżki i pochodzenie w PROVENANCE.md.
+Bez nowych zależności ani zewnętrznych materiałów.

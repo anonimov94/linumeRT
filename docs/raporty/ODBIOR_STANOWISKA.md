@@ -51,8 +51,9 @@ logi i częściowy `report.json`; nie twórz drugiego runnera.
 |---|---|---|---|
 | A1 | `python3 tools/agent_tests/run.py --model Codex`; następnie `python3 tools/check_requirements.py -v` | Runner i kontrola REQ: kod 0; zachowaj `state/test-runs/<id>/`, liczbę testów i listę pominięć. Pokrycie REQ nie dowodzi wykonania testów | Błąd polecenia: FAIL danej kontroli, zachowaj log; brak zależności: BLOCKED właściwej karty |
 | A2 | `make test-c test-san` | Obie komendy kod 0, zero raportów ASan/UBSan; pełny log | Raport sanitizera: FAIL; brak obsługi sanitizera: BLOCKED, nie wyłączaj go dla uzyskania PASS |
-| A3 | `make plant-matrix`; raporty w `build/raporty/` | Kod 0; wszystkie kryteria każdego scenariusza i każdej maszyny PASS, liczba i nazwy w raporcie | Jakakolwiek niezgodność: FAIL; niepełny zestaw: BLOCKED |
+| A3 | `make plant-matrix`; raporty w `build/raporty/`; sprawdź także sekcję Zdarzenia każdego HTML | Kod 0; wszystkie kryteria każdego scenariusza i każdej maszyny PASS, liczba i nazwy w raporcie. W scenariuszach bez celowego wstrzyknięcia nie może być nieoczekiwanych CRASH/COVER_CRASH. Dla awarii porównaj zdarzenia z zadeklarowanym oczekiwaniem | Niezgodność lub nieoczekiwana kolizja: FAIL nawet przy kodzie 0; niepełny zestaw: BLOCKED |
 | A4 | LinuxCNC 2.9 RIP, Xvfb, wyłącznie konfiguracje testowe; `python3 tools/agent_tests/run.py --model Codex --linuxcnc` | Wszystkie kontrole kod 0; osobna grupa `linuxcnc` bez nieuzasadnionych pominięć; zachowaj też zrzuty i dane z katalogów pytest | Brak RIP/DISPLAY/blokady: BLOCKED; błąd integracji: FAIL, zamknij wyłącznie własne procesy |
+| A5 | Podman, przygotowany obraz startera i Xvfb, bez sprzętu; `bash tools/dev/sim-e2e.sh` | Kod 0, demo faktycznie kończy się T11 + IDLE, druga próba raportuje K-302; dowody w `build/sim-e2e/` | Błąd drivera lub niedokończony program: FAIL; brak środowiska: BLOCKED |
 
 A4 obejmuje ponownie A1–A3, więc nie trzeba uruchamiać obu wariantów runnera.
 W CI odpowiadają temu `.github/workflows/ci.yml` i `linuxcnc.yml`.
@@ -61,6 +62,9 @@ Zapisz URL przebiegu, **head SHA** i pobierz artefakty `raporty-scenariuszy` /
 Workflow LinuxCNC filtruje ścieżki: PR wyłącznie dokumentacyjny może go nie uruchomić.
 W takim przypadku wykonaj A4 lokalnie albo jawnie zleć workflow dla właściwej gałęzi.
 Nie traktuj braku zadania CI jako PASS.
+A5 jest dodatkową próbą obróbki i diagnostyki kolizji; skrypt ustawia
+`HMI_ESTOP_BYPASS=1` wyłącznie w tymczasowej konfiguracji bez sprzętu.
+Nie zalicza toru zezwolenia ani testów Plant z niezmienionym postgui z A4.
 
 ## B — ręczny odbiór pulpitu na sim/Plant
 
@@ -77,7 +81,7 @@ zawieszeniu albo błędzie przerwij własną symulację i zapisz FAIL; nie konty
 | B2 | W Plant wykonaj Reset, załącz i bazuj wszystkie osie; JOG X+ krokiem 1 mm, X− 1 mm; w MDI `G21 G91 G1 X1 F60`, następnie `G1 X-1` i `G90` | Bazowanie wszystkich osi potwierdzone statusem; kierunki i przesunięcia ±1 mm, powrót z błędem ≤0,01 mm w odczycie ustalonym; zwolnienie JOG kończy ruch |
 | B3 | W Plant wpisz liczbę posuwu 120, obrotów 600, krok JOG 0,1; przełącz fokus; `M3 S600`, `M5`, `T1 M6` z potwierdzeniem wirtualnej wymiany | Pola nie tracą cyfr po odświeżeniu; zadane S=600, M5 zatrzymuje wirtualne wrzeciono, status T1 po M6; brak wiszącego dialogu |
 | B4 | Otwórz dostarczone `config/sim/nc_files/linumert_demo.ngc`, Start, Pauza, Wznów, poczekaj do końca | W pauzie status PAUSED, po wznowieniu postęp i koniec interpreter IDLE z T11; samo IDLE po Abort/błędzie nie zalicza próby |
-| B5 | W Cyklach utwórz poprawny program, zapisz `.lnx`, otwórz ponownie, oszacuj czas, zmień wymiar; wyeksportuj raport z obróconą kamerą i otwórz HTML | Wczytane dane identyczne; edycja unieważnia poprzedni czas; raport zawiera aktualną kamerę i zdarzenia; zapisz pliki jako dowody |
+| B5 | W pustych Cyklach wybierz Planowanie: X max=100, Y max=50, głębokość całkowita=1, średnica=50 mm, reszta domyślna; Dodaj krok → Zapisz .lnx → Otwórz .lnx → Szacuj czas. Zaznacz krok, zmień X max na 90 i kliknij Zmień wybrany. Następnie w Symulacji obróć kamerę, wyeksportuj raport i otwórz HTML | Wczytane dane identyczne; edycja unieważnia poprzedni czas; raport zawiera aktualną kamerę i zdarzenia z B4; zapisz oba `.lnx` i HTML jako dowody. Nie uruchamiaj wygenerowanego cyklu w tej próbie |
 | B6 | W trakcie wirtualnego przejazdu naciśnij grzyb HMI, spróbuj Start; potwierdź Reset i ponownie załącz bez Start | Odebranie zezwolenia widoczne w statusie; Start w E-STOP odrzucony; reset i ponowne załączenie same nie wznawiają programu |
 
 To rozwinięcie punktu 27 [odbioru planu](prototypy/PLAN-21-27-2026-10-21.md).
