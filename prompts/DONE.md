@@ -45,3 +45,4 @@ Wykonane: 33 z 84.
 086 | 2026-10-23 | Podgląd skórek według czterech makiet właściciela, sceny 3D i powiększanie, odbiór GL 64 wariantów; nie kończy SKIN-02…06; PR #89; Codex
 087 | 2026-10-23 | Nowe zrzuty skórek i rzeczywistej symulacji w README/raporcie hmi_sym, poprawka komentarza demo i potwierdzenie T11; PR #90; Codex
 088 | 2026-10-23 | Cztery osobne ekrany offline, układy i kontrolki według wizji, launcher --skin, 128 wariantów GL, nowa galeria; nie kończy integracji CNC; PR #91; Codex
+K04 | 2026-10-23 | Konkurs: typowany adapter read-only NML, cztery skórki, G53, timeout i reconnect LinuxCNC 2.9.10/Xvfb; PR #96 gotowy do oceny, bez scalania; raport raporty/04.md; Codex

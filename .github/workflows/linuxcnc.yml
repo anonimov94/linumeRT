@@ -92,6 +92,7 @@ jobs:
           path: |
             build/skin01/
             build/skin-preview/
+            build/skin-monitor/
             state/test-runs/
             state/spike_qtdragon.png
             /tmp/pytest-of-codex/

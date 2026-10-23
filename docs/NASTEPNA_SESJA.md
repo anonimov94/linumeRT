@@ -353,3 +353,11 @@ typowany snapshot i osobny launcher tools/dev/skin-monitor.py; cztery skórki,
 G53 mm/°, E-STOP z NML, bez kanału komend i bez konsumpcji error_channel.
 Lokalnie 30 testów + 87 subtestów PASS. Następne: rzeczywisty LinuxCNC/Xvfb,
 utrata/odzyskanie statusu, pełne testy i raport raporty/04.md. Bez scalania konkursu.
+
+Konkurs 04 — wynik: PR #96, e1748c7 + ec78736; rzeczywisty LinuxCNC 2.9.10
+sim/Xvfb PASS (brak CNC → odczyt → utrata → restart), bez komend i resetu safety.
+Pełny Debian: 1039 PASS/10 skip, lint/wymagania/test-c/test-san PASS.
+Końcowa prezentacja: 41 PASS + 87 subtestów. Raport `../raporty/04.md`;
+świeżość producenta NML 2.9 nadal niepotwierdzona, brak kanału poleceń.
+Następny krok: ocena konkursu i host QtVCP/STATUS z globalnymi kontrolkami.
+Bez scalania przed wspólną oceną; końcowe kontrole i SHA utrzymywane w PR #96.

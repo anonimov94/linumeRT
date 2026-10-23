@@ -864,3 +864,13 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
 - Radeon i Debian/Mesa: 128 wariantów PASS; Debian 26 testów + 87 subtestów PASS.
 - Nowa galeria w README/raporcie; pełna integracja QtVCP i szczegółowe modele nadal otwarte.
 - Autokontrola, bez niezależnego przeglądu; wynik końcowego CI i scalenia w PR #91.
+
+## Konkurs 04 — read-only integracja skórek · 2026-10-23 · Codex
+- Model-Author: Codex. PR #96, osobny checkout; bez scalania przed oceną konkursu.
+- Wspólny typowany adapter stat/NML, osobny monitor czterech skórek, G53 mm/°.
+- Brak komend/HAL/odbierania error_channel; produkcyjny handler bez zmian.
+- Jednorazowy proces izoluje tool mmap; limit 500 ms, wygaszenie i reconnect.
+- LinuxCNC 2.9.10 + Xvfb: brak CNC → odczyt → utrata → restart PASS, bez resetu E-STOP.
+- Debian 1039 PASS/10 skip, lint/wymagania i 108 testów C + ASan/UBSan PASS.
+- Końcowy Qt/IP: 41 PASS + 87 subtestów; logi/zrzuty w build/skin-monitor, raport raporty/04.md.
+- Autokontrola; świeżość producenta NML niepotwierdzona. NIEZWERYFIKOWANE NA SPRZĘCIE.
