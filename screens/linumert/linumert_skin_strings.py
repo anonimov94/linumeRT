@@ -10,6 +10,14 @@ from types import MappingProxyType
 from linumert_skin_contract import PresentationPreferences
 
 _EN = {
+    'feed_spindle': 'Feed / spindle',
+    'overrides': 'Overrides',
+    'machine_status': 'Machine status',
+    'power': 'Power',
+    'spindle': 'Spindle',
+    'coolant': 'Coolant',
+    'door': 'Door',
+    'estop_status': 'E-STOP status',
     "preview": "Presentation prototype — no machine connection",
     "maximize": "Maximize / restore panel",
     "skin": "Skin", "theme": "Color theme", "language": "Language",
@@ -29,6 +37,14 @@ _EN = {
     "demo_controls": "Preview only — machine commands disabled",
 }
 _PL = {
+    'feed_spindle': 'Posuw / wrzeciono',
+    'overrides': 'Korekcje',
+    'machine_status': 'Stan maszyny',
+    'power': 'Zasilanie',
+    'spindle': 'Wrzeciono',
+    'coolant': 'Chłodziwo',
+    'door': 'Drzwi',
+    'estop_status': 'Stan E-STOP',
     "preview": "Prototyp prezentacji — bez połączenia z maszyną",
     "maximize": "Powiększ / przywróć panel",
     "skin": "Skórka", "theme": "Motyw kolorystyczny", "language": "Język",
