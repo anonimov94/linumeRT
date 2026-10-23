@@ -437,6 +437,11 @@ z zainstalowanego LinuxCNC (GPL-2.0-or-later), wyłącznie w katalogu tymczasowy
 Aktualizacje własnych `docs/design/SKIN_SYSTEM_ROADMAP.md` i
 `docs/design/SKIN_AUDIT.md`; bez nowych zależności i zasobów graficznych.
 
+Konkurs 01, Codex, 2026-10-23: własny moduł
+`core/linumert/machine/launch.py` i test `tests/test_launch_gate.py` (GPL-2.0-or-later).
+Bramka przed exec LinuxCNC oraz atrapa procesu do prób offline; bez nowych zależności
+ani zewnętrznego kodu. Zmiany istniejącego startera i konfiguracji zachowują ich pochodzenie.
+
 ## Odbiór stanowiska — konkurs 2 · 2026-10-23
 Model-Author: Codex. Własne procedury i szablon:
 `docs/raporty/ODBIOR_STANOWISKA.md`, `docs/raporty/SZABLON_ODBIORU.md` oraz raport

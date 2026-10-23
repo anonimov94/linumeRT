@@ -48,4 +48,6 @@ Wykonane: 33 z 84.
 K04 | 2026-10-23 | Konkurs: typowany adapter read-only NML, cztery skórki, G53, timeout i reconnect LinuxCNC 2.9.10/Xvfb; PR #96 gotowy do oceny, bez scalania; raport raporty/04.md; Codex
 
 
+Konkurs-01 | 2026-10-23 | Bramka przed exec LinuxCNC: deklaracje hardware + audyt HAL, integracja startera sim/Plant; 41 testów zakresu PASS, pełne lint/test 1033 PASS; PR #93 do oceny bez scalenia; Codex
+
 KONKURS-03 | 2026-10-23 | Audyt trzech luk poza GUI, odmowa NaN/inf w machine.yaml; Debian 1104 PASS, 108 C/ASan PASS, REQ bez błędów; PR #95 do wspólnej oceny, bez scalenia; Model-Author: Codex

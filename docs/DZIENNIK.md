@@ -553,7 +553,7 @@ Brak komend ruchu przy kontroli; screenshot wykonany lokalnie. CI oraz odbiór w
 ## Plan 25.10 — czas pozostały i porównanie z Plant · Codex
 - Model-Author: Codex. Produkcja: szacowanie w tle, ETA podczas pracy i pauzy, unieważnienie po zmianie programu/INI, ograniczenia korekcji i startu od linii.
 - Estymator uwzględnia limit Z helisy; jawnie odmawia nieobsługiwanej płaszczyzny/trybu posuwu i brakujących limitów XYZ.
-- Lokalnie 40 testów czasu/widgetów/złożenia HMI PASS. Pomiar czasu dwóch kieszeni i planowania LinuxCNC + Plant oraz błąd modelu w pocket_calibration.json — odbiór CI wymagany.
+- Lokalnie 41 testów czasu/widgetów/złożenia HMI PASS. Pomiar czasu dwóch kieszeni i planowania LinuxCNC + Plant oraz błąd modelu w pocket_calibration.json — odbiór CI wymagany.
 - Wynik jest przybliżeniem, nie gwarancją czasu cyklu; start od XYZ=0 i oczekiwania operatora opisane w planie. Bez niezależnego przeglądu.
 
 ## Plan 26.10 — bieżący widok i oś czasu raportu · Codex
@@ -874,6 +874,14 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
 - Debian 1039 PASS/10 skip, lint/wymagania i 108 testów C + ASan/UBSan PASS.
 - Końcowy Qt/IP: 41 PASS + 87 subtestów; logi/zrzuty w build/skin-monitor, raport raporty/04.md.
 - Autokontrola; świeżość producenta NML niepotwierdzona. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## Konkurs 01 — bramka konfiguracji przed startem CNC · 2026-10-23 · Codex
+- Model-Author: Codex. PR #93; osobny worktree i gałąź, bez scalenia przed oceną.
+- Deklaracje hardware i ograniczony audyt HAL wymagane przed exec LinuxCNC.
+- Główny starter korzysta z bramki; trzy INI sim/Plant mają jawne profile; HAL bez zmian.
+- 41 testów bramki/deklaracji/HAL PASS; pełny make lint test: 1033 PASS, 11 skip; wymagania bez błędów.
+- CI wykryło RuntimeError Path.resolve na Pythonie 3.11; poprawiono jawną odmowę; raport opisuje granice.
+- Autokontrola, bez niezależnego przeglądu; NIEZWERYFIKOWANE NA SPRZĘCIE.
 
 ## Konkurs 3 — pokrycie wymagań poza GUI · 2026-10-23 · Codex
 - Model-Author: Codex. Osobna gałąź/worktree, PR #95; raport audytu `raporty/03.md`.

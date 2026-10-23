@@ -29,3 +29,9 @@ Tabela jest zgodna z wymaganiami (pilnuje tego `tests/test_plant_spec.py`).
 | REQ-QA-02 | 024, 082 | job `plant-matrix` (`run_scenario.py --matrix`), `test_matrix_smoke_on_every_machine` | zielone |
 | REQ-QA-03 | 016, 024 | 016: `test_fuzz_only_frame_errors`, `test_rejects_bad_frames`, `test_corrupt_frames_*`, `test_model_exception_gives_safe_state`, `test_watchdog_*`, `test_missing_template_refuses_start`, `test_bad_plant_yaml`; 024: `test_fuzz_machine_yaml`, `tests/test_scenario_faults.py`, scenariusze `link_loss`, `drive_fault_mid_program`, `estop_mid_program` (z LinuxCNC: `tests/test_scenario_linuxcnc.py`) | zielone |
 | REQ-QA-04 | 016, 024 | `test_determinism` (016: SHA-256 odpowiedzi serwera); scenariusze: `test_scenario_is_deterministic`, `test_frame_loss_is_deterministic` | zielone |
+
+Kontrola granicy uruchomienia (CLAUDE.md §6, konkurs 01; bez nowego identyfikatora REQ):
+`tests/test_launch_gate.py` sprawdza odmowę przed exec, kompletną deklarację hardware,
+pliki HAL/source, niejednoznaczne INI i profile sim/Plant z atrapą procesu CNC.
+To dodatkowe pokrycie kontraktu konfiguracji; nie zmienia statusu REQ-VD-06 ani nie
+stanowi odbioru fizycznego I/O, napędów lub zewnętrznego watchdoga.
