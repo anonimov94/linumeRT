@@ -7,9 +7,12 @@ No ACTION/STATUS, HAL, simulation worker or skin dependency. PyQt5/pyqtgraph onl
 import time
 
 import numpy as np
-import pyqtgraph.opengl as gl
 from OpenGL import GL
 from PyQt5 import QtCore, QtGui
+
+# Select the contracted Qt binding before pyqtgraph auto-detection.
+# isort: split
+import pyqtgraph.opengl as gl
 
 
 class RenderView(gl.GLViewWidget):

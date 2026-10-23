@@ -8,6 +8,8 @@ import os
 import sys
 from pathlib import Path
 
+os.environ.setdefault("PYQTGRAPH_QT_LIB", "PyQt5")
+
 # X11/Xwayland is the common host/Debian test path. Match PyOpenGL to Qt,
 # even when the desktop also exports WAYLAND_DISPLAY (PyOpenGL otherwise picks EGL).
 if sys.platform.startswith("linux"):

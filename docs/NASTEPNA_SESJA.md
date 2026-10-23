@@ -13,7 +13,11 @@ codex/skin-01-renderer, checkout /tmp/linumert-skin01; bez globalnego LOCK.
 PR #87, pierwszy push 37fde1a. Krok 1: reprodukcja QPainter i degeneracji kapsli, walidacja wejścia siatki;
 23 lokalne testy (z IP) PASS, lint PASS. Widok GL i launcher gotowe;
 próba Radeon/Mesa PASS (24-bit depth, niezależność od kolejności, culling,
-3 kamery, wireframe, obrót, 9 klatek/350 ms). Następnie automatyzacja, zrzuty
+3 kamery, wireframe, obrót, 9 klatek/350 ms).
+Push 894c68f: launcher/prototyp. Test Debian 12/LinuxCNC + llvmpipe/Mesa 22.3.6
+również PASS (pyqtgraph 0.13.1, 24-bit depth, 8 klatek/350 ms).
+Automatyczny probe i krok CI gotowe; następnie pełne testy, dokumentacja i odbiór PR.
+Zrzuty
 kilku kamer, test GPU Radeon 660M/Mesa oraz Debian/LinuxCNC i pełne CI.
 
 ## Aktualne polecenie — scalanie po zakończeniu
