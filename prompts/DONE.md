@@ -42,3 +42,4 @@ Wykonane: 33 z 84.
 054 | 2026-10-20 | Przygotówka: ;@STOCK, dialog Symulacja, K-321 (wcześniej) + cel sondy Plant z przygotówki (tools/stock_probe.py); Claude
 
 085 | 2026-10-23 | SKIN-01: reprodukcja zasłaniania i windingu brył, podgląd OpenGL na Radeon/Mesa i Debian/LinuxCNC; PR #87; Codex
+086 | 2026-10-23 | Podgląd skórek według czterech makiet właściciela, sceny 3D i powiększanie, odbiór GL 64 wariantów; nie kończy SKIN-02…06; PR #89; Codex

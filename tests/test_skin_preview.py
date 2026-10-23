@@ -53,7 +53,7 @@ def test_all_preview_selections_and_resolutions():
             assert window.preferences.skin == family
             assert window.preferences.theme == theme
             assert window.preferences.language == language
-            assert window.banner.text() == text("preview", window.preferences)
+            assert text("preview", window.preferences) in window.banner.text()
             assert window.grid.count() == 6
             assert set(window.cards) == {item[0] for item in LAYOUTS[family]}
             for card in window.cards.values():
@@ -68,3 +68,33 @@ def test_all_preview_selections_and_resolutions():
         window.close()
         window.deleteLater()
         app.sendPostedEvents(None, QtCore.QEvent.DeferredDelete)
+
+
+def test_maximize_keeps_global_controls_and_releases_previous_cards():
+    app = QtWidgets.QApplication.instance() or QtWidgets.QApplication([])
+    window = SkinPreview(viewport_factory=lambda role, colors: QtWidgets.QWidget())
+    window.show()
+    app.processEvents()
+    old_cards = list(window.cards.values())
+    for role in ("machine", "toolpath", "workpiece"):
+        window.expand_buttons[role].click()
+        app.processEvents()
+        assert window.maximized == role
+        assert window.grid.count() == 1
+        assert window.cards[role].width() > window.workspace.width() - 20
+        assert window.status.isVisible() and window.controls["stop"].isVisible()
+        window.expand_buttons[role].click()
+        app.processEvents()
+        assert window.grid.count() == 6
+        assert all(card.isVisible() for card in window.cards.values())
+    window.expand_buttons["machine"].click()
+    window.selectors["skin"].setCurrentIndex(1)
+    app.sendPostedEvents(None, QtCore.QEvent.DeferredDelete)
+    app.processEvents()
+    from PyQt5 import sip
+    assert all(sip.isdeleted(card) for card in old_cards)
+    assert window.maximized is None and window.grid.count() == 6
+    assert set(window.viewports) == {"machine", "toolpath", "workpiece"}
+    window.close()
+    window.deleteLater()
+    app.sendPostedEvents(None, QtCore.QEvent.DeferredDelete)

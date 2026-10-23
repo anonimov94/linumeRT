@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
 """Standalone Qt layout study. No LinuxCNC, HAL, file edits or machine commands.
 
-Model-Author: Codex. Viewports reserve space for the separately validated renderer.
+Model-Author: Codex. Optional interactive offline scenes use the SKIN-01 renderer.
 """
 
 from dataclasses import replace
@@ -13,31 +13,34 @@ from linumert_skin_contract import (
     PresentationPreferences,
     palette_for,
 )
+from linumert_skin_panel import SkinPanel, UnknownGauge
 from linumert_skin_strings import text
 from PyQt5 import QtCore, QtWidgets
 
 # role, row, column, row span, column span. These are distinct compositions,
 # not a recoloring of the existing QtDragon shell.
 LAYOUTS = {
-    "classic-digital": (("dro", 0, 0, 2, 1), ("toolpath", 0, 1, 2, 3),
-                        ("machine", 0, 4, 1, 1), ("workpiece", 1, 4, 1, 1),
-                        ("program", 2, 0, 1, 4), ("tools", 2, 4, 1, 1)),
-    "industrial-pro": (("dro", 0, 0, 1, 2), ("tools", 0, 2, 1, 1),
-                       ("machine", 1, 0, 2, 1), ("toolpath", 1, 1, 2, 1),
-                       ("workpiece", 1, 2, 1, 1), ("program", 2, 2, 1, 1)),
-    "cyberdeck": (("program", 0, 0, 1, 1), ("dro", 0, 1, 1, 1),
-                  ("toolpath", 0, 2, 2, 2), ("machine", 1, 0, 2, 2),
-                  ("workpiece", 2, 2, 1, 1), ("tools", 2, 3, 1, 1)),
-    "organic-vector": (("machine", 0, 0, 2, 2), ("dro", 0, 2, 1, 1),
-                       ("toolpath", 0, 3, 2, 2), ("tools", 1, 2, 1, 1),
-                       ("workpiece", 2, 0, 1, 2), ("program", 2, 2, 1, 3)),
+    "classic-digital": (("dro", 0, 0, 2, 1), ("program", 2, 0, 2, 1),
+                        ("toolpath", 0, 1, 3, 2), ("machine", 0, 3, 3, 1),
+                        ("tools", 3, 1, 1, 2), ("workpiece", 3, 3, 1, 1)),
+    "industrial-pro": (("machine", 0, 0, 3, 2), ("dro", 0, 2, 2, 2),
+                       ("toolpath", 0, 4, 2, 2), ("tools", 2, 2, 2, 2),
+                       ("program", 2, 4, 2, 2), ("workpiece", 3, 0, 1, 2)),
+    "cyberdeck": (("dro", 0, 0, 2, 1), ("program", 0, 1, 2, 1),
+                  ("toolpath", 0, 2, 2, 2), ("machine", 2, 0, 2, 1),
+                  ("tools", 2, 1, 2, 2), ("workpiece", 2, 3, 2, 1)),
+    "organic-vector": (("dro", 0, 0, 2, 1), ("program", 2, 0, 2, 1),
+                       ("machine", 0, 1, 2, 1), ("toolpath", 0, 2, 2, 2),
+                       ("tools", 2, 1, 2, 2), ("workpiece", 2, 3, 2, 1)),
 }
 
 
 class SkinPreview(QtWidgets.QMainWindow):
-    def __init__(self, preferences=None):
+    def __init__(self, preferences=None, viewport_factory=None):
         super().__init__()
         self.preferences = preferences or PresentationPreferences()
+        self.viewport_factory = viewport_factory
+        self.viewports = {}
         self.setWindowTitle("linumeRT · GUI prototype")
         self.resize(1280, 800)
         central = QtWidgets.QWidget()
@@ -80,10 +83,11 @@ class SkinPreview(QtWidgets.QMainWindow):
         self.demo_label.setWordWrap(True)
         footer.addWidget(self.demo_label, 1)
         self.controls = {}
-        for key in ("feed_hold", "stop"):
+        for key in ("start", "feed_hold", "stop"):
             button = QtWidgets.QPushButton()
             button.setObjectName(key)
             button.setEnabled(False)
+            button.setMinimumSize(120, 64)
             footer.addWidget(button)
             self.controls[key] = button
         root.addLayout(footer)
@@ -96,70 +100,124 @@ class SkinPreview(QtWidgets.QMainWindow):
     def refresh(self):
         p = self.preferences
         c = palette_for(p)
-        radius = {"classic-digital": 0, "industrial-pro": 4,
-                  "cyberdeck": 1, "organic-vector": 24}[p.skin]
+        radius = 22 if p.skin == "organic-vector" else 3
         self.setStyleSheet(f"""
             QMainWindow, QWidget {{ background: {c.background}; color: {c.text};
                 font-family: 'IBM Plex Sans', 'DejaVu Sans'; font-size: 14px; }}
-            QFrame[card="true"] {{ background: {c.panel}; border: 1px solid {c.muted};
-                border-radius: {radius}px; }}
+            QFrame[card="true"] {{ background: transparent; border: none; }}
             QFrame[card="true"] QLabel {{ background: transparent; border: none; }}
             QLabel[heading="true"] {{ color: {c.accent}; font-size: 17px; }}
             QLabel#banner {{ color: {c.warning}; padding: 8px; }}
             QLabel#dro {{ font-family: 'JetBrains Mono', 'DejaVu Sans Mono';
-                font-size: 32px; color: {c.accent}; }}
+                font-size: 28px; font-weight: bold; color: {c.accent}; }}
             QComboBox, QPushButton {{ min-height: 44px; padding: 0 10px;
-                background: {c.panel}; border: 1px solid {c.muted}; }}
+                background: qlineargradient(x1:0,y1:0,x2:0,y2:1,
+                    stop:0 {c.panel}, stop:1 {c.background});
+                border: 1px solid {c.muted}; border-radius: {radius}px; }}
             QPushButton:disabled {{ color: {c.muted}; }}
             QComboBox:focus {{ border: 2px solid {c.accent}; }}
+            QPushButton#start {{ border-bottom: 4px solid {c.success}; }}
+            QPushButton#feed_hold {{ border-bottom: 4px solid {c.warning}; }}
+            QPushButton#stop {{ border-bottom: 4px solid {c.error}; }}
         """)
         for key, label in self.selector_labels.items():
             label.setText(text(key, p))
-        self.banner.setText(text("preview", p))
+        self.banner.setText("linumeRT  //  " + p.skin.replace("-", " ").upper()
+                            + "  ·  " + text("preview", p))
         self.status.setText(text("alarms", p) + " · " + text("status_unknown", p)
                             + " · E-STOP: — · " + text("mode_manual", p) + ": —")
         self.demo_label.setText(text("demo_controls", p))
         for key, button in self.controls.items():
-            button.setText(text(key, p))
+            button.setText({"start": "▶ ", "feed_hold": "Ⅱ ", "stop": "■ "}[key] + text(key, p))
             button.setToolTip(text("demo_controls", p))
         while self.grid.count():
-            self.grid.takeAt(0).widget().deleteLater()
+            self.grid.takeAt(0)
+        for card in getattr(self, "cards", {}).values():
+            card.hide()
+            card.deleteLater()
         # Clear stretch from the previous composition before applying the next.
-        for column in range(5):
+        for column in range(6):
             self.grid.setColumnStretch(column, 0)
         self.cards = {}
+        self.maximized = None
+        self.expand_buttons = {}
+        self.viewports = {}
         for role, row, column, height, width in LAYOUTS[p.skin]:
-            card = QtWidgets.QFrame()
+            card = SkinPanel(p.skin, c)
             card.setProperty("card", True)
             card.setObjectName(role)
             layout = QtWidgets.QVBoxLayout(card)
-            heading = QtWidgets.QLabel("DRO" if role == "dro" else text(role, p))
+            layout.setContentsMargins(16, 12, 16, 12)
+            heading = QtWidgets.QLabel(("DRO / XYZ · mm" if role == "dro" else text(role, p)).upper())
             heading.setProperty("heading", True)
-            layout.addWidget(heading)
+            titlebar = QtWidgets.QHBoxLayout()
+            titlebar.addWidget(heading, 1)
+            if role in ("machine", "workpiece", "toolpath"):
+                expand = QtWidgets.QPushButton("↗")
+                expand.setFixedSize(44, 44)
+                expand.setToolTip(text("maximize", p))
+                expand.setAccessibleName(text("maximize", p))
+                expand.clicked.connect(lambda checked=False, key=role: self.toggle_panel(key))
+                titlebar.addWidget(expand)
+                self.expand_buttons[role] = expand
+            layout.addLayout(titlebar)
             if role == "dro":
-                content = "X  —\nY  —\nZ  —"
+                content = "X  —.———\nY  —.———\nZ  —.———"
             elif role == "program":
-                content = text("sample_program", p) + "\n\nG21 G90\nG0 X0 Y0\nM2"
+                content = text("sample_program", p) + "\n\n001  G21 G90\n002  G54\n003  G0 X0 Y0\n004  M2"
             elif role in ("machine", "workpiece", "toolpath"):
-                content = text("renderer_pending", p)
+                content = text("offline_scene", p) if self.viewport_factory else text(
+                    "renderer_pending", p)
             else:
                 content = "T —  ·  D —  ·  Z —"
             body = QtWidgets.QLabel(content)
             body.setWordWrap(True)
             if role == "dro":
                 body.setObjectName("dro")
-            layout.addWidget(body, 1, QtCore.Qt.AlignCenter)
+            if role in ("machine", "workpiece", "toolpath") and self.viewport_factory:
+                viewport = self.viewport_factory(role, c)
+                layout.addWidget(viewport, 1)
+                self.viewports[role] = viewport
+                layout.addWidget(body)
+            else:
+                layout.addWidget(body, 1, QtCore.Qt.AlignCenter)
+            if role == "tools":
+                instruments = QtWidgets.QHBoxLayout()
+                for label in ("F", "S", "G0"):
+                    instruments.addWidget(UnknownGauge(label, p.skin, c))
+                layout.addLayout(instruments, 1)
+            if role == "program":
+                body.setStyleSheet("font-family: monospace; font-size: 13px;")
             self.grid.addWidget(card, row, column, height, width)
             self.cards[role] = card
             for index in range(column, column + width):
                 self.grid.setColumnStretch(index, 1)
-        for row in range(3):
+        for row in range(4):
             self.grid.setRowStretch(row, 1)
 
+    def toggle_panel(self, role):
+        self.maximized = None if self.maximized == role else role
+        for card in self.cards.values():
+            self.grid.removeWidget(card)
+            card.hide()
+        if self.maximized:
+            card = self.cards[role]
+            self.grid.addWidget(card, 0, 0, 4, 6)
+            card.show()
+        else:
+            for key, row, column, height, width in LAYOUTS[self.preferences.skin]:
+                card = self.cards[key]
+                self.grid.addWidget(card, row, column, height, width)
+                card.show()
+        for key, button in self.expand_buttons.items():
+            button.setText("↙" if key == self.maximized else "↗")
 
-def main():
+
+def main(viewport_factory=None):
+    if QtWidgets.QApplication.instance() is None:
+        QtCore.QCoreApplication.setAttribute(QtCore.Qt.AA_ShareOpenGLContexts)
     app = QtWidgets.QApplication.instance() or QtWidgets.QApplication([])
-    window = SkinPreview()
+    window = SkinPreview(viewport_factory=viewport_factory)
     window.show()
     return app.exec_()
 

@@ -364,3 +364,24 @@ Zrzuty są dowodami testowymi w build/skin01 lub artefakcie CI, nie zasobami UI.
 
 `docs/design/SKIN_01_RENDERER.md` — Codex, 2026-10-23; opis i wyniki
 odbioru własnego prototypu SKIN-01, GPL-2.0-or-later.
+
+## Podgląd skórek z rendererem — 2026-10-23
+Model-Author: Codex. Własny `screens/linumert/linumert_skin_viewports.py`:
+sceny offline maszyny bramowej, ścieżki i detalu, GPL-2.0-or-later.
+Rozszerzenie własnych skin-preview.py / linumert_skin_preview.py / strings;
+bez nowych zależności ani zasobów zewnętrznych. Modele wyłącznie poglądowe.
+
+Wzorce dostarczone przez właściciela: `docs/design/referencje-skin/classic-digital.webp`,
+`docs/design/referencje-skin/industrial-pro.webp`, `docs/design/referencje-skin/cyberdeck.webp`,
+`docs/design/referencje-skin/organic-vector.webp`. Pobrane 2026-10-23 z
+https://megawrzuta.pl/hdimgnec (`linumert-showcase.zip`); według roadmapy obrazy
+wygenerowane w rozmowie właściciela. Wyłącznie dokumentacja referencyjna, nie tekstury UI.
+Brak osobnej deklaracji licencji obrazów w paczce; nie przypisujemy im GPL kodu.
+Własny `screens/linumert/linumert_skin_panel.py`: obudowy rysowane kodem Qt,
+Codex, 2026-10-23, GPL-2.0-or-later, bez kopiowania fragmentów bitmap.
+`docs/design/referencje-skin/README.md` — własny opis kompozycji oraz zakresu
+odbioru, Codex, 2026-10-23, GPL-2.0-or-later. Okrągłe wskaźniki w skin_panel.py
+są rysowane kodem Qt; stan nieznany, bez wartości demonstracyjnych udających CNC.
+
+`tools/dev/skin-check.py`: własny odbiór 64 wariantów osadzonych paneli OpenGL
+(zrzuty w build/skin-preview), Codex, 2026-10-23, GPL-2.0-or-later.

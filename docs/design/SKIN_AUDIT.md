@@ -64,7 +64,7 @@ Przyszły host musi ponowić odczyt tuż przed wymianą widoku, obsłużyć awar
 montażu i zachować globalne kontrolki przez całą operację. Sama zgoda z modelu
 nie eliminuje zmiany statusu między odczytem a montażem.
 
-## Osobny podgląd kompozycji Qt
+## Pierwszy podgląd kompozycji Qt — historyczny stan przed PR #89
 
 Uruchom z katalogu repozytorium w środowisku z PyQt5:
 
@@ -84,3 +84,32 @@ nakładania komórek, widoczność paneli i cele kontrolek co najmniej 44 px.
 Lokalny podgląd sprawdzono w Qt offscreen na Windows, nie na docelowym GPU/Mesa.
 W tym trybie Windows nie wylicza fontów: do zrzutów/testu zarejestrowano font
 systemowy bez kopiowania go do repo. Normalny launcher korzysta z fontów platformy.
+
+
+## Podgląd według obrazów właściciela — PR #89, 2026-10-23
+
+Model-Author: Codex. Wzorce: `referencje-skin/README.md` i cztery WEBP otrzymane
+z https://megawrzuta.pl/hdimgnec. Nie wykorzystujemy bitmap jako fasady aplikacji:
+obudowy, wskaźniki i układ są rysowane kodem Qt. Rodziny różnią się położeniem
+paneli, metalowymi/ściętymi/obłymi ramkami oraz geometrią wskaźników.
+
+`python3 tools/dev/skin-preview.py` uruchamia trzy niezależne, interaktywne
+widoki OpenGL: maszyna bramowa, detal z kieszenią i czterema otworami, kontury
+ścieżki. To modele poglądowe offline w mm, nie telemetria ani wynik wykonania CNC.
+DRO i wskaźniki pokazują brak danych; Start/Hold/Stop są jawnie nieaktywne.
+Opcja `--layout-only` pozwala oglądać układy bez pyqtgraph/PyOpenGL.
+Przyciski ↗/↙ powiększają i przywracają każdy panel 3D, zachowując status,
+selektory i kontrolki cyklu. Zmiana skórki usuwa także ukryte poprzednie karty.
+
+Launcher współdzieli konteksty OpenGL między widgetami Qt. Bez
+`AA_ShareOpenGLContexts` wielokrotna wymiana kart dawała puste panele w złożonym
+obrazie okna, mimo prawidłowego indywidualnego `grabFramebuffer`.
+`tools/dev/skin-check.py --output build/skin-preview` sprawdza 64 warianty,
+24-bitowy depth, niepuste obrazy GL, rozmiary 1280×800 / 1920×1080, powiększenie
+oraz złożone zrzuty czterech skórek w obu rozmiarach. Ten odbiór jest także w CI
+Debian/Mesa; zwykłe testy Qt offscreen pozostają niezależne od OpenGL.
+
+To ukończony krok podglądu, **nie ukończone SKIN-02…06 ani wierna realizacja
+całych makiet**. Otwarte: szczegółowe kontrolki/ikony/typografia, modele maszyny
+zamiast schematu, pełne strony oraz bezpieczny adapter stanu/poleceń QtVCP.
+Aktualny ekran operatora pozostaje osobną aplikacją. NIEZWERYFIKOWANE NA SPRZĘCIE.
