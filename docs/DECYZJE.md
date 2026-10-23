@@ -125,3 +125,9 @@ Dopisuje agent na końcu sesji, we właściwym miejscu listy:
 ## SKIN-01 — renderer prototypowy · 2026-10-23 · Codex · PROPOZYCJA
 
 Osobny podgląd pyqtgraph/OpenGL z buforem głębokości bada artefakty QPainter i winding geometrii poza aktualnym ekranem. Bez integracji komend/statusu CNC, bez zmiany kontraktu produkcyjnego QtVCP ani licencji. Szczegóły: `docs/design/SKIN_01_RENDERER.md`. Do niezależnej oceny przed wyborem renderera produkcyjnego.
+
+## Podgląd skórek — 2026-10-23 · Model-Author: Codex
+Osobny host offline odwzorowuje układy dostarczonych makiet. Nie zmienia stosu
+produkcyjnego ani właściciela komend QtVCP. Współdzielone konteksty Qt są wymagane
+przy wielokrotnym montażu paneli GL; odbiór sprawdza też cały złożony obraz okna.
+Pełna zgodność graficzna i SKIN-02…06 pozostają otwarte (PR #89).

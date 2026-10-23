@@ -842,6 +842,6 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
 - Odrębne kompozycje i obudowy, wskaźniki, trzy sceny OpenGL i powiększanie paneli.
 - Test Qt obejmuje przywracanie układu oraz usuwanie ukrytych kart po przełączeniu.
 - Naprawiono puste złożone panele po przełączeniach przez współdzielenie kontekstów Qt.
-- Radeon/Mesa: 64 warianty PASS; Debian llvmpipe: 64 PASS przed końcową poprawką.
+- Radeon/Mesa i Debian llvmpipe: po końcowej poprawce 64 warianty PASS; 23 testy + 87 subtestów PASS.
 - Debian: lint PASS, 1018 pytest PASS, 11 skip, 109 deselected, wymagania bez błędów.
 - Autokontrola, bez niezależnego przeglądu. Offline; pełne skórki i CNC nadal otwarte.

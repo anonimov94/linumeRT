@@ -1,6 +1,6 @@
 # Stan projektu i przekazanie
 
-Tura: Codex · 2026-10-23 · stan: w toku, odbiór PR #89.
+Tura: Codex · 2026-10-23 · stan: oddana; podgląd skórek gotowy, odbiór/scalenie w PR #89.
 
 ## Wynik końcowy — SKIN-01
 
@@ -312,9 +312,11 @@ Model-Author: Codex. Osobny checkout /tmp/linumert-skin-visual,
 gałąź codex/skin-visual-preview, PR #89. Wzorce od właściciela zapisane w
  docs/design/referencje-skin/; obejrzano cztery obrazy. Dopasowano hierarchię paneli,
  rodziny ramek i wskaźniki; trzy sceny GL, powiększanie z zachowaniem statusu.
-Push 38b3af3: odbiór GL w CI. Lokalny Debian: lint PASS, 1018 pytest PASS,
+Odbiór GL w CI, wraz z kontrolą złożonego obrazu po przełączeniach. Lokalny Debian: lint PASS, 1018 pytest PASS,
 11 skip, 109 deselected, wymagania 21/22 bez błędów. Radeon i Debian llvmpipe:
 64 kombinacje PASS. Końcowy odbiór obejmuje poprawkę współdzielenia kontekstów:
 indywidualny framebuffer nie wystarczał do wykrycia pustych paneli w zrzucie okna.
+Końcowy Debian llvmpipe: 64 kombinacje PASS; testy zmienionego kodu 23 PASS
++ 87 subtestów. Stan końcowych kontroli i scalenia utrzymywany w PR #89.
 To podgląd offline, bez poleceń CNC; pełna zgodność z makietami i SKIN-02…06 otwarte.
 Następny krok: szczegółowe kontrolki rodzin i adapter statusu w osobnym hoście QtVCP.
