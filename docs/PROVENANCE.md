@@ -382,3 +382,6 @@ Codex, 2026-10-23, GPL-2.0-or-later, bez kopiowania fragmentów bitmap.
 `docs/design/referencje-skin/README.md` — własny opis kompozycji oraz zakresu
 odbioru, Codex, 2026-10-23, GPL-2.0-or-later. Okrągłe wskaźniki w skin_panel.py
 są rysowane kodem Qt; stan nieznany, bez wartości demonstracyjnych udających CNC.
+
+`tools/dev/skin-check.py`: własny odbiór 64 wariantów osadzonych paneli OpenGL
+(zrzuty w build/skin-preview), Codex, 2026-10-23, GPL-2.0-or-later.
