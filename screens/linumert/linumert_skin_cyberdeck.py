@@ -4,6 +4,7 @@ from linumert_skin_screen import SkinScreen
 
 
 class CyberdeckScreen(SkinScreen):
+    STATUS_LOCATION = "footer"
     LAYOUT = (("dro", 0, 0, 6, 4), ("program", 0, 4, 6, 3),
               ("toolpath", 0, 7, 6, 5), ("machine", 6, 0, 6, 4),
               ("tools", 6, 4, 3, 4), ("diagnostics", 6, 8, 3, 4),

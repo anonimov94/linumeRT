@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
 """Common read-only view components, never the skin composition. Model-Author: Codex."""
 
-from linumert_skin_controls import EmergencyReadout, Lever, SkinButton
+from linumert_skin_controls import EmergencyReadout, Lever, ModeSelector, SkinButton
 from linumert_skin_panel import SkinPanel, UnknownGauge
 from linumert_skin_readouts import AxisReadout, FeedReadout, ProgramView, ToolReadout
 from linumert_skin_strings import text
@@ -11,6 +11,7 @@ from PyQt5 import QtWidgets
 class SkinScreen(QtWidgets.QWidget):
     LAYOUT = ()
     AXES = "XYZA"
+    STATUS_LOCATION = "header"
 
     def __init__(self, preferences, palette, viewport_factory=None):
         super().__init__()
@@ -32,7 +33,10 @@ class SkinScreen(QtWidgets.QWidget):
             card = SkinPanel(p.skin, c)
             card.setObjectName(role)
             layout = QtWidgets.QVBoxLayout(card)
-            layout.setContentsMargins(13, 8, 13, 9)
+            if p.skin == "organic-vector":
+                layout.setContentsMargins(20, 10, 16, 10)
+            else:
+                layout.setContentsMargins(13, 8, 13, 9)
             layout.setSpacing(4)
             heading = QtWidgets.QLabel(titles.get(role) or text(role, p))
             heading.setText(heading.text().upper())
@@ -97,7 +101,8 @@ class SkinScreen(QtWidgets.QWidget):
         elif role == "status":
             row = QtWidgets.QHBoxLayout()
             gauge = UnknownGauge("—", p.skin, c)
-            gauge.setMinimumSize(55, 55)
+            gauge.setMinimumSize(88, 55)
+            gauge.setFixedWidth(88)
             row.addWidget(gauge)
             label = QtWidgets.QLabel(text("status_unknown", p))
             label.setWordWrap(True)
@@ -152,7 +157,7 @@ class SkinScreen(QtWidgets.QWidget):
                 indicator.setToolTip(text("status_unknown", p))
                 layout.addWidget(indicator)
             elif item in ("edit", "dry_run", "block_delete"):
-                button = SkinButton(text(item, p), p.skin, c)
+                button = SkinButton(text(item, p).replace(" ", "\n", 1), p.skin, c)
                 button.setEnabled(False)
                 button.setFixedSize(76, 70)
                 button.setToolTip(text("demo_controls", p))
@@ -164,10 +169,23 @@ class SkinScreen(QtWidgets.QWidget):
                 gauge.setFixedSize(70, 80)
                 layout.addWidget(gauge)
             elif item == "mode":
-                button = SkinButton("JOG / MDI / AUTO", p.skin, c)
-                button.setEnabled(False)
-                button.setFixedSize(140, 70)
-                layout.addWidget(button)
+                if p.skin == "industrial-pro":
+                    mode = ModeSelector(c)
+                elif p.skin == "classic-digital":
+                    mode = Lever("JOG / MDI / AUTO", p.skin, c)
+                    mode.setFixedSize(140, 80)
+                else:
+                    mode = QtWidgets.QWidget()
+                    modes = QtWidgets.QHBoxLayout(mode)
+                    modes.setContentsMargins(0, 0, 0, 0)
+                    modes.setSpacing(2)
+                    for label in ("JOG", "MDI", "AUTO"):
+                        button = SkinButton(label, p.skin, c)
+                        button.setEnabled(False)
+                        button.setFixedSize(45, 58)
+                        modes.addWidget(button)
+                mode.setToolTip(text("demo_controls", p))
+                layout.addWidget(mode)
             else:
                 label = text(item, p) if item not in ("M01", "M3", "M8") else item
                 lever = Lever(label.upper(), p.skin, c)

@@ -66,8 +66,9 @@ class SkinPanel(QtWidgets.QFrame):
             p.drawPath(organic_path(inner))
         else:
             p.drawRoundedRect(inner, 3, 3)
-        if self.family in ("classic-digital", "industrial-pro"):
-            title = QtCore.QRectF(inner.x()+2, inner.y()+2, inner.width()-4, 25)
+        if self.family in ("classic-digital", "industrial-pro") and self.objectName():
+            title_height = 44 if self.objectName() in ("machine", "toolpath", "workpiece") else 25
+            title = QtCore.QRectF(inner.x()+2, inner.y()+2, inner.width()-4, title_height)
             bar = QtGui.QLinearGradient(title.topLeft(), title.bottomLeft())
             bar.setColorAt(0, QtGui.QColor(c.raised))
             bar.setColorAt(1, QtGui.QColor(c.background))
@@ -131,4 +132,4 @@ class UnknownGauge(QtWidgets.QWidget):
             else:
                 p.drawEllipse(face)
         p.setPen(QtGui.QColor(c.text))
-        p.drawText(rect, QtCore.Qt.AlignCenter, "— %")
+        p.drawText(rect, QtCore.Qt.AlignCenter, "—" if self.label == "—" else "— %")

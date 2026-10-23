@@ -4,6 +4,7 @@ from linumert_skin_screen import SkinScreen
 
 
 class OrganicVectorScreen(SkinScreen):
+    STATUS_LOCATION = "footer"
     LAYOUT = (("dro", 0, 0, 6, 3), ("program", 6, 0, 6, 3),
               ("machine", 0, 3, 6, 4), ("toolpath", 0, 7, 6, 5),
               ("status", 6, 3, 3, 3), ("feed", 6, 6, 3, 3),

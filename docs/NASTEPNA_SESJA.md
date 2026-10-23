@@ -337,3 +337,9 @@ układy i kontrolki maksymalnie odpowiadające czterem wzorcom graficznym.
 Osobny checkout /tmp/linumert-distinct-skins, gałąź codex/distinct-skin-screens.
 Pierwszy krok: fizyczne obudowy kontrolek cyklu, testy 64 układów PASS.
 Następnie: cztery osobne klasy ekranów, instrumenty i konsole dla każdej rodziny.
+Etap ekranów: osobne klasy Classic/Industrial/Cyberdeck/Organic, konsole, DRO,
+program, F/S, lokalna nawigacja i ustawienia; `--skin` uruchamia samodzielny ekran.
+Metalowe, ostrokątne i płynne obudowy oraz selektory i kontrolki rodzin.
+5 testów Qt PASS; 128 wariantów GL Radeon PASS (browser + standalone).
+Wcześniejszy błąd 815 px Industrial przy 1280×800 usunięty; 44 px zachowane.
+Następne: końcowy Debian, nowe zrzuty, dokumentacja i odbiór CI PR #91.

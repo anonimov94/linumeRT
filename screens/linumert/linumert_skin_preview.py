@@ -82,13 +82,17 @@ class SkinPreview(QtWidgets.QMainWindow):
         p = self.preferences
         c = palette_for(p)
         radius = 22 if p.skin == "organic-vector" else 3
+        heading_font = ("DejaVu Sans Mono" if p.skin in ("classic-digital", "cyberdeck")
+                        else "DejaVu Sans")
+        heading_color = c.text if p.skin in ("industrial-pro", "organic-vector") else c.accent
         self.setStyleSheet(f"""
             QMainWindow, QWidget {{ background: {c.background}; color: {c.text};
                 font-family: 'IBM Plex Sans', 'DejaVu Sans'; font-size: 14px; }}
             QFrame[card="true"] {{ background: transparent; border: none; }}
             QFrame[card="true"] QLabel {{ background: transparent; border: none; }}
-            QLabel[heading="true"] {{ color: {c.accent}; font-size: 17px; }}
-            QLabel#banner {{ color: {c.warning}; padding: 8px; }}
+            QLabel[heading="true"] {{ color: {heading_color}; font-size: 14px;
+                font-family: '{heading_font}'; font-weight: bold; }}
+            QLabel#banner {{ color: {c.warning}; font-size: 11px; padding: 2px 8px; }}
             QLabel#dro {{ font-family: 'JetBrains Mono', 'DejaVu Sans Mono';
                 font-size: 28px; font-weight: bold; color: {c.accent}; }}
             QComboBox, QPushButton {{ min-height: 44px; padding: 0 10px;
@@ -122,6 +126,11 @@ class SkinPreview(QtWidgets.QMainWindow):
         self.controls = screen.controls
         self.console = screen.console_widget
         self.root.addWidget(self.console)
+        self.root.removeWidget(self.status)
+        if screen.STATUS_LOCATION == "footer":
+            self.root.addWidget(self.status)
+        else:
+            self.root.insertWidget(self.root.indexOf(self.workspace), self.status)
         self.setWindowTitle("linumeRT · " + p.skin.replace("-", " ").title())
 
     def _replace_header(self, palette):

@@ -85,8 +85,13 @@ class SkinButton(QtWidgets.QPushButton):
         p.setPen(QtGui.QColor(c.text if self.isEnabled() else c.muted))
         font = QtGui.QFont("DejaVu Sans", 8)
         font.setBold(True)
+        caption_text = self.text().upper()
+        while (max(QtGui.QFontMetricsF(font).horizontalAdvance(line)
+                   for line in caption_text.split("\n")) > caption.width()
+               and font.pointSize() > 6):
+            font.setPointSize(font.pointSize()-1)
         p.setFont(font)
-        p.drawText(caption, QtCore.Qt.AlignCenter, self.text().upper())
+        p.drawText(caption, QtCore.Qt.AlignCenter | QtCore.Qt.TextWordWrap, caption_text)
 
     def _symbol(self, painter, box, color):
         painter.setBrush(color)
@@ -118,6 +123,16 @@ class Lever(QtWidgets.QWidget):
         p.setPen(QtGui.QColor(c.muted))
         p.drawText(QtCore.QRectF(0, 0, self.width(), 20), QtCore.Qt.AlignCenter, self.label)
         center = QtCore.QPointF(self.width()/2, self.height()/2+8)
+        if self.family == "cyberdeck":
+            slot = QtCore.QRectF(center.x()-26, center.y()-12, 52, 24)
+            p.fillPath(housing(slot, self.family), QtGui.QColor(c.background))
+            p.setPen(QtGui.QPen(QtGui.QColor(c.accent), 1))
+            p.drawPath(housing(slot, self.family))
+            p.setBrush(QtGui.QColor(c.raised))
+            p.drawRoundedRect(QtCore.QRectF(center.x()-7, center.y()-10, 14, 20), 2, 2)
+            p.drawText(QtCore.QRectF(0, self.height()-18, self.width(), 16),
+                       QtCore.Qt.AlignCenter, "—")
+            return
         p.setPen(QtGui.QPen(QtGui.QColor(c.muted), 2))
         p.setBrush(QtGui.QColor(c.background))
         p.drawEllipse(center, 15, 15)
@@ -158,3 +173,33 @@ class EmergencyReadout(QtWidgets.QWidget):
         p.drawText(QtCore.QRectF(15, 24, 54, 22), QtCore.Qt.AlignCenter, "—")
         p.setPen(QtGui.QColor(c.background))
         p.drawText(QtCore.QRectF(8, 62, 69, 14), QtCore.Qt.AlignCenter, "E-STOP")
+
+
+class ModeSelector(QtWidgets.QWidget):
+    """Industrial rotary housing with no assumed mode or active command."""
+    def __init__(self, palette):
+        super().__init__()
+        self.palette = palette
+        self.setFixedSize(140, 80)
+        self.setAccessibleName("JOG / MDI / AUTO —")
+
+    def paintEvent(self, event):
+        p = QtGui.QPainter(self)
+        p.setRenderHint(QtGui.QPainter.Antialiasing)
+        c = self.palette
+        center = QtCore.QPointF(42, 44)
+        metal = QtGui.QConicalGradient(center, 25)
+        for stop, value in ((0, c.panel), (.25, c.muted), (.5, c.text),
+                             (.65, c.background), (1, c.panel)):
+            metal.setColorAt(stop, QtGui.QColor(value))
+        p.setPen(QtGui.QPen(QtGui.QColor(c.muted), 2))
+        p.setBrush(metal)
+        p.drawEllipse(center, 25, 25)
+        p.setBrush(QtGui.QColor(c.background))
+        p.drawRoundedRect(QtCore.QRectF(35, 23, 14, 42), 4, 4)
+        p.setFont(QtGui.QFont("DejaVu Sans", 8))
+        p.setPen(QtGui.QColor(c.text))
+        p.drawText(QtCore.QRectF(27, 33, 30, 22), QtCore.Qt.AlignCenter, "—")
+        for row, label in enumerate(("JOG", "MDI", "AUTO")):
+            p.setPen(QtGui.QColor(c.muted))
+            p.drawText(QtCore.QRectF(82, 11+row*22, 55, 20), label + "  ○")
