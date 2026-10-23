@@ -415,3 +415,8 @@ symbol narzędzia i czytelny program przykładowy, Codex, 2026-10-23, GPL-2.0-or
 Własny `screens/linumert/linumert_skin_screen.py`: wspólne komponenty paneli
 odczytu, powiększania i nieaktywnych konsol; kompozycje należą do osobnych klas
 skórek. Codex, 2026-10-23, GPL-2.0-or-later. Bez zależności LinuxCNC/HAL.
+Własne osobne moduły ekranów: `screens/linumert/linumert_skin_classic.py`,
+`linumert_skin_industrial.py`, `linumert_skin_cyberdeck.py`, `linumert_skin_organic.py`
+oraz rejestr `linumert_skin_screens.py`. Codex, 2026-10-23, GPL-2.0-or-later.
+Osobne kompozycje i konsole według czterech wzorców właściciela; wspólne tylko
+komponenty odczytu i renderer. Bez zależności LinuxCNC/HAL.

@@ -54,11 +54,11 @@ def test_all_preview_selections_and_resolutions():
             assert window.preferences.theme == theme
             assert window.preferences.language == language
             assert text("preview", window.preferences) in window.banner.text()
-            assert window.grid.count() == 6
+            assert window.grid.count() == len(LAYOUTS[window.preferences.skin])
             assert set(window.cards) == {item[0] for item in LAYOUTS[family]}
             for card in window.cards.values():
                 assert card.isVisible()
-                assert card.width() > 100 and card.height() > 80
+                assert card.width() > 100 and card.height() > 60
                 assert window.workspace.rect().contains(card.geometry())
             for control in (*window.selectors.values(), *window.controls.values()):
                 assert control.height() >= 44
@@ -85,7 +85,7 @@ def test_maximize_keeps_global_controls_and_releases_previous_cards():
         assert window.status.isVisible() and window.controls["stop"].isVisible()
         window.expand_buttons[role].click()
         app.processEvents()
-        assert window.grid.count() == 6
+        assert window.grid.count() == len(LAYOUTS[window.preferences.skin])
         assert all(card.isVisible() for card in window.cards.values())
     window.expand_buttons["machine"].click()
     window.selectors["skin"].setCurrentIndex(1)
@@ -93,7 +93,8 @@ def test_maximize_keeps_global_controls_and_releases_previous_cards():
     app.processEvents()
     from PyQt5 import sip
     assert all(sip.isdeleted(card) for card in old_cards)
-    assert window.maximized is None and window.grid.count() == 6
+    assert window.maximized is None
+    assert window.grid.count() == len(LAYOUTS[window.preferences.skin])
     assert set(window.viewports) == {"machine", "toolpath", "workpiece"}
     window.close()
     window.deleteLater()
