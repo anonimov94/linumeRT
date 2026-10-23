@@ -10,7 +10,7 @@ import pytest
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 pytest.importorskip("PyQt5")
-from PyQt5 import QtCore, QtGui, QtWidgets  # noqa: E402
+from PyQt5 import QtCore, QtGui, QtTest, QtWidgets  # noqa: E402
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "screens" / "linumert"))
 from linumert_skin_contract import LANGUAGE_IDS, SKIN_IDS, THEME_IDS  # noqa: E402
@@ -96,6 +96,72 @@ def test_maximize_keeps_global_controls_and_releases_previous_cards():
     assert window.maximized is None
     assert window.grid.count() == len(LAYOUTS[window.preferences.skin])
     assert set(window.viewports) == {"machine", "toolpath", "workpiece"}
+    window.close()
+    window.deleteLater()
+    app.sendPostedEvents(None, QtCore.QEvent.DeferredDelete)
+
+
+
+def test_separate_screen_classes_have_working_local_navigation():
+    from linumert_skin_contract import PresentationPreferences
+    from linumert_skin_screens import SCREENS
+    app = QtWidgets.QApplication.instance() or QtWidgets.QApplication([])
+    assert len({cls.__module__ for cls in SCREENS.values()}) == 4
+    for skin, screen_type in SCREENS.items():
+        window = SkinPreview(PresentationPreferences(skin=skin), standalone=True)
+        window.show()
+        app.processEvents()
+        assert isinstance(window.workspace, screen_type)
+        assert not window.selector_box.isVisible()
+        program = next(button for button in window.header.findChildren(QtWidgets.QPushButton)
+                       if button.text() == text("program", window.preferences))
+        program.click()
+        app.processEvents()
+        assert window.maximized == "program"
+        assert window.status.isVisible() and window.controls["stop"].isVisible()
+        program.click()
+        assert window.maximized is None
+        start = window.controls["start"]
+        spy = QtTest.QSignalSpy(start.clicked)
+        QtTest.QTest.mouseClick(start, QtCore.Qt.LeftButton)
+        assert len(spy) == 0
+        window.close()
+        window.deleteLater()
+        app.sendPostedEvents(None, QtCore.QEvent.DeferredDelete)
+
+
+def test_presentation_dialog_applies_atomically_and_cancel_keeps_screen():
+    app = QtWidgets.QApplication.instance() or QtWidgets.QApplication([])
+    window = SkinPreview(standalone=True)
+    window.show()
+    before = window.preferences
+
+    def cancel():
+        dialog = app.activeModalWidget()
+        combo = dialog.findChild(QtWidgets.QComboBox, "skin")
+        combo.setCurrentIndex(combo.findData("cyberdeck"))
+        dialog.reject()
+
+    QtCore.QTimer.singleShot(0, cancel)
+    window.open_settings()
+    assert window.preferences == before
+
+    def apply():
+        dialog = app.activeModalWidget()
+        for key, value in (("skin", "organic-vector"), ("theme", "ion-blue"), ("language", "pl")):
+            combo = dialog.findChild(QtWidgets.QComboBox, key)
+            combo.setCurrentIndex(combo.findData(value))
+        dialog.accept()
+
+    QtCore.QTimer.singleShot(0, apply)
+    window.open_settings()
+    app.sendPostedEvents(None, QtCore.QEvent.DeferredDelete)
+    app.processEvents()
+    assert window.preferences.skin == "organic-vector"
+    assert window.preferences.theme == "ion-blue"
+    assert window.preferences.language == "pl"
+    assert all(not button.isEnabled() for button in window.controls.values())
+    assert not window.selector_box.isVisible()
     window.close()
     window.deleteLater()
     app.sendPostedEvents(None, QtCore.QEvent.DeferredDelete)

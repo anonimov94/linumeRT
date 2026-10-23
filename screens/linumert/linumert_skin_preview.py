@@ -4,6 +4,7 @@
 Model-Author: Codex. Optional interactive offline scenes use the SKIN-01 renderer.
 """
 
+import argparse
 from dataclasses import replace
 
 from linumert_skin_contract import (
@@ -13,6 +14,8 @@ from linumert_skin_contract import (
     PresentationPreferences,
     palette_for,
 )
+from linumert_skin_controls import SkinButton
+from linumert_skin_panel import SkinPanel
 from linumert_skin_screens import LAYOUTS as LAYOUTS
 from linumert_skin_screens import SCREENS
 from linumert_skin_strings import text
@@ -20,7 +23,7 @@ from PyQt5 import QtCore, QtWidgets
 
 
 class SkinPreview(QtWidgets.QMainWindow):
-    def __init__(self, preferences=None, viewport_factory=None):
+    def __init__(self, preferences=None, viewport_factory=None, standalone=False):
         super().__init__()
         self.preferences = preferences or PresentationPreferences()
         self.viewport_factory = viewport_factory
@@ -30,8 +33,11 @@ class SkinPreview(QtWidgets.QMainWindow):
         central = QtWidgets.QWidget()
         self.setCentralWidget(central)
         root = QtWidgets.QVBoxLayout(central)
-        selectors = QtWidgets.QHBoxLayout()
-        root.addLayout(selectors)
+        self.selector_box = QtWidgets.QWidget()
+        selectors = QtWidgets.QHBoxLayout(self.selector_box)
+        selectors.setContentsMargins(0, 0, 0, 0)
+        root.addWidget(self.selector_box)
+        self.selector_box.setVisible(not standalone)
         self.selectors = {}
         self.selector_labels = {}
         for field, choices in (("skin", SKIN_IDS), ("theme", THEME_IDS),
@@ -52,6 +58,8 @@ class SkinPreview(QtWidgets.QMainWindow):
             selectors.addWidget(combo, 1)
             self.selectors[field] = combo
             self.selector_labels[field] = label
+        self.header = QtWidgets.QWidget()
+        root.addWidget(self.header)
         self.banner = QtWidgets.QLabel()
         self.banner.setObjectName("banner")
         root.addWidget(self.banner)
@@ -95,10 +103,10 @@ class SkinPreview(QtWidgets.QMainWindow):
         """)
         for key, label in self.selector_labels.items():
             label.setText(text(key, p))
-        self.banner.setText("linumeRT  //  " + p.skin.replace("-", " ").upper()
-                            + "  ·  " + text("preview", p))
+        self.banner.setText(text("preview", p))
         self.status.setText(text("alarms", p) + " · " + text("status_unknown", p)
                             + " · E-STOP: — · " + text("mode_manual", p) + ": —")
+        self._replace_header(c)
         old_workspace = self.workspace
         if self.console:
             self.root.removeWidget(self.console)
@@ -116,6 +124,78 @@ class SkinPreview(QtWidgets.QMainWindow):
         self.root.addWidget(self.console)
         self.setWindowTitle("linumeRT · " + p.skin.replace("-", " ").title())
 
+    def _replace_header(self, palette):
+        old = self.header
+        self.header = SkinPanel(self.preferences.skin, palette)
+        row = QtWidgets.QHBoxLayout(self.header)
+        row.setContentsMargins(15, 7, 15, 7)
+        brand = QtWidgets.QLabel("linume<span style='color:" + palette.accent + "'>RT</span>")
+        brand.setStyleSheet("font-size:27px; font-weight:bold; background:transparent;")
+        row.addWidget(brand)
+        name = QtWidgets.QLabel(self.preferences.skin.replace("-", " ").upper())
+        name.setStyleSheet("font-size:15px; font-weight:bold; background:transparent;")
+        row.addWidget(name)
+        row.addStretch()
+        for key in ("machine", "program", "tools", "diagnostics", "settings"):
+            button = SkinButton(text(key, self.preferences), self.preferences.skin, palette)
+            button.setMinimumWidth(85)
+            if key == "settings":
+                button.clicked.connect(self.open_settings)
+            elif key == "diagnostics":
+                button.clicked.connect(self.open_diagnostics)
+            else:
+                button.setToolTip(text("maximize", self.preferences))
+                button.clicked.connect(lambda checked=False, role=key: self.toggle_panel(role))
+            row.addWidget(button)
+        self.root.replaceWidget(old, self.header)
+        old.hide()
+        old.deleteLater()
+
+    def open_diagnostics(self):
+        if "diagnostics" in self.cards:
+            self.toggle_panel("diagnostics")
+            return
+        lines = [text("preview", self.preferences)]
+        for role, view in self.viewports.items():
+            if hasattr(view, "context_report"):
+                try:
+                    report = view.context_report()
+                    lines.append(f"{role}: {report['renderer']} / depth {report['depth_bits']}")
+                except RuntimeError as error:
+                    lines.append(str(error))
+        QtWidgets.QMessageBox.information(self, text("diagnostics", self.preferences),
+                                          "\n".join(lines))
+
+    def open_settings(self):
+        dialog = QtWidgets.QDialog(self)
+        dialog.setWindowTitle(text("settings", self.preferences))
+        layout = QtWidgets.QFormLayout(dialog)
+        choices = {}
+        for key, source in self.selectors.items():
+            combo = QtWidgets.QComboBox()
+            combo.setObjectName(key)
+            for index in range(source.count()):
+                combo.addItem(source.itemText(index), source.itemData(index))
+            combo.setCurrentIndex(combo.findData(getattr(self.preferences, key)))
+            layout.addRow(text(key, self.preferences), combo)
+            choices[key] = combo
+        buttons = QtWidgets.QDialogButtonBox(
+            QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel)
+        buttons.button(QtWidgets.QDialogButtonBox.Ok).setText(text("apply", self.preferences))
+        buttons.button(QtWidgets.QDialogButtonBox.Cancel).setText(text("cancel", self.preferences))
+        buttons.accepted.connect(dialog.accept)
+        buttons.rejected.connect(dialog.reject)
+        layout.addRow(buttons)
+        if dialog.exec_() == QtWidgets.QDialog.Accepted:
+            selected = {key: combo.currentData() for key, combo in choices.items()}
+            self.preferences = replace(self.preferences, **selected)
+            for key, value in selected.items():
+                self.selectors[key].blockSignals(True)
+                self.selectors[key].setCurrentIndex(self.selectors[key].findData(value))
+                self.selectors[key].blockSignals(False)
+            self.refresh()
+        dialog.deleteLater()
+
     @property
     def maximized(self):
         return getattr(self.workspace, "maximized", None)
@@ -125,10 +205,18 @@ class SkinPreview(QtWidgets.QMainWindow):
 
 
 def main(viewport_factory=None):
+    parser = argparse.ArgumentParser(description="linumeRT · separate offline skin screens")
+    parser.add_argument("--skin", choices=SKIN_IDS)
+    parser.add_argument("--theme", choices=THEME_IDS, default=THEME_IDS[0])
+    parser.add_argument("--language", choices=LANGUAGE_IDS, default="en")
+    parser.add_argument("--layout-only", action="store_true")
+    args = parser.parse_args()
     if QtWidgets.QApplication.instance() is None:
         QtCore.QCoreApplication.setAttribute(QtCore.Qt.AA_ShareOpenGLContexts)
     app = QtWidgets.QApplication.instance() or QtWidgets.QApplication([])
-    window = SkinPreview(viewport_factory=viewport_factory)
+    preferences = PresentationPreferences(args.skin or SKIN_IDS[0], args.theme, args.language)
+    window = SkinPreview(preferences, viewport_factory=viewport_factory,
+                         standalone=args.skin is not None)
     window.show()
     return app.exec_()
 

@@ -10,6 +10,7 @@ from types import MappingProxyType
 from linumert_skin_contract import PresentationPreferences
 
 _EN = {
+    "apply": "Apply", "cancel": "Cancel",
     'feed_spindle': 'Feed / spindle',
     'overrides': 'Overrides',
     'machine_status': 'Machine status',
@@ -37,6 +38,7 @@ _EN = {
     "demo_controls": "Preview only — machine commands disabled",
 }
 _PL = {
+    "apply": "Zastosuj", "cancel": "Anuluj",
     'feed_spindle': 'Posuw / wrzeciono',
     'overrides': 'Korekcje',
     'machine_status': 'Stan maszyny',
