@@ -346,3 +346,21 @@ wynikami testów, nie nowymi zasobami produkcyjnymi.
 Poprawka lokalizacji kroku JOG przed scaleniem #67: własna walidacja QLocale,
 regresje klawiatury C/PL/DE, Model-Author: Codex, 2026-10-23, GPL-2.0-or-later.
 Bez nowych zasobów ani bibliotek.
+
+## SKIN-01 — 2026-10-23
+
+Model-Author: Codex. Własny simulation/linumert_sim/render_mesh.py i
+ tests/test_render_mesh.py, GPL-2.0-or-later. Scena przecinających się trójkątów
+oraz testy obrazu/geometrii opracowane w projekcie; bez zewnętrznych zasobów.
+Istniejący stos numpy/PyQt5/pyqtgraph/PyOpenGL, bez nowej zależności produktu.
+
+Własne simulation/linumert_sim/render_scene.py, render_view.py oraz
+tools/dev/renderer-preview.py: niezależny podgląd brył XYZ/mm i sterowanie kamerą,
+Codex, 2026-10-23, GPL-2.0-or-later. Bez nowych zależności i zasobów zewnętrznych.
+
+Własne tools/dev/renderer-check.py i tests/test_render_gl.py: regresje bufora
+OpenGL, cullingu, kamer i interakcji; Codex, 2026-10-23, GPL-2.0-or-later.
+Zrzuty są dowodami testowymi w build/skin01 lub artefakcie CI, nie zasobami UI.
+
+`docs/design/SKIN_01_RENDERER.md` — Codex, 2026-10-23; opis i wyniki
+odbioru własnego prototypu SKIN-01, GPL-2.0-or-later.

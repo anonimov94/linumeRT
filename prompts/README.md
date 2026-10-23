@@ -104,6 +104,7 @@ wymagały ekranu ani LinuxCNC. Bieżący stan i następny krok: [`docs/NASTEPNA_
 | [082](sesja-082.md) | M6 | Pełna regresja na Plant |  |
 | [083](sesja-083.md) | M6 | Wydanie v0.5.0-alpha |  |
 | [084](sesja-084.md) | M6 | Retrospektywa i kolejne półrocze |  |
+| [085](sesja-085.md) | SKIN | Renderer 3D offline i reprodukcja artefaktów | #87 |
 
 Nowa sesja startuje od [`docs/PROMPT_NOWEJ_SESJI.md`](../docs/PROMPT_NOWEJ_SESJI.md) (stały prompt) i stanu w
 `docs/NASTEPNA_SESJA.md`; osobny `START-NNN.md` tworzy się tylko dla sesji przerwanej w połowie.

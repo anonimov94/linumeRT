@@ -13,6 +13,7 @@ sesji: proces, scalenia, przeglądy). Treść: zrobione · testy · decyzje · d
 
 | Sesja | Temat | PR | Model |
 |---|---|---|---|
+| [085](#085--skin-01-renderer-3d-pr-87--2026-10-23--codex) | SKIN-01: renderer 3D | #87 | Codex |
 | [000](#000--planowanie--2026-10-17--) | Planowanie | — | — |
 | [001](#001--szkielet-repozytorium-ci-i-licencja--2026-10-17--claude-sonnet-55) | Szkielet repozytorium, CI i licencja | — | Claude (Sonnet 5.5) |
 | [002](#002--wytyczne-ip-i-rejestr-pochodzenia--2026-10-17--claude-sonnet-55) | Wytyczne IP i rejestr pochodzenia | — | Claude (Sonnet 5.5) |
@@ -814,3 +815,22 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
 - Usunięto filtr klawiszy; wpis walidowany dopiero przed JOG, bez separatorów tysięcy.
 - 13 testów Qt PASS: C/PL/DE, kropka/przecinek, błędny wpis i zatrzymanie mimo błędu.
 - Model-Author: Codex. Pełne CI po poprawce wymagane przed scaleniem.
+
+## SKIN-01 — reprodukcja geometrii · 2026-10-23 · Codex
+- Model-Author: Codex. Main po #67/#86, 11 lokalnych plików zachowanych bajt w bajt.
+- Osobny checkout/gałąź, bez przejmowania globalnej blokady i instancji CNC.
+- QPainter: rzeczywisty obraz przecinających się trójkątów potwierdza złe zasłanianie.
+- Stare _revolve: 48 zerowych trójkątów kapsli przy 24 segmentach.
+- Przygotówki box/cylinder/tube/casting i próbka STL mają poprawny winding/objętość.
+- Nowy kontrakt siatki odrzuca błędne indeksy/NaN i jawnie liczy degeneracje.
+- 13 lokalnych testów PASS, ruff PASS; prototyp GL i odbiór GPU/Debian jeszcze w toku.
+- Autokontrola, bez niezależnego przeglądu; bez zmian renderera produkcyjnego.
+
+
+## 085 — SKIN-01: renderer 3D (PR #87) · 2026-10-23 · Codex
+- Model-Author: Codex. Osobny offline podgląd GL z trzema scenami, kamerami, cullingiem, wireframe i odświeżeniem ≤30/s.
+- Odtworzono przecinające się trójkąty QPainter oraz 48 zerowych ścian w starym `_revolve`.
+- Radeon 660M/Mesa 26.2 oraz Debian 12/LinuxCNC 2.9.10/llvmpipe Mesa 22.3: depth 24, order 0%, culling zamkniętych brył, 3 kamery, obrót i limit klatek PASS.
+- Pełny lokalny test z niezależnym checkoutem git wymaga ścieżki common `.git`; ponowienie w toku. LinuxCNC CI: 109 testów PASS.
+- Pełne CI pierwszego SHA ujawniło PNG w `state/`; przeniesiono artefakty do ignorowanego `build/skin01/`.
+- Granice odbioru: bez testu konkretnego GPU właściciela i sprzętu obrabiarki. Autokontrola, bez niezależnego przeglądu.
