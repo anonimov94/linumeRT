@@ -216,6 +216,7 @@ QWidget#lrtClassic {{ border: none; }}
 #lrtRoot QLabel {{ color: {c['fg']}; background: transparent; }}
 QLabel#lrtLogo {{ font-size: 20px; font-weight: 700; }}
 QLabel#lrtMuted, QLabel#lrtCardTitle {{ color: {c['fg2']}; font-size: {small}px; }}
+QLabel#lrtMuted[dirty="true"] {{ color: {c['amber']}; font-weight: 600; }}
 QLabel#lrtCardTitle {{ letter-spacing: 1px; font-weight: 600; }}
 QLabel#lrtProgram {{ font-family: {FONT_NUM}; color: {c['fg']}; }}
 QLabel#lrtClock {{ font-family: {FONT_NUM}; font-size: 20px; }}
@@ -508,3 +509,4 @@ def mushroom_view(s: ShellState) -> tuple[str, str, str]:
     if s.estop:
         return "E-STOP", "obwód otwarty · potwierdź grzybem", "latched"
     return "E-STOP", "gotowy · kliknij, aby zatrzymać", "armed"
+

@@ -20,6 +20,7 @@ from __future__ import annotations
 import csv
 import io
 import json
+import math
 import os
 import sqlite3
 import time
@@ -29,7 +30,7 @@ from pathlib import Path
 from typing import Any
 
 from .tbl import INCH, MAX_POCKET, OFFSET_AXES, TblEntry, format_tbl, parse_tbl, scale_entries
-from .types import TYPES, ToolIssue, validate_geometry
+from .types import TYPES, ToolIssue, finite_number, validate_geometry
 
 MIGRATIONS: tuple[str, ...] = (
     # 1: narzędzia i historia
@@ -89,8 +90,10 @@ class Tool:
     used_min: float = 0.0
 
     def tool_diameter(self) -> float | None:
-        """Średnica dla LinuxCNC: z geometrii typu, inaczej pole D."""
-        return float(self.params["d"]) if "d" in self.params else self.diameter
+        """Effective D for LinuxCNC: nominal d + diameter wear, or raw table D."""
+        if "d" in self.params:
+            return float(self.params["d"]) + float(self.params.get("d_wear", 0.0))
+        return self.diameter
 
     def validate(self) -> list[ToolIssue]:
         issues = []
@@ -102,22 +105,57 @@ class Tool:
                 not 0 <= self.pocket <= MAX_POCKET:
             issues.append(ToolIssue("P-5201", {"tool": n, "field": "pocket",
                                                "expected": f"gniazdo 0…{MAX_POCKET}"}, "pocket"))
-        for name in self.offsets:
+        mappings = {}
+        for name in ("params", "offsets", "lathe"):
+            value = getattr(self, name)
+            if not isinstance(value, dict):
+                issues.append(ToolIssue("P-5201", {"tool": n, "field": name,
+                                                   "expected": "obiekt z nazwami pól"}, name))
+                value = {}
+            mappings[name] = value
+        for name, value in mappings["offsets"].items():
             if name not in OFFSET_AXES:
                 issues.append(ToolIssue("P-5201", {"tool": n, "field": f"offsets.{name}",
                                                    "expected": "oś X Y Z A B C U V W"}))
-        if self.diameter is not None and self.diameter < 0:
+            if not finite_number(value):
+                field_name = f"offsets.{name}"
+                issues.append(ToolIssue("P-5201", {"tool": n, "field": field_name,
+                                                   "expected": "skończona liczba"}, field_name))
+        for name, value in mappings["lathe"].items():
+            if (name not in ("I", "J", "Q") or not finite_number(value)
+                    or (name == "Q" and (not 0 <= value <= 9 or value != int(value)))):
+                field_name = f"lathe.{name}"
+                expected = "liczba całkowita 0…9" if name == "Q" else "I/J: skończona liczba"
+                issues.append(ToolIssue("P-5201", {"tool": n, "field": field_name,
+                                                   "expected": expected}, field_name))
+        if self.diameter is not None and (not finite_number(self.diameter) or self.diameter < 0):
             issues.append(ToolIssue("P-5201", {"tool": n, "field": "diameter",
-                                               "expected": ">= 0"}, "diameter"))
-        if self.life_min is not None and self.life_min <= 0:
-            issues.append(ToolIssue("P-5201", {"tool": n, "field": "life_min",
-                                               "expected": "> 0 minut"}, "life_min"))
+                                               "expected": "skończona liczba >= 0"}, "diameter"))
+        for name, value in (("life_min", self.life_min), ("used_min", self.used_min)):
+            if name == "life_min" and value is None:
+                continue
+            if (not finite_number(value) or value < 0
+                    or (name == "life_min" and value == 0)):
+                expected = "skończona liczba > 0 minut albo brak" if name == "life_min" else \
+                    "skończona liczba >= 0 minut"
+                issues.append(ToolIssue("P-5201", {"tool": n, "field": name,
+                                                   "expected": expected}, name))
         for text, name in ((self.description, "description"), (self.holder, "holder")):
             if "\n" in text or ";" in text:
                 issues.append(ToolIssue("P-5201", {"tool": n, "field": name,
                                                    "expected": "tekst w jednej linii bez ;"},
                                         name))
-        return issues + validate_geometry(n, self.type, self.params, self.stl)
+        geometry = (validate_geometry(n, self.type, self.params, self.stl)
+                    if isinstance(self.params, dict) else [])
+        if isinstance(self.params, dict) and not geometry:
+            wear = self.params.get("d_wear", 0.0)
+            if wear and "d" not in self.params:
+                issues.append(ToolIssue("P-5201", {"tool": n, "field": "d_wear",
+                                                   "expected": "nominalna średnica d"}, "d_wear"))
+            elif "d" in self.params and self.tool_diameter() <= 0:
+                issues.append(ToolIssue("P-5201", {"tool": n, "field": "d_wear",
+                                                   "expected": "D po korekcji > 0"}, "d_wear"))
+        return issues + geometry
 
     def warnings(self) -> list[ToolIssue]:
         """Ostrzeżenia dla symulacji: brak typu → walec zastępczy (K-320)."""
@@ -204,9 +242,18 @@ class ToolDB:
         return [Tool.from_row(r) for r in
                 self.db.execute("SELECT * FROM tools ORDER BY number").fetchall()]
 
-    def history(self, number: int | None = None) -> list[dict[str, Any]]:
+    def history(self, number: int | None = None, *,
+                limit: int | None = None) -> list[dict[str, Any]]:
+        """Chronological entries; limit selects the most recent entries. Model-Author: Codex."""
+        if limit is not None and (not isinstance(limit, int) or isinstance(limit, bool)
+                                  or limit < 1):
+            raise ValueError("limit historii musi być dodatnią liczbą całkowitą")
         query = "SELECT * FROM history" + (" WHERE number = ?" if number is not None else "")
-        rows = self.db.execute(query + " ORDER BY id", () if number is None else (number,))
+        args = () if number is None else (number,)
+        query += " ORDER BY id" if limit is None else " ORDER BY id DESC LIMIT ?"
+        rows = self.db.execute(query, args if limit is None else (*args, limit)).fetchall()
+        if limit is not None:
+            rows.reverse()
         return [{"time": r["time"], "number": r["number"], "action": r["action"],
                  "source": r["source"],
                  "before": json.loads(r["before"]) if r["before"] else None,
@@ -272,7 +319,11 @@ class ToolDB:
     def export_tbl(self, path: Path | str, units: str = "mm") -> Path:
         """Zapis tool.tbl w jednostkach maszyny (`units` = LINEAR_UNITS z INI: mm albo inch)."""
         path = Path(path)
-        entries = scale_entries([t.to_tbl() for t in self.tools()], _factor(units, to_db=False))
+        tools = self.tools()
+        issues = [issue for tool in tools for issue in tool.validate()]
+        if issues:
+            raise ToolDBError(issues)
+        entries = scale_entries([t.to_tbl() for t in tools], _factor(units, to_db=False))
         _atomic_write(path, format_tbl(entries))
         return path
 
@@ -373,11 +424,16 @@ def _merge(old: Tool | None, entry: TblEntry) -> Tool:
     merged.offsets = offsets
     merged.lathe = lathe
     merged.description = entry.comment
-    if "d" in old.params and diameter is not None and diameter != old.params["d"]:
-        merged.params = {**old.params, "d": diameter}  # średnica zmieniona w LinuxCNC (G10 L1)
+    if "d" in old.params and diameter is not None:
+        # D already includes wear. Preserve the correction rather than applying it twice.
+        if not math.isclose(diameter, old.tool_diameter(), rel_tol=0.0, abs_tol=1e-9):
+            merged.params = {**old.params, "d": diameter - old.params.get("d_wear", 0.0)}
+        if old.diameter is not None:
+            merged.diameter = diameter
     elif "d" not in old.params:
         merged.diameter = diameter
     return merged
 
 
 __all__ = ["TYPES", "Tool", "ToolDB", "ToolDBError"]
+

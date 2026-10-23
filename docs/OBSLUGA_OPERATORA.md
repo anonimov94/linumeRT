@@ -97,3 +97,195 @@ komunikat, bez częściowego czasu i bez potwierdzenia poprawności całego prog
 Limit może też osiągnąć duży, skończony program. Pętle skończone są dozwolone.
 Samodzielny interpreter ma osobne pliki robocze i nie współdzieli tabeli narzędzi
 z działającym sterowaniem. Model-Author: Codex.
+
+## Historia komunikatów w Diagnostyce
+
+W Diagnostyce filtr poziomu oraz pole wyszukiwania zawężają historię po treści,
+kodzie lub dacie. Lista pokazuje do 200 najnowszych pasujących komunikatów;
+„Eksport CSV…” zapisuje wszystkie pasujące wpisy (UTF-8, separator średnik).
+Czas zawiera datę i strefę czasową komputera. Reset alarmów nie usuwa historii.
+
+Historia zachowuje ostatnie 1000 komunikatów między uruchomieniami. Każdy plik INI
+ma osobną bazę w katalogu danych użytkownika: zwykle
+`~/.local/share/linumert/diagnostic-<identyfikator>.sqlite3`; dokładna ścieżka jest
+w podpowiedzi pod licznikiem wpisów. Przy braku miejsca, uszkodzeniu lub blokadzie
+bazy komunikaty pozostają widoczne w pamięci i pojawia się jawna informacja o braku
+zapisu. Nie oznacza to zachowania nowych wpisów po zamknięciu ekranu.
+
+Historia opisuje zdarzenia, a nie bieżący stan alarmów ani potwierdzenie usunięcia
+awarii. Na małym ekranie Diagnostykę można przewijać. Model-Author: Codex.
+
+## Szukanie narzędzi
+
+Narzędzia → pole wyszukiwania przyjmuje fragment opisu lub danych tabeli, np. `T12`,
+`P3`, średnicę albo nazwę typu. Wielkość liter nie ma znaczenia. Obok można wybrać
+typ lub „Bez typu”; oba filtry działają razem. Licznik pokazuje liczbę widocznych
+narzędzi względem całej bazy. „Wszystkie typy” i puste wyszukiwanie odsłaniają całą listę.
+Filtrowanie nie wybiera innego narzędzia, nie zmienia danych w edytorze i nie zapisuje tabeli.
+Wybrane narzędzie może zostać ukryte przez filtr; edytor nadal pokazuje jego numer T.
+Model-Author: Codex.
+
+Odświeżenie listy po zmianie bazy zachowuje zaznaczenie według numeru T i nie przełącza
+edytora na narzędzie, które zajęło poprzedni numer wiersza. Nie nadpisuje niezapisanych
+pól, również gdy wybrane T jest ukryte przez filtr. Jeśli T usunięto z bazy, zaznaczenie
+znika; pola edytora pozostają do decyzji operatora. Samo odświeżanie niczego nie zapisuje.
+
+## Eksport bazy narzędzi
+
+Narzędzia → „Eksport całej bazy CSV…” zapisuje wszystkie narzędzia z bazy,
+również ukryte przez filtry. Niezapisane pola edytora nie trafiają do pliku.
+CSV w UTF-8 zawiera parametry geometrii, korekcje, kierunek, oprawki i dane trwałości
+w formacie zgodnym z `ToolDB.import_csv`. Nie zawiera historii edycji ani samych
+plików STL (tylko ich zapisane ścieżki). Nie jest kopią całej konfiguracji maszyny.
+Anulowanie pozostawia dane bez zmian; błąd eksportu wyświetla komunikat.
+Operacja nie zmienia tabeli LinuxCNC ani aktywnego narzędzia. Model-Author: Codex.
+
+## Dane narzędzia poza formularzem
+
+Edycja istniejącego T zachowuje parametry tokarskie i korekcje osi inne niż Z,
+których formularz nie udostępnia. Oprawka, trwałość i zużycie mają własne pola;
+ścieżka STL jest dostępna dla typu specjalnego. „Nowe” zeruje formularz.
+Zmiana numeru T przy wypełnionym formularzu używa widocznych wartości. Nowy T
+nie przejmuje niewidocznych parametrów tokarskich ani korekcji pozostałych osi.
+Model-Author: Codex. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## Narzędzie specjalne STL
+
+Po wybraniu typu „Specjalne (STL)” pojawia się wymagane pole „Model STL” i przycisk
+„Wybierz…”. Można też wpisać ścieżkę ręcznie. Anulowanie wyboru nie czyści pola;
+„Nowe” zaczyna bez ścieżki poprzedniego narzędzia. „Zapisz” korzysta z dotychczasowej
+walidacji oraz bazy narzędzi. Zapisywana jest ścieżka, bez kopiowania pliku i bez
+sprawdzania poprawności siatki. Model powinien mieć oś Z i czoło w 0.
+
+Obecna symulacja nadal używa walca zastępczego, również po wskazaniu STL.
+Nie potwierdza to zgodności kolizji z rzeczywistą bryłą pliku. Przy małym oknie
+edytor można przewijać pionowo; długie wiersze formularza zawijają się.
+Model-Author: Codex.
+
+## Gdy tabela narzędzi nie daje się zapisać
+
+Brak statusu LinuxCNC blokuje „Zapisz” i „Usuń”, tak samo jak trwający program.
+Powód pojawia się w edytorze i alarmach. Błąd zapisu pliku lub bazy również jest
+pokazywany; po nim ekran nie wysyła przeładowania tabeli do CNC.
+
+Baza narzędzi może już zawierać zmianę, mimo że zapis `tool.tbl` nie powiódł się.
+Dotyczy to również usunięcia rekordu. Przed dalszą pracą sprawdź bazę i `tool.tbl`,
+usuń przyczynę błędu i uzgodnij tabelę z LinuxCNC. Komunikat błędu nie potwierdza
+wycofania zmiany ani synchronizacji z CNC. Model-Author: Codex.
+NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## Historia zmian narzędzia
+
+Narzędzia → „Historia T…” otwiera historię numeru T widocznego w edytorze.
+Działa również po usunięciu narzędzia z bazy. Lista pokazuje do 100 ostatnich wpisów,
+najnowsze na górze: czas UTC, dodanie/zmianę/usunięcie/import i źródło.
+Wybór wpisu pokazuje wyłącznie zmienione pola w kolumnach „Przed” i „Po”.
+„—” oznacza brak wartości. Zamknij i otwórz ponownie, aby odświeżyć podgląd.
+
+Jest to historia bazy, nie potwierdzenie zapisania `tool.tbl` ani wczytania tabeli
+przez LinuxCNC. Pomaga porównać dane po błędzie zapisu, ale nie przywraca zmian
+i nie wysyła komend CNC. Nieznany T pokazuje pustą historię, a błąd odczytu lub
+uszkodzony wpis — komunikat. Model-Author: Codex.
+
+## Oprawka i ręczne dane trwałości
+
+W edytorze narzędzia można podać nazwę/typ oprawki, planowaną trwałość oraz zużycie
+w minutach. W „Trwałość planowana” wartość 0/„—” oznacza brak ustalonego planu.
+Zużycie 0 jest poprawną wartością. Dane odczytują się z bazy; dopiero „Zapisz” je utrwala.
+„Nowe” zaczyna bez oprawki i planu, z zużyciem 0.
+
+Zużycie jest wpisem ręcznym: ten widok nie nalicza automatycznie minut obróbki.
+Przekroczenie planowanej trwałości nie blokuje programu. W bazie i imporcie CSV
+trwałość musi być dodatnią skończoną liczbą albo pusta, a zużycie skończoną liczbą
+nieujemną. Nieprawidłowe dane są odrzucane bez zmiany rekordu. Model-Author: Codex.
+
+## Niepoprawne dane przy imporcie i eksporcie narzędzi
+
+Średnica i korekcje muszą być skończonymi liczbami, a średnica nieujemna.
+Parametry tokarskie I/J są liczbami skończonymi; orientacja Q musi być całkowita
+w zakresie 0…9. Wartość Q2.5 jest odrzucana, nie zaokrąglana. Pola JSON parametrów,
+korekcji i tokarki muszą zawierać obiekty z nazwami pól, nie listy ani wartości null.
+
+Błędny import CSV nie zapisuje części wsadu. Eksport `tool.tbl` sprawdza również
+rekordy już istniejące w bazie; odmowa walidacji pozostawia dotychczasowy plik
+bez zmian. Przy odmowie z HMI nie następuje przeładowanie tabeli CNC; odczytaj
+komunikat i popraw dane przed dalszą pracą. Model-Author: Codex.
+NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## Korekcja średnicy a tabela LinuxCNC
+
+Dla narzędzia z nominalnym parametrem d eksportowana średnica D wynosi d + korekcja
+średnicy (`d_wear`). Przykład: 6 mm i −0,02 mm dają D=5,98 mm, czyli promień 2,99 mm
+używany przez G41/G42. Korekcja dotyczy średnicy, więc zmiana promienia jest dwukrotnie
+mniejsza. Bez nominalnej geometrii zwykłe pole D pozostaje wartością tabeli.
+
+Niezerowa korekcja wymaga nominalnego d; średnica po korekcji musi być dodatnia.
+Przy imporcie `tool.tbl` D jest już wartością po korekcji: zachowana korekcja jest
+odejmowana, aby wyliczyć nominalne d. Powtarzanie importu nie dolicza jej ponownie.
+Eksport/import tabeli dla maszyny calowej przelicza wartości z bazy w mm; dokładność
+zapisu to sześć miejsc po przecinku w jednostce tabeli. Model-Author: Codex.
+NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## Jednostki bazy i tabeli narzędzi
+
+Baza narzędzi i pola długości edytora są w mm. Plik `tool.tbl` jest odczytywany
+i zapisywany w jednostkach `[TRAJ]LINEAR_UNITS` z INI: mm albo inch. Dotyczy to
+pierwszego importu, utworzenia tabeli z danych startowych oraz „Zapisz” i „Usuń”.
+Kąty A/B/C i I/J nie są skalowane. Podpowiedź licznika tabeli podaje jej jednostkę.
+Przykład: D0.25 i Z2 w tabeli calowej odpowiadają D=6,35 mm i Z=50,8 mm w bazie.
+
+Nieznane jednostki powodują odmowę przed zapisem, zamiast założenia mm.
+Przy braku ustawienia jednostek pozostaje dotychczasowy domyślny mm.
+Proces symulacji również normalizuje długości do mm, zgodnie z opisem poniżej.
+Pełny ręczny odbiór maszyny calowej pozostaje osobnym punktem. Model-Author: Codex.
+NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## Jednostki procesu symulacji na żywo
+
+Pozycja XYZ, początek przygotówki z WCS oraz długość i średnica narzędzia z tabeli
+LinuxCNC są przeliczane z jednostek maszyny na mm. Modele maszyny, przygotówka,
+widok i ślad końcówki używają wspólnych wartości fizycznych; 1 cal odpowiada 25,4 mm.
+Nie trzeba zmieniać wymiarów modelu ani przygotówki po zmianie profilu mm/inch.
+Jednostkę określa `TRAJ/LINEAR_UNITS`, a nie bieżące G20/G21 programu.
+
+Nieznane jednostki zatrzymują uruchomienie procesu symulacji z komunikatem błędu.
+Nie jest to blokada ruchu ani polecenie E-STOP. Testy porównują geometrię i usuwany
+materiał, lecz nie zastępują ręcznego odbioru calowego HMI/obrabiarki.
+Model-Author: Codex. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## Początek przygotówki a aktywny WCS
+
+Przy definiowaniu przygotówki z `OFFSET=G54` (analogicznie inne WCS) aktywny układ
+jest odczytywany z bieżącego statusu LinuxCNC. Starszy zapis w pliku parametrów
+nie zastępuje jego aktualnej wartości po zerowaniu/przesunięciu detalu.
+
+Dla nieaktywnego WCS używany jest zapis w pliku parametrów; może nie obejmować
+najnowszych zmian trwającej sesji. Aby użyć bieżącego odczytu przy ręcznym
+przygotowaniu, wybierz docelowy WCS w LinuxCNC i ponów definicję przygotówki.
+Brak danych żądanego układu albo błąd odczytu statusu daje komunikat. Nowa definicja
+nie jest wtedy stosowana; poprzednia mapa i definicja pozostają. Ekran nie wybiera
+WCS ani nie wysyła polecenia ruchu w imieniu operatora. Model-Author: Codex.
+NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## Niezapisane zmiany w formularzu narzędzia
+
+Bursztynowe „T… · niezapisane” oznacza edycję od ostatniego wczytania lub udanego
+zapisu. Pojawia się już podczas wpisywania liczby, przed Enterem. Filtrowanie i
+odświeżanie listy go nie usuwają. „Zapisz” czyści wskaźnik po zapisie bazy i pliku;
+potwierdzenie wczytania przez CNC pozostaje odrębną sprawą. „Nowe” jest niezapisane.
+
+Kolejna edycja usuwa poprzedni komunikat sukcesu, lecz nie ukrywa błędu zapisu.
+Usunięcie jest potwierdzane jako „usunięte”, bez wcześniejszego napisu „zapisane”.
+Przy niezapisanej edycji wybór innego T lub „Nowe” wymaga decyzji w oknie opisanym poniżej. Model-Author: Codex.
+
+## Przełączenie niezapisanego formularza narzędzia
+
+Wybór innego T albo „Nowe” przy niezapisanych polach otwiera okno z decyzją.
+Domyślne „Zostań”, Enter i Escape zachowują pola oraz poprzednie zaznaczenie,
+również jeśli wiersz ukrył filtr. Dla nowego formularza pozostaje brak zaznaczenia.
+„Odrzuć zmiany” pozwala przełączyć formularz; nie zapisuje jego pól i nie cofa
+wcześniejszych zmian już zapisanych w bazie.
+
+Jeśli wybrany rekord zniknie z bazy podczas dialogu albo nie można go odczytać,
+ekran zachowuje dotychczasowy formularz i pokazuje powód. Po udanym zapisie klonu
+lub nowego T zaznaczenie dotyczy zapisanego numeru. Model-Author: Codex.

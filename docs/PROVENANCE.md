@@ -217,3 +217,96 @@ HAL połączeń i testy. Bez nowych bibliotek; użyto standardowych komponentów
 Interfejs external offsets z dokumentacji LinuxCNC 2.9:
 https://linuxcnc.org/docs/2.9/html/motion/external-offsets.html .
 Nie skopiowano kodu upstream; bazowy handler QtDragon pozostaje bez zmian.
+
+## Historia diagnostyczna — 2026-10-22
+
+Model-Author: Codex. Własny kod GPL-2.0-or-later: diag/journal.py, linumert_log_view.py
+oraz testy; integracja istniejącej Diagnostyki. SQLite i CSV ze standardowej biblioteki
+Python, istniejące PyQt5 i tokeny wyglądu. Bez nowych zależności ani zasobów zewnętrznych.
+
+## Filtry narzędzi — 2026-10-22
+
+Model-Author: Codex. Własna zmiana linumert_tools_page.py i test rzeczywistych widgetów
+Qt/SQLite, GPL-2.0-or-later. Użyto istniejących typów narzędzi i tokenów wyglądu;
+bez nowych bibliotek ani zasobów zewnętrznych.
+
+## Odświeżanie listy narzędzi — 2026-10-22
+
+Model-Author: Codex. Własna poprawka linumert_tools_page.py i regresja Qt/SQLite,
+GPL-2.0-or-later. Istniejące QSignalBlocker i model zaznaczenia Qt; bez nowych zależności.
+
+## Eksport narzędzi CSV — 2026-10-22
+
+Model-Author: Codex. Własna integracja istniejącego ToolDB.export_csv z QFileDialog
+oraz QSaveFile i testy Qt/SQLite, GPL-2.0-or-later. Bez nowych bibliotek ani zasobów.
+
+## Format liczb całkowitych tabeli narzędzi — 2026-10-22
+
+Model-Author: Codex. Własna poprawka formatowania i regresja Qt, GPL-2.0-or-later.
+Bez zależności i zasobów zewnętrznych.
+
+## Zachowanie metadanych narzędzia — 2026-10-22
+
+Model-Author: Codex. Własna poprawka budowania rekordu edytora oraz regresja Qt/SQLite,
+GPL-2.0-or-later. Standardowe dataclasses.replace; bez nowych bibliotek i zasobów.
+
+## Wybór ścieżki STL narzędzia — 2026-10-22
+
+Model-Author: Codex. Własny formularz, QFileDialog i testy widgetów Qt/SQLite,
+GPL-2.0-or-later. QScrollArea i QFormLayout z istniejącego PyQt5; bez nowych zależności.
+
+## Błędy zapisu tabeli narzędzi — 2026-10-22
+
+Model-Author: Codex. Własna obsługa wyjątków i regresje rzeczywistych przycisków Qt/SQLite,
+GPL-2.0-or-later. Standardowe sqlite3 i istniejące API LinuxCNC; bez nowych zależności.
+
+## Podgląd historii narzędzia — 2026-10-22
+
+Model-Author: Codex. Własny linumert_tool_history.py, integracja widoku, ograniczenie
+ToolDB.history i testy, GPL-2.0-or-later. Istniejące PyQt5, standardowe json/datetime/SQLite;
+bez nowych zależności ani zasobów zewnętrznych.
+
+## Pola oprawki i trwałości narzędzia — 2026-10-22
+
+Model-Author: Codex. Własne pola formularza, walidacja skończonych czasów i testy
+core/Qt/SQLite, GPL-2.0-or-later. Standardowe math oraz istniejące PyQt5; bez nowych zależności.
+
+## Walidacja liczb tabeli narzędzi — 2026-10-22
+
+Model-Author: Codex. Własne reguły Tool.validate, wspólne finite_number, bramka eksportu
+oraz regresje core/Qt/SQLite, GPL-2.0-or-later. Bez nowych zależności i zasobów.
+
+## Korekcja średnicy w eksporcie tabeli — 2026-10-22
+
+Model-Author: Codex. Własna poprawka Tool.tool_diameter, importu i walidacji oraz
+regresje core/symulacji/rs274, GPL-2.0-or-later. Użyto istniejącego Cutter i interpretera
+LinuxCNC; bez nowych bibliotek. Reguła D tabeli i G41/G42 zgodna z dokumentacją LinuxCNC 2.9.
+
+## Jednostki tabeli narzędzi w HMI — 2026-10-22
+
+Model-Author: Codex. Własna integracja jednostek INI w tooldata/ToolsPage i regresje
+Qt/SQLite/rs274, GPL-2.0-or-later. Istniejące przeliczniki ToolDB, bez nowych zależności.
+
+## Normalizacja jednostek procesu Live — 2026-10-22
+
+Model-Author: Codex. Własne przeliczenie wartości statusu i narzędzi oraz testy
+rzeczywistego silnika/mapy materiału, GPL-2.0-or-later. Bez nowych zależności.
+Semantykę parametrów WCS sprawdzono w LinuxCNC 2.9, convert_coordinate_system
+(USER_TO_PROGRAM_LEN); nie kopiowano kodu:
+https://github.com/LinuxCNC/linuxcnc/blob/2.9/src/emc/rs274ngc/interp_convert.cc .
+
+## Wybór WCS przygotówki w Live — 2026-10-22
+
+Model-Author: Codex. Własna reguła wyboru aktualnego/zapisanego WCS i regresje
+silnika symulacji, GPL-2.0-or-later. Istniejące status.g5x_index/g5x_offset i parser
+parametrów LinuxCNC; bez nowych zależności ani zasobów.
+
+## Wskaźnik niezapisanych zmian narzędzia — 2026-10-22
+
+Model-Author: Codex. Własny stan edycji, reguła QSS z istniejącym tokenem amber i test
+klawiatury/przycisków Qt/SQLite, GPL-2.0-or-later. Bez nowych bibliotek i zasobów.
+
+## Potwierdzenie porzucenia formularza narzędzia — 2026-10-22
+
+Model-Author: Codex. Własny dialog, przywrócenie zaznaczenia i testy rzeczywistych
+okien/klawiszy Qt/SQLite, GPL-2.0-or-later. Istniejące komponenty PyQt5; bez nowych zasobów.

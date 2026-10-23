@@ -624,3 +624,149 @@ Właściciel zgłosił pola działające tylko przez +/−. QtVCP kierował zdar
 
 PR #67 rozszerza wpis na korekcje F/G0/S, synchronizuje suwaki i chroni rozpoczęty wpis przed odświeżaniem. 97 lokalnych testów PASS; samotest pełnego QtVCP wpisuje sześć rodzajów wartości i linię programu, zapisuje stany/zrzuty. Pełny wynik w kontrolach PR #66/#67; manualny punkt 27 otwarty. Autokontrola, Model-Author: Codex.
 Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących prywatnych parametrów, interpretowane jako błąd poprawnego programu. Inicjalizujemy plik i nadpisujemy także PARAMETER_FILE w prywatnej kopii INI (INI ma pierwszeństwo przed -v). Nowa regresja chroni absolutną ścieżkę parametrów sterowania; wczesny test Plant sprawdza również poprawny skończony program. 109 testów lokalnych PASS, autokontrola, Model-Author: Codex.
+
+## Diagnostyka — trwała historia komunikatów · 2026-10-22 · Codex
+- Model-Author: Codex. PR #68: ostatnie 1000 wpisów SQLite, oddzielnie dla konfiguracji INI.
+- Filtr poziomu i wyszukiwanie; widok do 200, eksport CSV wszystkich pasujących wpisów.
+- Błąd bazy nie usuwa komunikatu z widoku: jawny tryb pamięciowy, bez nadpisania uszkodzonego pliku.
+- Diagnostyka przewijana na mniejszym ekranie; bez komend CNC i bez zmiany Resetu alarmów.
+- Lokalnie 7 testów PASS: restart, retencja, filtry, awarie zapisu i faktyczne kliknięcia Qt/CSV.
+- Próba złożonej Diagnostyki i zrzut Qt; pełne CI do odbioru w PR #68.
+- Autokontrola, bez niezależnego przeglądu. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## Narzędzia — wyszukiwanie i filtr typu · 2026-10-22 · Codex
+- Model-Author: Codex. Wyszukiwanie po T/P, opisie i wyświetlonych danych; filtr typu / bez typu.
+- Filtry łączone, licznik widocznych/wszystkich; pozostają po odświeżeniu listy.
+- Bez zapisu bazy/tool.tbl, bez komend CNC i bez automatycznego przełączenia edytora.
+- Test klika rzeczywiste Qt i używa prawdziwej SQLite: lokalnie PASS; pełne CI do odbioru w PR.
+- Własny podgląd z danymi testowymi; autokontrola, bez niezależnego przeglądu.
+
+## Narzędzia — zachowanie zaznaczenia przy odświeżaniu · 2026-10-22 · Codex
+- Model-Author: Codex. Odtworzono przeskok zaznaczenia T50→T30 po dodaniu rekordu.
+- Odświeżanie zachowuje T i kolumnę, również dla ukrytego wiersza; nie ładuje innego narzędzia.
+- Niezapisane pola edytora pozostają; po usunięciu T z bazy zaznaczenie jest czyszczone.
+- Istniejące komórki aktualizowane bez ponownego setItem; brak ostrzeżeń Qt o własności.
+- Regresja Qt/SQLite: przed poprawką FAIL, po poprawce PASS; brak komend CNC/zapisów z odświeżania.
+- Dokumentacja i podgląd GUI; pełne CI do odbioru w PR. Autokontrola, bez niezależnego przeglądu.
+
+## Narzędzia — eksport całej bazy CSV · 2026-10-22 · Codex
+- Model-Author: Codex. Przycisk eksportuje wszystkie zapisane narzędzia, niezależnie od filtrów.
+- Istniejący format ToolDB zachowuje geometrię, korekcje, kierunek, oprawkę i dane trwałości.
+- QSaveFile zapisuje atomowo; anulowanie i błędy odczytu/zapisu nie zmieniają danych.
+- Bez komend CNC, przeładowania tool.tbl i zapisywania pól edytora; opis zakresu w podpowiedzi.
+- Dwa testy Qt/SQLite PASS, w tym ponowny import CSV, Unicode, anulowanie i błędy.
+- Własny podgląd Qt; pełne CI do odbioru w PR. Autokontrola, bez niezależnego przeglądu.
+
+## Narzędzia — pełne wartości obrotów i liczby ostrzy · 2026-10-22 · Codex
+- Model-Author: Codex. Usuwanie końcowych zer dotyczy tylko części ułamkowej liczby.
+- Przy formacie całkowitym 12000 obr/min i 10 ostrzy nie są już pokazywane jako 12 i 1.
+- Zero pozostaje zerem; format wymiarów i oznaczenie braku danych zachowane.
+- Regresja rzeczywistego Qt: stary kod FAIL, poprawka PASS; łącznie trzy testy GUI PASS.
+- Własny podgląd tabeli/edytora; bez zmiany bazy i komend CNC. Pełne CI do odbioru w PR.
+- Autokontrola, bez niezależnego przeglądu.
+
+## Narzędzia — zachowanie danych poza formularzem · 2026-10-22 · Codex
+- Model-Author: Codex. Odtworzono utratę oprawki, trwałości i korekcji innych osi przy edycji.
+- Formularz aktualizuje edytowane pola istniejącego T; zachowuje pozostałe dane, w tym STL.
+- Nowy numer T nie dziedziczy ukrytych pól poprzednio oglądanego narzędzia.
+- Regresja starego kodu FAIL; cztery testy Qt/SQLite PASS, walidacja specjalnego STL i nowego T.
+- Samo budowanie rekordu nie zapisuje bazy ani nie wysyła CNC; istniejąca ścieżka zapisu zachowana.
+- Dokumentacja i przekazanie; pełne CI do odbioru w PR. Autokontrola, bez niezależnego przeglądu.
+- NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## Narzędzia — wskazanie modelu specjalnego STL · 2026-10-22 · Codex
+- Model-Author: Codex. Pole ścieżki i Wybierz… tylko dla typu Specjalne STL; anulowanie zachowuje pole.
+- Odczyt/zapis ścieżki przez istniejący rekord Tool i walidację; Nowe nie przejmuje ścieżki.
+- Jawna informacja o walcu zastępczym w symulacji; brak ładowania ani analizy siatki.
+- Edytor przewijany, długie wiersze zawijane; podgląd i próba rzeczywistego Qt w 1200×600.
+- Pięć testów Qt/SQLite PASS: wybór/anulowanie, wymagane pole, reload, brak zmian pliku/CNC.
+- Pełne CI do odbioru w PR. Autokontrola, bez niezależnego przeglądu.
+
+## Narzędzia — błędy zapisu i brak statusu CNC · 2026-10-22 · Codex
+- Model-Author: Codex. Brak statusu (utworzenie stat/poll) blokuje zapis i usunięcie; program nadal blokuje.
+- Błędy pliku i SQLite pokazane w edytorze/alarmie, bez nieobsłużonego wyjątku z przycisku Qt.
+- Po błędzie nie wysyła się przeładowania tabeli CNC; baza mogła już się zmienić, co mówi komunikat.
+- Bez pozornego rollbacku ani zapewnienia atomowości bazy i pliku; operator sprawdza oba przed pracą.
+- Dwie regresje na starym kodzie FAIL; sześć testów Qt/SQLite PASS, w tym blokada SQLite i częściowy zapis.
+- Własny podgląd błędu; pełne CI do odbioru w PR. Autokontrola, bez niezależnego przeglądu.
+- NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## Narzędzia — podgląd historii zmian przed/po · 2026-10-22 · Codex
+- Model-Author: Codex. Historia T… pokazuje do 100 najnowszych zmian dla T z edytora, także usuniętego.
+- Pola przed/po z nazwami parametrów i jednostkami, czas UTC, rodzaj zmiany i źródło.
+- Odczyt ograniczony w SQL; API historii bez limitu zachowuje dotychczasowe działanie.
+- Bez przywracania danych i komend CNC; historia bazy nie potwierdza wczytania tabeli przez CNC.
+- Dziewięć testów core/Qt/SQLite PASS: kolejność/limit, kliknięcie, pusta historia i błędne dane.
+- Własny podgląd Qt i dokumentacja; pełne CI do odbioru w PR. Autokontrola, bez niezależnego przeglądu.
+
+## Narzędzia — oprawka i ręczne dane trwałości · 2026-10-22 · Codex
+- Model-Author: Codex. Formularz odczytuje/zapisuje nazwę oprawki, planowaną trwałość i ręczne zużycie.
+- Brak planu = pusta trwałość; zużycie 0 poprawne. Nowe zeruje wartości, sama edycja nie zapisuje.
+- Brak automatycznego naliczania i blokady po przekroczeniu planu; dopuszczone zużycie większe od planu.
+- Core odrzuca ujemne/nieskończone/błędnie typowane czasy; próby zapisu/importu nie zmieniają rekordu.
+- Trzynaście testów core/Qt/SQLite PASS, w tym roundtrip pól i błędny CSV; własny podgląd Qt.
+- Dokumentacja poprawiona do bieżących pól; pełne CI do odbioru w PR. Autokontrola, bez niezależnego przeglądu.
+
+## Narzędzia — walidacja liczb i odmowa niepoprawnego eksportu · 2026-10-22 · Codex
+- Model-Author: Codex. Odtworzono eksport Dinf/Zinf i ciche obcięcie Q2.5→Q2.
+- Skończone liczby w średnicy, korekcjach i I/J; Q całkowite 0…9, bez bool i nieznanych pól tokarki.
+- params/offsets/lathe muszą być obiektami; wspólne sprawdzenie liczb obsługuje też zbyt duże int.
+- Eksport waliduje stare rekordy przed zapisem pliku; błąd pozostawia poprzedni tool.tbl.
+- Odmowa walidacji w Zapisz/Usuń jest obsłużona w HMI, bez przeładowania CNC.
+- Dwie regresje starego kodu FAIL; 17 testów core/Qt/SQLite PASS, także atomowość wsadu CSV.
+- Pełne CI do odbioru w PR. Autokontrola, bez niezależnego przeglądu. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## Narzędzia — korekcja średnicy w tabeli LinuxCNC · 2026-10-22 · Codex
+- Model-Author: Codex. Odtworzono pominięcie d_wear: nominalne 6 i −0,02 dawało D6 zamiast D5.98.
+- D tabeli = nominalne d + d_wear; zwykły wpis bez geometrii zachowuje surowe D tabeli.
+- Import efektywnego D zachowuje korekcję i wylicza nominalne d, bez ponownego dodawania zużycia.
+- Odrzucenie D po korekcji <= 0 oraz niezerowej korekcji bez nominalnego d.
+- Regresje starego kodu FAIL; 21 testów lokalnie PASS, także rzeczywisty Cutter i import mm/cale.
+- Cztery próby G41/G42 z ± korekcją w rzeczywistym rs274 dodane do CI; lokalnie niewykonane.
+- Pełne CI do odbioru w PR. Autokontrola, bez niezależnego przeglądu. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## Narzędzia — jednostki tabeli zgodne z INI · 2026-10-22 · Codex
+- Model-Author: Codex. Odtworzono import D0.25/Z2 z profilu calowego jako mm zamiast 6,35/50,8 mm.
+- Odczyt TRAJ/LINEAR_UNITS; import tabeli i eksport danych startowych z jednostkami maszyny.
+- Zapisz/Usuń w HMI przekazują jednostki tabeli, baza i pola długości pozostają w mm; kąty bez skali.
+- Nieznane jednostki odrzucone przed zapisem; przy braku ustawienia zachowany domyślny mm.
+- 26 testów lokalnie PASS, także rzeczywiste przyciski Qt, dane startowe i brak mutacji przy błędzie.
+- Próby G41/G42 w rs274 rozszerzone o tabelę calową; lokalnie niewykonane, odbiór przez CI.
+- Oddzielny dług przeliczenia pozycji/WCS/narzędzi Live zapisany; brak deklaracji pełnej symulacji calowej.
+- Autokontrola, bez niezależnego przeglądu. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## Symulacja — wspólne jednostki mm procesu Live · 2026-10-22 · Codex
+- Model-Author: Codex. XYZ, WCS z parametrów/statusu i Z/D tabeli przeliczane z jednostek INI na mm.
+- Silnik, komunikaty położenia i ślad końcówki otrzymują te same fizyczne długości dla mm/inch.
+- Nieznane jednostki raportowane zdarzeniem error przed startem odczytu i wątku poleceń.
+- Odtworzono regresję starego kodu FAIL; 30 testów lokalnie PASS (21 core/sim oraz 9 rzeczywistego Qt).
+- Testy obejmują WCS, narzędzie zastępcze i typowane, identyczną mapę materiału oraz ślad końcówki.
+- Atrapa statusu nie udostępnia komend CNC; bez zmian toru ruchu/safety. Fixture podglądu jawnie mm.
+- Wymagane pełne CI, ręcznego odbioru calowego HMI/obrabiarki nie zaliczono.
+- Autokontrola, bez niezależnego przeglądu. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## Symulacja — aktualny WCS początku przygotówki · 2026-10-22 · Codex
+- Model-Author: Codex. Odtworzono użycie starego X1 z pliku zamiast bieżącego X20 z G54.
+- Aktywny WCS bierze początek ze świeżo odczytanego statusu; inny z zapisanych parametrów.
+- Nie podstawia się przesunięcia aktywnego układu pod brakujący nieaktywny WCS.
+- Brak danych lub błąd poll daje error i zachowuje poprzednią mapę/definicję, bez komend CNC.
+- Regresja starego kodu FAIL; 32 testy lokalnie PASS, także przeliczenie zapisanego nieaktywnego WCS.
+- Dokumentacja opisuje świeżość statusu i ograniczenie pliku parametrów; pełne CI do odbioru w PR.
+- Autokontrola, bez niezależnego przeglądu. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## Narzędzia — wskaźnik niezapisanych zmian · 2026-10-22 · Codex
+- Model-Author: Codex. Bursztynowy napis przy T po edycji, także liczby przed Enterem.
+- Programowe wczytanie i udany Zapis czyszczą wskaźnik; Nowe oznacza niezapisany formularz.
+- Filtry/refresh zachowują stan; kolejna edycja czyści stare potwierdzenie sukcesu, nie błąd zapisu.
+- Usunięcie ma własny komunikat i nagłówek; bez automatycznego zapisu i zmiany komend CNC.
+- 33 testy lokalnie PASS, w tym rzeczywista klawiatura/przyciski Qt, SQLite i obsługa błędu.
+- Podgląd Qt i dokumentacja; potwierdzenie porzucenia edycji pozostaje osobnym zakresem.
+- Pełne CI do odbioru w PR. Autokontrola, bez niezależnego przeglądu.
+
+## Narzędzia — ochrona porzucenia edycji · 2026-10-22 · Codex
+- Model-Author: Codex. Inny T/Nowe pyta o odrzucenie niezapisanych pól; Zostań jest domyślne i pod Escape.
+- Anulowanie odtwarza poprzednie zaznaczenie, również ukryte lub brak zaznaczenia dla nowego T.
+- Docelowy rekord czytany po dialogu; jego zniknięcie/błąd odczytu zachowuje formularz z komunikatem.
+- Zapis klonu/nowego T zaznacza zapisany numer; odrzucenie nie zapisuje danych ani nie cofa bazy.
+- Regresja starego kodu FAIL; 35 testów lokalnie PASS, w tym prawdziwe okna/klawisze Qt i SQLite.
+- Podgląd i dokumentacja; pełne CI do odbioru w PR. Autokontrola, bez niezależnego przeglądu.
