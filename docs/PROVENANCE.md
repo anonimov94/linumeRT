@@ -410,3 +410,5 @@ tests/test_lexer.py sprawdzają rzeczywiste dostarczone programy demo/kolizji.
 Model-Author: Codex. Własny `screens/linumert/linumert_skin_controls.py`:
 rysowane kodem Qt prostokątne, ścięte i organiczne obudowy przycisków oraz
 poglądowe przełączniki. GPL-2.0-or-later, bez fragmentów bitmap i nowych zależności.
+Własny `screens/linumert/linumert_skin_readouts.py`: odczyty osi, F/S, poglądowy
+symbol narzędzia i czytelny program przykładowy, Codex, 2026-10-23, GPL-2.0-or-later.

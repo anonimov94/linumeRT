@@ -15,6 +15,7 @@ from linumert_skin_contract import (
 )
 from linumert_skin_panel import SkinPanel, UnknownGauge
 from linumert_skin_controls import SkinButton
+from linumert_skin_readouts import AxisReadout, ProgramView
 from linumert_skin_strings import text
 from PyQt5 import QtCore, QtWidgets
 
@@ -192,6 +193,12 @@ class SkinPreview(QtWidgets.QMainWindow):
                 layout.addWidget(viewport, 1)
                 self.viewports[role] = viewport
                 layout.addWidget(body)
+            elif role == "dro":
+                layout.addWidget(AxisReadout(p.skin, c, "XYZAB" if p.skin == "classic-digital" else "XYZA"), 1)
+                body.deleteLater()
+            elif role == "program":
+                layout.addWidget(ProgramView(c, text("sample_program", p)), 1)
+                body.deleteLater()
             else:
                 layout.addWidget(body, 1, QtCore.Qt.AlignCenter)
             if role == "tools":
@@ -199,8 +206,6 @@ class SkinPreview(QtWidgets.QMainWindow):
                 for label in ("F", "S", "G0"):
                     instruments.addWidget(UnknownGauge(label, p.skin, c))
                 layout.addLayout(instruments, 1)
-            if role == "program":
-                body.setStyleSheet("font-family: monospace; font-size: 13px;")
             self.grid.addWidget(card, row, column, height, width)
             self.cards[role] = card
             for index in range(column, column + width):
