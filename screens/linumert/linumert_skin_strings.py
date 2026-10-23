@@ -9,7 +9,6 @@ from types import MappingProxyType
 
 from linumert_skin_contract import PresentationPreferences
 
-
 _EN = {
     "preview": "Presentation prototype — no machine connection",
     "skin": "Skin", "theme": "Color theme", "language": "Language",

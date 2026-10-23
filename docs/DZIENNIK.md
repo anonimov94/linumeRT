@@ -781,3 +781,13 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
 - Brakujące klucze dają jawny błąd; identyfikatory alarmów nie są tłumaczone.
 - 6 testów unittest PASS, 32 kombinacje; pełne tłumaczenie obecnych stron poza zakresem.
 - Model-Author: Codex. Bez scalania.
+
+## GUI — manifesty i warunki przełączenia · 2026-10-23 · Codex
+
+- Poprawiono rejestr dokładnych ścieżek dokumentów: przyczyna błędu poprzedniego CI.
+- Manifest API 1 sprawdza komplet widoków, globalnych kontrolek i rozdzielczości.
+- Niezmienny model warunków przełączenia odmawia przy ruchu, programie, bazowaniu,
+  oczekujących komendach, braku/nieaktualności statusu. Bez dostępu do ACTION/HAL.
+- Lokalnie 20 testów + 87 subtestów PASS (kontrakty i strażnik IP), ruff PASS.
+- Integracja powłoki i renderer pozostają do wykonania; bez scalania.
+- Model-Author: Codex. Szczegóły kontraktu w docs/design/SKIN_AUDIT.md.

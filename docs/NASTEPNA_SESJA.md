@@ -239,3 +239,15 @@ trybów i stanów prototypu, niezależny od palety i układu. Nie tłumaczy jesz
 wszystkich stron starego HMI. Kody alarmów pozostają identyfikatorami katalogu.
 Aktualny wynik lokalny: 6 testów unittest PASS, komplet kluczy w obu językach
 we wszystkich 32 kombinacjach. Bez scalania. Model-Author: Codex.
+
+## GUI — kolejny krok 2026-10-23
+
+Model-Author: Codex. PR #86, codex/skin-foundation: walidator manifestu API 1
+oraz niezmienny model warunków przełączenia, bez integracji ACTION/HAL.
+Lokalnie pytest: 20 PASS + 87 subtestów (kontrakty skórek i strażnik IP);
+ruff dla zmienianych modułów/testów PASS. Narzędzia w katalogu tymczasowym,
+bez zmian zależności projektu. Qt/LinuxCNC nadal niewykonane lokalnie.
+Poprzednie CI: 930 PASS, 63 skip, 109 deselected, jeden błąd rejestru pochodzenia;
+brakujące dokładne ścieżki dokumentów poprawione i test strażnika IP lokalnie PASS.
+Następne: adapter statusu i osobny launcher prototypu; renderer wymaga próby GPU.
+Bez scalania; pozostałe dawne instrukcje scalania w tym dokumencie są historyczne.

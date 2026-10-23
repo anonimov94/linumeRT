@@ -327,3 +327,7 @@ Bez zewnętrznych tłumaczeń ani bibliotek.
 - `docs/design/SKIN_SYSTEM_ROADMAP.md` — ChatGPT, 2026-10-22, własna koncepcja
   na polecenie właściciela; źródło: gałąź design/skin-system-roadmap-2026-10-22,
   commit 32e8691. Dokument projektu, GPL-2.0-or-later; bez zewnętrznych grafik.
+
+Manifesty i reguła przełączania prezentacji: własny moduł
+screens/linumert/linumert_skin_runtime.py oraz testy test_skin_runtime.py,
+Model-Author: Codex, 2026-10-23, GPL-2.0-or-later. Bez kodu i zasobów zewnętrznych.

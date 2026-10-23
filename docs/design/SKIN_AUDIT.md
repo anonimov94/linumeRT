@@ -40,3 +40,26 @@ prototyp nie zmienia kontraktu produkcyjnego. SKIN-01 jest bramką przed wdroże
 nowego renderera, nawet jeśli prostsze kontrakty SKIN-02/03 powstaną wcześniej.
 STOP, Hold, alarmy i stan E-STOP muszą pozostać dostępne przy każdym układzie.
 Nie ma jeszcze odbioru nowych skórek ani renderera na docelowym komputerze.
+
+## Kontrakt manifestu i przełączenia — prototyp, 2026-10-23
+
+`screens/linumert/linumert_skin_runtime.py` przyjmuje manifest JSON z dokładnie
+polami `skin`, `version` (major.minor.patch), `api` (1), `views`, `global_controls`
+oraz `resolutions`. Wymagane widoki: dro, gcode, tools, toolpath, machine,
+workpiece, alarms, cycle, manual, diagnostics. Stałe kontrolki: alarms,
+estop_status, stop, feed_hold, mode. Deklaracja obejmuje 1280×800 i 1920×1080.
+Manifest opisuje zdolności pakietu; sam wpis nie potwierdza wdrożenia widoku.
+Nie ma jeszcze ładowania kodu wtyczek ani uruchamiania deklarowanych komponentów.
+
+Model `SwitchSnapshot` jest niezmienny i nie ma dostępu do ACTION/HAL.
+Adapter musi jawnie potwierdzić połączenie, zatrzymanie osi **i wrzeciona**,
+bezczynność interpretera, pustą kolejkę oraz brak bazowania i oczekującej komendy.
+Pauza programu nie jest bezczynnością. Znaczniki czasu korzystają z tego samego
+lokalnego zegara monotonicznego; próbka starsza niż 0,5 s lub z przyszłości
+powoduje odmowę, tak samo jak brak danych i niepoprawne typy.
+
+Reguła `switch_gate` zwraca wynik i stabilny kod przyczyny, bez zatrzymywania,
+resetowania czy zmiany trybu maszyny. Nie jest jeszcze podłączona do powłoki.
+Przyszły host musi ponowić odczyt tuż przed wymianą widoku, obsłużyć awarię
+montażu i zachować globalne kontrolki przez całą operację. Sama zgoda z modelu
+nie eliminuje zmiany statusu między odczytem a montażem.

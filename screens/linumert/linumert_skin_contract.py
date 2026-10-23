@@ -8,7 +8,6 @@ import json
 from dataclasses import dataclass
 from types import MappingProxyType
 
-
 SKIN_IDS = ("classic-digital", "industrial-pro", "cyberdeck", "organic-vector")
 THEME_IDS = ("classic-turquoise", "graphite-gray", "reactor-green", "ion-blue")
 LANGUAGE_IDS = ("en", "pl")
