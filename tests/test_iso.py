@@ -42,11 +42,18 @@ def test_packages_cover_runtime() -> None:
 def test_launcher_paths_exist() -> None:
     text = SCRIPTS[2].read_text()
     assert "config/sim/linumert_xyz/linumert_xyz.ini" in text
+    assert "--expect-profile sim" in text
+    assert "--expect-profile plant" in text
+    assert "linumert.machine.launch" in text
+    assert "--monitor" in text and "tools/dev/skin-monitor.py" in text
     assert (ROOT / "config/sim/linumert_xyz/linumert_xyz.ini").is_file()
     assert (ROOT / "config/plant/linumert_plant_xyz/linumert_plant_xyz.ini").is_file()
-    for desktop in (ISO / "config/includes.chroot/usr/share/applications").glob("*.desktop"):
+    desktops = ISO / "config/includes.chroot/usr/share/applications"
+    for desktop in desktops.glob("*.desktop"):
         body = desktop.read_text()
         assert "Exec=/usr/local/bin/linumert" in body and "Type=Application" in body
+    monitor = (desktops / "linumert-monitor.desktop").read_text()
+    assert "--monitor" in monitor and "read-only" in monitor
 
 
 def test_workflow_builds_and_publishes() -> None:
@@ -56,3 +63,6 @@ def test_workflow_builds_and_publishes() -> None:
     steps = " ".join(str(s) for s in wf["jobs"]["iso"]["steps"])
     for word in ("tools/iso/build.sh", "--privileged", "gh release upload", "--prerelease"):
         assert word in steps
+    release_step = next(s for s in wf["jobs"]["iso"]["steps"]
+                        if s.get("name") == "Wydanie testowe (obraz roboczy, na stałe)")
+    assert release_step["if"] == "github.event_name == 'workflow_dispatch'"

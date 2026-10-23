@@ -184,6 +184,10 @@ Gotowy system do wypalenia na pendrive: **Debian 12 + jądro PREEMPT_RT + LinuxC
 Uruchom bez instalacji (tryb live: ekran linumeRT na symulatorze, „linumeRT + Plant” z wirtualną
 obrabiarką) albo zainstaluj na dysk komputera maszyny (Calamares).
 
+Uruchomienia z obrazu przechodzą tę samą bramkę profilu `sim`/`plant` co starter repozytorium.
+W menu jest też **„linumeRT — monitor skórek (read-only)”**: osobny podgląd statusu działającego
+LinuxCNC, bez komend ruchu. Wymaga wcześniej uruchomionego `linumeRT` albo `linumeRT + Plant`.
+
 - Pobierz z [Releases](https://github.com/anonimov94/linumeRT/releases): wydania `v*` oraz obrazy robocze
   `iso-RRRRMMDD-<commit>` (pre-release, zostają na stałe). Nowy obraz na żądanie:
   [Actions → ISO live USB](https://github.com/anonimov94/linumeRT/actions/workflows/iso.yml) → **Run workflow** (ok. 30–60 min).

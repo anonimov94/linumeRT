@@ -1,6 +1,15 @@
 # Stan projektu i przekazanie
 
-Tura: Codex · 2026-10-23 · stan: oddana; osobne ekrany offline, odbiór/scalenie PR #91.
+Tura: Codex · 2026-10-23 · stan: oddana; PR #96/#93/#95/#94 scalone. Kolejny zakres: integracja launchera ISO z bramką profilu sim/Plant i monitorem skórek read-only; budowa oraz odbiór obrazu w toku.
+
+## ISO — integracja uruchomień i monitora read-only
+
+Gałąź `codex/iso-integrated`, osobny checkout `/tmp/linumert-iso-integrated`. Obraz live
+korzysta teraz z tej samej bramki `linumert.machine.launch` co starter repo; osobne menu
+uruchamia monitor statusu NML tylko do odczytu. PR buduje ISO jako kontrolę, ale nie publikuje
+release; publikacja roboczego ISO następuje dopiero przez ręczne `workflow_dispatch`, zgodnie z D39.
+Po scaleniu: zbudować ISO na `main`, sprawdzić nazwę/sha256/rozmiar i wynik workflow.
+Uruchomienie pozostaje symulacją; ISO i sprzęt fizyczny NIEZWERYFIKOWANE NA SPRZĘCIE.
 
 ## Konkurs 3 — wymagania poza GUI, 2026-10-23
 

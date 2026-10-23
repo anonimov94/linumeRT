@@ -47,6 +47,8 @@ Wykonane: 33 z 84.
 088 | 2026-10-23 | Cztery osobne ekrany offline, układy i kontrolki według wizji, launcher --skin, 128 wariantów GL, nowa galeria; nie kończy integracji CNC; PR #91; Codex
 K04 | 2026-10-23 | Konkurs: typowany adapter read-only NML, cztery skórki, G53, timeout i reconnect LinuxCNC 2.9.10/Xvfb; PR #96 gotowy do oceny, bez scalania; raport raporty/04.md; Codex
 
+K05 | 2026-10-23 | Obraz ISO: uruchomienia sim/Plant przez bramkę profilu, monitor skórek read-only z menu, build PR bez publikacji; budowa obrazu na main do wykonania; Codex
+
 
 Konkurs-01 | 2026-10-23 | Bramka przed exec LinuxCNC: deklaracje hardware + audyt HAL, integracja startera sim/Plant; 41 testów zakresu PASS, pełne lint/test 1033 PASS; PR #93 do oceny bez scalenia; Codex
 
