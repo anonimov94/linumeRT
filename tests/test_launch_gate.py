@@ -91,7 +91,11 @@ def test_refuses_before_exec(hardware, tmp_path, mutation):
         hardware.write_bytes(b"\xff")
     elif mutation == "missing_hal":
         (tmp_path / "post.hal").unlink()
-    result, log = invoke(hardware, tmp_path)
+    try:
+        result, log = invoke(hardware, tmp_path)
+    finally:
+        if mutation == "symlink_cycle":
+            hardware.unlink(missing_ok=True)
     assert result.returncode == 2, result.stderr
     assert not log.exists()
     assert json.loads(result.stderr)["errors"]
