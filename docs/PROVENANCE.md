@@ -315,6 +315,34 @@ klawiatury/przycisków Qt/SQLite, GPL-2.0-or-later. Bez nowych bibliotek i zasob
 Model-Author: Codex. Własny dialog, przywrócenie zaznaczenia i testy rzeczywistych
 okien/klawiszy Qt/SQLite, GPL-2.0-or-later. Istniejące komponenty PyQt5; bez nowych zasobów.
 
+## Kontrakt prototypu skórek — 2026-10-23
+
+Model-Author: Codex. Własny moduł preferencji, palety prototypowe i testy unittest,
+GPL-2.0-or-later. Turkus z istniejącego docs/design/tokens.yaml; kierunek z
+SKIN_SYSTEM_ROADMAP.md (Model-Author: ChatGPT, 2026-10-22). Bez nowych bibliotek,
+fontów, grafik i kodu producentów. Palety nie stanowią gotowych skórek GUI.
+
+Wspólne napisy prototypu EN/PL: własny katalog i regresje kompletności oraz
+rozróżnienia stanów, Model-Author: Codex, 2026-10-23, GPL-2.0-or-later.
+Bez zewnętrznych tłumaczeń ani bibliotek.
+
+- `docs/design/SKIN_AUDIT.md` — Codex, 2026-10-23, własny audyt repozytorium
+  i plan wdrożenia nowych wytycznych, GPL-2.0-or-later.
+- `docs/design/SKIN_SYSTEM_ROADMAP.md` — ChatGPT, 2026-10-22, własna koncepcja
+  na polecenie właściciela; źródło: gałąź design/skin-system-roadmap-2026-10-22,
+  commit 32e8691. Dokument projektu, GPL-2.0-or-later; bez zewnętrznych grafik.
+
+Manifesty i reguła przełączania prezentacji: własny moduł
+screens/linumert/linumert_skin_runtime.py oraz testy test_skin_runtime.py,
+Model-Author: Codex, 2026-10-23, GPL-2.0-or-later. Bez kodu i zasobów zewnętrznych.
+
+Podgląd układów Qt: własne screens/linumert/linumert_skin_preview.py,
+tools/dev/skin-preview.py i tests/test_skin_preview.py. Model-Author: Codex,
+2026-10-23, GPL-2.0-or-later. Bez zewnętrznych grafik/kodu. Istniejące PyQt5,
+bez nowej zależności projektu. Font systemowy użyty wyłącznie do testów Windows
+nie jest kopiowany ani redystrybuowany. Zrzuty w build/skin-preview/ są lokalnymi
+wynikami testów, nie nowymi zasobami produkcyjnymi.
+
 Poprawka lokalizacji kroku JOG przed scaleniem #67: własna walidacja QLocale,
 regresje klawiatury C/PL/DE, Model-Author: Codex, 2026-10-23, GPL-2.0-or-later.
 Bez nowych zasobów ani bibliotek.

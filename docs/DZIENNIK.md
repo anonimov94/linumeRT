@@ -771,6 +771,42 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
 - Regresja starego kodu FAIL; 35 testów lokalnie PASS, w tym prawdziwe okna/klawisze Qt i SQLite.
 - Podgląd i dokumentacja; pełne CI do odbioru w PR. Autokontrola, bez niezależnego przeglądu.
 
+## GUI SKIN-00 — 2026-10-23 · Codex
+
+- Audyt QtVCP/QSS/renderera i kolejność zmian według nowych wytycznych.
+- Kontrakt prototypu: osobne skórka/motyw/język, wersjonowany JSON, cztery palety.
+- 4 testy unittest PASS: 32 kombinacje, walidacja, niezmienność, kontrast 4.5:1.
+- Grafit wymaga jaśniejszego tekstu błędu; obecna prezentacja pozostaje bez zmian.
+- Pełny Qt/LinuxCNC i GPU/Mesa niewykonane lokalnie. Bez scalania na życzenie właściciela.
+- Model-Author: Codex. Następne kroki: docs/design/SKIN_AUDIT.md.
+
+## GUI — wspólne napisy prototypu EN/PL · 2026-10-23 · Codex
+
+- Dodano katalog nawigacji, trybów i stanów, niezależny od skórki oraz palety.
+- Brakujące klucze dają jawny błąd; identyfikatory alarmów nie są tłumaczone.
+- 6 testów unittest PASS, 32 kombinacje; pełne tłumaczenie obecnych stron poza zakresem.
+- Model-Author: Codex. Bez scalania.
+
+## GUI — manifesty i warunki przełączenia · 2026-10-23 · Codex
+
+- Poprawiono rejestr dokładnych ścieżek dokumentów: przyczyna błędu poprzedniego CI.
+- Manifest API 1 sprawdza komplet widoków, globalnych kontrolek i rozdzielczości.
+- Niezmienny model warunków przełączenia odmawia przy ruchu, programie, bazowaniu,
+  oczekujących komendach, braku/nieaktualności statusu. Bez dostępu do ACTION/HAL.
+- Lokalnie 20 testów + 87 subtestów PASS (kontrakty i strażnik IP), ruff PASS.
+- Integracja powłoki i renderer pozostają do wykonania; bez scalania.
+- Model-Author: Codex. Szczegóły kontraktu w docs/design/SKIN_AUDIT.md.
+
+## GUI — osobny podgląd czterech kompozycji Qt · 2026-10-23 · Codex
+
+- Dodano tools/dev/skin-preview.py i niezależne okno PyQt5, bez LinuxCNC/HAL.
+- Cztery układy, cztery palety, EN/PL; status niedostępny, STOP/Hold nieaktywne.
+- Panele 3D oznaczone jako niepodłączone; to studium układu, nie kompletny HMI.
+- Lokalnie 22 testy + 87 subtestów PASS; Qt obejmuje 64 warianty i cele >=44 px.
+- Ruff i diff-check PASS; wizualna kontrola zrzutów Windows/offscreen po dodaniu
+  fontu systemowego (tryb offscreen nie wylicza fontów). Bez redystrybucji fontu.
+- Model-Author: Codex. Bez scalania; docelowy renderer/GPU oraz podłączenie CNC do wykonania.
+
 ## PR #67 — lokalizacja kroku JOG przed scaleniem · 2026-10-23 · Codex
 
 - Właściciel zezwolił na scalanie ukończonych aktywnych gałęzi; #67 odświeżono main.

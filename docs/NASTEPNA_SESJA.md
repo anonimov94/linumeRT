@@ -1,6 +1,30 @@
 # Stan projektu i przekazanie
 
-Tura: Codex · 2026-10-22 · stan: realizacja ciągła w chmurze.
+Tura: Codex · 2026-10-23 · stan: integracja aktywnych gałęzi po testach.
+
+## Aktualne polecenie — scalanie po zakończeniu
+
+Właściciel zezwolił teraz na scalanie ukończonych aktywnych gałęzi po testach.
+To zastępuje wcześniejsze odłożenie scalania i wszystkie niższe historyczne zapisy
+„bez scalania”. PR #67 zawiera poprawkę lokalizacji kroku JOG; PR #86 obejmuje
+prototyp kompozycji Qt. Połączono je na gałęzi #86 do wspólnego odbioru CI;
+konflikty dotyczyły wyłącznie dopisywanych wpisów dokumentacji, zachowano obie strony.
+Kolejność scalenia do main: #67, następnie #86, po zielonym CI obu.
+Gałęzie tool-discard-edits i design/skin-system-roadmap-2026-10-22 są już zawarte
+w main (odpowiednio przodek main i PR #85); nie wymagają ponownego scalania.
+Model-Author: Codex.
+
+## GUI — aktualne polecenie właściciela 2026-10-23
+
+Model-Author: Codex. Dziś bez scalania; poniższe dawne polecenia automatycznego
+scalania nie obowiązują tej sesji. Właściciel odkłada scalanie na 2026-10-24.
+Nie ustawiono automatycznego scalenia ani harmonogramu.
+Gałąź `codex/skin-foundation`: SKIN-00 i niezależny kontrakt preferencji/palet.
+Lokalnie 4 testy unittest PASS: 32 kombinacje, walidacja, niezmienność oraz kontrast
+tekstów/statusów na panelach. Pełnego Qt/LinuxCNC nie uruchomiono na Windows/Python
+3.15 (brak Qt i pytest); pełne CI pozostaje do odbioru w PR.
+Następnie katalog tłumaczeń i manifesty, prototyp renderera oraz osobny launcher
+kompozycji; bramki w `design/SKIN_AUDIT.md`. Aktualny ekran nie używa prototypu.
 
 Model-Author: Codex. Bieżące polecenie właściciela: małe użyteczne tematy możliwe
 w chmurze → testy → push → scalenie po zielonym CI → kolejny temat, aż do „stop”.
@@ -227,6 +251,34 @@ przełącza bez zapisywania. Rekord docelowy czytany po dialogu, brak/błąd zac
 Udany zapis nowego/klonowanego T wiąże zaznaczenie z zapisanym numerem.
 35 testów lokalnie PASS, rzeczywiste okna Qt i podgląd; regresja starego kodu FAIL.
 Szkic następuje po #83; wynik pełnego CI i sprawdzony SHA w PR. Model-Author: Codex.
+
+Uzupełnienie GUI 2026-10-23: katalog wspólnych napisów EN/PL dla nawigacji,
+trybów i stanów prototypu, niezależny od palety i układu. Nie tłumaczy jeszcze
+wszystkich stron starego HMI. Kody alarmów pozostają identyfikatorami katalogu.
+Aktualny wynik lokalny: 6 testów unittest PASS, komplet kluczy w obu językach
+we wszystkich 32 kombinacjach. Bez scalania. Model-Author: Codex.
+
+## GUI — kolejny krok 2026-10-23
+
+Model-Author: Codex. PR #86, codex/skin-foundation: walidator manifestu API 1
+oraz niezmienny model warunków przełączenia, bez integracji ACTION/HAL.
+Lokalnie pytest: 20 PASS + 87 subtestów (kontrakty skórek i strażnik IP);
+ruff dla zmienianych modułów/testów PASS. Narzędzia w katalogu tymczasowym,
+bez zmian zależności projektu. Qt/LinuxCNC nadal niewykonane lokalnie.
+Poprzednie CI: 930 PASS, 63 skip, 109 deselected, jeden błąd rejestru pochodzenia;
+brakujące dokładne ścieżki dokumentów poprawione i test strażnika IP lokalnie PASS.
+Następne: adapter statusu i osobny launcher prototypu; renderer wymaga próby GPU.
+Bez scalania; pozostałe dawne instrukcje scalania w tym dokumencie są historyczne.
+
+## GUI — działający podgląd offline 2026-10-23
+
+Model-Author: Codex. Uruchomienie: python3 tools/dev/skin-preview.py (PyQt5).
+Cztery kompozycje i 32 wybory skórka/paleta/język, bez sterowania maszyną.
+Lokalnie 22 testy + 87 subtestów PASS; test Qt obejmuje 64 warianty rozmiarów/wyborów.
+Zrzuty lokalne: build/skin-preview/ (nieśledzone pliki testowe).
+Obecny ekran operatora nadal bez zmian; brak renderera 3D i adaptera CNC w prototypie.
+Następnie: scena testowa renderera oraz adapter statusu do przyszłej integracji.
+Nie scalać. Pełne CI aktualnego SHA sprawdzić w PR #86.
 
 ## Scalanie aktywnych gałęzi — 2026-10-23
 
