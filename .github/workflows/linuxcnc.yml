@@ -64,7 +64,7 @@ jobs:
         run: >-
           runuser -u codex -- env HOME=/home/codex LIBGL_ALWAYS_SOFTWARE=1
           xvfb-run -a -s '-screen 0 1280x800x24'
-          .venv/bin/python tools/dev/renderer-check.py --output state/skin01
+          .venv/bin/python tools/dev/renderer-check.py --output build/skin01
       - name: Start Plant with the actual QtVCP display
         run: >-
           runuser -u codex -- env HOME=/home/codex PYTHON=.venv/bin/python
@@ -85,7 +85,7 @@ jobs:
         with:
           name: linuxcnc-evidence
           path: |
-            state/skin01/
+            build/skin01/
             state/test-runs/
             state/spike_qtdragon.png
             /tmp/pytest-of-codex/

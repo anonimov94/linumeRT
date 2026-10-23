@@ -7,7 +7,7 @@ Audyt: `design/SKIN_AUDIT.md`; źródło: `design/SKIN_SYSTEM_ROADMAP.md`.
 Prototyp pozostaje w PyQt5/QtVCP, bez zmiany sterowania, HAL i limitu 30 FPS.
 Zastąpienie dotychczasowej kompozycji i rozszerzenie systemu tokenów wymagają
 przeglądu przed integracją; nie zmieniamy teraz zamrożonego kontraktu.
-Właściciel wstrzymał scalanie 2026-10-23; nie scalać w tej sesji.
+Późniejsze polecenie właściciela 2026-10-23 wznowiło scalanie ukończonych etapów po zielonym CI.
 
 Ten plik ma pierwszeństwo przed promptami sesji. Wymagania techniczne: `docs/wymagania/`.
 Format: decyzja · uzasadnienie · status (PRZYJĘTA / PROPOZYCJA / ODRZUCONA / ZASTĄPIONA).
@@ -120,3 +120,8 @@ Dopisuje agent na końcu sesji, we właściwym miejscu listy:
   jego urządzeń. Dobór architektury i poziomu bezpieczeństwa wymaga oceny ryzyka maszyny.
 - Audyt i dalsze kroki: [bezpieczenstwo/README.md](bezpieczenstwo/README.md).
   Model-Author: Codex. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+
+## SKIN-01 — renderer prototypowy · 2026-10-23 · Codex · PROPOZYCJA
+
+Osobny podgląd pyqtgraph/OpenGL z buforem głębokości bada artefakty QPainter i winding geometrii poza aktualnym ekranem. Bez integracji komend/statusu CNC, bez zmiany kontraktu produkcyjnego QtVCP ani licencji. Szczegóły: `docs/design/SKIN_01_RENDERER.md`. Do niezależnej oceny przed wyborem renderera produkcyjnego.

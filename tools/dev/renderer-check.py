@@ -98,6 +98,10 @@ def check(output):
         view.camera(camera)
         _, frame = capture(f"solids-{camera}")
         assert np.any(frame[:, :, :3] != [10, 12, 15], axis=2).sum() > 5000
+        view.set_debug(culling=True)
+        _, outside = capture(f"solids-{camera}-culled")
+        assert np.any(frame != outside, axis=2).mean() < .005
+        view.set_debug()
     view.camera("iso")
     _, normal = capture("solids-lit")
     view.set_debug(wireframe=True)

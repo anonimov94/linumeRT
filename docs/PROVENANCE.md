@@ -361,3 +361,6 @@ Codex, 2026-10-23, GPL-2.0-or-later. Bez nowych zależności i zasobów zewnętr
 Własne tools/dev/renderer-check.py i tests/test_render_gl.py: regresje bufora
 OpenGL, cullingu, kamer i interakcji; Codex, 2026-10-23, GPL-2.0-or-later.
 Zrzuty są dowodami testowymi w build/skin01 lub artefakcie CI, nie zasobami UI.
+
+`docs/design/SKIN_01_RENDERER.md` — Codex, 2026-10-23; opis i wyniki
+odbioru własnego prototypu SKIN-01, GPL-2.0-or-later.

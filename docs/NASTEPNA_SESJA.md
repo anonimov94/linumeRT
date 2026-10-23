@@ -1,6 +1,6 @@
 # Stan projektu i przekazanie
 
-Tura: Codex · 2026-10-23 · stan: SKIN-01 w toku, osobny checkout.
+Tura: Codex · 2026-10-23 · stan: SKIN-01 gotowy do scalenia po zielonym CI.
 
 ## Stan zatrzymania — SKIN-01
 
@@ -10,15 +10,13 @@ etapy po zielonych testach. Zastępuje niższe historyczne „bez scalania”.
 Main operatora zaktualizowany do 2bfd473; wszystkie 11 lokalnych plików zachowane
 (sumy SHA-256 i kopia w /tmp/linumert-skin01-backup). Osobna gałąź
 codex/skin-01-renderer, checkout /tmp/linumert-skin01; bez globalnego LOCK.
-PR #87, pierwszy push 37fde1a. Krok 1: reprodukcja QPainter i degeneracji kapsli, walidacja wejścia siatki;
+PR #87, commity 37fde1a, 894c68f, e09f3f1. Krok 1: reprodukcja QPainter i degeneracji kapsli, walidacja wejścia siatki;
 23 lokalne testy (z IP) PASS, lint PASS. Widok GL i launcher gotowe;
 próba Radeon/Mesa PASS (24-bit depth, niezależność od kolejności, culling,
 3 kamery, wireframe, obrót, 9 klatek/350 ms).
 Push 894c68f: launcher/prototyp. Test Debian 12/LinuxCNC + llvmpipe/Mesa 22.3.6
 również PASS (pyqtgraph 0.13.1, 24-bit depth, 8 klatek/350 ms).
-Automatyczny probe i krok CI gotowe; następnie pełne testy, dokumentacja i odbiór PR.
-Zrzuty
-kilku kamer, test GPU Radeon 660M/Mesa oraz Debian/LinuxCNC i pełne CI.
+Automatyczny probe i krok CI gotowe. Pierwszy pełny LinuxCNC job: ekran + 109 LinuxCNC PASS; runner zgłosił błąd provenance PNG w state/; poprawione na build/skin01. Aktualne CI i make lint/test/test-c/test-san ponowić i scalić po zielonym wyniku.
 
 ## Aktualne polecenie — scalanie po zakończeniu
 
