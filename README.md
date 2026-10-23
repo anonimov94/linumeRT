@@ -196,6 +196,9 @@ LinuxCNC, bez komend ruchu. Wymaga wcześniej uruchomionego `linumeRT` albo `lin
 - Przed pracą na maszynie: test latencji (`latency-histogram`) — nie każdy komputer nadaje się do RT.
   NIEZWERYFIKOWANE NA SPRZĘCIE.
 
+Tryb Live: konto `operator`, hasło `live` (domyślne Debian Live); pulpit loguje się
+automatycznie. Po instalacji na dysku obowiązują dane wybrane w instalatorze.
+
 ## Szybki start (Linux z podmanem, np. EndeavourOS)
 
 Jedno polecenie pobiera `main` z GitHuba do `~/linumeRT`, instaluje `git` i `podman` (pacman/dnf/apt, z sudo),

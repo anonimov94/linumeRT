@@ -6,6 +6,10 @@ on:
   workflow_dispatch:
   push:
     tags: ['v*']
+    branches: ['main', 'iso/**']
+    paths:
+      - 'tools/iso/**'
+      - '.github/workflows/iso.yml'
   pull_request:
     paths:
       - 'tools/iso/**'

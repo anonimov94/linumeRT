@@ -33,10 +33,19 @@ def test_packages_cover_runtime() -> None:
     pkgs = {ln.strip() for ln in (ISO / "config/package-lists/linumert.list.chroot").read_text()
             .splitlines() if ln.strip() and not ln.startswith("#")}
     assert {"linux-image-rt-amd64", "linuxcnc-uspace", "linuxcnc-uspace-dev", "calamares",
-            "python3-pyqtgraph", "python3-yaml", "python3-numpy", "build-essential"} <= pkgs
+            "python3-pyqtgraph", "python3-yaml", "python3-numpy", "build-essential",
+            "user-setup", "sudo"} <= pkgs
     hook = SCRIPTS[1].read_text()
     for comp in ("lrt_net", "lrt_cia402", "lrt_hardstop_home", "lrt_estop2"):
         assert comp in hook and (ROOT / "hal" / f"{comp}.comp").is_file()
+
+
+def test_live_login_configuration() -> None:
+    build = SCRIPTS[0].read_text()
+    hook = SCRIPTS[1].read_text()
+    assert "username=operator" in build
+    assert "test -x /usr/lib/user-setup/user-setup-apply" in hook
+    assert "[Seat:*]\nautologin-user=operator\nautologin-user-timeout=0" in hook
 
 
 def test_launcher_paths_exist() -> None:
