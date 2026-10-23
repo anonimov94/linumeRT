@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
 """Common read-only view components, never the skin composition. Model-Author: Codex."""
 
-from linumert_skin_controls import Lever, SkinButton
+from linumert_skin_controls import EmergencyReadout, Lever, SkinButton
 from linumert_skin_panel import SkinPanel, UnknownGauge
 from linumert_skin_readouts import AxisReadout, FeedReadout, ProgramView, ToolReadout
 from linumert_skin_strings import text
@@ -147,6 +147,16 @@ class SkinScreen(QtWidgets.QWidget):
                     button.setToolTip(text("demo_controls", p))
                     layout.addWidget(button)
                     self.controls[key] = button
+            elif item == "estop":
+                indicator = EmergencyReadout(c)
+                indicator.setToolTip(text("status_unknown", p))
+                layout.addWidget(indicator)
+            elif item in ("edit", "dry_run", "block_delete"):
+                button = SkinButton(text(item, p), p.skin, c)
+                button.setEnabled(False)
+                button.setFixedSize(76, 70)
+                button.setToolTip(text("demo_controls", p))
+                layout.addWidget(button)
             elif item == "space":
                 layout.addStretch()
             elif item in ("F", "S", "G0"):

@@ -13,4 +13,4 @@ class OrganicVectorScreen(SkinScreen):
     def build(self):
         self.mount()
         self.console_widget = self.console(("cycle", "space", "F", "S", "G0", "space",
-                                            "coolant", "spindle"))
+                                            "coolant", "spindle", "estop"))

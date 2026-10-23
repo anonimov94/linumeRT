@@ -4,6 +4,22 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 
+def organic_path(rect):
+    x, y, w, h = rect.x(), rect.y(), rect.width(), rect.height()
+    r = min(36, h*.3, w*.2)
+    path = QtGui.QPainterPath(QtCore.QPointF(x+r*1.4, y+1))
+    path.cubicTo(x+w*.35, y-1, x+w*.7, y+6, x+w-r, y+2)
+    path.quadTo(x+w, y+3, x+w-1, y+r)
+    path.cubicTo(x+w-r*.25, y+h*.4, x+w+1, y+h*.76, x+w-r*.4, y+h-r*.3)
+    path.quadTo(x+w-r*.6, y+h, x+w-r*1.6, y+h-1)
+    path.cubicTo(x+w*.62, y+h-7, x+w*.25, y+h+1, x+r, y+h-2)
+    path.quadTo(x, y+h-1, x+1, y+h-r)
+    path.cubicTo(x+r*.3, y+h*.63, x-1, y+h*.3, x+r*.45, y+r*.3)
+    path.quadTo(x+r*.65, y, x+r*1.4, y+1)
+    path.closeSubpath()
+    return path
+
+
 class SkinPanel(QtWidgets.QFrame):
     def __init__(self, family, palette):
         super().__init__()
@@ -23,8 +39,10 @@ class SkinPanel(QtWidgets.QFrame):
                       (x+w-cut,y+h), (x+cut,y+h), (x,y+h-cut), (x,y+cut)]
             path.addPolygon(QtGui.QPolygonF([QtCore.QPointF(*point) for point in points]))
             path.closeSubpath()
+        elif self.family == "organic-vector":
+            path = organic_path(rect)
         else:
-            radius = 38 if self.family == "organic-vector" else 5
+            radius = 5
             path.addRoundedRect(rect, radius, radius)
         rim = QtGui.QLinearGradient(0, 0, self.width(), self.height())
         for stop, color in ((0, c.muted), (.13, c.panel), (.48, c.muted),
@@ -44,10 +62,25 @@ class SkinPanel(QtWidgets.QFrame):
         fill.setColorAt(1, QtGui.QColor(c.background))
         p.setBrush(fill)
         p.setPen(QtGui.QPen(QtGui.QColor(c.background), 2))
-        p.drawRoundedRect(inner, 32 if self.family == "organic-vector" else 3,
-                          32 if self.family == "organic-vector" else 3)
+        if self.family == "organic-vector":
+            p.drawPath(organic_path(inner))
+        else:
+            p.drawRoundedRect(inner, 3, 3)
+        if self.family in ("classic-digital", "industrial-pro"):
+            title = QtCore.QRectF(inner.x()+2, inner.y()+2, inner.width()-4, 25)
+            bar = QtGui.QLinearGradient(title.topLeft(), title.bottomLeft())
+            bar.setColorAt(0, QtGui.QColor(c.raised))
+            bar.setColorAt(1, QtGui.QColor(c.background))
+            p.fillRect(title, bar)
+            p.setPen(QtGui.QPen(QtGui.QColor(c.muted), 1))
+            p.drawLine(title.bottomLeft(), title.bottomRight())
         p.setPen(QtGui.QPen(QtGui.QColor(c.accent), 2))
         if self.family == "cyberdeck":
+            neon = QtGui.QColor(c.accent)
+            neon.setAlpha(50)
+            p.setPen(QtGui.QPen(neon, 6))
+            p.drawPath(path)
+            p.setPen(QtGui.QPen(QtGui.QColor(c.accent), 2))
             p.drawLine(8, 28, 8, min(100, self.height()-28))
             p.drawLine(self.width()-70, self.height()-8, self.width()-24, self.height()-8)
         elif self.family == "organic-vector":

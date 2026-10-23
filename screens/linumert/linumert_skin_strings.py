@@ -10,6 +10,7 @@ from types import MappingProxyType
 from linumert_skin_contract import PresentationPreferences
 
 _EN = {
+    "edit": "Edit", "dry_run": "Dry run", "block_delete": "Block delete",
     "apply": "Apply", "cancel": "Cancel",
     'feed_spindle': 'Feed / spindle',
     'overrides': 'Overrides',
@@ -38,6 +39,7 @@ _EN = {
     "demo_controls": "Preview only — machine commands disabled",
 }
 _PL = {
+    "edit": "Edycja", "dry_run": "Próba", "block_delete": "Pomijanie bloków",
     "apply": "Zastosuj", "cancel": "Anuluj",
     'feed_spindle': 'Posuw / wrzeciono',
     'overrides': 'Korekcje',

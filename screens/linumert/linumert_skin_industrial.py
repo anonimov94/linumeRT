@@ -13,4 +13,4 @@ class IndustrialProScreen(SkinScreen):
     def build(self):
         self.mount()
         self.console_widget = self.console(("power", "mode", "space", "cycle",
-                                            "space", "coolant", "door", "M8"))
+                                            "space", "coolant", "door", "M8", "estop"))

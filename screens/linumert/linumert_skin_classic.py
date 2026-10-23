@@ -13,4 +13,5 @@ class ClassicDigitalScreen(SkinScreen):
 
     def build(self):
         self.mount()
-        self.console_widget = self.console(("cycle", "space", "mode", "M01", "M3", "M8"))
+        self.console_widget = self.console(("cycle", "edit", "dry_run", "block_delete",
+                                            "space", "mode", "M01", "M3", "M8", "estop"))

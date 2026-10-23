@@ -37,12 +37,17 @@ class SkinButton(QtWidgets.QPushButton):
         p.setRenderHint(QtGui.QPainter.Antialiasing)
         c = self.palette
         rect = QtCore.QRectF(self.rect()).adjusted(2, 2, -2, -2)
+        circular = self.family == "organic-vector" and bool(self.symbol)
+        if circular:
+            size = min(rect.width(), rect.height()-14)
+            rect = QtCore.QRectF((self.width()-size)/2, 2, size, size)
         shape = housing(rect, self.family)
         metal = QtGui.QLinearGradient(rect.topLeft(), rect.bottomRight())
         for stop, value in ((0, c.text), (.15, c.muted), (.45, c.background),
                              (.8, c.raised), (1, c.muted)):
             metal.setColorAt(stop, QtGui.QColor(value))
-        p.fillPath(shape, QtGui.QBrush(metal))
+        p.fillPath(shape, QtGui.QBrush(QtGui.QColor(c.raised)
+                                     if self.family == "cyberdeck" else metal))
         p.setPen(QtGui.QPen(QtGui.QColor(c.muted), 1))
         p.drawPath(shape)
         inset = 5 if self.family in ("classic-digital", "industrial-pro") else 3
@@ -56,6 +61,11 @@ class SkinButton(QtWidgets.QPushButton):
         color = QtGui.QColor(self.signal)
         p.setPen(QtGui.QPen(color, 2 if self.symbol else 1))
         p.drawPath(face)
+        if self.family == "cyberdeck":
+            glow = QtGui.QColor(self.signal)
+            glow.setAlpha(40)
+            p.setPen(QtGui.QPen(glow, 5))
+            p.drawPath(face)
         if self.isDown() or self.isChecked():
             tint = QtGui.QColor(self.signal)
             tint.setAlpha(65)
@@ -70,6 +80,8 @@ class SkinButton(QtWidgets.QPushButton):
                                     cap.width()-8, cap.height()*.3)
         else:
             caption = cap.adjusted(3, 0, -3, 0)
+        if circular:
+            caption = QtCore.QRectF(1, self.height()-18, self.width()-2, 17)
         p.setPen(QtGui.QColor(c.text if self.isEnabled() else c.muted))
         font = QtGui.QFont("DejaVu Sans", 8)
         font.setBold(True)
@@ -116,3 +128,33 @@ class Lever(QtWidgets.QWidget):
         p.drawRoundedRect(QtCore.QRectF(center.x()-5, center.y()-18, 10, 36), 4, 4)
         p.setPen(QtGui.QColor(c.text))
         p.drawText(QtCore.QRectF(self.width()-17, 27, 15, 20), QtCore.Qt.AlignCenter, "—")
+
+
+class EmergencyReadout(QtWidgets.QWidget):
+    """Non-interactive mushroom housing, explicitly unknown E-STOP state."""
+    def __init__(self, palette):
+        super().__init__()
+        self.palette = palette
+        self.setFixedSize(85, 80)
+        self.setAccessibleName("E-STOP —")
+
+    def paintEvent(self, event):
+        p = QtGui.QPainter(self)
+        p.setRenderHint(QtGui.QPainter.Antialiasing)
+        c = self.palette
+        p.setBrush(QtGui.QColor(c.warning))
+        p.setPen(QtGui.QPen(QtGui.QColor(c.background), 2))
+        p.drawRoundedRect(QtCore.QRectF(6, 3, 73, 73), 5, 5)
+        p.setBrush(QtGui.QColor(c.background))
+        p.drawEllipse(QtCore.QPointF(42, 38), 29, 29)
+        red = QtGui.QRadialGradient(35, 25, 48)
+        red.setColorAt(0, QtGui.QColor(c.error))
+        red.setColorAt(1, QtGui.QColor(c.background))
+        p.setBrush(red)
+        p.setPen(QtGui.QPen(QtGui.QColor(c.error), 2))
+        p.drawEllipse(QtCore.QPointF(42, 36), 23, 23)
+        p.setFont(QtGui.QFont("DejaVu Sans", 8, QtGui.QFont.Bold))
+        p.setPen(QtGui.QColor(c.text))
+        p.drawText(QtCore.QRectF(15, 24, 54, 22), QtCore.Qt.AlignCenter, "—")
+        p.setPen(QtGui.QColor(c.background))
+        p.drawText(QtCore.QRectF(8, 62, 69, 14), QtCore.Qt.AlignCenter, "E-STOP")

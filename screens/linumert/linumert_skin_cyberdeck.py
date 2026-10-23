@@ -12,4 +12,4 @@ class CyberdeckScreen(SkinScreen):
 
     def build(self):
         self.mount()
-        self.console_widget = self.console(("mode", "cycle", "space", "M3", "M8", "power"))
+        self.console_widget = self.console(("mode", "cycle", "space", "M3", "M8", "power", "estop"))
