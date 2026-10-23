@@ -125,3 +125,35 @@ Przykład hardware nadal jest niekompletny, bez HAL i bez zgody na uruchomienie 
 
 Kolejny dokument do przygotowania bez LinuxCNC: [protokół odbioru](ODBIOR.md).
 Wszystkie próby i pomiary sprzętowe pozostają niewykonane.
+
+## Konkurs 2026-10 — bramka przed procesem LinuxCNC
+
+Model-Author: Codex. `tools/linumert-start.sh` uruchamia teraz LinuxCNC przez
+`linumert.machine.launch`, z oczekiwanym profilem sim albo plant. Trzy dostarczone
+konfiguracje mają jawne MACHINE_PROFILE. Nie zmieniono ich torów HAL/E-STOP.
+
+Dla własnej konfiguracji (w przygotowanym środowisku LinuxCNC):
+
+```bash
+PYTHONPATH=core python3 -m linumert.machine.launch maszyna.ini --check-only
+# Uruchomienie CNC jest osobną, świadomą operacją:
+PYTHONPATH=core python3 -m linumert.machine.launch maszyna.ini
+```
+
+Bramka odmawia (kod 2) przed uruchomieniem LinuxCNC przy brakującym/nieznanym profilu,
+błędnej deklaracji albo błędzie odczytu. Dla hardware obowiązkowo sprawdza wszystkie
+HALFILE i POSTGUI_HALFILE oraz source istniejącym ograniczonym audytem offline.
+Nie ma opcji pominięcia tego audytu dla hardware. `--check-only` nigdy nie uruchamia CNC.
+Nierozwiązane #INCLUDE i dziedziczenie DEFAULT w INI powodują odmowę, zamiast przyjęcia
+niepełnego obrazu konfiguracji. Wynik JSON trafia na stderr przed ewentualnym exec.
+
+Zakres blokady: ten launcher i wywołania z głównego startera. Bezpośrednie `linuxcnc`,
+stare narzędzia deweloperskie, ISO i zewnętrzne eksportery nie są przechwytywane.
+Generator eksportu konfiguracji sprzętowej jeszcze nie istnieje; nie deklarujemy jego ochrony.
+Kontrola jest jednorazowa: pliki oraz środowisko muszą pozostać zaufane i niezmienne
+pomiędzy audytem i odczytem przez LinuxCNC (nie ma migawki ani blokady przed modyfikacją).
+Nie potwierdza kierunków pinów, działania loadrt/loadusr, logiki pośredniej, zewnętrznego
+watchdoga, okablowania ani PL/SIL. Profil sim/plant jest deklaracją, nie izolacją fizycznego I/O.
+`hardware_verified` zawsze false. Pozytywny wynik pozwala wyłącznie przejść kontrolę
+konfiguracji; nie zastępuje niezależnego projektu i protokołu ODBIOR.md.
+NIEZWERYFIKOWANE NA SPRZĘCIE; w sesji nie uruchamiano napędów.

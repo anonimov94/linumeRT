@@ -72,7 +72,8 @@ def test_sim_run_with_fake_podman(tmp_path: Path) -> None:
     assert any(c.startswith("podman build -t linumert-app:bookworm-") for c in calls)
     run = next(c for c in calls if c.startswith("podman run"))
     assert "--userns=keep-id" in run and f"-v {repo}:/work" in run
-    assert run.endswith("linuxcnc /work/config/sim/linumert_xyz/linumert_xyz.ini")
+    assert run.endswith("--expect-profile sim /work/config/sim/linumert_xyz/linumert_xyz.ini")
+    assert "-m linumert.machine.launch" in run
     assert "LINUMERT_SHELL=1" in run
     apps = tmp_path / "home" / ".local" / "share" / "applications"
     desktop = (apps / "linumert.desktop").read_text()

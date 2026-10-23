@@ -189,7 +189,7 @@ if [ "$shell" = 1 ]; then exec "${RUN[@]}" "$IMG" bash; fi
 
 if [ "$mode" = sim ]; then
     say "start: symulator LinuxCNC z ekranem linumeRT (zamknij okno, aby zakończyć)"
-    exec "${RUN[@]}" "$IMG" linuxcnc /work/config/sim/linumert_xyz/linumert_xyz.ini
+    exec "${RUN[@]}" "$IMG" env PYTHONPATH=/work/core /opt/linumert/bin/python -m linumert.machine.launch --expect-profile sim /work/config/sim/linumert_xyz/linumert_xyz.ini
 fi
 
 cfg=config/plant/linumert_plant_xyz ini=linumert_plant_xyz.ini yaml=plant.yaml
@@ -211,4 +211,4 @@ plant=$!
 trap "kill $plant 2>/dev/null; wait $plant 2>/dev/null; tail -3 /home/lcnc/plant.log" EXIT
 sleep 3
 kill -0 $plant 2>/dev/null || { cat /home/lcnc/plant.log; exit 1; }
-linuxcnc "/work/$cfg/$ini"' _ "$cfg" "$ini" "$yaml" "$PANEL_PORT"
+PYTHONPATH=/work/core /opt/linumert/bin/python -m linumert.machine.launch --expect-profile plant "/work/$cfg/$ini"' _ "$cfg" "$ini" "$yaml" "$PANEL_PORT"

@@ -425,3 +425,8 @@ Aktualizacja czterech `docs/raporty/hmi_sym/skin_*.png`, Codex, 2026-10-23:
 rzeczywiste osobne ekrany Qt z kodu ea2fc39, 1920×1080, bez retuszu. Industrial
 w Reactor Green, Cyberdeck w Ion Blue, pozostałe w Classic Turquoise.
 Własne kształty rysowane przez QPainter i własne sceny 3D; GPL-2.0-or-later.
+
+Konkurs 01, Codex, 2026-10-23: własny moduł
+`core/linumert/machine/launch.py` i test `tests/test_launch_gate.py` (GPL-2.0-or-later).
+Bramka przed exec LinuxCNC oraz atrapa procesu do prób offline; bez nowych zależności
+ani zewnętrznego kodu. Zmiany istniejącego startera i konfiguracji zachowują ich pochodzenie.

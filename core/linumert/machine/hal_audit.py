@@ -78,7 +78,7 @@ def audit_hal(paths: list[Path], cfg, base_dir: Path) -> list[str]:
         read(path if path.is_absolute() else base_dir / path)
     if not paths:
         errors.append("wymagany co najmniej jeden plik HAL")
-    if cfg.get("LINUMERT", "MACHINE_PROFILE", fallback="") != "hardware":
+    if cfg.get("LINUMERT", "MACHINE_PROFILE", fallback="").strip() != "hardware":
         errors.append("audyt toru fizycznego wymaga profilu hardware")
         return errors
     enable = "iocontrol.0.emc-enable-in"
