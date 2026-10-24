@@ -726,12 +726,16 @@
       "milestone": "M3",
       "title": "Test technologiczny na Plant",
       "prompt": "prompts/sesja-049.md",
-      "status": "partial",
-      "progress": "Wybrane cykle wykonane na LinuxCNC + Plant (#58/#60).",
+      "status": "done",
+      "progress": "Wybrane cykle na LinuxCNC + Plant (#58/#60); tools/suite_cycles.py: 10 przypadków generatorów (planowanie, wiercenie G81/G83, kieszenie, rowki, czopy, kontur) × router_gantry_steppers i mill_servo_table, warianty A (G0 z machine.yaml) i B (G0 ≤ 3000 mm/min): 40/40 PASS po poprawce Plant (interpolacja celu CSP w podkrokach, PLANT-SUBSTEPS). Wcześniejsze zgubione kroki routera i E-4201 frezarki przy G0 były artefaktem modelu, nie generatorów.",
       "remaining": [
-        "suite_cycles dla każdego generatora na router_steppers i mill_servo."
+        "Kontur z korekcją G41.1/G42.1 na Plant z LinuxCNC (atrapa jedzie bez korekcji; rs274 w CI)."
       ],
       "evidence": [
+        "tools/suite_cycles.py",
+        "tests/test_suite_cycles.py",
+        "docs/raporty/suite_cycles.md",
+        "docs/raporty/plant_substeps.md",
         "docs/DZIENNIK.md"
       ]
     },
