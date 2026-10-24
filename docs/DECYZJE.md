@@ -226,3 +226,14 @@ podkroki (jak interpolacja 60C2h w napędzie i stepgen). Domyślne `substeps` = 
 całkowania 1 ms jest za gruby dla krokowca przy G0. Wynik zbieżny dla n ≥ 2 (raport
 `docs/raporty/plant_substeps.md`). Konsekwencja dla M5: generator EtherCAT ustawia 60C2h równe
 okresowi wątku serwo. Model, nie maszyna. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## Sesja 007 — tłumaczenia Qt ekranu · 2026-10-24 · Claude · PROPOZYCJA
+
+Teksty operatora przez `translate(kontekst, tekst)` z `screens/linumert/linumert_i18n.py`
+(forma rozpoznawana przez pylupdate5; `tr(kontekst, tekst)` jest odczytywana błędnie). Tekst źródłowy
+po angielsku (docelowy język domyślny skórek), tłumaczenie PL w `screens/linumert/i18n/linumert_pl.ts`.
+Język: `LINUMERT_LANG`, potem `[LINUMERT]LANGUAGE` w INI, domyślnie `pl` (bez zmiany zachowania dla
+operatora). Ekran ładuje `.qm`, jeśli istnieje, a w przeciwnym razie czyta `.ts` wprost (`TsTranslator`),
+więc `lrelease` nie jest zależnością budowy. Kompletność PL pilnuje `tools/i18n_check.py` w testach.
+Istniejące napisy przechodzą na `translate()` w sesji 037; mechanizm skórek (`linumert_skin_strings`)
+pozostaje do ujednolicenia tamże.
