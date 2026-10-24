@@ -148,6 +148,7 @@ Nie są kolejnym harmonogramem. Ich status dotyczy tylko wskazanego kroku.
 | ROADMAP-UNIFICATION | 001, 084 | Jeden rejestr planu i migracja statusów | ukończone |
 | LIMITS-PREFLIGHT | 031, 051 | Kontrola limitów osi przed startem programu | częściowe |
 | ORIGIN-WIZARD | 033, 054 | Kreator zera detalu na przygotówce | częściowe |
+| M6-G43 | 034, 066 | Automatyczna korekta długości narzędzia po M6 | częściowe |
 
 ## Postęp, pozostały zakres i dowody
 
@@ -992,4 +993,12 @@ Pozostaje: Łuki między punktami końcowymi, obrót XY i limity osi obrotowych 
 Pozostaje: Odbiór na pulpicie właściciela i na maszynie wirtualnej (G10 L2 po kreatorze). Środki krawędzi, przygotówki obrócone i wizualne przesuwanie myszą w widoku 3D. Powiązanie z linią ;@STOCK programu (ORIGIN/OFFSET) i sondowaniem narożnika (033).
 
 Źródła: [screens/linumert/linumert_origin_wizard.py](../../screens/linumert/linumert_origin_wizard.py), [core/linumert/programs/workpiece.py](../../core/linumert/programs/workpiece.py), [tests/test_workpiece.py](../../tests/test_workpiece.py), [tests/test_hmi_workflow_widgets.py](../../tests/test_hmi_workflow_widgets.py).
+
+### M6-G43 — Automatyczna korekta długości narzędzia po M6
+
+**częściowe**. Remap M6 w INI sim i Plant (macros/lrt_m6.ngc): wbudowane M6, potem G43 H<narzędzie z T> albo G49 dla T0, jak w sterownikach przemysłowych. Kontrola limitów uwzględnia remap maszyny. Test rs274 z INI maszyny (T2 M6 -> 80 mm, T0 M6 -> 0), pełny przebieg e2e programu demo z 6 wymianami (306 s, bez kolizji).
+
+Pozostaje: Odbiór na pulpicie właściciela, w tym ręczna wymiana w oknie QtDragon. Program Facing z QtDragon (kod upstream) ma G49 i nie wywołuje M6, więc korekta nie jest włączana; osobna decyzja. Remap dla ATC (066) razem z magazynem narzędzi.
+
+Źródła: [config/sim/linumert_xyz/macros/lrt_m6.ngc](../../config/sim/linumert_xyz/macros/lrt_m6.ngc), [tests/test_m6_remap.py](../../tests/test_m6_remap.py), [core/linumert/programs/linuxcnc_check.py](../../core/linumert/programs/linuxcnc_check.py).
 

@@ -180,7 +180,7 @@ def analyze_ngc(ngc: Path | str, ini: Path | str, var: Path | str | None = None,
             copy = Path(directory) / "analiza.ngc"
             copy.write_text(number_lines(text), encoding="utf-8")
             run = run_interpreter(copy, root, timeout, parameters_from=var,
-                                  linear_units=units)
+                                  linear_units=units, machine_ini=ini)
     except OSError as exc:
         raise ValueError(f"nie można odczytać programu: {exc}") from exc
     except subprocess.TimeoutExpired as exc:

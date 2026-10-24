@@ -62,10 +62,33 @@ def find_linuxcnc(root: Path | str | None = None) -> tuple[list[str], Path | Non
     raise InterpreterUnavailable("brak rs274 (ustaw LINUXCNC_DIR na budowę RIP LinuxCNC 2.9)")
 
 
+def _with_machine_remaps(config: str, machine_ini: Path) -> str:
+    """REMAP i SUBROUTINE_PATH z INI maszyny (ścieżki bezwzględne) do konfiguracji analizy."""
+    import configparser
+
+    ini = configparser.RawConfigParser(strict=False)
+    ini.optionxform = str
+    if not ini.read(machine_ini, encoding="utf-8") or not ini.has_section("RS274NGC"):
+        return config
+    base = machine_ini.resolve().parent
+    paths = [str((base / p).resolve()) if not os.path.isabs(p) else p
+             for p in ini.get("RS274NGC", "SUBROUTINE_PATH", fallback="").split(":") if p]
+    remaps = re.findall(r"(?im)^[ \t]*REMAP[ \t]*=.*$", machine_ini.read_text(encoding="utf-8"))
+    if not paths and not remaps:
+        return config
+    config = re.sub(r"(?im)^[ \t]*(SUBROUTINE_PATH|REMAP)[ \t]*=.*(?:\n|$)", "", config)
+    extra = [f"SUBROUTINE_PATH = {':'.join(paths)}"] if paths else []
+    extra += [r.strip() for r in remaps]
+    config, count = re.subn(r"(?im)^(\[RS274NGC\][ \t]*)$", "\\g<1>\n" + "\n".join(extra),
+                            config, count=1)
+    return config if count else config + "\n[RS274NGC]\n" + "\n".join(extra) + "\n"
+
+
 def run_interpreter(ngc: Path | str, root: Path | str | None = None,
                     timeout: float = 20.0,
                     parameters_from: Path | str | None = None,
-                    linear_units: str | None = None) -> subprocess.CompletedProcess:
+                    linear_units: str | None = None,
+                    machine_ini: Path | str | None = None) -> subprocess.CompletedProcess:
     """Offline only: private HOME/tool mmap, parameters and cwd for every invocation.
 
     LinuxCNC 2.9.10 rs274 truncates $HOME/.tool.mmap even before reading its options.
@@ -90,6 +113,8 @@ def run_interpreter(ngc: Path | str, root: Path | str | None = None,
                                     r"\g<1>\nPARAMETER_FILE = analysis.var", config, count=1)
             if not count:
                 config += "\n[RS274NGC]\nPARAMETER_FILE = analysis.var\n"
+            if machine_ini is not None:  # remapy i podprogramy maszyny (np. M6 → G43)
+                config = _with_machine_remaps(config, Path(machine_ini))
             if linear_units:  # parametry z .var są w jednostkach maszyny, nie domyślnych (cale)
                 config = re.sub(r"(?im)^([ \t]*LINEAR_UNITS[ \t]*=).*$",
                                 rf"\g<1> {linear_units}", config)
