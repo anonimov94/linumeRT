@@ -44,6 +44,15 @@ GENERATORS = (basic.Header, basic.ToolChange, basic.FaceMill, drilling.DrillHole
 
 
 
+def _subroutines_word(n: int) -> str:
+    """Odmiana: 1 podprogram, 2–4 podprogramy, 5+ (i 12–14) podprogramów."""
+    if n == 1:
+        return "podprogram"
+    if n % 10 in (2, 3, 4) and n % 100 not in (12, 13, 14):
+        return "podprogramy"
+    return "podprogramów"
+
+
 def _mmss(seconds: float) -> str:
     seconds = round(seconds)
     return f"{seconds // 60}:{seconds % 60:02d}"
@@ -399,8 +408,9 @@ class CyclesPage(QtWidgets.QWidget):
         except OSError as exc:
             self.lbl_issue.setText(f"Nie zapisano podprogramów: {exc}")
             return []
-        self.lbl_issue.setText(f"Zapisano {len(paths)} podprogramy w {target} "
-                               "(lrt_face_mill, lrt_drill_grid, lrt_drill_circle).")
+        names = ", ".join(s.name for s in subroutines.SUBROUTINES)
+        self.lbl_issue.setText(f"Zapisano {len(paths)} {_subroutines_word(len(paths))} "
+                               f"w {target} ({names}).")
         return paths
 
     def open_lnx(self) -> bool:
