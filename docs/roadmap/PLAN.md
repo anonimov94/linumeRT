@@ -858,11 +858,11 @@ Pozostaje: Rozstrzygnąć propozycję zmiany prezentacji; nie zmienia zamrożone
 
 ### SKIN-02 — Skin API, host i kanały CNC
 
-**częściowe**. Manifesty, kontrola przełączenia i monitor read-only istnieją.
+**częściowe**. Manifesty, kontrola przełączenia i monitor read-only istnieją. N1/Codex: prawdziwy gcode potwierdza posuwy G20/G21 i fizyczne numery linii; naprawiony parameter_file. Demo z T1 M6 ujawnia SIGSEGV w tooldata, pełny odbiór pozostaje otwarty.
 
 Pozostaje: Produkcyjny host, kanał poleceń i potwierdzenie świeżości danych.
 
-Źródła: [docs/design/SKIN_SYSTEM_ROADMAP.md](../design/SKIN_SYSTEM_ROADMAP.md), [docs/design/SKIN_AUDIT.md](../design/SKIN_AUDIT.md).
+Źródła: [docs/design/SKIN_SYSTEM_ROADMAP.md](../design/SKIN_SYSTEM_ROADMAP.md), [docs/design/SKIN_AUDIT.md](../design/SKIN_AUDIT.md), [tests/test_toolpath.py](../../tests/test_toolpath.py).
 
 ### SKIN-03 — Palety, EN/PL i preferencje
 

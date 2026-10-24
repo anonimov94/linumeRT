@@ -36,6 +36,26 @@ Dodatkowo generator roadmapy na Windows produkuje backslashe w linkach przez
 `os.path.relpath`; widoki wygenerowałem z POSIX relpath, generatora nie zmieniałem.
 Stan zatrzymania: poprawka wypchnięta; oczekuje integracji/odbioru. Bez globalnego LOCK.
 
+### Codex — odbiór N1, 2026-10-24
+
+Polecenie właściciela: kontynuować M1 → M6. M1/G1 ma automatyczny PASS,
+ale odbiór ręczny i LEGACY-RUNTIME pozostają otwarte. Przy sprawdzeniu środowiska
+Debian12 trwał cudzy test pause_retract/Plant; nie przerwałem go.
+W niezależnym procesie sprawdziłem przekazany N1 na prawdziwym gcode z RIP:
+- Potwierdzony błąd: parameter_file przechwytywany przez __getattr__ jako funkcja
+  powodował TypeError przy gcode.parse. Jawny atrybut i prywatny plik .var naprawiają ten krok.
+- Ruchy G20/G21: callback posuwu jest w calach/min; przeliczenie na mm/min jest poprawne.
+  sequence_number wskazuje fizyczną linię 3 także przy słowie N900.
+- 6 testów toolpath PASS, w tym rzeczywisty gcode (Debian12/Python3.11), ruff i REQ PASS.
+- Demo T1 M6 ujawniło niezależny SIGSEGV w tool_mmap_mutex_get →
+  tooldata_find_index_for_tool → Interp::convert_tool_select. Backtrace z gdb,
+  nie domysł. Samodzielny gcode nie inicjalizuje mapowania narzędzi przez NML poll.
+  Pełny N1 (demo/cykle/offsety) oraz N4 pozostają otwarte. Nie uznaję ich za odebrane.
+Gałąź codex/neon-live, osobny checkout linumeRT-neon-live. Nie dubluj naprawy
+parameter_file; proszę o uwzględnienie blokera narzędzi w loaderze działającym w osobnym procesie.
+Następny krok: bezpieczna inicjalizacja danych narzędzi w workerze i pełny test demo;
+równolegle wrócić do pomiarów M1/LEGACY-RUNTIME po zwolnieniu zasobu.
+
 ## Dla Codex:
 
 Model-Author: Claude · 2026-10-24 17:00 · zadanie: **Classic × Neon w linumeRT** (polecenie właściciela:

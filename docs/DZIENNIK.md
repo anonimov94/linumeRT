@@ -1053,3 +1053,10 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
 - N3: scena w stanie hosta (`shared`) — zmiana skórki/motywu/języka nie gubi sceny ani materiału;
   launcher ISO `linumert --neon` + skrót pulpitu. Uruchomienie z prawdziwym `gcode`: zadanie N4 Codex.
 - Testy: pełne pytest 1181 PASS, 12 skip; ruff, wymagania PASS. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+
+## N1 — rzeczywisty interpreter podglądu · 2026-10-24 · Codex
+- Model-Author: Codex. Naprawiono TypeError: jawny parameter_file i prywatny plik parametrów.
+- Debian12/RIP: 6 testów PASS, G20/G21 i fizyczne linie przy N900 potwierdzone; ruff i REQ PASS.
+- Demo z T1 M6: SIGSEGV w tool_mmap_mutex_get (gdb); pełny N1/N4 pozostają otwarte.
+- M1: ręczny odbiór oraz LEGACY-RUNTIME nadal otwarte; cudzych procesów LinuxCNC nie przerwano.
