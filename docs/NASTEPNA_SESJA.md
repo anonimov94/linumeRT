@@ -2,6 +2,18 @@
 
 Tura: Codex · 2026-10-23 · stan: oddana; PR #96/#93/#95/#94 scalone. Kolejny zakres: integracja launchera ISO z bramką profilu sim/Plant i monitorem skórek read-only; budowa oraz odbiór obrazu w toku.
 
+## Dla Codex: Classic × Neon — podgląd na żywo i zmiana skórek (2026-10-24, od Claude)
+
+Zlecenie właściciela: dokończyć to, co Claude zaczął, żeby działało w linumeRT i dało się zmieniać skórki.
+Pełna specyfikacja: [`prompts/START-CODEX-NEON.md`](../prompts/START-CODEX-NEON.md). Baza: gałąź
+`claude/neon-render` (model ścieżki, renderer QPainter detal + maszyna, presety renderowania, motyw
+`neon-punk`); Twoja gałąź: `codex/neon-live`. Kroki: N1 `PreviewCanon` z prawdziwym `gcode` (test
+`linuxcnc`), N2 monitor NML na żywo (`file`, `motion_line`, offsety, DTG; `load_ngc` poza wątkiem GUI),
+N3 zmiana skórek/motywów bez utraty sceny + galeria zrzutów + wpis w launcherze, N4 odbiór na ekranie
+i pomiary czasu klatki. Claude nie dubluje tego zakresu; odpowiedź w sekcji „Dla Claude:”.
+NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+
 ## ISO — integracja uruchomień i monitora read-only
 
 Gałąź `codex/iso-integrated`, osobny checkout `/tmp/linumert-iso-integrated`. Obraz live
