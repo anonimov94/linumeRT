@@ -1385,9 +1385,9 @@
         "077"
       ],
       "status": "acceptance",
-      "progress": "Protokół przygotowany; brak zaliczonego ręcznego odbioru.",
+      "progress": "Protokół przygotowany. Ręcznie potwierdzone przez właściciela 2026-10-24 (SHA 4bc7a14, potem 27b9245): punkty 1–6 i 8 (pełny ekran, Plant, bazowanie/JOG/MDI, M3/M5/M6, program z pauzą i wznowieniem, cykle .lnx, brak pozostałej instancji po zamknięciu). Punkt 7 (raport HTML) i skróty QtDragon/Plant z menu aplikacji niesprawdzone.",
       "remaining": [
-        "Wykonać checklistę na pulpicie właściciela i zapisać dowody."
+        "Sprawdzić raport HTML (przycisk Raport w widoku symulacji, domyślnie ~/raport_symulacji.html), skróty QtDragon i Plant z menu oraz dołączyć zrzuty i log."
       ],
       "evidence": [
         "docs/PLAN_TYGODNIA_2026-10-21.md",
@@ -1678,13 +1678,14 @@
         "072",
         "082"
       ],
-      "status": "planned",
-      "progress": "Audyt konkursu 02 wykazał CRASH/COVER_CRASH mimo zielonego smoke.",
-      "remaining": [
-        "Dodać kryteria kolizji i uzyskać poprawny odbiór A3."
-      ],
+      "status": "done",
+      "progress": "Przyczyna: losowy start (seed 1) w router_atc_rack lądował wewnątrz magazynu. Start omija bryły kolizyjne (emulacja xorshift rdzenia C, zmiana tylko przy kolizji), a matrix_smoke wymaga braku CRASH i COVER_CRASH; macierz 5/5 po 4 kryteria, 1116 testów PASS.",
+      "remaining": [],
       "evidence": [
-        "prompts/konkurs-2026-10/raporty/02.md"
+        "prompts/konkurs-2026-10/raporty/02.md",
+        "tests/test_start_collision.py",
+        "plant/scenarios/matrix_smoke.yaml",
+        "plant/server/linumert_plant/build_machine.py"
       ]
     },
     {
@@ -1715,13 +1716,17 @@
         "082"
       ],
       "status": "partial",
-      "progress": "Testy runtime i launchery rozwijano później; stare listy nie są nowym harmonogramem.",
+      "progress": "Testy runtime i launchery rozwijano później; stare listy nie są nowym harmonogramem. 2026-10-24: przyczyna zrywania LRT-NET przy zakładkach panelu Plant znaleziona i usunięta (parsowanie biblioteki napędów w procesie Plant blokowało pętlę UDP przez GIL; teraz CSafeLoader, cache wg mtime, krótszy interwał GIL). Odtworzenie lokalne: przed poprawką RTT maks. 242 ms i 130 zgubionych ramek, po poprawce 11,9 ms i 0. Właściciel potwierdził na pulpicie (2026-10-24): przełączanie kart panelu Plant nie zrywa już łącza.",
       "remaining": [
-        "Rozliczyć niepotwierdzone kryteria: 10× LRT-NET, długie blokady GUI/heartbeat i VirtualBox na docelowym stanowisku."
+        "10× testy Plant z LinuxCNC: 1 z 10 przebiegów PASS (13/13), reszta do wykonania na wolnym pulpicie.",
+        "Zmierzyć najdłuższe zamrożenie GUI i heartbeat (50 000 linii G1), VirtualBox na docelowym stanowisku."
       ],
       "evidence": [
         "prompts/START-CODEX-HMI.md",
-        "prompts/START-CODEX-LINUX.md"
+        "prompts/START-CODEX-LINUX.md",
+        "tests/test_library_cache.py",
+        "plant/server/linumert_plant/drive_library.py",
+        "plant/server/linumert_plant/serve.py"
       ]
     },
     {
@@ -1739,6 +1744,50 @@
         "tools/roadmap.py",
         "tests/test_roadmap.py",
         "https://github.com/anonimov94/linumeRT/pull/99"
+      ]
+    },
+    {
+      "id": "LIMITS-PREFLIGHT",
+      "title": "Kontrola limitów osi przed startem programu",
+      "parents": [
+        "031",
+        "051"
+      ],
+      "status": "partial",
+      "progress": "Przycisk 'Sprawdź limity osi' w edytorze G-code: rs274 z kopią parametrów (G54/G92, korekta długości, jednostki z INI) porównuje punkty końcowe ruchów z MIN/MAX_LIMIT; wynik w tle, lista linii z przeskokiem do edytora. Odtworzony błąd z G54 Z=-150 (linia 3, Z=-130) na rzeczywistym rs274; 7 testów + test GUI. Kontrola jest teraz automatyczna: po wczytaniu programu ekran sprawdza go w tle (limity osi, G5x/G92, korekta długości), pokazuje wynik na stronie Produkcja i pyta przed 'Cykl start', gdy program wyjdzie poza limity; informuje też o cięciu bez korekty długości (G49).",
+      "remaining": [
+        "Łuki między punktami końcowymi, obrót XY i limity osi obrotowych nie są sprawdzane.",
+        "Automatyczne G43 po M6 (remap) i poprawne G43 w programie Facing z QtDragon (kod upstream) — osobna decyzja.",
+        "Odbiór na pulpicie właściciela."
+      ],
+      "evidence": [
+        "core/linumert/programs/limits.py",
+        "tests/test_limits.py",
+        "tests/test_hmi_workflow_widgets.py",
+        "screens/linumert/linumert_program_editor.py",
+        "screens/linumert/linumert_preflight.py",
+        "screens/linumert/linumert_shell.py"
+      ]
+    },
+    {
+      "id": "ORIGIN-WIZARD",
+      "title": "Kreator zera detalu na przygotówce",
+      "parents": [
+        "033",
+        "054"
+      ],
+      "status": "partial",
+      "progress": "Przycisk 'Kreator zera detalu…' na stronie Zero detalu: klikalny widok przygotówki z góry (4 narożniki i środek, góra/dół), położenie przygotówki na stole (narożnik X/Y, wierzch Z), pobranie pozycji narzędzia jako zera, kontrola zakresów osi z INI; wynik trafia do formularza, osobny przycisk zapisuje G5x. 10 punktów zera w Workpiece (bounds, fit_issues); testy rdzenia i GUI (Debian 12), zrzut dialogu.",
+      "remaining": [
+        "Odbiór na pulpicie właściciela i na maszynie wirtualnej (G10 L2 po kreatorze).",
+        "Środki krawędzi, przygotówki obrócone i wizualne przesuwanie myszą w widoku 3D.",
+        "Powiązanie z linią ;@STOCK programu (ORIGIN/OFFSET) i sondowaniem narożnika (033)."
+      ],
+      "evidence": [
+        "screens/linumert/linumert_origin_wizard.py",
+        "core/linumert/programs/workpiece.py",
+        "tests/test_workpiece.py",
+        "tests/test_hmi_workflow_widgets.py"
       ]
     }
   ]

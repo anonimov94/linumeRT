@@ -17,14 +17,12 @@ ROOT = os.environ.get("LINUMERT_ROOT", str(Path(__file__).resolve().parents[2]))
 if os.path.join(ROOT, "core") not in sys.path:
     sys.path.insert(0, os.path.join(ROOT, "core"))
 
-from linumert.programs.workpiece import Workpiece, offset_command
+from linumert.programs.workpiece import ANCHOR_TITLES, Workpiece, offset_command
 from linumert_workpiece_view import WorkpieceView
 
 SHAPES = (("Prostopadłościan", "box"), ("Walec", "cylinder"),
           ("Rura", "tube"), ("Odlew", "casting"))
-ANCHORS = (("Środek górnej powierzchni", "top-center"),
-           ("Środek dolnej powierzchni", "bottom-center"),
-           ("Lewy przedni narożnik na górze", "top-front-left"))
+ANCHORS = tuple((title, name) for name, title in ANCHOR_TITLES.items())
 
 
 class OffsetsPage(QtWidgets.QWidget):
@@ -33,6 +31,7 @@ class OffsetsPage(QtWidgets.QWidget):
         self.setObjectName("lrtPage")
         self.shell, self.spec, self.loading, self.valid = shell, Workpiece(), True, True
         ini = getattr(getattr(shell, "info", None), "INIPATH", "") or os.environ.get("INI_FILE_NAME")
+        self.ini_path = ini
         self.state_path = (Path(ini).resolve().parent / "linumert_workpiece.json" if ini else
                            Path.home() / ".config/linumert/workpiece.json")
         root = QtWidgets.QHBoxLayout(self)
@@ -79,6 +78,10 @@ class OffsetsPage(QtWidgets.QWidget):
         for title, value in ANCHORS:
             self.anchor.addItem(title, value)
         form.addRow("Punkt zerowy", self.anchor)
+        self.wizard_button = QtWidgets.QPushButton("Kreator zera detalu…")
+        self.wizard_button.setToolTip("Wybierz punkt zera na przygotówce i ułóż ją na stole")
+        self.wizard_button.clicked.connect(self.open_wizard)
+        form.addRow("", self.wizard_button)
         self.offset = QtWidgets.QComboBox()
         self.offset.addItems([f"G{n}" for n in range(54, 60)])
         form.addRow("Układ detalu", self.offset)
@@ -132,6 +135,46 @@ class OffsetsPage(QtWidgets.QWidget):
             client.message.connect(self.scene_event)
         if self.state_path.exists():
             self.load(self.state_path)
+
+    def tool_position(self):
+        """Pozycja czubka narzędzia w G53 (actual_position bez korekty długości) albo None."""
+        stat = getattr(getattr(self.shell, "status", None), "stat", None)
+        if stat is None or getattr(self.shell, "preview", False):
+            return None
+        try:
+            scale = 1 if getattr(self.shell.info, "MACHINE_IS_METRIC", True) else 25.4
+            return tuple((stat.actual_position[i] - stat.tool_offset[i]) * scale for i in range(3))
+        except (AttributeError, IndexError, TypeError):
+            return None
+
+    def axis_limits(self):
+        if not self.ini_path:
+            return {}
+        try:
+            from linumert.programs.limits import limits_from_ini
+            return limits_from_ini(self.ini_path)
+        except (ImportError, OSError, ValueError):
+            return {}
+
+    def open_wizard(self):
+        if not self.valid:
+            return None
+        from linumert_origin_wizard import OriginWizard
+
+        wizard = OriginWizard(self.build_spec(), self.axis_limits(), self.tool_position, self)
+        self.wizard = wizard
+        if wizard.exec_() != QtWidgets.QDialog.Accepted or wizard.result_spec is None:
+            return None
+        result = wizard.result_spec
+        self.loading = True
+        self.anchor.setCurrentIndex(self.anchor.findData(result.anchor))
+        for spin, number in zip(self.position, result.position, strict=True):
+            spin.setValue(number)
+        self.loading = False
+        self.preview()
+        self.message.setText("Kreator ustawił punkt zera w formularzu. Układ w maszynie "
+                             f"zapisze dopiero „Ustaw {result.offset}”.")
+        return result
 
     def read_machine_zero(self):
         """Aktywny układ ze STATUS; pozostałe zapisane układy z PARAMETER_FILE."""

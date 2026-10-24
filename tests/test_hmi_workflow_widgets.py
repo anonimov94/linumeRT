@@ -889,3 +889,153 @@ def test_eta_override_history_survives_estimation_and_resets_for_next_run(
     page.refresh()
     assert "Pozostało około" in page.lbl_remaining.text()
     page.close()
+
+
+def test_editor_axis_limit_check_runs_off_the_gui_thread(page_env, tmp_path, monkeypatch):
+    import time
+
+    from linumert.programs import limits
+
+    _, _, _, action = page_env
+    module = importlib.import_module("linumert_program_editor")
+    ini = Path(__file__).resolve().parents[1] / "config/sim/linumert_xyz/linumert_xyz.ini"
+    monkeypatch.setenv("INI_FILE_NAME", str(ini))
+    calls = []
+
+    def fake(ngc, ini_path, var):
+        calls.append(Path(ngc).read_text())
+        time.sleep(0.05)
+        return [limits.Violation(3, "Z", -130.0, -120.0, "min")]
+
+    monkeypatch.setattr(limits, "check_ngc", fake)
+    editor = module.ProgramEditor(tmp_path / "p.ngc", "G21\n(x)\nG0 Z20\nM2\n")
+    editor.limits_button.click()
+    assert not editor.limits_button.isEnabled() and "Sprawdzanie" in editor.validation.text()
+    deadline = time.time() + 5
+    while editor.limit_job is not None and time.time() < deadline:
+        editor.poll_limits()
+        time.sleep(0.02)
+    assert calls == ["G21\n(x)\nG0 Z20\nM2\n"] and editor.limits_button.isEnabled()
+    assert editor.issues.count() == 1 and "linia 3" in editor.issues.item(0).text()
+    assert "Ruchy poza limitami" in editor.validation.text()
+    assert editor.editor.textCursor().blockNumber() == 2 and not action.mock_calls
+    editor.deleteLater()
+
+
+def test_origin_wizard_moves_zero_not_stock_and_checks_limits(page_env):
+    from linumert.programs.workpiece import Workpiece
+    from PyQt5 import QtCore, QtTest
+
+    _home, _shell, _status, action = page_env
+    module = importlib.import_module("linumert_origin_wizard")
+    spec = Workpiece(x=100, y=60, height=30, anchor="top-front-left", position=(100, 100, -50))
+    limits = {"X": (0.0, 600.0), "Y": (0.0, 400.0), "Z": (-120.0, 0.0)}
+    wizard = module.OriginWizard(spec, limits, lambda: (300.0, 200.0, -40.0))
+    def flat(b):
+        return [*b[0], *b[1]]
+
+    bounds = flat(spec.bounds())
+    wizard.view.resize(400, 300)
+    rect = wizard.view._rect()
+    QtTest.QTest.mouseClick(wizard.view, QtCore.Qt.LeftButton,
+                            pos=wizard.view._pos(rect, 1, 1).toPoint())
+    assert wizard.spec.anchor == "top-back-right"
+    assert wizard.spec.position == pytest.approx((200, 160, -50))
+    assert flat(wizard.spec.bounds()) == pytest.approx(bounds)  # przygotówka stoi w miejscu
+    wizard.bottom_button.setChecked(True)
+    assert wizard.spec.anchor == "bottom-back-right"
+    assert wizard.spec.position == pytest.approx((200, 160, -80))
+    assert flat(wizard.spec.bounds()) == pytest.approx(bounds)
+    wizard.corner[0].setValue(150)  # przesunięcie przygotówki o 50 mm w X
+    assert wizard.spec.bounds()[0][0] == pytest.approx(150)
+    assert "mieści" in wizard.result.text()
+    wizard.corner[0].setValue(590)
+    assert "PROBLEM" in wizard.result.text() and "osi X" in wizard.result.text()
+    wizard.tool_button.click()
+    assert wizard.spec.position == pytest.approx((300, 200, -40))
+    assert "Zero w G53: X 300.000" in wizard.result.text()
+    wizard.use_button.click()
+    assert wizard.result_spec is wizard.spec and not action.mock_calls
+    wizard.deleteLater()
+
+
+def test_zero_detalu_wizard_fills_form_without_machine_commands(page_env, monkeypatch):
+    from PyQt5 import QtWidgets
+
+    _home, shell, _status, action = page_env
+    shell.c = importlib.import_module("linumert_shell_model").load_tokens()["kolory"]
+    wizard_module = importlib.import_module("linumert_origin_wizard")
+    module = importlib.import_module("linumert_offsets_page")
+    page = module.OffsetsPage(shell)
+
+    def fake_exec(self):
+        self.pick(1, -1)
+        self.use_button.click()
+        return QtWidgets.QDialog.Accepted
+
+    monkeypatch.setattr(wizard_module.OriginWizard, "exec_", fake_exec)
+    before = [*page.build_spec().bounds()[0], *page.build_spec().bounds()[1]]
+    page.open_wizard()
+    assert page.anchor.currentData() == "top-front-right"
+    assert [*page.build_spec().bounds()[0], *page.build_spec().bounds()[1]] == pytest.approx(before)
+    assert "Kreator ustawił" in page.message.text() and not action.mock_calls
+    page.close()
+
+
+def test_preflight_checks_in_background_and_blocks_only_current_file(page_env, tmp_path,
+                                                                     monkeypatch):
+    import time
+
+    from linumert.programs.limits import LimitReport, Violation
+
+    importlib.import_module("linumert_shell_model")
+    module = importlib.import_module("linumert_preflight")
+    ini = Path(__file__).resolve().parents[1] / "config/sim/linumert_xyz/linumert_xyz.ini"
+    monkeypatch.setenv("INI_FILE_NAME", str(ini))
+    program = tmp_path / "p.ngc"
+    program.write_text("G0 Z20\nM2\n")
+
+    def fake(path, ini_path, var):
+        time.sleep(0.05)
+        return LimitReport([Violation(3, "Z", -130.0, -120.0, "min", 4)], True)
+
+    preflight = module.Preflight(analyze=fake)
+    seen = []
+    preflight.changed.connect(lambda: seen.append(preflight.text))
+    preflight.request(str(program))
+    assert "sprawdzanie" in preflight.text and preflight.violations(str(program)) == []
+    deadline = time.time() + 5
+    while preflight._job is not None and time.time() < deadline:
+        preflight.poll()
+        time.sleep(0.02)
+    assert "UWAGA" in preflight.text and "linia 3" in preflight.text
+    assert preflight.violations(str(program))[0].count == 4
+    program.write_text("G0 Z20\nM2\n(zmiana)\n")  # zmieniony plik: stary wynik nie blokuje
+    assert preflight.violations(str(program)) == []
+
+
+def test_start_asks_before_running_a_program_outside_axis_limits(page_env, tmp_path, monkeypatch):
+    from unittest.mock import patch
+
+    from linumert.programs.limits import LimitReport, Violation, parameter_file
+
+    pytest.importorskip("linuxcnc")
+    importlib.import_module("linumert_shell_model")
+    module = importlib.import_module("linumert_preflight")
+    ini = Path(__file__).resolve().parents[1] / "config/sim/linumert_xyz/linumert_xyz.ini"
+    monkeypatch.setenv("INI_FILE_NAME", str(ini))
+    program = tmp_path / "p.ngc"
+    program.write_text("G0 Z20\nM2\n")
+    preflight = module.Preflight(analyze=lambda *a: None)
+    shell_module = importlib.import_module("linumert_shell")
+    fake_shell = SimpleNamespace(preflight=preflight, s=SimpleNamespace(file=str(program)),
+                                 h=Mock())
+    preflight.report = LimitReport([Violation(3, "Z", -130.0, -120.0, "min")])
+    preflight._key = preflight._key_for(str(program), str(ini), parameter_file(str(ini)))
+    with patch.object(shell_module.QtWidgets.QMessageBox, "question",
+                      return_value=shell_module.QtWidgets.QMessageBox.No) as ask:
+        assert not shell_module.LinumertShell._confirm_limits(fake_shell)
+        assert ask.called and "Start anulowany" in fake_shell.h.add_status.call_args[0][0]
+    with patch.object(shell_module.QtWidgets.QMessageBox, "question",
+                      return_value=shell_module.QtWidgets.QMessageBox.Yes):
+        assert shell_module.LinumertShell._confirm_limits(fake_shell)

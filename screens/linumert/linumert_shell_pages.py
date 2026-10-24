@@ -332,6 +332,14 @@ class ProductionPage(QtWidgets.QWidget):
         self.lbl_remaining = _label("Pozostały czas: oszacuj program.", "lrtMuted")
         self.lbl_remaining.setWordWrap(True)
         lay.addWidget(self.lbl_remaining)
+        self.lbl_limits = _label(getattr(getattr(self.shell, "preflight", None), "text", ""),
+                                 "lrtMuted")
+        self.lbl_limits.setWordWrap(True)
+        lay.addWidget(self.lbl_limits)
+        preflight = getattr(self.shell, "preflight", None)
+        if preflight is not None:
+            preflight.changed.connect(
+                lambda: self.lbl_limits.setText(preflight.text))
         self.btn_estimate = QtWidgets.QPushButton("Szacuj czas programu")
         self.btn_estimate.clicked.connect(self.estimate_time)
         lay.addWidget(self.btn_estimate)

@@ -144,7 +144,9 @@ Nie są kolejnym harmonogramem. Ich status dotyczy tylko wskazanego kroku.
 | KONKURS-04 (K04) | 028, 037 | Monitor skórek read-only | ukończone |
 | ISO-INTEGRATION (K05) | 077 | Bramka sim/Plant i monitor w obrazie ISO | ukończone |
 | ISO-ACCEPTANCE | 077, 078 | Odbiór i publikacja obrazu | do odbioru |
-| OD-01 | 024, 066, 072, 082 | Macierz Plant nie może przechodzić z nieoczekiwaną kolizją | planowane |
+| OD-01 | 024, 066, 072, 082 | Macierz Plant nie może przechodzić z nieoczekiwaną kolizją | ukończone |
 | EDITOR-VALIDATION | 044, 047 | Walidacja bieżącej treści i wyszukiwanie | ukończone |
 | LEGACY-RUNTIME | 017, 025, 026, 070, 077, 082 | Diagnostyka uruchomień z dawnych promptów startowych | częściowe |
 | ROADMAP-UNIFICATION | 001, 084 | Jeden rejestr planu i migracja statusów | ukończone |
+| LIMITS-PREFLIGHT | 031, 051 | Kontrola limitów osi przed startem programu | częściowe |
+| ORIGIN-WIZARD | 033, 054 | Kreator zera detalu na przygotówce | częściowe |

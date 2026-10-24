@@ -181,3 +181,10 @@ Raport: `../raporty/04.md`. Bez scalania przed wspólną oceną konkursu.
   kontrola nie potwierdza fizycznego sprzętu. Raport: `prompts/konkurs-2026-10/raporty/01.md`.
   Nie scalać PR #93 przed oceną konkursu (bieżące polecenie właściciela).
   Model-Author: Codex · implementacja do oceny, NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+- 2026-10-24 · ORIGIN-WIZARD · Jawne polecenie właściciela: kreator wyboru punktu zera na
+  przygotówce (jak w programach CAM) wyprzedza kolejność M2/G2. Powód: potrzebny do
+  rzetelnej pracy w symulatorze (G54 bez ręcznego liczenia). Wpływ na wcześniejsze bramki:
+  brak, kreator tylko wypełnia formularz „Zero detalu”; zapis G5x pozostaje osobnym,
+  bramkowanym przyciskiem. Rozszerza 033/054, nie zamyka ich.
+  Model-Author: Claude · NIEZWERYFIKOWANE NA SPRZĘCIE.

@@ -187,6 +187,13 @@ RUN=(podman run --rm -i "${TTY[@]}" --userns=keep-id --security-opt label=disabl
 
 if [ "$shell" = 1 ]; then exec "${RUN[@]}" "$IMG" bash; fi
 
+# Jedna instancja: druga kopia dzieliłaby HAL, porty i pliki robocze i wywracała pierwszą.
+INSTANCE=linumert-hmi
+if podman ps --format '{{.Names}}' 2>/dev/null | grep -qx "$INSTANCE"; then
+    die "linumeRT już działa (kontener $INSTANCE). Wróć do jego okna albo zamknij je: podman stop $INSTANCE"
+fi
+RUN+=(--name "$INSTANCE")
+
 if [ "$mode" = sim ]; then
     say "start: symulator LinuxCNC z ekranem linumeRT (zamknij okno, aby zakończyć)"
     exec "${RUN[@]}" "$IMG" env PYTHONPATH=/work/core /opt/linumert/bin/python -m linumert.machine.launch --expect-profile sim /work/config/sim/linumert_xyz/linumert_xyz.ini

@@ -1,6 +1,9 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
 """Offline G-code editor: save a new copy, never command CNC. Model-Author: Codex."""
 
+import os
+import tempfile
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 from PyQt5 import QtCore, QtGui, QtWidgets
@@ -67,14 +70,24 @@ class ProgramEditor(QtWidgets.QDialog):
         self.validation.setWordWrap(True)
         layout.addWidget(self.validation)
         self.editor.textChanged.connect(self.invalidate_check)
+        self.limit_pool = ThreadPoolExecutor(max_workers=1)
+        self.limit_job = None
+        self.limit_revision = 0
+        self.limit_timer = QtCore.QTimer(self)
+        self.limit_timer.setInterval(150)
+        self.limit_timer.timeout.connect(self.poll_limits)
         row = QtWidgets.QHBoxLayout()
         self.check_button = QtWidgets.QPushButton("Sprawdź bieżącą treść")
         self.check_button.clicked.connect(self.check_text)
+        self.limits_button = QtWidgets.QPushButton("Sprawdź limity osi")
+        self.limits_button.setToolTip(
+            "Porównuje ścieżkę programu (z układem G54 i korektą narzędzia) z limitami osi w INI")
+        self.limits_button.clicked.connect(self.check_limits)
         save = QtWidgets.QPushButton("Zapisz nową kopię…")
         save.clicked.connect(self.choose_destination)
         close = QtWidgets.QPushButton("Zamknij")
         close.clicked.connect(self.reject)
-        for button in (self.check_button, save, close):
+        for button in (self.check_button, self.limits_button, save, close):
             button.setMinimumHeight(44)
             row.addWidget(button)
         layout.addLayout(row)
@@ -139,6 +152,7 @@ class ProgramEditor(QtWidgets.QDialog):
         self.search_result.setText(f"Wystąpienia: {count}. Cofnij zmiany: Ctrl+Z w edytorze.")
 
     def invalidate_check(self):
+        self.limit_revision += 1
         self.issues.clear()
         self.issues.hide()
         self.editor.setExtraSelections([])
@@ -170,6 +184,66 @@ class ProgramEditor(QtWidgets.QDialog):
         self.validation.setText(result + " Kontrola nie sprawdza ruchu ani semantyki LinuxCNC.")
         if issues:
             self.show_issue(self.issues.item(0))
+
+    @staticmethod
+    def machine_ini():
+        ini = os.environ.get("INI_FILE_NAME", "")
+        return ini if ini and Path(ini).is_file() else ""
+
+    def check_limits(self):
+        ini = self.machine_ini()
+        if not ini:
+            self.validation.setText("Brak pliku INI maszyny: nie można sprawdzić limitów osi.")
+            return
+        if self.limit_job is not None:
+            return
+        from linumert.programs.limits import check_ngc, parameter_file
+
+        fd, tmp = tempfile.mkstemp(prefix="linumert-limity-", suffix=".ngc")
+        with os.fdopen(fd, "w", encoding="utf-8") as handle:
+            handle.write(self.editor.toPlainText())
+        self.limit_job = (self.limit_pool.submit(check_ngc, tmp, ini, parameter_file(ini)),
+                          tmp, self.limit_revision)
+        self.limits_button.setEnabled(False)
+        self.validation.setText("Sprawdzanie limitów osi…")
+        self.limit_timer.start()
+
+    def poll_limits(self):
+        if self.limit_job is None:
+            self.limit_timer.stop()
+            return
+        future, tmp, revision = self.limit_job
+        if not future.done():
+            return
+        self.limit_timer.stop()
+        self.limit_job = None
+        self.limits_button.setEnabled(True)
+        try:
+            os.unlink(tmp)
+        except OSError:
+            pass
+        if revision != self.limit_revision:
+            self.validation.setText("Treść zmieniona: sprawdź limity osi ponownie.")
+            return
+        try:
+            found = future.result()
+        except Exception as exc:  # noqa: BLE001 - brak rs274 albo błąd programu: komunikat
+            self.validation.setText(f"Limity osi niesprawdzone: {exc}")
+            return
+        self.issues.clear()
+        for v in found[:MAX_ISSUES]:
+            item = QtWidgets.QListWidgetItem(v.message())
+            item.setData(QtCore.Qt.UserRole, (v.line or 1, 1))
+            self.issues.addItem(item)
+        self.issues.setVisible(bool(found))
+        if found:
+            self.validation.setText(
+                f"Ruchy poza limitami osi: {len(found)}. Program zatrzymałby się w trakcie "
+                "obróbki; popraw program albo układ detalu (G54). Sprawdzane są punkty końcowe.")
+            self.show_issue(self.issues.item(0))
+        else:
+            self.validation.setText("Punkty końcowe ruchów mieszczą się w limitach osi "
+                                    "(łuki między punktami nie są sprawdzane).")
 
     def show_issue(self, item):
         line, col = item.data(QtCore.Qt.UserRole)
