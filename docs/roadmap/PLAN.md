@@ -789,17 +789,17 @@ Pozostaje: Pełne kryteria HMI i odbiór pulpitu pozostają do rozliczenia.
 
 ### D38-A — Wycofanie i powrót w pauzie
 
-**ukończone**. PR #62: external offsets, zachowanie modalności i testy sim/Plant PASS.
+**ukończone**. PR #62: external offsets, zachowanie modalności i testy sim/Plant PASS. PR #102: poprawka zależności QtVCP i test pełnego HMI (pauza, podgląd, raport, rzeczywiste wycofanie Z 2 mm/powrót/wznowienie), Debian PASS.
 
-Źródła: [docs/raporty/prototypy/PLAN-21-27-2026-10-21.md](../raporty/prototypy/PLAN-21-27-2026-10-21.md).
+Źródła: [docs/raporty/prototypy/PLAN-21-27-2026-10-21.md](../raporty/prototypy/PLAN-21-27-2026-10-21.md), [docs/raporty/HMI_PAUSE_RUNTIME_2026-10-24.md](../raporty/HMI_PAUSE_RUNTIME_2026-10-24.md), [tests/test_hmi_runtime_linuxcnc.py](../../tests/test_hmi_runtime_linuxcnc.py), [PR](https://github.com/anonimov94/linumeRT/pull/102).
 
 ### D38-B — Odzyskiwanie i powrót helisą z zakładką
 
-**częściowe**. Geometria i diagnostyczny podgląd istnieją.
+**częściowe**. Geometria i diagnostyczny podgląd istnieją. Awaria otwierania podglądu w systemowym Pythonie QtVCP naprawiona w PR #102; nie dodaje wykonania helisy.
 
 Pozostaje: Wykonanie po Abort/E-STOP/wymianie narzędzia i pełny odbiór; podgląd nie wykonuje ruchu.
 
-Źródła: [docs/design/WZNOWIENIE.md](../design/WZNOWIENIE.md), [docs/raporty/prototypy/PLAN-21-27-2026-10-21.md](../raporty/prototypy/PLAN-21-27-2026-10-21.md).
+Źródła: [docs/design/WZNOWIENIE.md](../design/WZNOWIENIE.md), [docs/raporty/prototypy/PLAN-21-27-2026-10-21.md](../raporty/prototypy/PLAN-21-27-2026-10-21.md), [docs/raporty/HMI_PAUSE_RUNTIME_2026-10-24.md](../raporty/HMI_PAUSE_RUNTIME_2026-10-24.md).
 
 ### PLAN-21-22 — Kieszenie v2
 

@@ -954,5 +954,6 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
 - Log operatora: QtVCP /usr/bin/python3 nie widzi pydantic z venv startera; wyjątek w podglądzie D38.
 - Bramka exec przekazuje ścieżki zależności venv; wspólny Preview2D nie importuje kompilatora cykli.
 - Przed poprawką 2 regresje FAIL; po poprawce 94 testy zakresu i 10 subtestów PASS w Debianie 12.
-- Rzeczywista pauza/retrakcja oraz odbiór startera w toku; brak zmian progów i zabezpieczeń ruchu.
-- Autokontrola, bez niezależnego przeglądu; końcowe SHA i odbiór w PR.
+- Pełny HMI z bramki startera: 15 kroków PASS (42,72 s), pauza/podgląd/raport/Z+2 mm/powrót/wznowienie.
+- Nowy test integracyjny wewnątrz QtVCP, zrzuty i raport; brak zmian progów oraz zabezpieczeń ruchu.
+- Autokontrola, bez niezależnego przeglądu; końcowe SHA i pełny odbiór w PR #102.
