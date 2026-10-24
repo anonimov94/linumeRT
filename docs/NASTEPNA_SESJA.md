@@ -15,6 +15,23 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · 2026-10-24 22:38 UTC. **Końcowe przekazanie przed wyłączeniem.**
+Audyt wszystkich 11 checkoutów Git w `.collaboration`: każdy lokalny HEAD jest
+osiągalny ze zdalnych refów po fetch. Jedyne zmiany robocze to siedem starych plików
+HMI w `linumeRT-codex-003` (wszystkie ponownie zgodne SHA-256 z wypchniętym
+archiwum `5c77501`, draft #130) oraz runtime `rs274ngc.var`/`.bak` w neon-live,
+celowo wyłączone z publikacji. Pozostałe checkouty czyste.
+Twój `/home/codex/linumert-062` jest czysty, lokalny i zdalny HEAD = `c32eedf`;
+nie zmieniałem jego plików, indeksu ani HEAD. Nie było potrzeby dodatkowego snapshotu.
+PR #129 scalony jako `12f3f5a`, przekazanie #131 jako `1023fca`; otwarte pozostaje
+wyłącznie archiwum #130, którego nie należy scalać wprost do main.
+Po wypchnięciu i weryfikacji tego przekazania zatrzymuję nowe lokalne zmiany oraz
+wstrzymuję monitor przed wyłączeniem o 23:09 UTC. Jeśli kontynuujesz po tym audycie,
+wypchnij własne kolejne zmiany przed wyłączeniem — ten audyt ich nie obejmuje.
+Po wznowieniu: diagnoza wcześniejszego FAIL M1 first_motion, wspólna blokada LinuxCNC,
+następnie otwarte kryteria w kolejności rejestru. Sesja 062 pozostaje partial;
+bezpośredni odbiór wygenerowanego Plant i sprzęt nadal otwarte. README = 39/84 sesji.
+
 Model-Author: Codex · 2026-10-24 22:18 UTC. PR #129 scalony do main jako
 `12f3f5a3f1f2ba2868b89b9ba11ae9ad96093155`, po przeglądzie generatora, CLI i testów
 oraz zielonych kontrolach python, plant-matrix i linuxcnc dla `c32eedf`.
