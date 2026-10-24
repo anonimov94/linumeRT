@@ -30,7 +30,7 @@ for _p in (os.path.join(ROOT, "core"),):
     if _p not in sys.path:
         sys.path.insert(0, _p)
 
-from linumert.generators import basic, drilling, pockets, subroutines  # noqa: E402
+from linumert.generators import basic, contours, drilling, pockets, subroutines  # noqa: E402
 from linumert.generators.registry import GeneratorRegistry  # noqa: E402
 from linumert.generators.tooling import check_steps  # noqa: E402
 from linumert.programs.compiler import CompileError, compile_program  # noqa: E402
@@ -39,8 +39,18 @@ from linumert.programs.lnx import LnxError, LnxProgram, Step, load_lnx, save_lnx
 ACTION = Action()
 GENERATORS = (basic.Header, basic.ToolChange, basic.FaceMill, drilling.DrillHoles,
               pockets.PocketRect, pockets.PocketCircle,
-              basic.ProgramEnd)
+              contours.SlotLinear, contours.SlotArc, contours.StudRect, contours.StudCircle,
+              contours.Contour, basic.ProgramEnd)
 
+
+
+def _subroutines_word(n: int) -> str:
+    """Odmiana: 1 podprogram, 2–4 podprogramy, 5+ (i 12–14) podprogramów."""
+    if n == 1:
+        return "podprogram"
+    if n % 10 in (2, 3, 4) and n % 100 not in (12, 13, 14):
+        return "podprogramy"
+    return "podprogramów"
 
 
 def _mmss(seconds: float) -> str:
@@ -55,7 +65,7 @@ class CyclesPage(QtWidgets.QWidget):
         self.shell = shell
         self.program = LnxProgram(name="Program z cykli")
         self.registry = GeneratorRegistry()
-        for group in (basic, drilling, pockets):
+        for group in (basic, drilling, pockets, contours):
             group.register(self.registry)
         self.lnx_path = None
         self._dirty = False
@@ -398,8 +408,9 @@ class CyclesPage(QtWidgets.QWidget):
         except OSError as exc:
             self.lbl_issue.setText(f"Nie zapisano podprogramów: {exc}")
             return []
-        self.lbl_issue.setText(f"Zapisano {len(paths)} podprogramy w {target} "
-                               "(lrt_face_mill, lrt_drill_grid, lrt_drill_circle).")
+        names = ", ".join(s.name for s in subroutines.SUBROUTINES)
+        self.lbl_issue.setText(f"Zapisano {len(paths)} {_subroutines_word(len(paths))} "
+                               f"w {target} ({names}).")
         return paths
 
     def open_lnx(self) -> bool:

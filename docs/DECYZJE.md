@@ -216,3 +216,14 @@ freza w połowie rozdzielczości, następny komplet warstw wypiekany strumieniow
 z histerezą (bez klatek jednorazowego wypiekania), 10 Hz w bezczynności. Pomiar (WSL, raster
 offscreen, 700×640, ruch 3 mm/klatkę): detal mediana 2,9 / 6,5 / 6,8 ms, maks. ≤ 20 ms;
 maszyna 3,0–3,8 ms. Poglądowe, nie model kolizji. NIEZWERYFIKOWANE NA SPRZĘCIE. Do oceny Codex.
+
+## Sesja 007 — tłumaczenia Qt ekranu · 2026-10-24 · Claude · PROPOZYCJA
+
+Teksty operatora przez `translate(kontekst, tekst)` z `screens/linumert/linumert_i18n.py`
+(forma rozpoznawana przez pylupdate5; `tr(kontekst, tekst)` jest odczytywana błędnie). Tekst źródłowy
+po angielsku (docelowy język domyślny skórek), tłumaczenie PL w `screens/linumert/i18n/linumert_pl.ts`.
+Język: `LINUMERT_LANG`, potem `[LINUMERT]LANGUAGE` w INI, domyślnie `pl` (bez zmiany zachowania dla
+operatora). Ekran ładuje `.qm`, jeśli istnieje, a w przeciwnym razie czyta `.ts` wprost (`TsTranslator`),
+więc `lrelease` nie jest zależnością budowy. Kompletność PL pilnuje `tools/i18n_check.py` w testach.
+Istniejące napisy przechodzą na `translate()` w sesji 037; mechanizm skórek (`linumert_skin_strings`)
+pozostaje do ujednolicenia tamże.

@@ -1,7 +1,7 @@
 <!-- Generowane przez python3 tools/roadmap.py; edytuj docs/roadmap/plan.json. -->
 # Wspólny plan linumeRT
 
-Pierwotny plan: **84 sesje M0–M6**, commit `796c6a2`. Stan na 2026-10-24: planowane: 18; w toku: 0; częściowe: 35; do odbioru: 0; ukończone: 31; zablokowane: 0.
+Pierwotny plan: **84 sesje M0–M6**, commit `796c6a2`. Stan na 2026-10-24: planowane: 17; w toku: 0; częściowe: 32; do odbioru: 0; ukończone: 35; zablokowane: 0.
 
 Zakończenie części implementacji nie oznacza odbioru całej funkcji ani sprzętu.
 
@@ -27,7 +27,7 @@ Zakończenie części implementacji nie oznacza odbioru całej funkcji ani sprz�
 | 004 | M0 | [Konfiguracja sim 3 osie z QtDragon](../../prompts/sesja-004.md) | ukończone |
 | 005 | M0 | [Kopia bazowa ekranu QtDragon](../../prompts/sesja-005.md) | ukończone |
 | 006 | M0 | [Rdzeń: model stanu maszyny i atrapa](../../prompts/sesja-006.md) | ukończone |
-| 007 | M0 | [Katalog alarmów i tłumaczenia](../../prompts/sesja-007.md) | częściowe |
+| 007 | M0 | [Katalog alarmów i tłumaczenia](../../prompts/sesja-007.md) | ukończone |
 | 008 | M0 | [Bufor i bramka G0](../../prompts/sesja-008.md) | ukończone |
 | 009 | M1 | [Specyfikacja wirtualnej maszyny Plant](../../prompts/sesja-009.md) | ukończone |
 | 010 | M1 | [Model obrabiarki machine.yaml (jedno źródło prawdy)](../../prompts/sesja-010.md) | ukończone |
@@ -47,7 +47,7 @@ Zakończenie części implementacji nie oznacza odbioru całej funkcji ani sprz�
 | 024 | M1 | [Plant: scenariusze i raport prototypu](../../prompts/sesja-024.md) | ukończone |
 | 025 | M1 | [Skrypty maszyn wirtualnych (VirtualBox)](../../prompts/sesja-025.md) | ukończone |
 | 026 | M1 | [Bufor i bramka G1 (prototyp P0)](../../prompts/sesja-026.md) | ukończone |
-| 027 | M2 | [Własny system projektowy ekranu](../../prompts/sesja-027.md) | częściowe |
+| 027 | M2 | [Własny system projektowy ekranu](../../prompts/sesja-027.md) | ukończone |
 | 028 | M2 | [Kompozycja ekranu głównego](../../prompts/sesja-028.md) | częściowe |
 | 029 | M2 | [Tryby, JOG i pulpit MPG](../../prompts/sesja-029.md) | częściowe |
 | 030 | M2 | [MDI i klawiatura ekranowa](../../prompts/sesja-030.md) | częściowe |
@@ -63,12 +63,12 @@ Zakończenie części implementacji nie oznacza odbioru całej funkcji ani sprz�
 | 040 | M3 | [Generatory: nagłówek, koniec, narzędzie, planowanie](../../prompts/sesja-040.md) | ukończone |
 | 041 | M3 | [Generatory: kieszenie](../../prompts/sesja-041.md) | ukończone |
 | 042 | M3 | [Generatory: wiercenie i gwintowanie](../../prompts/sesja-042.md) | częściowe |
-| 043 | M3 | [Generatory: rowki, czopy, kontur](../../prompts/sesja-043.md) | planowane |
+| 043 | M3 | [Generatory: rowki, czopy, kontur](../../prompts/sesja-043.md) | ukończone |
 | 044 | M3 | [Lekser G-code i walidacja w edytorze](../../prompts/sesja-044.md) | ukończone |
 | 045 | M3 | [Panel programu dialogowego](../../prompts/sesja-045.md) | częściowe |
 | 046 | M3 | [Podglądy 2D w formularzach](../../prompts/sesja-046.md) | częściowe |
 | 047 | M3 | [Menedżer programów i pliki .lnx](../../prompts/sesja-047.md) | częściowe |
-| 048 | M3 | [Biblioteka podprogramów o-word](../../prompts/sesja-048.md) | częściowe |
+| 048 | M3 | [Biblioteka podprogramów o-word](../../prompts/sesja-048.md) | ukończone |
 | 049 | M3 | [Test technologiczny na Plant](../../prompts/sesja-049.md) | częściowe |
 | 050 | M3 | [Bufor i bramka G3 (prototyp v0.2)](../../prompts/sesja-050.md) | planowane |
 | 051 | M4 | [Ścieżka z programu](../../prompts/sesja-051.md) | częściowe |
@@ -190,11 +190,9 @@ Nie są kolejnym harmonogramem. Ich status dotyczy tylko wskazanego kroku.
 
 ### 007 — Katalog alarmów i tłumaczenia
 
-**częściowe**. Katalog alarmów i manager PL/EN gotowe.
+**ukończone**. 2026-10-24 | Katalog alarmów i manager PL/EN (2026-10-18) oraz mechanizm Qt: screens/linumert/linumert_i18n.py (translate(), .qm albo .ts bez lrelease, język z INI/env), screens/linumert/i18n/linumert_pl.ts, tools/i18n.sh (pylupdate5/lrelease), tools/i18n_check.py; pierwsze teksty przez translate(): panel alarmów; Claude
 
-Pozostaje: Brakuje pełnego mechanizmu Qt .ts/.qm i tools/i18n.sh; powiązane z 037.
-
-Źródła: [docs/DZIENNIK.md](../DZIENNIK.md), [prompts/sesja-007.md](../../prompts/sesja-007.md).
+Źródła: [docs/DZIENNIK.md](../DZIENNIK.md), [tests/test_alarms.py](../../tests/test_alarms.py), [tests/test_i18n.py](../../tests/test_i18n.py), [prompts/sesja-007.md](../../prompts/sesja-007.md).
 
 ### 008 — Bufor i bramka G0
 
@@ -318,11 +316,9 @@ Pozostaje: Odbiór ręczny VM/Plant pozostaje otwarty; automatyczny P0 PASS nie 
 
 ### 027 — Własny system projektowy ekranu
 
-**częściowe**. Tokeny, ikony i makiety istnieją; później dodano koncepcję skórek.
+**ukończone**. 2026-10-24 | Rozliczenie promptu 027: tokens.yaml źródłem prawdy; QSS powłoki generowany z tokenów (linumert_shell_model.shell_qss, test kolorów/44 px) + tools/gen_qss.py do zrzutu; fonty IBM Plex Sans i JetBrains Mono (OFL) w screens/linumert/fonts, rejestrowane przy starcie ekranu i podglądu skórek; 31 ikon z wpisami PROVENANCE (test_ip_guard); skórki korzystają z kontraktu palet (linumert_skin_contract); Claude
 
-Pozostaje: Rozliczyć kryteria oryginalnego promptu oraz kontrakt nowych skórek.
-
-Źródła: [docs/DZIENNIK.md](../DZIENNIK.md), [prompts/sesja-027.md](../../prompts/sesja-027.md).
+Źródła: [docs/DZIENNIK.md](../DZIENNIK.md), [tests/test_design_system.py](../../tests/test_design_system.py), [tests/test_hmi_shell_model.py](../../tests/test_hmi_shell_model.py), [tests/test_ip_guard.py](../../tests/test_ip_guard.py), [prompts/sesja-027.md](../../prompts/sesja-027.md).
 
 ### 028 — Kompozycja ekranu głównego
 
@@ -394,7 +390,7 @@ Pozostaje: Pełne mapowanie kodów napędów/VFD i scenariusze alarmów z prompt
 
 ### 037 — Język polski i angielski
 
-**częściowe**. Katalog EN/PL prototypu skórek istnieje.
+**częściowe**. Katalog EN/PL prototypu skórek istnieje. Mechanizm .ts/translate() z sesji 007 gotowy (Claude, 2026-10-24).
 
 Pozostaje: Pełne tłumaczenie produkcyjnego HMI .ts/.qm, przełącznik i formaty jednostek; dług 007.
 
@@ -436,9 +432,9 @@ Pozostaje: Odbiór wszystkich wzorów, cykli, walidacji i podglądu przez GUI.
 
 ### 043 — Generatory: rowki, czopy, kontur
 
-**planowane**. Brak potwierdzonego zakończenia zakresu.
+**ukończone**. 2026-10-24 | contours.py: slot_linear, slot_arc, stud_rect, stud_circle, contour (G41.1/G42.1, dojazd/odjazd styczny, P-5010 z numerem segmentu), preview_2d, w menu Cykli; golden 5 programów, weryfikacja materiałem StockMap, test rs274 w CI; Claude
 
-Źródła: [prompts/sesja-043.md](../../prompts/sesja-043.md).
+Źródła: [docs/DZIENNIK.md](../DZIENNIK.md), [tests/test_gen_contours.py](../../tests/test_gen_contours.py), [tests/golden/contours_contour.ngc](../../tests/golden/contours_contour.ngc), [prompts/sesja-043.md](../../prompts/sesja-043.md).
 
 ### 044 — Lekser G-code i walidacja w edytorze
 
@@ -472,11 +468,9 @@ Pozostaje: Pełny menedżer, szablony i odbiór bezpiecznych operacji plikowych.
 
 ### 048 — Biblioteka podprogramów o-word
 
-**częściowe**. Podprogramy planowania i wiercenia oraz eksport NgcGui wdrożone.
+**ukończone**. 2026-10-24 | 6 podprogramów o<lrt_...> z nagłówkiem NgcGui (planowanie, wiercenie siatka/okrąg, kieszeń prostokątna i okrągła, rowek prosty), zgodność ruchu z generatorami w rs274 (CI), eksport z Cykli, docs/user/PODPROGRAMY.md; Claude
 
-Pozostaje: Brak podprogramów kieszeni i rowków; zależności 041/043.
-
-Źródła: [docs/DZIENNIK.md](../DZIENNIK.md), [prompts/sesja-048.md](../../prompts/sesja-048.md).
+Źródła: [docs/DZIENNIK.md](../DZIENNIK.md), [tests/test_subroutines.py](../../tests/test_subroutines.py), [docs/user/PODPROGRAMY.md](../user/PODPROGRAMY.md), [prompts/sesja-048.md](../../prompts/sesja-048.md).
 
 ### 049 — Test technologiczny na Plant
 
