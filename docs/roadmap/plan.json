@@ -641,10 +641,14 @@
       "milestone": "M3",
       "title": "Generatory: rowki, czopy, kontur",
       "prompt": "prompts/sesja-043.md",
-      "status": "planned",
-      "progress": "Brak potwierdzonego zakończenia zakresu.",
+      "status": "done",
+      "progress": "2026-10-24 | contours.py: slot_linear, slot_arc, stud_rect, stud_circle, contour (G41.1/G42.1, dojazd/odjazd styczny, P-5010 z numerem segmentu), preview_2d, w menu Cykli; golden 5 programów, weryfikacja materiałem StockMap, test rs274 w CI; Claude",
       "remaining": [],
-      "evidence": []
+      "evidence": [
+        "docs/DZIENNIK.md",
+        "tests/test_gen_contours.py",
+        "tests/golden/contours_contour.ngc"
+      ]
     },
     {
       "id": "044",
