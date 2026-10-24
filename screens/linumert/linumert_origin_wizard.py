@@ -230,8 +230,9 @@ class OriginWizard(QtWidgets.QDialog):
             lines.append("Zakresy osi: " + ("PROBLEM" if issues else "przygotówka się mieści"))
         lines += issues
         self.result.setText("\n".join(lines))
-        self.use_button.setToolTip("Przenosi punkt i położenie do formularza"
-                                   + (" (uwaga na zakresy osi)" if issues else ""))
+        self.use_button.setText("Użyj mimo wyjścia poza zakres osi" if issues
+                                else "Użyj w formularzu")
+        self.result.setStyleSheet("color: #b00020;" if issues else "")
 
     def accept_spec(self):
         self.result_spec = self.spec

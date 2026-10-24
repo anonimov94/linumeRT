@@ -36,7 +36,8 @@ def test_g54_offset_and_tool_length_are_added():
                    "USE_TOOL_LENGTH_OFFSET(0.0, 0.0, 30.0, 0, 0, 0, 0, 0, 0)",
                    "STRAIGHT_FEED(0, 0, -15.0, 0, 0, 0)")
     got = check_canon(canon, LIM)
-    assert [(v.line, v.value, v.side) for v in got] == [(10, -130.0, "min"), (12, -135.0, "min")]
+    assert [(v.line, v.value, v.side, v.count) for v in got] == [(10, -130.0, "min", 2)]
+    assert "i 1 kolejnych" in got[0].message()
 
 
 def test_inches_are_converted():

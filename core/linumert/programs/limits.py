@@ -14,6 +14,7 @@ program + przesunięcie G5x + G92 + korekta długości narzędzia; obrót XY (G1
 from __future__ import annotations
 
 import configparser
+import dataclasses
 import re
 import subprocess
 import tempfile
@@ -36,11 +37,13 @@ class Violation:
     value: float          # [mm] położenie maszynowe, którego program żąda
     limit: float          # [mm] przekroczony limit
     side: str             # "min" albo "max"
+    count: int = 1        # ile ruchów przekracza tę samą stronę limitu tej osi
 
     def message(self) -> str:
         kind = "dolny" if self.side == "min" else "górny"
+        more = f" (i {self.count - 1} kolejnych ruchów)" if self.count > 1 else ""
         return (f"linia {self.line}: oś {self.axis} do {self.value:.3f} mm przekracza "
-                f"{kind} limit {self.limit:.3f} mm")
+                f"{kind} limit {self.limit:.3f} mm{more}")
 
 
 def limits_from_ini(path: Path | str) -> dict[str, tuple[float, float]]:
@@ -80,9 +83,9 @@ def _floats(args: str) -> list[float]:
 
 
 def check_canon(text: str, limits: dict[str, tuple[float, float]]) -> list[Violation]:
-    """Pierwsze przekroczenie każdej osi i strony w kolejności programu (po jednym na linię)."""
+    """Pierwsze przekroczenie każdej osi i strony limitu; `count` liczy wszystkie ruchy."""
     found: list[Violation] = []
-    seen: set[tuple[int, str, str]] = set()
+    seen: dict[tuple[str, str], int] = {}
     scale = 1.0
     g5x = g92 = tlo = (0.0, 0.0, 0.0)  # przesunięcia układu, G92 i korekta długości (XYZ)
     for raw in text.splitlines():
@@ -116,10 +119,13 @@ def check_canon(text: str, limits: dict[str, tuple[float, float]]) -> list[Viola
             value = (value + g5x[i] + g92[i] + tlo[i]) * scale
             lo, hi = limits[axis]
             for side, limit, bad in (("min", lo, value < lo - EPS), ("max", hi, value > hi + EPS)):
-                key = (line, axis, side)
+                key = (axis, side)
                 if bad and key not in seen:
-                    seen.add(key)
+                    seen[key] = len(found)
                     found.append(Violation(line, axis, value, limit, side))
+                elif bad:
+                    first = found[seen[key]]
+                    found[seen[key]] = dataclasses.replace(first, count=first.count + 1)
     return found
 
 
