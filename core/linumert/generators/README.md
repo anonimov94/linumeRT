@@ -16,3 +16,9 @@ wbudowane (nagłówek, koniec, narzędzie, planowanie, kieszenie, wiercenie, row
 
 Zasady: wyłącznie tekst G-code LinuxCNC; podprogramy `o<nazwa> call`; bez M98/M99 i bez M2/M30
 (koniec dopisuje kompilator); wynik zależy tylko od parametrów i wersji.
+
+## Generatory konturowe (sesja 043, `contours.py`)
+`slot_linear`, `slot_arc` (rowki: oś + obwiednie, wejście pionowe albo rampa po osi), `stud_rect`,
+`stud_circle` (czopy od marginesu do ściany, współ- lub przeciwbieżnie), `contour` (odcinki i łuki
+z tekstu, korekcja G41.1/G42.1 z D frezu, styczny dojazd/odjazd, P-5010 przy nieciągłości).
+Golden: `tests/golden/contours_*.ngc`; geometria sprawdzana materiałem `StockMap`.

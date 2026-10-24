@@ -1053,3 +1053,13 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
 - N3: scena w stanie hosta (`shared`) — zmiana skórki/motywu/języka nie gubi sceny ani materiału;
   launcher ISO `linumert --neon` + skrót pulpitu. Uruchomienie z prawdziwym `gcode`: zadanie N4 Codex.
 - Testy: pełne pytest 1181 PASS, 12 skip; ruff, wymagania PASS. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## 043 — Generatory: rowki, czopy, kontur · 2026-10-24 · Claude
+- **Zrobione:** `core/linumert/generators/contours.py`: slot_linear, slot_arc, stud_rect, stud_circle, contour
+  (segmenty L/A z tekstu, G41.1/G42.1 D=średnica, styczny dojazd/odjazd, P-5010 z numerem segmentu, promień łuku),
+  preview_2d; na stronie Cykle (menu + rejestr). Zrzut: build/contours/cycles-contours.png.
+- **Testy:** golden 5 programów; materiał `StockMap`: rowek tnie dokładnie szerokość, czop nietknięty, rowek łukowy
+  bez cięciwy, G0 bez materiału, rampa bez zagłębienia pionowego; walidacje; GUI Cykli; test rs274 (`linuxcnc`, CI).
+- **Decyzje:** tor środka narzędzia; kontur z korekcją dynamiczną LinuxCNC (bez tabeli narzędzi).
+- **Do sprawdzenia ręcznie:** kontur z korekcją na Plant; czopy przy realnym marginesie przygotówki.
+  Model-Author: Claude. NIEZWERYFIKOWANE NA SPRZĘCIE.

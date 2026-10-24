@@ -4,6 +4,7 @@ SPDX-License-Identifier: GPL-2.0-or-later
 """
 
 import importlib
+import os
 import sys
 import types
 from pathlib import Path
@@ -1039,3 +1040,34 @@ def test_start_asks_before_running_a_program_outside_axis_limits(page_env, tmp_p
     with patch.object(shell_module.QtWidgets.QMessageBox, "question",
                       return_value=shell_module.QtWidgets.QMessageBox.Yes):
         assert shell_module.LinumertShell._confirm_limits(fake_shell)
+
+
+def test_cycles_page_offers_contour_generators(page_env, monkeypatch, tmp_path):
+    """Sesja 043: rowki, czopy i kontur w menu Cykli, podgląd 2D i krok programu (Claude)."""
+    module, page, _shell = _cycles(page_env, monkeypatch)
+    titles = {page.cmb.itemText(i) for i in range(page.cmb.count())}
+    assert {"Rowek prosty", "Rowek łukowy", "Czop prostokątny", "Czop okrągły",
+            "Kontur"} <= titles
+    page.cmb.setCurrentIndex(page.cmb.findText("Kontur"))
+    page.inputs["segments"].setText("L 0,0 40,0; A 40,0 40,20 40,10 CCW; L 40,20 0,20")
+    for name, value in (("tool_d", "6"), ("depth", "2")):
+        page.inputs[name].setText(value)
+    page.inputs["compensation"].setCurrentText("left")
+    lines = page.preview()
+    assert lines and "G41.1 D6" in lines and page.view2d.lines
+    page.inputs["segments"].setText("L 0,0 40,0; L 41,0 50,0")
+    assert page.preview() is None and "segmencie 2" in page.lbl_issue.text()
+    page.cmb.setCurrentIndex(page.cmb.findText("Czop prostokątny"))
+    for name, value in (("width", "40"), ("height", "24"), ("corner_radius", "5"),
+                        ("tool_d", "6"), ("depth", "2"), ("margin", "6")):
+        page.inputs[name].setText(value)
+    assert page.preview() and page.view2d.lines
+    page.add_step()
+    assert "Czop prostokatny" in page.text()
+    page.resize(1100, 750)
+    page.show()
+    module.QtWidgets.QApplication.processEvents()
+    shot = os.environ.get("LINUMERT_SHOT_DIR")
+    assert page.grab().save(str(Path(shot) / "cycles-contours.png" if shot else
+                                 tmp_path / "cycles-contours.png"))
+    page.close()

@@ -1,7 +1,7 @@
 <!-- Generowane przez python3 tools/roadmap.py; edytuj docs/roadmap/plan.json. -->
 # Wspólny plan linumeRT
 
-Pierwotny plan: **84 sesje M0–M6**, commit `796c6a2`. Stan na 2026-10-24: planowane: 18; w toku: 0; częściowe: 35; do odbioru: 0; ukończone: 31; zablokowane: 0.
+Pierwotny plan: **84 sesje M0–M6**, commit `796c6a2`. Stan na 2026-10-24: planowane: 17; w toku: 0; częściowe: 35; do odbioru: 0; ukończone: 32; zablokowane: 0.
 
 Zakończenie części implementacji nie oznacza odbioru całej funkcji ani sprzętu.
 
@@ -63,7 +63,7 @@ Zakończenie części implementacji nie oznacza odbioru całej funkcji ani sprz�
 | 040 | M3 | [Generatory: nagłówek, koniec, narzędzie, planowanie](../../prompts/sesja-040.md) | ukończone |
 | 041 | M3 | [Generatory: kieszenie](../../prompts/sesja-041.md) | ukończone |
 | 042 | M3 | [Generatory: wiercenie i gwintowanie](../../prompts/sesja-042.md) | częściowe |
-| 043 | M3 | [Generatory: rowki, czopy, kontur](../../prompts/sesja-043.md) | planowane |
+| 043 | M3 | [Generatory: rowki, czopy, kontur](../../prompts/sesja-043.md) | ukończone |
 | 044 | M3 | [Lekser G-code i walidacja w edytorze](../../prompts/sesja-044.md) | ukończone |
 | 045 | M3 | [Panel programu dialogowego](../../prompts/sesja-045.md) | częściowe |
 | 046 | M3 | [Podglądy 2D w formularzach](../../prompts/sesja-046.md) | częściowe |
@@ -436,9 +436,9 @@ Pozostaje: Odbiór wszystkich wzorów, cykli, walidacji i podglądu przez GUI.
 
 ### 043 — Generatory: rowki, czopy, kontur
 
-**planowane**. Brak potwierdzonego zakończenia zakresu.
+**ukończone**. 2026-10-24 | contours.py: slot_linear, slot_arc, stud_rect, stud_circle, contour (G41.1/G42.1, dojazd/odjazd styczny, P-5010 z numerem segmentu), preview_2d, w menu Cykli; golden 5 programów, weryfikacja materiałem StockMap, test rs274 w CI; Claude
 
-Źródła: [prompts/sesja-043.md](../../prompts/sesja-043.md).
+Źródła: [docs/DZIENNIK.md](../DZIENNIK.md), [tests/test_gen_contours.py](../../tests/test_gen_contours.py), [tests/golden/contours_contour.ngc](../../tests/golden/contours_contour.ngc), [prompts/sesja-043.md](../../prompts/sesja-043.md).
 
 ### 044 — Lekser G-code i walidacja w edytorze
 

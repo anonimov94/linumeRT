@@ -1,0 +1,25 @@
+( linumeRT: program stud_circle.ngc )
+( zrodlo: stud_circle.ngc, schemat .lnx 1 )
+G21
+( krok 1: stud_circle v1 )
+( Czop okragly: tor srodka narzedzia, symulacja wymagana )
+G17 G90 G91.1 G94 G40 G80
+G0 Z5
+G0 X43 Y25
+G0 Z1
+G1 Z-1 F100
+G3 X43 Y25 I-18 J0 F400
+G1 X40.5 Y25 F400
+G3 X40.5 Y25 I-15.5 J0 F400
+G1 X38 Y25 F400
+G3 X38 Y25 I-13 J0 F400
+G1 X43 Y25 F400
+G1 Z-2 F100
+G3 X43 Y25 I-18 J0 F400
+G1 X40.5 Y25 F400
+G3 X40.5 Y25 I-15.5 J0 F400
+G1 X38 Y25 F400
+G3 X38 Y25 I-13 J0 F400
+G1 X43 Y25 F400
+G0 Z5
+M2
