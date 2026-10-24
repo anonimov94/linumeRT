@@ -1054,6 +1054,15 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
   launcher ISO `linumert --neon` + skrót pulpitu. Uruchomienie z prawdziwym `gcode`: zadanie N4 Codex.
 - Testy: pełne pytest 1181 PASS, 12 skip; ruff, wymagania PASS. NIEZWERYFIKOWANE NA SPRZĘCIE.
 
+## 007 — Katalog alarmów i tłumaczenia (domknięcie) · 2026-10-24 · Claude
+- **Zrobione:** `linumert_i18n.py` (`translate()`, `TsTranslator` czyta `.ts` bez lrelease, `.qm` gdy jest,
+  język z env/INI, domyślnie PL), `i18n/linumert_pl.ts`, `tools/i18n.sh` (pylupdate5 + opcjonalnie lrelease),
+  `tools/i18n_check.py` (kompletność PL); powłoka HMI instaluje język przed budową widoków; panel alarmów
+  przez `translate()`. Katalog W/E/K/P i AlarmManager z 2026-10-18 bez zmian.
+- **Decyzje:** źródło EN + `.ts` PL, forma `translate()` (PROPOZYCJA w DECYZJE).
+- **Do sprawdzenia ręcznie:** HMI w LinuxCNC pokazuje polską podpowiedź Resetu; `LINUMERT_LANG=en` — angielską.
+- **Długi:** pozostałe napisy ekranu i skórek → sesja 037. Testy: pełne pytest 1230 PASS; ruff, REQ PASS.
+  Model-Author: Claude. Autokontrola. NIEZWERYFIKOWANE NA SPRZĘCIE.
 ## 043 — Generatory: rowki, czopy, kontur · 2026-10-24 · Claude
 - **Zrobione:** `core/linumert/generators/contours.py`: slot_linear, slot_arc, stud_rect, stud_circle, contour
   (segmenty L/A z tekstu, G41.1/G42.1 D=średnica, styczny dojazd/odjazd, P-5010 z numerem segmentu, promień łuku),
