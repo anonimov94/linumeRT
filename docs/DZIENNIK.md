@@ -978,3 +978,11 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
 - Model-Author: Claude. Właściciel przeszedł checklistę na własnym pulpicie (HMI z Plant, SHA 4bc7a14 i 27b9245).
 - Potwierdzone: punkty 1–6 i 8; przełączanie kart panelu Plant nie zrywa łącza po poprawce LEGACY-RUNTIME.
 - Otwarte: punkt 7 (raport HTML), skróty QtDragon/Plant z menu, zrzuty i log. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## LIMITS-PREFLIGHT — kontrola limitów osi przed startem — 2026-10-24 · Claude
+- Model-Author: Claude. Zakres 031/051; sugestia właściciela po zatrzymaniu maszyny w materiale z błędem limitu Z.
+- LinuxCNC odrzuca ruch dopiero w planerze; teraz edytor G-code ma przycisk „Sprawdź limity osi” (praca w tle, bez blokowania GUI/heartbeat).
+- Rdzeń `programs/limits.py`: rs274 z kopią pliku parametrów i jednostkami z INI; pozycja maszynowa = program + G5x + G92 + korekta długości; numery linii pliku.
+- Odtworzono zgłoszony błąd: G54 Z=-150, `G0 Z20` → linia 3, Z=-130 < -120; po offsecie -50 brak naruszeń (rs274 w Debianie 12).
+- Nie zmieniono zachowania LinuxCNC ani limitów; sprawdzane tylko punkty końcowe (łuki, obrót XY, osie ABC pominięte).
+- Testy: tests/test_limits.py (7 + 1 z rs274), test GUI w tests/test_hmi_workflow_widgets.py (42 PASS w Debianie).

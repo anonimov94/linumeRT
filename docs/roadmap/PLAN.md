@@ -146,6 +146,7 @@ Nie są kolejnym harmonogramem. Ich status dotyczy tylko wskazanego kroku.
 | EDITOR-VALIDATION | 044, 047 | Walidacja bieżącej treści i wyszukiwanie | ukończone |
 | LEGACY-RUNTIME | 017, 025, 026, 070, 077, 082 | Diagnostyka uruchomień z dawnych promptów startowych | częściowe |
 | ROADMAP-UNIFICATION | 001, 084 | Jeden rejestr planu i migracja statusów | ukończone |
+| LIMITS-PREFLIGHT | 031, 051 | Kontrola limitów osi przed startem programu | częściowe |
 
 ## Postęp, pozostały zakres i dowody
 
@@ -974,4 +975,12 @@ Pozostaje: 10× testy Plant z LinuxCNC: 1 z 10 przebiegów PASS (13/13), reszta 
 **ukończone**. PR #99: jeden rejestr, generowane widoki, kontrola CI, instrukcje i migracja historii; lokalne testy i odbiór DOM PASS. Wynik CI i SHA w PR.
 
 Źródła: [docs/roadmap/README.md](README.md), [tools/roadmap.py](../../tools/roadmap.py), [tests/test_roadmap.py](../../tests/test_roadmap.py), [PR](https://github.com/anonimov94/linumeRT/pull/99).
+
+### LIMITS-PREFLIGHT — Kontrola limitów osi przed startem programu
+
+**częściowe**. Przycisk 'Sprawdź limity osi' w edytorze G-code: rs274 z kopią parametrów (G54/G92, korekta długości, jednostki z INI) porównuje punkty końcowe ruchów z MIN/MAX_LIMIT; wynik w tle, lista linii z przeskokiem do edytora. Odtworzony błąd z G54 Z=-150 (linia 3, Z=-130) na rzeczywistym rs274; 7 testów + test GUI.
+
+Pozostaje: Łuki między punktami końcowymi, obrót XY i limity osi obrotowych nie są sprawdzane. Wywołanie kontroli automatycznie przy wczytaniu programu do AUTO oraz odbiór na pulpicie właściciela.
+
+Źródła: [core/linumert/programs/limits.py](../../core/linumert/programs/limits.py), [tests/test_limits.py](../../tests/test_limits.py), [tests/test_hmi_workflow_widgets.py](../../tests/test_hmi_workflow_widgets.py), [screens/linumert/linumert_program_editor.py](../../screens/linumert/linumert_program_editor.py).
 

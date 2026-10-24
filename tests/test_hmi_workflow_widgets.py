@@ -889,3 +889,34 @@ def test_eta_override_history_survives_estimation_and_resets_for_next_run(
     page.refresh()
     assert "Pozostało około" in page.lbl_remaining.text()
     page.close()
+
+
+def test_editor_axis_limit_check_runs_off_the_gui_thread(page_env, tmp_path, monkeypatch):
+    import time
+
+    from linumert.programs import limits
+
+    _, _, _, action = page_env
+    module = importlib.import_module("linumert_program_editor")
+    ini = Path(__file__).resolve().parents[1] / "config/sim/linumert_xyz/linumert_xyz.ini"
+    monkeypatch.setenv("INI_FILE_NAME", str(ini))
+    calls = []
+
+    def fake(ngc, ini_path, var):
+        calls.append(Path(ngc).read_text())
+        time.sleep(0.05)
+        return [limits.Violation(3, "Z", -130.0, -120.0, "min")]
+
+    monkeypatch.setattr(limits, "check_ngc", fake)
+    editor = module.ProgramEditor(tmp_path / "p.ngc", "G21\n(x)\nG0 Z20\nM2\n")
+    editor.limits_button.click()
+    assert not editor.limits_button.isEnabled() and "Sprawdzanie" in editor.validation.text()
+    deadline = time.time() + 5
+    while editor.limit_job is not None and time.time() < deadline:
+        editor.poll_limits()
+        time.sleep(0.02)
+    assert calls == ["G21\n(x)\nG0 Z20\nM2\n"] and editor.limits_button.isEnabled()
+    assert editor.issues.count() == 1 and "linia 3" in editor.issues.item(0).text()
+    assert "Ruchy poza limitami" in editor.validation.text()
+    assert editor.editor.textCursor().blockNumber() == 2 and not action.mock_calls
+    editor.deleteLater()

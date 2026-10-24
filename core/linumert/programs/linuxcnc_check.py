@@ -63,7 +63,9 @@ def find_linuxcnc(root: Path | str | None = None) -> tuple[list[str], Path | Non
 
 
 def run_interpreter(ngc: Path | str, root: Path | str | None = None,
-                    timeout: float = 20.0) -> subprocess.CompletedProcess:
+                    timeout: float = 20.0,
+                    parameters_from: Path | str | None = None,
+                    linear_units: str | None = None) -> subprocess.CompletedProcess:
     """Offline only: private HOME/tool mmap, parameters and cwd for every invocation.
 
     LinuxCNC 2.9.10 rs274 truncates $HOME/.tool.mmap even before reading its options.
@@ -88,12 +90,17 @@ def run_interpreter(ngc: Path | str, root: Path | str | None = None,
                                     r"\g<1>\nPARAMETER_FILE = analysis.var", config, count=1)
             if not count:
                 config += "\n[RS274NGC]\nPARAMETER_FILE = analysis.var\n"
+            if linear_units:  # parametry z .var są w jednostkach maszyny, nie domyślnych (cale)
+                config = re.sub(r"(?im)^([ \t]*LINEAR_UNITS[ \t]*=).*$",
+                                rf"\g<1> {linear_units}", config)
             ini = private / "analysis.ini"
             ini.write_text(config)
             options = ["-i", str(ini),
                        "-t", str((sim / "sim.tbl").resolve())]
             if (sim / "sim.var").exists():
                 shutil.copyfile(sim / "sim.var", parameters)
+        if parameters_from is not None and Path(parameters_from).is_file():
+            shutil.copyfile(parameters_from, parameters)  # kopia: oryginał nietknięty
         options += ["-v", str(parameters), "-n", "0", str(ngc)]
         command = " ".join(prefix + ["exec rs274 " + shlex.join(options)])
         return run_bounded(["bash", "-c", command], cwd=directory, env=env, timeout=timeout)
