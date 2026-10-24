@@ -909,6 +909,23 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
 - Uruchomienie i obraz: symulacja, NIEZWERYFIKOWANE NA SPRZĘCIE.
 - Model-Author: Codex.
 
+## Wspólna roadmapa — 2026-10-24 · Codex
+- Model-Author: Codex. Na polecenie właściciela: jeden rejestr 84 sesji i późniejszych rozszerzeń.
+- `plan.json` → generator → spis promptów, DONE, pełny plan i HTML; brak statusów w localStorage.
+- Zachowano numerację, aliasy i historyczne dowody; 007/048 skorygowano na częściowe.
+- Instrukcje sesji korzystają z rejestru; dawne plany są specyfikacjami/historią, przekazanie odchudzono.
+- Lokalnie: lint, 1071 pytest PASS (88 skip bez GUI), REQ 21/22 bez błędów; odbiór DOM PASS.
+- Końcowy generator/IP: 20 testów PASS; pełne CI i SHA w PR #99 (LinuxCNC/Plant osobno).
+- Autokontrola, bez niezależnego przeglądu. Bez zmiany funkcji CNC i odbioru sprzętowego.
+
+## Lekcja AI — dyscyplina pierwotnego planu · 2026-10-24 · Codex
+- Model-Author: Codex. Polecenie właściciela: zachować wnioski audytu dla następnych sesji.
+- Reguła w WSPOLPRACA_MODELI: cel i ID przed pracą, domykanie kryteriów/bramek M0–M6.
+- Nowe pomysły są rozszerzeniami; jawna zmiana priorytetu właściciela ma zapis wpływu na plan.
+- Prompt startowy i Savoir-vivre AI przypominają lekcję; bez nowej listy statusów i zmian funkcji CNC.
+- Walidacja: roadmapa i lint PASS; 1072 pytest PASS, 88 skip, REQ 21/22 bez błędów; PR #100.
+- Tylko dokumentacja; autokontrola, bez niezależnego przeglądu, scalanie według §5 WSPOLPRACA_MODELI.
+
 ## Edytor G-code — walidacja i wyszukiwanie · 2026-10-24 · Codex
 - Model-Author: Codex. Roadmapa 044/HMI-04: kontrola niezapisanej treści w Program → Edytuj kopię.
 - Lista błędów z przejściem do linii/kolumny (także Unicode); edycja unieważnia wynik.

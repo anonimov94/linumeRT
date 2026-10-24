@@ -1,6 +1,11 @@
 # linumeRT — roadmap nowego systemu skórek GUI
 
-Status: **nowy cel rozwojowy / wytyczne projektowe**, nie implementacja.
+> Specyfikacja i historia realizacji; nie jest osobnym harmonogramem.
+> Bieżący status, pozostały zakres i powiązania (SKIN-00…06 i kroki podglądu):
+> [wspólna roadmapa](../roadmap/PLAN.md), [rejestr](../roadmap/plan.json).
+> Niższe datowane opisy stanu są zapisem historycznym; status aktualizuj wyłącznie w rejestrze.
+
+Rola: **specyfikacja systemu skórek**; bieżący status etapów wyłącznie we wspólnym rejestrze.
 Model-Author: ChatGPT · 2026-10-22. Koncepcja na polecenie właściciela.
 
 ## Decyzja kierunkowa właściciela
@@ -49,7 +54,7 @@ Właściciel zgłosił na EndeavourOS wadliwe wyświetlanie trójkątów, błęd
 - Testy geometrii (normalne, winding, zdegenerowane trójkąty, widoczność), screenshot regresyjny z kilku kątów oraz test interaktywny na EndeavourOS i Debian 12.
 - Maksimum 30 FPS zgodnie z obecnym kontraktem do czasu osobnej decyzji. Symulacja / GUI nie blokują RT. Zero udawania precyzyjnej symulacji dla modeli poglądowych.
 
-## Etapy roadmapy (do oszacowania, po istniejących zobowiązaniach)
+## Zakres etapów (status i kolejność we wspólnym rejestrze)
 
 - **SKIN-00** — audyt kontraktów, wpis PROPOZYCJA w `docs/DECYZJE.md`, rozstrzygnięcie konfliktu z zamrożonym QtDragon i wspólnymi tokenami w `CLAUDE.md`.
 - **SKIN-01** — niezależny prototyp renderera 3D; reprodukcja i regresje artefaktów z EndeavourOS.
@@ -65,7 +70,7 @@ Cztery faktycznie odrębne aplikacje GUI, po cztery palety, dwujęzyczne, z moż
 
 ## Makiety poglądowe
 
-W rozmowie z właścicielem wygenerowano cztery obrazy: Industrial Pro, Classic Digital, Cyberdeck, Organic Vector. **Grafiki nie są jeszcze załączone do repozytorium**; niniejszy opis zachowuje ich układ i wytyczne. Przed dodaniem plików graficznych: ustalić prawa i pochodzenie, wpisać je do `docs/PROVENANCE.md`, zweryfikować bezpieczeństwo oraz kontrakt IP. Nie kopiować ani nie brandować ekranów innych produktów.
+W rozmowie z właścicielem wygenerowano cztery obrazy: Industrial Pro, Classic Digital, Cyberdeck, Organic Vector. Referencje są w `referencje-skin/`, a pochodzenie w `docs/PROVENANCE.md`; opis zachowuje wytyczne kompozycji. Nowe pliki wymagają wpisu pochodzenia i sprawdzenia kontraktu IP. Nie kopiować ani nie brandować ekranów innych produktów.
 
 ## Konkurs 04 — pionowy wycinek read-only (2026-10-23)
 

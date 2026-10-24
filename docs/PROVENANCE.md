@@ -456,6 +456,15 @@ Wyłącznie dowody testów programowych; bez pomiarów fizycznego stanowiska.
 GitHub Actions 40001235761 dla ffb7037, Codex, 2026-10-23, GPL-2.0-or-later;
 manifest SHA-256, bez binariów LinuxCNC i bez nowych zależności.
 
+## Wspólna roadmapa — 2026-10-24
+
+`tools/roadmap.py`, `tests/test_roadmap.py`, `docs/roadmap/plan.json`,
+`docs/roadmap/template.html`, `docs/roadmap/README.md` i generowane widoki:
+własne opracowanie Codex na polecenie właściciela, GPL-2.0-or-later.
+Źródła danych: pierwotny plan z commita `796c6a2`, prompty, dziennik i raporty repozytorium;
+bez zasobów zewnętrznych i nowych zależności runtime. Zastępują dawny HTML
+z osadzonymi makietami; makiety źródłowe w `docs/design/makiety/` pozostają zachowane.
+
 Edytor G-code: kontrola bieżącej treści, wyszukiwanie/zamiana i testy Qt.
 Autor: projekt linumeRT / Codex, 2026-10-24, GPL-2.0-or-later, własny kod
 w screens/linumert/linumert_program_editor.py oraz tests/test_hmi_workflow_widgets.py.

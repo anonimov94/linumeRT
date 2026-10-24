@@ -1,5 +1,10 @@
 # Lista do wykonania: 21–27 października 2026
 
+> Specyfikacja i historia realizacji; nie jest osobnym harmonogramem.
+> Bieżący status, pozostały zakres i powiązania (PLAN-21-22…PLAN-27 i D38-A/B):
+> [wspólna roadmapa](roadmap/PLAN.md), [rejestr](roadmap/plan.json).
+> Niższe datowane opisy stanu są zapisem historycznym; status aktualizuj wyłącznie w rejestrze.
+
 Model-Author: Codex. Polecenie właściciela: dokończyć rozpoczęte prace; nie zaczynać nowych sesji.
 Ta lista obejmuje braki w już rozpoczętych obszarach. Właściciel następnie polecił realizować
 plan 21–27 bez czekania na odpowiedź, aż do „stop”. Stan początkowy zapisano w tabeli;

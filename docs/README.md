@@ -8,7 +8,8 @@ sprzecznościach: `CLAUDE.md` → `DECYZJE.md` → `wymagania/` → specyfikacje
 | Dokument | Po co |
 |---|---|
 | [`../README.md`](../README.md) | czym jest linumeRT, co już działa, szybki start |
-| [`NASTEPNA_SESJA.md`](NASTEPNA_SESJA.md) | **stan bieżący**: tura, PR i plan scalania, następna praca, środowisko, otwarte sprawy |
+| [`roadmap/PLAN.md`](roadmap/PLAN.md) | wspólny plan i statusy 84 sesji oraz rozszerzeń; źródło: `roadmap/plan.json` |
+| [`NASTEPNA_SESJA.md`](NASTEPNA_SESJA.md) | przekazanie, aktywny checkout, środowisko i odsyłacz do wspólnego planu |
 | [`PROMPT_NOWEJ_SESJI.md`](PROMPT_NOWEJ_SESJI.md) | stały prompt startowy agenta: kolejność lektury, praca, zamknięcie sesji |
 | [`../CLAUDE.md`](../CLAUDE.md) | kontrakt dla agentów: stos, struktura repo, RT, bezpieczeństwo, IP, Definition of Done |
 
@@ -51,8 +52,8 @@ sprzecznościach: `CLAUDE.md` → `DECYZJE.md` → `wymagania/` → specyfikacje
 | [`WSPOLPRACA_MODELI.md`](WSPOLPRACA_MODELI.md) | jedyne źródło zasad współpracy Claude i Codex: tury, blokady, małe kroki, scalanie |
 | [`DECYZJE.md`](DECYZJE.md) | decyzje: architektura (D01–D23), proces i kierunek (D24–D32), decyzje techniczne sesji |
 | [`DZIENNIK.md`](DZIENNIK.md) | dziennik pracy: spis sesji według numeru i wpisy chronologicznie |
-| [`../prompts/README.md`](../prompts/README.md) | plan 84 sesji ze stanem; [`DONE.md`](../prompts/DONE.md) — wykonane |
-| [`roadmap/index.html`](roadmap/index.html) | interaktywna mapa planu (kamienie M0–M6) |
+| [`../prompts/README.md`](../prompts/README.md) | generowany spis sesji i rozszerzeń; [`DONE.md`](../prompts/DONE.md) — generowany widok ukończonych zakresów |
+| [`roadmap/index.html`](roadmap/index.html) | generowany, filtrowany widok wspólnego rejestru, bez lokalnego zapisu statusów |
 | [`raporty/SPIKE_LINUXCNC.md`](raporty/SPIKE_LINUXCNC.md) | raport sesji 003: budowa i testy LinuxCNC 2.9 RIP w środowisku agenta |
 | [`raporty/`](raporty/) | raporty kamieni (G0: zrzuty ekranu z symulatora i z Plant) |
 | [`archiwum/`](archiwum/) | poprzednie wersje dokumentów stanu (bez mocy obowiązującej) |
