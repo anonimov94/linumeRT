@@ -492,3 +492,15 @@ fonty IBM Plex i JetBrains Mono (OFL-1.1, już w tokens.yaml) ładowane z Google
 `screens/linumert/linumert_neon_view.py` i `linumert_neon_render.py` (renderer QPainter, presety), `core/linumert/programs/toolpath.py`
 (model ścieżki), `tools/dev/neon-preview.py` i program `config/sim/nc_files/linumert_neon_demo.ngc`.
 Bez nowych zależności i bez cudzych grafik.
+
+## Fonty ekranu — sesja 027 (Model-Author: Claude, 2026-10-24)
+
+Pobrane z repozytoriów autorów, niezmienione; licencje obok plików: `screens/linumert/fonts/OFL-IBMPlexSans.txt` (IBM, plex-sans/LICENSE.txt) i `screens/linumert/fonts/OFL-JetBrainsMono.txt` (JetBrainsMono/OFL.txt). Rejestrowane w aplikacji przez `screens/linumert/linumert_fonts.py`; `tools/gen_qss.py` — własny kod, GPL-2.0-or-later.
+
+| Plik | Rodzaj | Autor | Data | Źródło | Licencja | Użycie | Ścieżka | Suma |
+|---|---|---|---|---|---|---|---|---|
+| IBMPlexSans-Bold.ttf | font | IBM Corp. | 2026-10-24 | https://github.com/IBM/plex (packages/plex-sans/fonts/complete/ttf) | OFL-1.1 | ekran linumeRT (tokens.yaml: fonty) | `screens/linumert/fonts/IBMPlexSans-Bold.ttf` | sha256 9e6c74a889a700d707613d24548fe4ffa6bc59559a0689d2cf9e133bdcdafb2f |
+| IBMPlexSans-Regular.ttf | font | IBM Corp. | 2026-10-24 | https://github.com/IBM/plex (packages/plex-sans/fonts/complete/ttf) | OFL-1.1 | ekran linumeRT (tokens.yaml: fonty) | `screens/linumert/fonts/IBMPlexSans-Regular.ttf` | sha256 975dcda37d80f038dcd143c22e33ca2d97a0cc5a929aace1c749153b0fe1afa5 |
+| IBMPlexSans-SemiBold.ttf | font | IBM Corp. | 2026-10-24 | https://github.com/IBM/plex (packages/plex-sans/fonts/complete/ttf) | OFL-1.1 | ekran linumeRT (tokens.yaml: fonty) | `screens/linumert/fonts/IBMPlexSans-SemiBold.ttf` | sha256 a20caf8286023a6a7a85e40b1d2a4ae9fc3e3b1f9eda8f4c542dd4986af67bb1 |
+| JetBrainsMono-Bold.ttf | font | The JetBrains Mono Project Authors | 2026-10-24 | https://github.com/JetBrains/JetBrainsMono (fonts/ttf) | OFL-1.1 | ekran linumeRT (tokens.yaml: fonty) | `screens/linumert/fonts/JetBrainsMono-Bold.ttf` | sha256 d22c4f3821d725eb01210d278d95dfcfcaadc34699a06658d47c8a5cc5830ada |
+| JetBrainsMono-Regular.ttf | font | The JetBrains Mono Project Authors | 2026-10-24 | https://github.com/JetBrains/JetBrainsMono (fonts/ttf) | OFL-1.1 | ekran linumeRT (tokens.yaml: fonty) | `screens/linumert/fonts/JetBrainsMono-Regular.ttf` | sha256 e6fd0d7e91550b3ed2b735d4312474362c4716edc4fc0577a0f61ed782d5aed1 |
