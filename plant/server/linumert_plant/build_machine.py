@@ -173,6 +173,45 @@ def _stops(axis: Axis, index: int, unit: float) -> tuple[list[tuple[str, float]]
     return out, errors
 
 
+def collision_free_start(cfg: MachineConfig, seed: int) -> dict[str, float] | None:
+    """Pozycja startowa poza bryłami kolizyjnymi, gdy losowanie rdzenia C w nie trafia (REQ-VM-07).
+
+    Odtwarza generator rdzenia (xorshift32 z ziarna); jeśli wylosowana pozycja nie koliduje,
+    zwraca None i zostaje losowanie C. Inaczej losuje dalej z tego samego strumienia,
+    aż pozycja nosa nie przecina stałych brył (maszyna nie może stanąć we wnętrzu magazynu).
+    """
+    if not cfg.collision_bodies:
+        return None
+    from .collisions import CollisionModel
+
+    state = (seed & 0xFFFFFFFF) or 0x2545F491
+
+    def draw() -> dict[str, float]:
+        nonlocal state
+        pose = {}
+        for axis in cfg.axes:
+            state ^= (state << 13) & 0xFFFFFFFF
+            state ^= state >> 17
+            state ^= (state << 5) & 0xFFFFFFFF
+            lo, hi = axis.soft_limits
+            pose[axis.letter] = lo + (state >> 8) / 16777216.0 * (hi - lo)
+        return pose
+
+    model = CollisionModel.from_config(cfg)
+
+    def free(pose: dict[str, float]) -> bool:
+        return not model.check(0.0, [pose.get(letter, 0.0) for letter in "XYZ"])
+
+    first = draw()
+    if free(first):
+        return None
+    for _ in range(1000):
+        pose = draw()
+        if free(pose):
+            return pose
+    raise ValueError("start: brak pozycji poza bryłami kolizyjnymi w zakresie soft limits")
+
+
 def build_model(cfg: MachineConfig, drives: dict[str, Any], seed: int = 1,
                 start: str = "random") -> MachineModel:
     """Zamienia konfigurację i rozwiązane napędy na model rdzenia C (zbiera wszystkie błędy).
@@ -208,6 +247,8 @@ def build_model(cfg: MachineConfig, drives: dict[str, Any], seed: int = 1,
             put((f"mech.{i}.{key}", float(value)))
         model.curves[i] = [(float(o), float(t)) for o, t in mapped["curve"]]
 
+    safe_start = collision_free_start(cfg, seed) if start == "random" else None
+
     # Osie maszyny
     for j, axis in enumerate(cfg.axes):
         model.joints.append(axis.letter)
@@ -223,7 +264,9 @@ def build_model(cfg: MachineConfig, drives: dict[str, Any], seed: int = 1,
         if axis.gantry_max_skew is not None:
             put((f"joint.{j}.max_skew", axis.gantry_max_skew * unit))
         put((f"joint.{j}.initial", 0.5 * (axis.soft_limits[0] + axis.soft_limits[1]) * unit))
-        if start == "random":
+        if start == "random" and safe_start is not None:
+            put((f"joint.{j}.initial", safe_start[axis.letter] * unit))
+        elif start == "random":
             put((f"joint.{j}.initial_random", 1.0))
             put((f"joint.{j}.initial_min", axis.soft_limits[0] * unit))
             put((f"joint.{j}.initial_max", axis.soft_limits[1] * unit))

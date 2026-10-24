@@ -957,3 +957,11 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
 - Pełny HMI z bramki startera: 15 kroków PASS (42,72 s), pauza/podgląd/raport/Z+2 mm/powrót/wznowienie.
 - Nowy test integracyjny wewnątrz QtVCP, zrzuty i raport; brak zmian progów oraz zabezpieczeń ruchu.
 - Autokontrola, bez niezależnego przeglądu; końcowe SHA i pełny odbiór w PR #102.
+
+## OD-01 — Macierz Plant bez nieoczekiwanych kolizji — 2026-10-24 · Claude
+- Model-Author: Claude. Zakres 024/066/072/082; pierwszy punkt kolejności z WSPOLPRACA_MODELI.md.
+- Przyczyna: losowy start po włączeniu (ziarno 1) w router_atc_rack lądował wewnątrz magazynu (CRASH, COVER_CRASH).
+- Start omija bryły kolizyjne: Python odtwarza xorshift32 rdzenia C i zmienia pozycję tylko przy kolizji (inne starty bez zmian).
+- matrix_smoke wymaga teraz `event: CRASH` i `COVER_CRASH` z `present: false`; przed poprawką FAIL 2/4, po niej 5 maszyn × 4/4.
+- Testy: nowy tests/test_start_collision.py, 1116 PASS; test_sim_engine::test_sample_programs_stock_lines pada przez plik bez ;@STOCK w config/sim/nc_files (poza zakresem).
+- Autokontrola, bez niezależnego przeglądu; ponowny odbiór A3 na stanowisku właściciela osobno.

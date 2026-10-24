@@ -11,4 +11,6 @@ steps:
   - {at: 0.05, action: move, X: 2, feed: 600}
 expect:
   - no_alarm: true
+  - event: {name: CRASH, present: false}
+  - event: {name: COVER_CRASH, present: false}
   - position: {axis: X, value: 2.0, tol: 0.05}

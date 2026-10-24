@@ -1678,13 +1678,14 @@
         "072",
         "082"
       ],
-      "status": "planned",
-      "progress": "Audyt konkursu 02 wykazał CRASH/COVER_CRASH mimo zielonego smoke.",
-      "remaining": [
-        "Dodać kryteria kolizji i uzyskać poprawny odbiór A3."
-      ],
+      "status": "done",
+      "progress": "Przyczyna: losowy start (seed 1) w router_atc_rack lądował wewnątrz magazynu. Start omija bryły kolizyjne (emulacja xorshift rdzenia C, zmiana tylko przy kolizji), a matrix_smoke wymaga braku CRASH i COVER_CRASH; macierz 5/5 po 4 kryteria, 1116 testów PASS.",
+      "remaining": [],
       "evidence": [
-        "prompts/konkurs-2026-10/raporty/02.md"
+        "prompts/konkurs-2026-10/raporty/02.md",
+        "tests/test_start_collision.py",
+        "plant/scenarios/matrix_smoke.yaml",
+        "plant/server/linumert_plant/build_machine.py"
       ]
     },
     {
