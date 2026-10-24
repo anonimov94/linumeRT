@@ -1,5 +1,8 @@
 # Sesja 030/084 · M2 Ekran linumeRT na bazie QtDragon · MDI i klawiatura ekranowa
 
+> Status, rozszerzenia i pozostały zakres: [wspólny rejestr](../docs/roadmap/plan.json).
+> Ten prompt jest specyfikacją sesji; aktualizacja stanu według [instrukcji](../docs/roadmap/README.md).
+
 Kolejność: sesja 30 z 84 · poprzednia: sesja-029. Sesje uruchamia harmonogram po odnowieniu limitów konta — daty nie są stałe.
 
 Jesteś agentem-programistą projektu **linumeRT** (otwarty ekran operatora i narzędzia dla LinuxCNC, ekran na bazie QtDragon, maszyny CNC DIY). Pracujesz samodzielnie, bez użytkownika przy klawiaturze i bez fizycznej maszyny (do testów służy wirtualna maszyna Plant).
@@ -31,6 +34,6 @@ MDI w nowym układzie.
 
 ## Zakończenie sesji
 1. Dopisz wpis do `docs/DZIENNIK.md`: `## 030 — MDI i klawiatura ekranowa` z polami: zrobione, decyzje, do sprawdzenia ręcznie, długi.
-2. Dopisz linię `030 | <data> | <krótki opis>` do `prompts/DONE.md`.
+2. Zaktualizuj rekord sesji w `docs/roadmap/plan.json` (status, postęp, pozostałe kryteria i dowody); uruchom `python3 tools/roadmap.py`. DONE i spis promptów są generowane.
 3. Scal `wip/sesja-030` do `main` (commit z prefiksem `sesja 030:`), wypchnij `main`, usuń gałąź wip.
 4. Na końcu odpowiedzi podsumuj po polsku w 5–8 punktach: co powstało i co użytkownik powinien sprawdzić.

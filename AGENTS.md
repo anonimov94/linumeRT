@@ -5,6 +5,9 @@ Punkt wejścia każdej sesji: [`docs/PROMPT_NOWEJ_SESJI.md`](docs/PROMPT_NOWEJ_S
 `docs/NASTEPNA_SESJA.md` (czyja tura, stan, zadania) → `docs/DECYZJE.md` → ostatnie wpisy `docs/DZIENNIK.md`
 → prompt sesji z `prompts/`.
 
+Statusy i wspólny plan: `docs/roadmap/plan.json`; `prompts/DONE.md`, spis promptów i roadmapa HTML
+są generowane przez `python3 tools/roadmap.py`, bez ręcznego dopisywania.
+
 Skrót (szczegóły w `WSPOLPRACA_MODELI.md`):
 - Claude i Codex pracują na zmianę: linia `Tura:` w `NASTEPNA_SESJA.md` i `prompts/LOCK`. Praca równoległa
   tylko wyjątkowo, w osobnych checkoutach i z blokadami zasobów (D28, D30). Od D31 cały zakres prowadzi Claude.

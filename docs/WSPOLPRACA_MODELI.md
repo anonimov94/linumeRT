@@ -5,6 +5,20 @@ Model-Author: Claude · 2026-10-18. **Jedyne źródło zasad współpracy.** `AG
 osobny commit + wpis w `docs/DECYZJE.md` (sekcja decyzji właściciela). Powód wersji 2: limity tokenów często przerywają
 sesje, więc pracujemy małymi krokami, z częstym pushem i jawnym przekazaniem tury.
 
+## Aktualizacja właściciela — wspólna roadmapa 2026-10-24 (ma pierwszeństwo)
+
+Jedyne źródło statusów, powiązań zadań i pozostałego zakresu to `docs/roadmap/plan.json`.
+Pierwotne 001–084 i M0–M6 pozostają; późniejsze plany są rozszerzeniami przypisanymi
+przez `parents` do tych sesji. Specyfikacje/prompt opisują wymagania, dziennik i raporty
+zachowują dowody, `NASTEPNA_SESJA.md` służy przekazaniu oraz środowisku.
+Po każdym kroku aktualizuj właściwy rekord i generuj widoki `python3 tools/roadmap.py`.
+Nie dopisuj ręcznie do DONE ani tabel statusów w starych planach; `make lint` pilnuje zgodności.
+Wybór pracy: najniższa nieukończona sesja z uwzględnieniem rozszerzeń i zależności,
+chyba że bieżące polecenie właściciela wskazuje inny zakres. Ukończona część ani
+rozszerzenie nie zamykają całej sesji, bramki lub odbioru sprzętu.
+Polecenie to zastępuje starsze instrukcje dopisywania do DONE i prowadzenia osobnych planów.
+Model-Author: Codex.
+
 ## Aktualizacja właściciela — bieżące zlecenie 2026-10-20 (ma pierwszeństwo)
 
 Codex kontynuuje HMI w osobnym checkoutcie i nie zakłada globalnej blokady `prompts/LOCK`

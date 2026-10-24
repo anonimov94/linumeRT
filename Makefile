@@ -9,6 +9,7 @@ install:
 	$(PYTHON) -m pip install $(PIP_FLAGS) -e ".[dev]"
 
 lint:
+	$(PYTHON) tools/roadmap.py --check
 	$(PYTHON) -m ruff check .
 
 # Testy i pokrycie wymagań REQ (sesja 024, REQ-QA-01).

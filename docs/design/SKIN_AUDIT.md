@@ -1,6 +1,12 @@
 # SKIN-00 — audyt i kolejność wdrożenia
 
-Model-Author: Codex · 2026-10-23. Gałąź robocza, bez scalania na polecenie właściciela.
+> Specyfikacja i historia realizacji; nie jest osobnym harmonogramem.
+> Bieżący status, pozostały zakres i powiązania (SKIN-00…06 i kroki podglądu):
+> [wspólna roadmapa](../roadmap/PLAN.md), [rejestr](../roadmap/plan.json).
+> Niższe datowane opisy stanu są zapisem historycznym; status aktualizuj wyłącznie w rejestrze.
+
+Model-Author: Codex · 2026-10-23. Poniższe wpisy zachowują kontekst historycznych etapów;
+bieżące zasady scalania są w `docs/WSPOLPRACA_MODELI.md`.
 Źródło: `SKIN_SYSTEM_ROADMAP.md` z gałęzi design, commit 32e8691.
 
 ## Granice obecnej prezentacji

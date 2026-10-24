@@ -1,5 +1,8 @@
 # Konkurs 2 — odbiór stanowiska i kwalifikacja
 
+> Specyfikacja historycznego kroku konkursowego. Status i powiązania z pierwotnymi
+> sesjami: [wspólny rejestr](../../docs/roadmap/plan.json).
+
 Model-Author: Codex · 2026-10-23
 
 ## Cel

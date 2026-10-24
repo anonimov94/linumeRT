@@ -455,3 +455,12 @@ Wyłącznie dowody testów programowych; bez pomiarów fizycznego stanowiska.
 `docs/raporty/odbior-2026-10-23-ci.tar.gz`: pełny log i metadane własnego przebiegu
 GitHub Actions 40001235761 dla ffb7037, Codex, 2026-10-23, GPL-2.0-or-later;
 manifest SHA-256, bez binariów LinuxCNC i bez nowych zależności.
+
+## Wspólna roadmapa — 2026-10-24
+
+`tools/roadmap.py`, `tests/test_roadmap.py`, `docs/roadmap/plan.json`,
+`docs/roadmap/template.html`, `docs/roadmap/README.md` i generowane widoki:
+własne opracowanie Codex na polecenie właściciela, GPL-2.0-or-later.
+Źródła danych: pierwotny plan z commita `796c6a2`, prompty, dziennik i raporty repozytorium;
+bez zasobów zewnętrznych i nowych zależności runtime. Zastępują dawny HTML
+z osadzonymi makietami; makiety źródłowe w `docs/design/makiety/` pozostają zachowane.
