@@ -1,7 +1,7 @@
 <!-- Generowane przez python3 tools/roadmap.py; edytuj docs/roadmap/plan.json. -->
 # Ukończone zakresy — widok rejestru
 
-Pierwotny plan: **84 sesje M0–M6**, commit `796c6a2`. Stan na 2026-10-24: planowane: 18; w toku: 0; częściowe: 35; do odbioru: 0; ukończone: 31.
+Pierwotny plan: **84 sesje M0–M6**, commit `796c6a2`. Stan na 2026-10-24: planowane: 18; w toku: 0; częściowe: 35; do odbioru: 0; ukończone: 31; zablokowane: 0.
 
 Zakończenie części implementacji nie oznacza odbioru całej funkcji ani sprzętu.
 
@@ -58,6 +58,7 @@ KONKURS-02 | PR #94 scalony: procedura i dowody; odbiór A3 FAIL OD-01, T1–T7 
 KONKURS-03 | PR #95 scalony: odrzucanie NaN/inf; real mapping i geometria ATC nadal otwarte.
 KONKURS-04 | PR #96 scalony: odczyt NML; nie kończy SKIN-02/04…06.
 ISO-INTEGRATION | PR #97 scalony: integracja menu/launchera i walidacja budowy bez publikacji.
+ROADMAP-UNIFICATION | PR #99: jeden rejestr, generowane widoki, kontrola CI, instrukcje i migracja historii; lokalne testy i odbiór DOM PASS. Wynik CI i SHA w PR.
 
 ## Korekty historycznego rejestru
 

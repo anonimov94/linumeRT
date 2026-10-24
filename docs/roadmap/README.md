@@ -24,7 +24,8 @@ nie każda poprawka musi tworzyć nowe zadanie.
    sesje nadrzędne i odsyłacz do specyfikacji/promptu. Numeracji 001–084 nie zmieniaj.
 3. `done` oznacza ukończony zakres danego rekordu z dowodami. `partial` oznacza
    działającą część i otwarte kryteria, `in_progress` aktywną pracę, `acceptance`
-   oczekiwanie na odbiór, `planned` brak potwierdzonej realizacji.
+   oczekiwanie na odbiór, `planned` brak potwierdzonej realizacji, a `blocked`
+   jawną blokadę z przyczyną i warunkiem odblokowania w `remaining`.
    Ukończone rozszerzenie nie zamyka automatycznie sesji nadrzędnej ani bramki.
 4. Uruchom `python3 tools/roadmap.py`, a następnie `python3 tools/roadmap.py --check`.
    Generator aktualizuje [pełny plan](PLAN.md), [HTML](index.html),

@@ -11,7 +11,8 @@
       "in_progress": "w toku",
       "partial": "częściowe",
       "acceptance": "do odbioru",
-      "done": "ukończone"
+      "done": "ukończone",
+      "blocked": "zablokowane"
     },
     "completion": "done oznacza ukończony zakres danego wiersza; ukończone rozszerzenie nie zamyka automatycznie sesji nadrzędnej ani bramki.",
     "selection": "Wybierz najniższe nieukończone ID 001–084, uwzględniając rozszerzenia, zależności i jawne bieżące polecenie właściciela.",
@@ -1723,15 +1724,14 @@
         "001",
         "084"
       ],
-      "status": "in_progress",
-      "progress": "Rejestr i generator wdrożone; instrukcje oraz kontrole w PR.",
-      "remaining": [
-        "Zakończyć walidację i scalić PR z instrukcjami pracy."
-      ],
+      "status": "done",
+      "progress": "PR #99: jeden rejestr, generowane widoki, kontrola CI, instrukcje i migracja historii; lokalne testy i odbiór DOM PASS. Wynik CI i SHA w PR.",
+      "remaining": [],
       "evidence": [
         "docs/roadmap/README.md",
         "tools/roadmap.py",
-        "tests/test_roadmap.py"
+        "tests/test_roadmap.py",
+        "https://github.com/anonimov94/linumeRT/pull/99"
       ]
     }
   ]

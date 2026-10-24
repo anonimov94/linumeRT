@@ -914,5 +914,6 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
 - `plan.json` → generator → spis promptów, DONE, pełny plan i HTML; brak statusów w localStorage.
 - Zachowano numerację, aliasy i historyczne dowody; 007/048 skorygowano na częściowe.
 - Instrukcje sesji korzystają z rejestru; dawne plany są specyfikacjami/historią, przekazanie odchudzono.
-- Krok 1: lint i 19 testów generatora/IP PASS; pełne wyniki i SHA w PR #99.
+- Lokalnie: lint, 1071 pytest PASS (88 skip bez GUI), REQ 21/22 bez błędów; odbiór DOM PASS.
+- Końcowy generator/IP: 20 testów PASS; pełne CI i SHA w PR #99 (LinuxCNC/Plant osobno).
 - Autokontrola, bez niezależnego przeglądu. Bez zmiany funkcji CNC i odbioru sprzętowego.

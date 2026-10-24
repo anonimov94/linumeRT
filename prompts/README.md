@@ -1,11 +1,25 @@
 <!-- Generowane przez python3 tools/roadmap.py; edytuj docs/roadmap/plan.json. -->
 # Prompty i wspólna roadmapa linumeRT
 
-Pierwotny plan: **84 sesje M0–M6**, commit `796c6a2`. Stan na 2026-10-24: planowane: 18; w toku: 0; częściowe: 35; do odbioru: 0; ukończone: 31.
+Pierwotny plan: **84 sesje M0–M6**, commit `796c6a2`. Stan na 2026-10-24: planowane: 18; w toku: 0; częściowe: 35; do odbioru: 0; ukończone: 31; zablokowane: 0.
 
 Zakończenie części implementacji nie oznacza odbioru całej funkcji ani sprzętu.
 
 Jedyne źródło statusów, powiązań i pozostałej pracy: [plan.json](../docs/roadmap/plan.json). Zasady aktualizacji: [instrukcja roadmapy](../docs/roadmap/README.md). Szczegóły i dowody: [PLAN.md](../docs/roadmap/PLAN.md); [widok HTML](../docs/roadmap/index.html).
+
+## Kamienie pierwotnego planu
+
+| Kamień | Cel | Kryterium bramki (cel, nie wynik odbioru) |
+|---|---|---|
+| M0 — Fundament, prawo, środowisko | Repozytorium, CI, wytyczne IP i rejestr pochodzenia, budowa LinuxCNC w środowisku agenta, kopia bazowa QtDragon, rdzeń z atrapą. | G0: CI zielone; ekran `linumert` (kopia QtDragon) startuje w LinuxCNC sim; wynik spike'a budowania LinuxCNC zapisany. |
+| M1 — Wirtualna obrabiarka Plant | Osobna VM symulująca fizyczną obrabiarkę: biblioteka kopiowalnych, parametryzowanych napędów wirtualnych; konfigurowalna kinematyka, liczba osi, przejazdy, zderzaki, krańcówki, ograniczenia programowe i strefy zakazane, magazyn narzędzi z położeniem i pozycjami wymiany, bazowanie po rozruchu (krańcówka, indeks, twardy zderzak, enkoder absolutny, bazowanie w napędzie); dynamika z bezwładnością i ograniczeniem przyspieszenia; panel z edytorem i awariami. | G1: LinuxCNC (VM-A) bazuje każdą metodą i wykonuje program na Plant (VM-B); wszystkie REQ-VD/VM/QA z WIRTUALNA_OBRABIARKA.md mają zielone testy (check_requirements.py). |
+| M2 — Ekran linumeRT na bazie QtDragon | Własny system projektowy i kompozycja ekranu, tryby, JOG/MPG, MDI, AUTO, narzędzia, zerowanie i sonda, zmiana narzędzia, alarmy, role, PL/EN. | G2: prototyp v0.1 przechodzi zestaw scenariuszy operatora na Plant; przegląd podobieństwa ekranów wykonany. |
+| M3 — Programowanie dialogowe | Format .lnx, generatory cykli, panel dialogowy z podglądem 2D, biblioteka podprogramów o-word, integracja z plikami QtDragon. | G3: program z 5 krokami generuje .ngc, który wykonuje się na Plant bez alarmów; czasy i błędy nadążania w raporcie. |
+| M4 — Symulacja i kolizje | Ścieżka, czas obróbki, przygotówka, materiał 2.5D, reguły kolizji lite, widok 3D 30 FPS, raport; walidacja czasu względem Plant. | G4: szacowany czas różni się od czasu na Plant o ≤ 10 %; K-301/K-302 wykrywane na plikach testowych. |
+| M5 — Konfiguracja maszyn hobbystów | machine.yaml → INI/HAL dla sim, Plant, step/dir, EtherCAT, VFD; 4/5 osi; ATC; kreator; diagnostyka napędów; asystent strojenia na Plant. | G5: 5 przykładowych maszyn działa na Plant (w tym 5 osi i ATC); konfiguracje sprzętowe oznaczone jako niezweryfikowane. |
+| M6 — Wtyczki, instalator, alfa | Wtyczki deklaratywne, instalator dla Debiana 12 + LinuxCNC 2.9, dokumentacja, przegląd IP przed wydaniem, regresja na Plant, wydanie alfa. | G6: instalacja na czystej VM, pełna regresja scenariuszy zielona, lista kontrolna IP §9 wypełniona, nazwa linumeRT sprawdzona w rejestrach. |
+
+## Sesje 001–084
 
 | ID | Kamień | Zakres | Stan |
 |---|---|---|---|
@@ -133,4 +147,4 @@ Nie są kolejnym harmonogramem. Ich status dotyczy tylko wskazanego kroku.
 | OD-01 | 024, 066, 072, 082 | Macierz Plant nie może przechodzić z nieoczekiwaną kolizją | planowane |
 | EDITOR-VALIDATION | 044, 047 | Walidacja bieżącej treści i wyszukiwanie | w toku |
 | LEGACY-RUNTIME | 017, 025, 026, 070, 077, 082 | Diagnostyka uruchomień z dawnych promptów startowych | częściowe |
-| ROADMAP-UNIFICATION | 001, 084 | Jeden rejestr planu i migracja statusów | w toku |
+| ROADMAP-UNIFICATION | 001, 084 | Jeden rejestr planu i migracja statusów | ukończone |

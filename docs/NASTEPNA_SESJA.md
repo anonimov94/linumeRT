@@ -1,6 +1,6 @@
 # Przekazanie i środowisko
 
-Tura: Codex · 2026-10-24 · stan: w toku; ujednolicenie roadmapy w osobnym checkoutcie.
+Tura: Codex · 2026-10-24 · stan: oddana; ujednolicenie roadmapy w PR #99.
 
 Model-Author: Codex. Bez globalnego LOCK; zasady współpracy wyłącznie w
 [WSPOLPRACA_MODELI.md](WSPOLPRACA_MODELI.md).
@@ -13,11 +13,14 @@ Jedyny rejestr statusów, pozostałego zakresu i powiązań:
 Nie utrzymuj tu drugiej listy statusów. Dobór sesji i rozszerzeń według rejestru
 oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj automatycznie.
 
-## Stan zatrzymania
+## Przekazanie
 
-- Krok 1: rejestr, generator i widoki wypchnięte (`52617b8`); lint i 19 testów PASS.
-- Następny krok tej zmiany: instrukcje, migracja dawnych planów, pełne kontrole i PR.
-- Odrębny PR edytora #98: zakres `EDITOR-VALIDATION`; nie zmieniano jego gałęzi.
+Zmiany roadmapy: PR #99, gałąź `codex/unified-roadmap`, osobny checkout
+`/tmp/linumert-unified-roadmap`. Końcowy SHA, kontrole CI i scalenie sprawdzaj w
+[PR #99](https://github.com/anonimov94/linumeRT/pull/99).
+Kolejny zakres wybierz z rejestru zgodnie z bieżącym poleceniem właściciela.
+Odrębny PR edytora #98 ma rekord `EDITOR-VALIDATION`; jego gałęzi nie zmieniano.
+Przy jego scalaniu zaktualizuj rejestr i wygeneruj widoki zamiast dopisywać DONE.
 
 ## Środowisko i odbiór
 

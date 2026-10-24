@@ -34,11 +34,13 @@ def validate(plan: dict, root: Path) -> None:
     if milestones != [f'M{n}' for n in range(7)]:
         raise ValueError('Wymagane kamienie M0–M6')
     labels = plan['policy']['status_labels']
-    if set(labels) != {'planned', 'in_progress', 'partial', 'acceptance', 'done'}:
+    if set(labels) != {'planned', 'in_progress', 'partial', 'acceptance', 'done', 'blocked'}:
         raise ValueError('Niepoprawny słownik statusów')
     for row in rows:
         if row['status'] not in labels or not row['progress'].strip():
             raise ValueError(f"Niepoprawny status/opis: {row['id']}")
+        if row['status'] in {'partial', 'acceptance', 'blocked'} and not row['remaining']:
+            raise ValueError(f"Brak otwartych kryteriów/blokady: {row['id']}")
         if row in sessions:
             if row['milestone'] not in milestones:
                 raise ValueError(f"Nieznany kamień: {row['id']}")
@@ -73,7 +75,13 @@ def summary(plan: dict) -> str:
 
 
 def table(plan: dict, base: str, *, detailed: bool = False) -> str:
-    lines = ['| ID | Kamień | Zakres | Stan |', '|---|---|---|---|']
+    lines = ['## Kamienie pierwotnego planu', '',
+             '| Kamień | Cel | Kryterium bramki (cel, nie wynik odbioru) |', '|---|---|---|']
+    for milestone in plan['milestones']:
+        lines.append(f"| {milestone['id']} — {milestone['name']} | {milestone['goal']} "
+                     f"| {milestone['gate']} |")
+    lines += ['', '## Sesje 001–084', '',
+              '| ID | Kamień | Zakres | Stan |', '|---|---|---|---|']
     labels = plan['policy']['status_labels']
     for row in plan['sessions']:
         title = f"[{row['title']}]({os.path.relpath(row['prompt'], base)})"

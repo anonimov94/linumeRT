@@ -29,7 +29,7 @@ def test_public_views_match_registry_and_current_prompts(plan):
 
 
 @pytest.mark.parametrize(
-    'mutation', ['missing_session', 'duplicate_alias', 'orphan', 'no_evidence']
+    'mutation', ['missing_session', 'duplicate_alias', 'orphan', 'no_evidence', 'empty_blocker']
 )
 def test_invalid_registry_is_rejected(plan, mutation):
     if mutation == 'missing_session':
@@ -38,8 +38,11 @@ def test_invalid_registry_is_rejected(plan, mutation):
         plan['extensions'][0]['aliases'] = ['001']
     elif mutation == 'orphan':
         plan['extensions'][0]['parents'] = ['999']
-    else:
+    elif mutation == 'no_evidence':
         plan['sessions'][0]['evidence'] = []
+    else:
+        plan['sessions'][0]['status'] = 'blocked'
+        plan['sessions'][0]['remaining'] = []
     with pytest.raises(ValueError):
         roadmap.validate(plan, ROOT)
 
