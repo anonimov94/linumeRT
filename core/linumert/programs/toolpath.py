@@ -210,6 +210,10 @@ class PreviewCanon:
     NIEZWERYFIKOWANE z prawdziwym interpreterem w środowisku autora.
     """
 
+    # gcodemodule czyta ten atrybut jako tekst (bez pliku parametrów: ""); bez niego
+    # __getattr__ zwraca funkcję i parse() kończy się TypeError.
+    parameter_file = ""
+
     def __init__(self, axis_mask: int = 0x7):
         self.moves: list[Move] = []
         self.notes: list[str] = []

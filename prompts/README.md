@@ -1,7 +1,7 @@
 <!-- Generowane przez python3 tools/roadmap.py; edytuj docs/roadmap/plan.json. -->
 # Prompty i wspólna roadmapa linumeRT
 
-Pierwotny plan: **84 sesje M0–M6**, commit `796c6a2`. Stan na 2026-10-24: planowane: 17; w toku: 0; częściowe: 34; do odbioru: 0; ukończone: 33; zablokowane: 0.
+Pierwotny plan: **84 sesje M0–M6**, commit `796c6a2`. Stan na 2026-10-24: planowane: 17; w toku: 0; częściowe: 33; do odbioru: 0; ukończone: 34; zablokowane: 0.
 
 Zakończenie części implementacji nie oznacza odbioru całej funkcji ani sprzętu.
 
@@ -73,7 +73,7 @@ Jedyne źródło statusów, powiązań i pozostałej pracy: [plan.json](../docs/
 | 048 | M3 | [Biblioteka podprogramów o-word](sesja-048.md) | częściowe |
 | 049 | M3 | [Test technologiczny na Plant](sesja-049.md) | częściowe |
 | 050 | M3 | [Bufor i bramka G3 (prototyp v0.2)](sesja-050.md) | planowane |
-| 051 | M4 | [Ścieżka z programu](sesja-051.md) | częściowe |
+| 051 | M4 | [Ścieżka z programu](sesja-051.md) | ukończone |
 | 052 | M4 | [Proces symulacji](sesja-052.md) | częściowe |
 | 053 | M4 | [Czas obróbki i porównanie z Plant](sesja-053.md) | częściowe |
 | 054 | M4 | [Przygotówka](sesja-054.md) | ukończone |

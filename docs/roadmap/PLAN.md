@@ -1,7 +1,7 @@
 <!-- Generowane przez python3 tools/roadmap.py; edytuj docs/roadmap/plan.json. -->
 # Wspólny plan linumeRT
 
-Pierwotny plan: **84 sesje M0–M6**, commit `796c6a2`. Stan na 2026-10-24: planowane: 17; w toku: 0; częściowe: 34; do odbioru: 0; ukończone: 33; zablokowane: 0.
+Pierwotny plan: **84 sesje M0–M6**, commit `796c6a2`. Stan na 2026-10-24: planowane: 17; w toku: 0; częściowe: 33; do odbioru: 0; ukończone: 34; zablokowane: 0.
 
 Zakończenie części implementacji nie oznacza odbioru całej funkcji ani sprzętu.
 
@@ -71,7 +71,7 @@ Zakończenie części implementacji nie oznacza odbioru całej funkcji ani sprz�
 | 048 | M3 | [Biblioteka podprogramów o-word](../../prompts/sesja-048.md) | częściowe |
 | 049 | M3 | [Test technologiczny na Plant](../../prompts/sesja-049.md) | częściowe |
 | 050 | M3 | [Bufor i bramka G3 (prototyp v0.2)](../../prompts/sesja-050.md) | planowane |
-| 051 | M4 | [Ścieżka z programu](../../prompts/sesja-051.md) | częściowe |
+| 051 | M4 | [Ścieżka z programu](../../prompts/sesja-051.md) | ukończone |
 | 052 | M4 | [Proces symulacji](../../prompts/sesja-052.md) | częściowe |
 | 053 | M4 | [Czas obróbki i porównanie z Plant](../../prompts/sesja-053.md) | częściowe |
 | 054 | M4 | [Przygotówka](../../prompts/sesja-054.md) | ukończone |
@@ -494,11 +494,11 @@ Bramka automatyczna: `open`; odbiór stanowiska osobno.
 
 ### 051 — Ścieżka z programu
 
-**częściowe**. Działa ścieżka rs274 i pomiar na żywo.
+**ukończone**. simulation/linumert_sim/path.py: MoveList (start/end float32, line/tool int32, kind int8, feed float32), łuki G17/G18/G19 z linią śrubową na cięciwach z błędem ≤ 0,01 mm, PathCanon dla gcode.parse oraz zapasowy interpreter podzbioru (G0–G3, IJK/R, G20/21, G90/91, G90.1/91.1, T/M6, G81/82/83/73 z G98/G99) z notatkami zamiast zgadywania. 10 programów golden z M3; z LinuxCNC 2.9 (RIP) 9 programów bez korekcji zgodnych z rs274 co do linii, końców i długości. Naprawiony brak canon.parameter_file (TypeError w gcode.parse, także w core load_ngc).
 
-Pozostaje: Rozliczyć MoveList, canon, łuki i pełną macierz 10 programów.
+Pozostaje: Podłączenie MoveList do procesu symulacji i widoku 3D (052/057). Korekcja G41/G42 i o-word call tylko przez rs274 (podzbiór zapisuje notatkę).
 
-Źródła: [docs/DZIENNIK.md](../DZIENNIK.md), [prompts/sesja-051.md](../../prompts/sesja-051.md).
+Źródła: [simulation/linumert_sim/path.py](../../simulation/linumert_sim/path.py), [tests/test_sim_path.py](../../tests/test_sim_path.py), [tests/test_toolpath.py](../../tests/test_toolpath.py), [docs/DZIENNIK.md](../DZIENNIK.md), [prompts/sesja-051.md](../../prompts/sesja-051.md).
 
 ### 052 — Proces symulacji
 
