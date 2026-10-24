@@ -755,12 +755,16 @@
       "milestone": "M4",
       "title": "Ścieżka z programu",
       "prompt": "prompts/sesja-051.md",
-      "status": "partial",
-      "progress": "Działa ścieżka rs274 i pomiar na żywo.",
+      "status": "done",
+      "progress": "simulation/linumert_sim/path.py: MoveList (start/end float32, line/tool int32, kind int8, feed float32), łuki G17/G18/G19 z linią śrubową na cięciwach z błędem ≤ 0,01 mm, PathCanon dla gcode.parse oraz zapasowy interpreter podzbioru (G0–G3, IJK/R, G20/21, G90/91, G90.1/91.1, T/M6, G81/82/83/73 z G98/G99) z notatkami zamiast zgadywania. 10 programów golden z M3; z LinuxCNC 2.9 (RIP) 9 programów bez korekcji zgodnych z rs274 co do linii, końców i długości. Naprawiony brak canon.parameter_file (TypeError w gcode.parse, także w core load_ngc).",
       "remaining": [
-        "Rozliczyć MoveList, canon, łuki i pełną macierz 10 programów."
+        "Podłączenie MoveList do procesu symulacji i widoku 3D (052/057).",
+        "Korekcja G41/G42 i o-word call tylko przez rs274 (podzbiór zapisuje notatkę)."
       ],
       "evidence": [
+        "simulation/linumert_sim/path.py",
+        "tests/test_sim_path.py",
+        "tests/test_toolpath.py",
         "docs/DZIENNIK.md"
       ]
     },

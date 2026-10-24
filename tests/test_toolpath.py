@@ -112,3 +112,14 @@ def test_demo_program_matches_file_and_has_distinct_zones():
     assert lo == pytest.approx((-20, -20, -14)) and hi[2] == pytest.approx(25)
     t = tp.seconds(6000)
     assert t[-1] > 60 and np.all(np.diff(t) >= 0)
+
+
+@pytest.mark.linuxcnc
+def test_load_ngc_with_linuxcnc_interpreter():
+    """gcodemodule czyta canon.parameter_file jako tekst (sesja 051: wcześniej TypeError)."""
+    pytest.importorskip("gcode")
+    from linumert.programs.toolpath import load_ngc
+
+    path = Path(__file__).parent / "golden" / "pocket_helix.ngc"
+    tp = load_ngc(path)
+    assert len(tp) > 5 and tp.length > 0

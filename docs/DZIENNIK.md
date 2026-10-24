@@ -1085,6 +1085,18 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
 - **Do sprawdzenia ręcznie:** kontur z korekcją na Plant; czopy przy realnym marginesie przygotówki.
   Model-Author: Claude. NIEZWERYFIKOWANE NA SPRZĘCIE.
 
+## 051 — Ścieżka z programu · 2026-10-24 · Claude
+- **Zrobione:** `simulation/linumert_sim/path.py`: `MoveList` w tablicach (float32/int32/int8), `PathCanon` dla
+  `gcode.parse`, `SubsetInterpreter` dla CI (G0–G3 w G17/G18/G19, IJK/R, linia śrubowa, G20/21, G90/91, G90.1/91.1,
+  T/M6, G81/G82/G83/G73 z G98/G99 i Q); łuki na cięciwach z błędem ≤ 0,01 mm; `load_path(prefer=auto|rs274|subset)`.
+  Nieobsługiwane (o-word call, G41/G42, G28/G30/G53, G5.1…) → notatka, ruch pominięty.
+- **Błąd znaleziony przy okazji:** canon bez atrybutu `parameter_file` → `gcode.parse` kończył się TypeError
+  (gcodemodule czyta go jako tekst). Dotyczyło też `core/linumert/programs/toolpath.py` (`load_ngc`, Classic × Neon).
+- **Testy:** 10 programów golden (M3): ciągłość, końce linii, posuwy, błąd cięciwy; R krótki/długi, płaszczyzny,
+  pełny okrąg, G91/G20, cykle; z LinuxCNC 2.9 RIP: 9 programów bez korekcji = rs274 (linie, końce, długości).
+- **Decyzje:** współrzędne programu bez G5x/G92 (jak podgląd LinuxCNC); start podzbioru 0,0,0.
+- **Długi:** podłączenie do procesu symulacji/widoku (052/057). Model-Author: Claude. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
 ## 048 — Biblioteka podprogramów o-word (domknięcie) · 2026-10-24 · Claude
 - **Zrobione:** `o<lrt_pocket_rect>`, `o<lrt_pocket_circle>`, `o<lrt_slot_linear>` (NgcGui) — ruch jak generatory
   pocket_rect v2 / pocket_circle v2 (wejście pionowe, bez naddatków) i slot_linear v1; fragmenty o-word kieszeni
