@@ -46,6 +46,16 @@ class Violation:
                 f"{kind} limit {self.limit:.3f} mm{more}")
 
 
+@dataclass(frozen=True)
+class LimitReport:
+    violations: list[Violation]
+    cuts_without_tlo: bool = False   # ruch roboczy przy nieaktywnej korekcie długości (G49)
+
+    @property
+    def ok(self) -> bool:
+        return not self.violations
+
+
 def limits_from_ini(path: Path | str) -> dict[str, tuple[float, float]]:
     ini = configparser.ConfigParser(strict=False, interpolation=None)
     if not ini.read(path, encoding="utf-8"):
@@ -83,7 +93,12 @@ def _floats(args: str) -> list[float]:
 
 
 def check_canon(text: str, limits: dict[str, tuple[float, float]]) -> list[Violation]:
+    return analyze_canon(text, limits).violations
+
+
+def analyze_canon(text: str, limits: dict[str, tuple[float, float]]) -> LimitReport:
     """Pierwsze przekroczenie każdej osi i strony limitu; `count` liczy wszystkie ruchy."""
+    cuts_without_tlo = False
     found: list[Violation] = []
     seen: dict[tuple[str, str], int] = {}
     scale = 1.0
@@ -113,6 +128,8 @@ def check_canon(text: str, limits: dict[str, tuple[float, float]]) -> list[Viola
             pos = tuple(_floats(args)[:3])
         else:
             continue
+        if name != "STRAIGHT_TRAVERSE" and not any(tlo):
+            cuts_without_tlo = True
         for i, (axis, value) in enumerate(zip(AXES, pos, strict=False)):
             if axis not in limits:
                 continue
@@ -126,7 +143,7 @@ def check_canon(text: str, limits: dict[str, tuple[float, float]]) -> list[Viola
                 elif bad:
                     first = found[seen[key]]
                     found[seen[key]] = dataclasses.replace(first, count=first.count + 1)
-    return found
+    return LimitReport(found, cuts_without_tlo)
 
 
 _N_WORD = re.compile(r"^\s*[Nn]\d+\s*")
@@ -144,6 +161,11 @@ def number_lines(text: str) -> str:
 
 def check_ngc(ngc: Path | str, ini: Path | str, var: Path | str | None = None,
               root: Path | str | None = None, timeout: float = 20.0) -> list[Violation]:
+    return analyze_ngc(ngc, ini, var, root, timeout).violations
+
+
+def analyze_ngc(ngc: Path | str, ini: Path | str, var: Path | str | None = None,
+                root: Path | str | None = None, timeout: float = 20.0) -> LimitReport:
     """Uruchamia rs274 (z kopią parametrów `var`) i porównuje ścieżkę z limitami INI."""
     limits = limits_from_ini(ini)
     units = _linear_units(ini)
@@ -163,4 +185,4 @@ def check_ngc(ngc: Path | str, ini: Path | str, var: Path | str | None = None,
     if run.returncode or "PROGRAM_END()" not in run.stdout:
         raise ValueError("interpreter nie doszedł do końca programu: "
                          + (run.stderr or run.stdout)[-300:])
-    return check_canon(run.stdout, limits)
+    return analyze_canon(run.stdout, limits)

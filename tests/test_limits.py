@@ -4,7 +4,13 @@ import os
 from pathlib import Path
 
 import pytest
-from linumert.programs.limits import check_canon, check_ngc, limits_from_ini, number_lines
+from linumert.programs.limits import (
+    analyze_canon,
+    check_canon,
+    check_ngc,
+    limits_from_ini,
+    number_lines,
+)
 
 ROOT = Path(__file__).resolve().parents[1]
 SIM_INI = ROOT / "config/sim/linumert_xyz/linumert_xyz.ini"
@@ -38,6 +44,15 @@ def test_g54_offset_and_tool_length_are_added():
     got = check_canon(canon, LIM)
     assert [(v.line, v.value, v.side, v.count) for v in got] == [(10, -130.0, "min", 2)]
     assert "i 1 kolejnych" in got[0].message()
+
+
+def test_cutting_without_tool_length_offset_is_flagged():
+    cut = _canon("STRAIGHT_TRAVERSE(0, 0, 20.0, 0, 0, 0)", "STRAIGHT_FEED(5, 0, -1.0, 0, 0, 0)")
+    assert analyze_canon(cut, LIM).cuts_without_tlo
+    with_tlo = _canon("USE_TOOL_LENGTH_OFFSET(0, 0, 80.0, 0, 0, 0, 0, 0, 0)",
+                      "STRAIGHT_FEED(5, 0, -100.0, 0, 0, 0)")
+    assert not analyze_canon(with_tlo, LIM).cuts_without_tlo
+    assert analyze_canon(_canon("STRAIGHT_TRAVERSE(0, 0, -5.0, 0, 0, 0)"), LIM).ok
 
 
 def test_inches_are_converted():

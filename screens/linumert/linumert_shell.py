@@ -33,6 +33,7 @@ import linumert_shell_pages as pages
 from linumert_homing_page import HomingPage
 from linumert_program_page import ProgramPage
 from linumert_offsets_page import OffsetsPage
+from linumert_preflight import Preflight
 import linumert_sim_page as sim_page
 
 try:  # baza narzędzi wymaga rdzenia linumert (pyyaml); bez niego obszar = tabela QtDragon
@@ -174,6 +175,7 @@ class LinumertShell(QtCore.QObject):
         lay.setContentsMargins(0, 0, 0, 0)
         lay.addWidget(classic)
         self.stack.addWidget(classic_page)
+        self.preflight = Preflight(parent=self)
         self.diag = pages.DiagPage(self)
         self.production = pages.ProductionPage(self)
         self.start = pages.StartPage(self)
@@ -624,6 +626,8 @@ class LinumertShell(QtCore.QObject):
             self.program_lines = []
         self.s.total_lines = len(self.program_lines)
         self.refresh()
+        if self.s.file and hasattr(self, "preflight"):
+            self.preflight.request(self.s.file)
 
     def _positions(self, _w, absolute, relative, dtg, _joints) -> None:
         self.positions = (relative, absolute, dtg)
@@ -642,10 +646,27 @@ class LinumertShell(QtCore.QObject):
     def cycle_start(self) -> None:
         if not self._allowed("start"):
             return
+        if not self._confirm_limits():
+            return
         ACTION.RUN(0)
         if hasattr(self.h, "start_timer"):
             self.h.start_timer()
         self.h.add_status(f"Start programu {os.path.basename(self.s.file)}")
+
+    def _confirm_limits(self) -> bool:
+        bad = self.preflight.violations(self.s.file) if hasattr(self, "preflight") else []
+        if not bad:
+            return True
+        more = "\n".join(v.message() for v in bad[:4])
+        answer = QtWidgets.QMessageBox.question(
+            QtWidgets.QApplication.activeWindow(), "Program wyjdzie poza limity osi",
+            f"{more}\n\nLinuxCNC zatrzyma maszynę w trakcie obróbki. Poprawiono układ detalu "
+            "albo program? Uruchomić mimo to?",
+            QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No, QtWidgets.QMessageBox.No)
+        if answer != QtWidgets.QMessageBox.Yes:
+            self.h.add_status("Start anulowany: program poza limitami osi")
+            return False
+        return True
 
     def home_all(self) -> None:
         if self._allowed("home"):

@@ -999,3 +999,11 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
 - GUI: „Kreator zera detalu…” w Zero detalu: widok z góry, klik punktu, narożnik i wierzch przygotówki na stole w G53, pobranie pozycji narzędzia jako zera, kontrola zakresów osi z INI.
 - Zmiana punktu zera nie rusza przygotówki (przelicza zero); przesunięcie narożnika przesuwa przygotówkę. Wynik trafia do formularza, G5x zapisuje osobny przycisk.
 - Testy: 65 PASS (rdzeń + GUI w Debianie 12), zrzut build/kreator/kreator.png. Do sprawdzenia na pulpicie.
+
+## LIMITS-PREFLIGHT — automatyczna kontrola po wczytaniu programu — 2026-10-24 · Claude
+- Model-Author: Claude. Polecenie właściciela: zachowanie jak w sprzęcie przemysłowym.
+- Przyczyna komunikatów K-301/302/303/305 w CSV: program z G49 (bez G43) przy narzędziu T2 o długości 80 mm; symulator liczy czubek jako oś − 80 mm, więc czubek wchodzi w materiał i stół.
+- Po wczytaniu programu ekran sprawdza go w tle (rs274 + parametry układów, jednostki INI); wynik na stronie Produkcja; „Cykl start” pyta, gdy program wyjdzie poza limity osi (domyślnie Nie).
+- Ostrzeżenie informacyjne, gdy program tnie przy nieaktywnej korekcie długości (G49). Nic nie blokuje sterownika; ekran nie jest funkcją bezpieczeństwa.
+- Raport grupuje powtórzenia (jeden wiersz + licznik); kreator zera wyraźnie oznacza wynik poza zakresem osi.
+- Testy: 54 PASS w Debianie (GUI + rdzeń); do sprawdzenia na pulpicie. Poza zakresem: automatyczne G43 po M6 (remap).

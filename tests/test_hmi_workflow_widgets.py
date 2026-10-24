@@ -980,3 +980,51 @@ def test_zero_detalu_wizard_fills_form_without_machine_commands(page_env, monkey
     assert [*page.build_spec().bounds()[0], *page.build_spec().bounds()[1]] == pytest.approx(before)
     assert "Kreator ustawił" in page.message.text() and not action.mock_calls
     page.close()
+
+
+def test_preflight_checks_in_background_and_blocks_only_current_file(page_env, tmp_path,
+                                                                     monkeypatch):
+    import time
+
+    from linumert.programs.limits import LimitReport, Violation
+
+    importlib.import_module("linumert_shell_model")
+    module = importlib.import_module("linumert_preflight")
+    ini = Path(__file__).resolve().parents[1] / "config/sim/linumert_xyz/linumert_xyz.ini"
+    monkeypatch.setenv("INI_FILE_NAME", str(ini))
+    program = tmp_path / "p.ngc"
+    program.write_text("G0 Z20\nM2\n")
+
+    def fake(path, ini_path, var):
+        time.sleep(0.05)
+        return LimitReport([Violation(3, "Z", -130.0, -120.0, "min", 4)], True)
+
+    preflight = module.Preflight(analyze=fake)
+    seen = []
+    preflight.changed.connect(lambda: seen.append(preflight.text))
+    preflight.request(str(program))
+    assert "sprawdzanie" in preflight.text and preflight.violations(str(program)) == []
+    deadline = time.time() + 5
+    while preflight._job is not None and time.time() < deadline:
+        preflight.poll()
+        time.sleep(0.02)
+    assert "UWAGA" in preflight.text and "linia 3" in preflight.text
+    assert preflight.violations(str(program))[0].count == 4
+    program.write_text("G0 Z20\nM2\n(zmiana)\n")  # zmieniony plik: stary wynik nie blokuje
+    assert preflight.violations(str(program)) == []
+    shell_module = importlib.import_module("linumert_shell")
+    box = Mock()
+    fake_shell = SimpleNamespace(preflight=preflight, s=SimpleNamespace(file=str(program)),
+                                 h=Mock(), _confirm_limits=None)
+    preflight.report = LimitReport([Violation(3, "Z", -130.0, -120.0, "min")])
+    preflight._key = preflight._key_for(str(program), str(ini),
+                                        __import__("linumert.programs.limits", fromlist=["x"])
+                                        .parameter_file(str(ini)))
+    with patch.object(shell_module.QtWidgets.QMessageBox, "question",
+                      return_value=shell_module.QtWidgets.QMessageBox.No) as ask:
+        assert not shell_module.LinumertShell._confirm_limits(fake_shell)
+        assert ask.called and "Start anulowany" in fake_shell.h.add_status.call_args[0][0]
+    with patch.object(shell_module.QtWidgets.QMessageBox, "question",
+                      return_value=shell_module.QtWidgets.QMessageBox.Yes):
+        assert shell_module.LinumertShell._confirm_limits(fake_shell)
+    del box

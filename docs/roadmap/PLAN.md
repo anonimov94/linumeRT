@@ -979,11 +979,11 @@ Pozostaje: 10× testy Plant z LinuxCNC: 1 z 10 przebiegów PASS (13/13), reszta 
 
 ### LIMITS-PREFLIGHT — Kontrola limitów osi przed startem programu
 
-**częściowe**. Przycisk 'Sprawdź limity osi' w edytorze G-code: rs274 z kopią parametrów (G54/G92, korekta długości, jednostki z INI) porównuje punkty końcowe ruchów z MIN/MAX_LIMIT; wynik w tle, lista linii z przeskokiem do edytora. Odtworzony błąd z G54 Z=-150 (linia 3, Z=-130) na rzeczywistym rs274; 7 testów + test GUI.
+**częściowe**. Przycisk 'Sprawdź limity osi' w edytorze G-code: rs274 z kopią parametrów (G54/G92, korekta długości, jednostki z INI) porównuje punkty końcowe ruchów z MIN/MAX_LIMIT; wynik w tle, lista linii z przeskokiem do edytora. Odtworzony błąd z G54 Z=-150 (linia 3, Z=-130) na rzeczywistym rs274; 7 testów + test GUI. Kontrola jest teraz automatyczna: po wczytaniu programu ekran sprawdza go w tle (limity osi, G5x/G92, korekta długości), pokazuje wynik na stronie Produkcja i pyta przed 'Cykl start', gdy program wyjdzie poza limity; informuje też o cięciu bez korekty długości (G49).
 
-Pozostaje: Łuki między punktami końcowymi, obrót XY i limity osi obrotowych nie są sprawdzane. Wywołanie kontroli automatycznie przy wczytaniu programu do AUTO oraz odbiór na pulpicie właściciela.
+Pozostaje: Łuki między punktami końcowymi, obrót XY i limity osi obrotowych nie są sprawdzane. Automatyczne G43 po M6 (remap) i poprawne G43 w programie Facing z QtDragon (kod upstream) — osobna decyzja. Odbiór na pulpicie właściciela.
 
-Źródła: [core/linumert/programs/limits.py](../../core/linumert/programs/limits.py), [tests/test_limits.py](../../tests/test_limits.py), [tests/test_hmi_workflow_widgets.py](../../tests/test_hmi_workflow_widgets.py), [screens/linumert/linumert_program_editor.py](../../screens/linumert/linumert_program_editor.py).
+Źródła: [core/linumert/programs/limits.py](../../core/linumert/programs/limits.py), [tests/test_limits.py](../../tests/test_limits.py), [tests/test_hmi_workflow_widgets.py](../../tests/test_hmi_workflow_widgets.py), [screens/linumert/linumert_program_editor.py](../../screens/linumert/linumert_program_editor.py), [screens/linumert/linumert_preflight.py](../../screens/linumert/linumert_preflight.py), [screens/linumert/linumert_shell.py](../../screens/linumert/linumert_shell.py).
 
 ### ORIGIN-WIZARD — Kreator zera detalu na przygotówce
 
