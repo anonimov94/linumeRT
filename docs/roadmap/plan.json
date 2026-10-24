@@ -1278,10 +1278,13 @@
         "031"
       ],
       "status": "done",
-      "progress": "PR #62: external offsets, zachowanie modalności i testy sim/Plant PASS.",
+      "progress": "PR #62: external offsets, zachowanie modalności i testy sim/Plant PASS. PR #102: poprawka zależności QtVCP i test pełnego HMI (pauza, podgląd, raport, rzeczywiste wycofanie Z 2 mm/powrót/wznowienie), Debian PASS.",
       "remaining": [],
       "evidence": [
-        "docs/raporty/prototypy/PLAN-21-27-2026-10-21.md"
+        "docs/raporty/prototypy/PLAN-21-27-2026-10-21.md",
+        "docs/raporty/HMI_PAUSE_RUNTIME_2026-10-24.md",
+        "tests/test_hmi_runtime_linuxcnc.py",
+        "https://github.com/anonimov94/linumeRT/pull/102"
       ]
     },
     {
@@ -1291,13 +1294,14 @@
         "031"
       ],
       "status": "partial",
-      "progress": "Geometria i diagnostyczny podgląd istnieją.",
+      "progress": "Geometria i diagnostyczny podgląd istnieją. Awaria otwierania podglądu w systemowym Pythonie QtVCP naprawiona w PR #102; nie dodaje wykonania helisy.",
       "remaining": [
         "Wykonanie po Abort/E-STOP/wymianie narzędzia i pełny odbiór; podgląd nie wykonuje ruchu."
       ],
       "evidence": [
         "docs/design/WZNOWIENIE.md",
-        "docs/raporty/prototypy/PLAN-21-27-2026-10-21.md"
+        "docs/raporty/prototypy/PLAN-21-27-2026-10-21.md",
+        "docs/raporty/HMI_PAUSE_RUNTIME_2026-10-24.md"
       ]
     },
     {

@@ -1,6 +1,6 @@
 # Przekazanie i środowisko
 
-Tura: Codex · 2026-10-24 · stan: oddana; domknięcie gałęzi w PR #98 i #101, wyniki/scalenia w PR.
+Tura: Codex · 2026-10-24 · stan: oddana; poprawka awarii podglądu D38 w PR #102, odbiór pełnego HMI PASS.
 
 Model-Author: Codex. Bez globalnego LOCK; zasady współpracy wyłącznie w
 [WSPOLPRACA_MODELI.md](WSPOLPRACA_MODELI.md).
@@ -14,6 +14,14 @@ Nie utrzymuj tu drugiej listy statusów. Dobór sesji i rozszerzeń według reje
 oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj automatycznie.
 
 ## Przekazanie
+
+Bieżąca naprawa zgłoszenia właściciela: [PR #102](https://github.com/anonimov94/linumeRT/pull/102),
+`codex/hmi-pause-runtime`, checkout `/tmp/linumert-hmi-pause-runtime`.
+Pierwszy krok `a21a3bb` wypchnięty: zależności venv widoczne w systemowym QtVCP,
+Preview2D niezależny od Cyklów. Test rzeczywistego HMI przeszedł 15 kroków pauzy,
+podglądu, raportu, wycofania Z o 2 mm, powrotu i wznowienia; pełne CI/SHA w PR.
+Raport i granice: [HMI_PAUSE_RUNTIME_2026-10-24.md](raporty/HMI_PAUSE_RUNTIME_2026-10-24.md).
+Po scaleniu uruchomić poprawiony starter dla operatora; pozostały zakres D38-B nadal w rejestrze.
 
 Lekcja dla następnych sesji AI: [zasada powrotu do pierwotnych założeń i kolejności](WSPOLPRACA_MODELI.md).
 Zapis instrukcji: [PR #100](https://github.com/anonimov94/linumeRT/pull/100),

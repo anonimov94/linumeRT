@@ -43,7 +43,7 @@ Ukończone pierwotne sesje: **31 z 84**.
 
 ## Ukończone rozszerzenia (nie zamykają automatycznie sesji)
 
-D38-A | PR #62: external offsets, zachowanie modalności i testy sim/Plant PASS.
+D38-A | PR #62: external offsets, zachowanie modalności i testy sim/Plant PASS. PR #102: poprawka zależności QtVCP i test pełnego HMI (pauza, podgląd, raport, rzeczywiste wycofanie Z 2 mm/powrót/wznowienie), Debian PASS.
 PLAN-21-22 | Rampa/helisa, geometria i wykańczanie; #58, odbiór automatyczny PASS.
 PLAN-23 | PR #59: odbiór automatyczny wskazanego kroku PASS.
 PLAN-24 | PR #60: odbiór podglądu PASS; wykonanie pozostaje w D38-B.
