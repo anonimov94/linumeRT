@@ -925,3 +925,18 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
 - Prompt startowy i Savoir-vivre AI przypominają lekcję; bez nowej listy statusów i zmian funkcji CNC.
 - Walidacja: roadmapa i lint PASS; 1072 pytest PASS, 88 skip, REQ 21/22 bez błędów; PR #100.
 - Tylko dokumentacja; autokontrola, bez niezależnego przeglądu, scalanie według §5 WSPOLPRACA_MODELI.
+
+## Edytor G-code — walidacja i wyszukiwanie · 2026-10-24 · Codex
+- Model-Author: Codex. Roadmapa 044/HMI-04: kontrola niezapisanej treści w Program → Edytuj kopię.
+- Lista błędów z przejściem do linii/kolumny (także Unicode); edycja unieważnia wynik.
+- Wyszukiwanie dosłowne, zamiana pojedyncza/wszystkich, jedna operacja Cofnij; limit wyniku 256 KiB.
+- 10 testów Qt PASS, ruff i kontrola wymagań PASS; zrzut build/editor-preview.png.
+- Szerszy zestaw Windows ujawnił ograniczenia lokalizacji, kodowania i dowiązań; odbiór LinuxCNC przez CI.
+- Kontrola składni do 64 KiB nie jest kontrolą semantyki/ruchu. Bez nowych zależności produkcyjnych.
+
+## Domknięcie edytora PR #98 — 2026-10-24 · Codex
+- Model-Author: Codex. Polecenie właściciela: dokończyć wszystkie rozpoczęte gałęzie i scalić.
+- 044/047, EDITOR-VALIDATION: zachowano walidację, wyszukiwanie i Undo; integracja z nowym rejestrem.
+- Zachowano obie historie dziennika/provenance; przekazanie korzysta z bieżącego dokumentu main.
+- Debian 12/Qt: 60 testów zakresu PASS; rzeczywisty dialog zapisany w build/editor-closeout/.
+- Pełne kontrole i SHA w PR #98; autokontrola, bez niezależnego przeglądu.

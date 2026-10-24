@@ -464,3 +464,9 @@ własne opracowanie Codex na polecenie właściciela, GPL-2.0-or-later.
 Źródła danych: pierwotny plan z commita `796c6a2`, prompty, dziennik i raporty repozytorium;
 bez zasobów zewnętrznych i nowych zależności runtime. Zastępują dawny HTML
 z osadzonymi makietami; makiety źródłowe w `docs/design/makiety/` pozostają zachowane.
+
+Edytor G-code: kontrola bieżącej treści, wyszukiwanie/zamiana i testy Qt.
+Autor: projekt linumeRT / Codex, 2026-10-24, GPL-2.0-or-later, własny kod
+w screens/linumert/linumert_program_editor.py oraz tests/test_hmi_workflow_widgets.py.
+Bez nowych bibliotek i zasobów produkcyjnych. Lokalny zrzut build/editor-preview.png
+korzysta z fontu systemowego wyłącznie do odbioru, bez jego redystrybucji.

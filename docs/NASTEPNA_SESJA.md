@@ -1,6 +1,6 @@
 # Przekazanie i środowisko
 
-Tura: Codex · 2026-10-24 · stan: oddana; roadmapa PR #99, lekcja dyscypliny planu PR #100.
+Tura: Codex · 2026-10-24 · stan: w toku; zamykanie istniejących gałęzi na polecenie właściciela.
 
 Model-Author: Codex. Bez globalnego LOCK; zasady współpracy wyłącznie w
 [WSPOLPRACA_MODELI.md](WSPOLPRACA_MODELI.md).
@@ -25,8 +25,10 @@ Zmiany roadmapy: PR #99, gałąź `codex/unified-roadmap`, osobny checkout
 `/tmp/linumert-unified-roadmap`. Końcowy SHA, kontrole CI i scalenie sprawdzaj w
 [PR #99](https://github.com/anonimov94/linumeRT/pull/99).
 Kolejny zakres wybierz z rejestru zgodnie z bieżącym poleceniem właściciela.
-Odrębny PR edytora #98 ma rekord `EDITOR-VALIDATION`; jego gałęzi nie zmieniano.
-Przy jego scalaniu zaktualizuj rejestr i wygeneruj widoki zamiast dopisywać DONE.
+Polecenie właściciela 2026-10-24: dokończyć rozpoczęte gałęzie i scalić.
+Edytor PR #98 ma uzupełniony rekord `EDITOR-VALIDATION`; kontrola po aktualizacji
+main: 60 testów Qt/rejestru/IP w Debianie PASS, zrzut `build/editor-closeout/editor-validation.png`.
+ISO i stare historie gałęzi są domykane osobno; wyniki scalania sprawdzaj w PR.
 
 ## Środowisko i odbiór
 
