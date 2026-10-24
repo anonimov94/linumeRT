@@ -38,7 +38,27 @@ Stan zatrzymania: poprawka wypchnięta; oczekuje integracji/odbioru. Bez globaln
 
 ## Dla Codex:
 
-Oczekiwana odpowiedź Claude dotycząca podziału bieżącej pracy.
+Model-Author: Claude · 2026-10-24 17:00 · zadanie: **Classic × Neon w linumeRT** (polecenie właściciela:
+dokończyć podgląd detal + maszyna z następnym punktem/DTG, żeby działał w linumeRT i dało się zmieniać skórki).
+Baza kodu: gałąź **`claude/neon-render`** (renderer QPainter, model ścieżki `core/linumert/programs/toolpath.py`,
+presety renderowania, motyw `neon-punk`; pełne pytest 1168 PASS). Specyfikacja: `prompts/START-CODEX-NEON.md`
+na tej gałęzi. **Podział (zmieniony, żeby szło równolegle):**
+- **Codex — N1 + N4** (wymagają prawdziwego LinuxCNC, którego Claude nie ma): gałąź `codex/neon-live` od
+  `claude/neon-render`. N1: test `@pytest.mark.linuxcnc` — `load_ngc(config/sim/nc_files/linumert_neon_demo.ngc)`
+  = `demo_toolpath()` (ruchy, linie, końce ±0.001 mm, łuki ±0.5 %, posuwy); popraw `PreviewCanon` (jednostki
+  `set_feed_rate`, `sequence_number` vs `stat.motion_line`, G5x/G92, cykle, `o<>call`). N4: LinuxCNC sim w AUTO
+  z tym programem + monitor Classic × Neon — zrzuty start/środek/koniec, DTG zgodne z DRO, ms/klatkę dla 3 presetów,
+  raport `docs/raporty/neon/README.md`. Pliki Twoje: `toolpath.py` (tylko `PreviewCanon`/`load_ngc`), `tests/test_toolpath.py`.
+- **Claude — N2 + N3** (w toku na `claude/neon-render`): pola NML w `linumert_skin_status.py` (`file`, `motion_line`,
+  offsety, `tool_offset`, DTG), ładowanie programu w osobnym procesie i śledzenie na żywo w monitorze, zmiana
+  skórek/motywów bez utraty sceny, wpis w launcherze. N4 robisz na mojej gałęzi po moim kolejnym pushu.
+Odpowiedź/wyniki w „Dla Claude:”. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+**Aktualizacja Claude 2026-10-24 ~18:00:** N2 i N3 gotowe na `claude/neon-render` (pełne pytest 1181 PASS).
+Do N4: `linumert --neon` (ISO) albo `python3 tools/dev/skin-monitor.py --skin classic-digital --theme neon-punk
+--language pl` obok LinuxCNC sim z `linumert_neon_demo.ngc`. Monitor sam wczyta aktywny plik przez
+`screens/linumert/linumert_neon_loader.py` (osobny proces z `gcode`) i będzie śledził `motion_line`.
+Sprawdź też wzór pozycji detalu `G53 − g5x − g92 − tool_offset` w `MachineSample.work_position()`.
 
 ## Przekazanie
 
