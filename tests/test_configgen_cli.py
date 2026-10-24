@@ -89,7 +89,7 @@ def test_generated_sim_config_runs_and_homes_in_linuxcnc(tmp_path):
         pytest.skip(f"działa inny LinuxCNC: {rip.leftovers()}")
     cfg_dir = tmp_path / "cfg"
     cfg_dir.mkdir()
-    opt = Options(hal_dir=str(ROOT / "hal"), program_prefix=str(ROOT / "config/sim/nc_files"),
+    opt = Options(hal_dir=str(ROOT / "config/hal"), program_prefix=str(ROOT / "config/sim/nc_files"),
                   tool_table=str(ROOT / "config/sim/linumert_xyz/tool.tbl"), postgui="",
                   subroutine_path=str(ROOT / "config/sim/linumert_xyz/macros"))
     cfg = load_machine(ROUTER)
