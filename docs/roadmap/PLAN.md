@@ -1,7 +1,7 @@
 <!-- Generowane przez python3 tools/roadmap.py; edytuj docs/roadmap/plan.json. -->
 # Wspólny plan linumeRT
 
-Pierwotny plan: **84 sesje M0–M6**, commit `796c6a2`. Stan na 2026-10-24: planowane: 18; w toku: 0; częściowe: 35; do odbioru: 0; ukończone: 31; zablokowane: 0.
+Pierwotny plan: **84 sesje M0–M6**, commit `796c6a2`. Stan na 2026-10-24: planowane: 18; w toku: 0; częściowe: 34; do odbioru: 0; ukończone: 32; zablokowane: 0.
 
 Zakończenie części implementacji nie oznacza odbioru całej funkcji ani sprzętu.
 
@@ -27,7 +27,7 @@ Zakończenie części implementacji nie oznacza odbioru całej funkcji ani sprz�
 | 004 | M0 | [Konfiguracja sim 3 osie z QtDragon](../../prompts/sesja-004.md) | ukończone |
 | 005 | M0 | [Kopia bazowa ekranu QtDragon](../../prompts/sesja-005.md) | ukończone |
 | 006 | M0 | [Rdzeń: model stanu maszyny i atrapa](../../prompts/sesja-006.md) | ukończone |
-| 007 | M0 | [Katalog alarmów i tłumaczenia](../../prompts/sesja-007.md) | częściowe |
+| 007 | M0 | [Katalog alarmów i tłumaczenia](../../prompts/sesja-007.md) | ukończone |
 | 008 | M0 | [Bufor i bramka G0](../../prompts/sesja-008.md) | ukończone |
 | 009 | M1 | [Specyfikacja wirtualnej maszyny Plant](../../prompts/sesja-009.md) | ukończone |
 | 010 | M1 | [Model obrabiarki machine.yaml (jedno źródło prawdy)](../../prompts/sesja-010.md) | ukończone |
@@ -190,11 +190,9 @@ Nie są kolejnym harmonogramem. Ich status dotyczy tylko wskazanego kroku.
 
 ### 007 — Katalog alarmów i tłumaczenia
 
-**częściowe**. Katalog alarmów i manager PL/EN gotowe.
+**ukończone**. 2026-10-24 | Katalog alarmów i manager PL/EN (2026-10-18) oraz mechanizm Qt: screens/linumert/linumert_i18n.py (translate(), .qm albo .ts bez lrelease, język z INI/env), screens/linumert/i18n/linumert_pl.ts, tools/i18n.sh (pylupdate5/lrelease), tools/i18n_check.py; pierwsze teksty przez translate(): panel alarmów; Claude
 
-Pozostaje: Brakuje pełnego mechanizmu Qt .ts/.qm i tools/i18n.sh; powiązane z 037.
-
-Źródła: [docs/DZIENNIK.md](../DZIENNIK.md), [prompts/sesja-007.md](../../prompts/sesja-007.md).
+Źródła: [docs/DZIENNIK.md](../DZIENNIK.md), [tests/test_alarms.py](../../tests/test_alarms.py), [tests/test_i18n.py](../../tests/test_i18n.py), [prompts/sesja-007.md](../../prompts/sesja-007.md).
 
 ### 008 — Bufor i bramka G0
 
@@ -394,7 +392,7 @@ Pozostaje: Pełne mapowanie kodów napędów/VFD i scenariusze alarmów z prompt
 
 ### 037 — Język polski i angielski
 
-**częściowe**. Katalog EN/PL prototypu skórek istnieje.
+**częściowe**. Katalog EN/PL prototypu skórek istnieje. Mechanizm .ts/translate() z sesji 007 gotowy (Claude, 2026-10-24).
 
 Pozostaje: Pełne tłumaczenie produkcyjnego HMI .ts/.qm, przełącznik i formaty jednostek; dług 007.
 

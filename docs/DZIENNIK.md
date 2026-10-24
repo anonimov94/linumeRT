@@ -1022,3 +1022,13 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
 - Kontrola limitów (`run_interpreter(machine_ini=…)`) wczytuje remapy i SUBROUTINE_PATH z INI maszyny, żeby nie zgłaszać fałszywego „bez korekty długości”.
 - Testy: 5 w tests/test_m6_remap.py (w tym rs274 z INI maszyny: T2 M6 → 80 mm, T0 M6 → 0), e2e `sim-e2e.sh` PASS (demo 306 s, 6 wymian, bez kolizji).
 - Nie obejmuje Facing z QtDragon (G49, bez M6) ani ATC. NIEZWERYFIKOWANE NA SPRZĘCIE; do sprawdzenia ręcznie wymiana M6 w oknie QtDragon.
+
+## 007 — Katalog alarmów i tłumaczenia (domknięcie) · 2026-10-24 · Claude
+- **Zrobione:** `linumert_i18n.py` (`translate()`, `TsTranslator` czyta `.ts` bez lrelease, `.qm` gdy jest,
+  język z env/INI, domyślnie PL), `i18n/linumert_pl.ts`, `tools/i18n.sh` (pylupdate5 + opcjonalnie lrelease),
+  `tools/i18n_check.py` (kompletność PL); powłoka HMI instaluje język przed budową widoków; panel alarmów
+  przez `translate()`. Katalog W/E/K/P i AlarmManager z 2026-10-18 bez zmian.
+- **Decyzje:** źródło EN + `.ts` PL, forma `translate()` (PROPOZYCJA w DECYZJE).
+- **Do sprawdzenia ręcznie:** HMI w LinuxCNC pokazuje polską podpowiedź Resetu; `LINUMERT_LANG=en` — angielską.
+- **Długi:** pozostałe napisy ekranu i skórek → sesja 037. Testy: pełne pytest 1230 PASS; ruff, REQ PASS.
+  Model-Author: Claude. Autokontrola. NIEZWERYFIKOWANE NA SPRZĘCIE.
