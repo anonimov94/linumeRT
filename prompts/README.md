@@ -150,3 +150,4 @@ Nie są kolejnym harmonogramem. Ich status dotyczy tylko wskazanego kroku.
 | ROADMAP-UNIFICATION | 001, 084 | Jeden rejestr planu i migracja statusów | ukończone |
 | LIMITS-PREFLIGHT | 031, 051 | Kontrola limitów osi przed startem programu | częściowe |
 | ORIGIN-WIZARD | 033, 054 | Kreator zera detalu na przygotówce | częściowe |
+| M6-G43 | 034, 066 | Automatyczna korekta długości narzędzia po M6 | częściowe |
