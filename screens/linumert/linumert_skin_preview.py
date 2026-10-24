@@ -28,6 +28,7 @@ class SkinPreview(QtWidgets.QMainWindow):
         self.preferences = preferences or PresentationPreferences()
         self.viewport_factory = viewport_factory
         self.viewports = {}
+        self.shared = {"owner": self}   # przeżywa zmianę skórki (scena ścieżki, profil renderu)
         self.setWindowTitle("linumeRT · GUI prototype")
         self.resize(1280, 800)
         central = QtWidgets.QWidget()
@@ -116,7 +117,7 @@ class SkinPreview(QtWidgets.QMainWindow):
             self.root.removeWidget(self.console)
             self.console.hide()
             self.console.deleteLater()
-        screen = SCREENS[p.skin](p, c, self.viewport_factory)
+        screen = SCREENS[p.skin](p, c, self.viewport_factory, self.shared)
         self.root.replaceWidget(old_workspace, screen)
         old_workspace.hide()
         old_workspace.deleteLater()

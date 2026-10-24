@@ -1022,3 +1022,34 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
 - Kontrola limitów (`run_interpreter(machine_ini=…)`) wczytuje remapy i SUBROUTINE_PATH z INI maszyny, żeby nie zgłaszać fałszywego „bez korekty długości”.
 - Testy: 5 w tests/test_m6_remap.py (w tym rs274 z INI maszyny: T2 M6 → 80 mm, T0 M6 → 0), e2e `sim-e2e.sh` PASS (demo 306 s, 6 wymian, bez kolizji).
 - Nie obejmuje Facing z QtDragon (G49, bez M6) ani ATC. NIEZWERYFIKOWANE NA SPRZĘCIE; do sprawdzenia ręcznie wymiana M6 w oknie QtDragon.
+
+## Classic × Neon — renderer detal + maszyna · 2026-10-24 · Claude
+- Model-Author: Claude. Gałąź `claude/neon-render` (worktree), polecenie właściciela: render jak w koncepcji HTML.
+- Rdzeń `programs/toolpath.py`: ruchy z liniami programu, łuki ARC_FEED, strefy START/KONIEC, DTG,
+  `locate(motion_line, pozycja)`; odbiornik `PreviewCanon` dla `gcode.parse` (bez LinuxCNC nietestowany z interpreterem).
+- `linumert_neon_view.py`: scena wspólna, widok detalu (śledzi narzędzie), widok maszyny, oś programu;
+  Classic używa go dla ról toolpath/machine, gdy host ma fabrykę widoków. Motyw `neon-punk`.
+- `tools/dev/neon-preview.py` (okno i `--png`), program `linumert_neon_demo.ngc`, koncepcja HTML w `docs/design/koncepcje/`.
+- Testy: 10 nowych (model + Qt offscreen), pełne pytest lokalnie (WSL, Python 3.11, bez LinuxCNC): 1143 PASS, 12 skip; ruff PASS.
+- Otwarte: podłączenie do `stat.motion_line`/`stat.file` w monitorze NML, test `PreviewCanon` z prawdziwym `gcode`.
+- Autokontrola, bez niezależnego przeglądu. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## Classic × Neon — sposoby renderowania · 2026-10-24 · Claude
+- Model-Author: Claude. Polecenie właściciela: ustawiany render z cieniowaniem dla detalu i maszyny, oszczędnie jak w grach.
+- `linumert_neon_render.py`: RenderSettings + 3 presety, profil QSettings (uszkodzony wpis → preset), regulator jakości,
+  cieniowanie Lamberta z cullingiem, cienie rzutowane, tekstura materiału warstwami Z z `StockMap`.
+- `linumert_neon_view.py`: menu ⚙ per widok, warstwy wypiekane/przesuwane, akumulacja wykonanych ruchów, strumieniowanie
+  następnych warstw, poświata/ślad w ½ rozdzielczości, polilinie zamiast QPainterPath (~10× szybciej dla półprzezroczystych).
+- Pomiar detalu: z 37 ms do 2,9–6,8 ms mediany; najgorsza klatka z 54 ms do ≤ 20 ms (3 mm/klatkę). Szczegóły w DECYZJE.
+- Testy: 10 nowych w `test_neon_render.py`; pełne pytest lokalnie: 1153 PASS, 12 skip; ruff i wymagania PASS.
+- Zrzuty presetów: `tools/dev/neon-preview.py --png … --preset …` (build/neon). Autokontrola. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## Classic × Neon — N2 + N3: monitor na żywo i zmiana skórek · 2026-10-24 · Claude
+- Model-Author: Claude. Podział z Codex: Claude N2+N3, Codex N1+N4 (prawdziwy LinuxCNC).
+- N2: próbka NML z `file`, `motion_line`, G5x/G92/narzędzie, `distance_to_go`, `dtg` (walidacja, mm);
+  `linumert_neon_loader.py` — `gcode.parse` w jednorazowym procesie (timeout 20 s, limit 64 MB);
+  monitor: nowy plik → wczytanie, linia + pozycja detalu → następny punkt, DTG z LinuxCNC; bez programu
+  uczciwy opis zamiast sceny demo. Przygotówka z `;@STOCK` (dowolne ORIGIN) albo z obrysu ruchów.
+- N3: scena w stanie hosta (`shared`) — zmiana skórki/motywu/języka nie gubi sceny ani materiału;
+  launcher ISO `linumert --neon` + skrót pulpitu. Uruchomienie z prawdziwym `gcode`: zadanie N4 Codex.
+- Testy: pełne pytest 1181 PASS, 12 skip; ruff, wymagania PASS. NIEZWERYFIKOWANE NA SPRZĘCIE.

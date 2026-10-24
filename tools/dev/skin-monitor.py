@@ -6,7 +6,9 @@ import argparse
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "screens/linumert"))
+ROOT = Path(__file__).resolve().parents[2]
+# Classic × Neon importuje model ścieżki z rdzenia i materiał z symulacji (bez instalacji pakietu).
+sys.path[:0] = [str(ROOT / "screens/linumert"), str(ROOT / "core"), str(ROOT / "simulation")]
 from linumert_skin_contract import (  # noqa: E402
     LANGUAGE_IDS,
     SKIN_IDS,
