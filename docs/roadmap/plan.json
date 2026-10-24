@@ -1759,9 +1759,9 @@
         "082"
       ],
       "status": "partial",
-      "progress": "Testy runtime i launchery rozwijano później; stare listy nie są nowym harmonogramem. 2026-10-24: przyczyna zrywania LRT-NET przy zakładkach panelu Plant znaleziona i usunięta (parsowanie biblioteki napędów w procesie Plant blokowało pętlę UDP przez GIL; teraz CSafeLoader, cache wg mtime, krótszy interwał GIL). Odtworzenie lokalne: przed poprawką RTT maks. 242 ms i 130 zgubionych ramek, po poprawce 11,9 ms i 0. Właściciel potwierdził na pulpicie (2026-10-24): przełączanie kart panelu Plant nie zrywa już łącza.",
+      "progress": "Testy runtime i launchery rozwijano później; stare listy nie są nowym harmonogramem. 2026-10-24: przyczyna zrywania LRT-NET przy zakładkach panelu Plant znaleziona i usunięta (parsowanie biblioteki napędów w procesie Plant blokowało pętlę UDP przez GIL; teraz CSafeLoader, cache wg mtime, krótszy interwał GIL). Odtworzenie lokalne: przed poprawką RTT maks. 242 ms i 130 zgubionych ramek, po poprawce 11,9 ms i 0. Właściciel potwierdził na pulpicie (2026-10-24): przełączanie kart panelu Plant nie zrywa już łącza. Odbiór WSL 2026-10-24: d643a97 7 przebiegów PASS, 8. FAIL (nadążanie X); aktualny 8b255cd 5 przebiegów PASS, 6. FAIL (KeyboardInterrupt podczas bazowania first_motion, rapid_vs_feed nieukończony). Dziesięć kolejnych przebiegów niezaliczone; raport M1_REPEAT_2026-10-24.md.",
       "remaining": [
-        "10× testy Plant z LinuxCNC: 1 z 10 przebiegów PASS (13/13), reszta do wykonania na wolnym pulpicie.",
+        "Ustalić przyczynę KeyboardInterrupt/bazowania first_motion i przerwania rapid_vs_feed; następnie ponowić wymaganą serię 10 kolejnych przebiegów PASS. Dotychczasowe serie WSL mają wynik FAIL.",
         "Zmierzyć najdłuższe zamrożenie GUI i heartbeat (50 000 linii G1), VirtualBox na docelowym stanowisku."
       ],
       "evidence": [
@@ -1769,7 +1769,9 @@
         "prompts/START-CODEX-LINUX.md",
         "tests/test_library_cache.py",
         "plant/server/linumert_plant/drive_library.py",
-        "plant/server/linumert_plant/serve.py"
+        "plant/server/linumert_plant/serve.py",
+        "docs/raporty/prototypy/M1_REPEAT_2026-10-24.md",
+        "docs/raporty/prototypy/M1_REPEAT_2026-10-24.json"
       ]
     },
     {

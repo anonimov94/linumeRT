@@ -1200,3 +1200,15 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
   `tools/lock.py acquire linuxcnc`.
 - **Decyzje:** PROPOZYCJA w DECYZJE (reguły generatora). **Do sprawdzenia ręcznie:** nazwy pinów Mesa na karcie.
 - **Długi:** EtherCAT (063), PWM/mb2hal wrzeciona (064), kreator (067). Model-Author: Claude. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## M1 — odbiór powtarzalności · 2026-10-24 · Codex
+- Model-Author: Codex. Wynik FAIL: d643a97 7 PASS/8. próba FAIL; 8b255cd 5 PASS/6. próba FAIL.
+- Stary: nadążanie X 0,3 mm > 0,2; nowy: KeyboardInterrupt przy bazowaniu i rapid_vs_feed nieukończony.
+- Raport i dane: docs/raporty/prototypy/M1_REPEAT_2026-10-24.md/.json. Nie zamknięto LEGACY-RUNTIME.
+- Blokada linuxcnc zwolniona. Następny krok: zachować pełne logi first_motion i ustalić przyczynę.
+
+
+## README — aktualny postęp sesji · 2026-10-24 · Codex
+- Zastąpiono statyczne 31/84 grafiką SVG generowaną z plan.json: obecnie 39/84 (46,4%).
+- Model-Author: Codex. Rozkład M0–M6 liczy sesje, bez deklarowania odbioru bramek.
+- Generator i --check obejmują grafikę; odnośniki Markdown są identyczne na Windows/Linux.

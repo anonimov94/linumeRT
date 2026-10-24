@@ -8,8 +8,9 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
+import posixpath
 from collections import Counter
+from html import escape
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -65,7 +66,7 @@ def validate(plan: dict, root: Path) -> None:
 def link(ref: str, base: str) -> str:
     if ref.startswith('https://'):
         return f'[PR]({ref})'
-    return f'[{ref}]({os.path.relpath(ref, base)})'
+    return f'[{ref}]({posixpath.relpath(ref, base)})'
 
 
 def summary(plan: dict) -> str:
@@ -84,7 +85,7 @@ def table(plan: dict, base: str, *, detailed: bool = False) -> str:
               '| ID | Kamień | Zakres | Stan |', '|---|---|---|---|']
     labels = plan['policy']['status_labels']
     for row in plan['sessions']:
-        title = f"[{row['title']}]({os.path.relpath(row['prompt'], base)})"
+        title = f"[{row['title']}]({posixpath.relpath(row['prompt'], base)})"
         lines.append(f"| {row['id']} | {row['milestone']} | {title} | {labels[row['status']]} |")
     lines += ['', '## Rozszerzenia włączone do pierwotnych sesji', '',
               'Nie są kolejnym harmonogramem. Ich status dotyczy tylko wskazanego kroku.', '',
@@ -107,6 +108,59 @@ def table(plan: dict, base: str, *, detailed: bool = False) -> str:
             if refs:
                 lines += ['Źródła: ' + ', '.join(link(ref, base) for ref in refs) + '.', '']
     return '\n'.join(lines) + '\n'
+
+
+def progress_svg(plan: dict) -> str:
+    """README chart: original sessions only, never infer acceptance from counts.
+
+    Palette follows docs/design/tokens.yaml (bg, panel, line, fg, fg2, teal).
+    Plain SVG keeps the GitHub view sharp without fonts, scripts or remote assets.
+    """
+    rows = plan['sessions']
+    counts = Counter(row['status'] for row in rows)
+    done, total = counts['done'], plan['original_count']
+    percent = f'{100 * done / total:.1f}'.replace('.', ',')
+    svg = ['<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="700" '
+           'viewBox="0 0 1200 700" role="img" aria-labelledby="title desc">',
+           f'<title id="title">linumeRT — ukończone sesje: {done}/{total}</title>',
+           '<desc id="desc">Postęp sesji M0–M6 z rejestru plan.json. '
+           'Licznik sesji nie oznacza zaliczenia bramek ani odbioru sprzętu.</desc>',
+           '<rect width="1200" height="700" rx="24" fill="#0a0c0f"/>',
+           '<g font-family="sans-serif" fill="#e8eef4">',
+           '<text x="56" y="55" fill="#2dd4bf" font-size="18" '
+           'letter-spacing="3">linumeRT / STAN PROJEKTU</text>',
+           '<text x="56" y="111" font-size="38" font-weight="700">'
+           'Ukończone sesje pierwotnego planu</text>',
+           f'<text x="56" y="195" font-size="64" font-weight="700">{done} / {total}</text>',
+           f'<text x="344" y="192" font-size="28" fill="#2dd4bf">{percent}%</text>',
+           f'<text x="1144" y="190" text-anchor="end" font-size="18" '
+           f'fill="#9aa7b4">Stan rejestru: {escape(plan["updated"])}</text>',
+           '<rect x="56" y="219" width="1088" height="10" rx="5" fill="#26303a"/>',
+           f'<rect x="56" y="219" width="{1088 * done / total:.2f}" height="10" '
+           'rx="5" fill="#2dd4bf"/>']
+    for index, milestone in enumerate(plan['milestones']):
+        group = [r for r in rows if r['milestone'] == milestone['id']]
+        n = sum(r['status'] == 'done' for r in group)
+        y = 270 + index * 45
+        width = 370 * n / len(group) if group else 0
+        svg += [f'<text x="56" y="{y}" font-size="18" font-weight="700">'
+                f'{escape(milestone["id"])}</text>',
+                f'<text x="108" y="{y}" font-size="17" fill="#9aa7b4">'
+                f'{escape(milestone["name"])}</text>',
+                f'<rect x="682" y="{y - 15}" width="370" height="14" '
+                'rx="7" fill="#26303a"/>',
+                f'<rect x="682" y="{y - 15}" width="{width:.2f}" height="14" '
+                'rx="7" fill="#2dd4bf"/>',
+                f'<text x="1144" y="{y}" text-anchor="end" font-size="18">'
+                f'{n} / {len(group)}</text>']
+    svg += ['<path d="M56 586 H1144" stroke="#26303a"/>',
+            f'<text x="56" y="620" font-size="18">Częściowe: {counts["partial"]} '
+            f' · W toku: {counts["in_progress"]} · Planowane: {counts["planned"]} '
+            f' · Do odbioru: {counts["acceptance"]} · Zablokowane: {counts["blocked"]}</text>',
+            '<text x="56" y="655" font-size="16" fill="#9aa7b4">'
+            'Ukończone sesje ≠ zaliczone bramki, odbiór pulpitu, RT lub sprzętu.</text>',
+            '</g></svg>']
+    return '\n'.join(svg) + '\n'
 
 
 def outputs(plan: dict, root: Path) -> dict[str, str]:
@@ -151,7 +205,8 @@ def outputs(plan: dict, root: Path) -> dict[str, str]:
         raise ValueError('Szablon wymaga dokładnie jednego znacznika danych')
     page = template.replace(MARKER, f'<script id="plan" type="application/json">{encoded}</script>')
     return {'prompts/README.md': readme, 'prompts/DONE.md': done,
-            'docs/roadmap/PLAN.md': detail, 'docs/roadmap/index.html': page}
+            'docs/roadmap/PLAN.md': detail, 'docs/roadmap/index.html': page,
+            'docs/raporty/postep-sesji.svg': progress_svg(plan)}
 
 
 def main() -> int:
