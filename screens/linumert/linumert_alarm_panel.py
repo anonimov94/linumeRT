@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
 """Trzy ostatnie alarmy i pojedynczy/podwójny Reset. Model-Author: Codex."""
+from linumert_i18n import translate
 from PyQt5 import QtCore, QtWidgets
 
 
@@ -20,8 +21,9 @@ class AlarmPanel(QtWidgets.QFrame):
             row.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Preferred)
             rows.addWidget(row)
         layout.addLayout(rows, 1)
-        self.reset = QtWidgets.QPushButton("Reset")
-        self.reset.setToolTip("Raz: skasuj ustąpione alarmy. Dwa razy: potwierdź także E-STOP.")
+        self.reset = QtWidgets.QPushButton(translate("AlarmPanel", "Reset"))
+        self.reset.setToolTip(translate(
+            "AlarmPanel", "Once: clear resolved alarms. Twice: also acknowledge E-STOP."))
         self.timer = QtCore.QTimer(self)
         self.timer.setSingleShot(True)
         self.timer.timeout.connect(lambda: shell.reset_alarms(False))

@@ -139,6 +139,12 @@ class LinumertShell(QtCore.QObject):
         self.s = model.ShellState(axes=tuple(a.upper() for a in INFO.AVAILABLE_AXES))
         ini = os.environ.get("INI_FILE_NAME") or getattr(INFO, "INIPATH", "")
         self.s.virtual = bool(ini and virtual_config(ini))
+        # Sesja 007: język ekranu przed budową widoków (teksty przez translate(), źródło EN).
+        from linumert_i18n import install as install_language
+        from linumert_i18n import language_from_ini
+
+        self.language = language_from_ini(ini)
+        install_language(self.language)
         self.virtual_session = VirtualSession(self)
         self.dro_view = "work"
         self.program_lines: list[str] = []
@@ -155,6 +161,10 @@ class LinumertShell(QtCore.QObject):
 
     # ---- budowa ---------------------------------------------------------------------------
     def install(self) -> LinumertShell:
+        # Sesja 027: fonty z tokens.yaml dołączone do ekranu (OFL), przed zastosowaniem QSS.
+        from linumert_fonts import register as register_fonts
+
+        self.fonts = register_fonts()
         classic = self.w.takeCentralWidget()
         root = QtWidgets.QWidget()
         root.setObjectName("lrtRoot")

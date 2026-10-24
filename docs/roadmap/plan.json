@@ -160,13 +160,13 @@
       "milestone": "M0",
       "title": "Katalog alarmów i tłumaczenia",
       "prompt": "prompts/sesja-007.md",
-      "status": "partial",
-      "progress": "Katalog alarmów i manager PL/EN gotowe.",
-      "remaining": [
-        "Brakuje pełnego mechanizmu Qt .ts/.qm i tools/i18n.sh; powiązane z 037."
-      ],
+      "status": "done",
+      "progress": "2026-10-24 | Katalog alarmów i manager PL/EN (2026-10-18) oraz mechanizm Qt: screens/linumert/linumert_i18n.py (translate(), .qm albo .ts bez lrelease, język z INI/env), screens/linumert/i18n/linumert_pl.ts, tools/i18n.sh (pylupdate5/lrelease), tools/i18n_check.py; pierwsze teksty przez translate(): panel alarmów; Claude",
+      "remaining": [],
       "evidence": [
-        "docs/DZIENNIK.md"
+        "docs/DZIENNIK.md",
+        "tests/test_alarms.py",
+        "tests/test_i18n.py"
       ],
       "historical_completion": "2026-10-18 | Katalog alarmów (56 kodów PL/EN) z walidacją, AlarmManager, 23 testy; tłumaczenia Qt (.ts, i18n.sh) odłożone do sesji ekranu; PR #6; Claude"
     },
@@ -428,13 +428,14 @@
       "milestone": "M2",
       "title": "Własny system projektowy ekranu",
       "prompt": "prompts/sesja-027.md",
-      "status": "partial",
-      "progress": "Tokeny, ikony i makiety istnieją; później dodano koncepcję skórek.",
-      "remaining": [
-        "Rozliczyć kryteria oryginalnego promptu oraz kontrakt nowych skórek."
-      ],
+      "status": "done",
+      "progress": "2026-10-24 | Rozliczenie promptu 027: tokens.yaml źródłem prawdy; QSS powłoki generowany z tokenów (linumert_shell_model.shell_qss, test kolorów/44 px) + tools/gen_qss.py do zrzutu; fonty IBM Plex Sans i JetBrains Mono (OFL) w screens/linumert/fonts, rejestrowane przy starcie ekranu i podglądu skórek; 31 ikon z wpisami PROVENANCE (test_ip_guard); skórki korzystają z kontraktu palet (linumert_skin_contract); Claude",
+      "remaining": [],
       "evidence": [
-        "docs/DZIENNIK.md"
+        "docs/DZIENNIK.md",
+        "tests/test_design_system.py",
+        "tests/test_hmi_shell_model.py",
+        "tests/test_ip_guard.py"
       ]
     },
     {
@@ -564,7 +565,7 @@
       "title": "Język polski i angielski",
       "prompt": "prompts/sesja-037.md",
       "status": "partial",
-      "progress": "Katalog EN/PL prototypu skórek istnieje.",
+      "progress": "Katalog EN/PL prototypu skórek istnieje. Mechanizm .ts/translate() z sesji 007 gotowy (Claude, 2026-10-24).",
       "remaining": [
         "Pełne tłumaczenie produkcyjnego HMI .ts/.qm, przełącznik i formaty jednostek; dług 007."
       ],
