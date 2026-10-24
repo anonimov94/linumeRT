@@ -44,7 +44,7 @@ Rozdzielić monolityczny QtDragon na dedykowane widoki operatora bez przepisywan
 6. Układ skalowalny dla 1280×768; duże cele dotykowe, klawiatura i czytelność alarmów.
 
 ## Etapy realizacji i odbiór
-- HMI-01: mapa widgetów i kontrakt sygnałów QtDragon; screenshot bazowy.
+- HMI-01: ukończona [mapa widgetów](HMI_WIDGET_MAP.md) i [kontrakt bazowy](HMI_BASELINE.md); istniejący zrzut G0 jako punkt odniesienia.
 - HMI-02: shell + nawigacja + Start/Bazowanie/Ręczne, bez regresji istniejących akcji.
 - HMI-03: Zero detalu/Narzędzia z potwierdzeniami i interlockami.
 - HMI-04: Programy/Edytor/Symulacja/Produkcja.
