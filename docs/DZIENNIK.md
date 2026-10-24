@@ -1183,6 +1183,23 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
 - Przed zmianą 3 warianty FAIL, po zmianie 4 warianty PASS (unittest, Windows).
 - Odbiór GUI/LinuxCNC i sprzętu nie został wykonany; NIEZWERYFIKOWANE NA SPRZĘCIE.
 
+## 062 — Generator INI/HAL: szablony, CLI, sprzęt step/dir · 2026-10-24 · Claude
+- **Zrobione:** `configgen.py` (cele `plant`, `sim`), `configgen_hw.py` (`hardware`: Mesa 7i96S/7i76E przez hm2_eth
+  i port równoległy z programowym stepgen i ostrzeżeniem o latencji; falownik hy_vfd; [SAFETY]), CLI
+  `linumert-config build` (`config_build.py`: podgląd diff, zapis z kopią zapasową z kroku 1 Codex, kody 0/1/2),
+  `hardware.inputs/outputs/step_dir/heartbeat_output/watchdog_monitor` w schemacie, przykład
+  `config/hardware/router_gantry_mesa.example.yaml`.
+- **Testy:** golden — `plant` dla mill_servo_table = ręczna konfiguracja Plant (INI klucz po kluczu, HAL instrukcja
+  po instrukcji); wszystkie 5 maszyn × plant/sim — kontrakt D05; CLI (podgląd, zapis, kopia, plik operatora,
+  odmowa złej maszyny); sprzęt: `deployment --hal-from-ini` PASS dla Mesa i LPT, odmowy bez E-STOP/heartbeat/
+  watchdog/krańcówki, EtherCAT → 063. **LinuxCNC 2.9 RIP:** wygenerowany `sim` bramy routera startuje, włącza się
+  i bazuje 4 jointy do HOME z generatora.
+- **Incydent:** pierwsze uruchomienie mojego testu LinuxCNC (23:17) zbiegło się z serią prób M1 Codex na tej samej
+  maszynie; `start_linuxcnc` sprząta procesy LinuxCNC użytkownika, więc najpewniej przerwałem jedną jego próbę
+  (zakończona 23:19 bez wyniku). Test pomija się teraz, gdy działa inny LinuxCNC; kolejne przebiegi pod
+  `tools/lock.py acquire linuxcnc`.
+- **Decyzje:** PROPOZYCJA w DECYZJE (reguły generatora). **Do sprawdzenia ręcznie:** nazwy pinów Mesa na karcie.
+- **Długi:** EtherCAT (063), PWM/mb2hal wrzeciona (064), kreator (067). Model-Author: Claude. NIEZWERYFIKOWANE NA SPRZĘCIE.
 
 ## M1 — odbiór powtarzalności · 2026-10-24 · Codex
 - Model-Author: Codex. Wynik FAIL: d643a97 7 PASS/8. próba FAIL; 8b255cd 5 PASS/6. próba FAIL.

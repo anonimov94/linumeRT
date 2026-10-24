@@ -6,6 +6,10 @@ Model stanu maszyny, atrapa maszyny do testow oraz model machine.yaml.
 |---|---|
 | `schema.py` | schemat Pydantic v2 `machine.yaml` (jedno źródło prawdy o maszynie, sesja 010) |
 | `validate.py` | reguły spójności (24 reguły; błędy po polsku) |
+| `configgen.py` | generator INI/HAL z machine.yaml: `plant` (lrt_net), `sim` (sesja 062) |
+| `configgen_hw.py` | wyjście `hardware`: step/dir Mesa 7i96S/7i76E i port równoległy, kontrakt bezpieczeństwa |
+| `config_build.py` | CLI `linumert-config build` (podgląd diff, zapis z kopią zapasową) |
+| `config_files.py` | kopia zapasowa i diff katalogu konfiguracji (Codex, krok 1 sesji 062) |
 
 Przykładowe maszyny: `config/machines/`. Opis: `docs/PLANT.md`.
 

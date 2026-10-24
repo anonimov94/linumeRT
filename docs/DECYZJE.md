@@ -255,3 +255,20 @@ merge b2ee924; generator M5 wyprzedza pozostałe otwarte kryteria wcześniejszyc
 kamieni, których status pozostaje bez zmian. Zależność 061 scalona w #125.
 Krok 1 zapewnia backup/diff; konfiguracje sprzętowe wymagają jawnego mapowania
 E-STOP i pełnego kontraktu bezpieczeństwa przed generowaniem HAL.
+
+## Sesja 062 — reguły generatora INI/HAL · 2026-10-24 · Claude · PROPOZYCJA
+
+Generator (`core/linumert/machine/configgen.py`) nie wprowadza nowych liczb poza tymi regułami:
+jointy = napędy osi w kolejności `drives:` bez wrzeciona (jak ramka LRT-NET); `HOME` = programowa
+granica po stronie bazy przesunięta 4 mm do środka; `HOME_OFFSET` = pozycja krańcówki wspólnej
+z bazą; brama: `HOME_SEQUENCE` ujemne; `FERROR` 2,0 / `MIN_FERROR` 0,5; `OFFSET_AV_RATIO` 0,2 dla Z
+(D38); bez `HOME_USE_INDEX` do czasu EtherCAT (063). Dla tych reguł wynik `plant` dla
+`mill_servo_table` jest instrukcja po instrukcji równy ręcznej konfiguracji
+`config/plant/linumert_plant_xyz` (test golden). Skala: Plant — model Plant, sprzęt —
+`drive_real.counts_per_unit` (ta sama mechanika szablonu). Wyjście `hardware`: monitor E-STOP
+wprost do `iocontrol.0.emc-enable-in`, reset fizyczny, grzyb HMI poza torem bezpieczeństwa,
+sygnał życia PC na zadeklarowane wyjście — wynik przechodzi `deployment --hal-from-ini`;
+generator odmawia bez pinu E-STOP, heartbeat lub monitora watchdoga. Piny fizyczne podaje
+`machine.yaml` (`hardware.inputs/outputs/step_dir`), generator ich nie zgaduje. Generator jest
+w rdzeniu i leniwie importuje `linumert_plant` (biblioteka szablonów napędów).
+NIEZWERYFIKOWANE NA SPRZĘCIE.

@@ -314,6 +314,17 @@ class Hardware(Strict):
     address: str | None = None                            # parport: 0x378; Mesa: adres IP
     channels: dict[str, int] = Field(min_length=1)
     spindle_device: str | None = None                     # port falownika, np. /dev/ttyUSB0
+    # Piny fizyczne HAL (sesja 062): wejście/wyjście z io.inputs/io.outputs → pin karty, np.
+    # parport.0.pin-10-in, hm2_7i96s.0.inm.00.input-00. Stan jak w Plant: 1 = obwód zamknięty.
+    # Wybór pinów należy do projektu maszyny; generator ich nie zgaduje.
+    inputs: dict[str, str] = {}
+    outputs: dict[str, str] = {}
+    step_dir: dict[str, tuple[int, int]] = {}             # parport: napęd → (pin step, pin dir)
+    base_period_ns: int = Field(default=25000, ge=5000, le=100000)  # parport: wątek impulsów
+    # Kontrakt bezpieczeństwa (docs/bezpieczenstwo, deployment.py): wyjście sygnału życia PC
+    # do zewnętrznego watchdoga i wejście jego potwierdzenia.
+    heartbeat_output: str | None = None
+    watchdog_monitor: str | None = None
 
     @model_validator(mode="after")
     def _board(self) -> Hardware:
