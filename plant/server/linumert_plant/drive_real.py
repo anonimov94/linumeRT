@@ -161,6 +161,16 @@ def counts_per_unit(params: dict[str, Any]) -> float:
     return counts / per_rev
 
 
+def joint_drives(cfg) -> list[tuple[Any, str]]:
+    """Jointy LinuxCNC = napędy osi w kolejności sekcji `drives:` bez wrzeciona.
+
+    Ta sama reguła co ramka LRT-NET i konfiguracja Plant (tests/test_plant_config.py), więc
+    numer jointu nie zależy od celu (plant, sim, hardware).
+    """
+    owner = {name: axis for axis in cfg.axes for name in axis.drives}
+    return [(owner[d.name], d.name) for d in cfg.drives if d.name in owner]
+
+
 def hardware_plan(cfg, drives: dict[str, Any]) -> list[dict[str, Any]]:
     """Plan sprzętu: każdy napęd osi i wrzeciono → sterownik, kanał, skala.
 
@@ -172,7 +182,7 @@ def hardware_plan(cfg, drives: dict[str, Any]) -> list[dict[str, Any]]:
         raise ValueError(["hardware: brak sekcji (wymagana dla target: hardware)"])
     errors: list[str] = []
     plan: list[dict[str, Any]] = []
-    for joint, (axis, name) in enumerate((a, n) for a in cfg.axes for n in a.drives):
+    for joint, (axis, name) in enumerate(joint_drives(cfg)):
         inst = drives[name]
         real = inst.params.get("real")
         entry = {"drive": name, "axis": axis.letter, "joint": joint,
