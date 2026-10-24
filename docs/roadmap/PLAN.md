@@ -1,7 +1,7 @@
 <!-- Generowane przez python3 tools/roadmap.py; edytuj docs/roadmap/plan.json. -->
 # Wspólny plan linumeRT
 
-Pierwotny plan: **84 sesje M0–M6**, commit `796c6a2`. Stan na 2026-10-24: planowane: 17; w toku: 0; częściowe: 29; do odbioru: 0; ukończone: 38; zablokowane: 0.
+Pierwotny plan: **84 sesje M0–M6**, commit `796c6a2`. Stan na 2026-10-24: planowane: 16; w toku: 0; częściowe: 29; do odbioru: 0; ukończone: 39; zablokowane: 0.
 
 Zakończenie części implementacji nie oznacza odbioru całej funkcji ani sprzętu.
 
@@ -56,7 +56,7 @@ Zakończenie części implementacji nie oznacza odbioru całej funkcji ani sprz�
 | 033 | M2 | [Zerowanie detalu i sonda](../../prompts/sesja-033.md) | częściowe |
 | 034 | M2 | [Ręczna zmiana narzędzia](../../prompts/sesja-034.md) | częściowe |
 | 035 | M2 | [Alarmy na ekranie](../../prompts/sesja-035.md) | częściowe |
-| 036 | M2 | [Poziomy dostępu](../../prompts/sesja-036.md) | planowane |
+| 036 | M2 | [Poziomy dostępu](../../prompts/sesja-036.md) | ukończone |
 | 037 | M2 | [Język polski i angielski](../../prompts/sesja-037.md) | częściowe |
 | 038 | M2 | [Bufor i bramka G2 (prototyp v0.1)](../../prompts/sesja-038.md) | planowane |
 | 039 | M3 | [Format .lnx i BaseMacroGenerator](../../prompts/sesja-039.md) | ukończone |
@@ -385,9 +385,9 @@ Pozostaje: Pełne mapowanie kodów napędów/VFD i scenariusze alarmów z prompt
 
 ### 036 — Poziomy dostępu
 
-**planowane**. Brak potwierdzonego zakończenia zakresu.
+**ukończone**. 2026-10-24 | Role operator/technolog/serwis, PIN scrypt w SQLite (nigdy jawnie), blokada po błędach, audyt, CLI; przycisk roli i logowanie PIN w HMI; blokada edycji narzędzi/offsetów (technolog) i Konfiguracji/pełnego QtDragon (serwis). Opcjonalny klucz pulpitu: API Session.set_key, pin HAL do podłączenia z pulpitem; Claude
 
-Źródła: [prompts/sesja-036.md](../../prompts/sesja-036.md).
+Źródła: [docs/DZIENNIK.md](../DZIENNIK.md), [tests/test_access.py](../../tests/test_access.py), [tests/test_access_ui.py](../../tests/test_access_ui.py), [docs/OBSLUGA_OPERATORA.md](../OBSLUGA_OPERATORA.md), [prompts/sesja-036.md](../../prompts/sesja-036.md).
 
 ### 037 — Język polski i angielski
 

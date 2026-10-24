@@ -1056,6 +1056,15 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
   launcher ISO `linumert --neon` + skrót pulpitu. Uruchomienie z prawdziwym `gcode`: zadanie N4 Codex.
 - Testy: pełne pytest 1181 PASS, 12 skip; ruff, wymagania PASS. NIEZWERYFIKOWANE NA SPRZĘCIE.
 
+## 036 — Poziomy dostępu · 2026-10-24 · Claude
+- **Zrobione:** `core/linumert/access` (role, PIN scrypt w SQLite, blokada po błędach, audyt, CLI
+  `python -m linumert.access`); ekran: `linumert_access_ui` (przycisk roli w górnym pasku, okno PIN z keypadem
+  44 px, `require()`/`audit()`); strażnicy: zapis/usuwanie narzędzi, zero detalu i zapis przygotówki
+  (technolog), Konfiguracja i pełny QtDragon (serwis). Zrzut: build/access/pin-dialog.png.
+- **Decyzje:** bez domyślnych PIN-ów, brak PIN-ów = kontrola wyłączona (PROPOZYCJA w DECYZJE).
+- **Do sprawdzenia ręcznie:** ustawić PIN serwisu CLI, w HMI zalogować się, sprawdzić odmowę dla Operatora.
+- **Długi:** pin HAL klucza pulpitu (API gotowe). Testy: 12 nowych; pełne pytest w PR. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
 ## 027 — Własny system projektowy ekranu (domknięcie) · 2026-10-24 · Claude
 - **Zrobione:** rozliczenie promptu: QSS powłoki z tokenów już generowany w czasie działania (`shell_qss`, test
   kolorów i celu 44 px) — dodano `tools/gen_qss.py` (zrzut tego samego stylu); fonty IBM Plex Sans (Regular,

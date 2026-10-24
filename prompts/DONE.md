@@ -1,13 +1,13 @@
 <!-- Generowane przez python3 tools/roadmap.py; edytuj docs/roadmap/plan.json. -->
 # Ukończone zakresy — widok rejestru
 
-Pierwotny plan: **84 sesje M0–M6**, commit `796c6a2`. Stan na 2026-10-24: planowane: 17; w toku: 0; częściowe: 29; do odbioru: 0; ukończone: 38; zablokowane: 0.
+Pierwotny plan: **84 sesje M0–M6**, commit `796c6a2`. Stan na 2026-10-24: planowane: 16; w toku: 0; częściowe: 29; do odbioru: 0; ukończone: 39; zablokowane: 0.
 
 Zakończenie części implementacji nie oznacza odbioru całej funkcji ani sprzętu.
 
 To wynik generatora, nie lista do ręcznego dopisywania. Wybór pracy i statusy są w [plan.json](../docs/roadmap/plan.json); częściowe zakresy w [PLAN.md](../docs/roadmap/PLAN.md).
 
-Ukończone pierwotne sesje: **38 z 84**.
+Ukończone pierwotne sesje: **39 z 84**.
 
 001 | 2026-10-17 | Szkielet monorepo: pyproject, katalogi z README, Makefile, CI, LICENSE (GPL-2), LICENCJE, PROVENANCE, testy licencji/IP/układu; Claude
 002 | 2026-10-17 | Proces IP, słownik, rejestr pochodzenia (52 wpisy), lista przed wydaniem, rozszerzony strażnik IP; Claude
@@ -37,6 +37,7 @@ Ukończone pierwotne sesje: **38 z 84**.
 026 | 2026-10-20 | Odbiór automatyczny Plant P0/G1: pełne CI Debian 12/LinuxCNC, C+ASan/UBSan, scenariusze, raport P0 i checklista ręczna; PR #56; Codex
 027 | 2026-10-24 | Rozliczenie promptu 027: tokens.yaml źródłem prawdy; QSS powłoki generowany z tokenów (linumert_shell_model.shell_qss, test kolorów/44 px) + tools/gen_qss.py do zrzutu; fonty IBM Plex Sans i JetBrains Mono (OFL) w screens/linumert/fonts, rejestrowane przy starcie ekranu i podglądu skórek; 31 ikon z wpisami PROVENANCE (test_ip_guard); skórki korzystają z kontraktu palet (linumert_skin_contract); Claude
 032 | 2026-10-18 | Baza narzędzi (rdzeń): 10 typów z walidacją, SQLite z migracjami i historią, tool.tbl bez strat (sprawdzone w rs274 LinuxCNC 2.9), CSV; ekran w sesji ekranu; PR #16; Claude
+036 | 2026-10-24 | Role operator/technolog/serwis, PIN scrypt w SQLite (nigdy jawnie), blokada po błędach, audyt, CLI; przycisk roli i logowanie PIN w HMI; blokada edycji narzędzi/offsetów (technolog) i Konfiguracji/pełnego QtDragon (serwis). Opcjonalny klucz pulpitu: API Session.set_key, pin HAL do podłączenia z pulpitem; Claude
 039 | 2026-10-18 | Format .lnx (Pydantic + lnx_schema.json), ;@STOCK, BaseMacroGenerator, deterministyczny kompilator .lnx → .ngc (golden, rs274), alarmy P-5011…P-5015; PR #14; Claude
 040 | 2026-10-20 | Generatory header/program_end/tool_change/face_mill (#47) + walidacja kroków z bazą narzędzi (typ, średnica, skok, długość ostrza, obroty, kierunek; P-5207…P-5211, compile_program(tools=…)); Claude
 041 | 2026-10-21 | Kieszenie v2: pionowo/rampa/helisa, naroża, obrót, CW/CCW, naddatki i wykańczanie; v1 niezmienne; golden, materiał bez wysp, rs274 i wykonanie na LinuxCNC + Plant; 882 + 94 LinuxCNC PASS; PR #58; Codex

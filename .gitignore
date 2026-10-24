@@ -30,3 +30,6 @@ screens/linumert/resources.py
 config/plant/linumert_plant_xyz/*_vm.ini
 config/sim/linumert_xyz/linumert_tools.db
 config/**/linumert_workpiece.json
+
+# Sesja 036: baza ról i PIN-ów tworzona obok INI maszyny (nie wersjonujemy)
+linumert_access.sqlite

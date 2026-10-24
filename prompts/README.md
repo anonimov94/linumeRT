@@ -1,7 +1,7 @@
 <!-- Generowane przez python3 tools/roadmap.py; edytuj docs/roadmap/plan.json. -->
 # Prompty i wspólna roadmapa linumeRT
 
-Pierwotny plan: **84 sesje M0–M6**, commit `796c6a2`. Stan na 2026-10-24: planowane: 17; w toku: 0; częściowe: 29; do odbioru: 0; ukończone: 38; zablokowane: 0.
+Pierwotny plan: **84 sesje M0–M6**, commit `796c6a2`. Stan na 2026-10-24: planowane: 16; w toku: 0; częściowe: 29; do odbioru: 0; ukończone: 39; zablokowane: 0.
 
 Zakończenie części implementacji nie oznacza odbioru całej funkcji ani sprzętu.
 
@@ -58,7 +58,7 @@ Jedyne źródło statusów, powiązań i pozostałej pracy: [plan.json](../docs/
 | 033 | M2 | [Zerowanie detalu i sonda](sesja-033.md) | częściowe |
 | 034 | M2 | [Ręczna zmiana narzędzia](sesja-034.md) | częściowe |
 | 035 | M2 | [Alarmy na ekranie](sesja-035.md) | częściowe |
-| 036 | M2 | [Poziomy dostępu](sesja-036.md) | planowane |
+| 036 | M2 | [Poziomy dostępu](sesja-036.md) | ukończone |
 | 037 | M2 | [Język polski i angielski](sesja-037.md) | częściowe |
 | 038 | M2 | [Bufor i bramka G2 (prototyp v0.1)](sesja-038.md) | planowane |
 | 039 | M3 | [Format .lnx i BaseMacroGenerator](sesja-039.md) | ukończone |

@@ -227,6 +227,16 @@ całkowania 1 ms jest za gruby dla krokowca przy G0. Wynik zbieżny dla n ≥ 2 
 `docs/raporty/plant_substeps.md`). Konsekwencja dla M5: generator EtherCAT ustawia 60C2h równe
 okresowi wątku serwo. Model, nie maszyna. NIEZWERYFIKOWANE NA SPRZĘCIE.
 
+## Sesja 036 — poziomy dostępu · 2026-10-24 · Claude · PROPOZYCJA
+
+Role operator < technolog < serwis w `core/linumert/access` (bez UI). PIN tylko jako `hashlib.scrypt`
+(n=2^14, r=8, p=1, sól 16 B), porównanie `hmac.compare_digest`, blokada 30 s po 5 błędach, audyt w tej
+samej bazie SQLite obok INI (`[LINUMERT]ACCESS_DB`). Bez domyślnych PIN-ów: brak PIN-ów = kontrola
+wyłączona (zgodność wstecz, uczciwy napis w GUI); PIN ustawia CLI. Uprawnienia: `tools.edit`,
+`offsets.edit` (technolog), `settings`, `classic` (serwis — pełny QtDragon zawiera jego ustawienia).
+Klucz z pulpitu: API `Session.set_key()`; pin HAL do podłączenia przy pulpicie. Role nie są funkcją
+bezpieczeństwa (CLAUDE.md §6).
+
 ## Sesja 007 — tłumaczenia Qt ekranu · 2026-10-24 · Claude · PROPOZYCJA
 
 Teksty operatora przez `translate(kontekst, tekst)` z `screens/linumert/linumert_i18n.py`
