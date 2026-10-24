@@ -162,3 +162,17 @@ z §6a. Ścieżka z interpretera LinuxCNC (`gcode.parse` → `PreviewCanon`), ni
 Etap 1 = program demo offline; śledzenie `stat.motion_line`/pozycji w monitorze NML jest
 przygotowane w modelu (`Toolpath.locate`, `PathScene.follow`), ale niepodłączone.
 NIEZWERYFIKOWANE NA SPRZĘCIE. Do oceny Codex.
+
+## Classic × Neon — sposoby renderowania · 2026-10-24 · Claude · PROPOZYCJA
+
+Na polecenie właściciela operator ustawia sposób renderowania osobno dla detalu i maszyny (⚙ w rogu
+widoku; zapis w profilu QSettings `linumeRT/podglad-neon`): presety Ekonomiczny / Zrównoważony /
+Wysoki oraz styl linie/cieniowany, cienie rzucane, poświata, materiał, wygładzanie, limit 15/20/30 FPS
+i automatyczna jakość. Nadal QPainter, bez nowych zależności i bez z-bufora: cieniowanie Lamberta per
+ściana z odrzucaniem ścian tylnych, cienie jako rzut na płaszczyznę, materiał z `StockMap`
+wypiekany do warstw tekstur na swoich Z (≤ 10 Hz, skrawanie porcjami czasu), tło i ścieżka w
+warstwach wypiekanych i przesuwanych, wykonane ruchy dorysowywane przyrostowo, poświata i ślad
+freza w połowie rozdzielczości, następny komplet warstw wypiekany strumieniowo, regulator jakości
+z histerezą (bez klatek jednorazowego wypiekania), 10 Hz w bezczynności. Pomiar (WSL, raster
+offscreen, 700×640, ruch 3 mm/klatkę): detal mediana 2,9 / 6,5 / 6,8 ms, maks. ≤ 20 ms;
+maszyna 3,0–3,8 ms. Poglądowe, nie model kolizji. NIEZWERYFIKOWANE NA SPRZĘCIE. Do oceny Codex.

@@ -4,6 +4,7 @@
 Classic × Neon (Model-Author: Claude): role 'toolpath' i 'machine' rysuje szybki renderer
 QPainter ze wspólną sceną — zbliżenie na detal i cała maszyna z następnym punktem i DTG.
 """
+from linumert_neon_render import SettingsStore
 from linumert_neon_view import NeonDetailPanel, NeonPathView, PathScene
 from linumert_skin_screen import SkinScreen
 from linumert_skin_strings import text
@@ -31,10 +32,12 @@ class ClassicDigitalScreen(SkinScreen):
         if self.path_scene is None:
             from linumert.programs.toolpath import demo_toolpath
             self.path_scene = PathScene(demo_toolpath(), parent=self)
+            # Sposób renderowania każdego widoku zapisany w profilu operatora (⚙ w rogu widoku).
+            self.render_store = SettingsStore()
         if role == "toolpath":
-            view = NeonDetailPanel(self.path_scene, self.palette)
+            view = NeonDetailPanel(self.path_scene, self.palette, self.render_store)
         else:
-            view = NeonPathView(self.path_scene, "machine", self.palette)
+            view = NeonPathView(self.path_scene, "machine", self.palette, self.render_store)
         view.setToolTip(text("neon_scene", self.preferences))
         self.viewports[role] = view
         return view

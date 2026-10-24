@@ -927,3 +927,13 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
 - Testy: 10 nowych (model + Qt offscreen), pełne pytest lokalnie (WSL, Python 3.11, bez LinuxCNC): 1143 PASS, 12 skip; ruff PASS.
 - Otwarte: podłączenie do `stat.motion_line`/`stat.file` w monitorze NML, test `PreviewCanon` z prawdziwym `gcode`.
 - Autokontrola, bez niezależnego przeglądu. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## Classic × Neon — sposoby renderowania · 2026-10-24 · Claude
+- Model-Author: Claude. Polecenie właściciela: ustawiany render z cieniowaniem dla detalu i maszyny, oszczędnie jak w grach.
+- `linumert_neon_render.py`: RenderSettings + 3 presety, profil QSettings (uszkodzony wpis → preset), regulator jakości,
+  cieniowanie Lamberta z cullingiem, cienie rzutowane, tekstura materiału warstwami Z z `StockMap`.
+- `linumert_neon_view.py`: menu ⚙ per widok, warstwy wypiekane/przesuwane, akumulacja wykonanych ruchów, strumieniowanie
+  następnych warstw, poświata/ślad w ½ rozdzielczości, polilinie zamiast QPainterPath (~10× szybciej dla półprzezroczystych).
+- Pomiar detalu: z 37 ms do 2,9–6,8 ms mediany; najgorsza klatka z 54 ms do ≤ 20 ms (3 mm/klatkę). Szczegóły w DECYZJE.
+- Testy: 10 nowych w `test_neon_render.py`; pełne pytest lokalnie: 1153 PASS, 12 skip; ruff i wymagania PASS.
+- Zrzuty presetów: `tools/dev/neon-preview.py --png … --preset …` (build/neon). Autokontrola. NIEZWERYFIKOWANE NA SPRZĘCIE.

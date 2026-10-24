@@ -15,11 +15,12 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-sys.path[:0] = [str(ROOT / "screens/linumert"), str(ROOT / "core")]
+sys.path[:0] = [str(ROOT / "screens/linumert"), str(ROOT / "core"), str(ROOT / "simulation")]
 if sys.platform.startswith("linux"):
     os.environ.setdefault("QT_QPA_PLATFORM", "xcb")
 
 from linumert.programs.toolpath import demo_toolpath, load_ngc  # noqa: E402
+from linumert_neon_render import PRESETS, MemoryStore, SettingsStore  # noqa: E402
 from linumert_neon_view import NeonDetailPanel, NeonPathView, PathScene  # noqa: E402
 from PyQt5 import QtCore, QtWidgets  # noqa: E402
 
@@ -34,16 +35,18 @@ QLabel#title { color: #ab9fcc; font-weight: 600; letter-spacing: 2px; }
 
 
 class NeonWindow(QtWidgets.QWidget):
-    def __init__(self, toolpath):
+    def __init__(self, toolpath, store=None):
         super().__init__()
         self.setWindowTitle("linumeRT · Classic × Neon")
         self.setStyleSheet(STYLE)
         self.scene = PathScene(toolpath)
         root = QtWidgets.QVBoxLayout(self)
         views = QtWidgets.QHBoxLayout()
-        for title, widget, stretch in (
-                ("DETAL · ZBLIŻENIE", NeonDetailPanel(self.scene), 13),
-                ("MASZYNA · CAŁOŚĆ", NeonPathView(self.scene, "machine"), 10)):
+        store = store or SettingsStore()
+        self.detail = NeonDetailPanel(self.scene, store=store)
+        self.machine = NeonPathView(self.scene, "machine", store=store)
+        for title, widget, stretch in (("DETAL · ZBLIŻENIE", self.detail, 13),
+                                       ("MASZYNA · CAŁOŚĆ", self.machine, 10)):
             column = QtWidgets.QVBoxLayout()
             label = QtWidgets.QLabel(title)
             label.setObjectName("title")
@@ -97,16 +100,24 @@ def main(argv=None):
     parser.add_argument("--ngc", help="program NGC (wymaga modułu gcode z LinuxCNC 2.9)")
     parser.add_argument("--png", help="zapisz zrzut okna i zakończ")
     parser.add_argument("--seek", type=float, default=None, help="droga [mm] dla zrzutu")
+    parser.add_argument("--preset", choices=sorted(PRESETS),
+                        help="jakość obu widoków dla zrzutu (bez zapisu w profilu)")
     args = parser.parse_args(argv)
     app = QtWidgets.QApplication(sys.argv[:1])
     toolpath = load_ngc(args.ngc) if args.ngc else demo_toolpath()
-    window = NeonWindow(toolpath)
+    window = NeonWindow(toolpath, MemoryStore() if args.png else None)
+    if args.preset:
+        for view in (window.detail.view, window.machine):
+            view.set_settings(PRESETS[args.preset], persist=False)
     window.resize(1280, 800)
     window.show()
     if args.png:
         window.scene.playing = False
         if args.seek is not None:
             window.scene.seek(args.seek)
+        if window.scene.material is not None:
+            while not window.scene.update_material(budget=1.0):
+                pass
         for _ in range(3):
             window.scene.tick()
             app.processEvents()
