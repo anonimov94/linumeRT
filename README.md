@@ -158,19 +158,11 @@ LinuxCNC 2.9, HAL, Python and QtVCP integration, reproducible tests, and the GPL
 
 ## NEXT MILESTONE: A MODULAR OPERATOR COCKPIT
 
-| Phase | Engineering objective |
-|:--|:--|
-| **SKIN-00** | Confirm architecture and compatibility constraints |
-| **SKIN-01** | Offline renderer verified; production integration remains open |
-| **SKIN-02** | Build modular skin API, manifests and safe layout selection |
-| **SKIN-03** | Implement four palettes and English/Polski localization |
-| **SKIN-04** | Deliver Classic Digital and Industrial Pro |
-| **SKIN-05** | Deliver Cyberdeck and Organic Vector |
-| **SKIN-06** | Validate the full 16-combination matrix and LinuxCNC/Plant integration |
+Skin Engine is an extension of the original M2/M4 milestones. SKIN-00…06, their progress and acceptance criteria are tracked in the [unified project plan](docs/roadmap/PLAN.md); technical design remains in the skin specification.
 
 **Safety:** the graphical interface does not replace a hardware E-STOP or certified safety chain. New layouts must preserve visible alarm states and follow LinuxCNC/HAL interlocks. Hardware operation remains **unverified**.
 
-**[Full skin-engineering roadmap →](docs/design/SKIN_SYSTEM_ROADMAP.md)**
+**[Unified project roadmap and status →](docs/roadmap/PLAN.md)** · [Skin specification](docs/design/SKIN_SYSTEM_ROADMAP.md)
 
 ---
 
@@ -335,4 +327,4 @@ nie dotyczy tego projektu.
 
 Planowany jest **zupełnie nowy, wymienny interfejs HMI** z czterema autorskimi rodzinami skórek: Classic Digital, Industrial Pro, Cyberdeck i Organic Vector. Każda będzie obsługiwać cztery niezależne palety (turkusowa, grafitowa, zielona, niebieska), języki English/Polski oraz konfigurowalne rozmieszczenie widoków maszyny 3D, detalu i ścieżki. Etap wymaga nowego, zweryfikowanego renderera 3D i zachowania bezpieczeństwa LinuxCNC/HAL.
 
-**Status: roadmapa i wytyczne — jeszcze nie wdrożono.** Szczegóły: [SKIN_SYSTEM_ROADMAP.md](docs/design/SKIN_SYSTEM_ROADMAP.md).
+Bieżący status skórek, pozostały zakres i powiązania z pierwotnymi sesjami: [wspólna roadmapa](docs/roadmap/PLAN.md). Specyfikacja: [SKIN_SYSTEM_ROADMAP.md](docs/design/SKIN_SYSTEM_ROADMAP.md).

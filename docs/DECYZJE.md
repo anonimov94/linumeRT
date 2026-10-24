@@ -78,6 +78,17 @@ Współpraca modeli, scalanie, środowisko. Obowiązujące zasady w skrócie: [`
 - 2026-10-19 · D38 · Właściciel: wycofanie narzędzia i powrót do obróbki — w pauzie przez external offsets HAL, po przerwaniu programu przez prolog generowany przez ekran: zejście po helisie i dojazd łukiem stycznym, wejście na ścieżkę z zakładką przed punktem przerwania (bez naddatku), parametry w ustawieniach maszyny. Opis: `docs/design/WZNOWIENIE.md`. Model-Author: Claude. · PROPOZYCJA
 - 2026-10-19 · D39 · Właściciel: obrazy ISO z ręcznego `workflow_dispatch`, spoza tagu `v*`, publikowane jako trwałe wydania testowe (pre-release) `iso-RRRRMMDD-<sha>` (artefakty Actions mają limit 90 dni); budowa z pull requestu służy wyłącznie walidacji i nie publikuje wydania. Model-Author: Claude; doprecyzowanie Codex 2026-10-23. · PRZYJĘTA
 
+## Wspólna roadmapa — polecenie właściciela 2026-10-24
+
+Model-Author: Codex. PRZYJĘTA. Jedyny rejestr statusów, powiązań i pozostałej pracy:
+`docs/roadmap/plan.json`. Pierwotne 84 sesje i M0–M6 zachowują numery; późniejsze
+HMI, D38, plan 21–27, skórki, ISO i konkursy włączono jako rozszerzenia z sesjami nadrzędnymi.
+`prompts/README.md`, `prompts/DONE.md`, `docs/roadmap/PLAN.md` i HTML są generowane;
+CI odrzuca rozjazd. 007/048 są częściowe zgodnie z odłożonym zakresem, z zachowaniem
+historii. Ukończony wycinek nie zamyka sesji nadrzędnej, bramki ani odbioru sprzętu.
+Specyfikacje i REQ nadal określają wymagania; nie zmienia to stosu ani kontraktu safety.
+Zasady aktualizacji w `docs/WSPOLPRACA_MODELI.md` i `docs/roadmap/README.md`.
+
 ## Decyzje techniczne sesji (według numeru sesji)
 
 

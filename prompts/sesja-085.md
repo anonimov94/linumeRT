@@ -1,5 +1,8 @@
 # Sesja 085 · SKIN-01 · Renderer 3D offline
 
+> Status, rozszerzenia i pozostały zakres: [wspólny rejestr](../docs/roadmap/plan.json).
+> Ten prompt jest specyfikacją sesji; aktualizacja stanu według [instrukcji](../docs/roadmap/README.md).
+
 Model-Author: Codex · 2026-10-23. Zakres według `docs/design/SKIN_AUDIT.md` i `SKIN_SYSTEM_ROADMAP.md`.
 
 Cel: odtworzyć błędy ścian QPainter/OpenGL/STL, zbudować osobny podgląd renderera, sprawdzić lokalny GPU/Mesa i Debian/LinuxCNC. Nie integrować go jeszcze z aktualnym sterowaniem.

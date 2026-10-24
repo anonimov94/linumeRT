@@ -131,6 +131,7 @@ Nie są kolejnym harmonogramem. Ich status dotyczy tylko wskazanego kroku.
 | OD-01 | 024, 066, 072, 082 | Macierz Plant nie może przechodzić z nieoczekiwaną kolizją | planowane |
 | EDITOR-VALIDATION | 044, 047 | Walidacja bieżącej treści i wyszukiwanie | w toku |
 | LEGACY-RUNTIME | 017, 025, 026, 070, 077, 082 | Diagnostyka uruchomień z dawnych promptów startowych | częściowe |
+| ROADMAP-UNIFICATION | 001, 084 | Jeden rejestr planu i migracja statusów | w toku |
 
 ## Postęp, pozostały zakres i dowody
 
@@ -957,4 +958,12 @@ Pozostaje: Odbiór CI i scalenie PR #98; nie zaliczać jako wdrożone.
 Pozostaje: Rozliczyć niepotwierdzone kryteria: 10× LRT-NET, długie blokady GUI/heartbeat i VirtualBox na docelowym stanowisku.
 
 Źródła: [prompts/START-CODEX-HMI.md](../../prompts/START-CODEX-HMI.md), [prompts/START-CODEX-LINUX.md](../../prompts/START-CODEX-LINUX.md).
+
+### ROADMAP-UNIFICATION — Jeden rejestr planu i migracja statusów
+
+**w toku**. Rejestr i generator wdrożone; instrukcje oraz kontrole w PR.
+
+Pozostaje: Zakończyć walidację i scalić PR z instrukcjami pracy.
+
+Źródła: [docs/roadmap/README.md](README.md), [tools/roadmap.py](../../tools/roadmap.py), [tests/test_roadmap.py](../../tests/test_roadmap.py).
 

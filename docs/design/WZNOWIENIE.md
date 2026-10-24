@@ -1,5 +1,10 @@
 # Wycofanie narzędzia i powrót do obróbki (PROPOZYCJA)
 
+> Specyfikacja i historia realizacji; nie jest osobnym harmonogramem.
+> Bieżący status, pozostały zakres i powiązania (D38-A/B w sesji 031):
+> [wspólna roadmapa](../roadmap/PLAN.md), [rejestr](../roadmap/plan.json).
+> Niższe datowane opisy stanu są zapisem historycznym; status aktualizuj wyłącznie w rejestrze.
+
 Model-Author: Claude · 2026-10-19 · polecenie właściciela. Status: PROPOZYCJA do planu (M2/M4).
 NIEZWERYFIKOWANE NA SPRZĘCIE.
 

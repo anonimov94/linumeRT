@@ -1715,6 +1715,24 @@
         "prompts/START-CODEX-HMI.md",
         "prompts/START-CODEX-LINUX.md"
       ]
+    },
+    {
+      "id": "ROADMAP-UNIFICATION",
+      "title": "Jeden rejestr planu i migracja statusów",
+      "parents": [
+        "001",
+        "084"
+      ],
+      "status": "in_progress",
+      "progress": "Rejestr i generator wdrożone; instrukcje oraz kontrole w PR.",
+      "remaining": [
+        "Zakończyć walidację i scalić PR z instrukcjami pracy."
+      ],
+      "evidence": [
+        "docs/roadmap/README.md",
+        "tools/roadmap.py",
+        "tests/test_roadmap.py"
+      ]
     }
   ]
 }

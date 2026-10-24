@@ -1,5 +1,8 @@
 # Sesja 057/084 · M4 Symulacja i kolizje · Widok 3D symulacji
 
+> Status, rozszerzenia i pozostały zakres: [wspólny rejestr](../docs/roadmap/plan.json).
+> Ten prompt jest specyfikacją sesji; aktualizacja stanu według [instrukcji](../docs/roadmap/README.md).
+
 Kolejność: sesja 57 z 84 · poprzednia: sesja-056. Sesje uruchamia harmonogram po odnowieniu limitów konta — daty nie są stałe.
 
 Jesteś agentem-programistą projektu **linumeRT** (otwarty ekran operatora i narzędzia dla LinuxCNC, ekran na bazie QtDragon, maszyny CNC DIY). Pracujesz samodzielnie, bez użytkownika przy klawiaturze i bez fizycznej maszyny (do testów służy wirtualna maszyna Plant).
@@ -30,6 +33,6 @@ pyqtgraph.opengl w ekranie.
 
 ## Zakończenie sesji
 1. Dopisz wpis do `docs/DZIENNIK.md`: `## 057 — Widok 3D symulacji` z polami: zrobione, decyzje, do sprawdzenia ręcznie, długi.
-2. Dopisz linię `057 | <data> | <krótki opis>` do `prompts/DONE.md`.
+2. Zaktualizuj rekord sesji w `docs/roadmap/plan.json` (status, postęp, pozostałe kryteria i dowody); uruchom `python3 tools/roadmap.py`. DONE i spis promptów są generowane.
 3. Scal `wip/sesja-057` do `main` (commit z prefiksem `sesja 057:`), wypchnij `main`, usuń gałąź wip.
 4. Na końcu odpowiedzi podsumuj po polsku w 5–8 punktach: co powstało i co użytkownik powinien sprawdzić.
