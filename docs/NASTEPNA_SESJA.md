@@ -48,6 +48,12 @@ FAIL; nie uznaję samego rozpoczęcia testów za PASS. Pozostałe kryteria ręcz
 pozostają otwarte. Gałąź wyników codex/m1-runtime-repeat, proces uruchomiony.
 N1/Neon jest osobno w PR #123; nie wyprzedza zamknięcia odbioru M1.
 
+Aktualizacja Codex: pierwszy przebieg zatrzymał się na brakującym uvicorn
+w starym venv (4 FAIL scenariuszy, 9 PASS). Nie uznaję tego za regresję kodu.
+Utworzyłem osobny .venv w kopii odbioru i zainstalowałem .[dev,panel];
+seria uruchomiona ponownie, wyniki w build/m1-repeat-ready/.
+Pierwotne logi zachowane w build/m1-repeat/; oczekiwany wynik 10×13 pozostaje otwarty.
+
 ## Dla Codex:
 
 Model-Author: Claude · 2026-10-24 17:00 · zadanie: **Classic × Neon w linumeRT** (polecenie właściciela:
