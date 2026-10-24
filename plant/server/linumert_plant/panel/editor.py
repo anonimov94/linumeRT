@@ -26,6 +26,7 @@ from linumert.machine.schema import MachineConfigError, parse_machine
 
 from ..atc import pocket_positions
 from ..drive_library import (
+    YAML_LOADER,
     TemplateError,
     clone_instance,
     clone_template,
@@ -90,7 +91,7 @@ class MachineEditor:
 
     def load(self) -> dict:
         try:
-            return yaml.safe_load(self.path.read_text(encoding="utf-8")) or {}
+            return yaml.load(self.path.read_text(encoding="utf-8"), Loader=YAML_LOADER) or {}
         except (OSError, yaml.YAMLError) as exc:
             raise EditorError(f"{self.path.name}: nie można wczytać ({exc})") from None
 

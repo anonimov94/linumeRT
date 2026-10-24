@@ -26,6 +26,7 @@ SCRIPT = ROOT / "tools" / "linumert-start.sh"
 FAKE = """#!/bin/bash
 echo "podman $*" >> "$FAKE_LOG"
 if [ "$1 $2" = "image exists" ]; then [ -n "$FAKE_IMAGE" ] && exit 0 || exit 1; fi
+[ "$1" = ps ] && [ -n "$FAKE_RUNNING" ] && echo linumert-hmi
 [ "$1" = build ] && cat > /dev/null
 exit 0
 """
@@ -50,7 +51,8 @@ def _clone(tmp_path: Path) -> Path:
     return repo
 
 
-def _run(tmp_path: Path, repo: Path, *args: str, image: bool = False) -> tuple[str, list[str]]:
+def _run(tmp_path: Path, repo: Path, *args: str, image: bool = False,
+         running: bool = False, ok: bool = True) -> tuple[str, list[str]]:
     bin_dir = tmp_path / "bin"
     bin_dir.mkdir(exist_ok=True)
     fake = bin_dir / "podman"
@@ -59,11 +61,12 @@ def _run(tmp_path: Path, repo: Path, *args: str, image: bool = False) -> tuple[s
     log = tmp_path / "podman.log"
     log.unlink(missing_ok=True)
     env = {"HOME": str(tmp_path / "home"), "PATH": f"{bin_dir}:/usr/bin:/bin", "DISPLAY": ":0",
-           "FAKE_LOG": str(log), "FAKE_IMAGE": "1" if image else ""}
+           "FAKE_LOG": str(log), "FAKE_IMAGE": "1" if image else "",
+           "FAKE_RUNNING": "1" if running else ""}
     r = subprocess.run(["bash", str(repo / "tools" / "linumert-start.sh"), "--no-update", *args],
                        env=env, capture_output=True, text=True, timeout=60)
-    assert r.returncode == 0, r.stdout + r.stderr
-    return r.stdout, log.read_text().splitlines() if log.exists() else []
+    assert (r.returncode == 0) == ok, r.stdout + r.stderr
+    return r.stdout + r.stderr, log.read_text().splitlines() if log.exists() else []
 
 
 def test_sim_run_with_fake_podman(tmp_path: Path) -> None:
@@ -100,6 +103,20 @@ def test_plant_run_and_existing_image(tmp_path: Path) -> None:
     assert "--panel-listen 0.0.0.0" in log
     _out, calls = _run(tmp_path, repo, "--classic", image=True)
     assert "LINUMERT_SHELL=0" in next(c for c in calls if c.startswith("podman run"))
+
+
+def test_second_instance_is_refused_and_first_is_named(tmp_path: Path) -> None:
+    repo = _clone(tmp_path)
+    _, calls = _run(tmp_path, repo, image=True)
+    assert "--name linumert-hmi" in next(c for c in calls if c.startswith("podman run"))
+    out, calls = _run(tmp_path, repo, image=True, running=True, ok=False)
+    assert "już działa" in out and "podman stop linumert-hmi" in out
+    assert not any(c.startswith("podman run") for c in calls)
+
+
+def test_shell_mode_ignores_running_instance(tmp_path: Path) -> None:
+    repo = _clone(tmp_path)
+    _run(tmp_path, repo, "--shell", image=True, running=True)
 
 
 def test_bad_option_and_vfd_without_plant(tmp_path: Path) -> None:

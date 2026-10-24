@@ -45,10 +45,14 @@ class DriveInstance:
     params: dict[str, Any] = field(repr=False)
 
 
+YAML_LOADER = getattr(yaml, "CSafeLoader", yaml.SafeLoader)
+_library_cache: dict[Path, tuple[tuple, dict[str, dict[str, Any]]]] = {}
+
+
 def _read_yaml(path: Path) -> Any:
     try:
         with path.open(encoding="utf-8") as handle:
-            return yaml.safe_load(handle)
+            return yaml.load(handle, Loader=YAML_LOADER)
     except OSError as exc:
         raise TemplateError(Issue(str(path), f"nie można odczytać pliku: {exc.strerror}")) from exc
     except yaml.YAMLError as exc:
@@ -74,10 +78,20 @@ def load_library(directory: Path | None = None) -> dict[str, dict[str, Any]]:
     folder = LIBRARY_DIR if directory is None else Path(directory)
     if not folder.is_dir():
         raise TemplateError(Issue(str(folder), "brak katalogu biblioteki napędów"))
+    paths = sorted(folder.glob("*.yaml"))
+    try:
+        signature = tuple((p.name, p.stat().st_mtime_ns, p.stat().st_size) for p in paths)
+    except OSError:
+        signature = ()
+    cached = _library_cache.get(folder)
+    if signature and cached is not None and cached[0] == signature:
+        return copy.deepcopy(cached[1])
     library: dict[str, dict[str, Any]] = {}
-    for path in sorted(folder.glob("*.yaml")):
+    for path in paths:
         tpl = load_template_file(path)
         library[tpl["id"]] = tpl
+    if signature:
+        _library_cache[folder] = (signature, copy.deepcopy(library))
     return library
 
 

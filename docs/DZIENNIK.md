@@ -958,6 +958,63 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
 - Nowy test integracyjny wewnątrz QtVCP, zrzuty i raport; brak zmian progów oraz zabezpieczeń ruchu.
 - Autokontrola, bez niezależnego przeglądu; końcowe SHA i pełny odbiór w PR #102.
 
+## OD-01 — Macierz Plant bez nieoczekiwanych kolizji — 2026-10-24 · Claude
+- Model-Author: Claude. Zakres 024/066/072/082; pierwszy punkt kolejności z WSPOLPRACA_MODELI.md.
+- Przyczyna: losowy start po włączeniu (ziarno 1) w router_atc_rack lądował wewnątrz magazynu (CRASH, COVER_CRASH).
+- Start omija bryły kolizyjne: Python odtwarza xorshift32 rdzenia C i zmienia pozycję tylko przy kolizji (inne starty bez zmian).
+- matrix_smoke wymaga teraz `event: CRASH` i `COVER_CRASH` z `present: false`; przed poprawką FAIL 2/4, po niej 5 maszyn × 4/4.
+- Testy: nowy tests/test_start_collision.py, 1116 PASS; test_sim_engine::test_sample_programs_stock_lines pada przez plik bez ;@STOCK w config/sim/nc_files (poza zakresem).
+- Autokontrola, bez niezależnego przeglądu; ponowny odbiór A3 na stanowisku właściciela osobno.
+
+## LEGACY-RUNTIME — zrywanie LRT-NET przy zakładkach panelu Plant — 2026-10-24 · Claude
+- Model-Author: Claude. Zgłoszenie właściciela: przełączanie zakładek Praca/Napędy/Maszyna daje „N cykli bez odpowiedzi” (do 335).
+- Pomiar na żywo: serie 70–350 zgubionych cykli; wątek RT LinuxCNC i ekran nie głodowały (opóźnienie kolejki 0–2 ms), więc zatrzymywał się proces Plant.
+- Przyczyna: endpointy zakładek wołały `load_library` (102 ms czystego Pythona, 7 szablonów YAML) w wątku panelu; GIL opóźniał odpowiedzi pętli UDP.
+- Poprawka: CSafeLoader, cache biblioteki wg mtime/rozmiaru plików (kopia głęboka), `sys.setswitchinterval(0.0005)` w `serve`.
+- Odtworzenie lokalne (Plant + lrtnet_probe 1 kHz + odpytywanie endpointów): przed RTT maks. 242 ms, 130 utraconych, watchdog; po 11,9 ms, 0 utraconych.
+- Testy: tests/test_library_cache.py. Nie zmieniono timeout-cycles ani łańcucha E-STOP. Do potwierdzenia na pulpicie właściciela.
+
+## PLAN-27 — częściowy ręczny odbiór pulpitu — 2026-10-24 · Claude
+- Model-Author: Claude. Właściciel przeszedł checklistę na własnym pulpicie (HMI z Plant, SHA 4bc7a14 i 27b9245).
+- Potwierdzone: punkty 1–6 i 8; przełączanie kart panelu Plant nie zrywa łącza po poprawce LEGACY-RUNTIME.
+- Otwarte: punkt 7 (raport HTML), skróty QtDragon/Plant z menu, zrzuty i log. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## LIMITS-PREFLIGHT — kontrola limitów osi przed startem — 2026-10-24 · Claude
+- Model-Author: Claude. Zakres 031/051; sugestia właściciela po zatrzymaniu maszyny w materiale z błędem limitu Z.
+- LinuxCNC odrzuca ruch dopiero w planerze; teraz edytor G-code ma przycisk „Sprawdź limity osi” (praca w tle, bez blokowania GUI/heartbeat).
+- Rdzeń `programs/limits.py`: rs274 z kopią pliku parametrów i jednostkami z INI; pozycja maszynowa = program + G5x + G92 + korekta długości; numery linii pliku.
+- Odtworzono zgłoszony błąd: G54 Z=-150, `G0 Z20` → linia 3, Z=-130 < -120; po offsecie -50 brak naruszeń (rs274 w Debianie 12).
+- Nie zmieniono zachowania LinuxCNC ani limitów; sprawdzane tylko punkty końcowe (łuki, obrót XY, osie ABC pominięte).
+- Testy: tests/test_limits.py (7 + 1 z rs274), test GUI w tests/test_hmi_workflow_widgets.py (42 PASS w Debianie).
+
+## Starter — jedna instancja linumeRT — 2026-10-24 · Claude
+- Model-Author: Claude. Zgłoszenie właściciela: aplikacja padła po uruchomieniu drugiej kopii.
+- Dowód w logu: druga instancja LinuxCNC dostała „tpmod/homemod/trivkins: already exists” (wspólne zasoby), po czym obie zostały zatrzymane.
+- Kontener ma teraz stałą nazwę `linumert-hmi`; starter odmawia drugiego startu komunikatem i podaje `podman stop linumert-hmi`. Tryb `--shell` bez blokady.
+- Test z atrapą podmana (nazwa kontenera, odmowa, brak `podman run`); 11 PASS. Nieprzetestowane na pulpicie właściciela.
+
+## ORIGIN-WIZARD — kreator zera detalu na przygotówce — 2026-10-24 · Claude
+- Model-Author: Claude. Polecenie właściciela: kreator wyboru punktu zera na przygotówce jak w programach CAM.
+- Rdzeń: `Workpiece` ma 10 punktów zera (narożniki i środek, góra/dół), `bounds()` i `fit_issues(limits)`; `anchor_name()` z kliknięcia.
+- GUI: „Kreator zera detalu…” w Zero detalu: widok z góry, klik punktu, narożnik i wierzch przygotówki na stole w G53, pobranie pozycji narzędzia jako zera, kontrola zakresów osi z INI.
+- Zmiana punktu zera nie rusza przygotówki (przelicza zero); przesunięcie narożnika przesuwa przygotówkę. Wynik trafia do formularza, G5x zapisuje osobny przycisk.
+- Testy: 65 PASS (rdzeń + GUI w Debianie 12), zrzut build/kreator/kreator.png. Do sprawdzenia na pulpicie.
+
+## LIMITS-PREFLIGHT — automatyczna kontrola po wczytaniu programu — 2026-10-24 · Claude
+- Model-Author: Claude. Polecenie właściciela: zachowanie jak w sprzęcie przemysłowym.
+- Przyczyna komunikatów K-301/302/303/305 w CSV: program z G49 (bez G43) przy narzędziu T2 o długości 80 mm; symulator liczy czubek jako oś − 80 mm, więc czubek wchodzi w materiał i stół.
+- Po wczytaniu programu ekran sprawdza go w tle (rs274 + parametry układów, jednostki INI); wynik na stronie Produkcja; „Cykl start” pyta, gdy program wyjdzie poza limity osi (domyślnie Nie).
+- Ostrzeżenie informacyjne, gdy program tnie przy nieaktywnej korekcie długości (G49). Nic nie blokuje sterownika; ekran nie jest funkcją bezpieczeństwa.
+- Raport grupuje powtórzenia (jeden wiersz + licznik); kreator zera wyraźnie oznacza wynik poza zakresem osi.
+- Testy: 54 PASS w Debianie (GUI + rdzeń); do sprawdzenia na pulpicie. Poza zakresem: automatyczne G43 po M6 (remap).
+
+## LIMITS-PREFLIGHT — poprawki po uwadze właściciela — 2026-10-24 · Claude
+- Model-Author: Claude. Uwaga właściciela: g54 wczytuje się automatycznie przy starcie.
+- Kontrola uruchamia się też dla programu wczytanego przed podłączeniem statusu (start ekranu).
+- Błąd własny: oś jeszcze nieruszona przez program (interpreter startuje w zerze maszyny) dawała fałszywe „X=0 poniżej limitu 1” w konfiguracji Plant; teraz oś jest oceniana od pierwszego ruchu.
+- Na g54: sim — linia 13, Z=-130 < -120 (i 81 ruchów); Plant — linia 9, Z=-134 < -119 (i 85 ruchów); G49 bez G43.
+- Testy: 55 PASS (GUI + rdzeń), 3 PASS z prawdziwym LinuxCNC (start ekranu).
+
 ## Classic × Neon — renderer detal + maszyna · 2026-10-24 · Claude
 - Model-Author: Claude. Gałąź `claude/neon-render` (worktree), polecenie właściciela: render jak w koncepcji HTML.
 - Rdzeń `programs/toolpath.py`: ruchy z liniami programu, łuki ARC_FEED, strefy START/KONIEC, DTG,

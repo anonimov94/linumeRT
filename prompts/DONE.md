@@ -58,6 +58,7 @@ KONKURS-02 | PR #94 scalony: procedura i dowody; odbiór A3 FAIL OD-01, T1–T7 
 KONKURS-03 | PR #95 scalony: odrzucanie NaN/inf; real mapping i geometria ATC nadal otwarte.
 KONKURS-04 | PR #96 scalony: odczyt NML; nie kończy SKIN-02/04…06.
 ISO-INTEGRATION | PR #97: bramka sim/Plant i monitor; PR #101 (iso/fix-live-login) dodaje konto linumert, user-setup/sudo i jawny autologin. Debian 12: rzeczywiste tworzenie konta, hasło, UID i idempotencja PASS; budowa końcowego ISO w kontrolach PR #101.
+OD-01 | Przyczyna: losowy start (seed 1) w router_atc_rack lądował wewnątrz magazynu. Start omija bryły kolizyjne (emulacja xorshift rdzenia C, zmiana tylko przy kolizji), a matrix_smoke wymaga braku CRASH i COVER_CRASH; macierz 5/5 po 4 kryteria, 1116 testów PASS.
 EDITOR-VALIDATION | PR #98: walidacja niezapisanej treści, lista błędów z przejściem do linii i wyszukiwanie/zamiana z Undo; Qt w Debianie: 60 testów zakresu PASS, zrzut rzeczywistego dialogu. Końcowe CI i SHA w PR.
 ROADMAP-UNIFICATION | PR #99: jeden rejestr, generowane widoki, kontrola CI, instrukcje i migracja historii; lokalne testy i odbiór DOM PASS. Wynik CI i SHA w PR.
 
