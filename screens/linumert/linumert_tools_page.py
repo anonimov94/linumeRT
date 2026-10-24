@@ -30,6 +30,8 @@ from linumert.tools.db import Tool, ToolDBError  # noqa: E402
 from linumert.tools.types import COMMON, PARAMS, TYPES  # noqa: E402
 from linumert_sim.tooldata import open_db, save_tool, table_units  # noqa: E402
 
+import linumert_access_ui as access_ui  # noqa: E402
+
 COLUMNS = ["T", "P", "Typ", "Opis", "D", "Korekcja D", "Długość Z", "Ostrza", "Maks. obr",
            "Kierunek"]
 
@@ -490,6 +492,8 @@ class ToolsPage(QtWidgets.QWidget):
         self.shell.show_alarm("err", message)
 
     def save(self) -> None:
+        if not access_ui.require(self.shell, "tools.edit", f"T{self.spin_t.value()}"):
+            return
         if not self._open():
             return
         if self._busy():
@@ -501,6 +505,7 @@ class ToolsPage(QtWidgets.QWidget):
             self._write_failed(exc)
             return
         self._reload_linuxcnc()
+        access_ui.audit(self.shell, "tools.edit", f"T{tool.number} zapis")
         self.lbl_issue.setText(f"T{tool.number} zapisane w bazie i w {os.path.basename(self.tbl)}")
         self._last_success = True
         self._edit_state(False)
@@ -509,6 +514,8 @@ class ToolsPage(QtWidgets.QWidget):
         self._restore_selection()
 
     def remove(self) -> None:
+        if not access_ui.require(self.shell, "tools.edit", f"T{self.spin_t.value()} usuń"):
+            return
         if not self._open() or self._busy():
             return
         n = self.spin_t.value()
@@ -524,6 +531,7 @@ class ToolsPage(QtWidgets.QWidget):
             self._write_failed(exc)
             return
         self._reload_linuxcnc()
+        access_ui.audit(self.shell, "tools.edit", f"T{n} usunięcie")
         self.lbl_issue.setText(f"T{n} usunięte z bazy i z {os.path.basename(self.tbl)}")
         self._last_success = True
         self._edit_state(False)

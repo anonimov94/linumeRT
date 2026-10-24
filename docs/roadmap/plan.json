@@ -553,10 +553,15 @@
       "milestone": "M2",
       "title": "Poziomy dostępu",
       "prompt": "prompts/sesja-036.md",
-      "status": "planned",
-      "progress": "Brak potwierdzonego zakończenia zakresu.",
+      "status": "done",
+      "progress": "2026-10-24 | Role operator/technolog/serwis, PIN scrypt w SQLite (nigdy jawnie), blokada po błędach, audyt, CLI; przycisk roli i logowanie PIN w HMI; blokada edycji narzędzi/offsetów (technolog) i Konfiguracji/pełnego QtDragon (serwis). Opcjonalny klucz pulpitu: API Session.set_key, pin HAL do podłączenia z pulpitem; Claude",
       "remaining": [],
-      "evidence": []
+      "evidence": [
+        "docs/DZIENNIK.md",
+        "tests/test_access.py",
+        "tests/test_access_ui.py",
+        "docs/OBSLUGA_OPERATORA.md"
+      ]
     },
     {
       "id": "037",

@@ -139,6 +139,11 @@ class LinumertShell(QtCore.QObject):
         self.s = model.ShellState(axes=tuple(a.upper() for a in INFO.AVAILABLE_AXES))
         ini = os.environ.get("INI_FILE_NAME") or getattr(INFO, "INIPATH", "")
         self.s.virtual = bool(ini and virtual_config(ini))
+        # Sesja 036: role operator/technolog/serwis (PIN w SQLite obok INI); bez PIN-ów wyłączone.
+        import linumert_access_ui as access_ui
+
+        self.access, self.access_reason = access_ui.open_session(ini)
+        self.current_area: str | None = None
         self.virtual_session = VirtualSession(self)
         self.dro_view = "work"
         self.program_lines: list[str] = []
@@ -270,7 +275,12 @@ class LinumertShell(QtCore.QObject):
         self.lbl_plant = _label("", "", pill="info")
         self.lbl_machine = _label("", "", pill="err")
         self.lbl_clock = _label("", "lrtClock")
-        for wdg in (self.lbl_plant, self.lbl_machine, self.lbl_clock):
+        import linumert_access_ui as access_ui
+
+        self.role_button = access_ui.RoleButton(self.access, self.access_reason)
+        self.role_button.changed.connect(lambda role: self.show_alarm(
+            "info", f"Rola: {access_ui.ROLE_LABEL[role]}"))
+        for wdg in (self.lbl_plant, self.lbl_machine, self.role_button, self.lbl_clock):
             lay.addWidget(wdg)
         return bar
 
@@ -720,6 +730,16 @@ class LinumertShell(QtCore.QObject):
 
     # ---- nawigacja (tylko prezentacja) ---------------------------------------------------
     def select_area(self, area: str) -> None:
+        import linumert_access_ui as access_ui
+
+        permission = {"settings": "settings", "classic": "classic"}.get(area)
+        if permission and not access_ui.require(self, permission, area):
+            if self.current_area in self.areas:
+                self.areas[self.current_area].setChecked(True)
+            else:
+                self.areas[area].setChecked(False)
+            return
+        self.current_area = area
         self.areas[area].setChecked(True)
         target = dict((a, b) for a, _t, _i, b in AREAS)[area]
         if target == "page:tools" and self.tools is None:

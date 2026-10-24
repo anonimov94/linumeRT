@@ -216,3 +216,13 @@ freza w połowie rozdzielczości, następny komplet warstw wypiekany strumieniow
 z histerezą (bez klatek jednorazowego wypiekania), 10 Hz w bezczynności. Pomiar (WSL, raster
 offscreen, 700×640, ruch 3 mm/klatkę): detal mediana 2,9 / 6,5 / 6,8 ms, maks. ≤ 20 ms;
 maszyna 3,0–3,8 ms. Poglądowe, nie model kolizji. NIEZWERYFIKOWANE NA SPRZĘCIE. Do oceny Codex.
+
+## Sesja 036 — poziomy dostępu · 2026-10-24 · Claude · PROPOZYCJA
+
+Role operator < technolog < serwis w `core/linumert/access` (bez UI). PIN tylko jako `hashlib.scrypt`
+(n=2^14, r=8, p=1, sól 16 B), porównanie `hmac.compare_digest`, blokada 30 s po 5 błędach, audyt w tej
+samej bazie SQLite obok INI (`[LINUMERT]ACCESS_DB`). Bez domyślnych PIN-ów: brak PIN-ów = kontrola
+wyłączona (zgodność wstecz, uczciwy napis w GUI); PIN ustawia CLI. Uprawnienia: `tools.edit`,
+`offsets.edit` (technolog), `settings`, `classic` (serwis — pełny QtDragon zawiera jego ustawienia).
+Klucz z pulpitu: API `Session.set_key()`; pin HAL do podłączenia przy pulpicie. Role nie są funkcją
+bezpieczeństwa (CLAUDE.md §6).
