@@ -768,12 +768,17 @@
       "milestone": "M4",
       "title": "Proces symulacji",
       "prompt": "prompts/sesja-052.md",
-      "status": "partial",
-      "progress": "Symulacja live działa w osobnym procesie nice 10.",
+      "status": "done",
+      "progress": "Symulacja live (osobny proces, nice 10) z wcześniejszych sesji, a teraz także offline: simulation/linumert_sim/offline.py (ścieżka 051 → SimEngine: materiał, K-3xx, czas G0/G1, objętość usunięta) i worker.py — proces potomny spawn z nice ≥ 10, kolejka zadań, anulowanie zadania bieżącego i oczekującego, cache wyników po SHA-256 wejścia (pamięć + pliki JSON), wątek pomocniczy z callbackiem; most sygnałów Qt screens/linumert/linumert_sim_worker.py. MoveList z obrotami wrzeciona (S, M3/M4/M5; rs274 przez LineCode.spindle/speed).",
       "remaining": [
-        "Rozliczyć anulowanie, cache SHA-256 i pełne API offline."
+        "Podłączenie workera offline do strony Symulacja ekranu i widoku 3D (057).",
+        "Czas z przyspieszeniami i porównanie z Plant (053)."
       ],
       "evidence": [
+        "simulation/linumert_sim/offline.py",
+        "simulation/linumert_sim/worker.py",
+        "screens/linumert/linumert_sim_worker.py",
+        "tests/test_sim_worker.py",
         "docs/DZIENNIK.md"
       ]
     },

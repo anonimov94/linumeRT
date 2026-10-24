@@ -1,7 +1,7 @@
 <!-- Generowane przez python3 tools/roadmap.py; edytuj docs/roadmap/plan.json. -->
 # Wspólny plan linumeRT
 
-Pierwotny plan: **84 sesje M0–M6**, commit `796c6a2`. Stan na 2026-10-24: planowane: 17; w toku: 0; częściowe: 33; do odbioru: 0; ukończone: 34; zablokowane: 0.
+Pierwotny plan: **84 sesje M0–M6**, commit `796c6a2`. Stan na 2026-10-24: planowane: 17; w toku: 0; częściowe: 32; do odbioru: 0; ukończone: 35; zablokowane: 0.
 
 Zakończenie części implementacji nie oznacza odbioru całej funkcji ani sprzętu.
 
@@ -72,7 +72,7 @@ Zakończenie części implementacji nie oznacza odbioru całej funkcji ani sprz�
 | 049 | M3 | [Test technologiczny na Plant](../../prompts/sesja-049.md) | częściowe |
 | 050 | M3 | [Bufor i bramka G3 (prototyp v0.2)](../../prompts/sesja-050.md) | planowane |
 | 051 | M4 | [Ścieżka z programu](../../prompts/sesja-051.md) | ukończone |
-| 052 | M4 | [Proces symulacji](../../prompts/sesja-052.md) | częściowe |
+| 052 | M4 | [Proces symulacji](../../prompts/sesja-052.md) | ukończone |
 | 053 | M4 | [Czas obróbki i porównanie z Plant](../../prompts/sesja-053.md) | częściowe |
 | 054 | M4 | [Przygotówka](../../prompts/sesja-054.md) | ukończone |
 | 055 | M4 | [Materiał 2.5D](../../prompts/sesja-055.md) | częściowe |
@@ -502,11 +502,11 @@ Pozostaje: Podłączenie MoveList do procesu symulacji i widoku 3D (052/057). Ko
 
 ### 052 — Proces symulacji
 
-**częściowe**. Symulacja live działa w osobnym procesie nice 10.
+**ukończone**. Symulacja live (osobny proces, nice 10) z wcześniejszych sesji, a teraz także offline: simulation/linumert_sim/offline.py (ścieżka 051 → SimEngine: materiał, K-3xx, czas G0/G1, objętość usunięta) i worker.py — proces potomny spawn z nice ≥ 10, kolejka zadań, anulowanie zadania bieżącego i oczekującego, cache wyników po SHA-256 wejścia (pamięć + pliki JSON), wątek pomocniczy z callbackiem; most sygnałów Qt screens/linumert/linumert_sim_worker.py. MoveList z obrotami wrzeciona (S, M3/M4/M5; rs274 przez LineCode.spindle/speed).
 
-Pozostaje: Rozliczyć anulowanie, cache SHA-256 i pełne API offline.
+Pozostaje: Podłączenie workera offline do strony Symulacja ekranu i widoku 3D (057). Czas z przyspieszeniami i porównanie z Plant (053).
 
-Źródła: [docs/DZIENNIK.md](../DZIENNIK.md), [prompts/sesja-052.md](../../prompts/sesja-052.md).
+Źródła: [simulation/linumert_sim/offline.py](../../simulation/linumert_sim/offline.py), [simulation/linumert_sim/worker.py](../../simulation/linumert_sim/worker.py), [screens/linumert/linumert_sim_worker.py](../../screens/linumert/linumert_sim_worker.py), [tests/test_sim_worker.py](../../tests/test_sim_worker.py), [docs/DZIENNIK.md](../DZIENNIK.md), [prompts/sesja-052.md](../../prompts/sesja-052.md).
 
 ### 053 — Czas obróbki i porównanie z Plant
 

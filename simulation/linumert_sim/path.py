@@ -43,7 +43,8 @@ class InterpreterUnavailable(RuntimeError):
 @dataclass(frozen=True, eq=False)
 class MoveList:
     """Odcinki ścieżki w tablicach: start/end (n, 3) float32 [mm], line/tool int32,
-    kind int8 (0 G0, 1 G1, 2 cięciwa łuku), feed float32 [mm/min] (0 dla G0)."""
+    kind int8 (0 G0, 1 G1, 2 cięciwa łuku), feed float32 [mm/min] (0 dla G0), spindle float32
+    [obr/min] ze znakiem (> 0 M3, < 0 M4, 0 stoi)."""
 
     start: np.ndarray
     end: np.ndarray
@@ -51,6 +52,7 @@ class MoveList:
     tool: np.ndarray
     kind: np.ndarray
     feed: np.ndarray
+    spindle: np.ndarray
     notes: tuple[str, ...] = ()
     source: str = "subset"          # "rs274" albo "subset"
 
@@ -94,15 +96,16 @@ class MoveListBuilder:
         if text not in self.notes:
             self.notes.append(text)
 
-    def add(self, start, end, line: int, tool: int, kind: int, feed: float) -> None:
+    def add(self, start, end, line: int, tool: int, kind: int, feed: float,
+            spindle: float = 0.0) -> None:
         if not (np.all(np.isfinite(start)) and np.all(np.isfinite(end))):
             raise ValueError(f"linia {line}: współrzędne ruchu nie są skończone")
-        self._rows.append((tuple(start), tuple(end), line, tool, kind, feed))
+        self._rows.append((tuple(start), tuple(end), line, tool, kind, feed, spindle))
 
     def add_polyline(self, pts: np.ndarray, line: int, tool: int, kind: int,
-                     feed: float) -> None:
+                     feed: float, spindle: float = 0.0) -> None:
         for a, b in zip(pts[:-1], pts[1:], strict=True):
-            self.add(a, b, line, tool, kind, feed)
+            self.add(a, b, line, tool, kind, feed, spindle)
 
     def build(self, source: str) -> MoveList:
         n = len(self._rows)
@@ -112,9 +115,11 @@ class MoveListBuilder:
         tool = np.zeros(n, dtype=np.int32)
         kind = np.zeros(n, dtype=np.int8)
         feed = np.zeros(n, dtype=np.float32)
-        for i, (s, e, ln, t, k, f) in enumerate(self._rows):
-            start[i], end[i], line[i], tool[i], kind[i], feed[i] = s, e, ln, t, k, f
-        return MoveList(start, end, line, tool, kind, feed, tuple(self.notes), source)
+        spindle = np.zeros(n, dtype=np.float32)
+        for i, (s, e, ln, t, k, f, sp) in enumerate(self._rows):
+            start[i], end[i], line[i], tool[i], kind[i], feed[i], spindle[i] = (
+                s, e, ln, t, k, f, sp)
+        return MoveList(start, end, line, tool, kind, feed, spindle, tuple(self.notes), source)
 
 
 # --------------------------------------------------------------------------- łuki
@@ -184,6 +189,7 @@ class PathCanon:
         self.plane = 1
         self.tool = 0
         self.pending_tool = 0
+        self.rpm = 0.0
         self.g5x = np.zeros(3)
         self.g92 = np.zeros(3)
         self.axis_mask = axis_mask
@@ -210,6 +216,10 @@ class PathCanon:
     # --- stan ---
     def next_line(self, state):
         self.lineno = int(state.sequence_number)
+        # Stan modalny wrzeciona (M3/M4/M5) i S z interpretera; gcodemodule nie woła
+        # osobnych metod wrzeciona.
+        direction = {3: 1.0, 4: -1.0}.get(int(getattr(state, "spindle", 5)), 0.0)
+        self.rpm = direction * float(getattr(state, "speed", 0.0))
 
     def set_plane(self, plane):
         self.plane = plane
@@ -248,7 +258,7 @@ class PathCanon:
         end = np.asarray(end, dtype=float) * INCH
         start = end if self.pos is None else self.pos
         self.out.add(start, end, self.lineno, self.tool, kind,
-                     0.0 if kind == KIND_RAPID else self.feed)
+                     0.0 if kind == KIND_RAPID else self.feed, self.rpm)
         self.pos = end
 
     def straight_traverse(self, x, y, z, *rest):
@@ -274,7 +284,7 @@ class PathCanon:
         start = end if self.pos is None else self.pos
         pts = arc_points(start, end, (first_axis * INCH, second_axis * INCH), int(rotation),
                          (a1, a2, ax))
-        self.out.add_polyline(pts, self.lineno, self.tool, KIND_ARC, self.feed)
+        self.out.add_polyline(pts, self.lineno, self.tool, KIND_ARC, self.feed, self.rpm)
         self.pos = end
 
     def movelist(self) -> MoveList:
@@ -317,6 +327,8 @@ class _State:
     plane: int = 1
     tool: int = 0
     pending_tool: int = 0
+    speed: float = 0.0
+    direction: float = 0.0
     retract: str = "98"
     cycle_initial_z: float | None = None
     cycle: dict = field(default_factory=dict)
@@ -399,11 +411,20 @@ class SubsetInterpreter:
             s.pending_tool = int(val["T"])
         if "6" in m:
             s.tool = s.pending_tool
+        if "S" in val:
+            s.speed = val["S"]
+        for code, direction in (("3", 1.0), ("4", -1.0), ("5", 0.0)):
+            if code in m:
+                s.direction = direction
         if not skip and (any(k in val for k in "XYZ") or (s.motion in ("2", "3") and any(
                 k in val for k in "IJKR"))):
             self._motion(number, val)
         if "2" in m or "30" in m:
             self.ended = True
+
+    @property
+    def rpm(self) -> float:
+        return self.s.direction * self.s.speed
 
     def _target(self, val: dict) -> np.ndarray:
         s = self.s
@@ -425,14 +446,15 @@ class SubsetInterpreter:
         end = self._target(val)
         if s.motion in ("0", "1"):
             kind = KIND_RAPID if s.motion == "0" else KIND_FEED
-            self.out.add(s.pos, end, number, s.tool, kind, 0.0 if kind == KIND_RAPID else s.feed)
+            self.out.add(s.pos, end, number, s.tool, kind,
+                         0.0 if kind == KIND_RAPID else s.feed, self.rpm)
         else:
             a1, a2, ax = PLANE_AXES[s.plane]
             center = self._center(number, val, end, (a1, a2))
             turns = int(val.get("P", 1))
             rotation = turns if s.motion == "3" else -turns
             pts = arc_points(s.pos, end, center, rotation, (a1, a2, ax))
-            self.out.add_polyline(pts, number, s.tool, KIND_ARC, s.feed)
+            self.out.add_polyline(pts, number, s.tool, KIND_ARC, s.feed, self.rpm)
         s.pos = end
 
     def _center(self, number, val, end, axes) -> tuple[float, float]:
@@ -485,7 +507,7 @@ class SubsetInterpreter:
         def go(kind, point):
             point = np.asarray(point, dtype=float)
             self.out.add(s.pos, point, number, s.tool, kind,
-                         0.0 if kind == KIND_RAPID else s.feed)
+                         0.0 if kind == KIND_RAPID else s.feed, self.rpm)
             s.pos = point
 
         if s.pos[2] < r:
