@@ -8,6 +8,7 @@ from linumert_neon_render import SettingsStore
 from linumert_neon_view import NeonDetailPanel, NeonPathView, PathScene
 from linumert_skin_screen import SkinScreen
 from linumert_skin_strings import text
+from PyQt5 import QtWidgets
 
 
 class ClassicDigitalScreen(SkinScreen):
@@ -20,24 +21,36 @@ class ClassicDigitalScreen(SkinScreen):
     NEON_ROLES = ("toolpath", "machine")
 
     def build(self):
-        self.path_scene = None
         self.mount()
         self.console_widget = self.console(("cycle", "edit", "dry_run", "block_delete",
                                             "space", "mode", "M01", "M3", "M8", "estop"))
 
+    @property
+    def path_scene(self):
+        return self.shared.get("path_scene")
+
     def body(self, role):
-        # Bez fabryki widoków (studium układu) zostaje zwykły opis „renderer niepodłączony”.
-        if role not in self.NEON_ROLES or not self.viewport_factory:
+        if role not in self.NEON_ROLES:
             return super().body(role)
-        if self.path_scene is None:
+        scene = self.path_scene
+        if scene is None:
+            if not self.viewport_factory:
+                # Monitor na żywo: uczciwy stan programu; studium układu: zwykły opis.
+                note = self.shared.get("program_note")
+                if note is None:
+                    return super().body(role)
+                label = QtWidgets.QLabel(note)
+                label.setWordWrap(True)
+                return label
             from linumert.programs.toolpath import demo_toolpath
-            self.path_scene = PathScene(demo_toolpath(), parent=self)
-            # Sposób renderowania każdego widoku zapisany w profilu operatora (⚙ w rogu widoku).
-            self.render_store = SettingsStore()
+            scene = self.shared["path_scene"] = PathScene(
+                demo_toolpath(), parent=self.shared.get("owner", self))
+        # Sposób renderowania każdego widoku zapisany w profilu operatora (⚙ w rogu widoku).
+        store = self.shared.setdefault("render_store", SettingsStore())
         if role == "toolpath":
-            view = NeonDetailPanel(self.path_scene, self.palette, self.render_store)
+            view = NeonDetailPanel(scene, self.palette, store)
         else:
-            view = NeonPathView(self.path_scene, "machine", self.palette, self.render_store)
-        view.setToolTip(text("neon_scene", self.preferences))
+            view = NeonPathView(scene, "machine", self.palette, store)
+        view.setToolTip(text("neon_scene" if not scene.live else "neon_live", self.preferences))
         self.viewports[role] = view
         return view

@@ -127,7 +127,108 @@ def test_classic_skin_uses_neon_views_with_shared_scene(app):
     assert isinstance(screen.viewports["toolpath"], NeonDetailPanel)
     assert isinstance(screen.viewports["machine"], NeonPathView)
     assert screen.viewports["toolpath"].scene is screen.viewports["machine"].scene
-    assert screen.path_scene.parent() is screen
+    assert screen.path_scene.parent() is screen      # bez hosta: właścicielem jest ekran
     assert isinstance(screen.viewports["workpiece"], QtWidgets.QLabel)
     layout_only = SCREENS["classic-digital"](prefs, palette_for(prefs))
     assert not layout_only.viewports and layout_only.path_scene is None
+
+
+def test_loader_json_roundtrip_and_errors():
+    from linumert_neon_loader import toolpath_from_json, toolpath_to_json
+
+    tp = demo_toolpath()
+    back = toolpath_from_json(toolpath_to_json(tp).encode(), tp.source)
+    assert len(back) == len(tp) and back.source == tp.source
+    assert [m.line for m in back.moves] == [m.line for m in tp.moves]
+    assert back.length == pytest.approx(tp.length, rel=1e-6)
+    for bad in (b'{"error": "linia 7: zly kod"}', b'[]', b'{"version": 2, "moves": []}',
+                b'{"version": 1, "moves": [[1, "tak", 0, []]]}'):
+        with pytest.raises(ValueError):
+            toolpath_from_json(bad)
+
+
+def test_loader_process_reports_missing_interpreter_honestly(app):
+    import importlib.util
+
+    if importlib.util.find_spec("gcode") is not None:
+        pytest.skip("środowisko z LinuxCNC: wariant bez interpretera nie dotyczy")
+    from linumert_skin_monitor import ProgramLoader
+
+    loader = ProgramLoader(timeout_s=20)
+    seen = []
+    loader.loaded.connect(lambda tp, note: seen.append((tp, note)))
+    loader.start(str(ROOT / "config/sim/nc_files/linumert_neon_demo.ngc"))
+    import time
+    end = time.monotonic() + 20
+    while not seen and time.monotonic() < end:
+        app.processEvents(QtCore.QEventLoop.AllEvents, 50)
+    assert seen and seen[0][0] is None and "gcode" in seen[0][1]
+
+
+def test_monitor_follows_live_program_and_survives_skin_switch(app):
+    import json
+    import time
+    from types import SimpleNamespace
+
+    from linumert_skin_contract import PresentationPreferences
+    from linumert_skin_monitor import SkinMonitor
+    from linumert_skin_status import decode_sample, read_status
+
+    window = SkinMonitor(PresentationPreferences("classic-digital", "neon-punk", "pl"))
+    window.reader.timer.stop()
+    window.loader.start = lambda path: None          # bez procesu: ścieżka podana niżej
+    window.show()
+    app.processEvents()
+    try:
+        assert "toolpath" not in window.viewports      # bez programu: tylko opis stanu
+        api = SimpleNamespace(MODE_MANUAL=1, MODE_MDI=3, MODE_AUTO=2, STATE_ESTOP=1,
+                              STATE_ESTOP_RESET=2, STATE_OFF=3, STATE_ON=4, INTERP_IDLE=1,
+                              INTERP_READING=2, INTERP_PAUSED=3, INTERP_WAITING=4)
+        tp = demo_toolpath()
+        target = tp.moves[30]
+        here = target.at(target.length / 3)
+        status = SimpleNamespace(
+            poll=lambda: None, linear_units=1.0, angular_units=1.0, axis_mask=7,
+            actual_position=tuple(float(v) for v in here + (100, 100, -150)) + (0,) * 6,
+            task_mode=2,
+            task_state=4, interp_state=2, estop=0, enabled=True, file="/nc/neon.ngc",
+            motion_line=target.line, g5x_offset=(100, 100, -150) + (0,) * 6,
+            g92_offset=(0,) * 9, tool_offset=(0,) * 9, rotation_xy=0.0,
+            distance_to_go=1.25, dtg=(1, 0, 0) + (0,) * 6)
+        sample = decode_sample(json.dumps(read_status(status, api)).encode(), time.monotonic())
+        window.present(sample, "sampled")
+        assert window.program_file == "/nc/neon.ngc"
+        window.program_loaded(tp, "neon.ngc · test")
+        window.present(sample, "sampled")
+        scene = window.shared["path_scene"]
+        assert scene.live and scene.index == 30 and scene.dtg() == pytest.approx(1.25)
+        assert isinstance(window.viewports["toolpath"], NeonDetailPanel)
+        window.select("skin", "industrial-pro")
+        window.select("skin", "classic-digital")
+        window.select("theme", "classic-turquoise")
+        assert window.shared["path_scene"] is scene    # zmiana skórki/motywu: ta sama scena
+        assert window.viewports["toolpath"].scene is scene
+        status.file = ""
+        window.present(decode_sample(json.dumps(read_status(status, api)).encode(),
+                                     time.monotonic()), "sampled")
+        assert "path_scene" not in window.shared and "toolpath" not in window.viewports
+    finally:
+        window.close()
+        app.processEvents()
+
+
+def test_preview_keeps_demo_scene_across_skin_and_theme(app):
+    from linumert_skin_contract import PresentationPreferences
+    from linumert_skin_preview import SkinPreview
+
+    window = SkinPreview(PresentationPreferences("classic-digital", "neon-punk", "pl"),
+                         viewport_factory=lambda role, palette: QtWidgets.QLabel(role))
+    scene = window.shared["path_scene"]
+    scene.timer.stop()
+    scene.seek(500)
+    for field, value in (("theme", "ion-blue"), ("skin", "cyberdeck"), ("language", "en"),
+                         ("skin", "classic-digital")):
+        window.select(field, value)
+    assert window.shared["path_scene"] is scene and scene.index > 0
+    assert window.viewports["machine"].scene is scene
+    window.close()

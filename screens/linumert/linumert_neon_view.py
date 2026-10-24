@@ -60,11 +60,18 @@ class PathScene(QtCore.QObject):
 
     changed = QtCore.pyqtSignal()
 
-    def __init__(self, toolpath: Toolpath, stock=DEMO_STOCK, live=False, parent=None):
+    def __init__(self, toolpath: Toolpath, stock=DEMO_STOCK, live=False, parent=None,
+                 stock_box=None):
         super().__init__(parent)
         self.toolpath = toolpath
-        self.stock = stock
+        if stock_box is None:
+            stock_box = ((0.0, 0.0, -stock[2]), (stock[0], stock[1], 0.0))
+        # Przygotówka w układzie detalu (dolny-lewy-przedni i górny-prawy-tylny narożnik).
+        self.stock_lo = np.asarray(stock_box[0], dtype=float)
+        self.stock_hi = np.asarray(stock_box[1], dtype=float)
+        self.stock = tuple(float(v) for v in self.stock_hi - self.stock_lo)
         self.live = live
+        self.reported_dtg = None       # stat.distance_to_go w trybie na żywo
         self.index, self.s = 0, 0.0
         self.playing = not live
         self.speed = 8
@@ -101,6 +108,8 @@ class PathScene(QtCore.QObject):
         return None if self.done else self.toolpath.moves[self.index]
 
     def dtg(self):
+        if self.live and self.reported_dtg is not None:
+            return self.reported_dtg
         return self.toolpath.dtg(self.index, self.s)
 
     def zone(self, index):
@@ -145,8 +154,8 @@ class PathScene(QtCore.QObject):
         if self.material is None:
             from linumert_sim.cutter import make_cutter
             from linumert_sim.zmap import StockMap
-            sx, sy, sz = self.stock
-            self.material = StockMap("BOX", 0.0, 0.0, sx, sy, -sz, 0.0, cell=0.5)
+            lo, hi = self.stock_lo, self.stock_hi
+            self.material = StockMap("BOX", lo[0], lo[1], hi[0], hi[1], lo[2], hi[2], cell=0.5)
             self._cutter = make_cutter(1, 50.0, 6.0, "flat")
             self._cut_d = 0.0
         return self.material
@@ -520,8 +529,9 @@ class NeonPathView(QtWidgets.QWidget):
         sc = self.scene
         tool = sc.tool_position()
         sx, sy, sz = sc.stock
+        lo, hi = sc.stock_lo, sc.stock_hi
         cam = self.camera
-        target = tool if self.follow else np.array((sx / 2, sy / 2, -sz / 2))
+        target = tool if self.follow else (lo + hi) / 2
         # Pierwsza klatka ustawia kamerę od razu; dalej płynne dojście za narzędziem.
         cam.target = cam.target + (target - cam.target) * (0.25 if self._aimed else 1.0)
         self._aimed = True
@@ -534,12 +544,13 @@ class NeonPathView(QtWidgets.QWidget):
 
         def draw_static(bp, project):
             shader = Shader(bp, project, toward, eff)
-            self.grid(bp, project, (-60, 180), (-60, 140), -sz, 10, color(self.muted, 0.18))
-            shader.box((0, 0, -sz), (sx, sy, 0), METAL if eff.style != "linie" else self.muted,
+            self.grid(bp, project, (lo[0] - 60, hi[0] + 60), (lo[1] - 60, hi[1] + 60), lo[2], 10,
+                      color(self.muted, 0.18))
+            shader.box(lo, hi, METAL if eff.style != "linie" else self.muted,
                        fill_alpha=0.05, solid_alpha=1.0)
             if not material:
-                self.grid(bp, project, (0, sx), (0, sy), 0, 10, color(self.muted, 0.28),
-                          inner=True)
+                self.grid(bp, project, (lo[0], hi[0]), (lo[1], hi[1]), hi[2], 10,
+                          color(self.muted, 0.28), inner=True)
             origin = project(np.zeros(3))
             for axis, col in ((0, NEON["red"]), (1, NEON["lime"]), (2, NEON["cyan"])):
                 end = np.zeros(3)
@@ -609,11 +620,11 @@ class NeonPathView(QtWidgets.QWidget):
                 bp.drawLine(QtCore.QPointF(*a), QtCore.QPointF(*b))
             for x in (-30, 440):
                 shader.box((x - 8, 0, -200), (x + 8, 320, -188), self.muted, 0.1)
-            shader.box((g[0], g[1], g[2] - sz), (g[0] + sx, g[1] + sy, g[2]),
-                       METAL if eff.style != "linie" else self.fg, 0.08, solid_alpha=1.0)
-            for cx, cy in ((g[0] - 18, g[1] + 20), (g[0] - 18, g[1] + sy - 20),
-                           (g[0] + sx + 8, g[1] + 20), (g[0] + sx + 8, g[1] + sy - 20)):
-                shader.box((cx, cy - 6, table_z), (cx + 10, cy + 6, g[2] - sz + 8),
+            a, b = g + sc.stock_lo, g + sc.stock_hi
+            shader.box(a, b, METAL if eff.style != "linie" else self.fg, 0.08, solid_alpha=1.0)
+            for cx, cy in ((a[0] - 18, a[1] + 20), (a[0] - 18, b[1] - 20),
+                           (b[0] + 8, a[1] + 20), (b[0] + 8, b[1] - 20)):
+                shader.box((cx, cy - 6, table_z), (cx + 10, cy + 6, a[2] + 8),
                            NEON["orange"], 0.12)
 
         layers, offset = self._layers(w, h, 0, eff, 0.7, 0, tuple(g), draw_static)
@@ -991,3 +1002,24 @@ class NeonDetailPanel(QtWidgets.QWidget):
         code = sc.toolpath.source[m.line - 1] if 0 < m.line <= len(sc.toolpath.source) else ""
         self.info.setText(f"NASTĘPNY P{sc.index + 1:03d} · N{m.line:04d} · {zone} · "
                           f"DTG {sc.dtg():.3f} mm · {code}")
+
+
+def stock_box_for(toolpath):
+    """Przygotówka podglądu w układzie detalu: z `;@STOCK` (dowolne ORIGIN) albo z obrysu
+    ruchów roboczych, gdy program jej nie deklaruje."""
+    from linumert.programs.stock import StockError, parse_stock_line
+    from linumert_sim.placement import stock_bounds
+
+    for line in toolpath.source[:200]:
+        if line.strip().upper().startswith(";@STOCK"):
+            try:
+                x0, y0, x1, y1, z0, z1 = stock_bounds(parse_stock_line(line.strip()), (0, 0, 0))
+                return (x0, y0, z0), (x1, y1, z1)
+            except (StockError, ValueError):
+                break
+    feed = [m.points for m in toolpath.moves if not m.rapid and m.length > 0]
+    if not feed:
+        return None
+    pts = np.concatenate(feed)
+    lo, hi = pts.min(axis=0), pts.max(axis=0)
+    return (lo[0] - 5, lo[1] - 5, min(lo[2], -1.0)), (hi[0] + 5, hi[1] + 5, max(0.0, hi[2]))

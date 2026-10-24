@@ -978,3 +978,13 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
 - Pomiar detalu: z 37 ms do 2,9–6,8 ms mediany; najgorsza klatka z 54 ms do ≤ 20 ms (3 mm/klatkę). Szczegóły w DECYZJE.
 - Testy: 10 nowych w `test_neon_render.py`; pełne pytest lokalnie: 1153 PASS, 12 skip; ruff i wymagania PASS.
 - Zrzuty presetów: `tools/dev/neon-preview.py --png … --preset …` (build/neon). Autokontrola. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## Classic × Neon — N2 + N3: monitor na żywo i zmiana skórek · 2026-10-24 · Claude
+- Model-Author: Claude. Podział z Codex: Claude N2+N3, Codex N1+N4 (prawdziwy LinuxCNC).
+- N2: próbka NML z `file`, `motion_line`, G5x/G92/narzędzie, `distance_to_go`, `dtg` (walidacja, mm);
+  `linumert_neon_loader.py` — `gcode.parse` w jednorazowym procesie (timeout 20 s, limit 64 MB);
+  monitor: nowy plik → wczytanie, linia + pozycja detalu → następny punkt, DTG z LinuxCNC; bez programu
+  uczciwy opis zamiast sceny demo. Przygotówka z `;@STOCK` (dowolne ORIGIN) albo z obrysu ruchów.
+- N3: scena w stanie hosta (`shared`) — zmiana skórki/motywu/języka nie gubi sceny ani materiału;
+  launcher ISO `linumert --neon` + skrót pulpitu. Uruchomienie z prawdziwym `gcode`: zadanie N4 Codex.
+- Testy: pełne pytest 1181 PASS, 12 skip; ruff, wymagania PASS. NIEZWERYFIKOWANE NA SPRZĘCIE.
