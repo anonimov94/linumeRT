@@ -5,6 +5,45 @@ Model-Author: Claude · 2026-10-18. **Jedyne źródło zasad współpracy.** `AG
 osobny commit + wpis w `docs/DECYZJE.md` (sekcja decyzji właściciela). Powód wersji 2: limity tokenów często przerywają
 sesje, więc pracujemy małymi krokami, z częstym pushem i jawnym przekazaniem tury.
 
+## Lekcja projektu — pilnowanie założeń i kolejności (2026-10-24, ma pierwszeństwo)
+
+Model-Author: Codex. Polecenie właściciela po porównaniu projektu z pierwotnym planem.
+Rozwijanie skórek, renderera i ISO równolegle z niedomkniętymi wcześniejszymi etapami
+rozproszyło pracę. Wiele działających części nie dało kolejnych odebranych kamieni.
+Zachowujemy wykonany kod i przywracamy dyscyplinę domykania planu.
+
+1. **Na początku każdej sesji wróć do celu i kontraktu `CLAUDE.md` oraz rejestru
+   `docs/roadmap/plan.json`.** Przed implementacją podaj: ID pierwotnej sesji,
+   kryterium/bramkę do zamknięcia, otwarte zależności i jeden mały rezultat tej sesji.
+   Sprawdź dotychczasowe dowody, aby nie implementować ponownie ukończonych części.
+2. **Pracuj według M0 → M1 → M2/G2 → M3/G3 → M4/G4 → M5/G5 → M6/G6.**
+   Domykaj najwcześniejszy otwarty zakres i jego kryteria przed rozwijaniem kolejnego
+   kamienia. Wcześniejszy krok zależności lub naprawę blokera ogranicz do zakresu
+   niezbędnego do odbioru; zapisz powiązanie i uzasadnienie w rejestrze/dzienniku.
+   Przy zewnętrznej blokadzie wykonuj pozostałe dostępne zadania tego etapu;
+   nie zastępuj brakującego odbioru deklaracją ani nowym prototypem.
+3. **Najpierw doprowadź rozpoczętą funkcję do użytecznego i odebranego działania.**
+   Zachowaj GUI od pierwszego kroku (D36), domknij integrację, testy i dokumentację.
+   Liczba testów, ukończony backend, zrzut lub podgląd nie zastępują kryteriów całej
+   sesji. Wynik automatyczny, pulpit, RT i sprzęt zachowują osobne dowody odbioru.
+4. **Nowe pomysły wpisuj jako rozszerzenia pierwotnych sesji w rejestrze.** Sam wpis
+   nie zmienia priorytetu, nie otwiera osobnej roadmapy i nie uzasadnia pracy poza
+   bieżącym etapem. Rozwijaj wspólną logikę raz; kolejne skórki korzystają z jej
+   kontraktu zamiast tworzyć oddzielne implementacje sterowania.
+5. **Jawne nowe polecenie właściciela może zmienić zakres lub kolejność.** Wykonaj je
+   i zapisz powód, wpływ na wcześniejsze bramki oraz nowe powiązania w `DECYZJE.md`
+   i rejestrze. Nie interpretuj ogólnego „kontynuuj” ani dawnych zleceń „wybieraj
+   najłatwiejsze tematy” jako zmiany tej kolejności. Rutynowe decyzje w zatwierdzonym
+   zakresie podejmuj samodzielnie; ta reguła nie tworzy dodatkowej procedury zgód.
+6. **Na końcu sesji rozlicz postęp względem planu:** które kryterium domknięto,
+   co nadal pozostaje i jakie jest następne zadanie z tej samej kolejności.
+   Aktualizuj wyłącznie rejestr i generuj widoki; nie twórz konkurencyjnej listy statusów.
+
+Wnioski z audytu 2026-10-24: odbiór podstawy obejmuje OD-01, PLAN-27,
+LEGACY-RUNTIME i domknięcie rozpoczętego edytora; następnie zaległość 007 oraz M2/G2,
+a dalej M3/G3, M4/G4, M5/G5 i M6/G6. Aktualny stan tych zadań pozostaje wyłącznie
+w rejestrze; ta lista wyjaśnia powrót do planu i nie jest osobnym harmonogramem.
+
 ## Aktualizacja właściciela — wspólna roadmapa 2026-10-24 (ma pierwszeństwo)
 
 Jedyne źródło statusów, powiązań zadań i pozostałego zakresu to `docs/roadmap/plan.json`.

@@ -1,6 +1,6 @@
 # Przekazanie i środowisko
 
-Tura: Codex · 2026-10-24 · stan: oddana; ujednolicenie roadmapy w PR #99.
+Tura: Codex · 2026-10-24 · stan: oddana; roadmapa PR #99, lekcja dyscypliny planu PR #100.
 
 Model-Author: Codex. Bez globalnego LOCK; zasady współpracy wyłącznie w
 [WSPOLPRACA_MODELI.md](WSPOLPRACA_MODELI.md).
@@ -14,6 +14,12 @@ Nie utrzymuj tu drugiej listy statusów. Dobór sesji i rozszerzeń według reje
 oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj automatycznie.
 
 ## Przekazanie
+
+Lekcja dla następnych sesji AI: [zasada powrotu do pierwotnych założeń i kolejności](WSPOLPRACA_MODELI.md).
+Zapis instrukcji: [PR #100](https://github.com/anonimov94/linumeRT/pull/100),
+checkout `/tmp/linumert-plan-discipline`, pierwszy krok `96ba9af` wypchnięty.
+Lokalnie lint, 1072 testy i kontrola REQ PASS; 88 skip bez GUI, LinuxCNC poza zakresem zmiany dokumentów.
+Kolejna sesja wybiera ID i kryterium/bramkę według reguły oraz aktualnego rejestru.
 
 Zmiany roadmapy: PR #99, gałąź `codex/unified-roadmap`, osobny checkout
 `/tmp/linumert-unified-roadmap`. Końcowy SHA, kontrole CI i scalenie sprawdzaj w
