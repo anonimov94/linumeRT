@@ -66,3 +66,9 @@ Model-Author: Codex. LinuxCNC 2.9 jest pobierany do cache z oficjalnego repozyto
 Model-Author: Codex. Własne procedury, szablon, raport konkursu i archiwum
 dowodów programowych: GPL-2.0-or-later; ścieżki i pochodzenie w PROVENANCE.md.
 Bez nowych zależności ani zewnętrznych materiałów.
+
+## Tłumaczenia Qt — sesja 007, 2026-10-24
+Model-Author: Claude. `tools/i18n.sh` wywołuje narzędzia deweloperskie `pylupdate5` (pakiet Debiana
+`pyqt5-dev-tools`, GPL-3.0, jak PyQt5) i opcjonalnie `lrelease` (`qttools5-dev-tools`, Qt — LGPL-3.0/GPL).
+Służą tylko do aktualizacji `.ts` i kompilacji `.qm`; nie są zależnością uruchomieniową (ekran czyta `.ts`
+własnym `TsTranslator`). Pliki `screens/linumert/i18n/*.ts` to własne teksty, GPL-2.0-or-later.
