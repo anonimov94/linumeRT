@@ -462,6 +462,9 @@ def render(cfg: MachineConfig, target: str, opt: Options | None = None,
         if cfg.target != "hardware" or cfg.hardware is None:
             raise hwgen.HardwareConfigError(["cel hardware wymaga target: hardware i sekcji "
                                              "hardware: w machine.yaml"])
+        if cfg.hardware.interface == "ethercat":
+            raise hwgen.HardwareConfigError(["hardware.interface ethercat: generator EtherCAT "
+                                             "to sesja 063"])
         plan = hwgen.hardware_plan(cfg)
         errors = hwgen.check(cfg, plan)
         if errors:

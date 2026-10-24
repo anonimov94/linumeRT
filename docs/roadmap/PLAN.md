@@ -1,7 +1,7 @@
 <!-- Generowane przez python3 tools/roadmap.py; edytuj docs/roadmap/plan.json. -->
 # Wspólny plan linumeRT
 
-Pierwotny plan: **84 sesje M0–M6**, commit `796c6a2`. Stan na 2026-10-24: planowane: 15; w toku: 1; częściowe: 29; do odbioru: 0; ukończone: 39; zablokowane: 0.
+Pierwotny plan: **84 sesje M0–M6**, commit `796c6a2`. Stan na 2026-10-24: planowane: 15; w toku: 0; częściowe: 30; do odbioru: 0; ukończone: 39; zablokowane: 0.
 
 Zakończenie części implementacji nie oznacza odbioru całej funkcji ani sprzętu.
 
@@ -82,7 +82,7 @@ Zakończenie części implementacji nie oznacza odbioru całej funkcji ani sprz�
 | 059 | M4 | [Raport symulacji i eksport STL](../../prompts/sesja-059.md) | częściowe |
 | 060 | M4 | [Bufor i bramka G4 (prototyp v0.3)](../../prompts/sesja-060.md) | planowane |
 | 061 | M5 | [machine.yaml: napędy i wejścia rzeczywiste](../../prompts/sesja-061.md) | częściowe |
-| 062 | M5 | [Generator INI/HAL: sim, Plant, step/dir](../../prompts/sesja-062.md) | w toku |
+| 062 | M5 | [Generator INI/HAL: sim, Plant, step/dir](../../prompts/sesja-062.md) | częściowe |
 | 063 | M5 | [Generator EtherCAT (lcec, CiA 402)](../../prompts/sesja-063.md) | planowane |
 | 064 | M5 | [Wrzeciono RS485 w generatorze](../../prompts/sesja-064.md) | planowane |
 | 065 | M5 | [Kinematyki 4 i 5 osi](../../prompts/sesja-065.md) | częściowe |
@@ -577,11 +577,11 @@ Pozostaje: Pulpit (MPG, przyciski) i E-STOP rzeczywisty w sekcji hardware. Rapor
 
 ### 062 — Generator INI/HAL: sim, Plant, step/dir
 
-**w toku**. Codex: rozpoczęto po scaleniu integracji #125 (b2ee924), na jawne polecenie właściciela. Krok 1: kopia całej istniejącej konfiguracji do unikalnego katalogu, diff bez zapisu, odmowa nieprawidłowych ścieżek i dowiązań; 8 testów Windows/Python3.12 PASS.
+**częściowe**. Codex: rozpoczęto po scaleniu integracji #125 (b2ee924), na jawne polecenie właściciela. Krok 1: kopia całej istniejącej konfiguracji do unikalnego katalogu, diff bez zapisu, odmowa nieprawidłowych ścieżek i dowiązań; 8 testów Windows/Python3.12 PASS. Claude: szablony INI/HAL plant i sim z machine.yaml (golden: plant = ręczna konfiguracja Plant instrukcja po instrukcji), wyjście hardware step/dir (Mesa 7i96S/7i76E, port równoległy z ostrzeżeniem, hy_vfd, [SAFETY]; przechodzi deployment --hal-from-ini; odmowa bez E-STOP), CLI linumert-config build z podglądem i kopią zapasową; wygenerowany sim bramy uruchomiony i zbazowany w LinuxCNC 2.9 RIP.
 
-Pozostaje: Szablony INI/HAL sim i Plant oraz zgodność D05, DISPLAY linumert. Wyjścia stepgen parport i Mesa 7i96S/7i76E z jawnymi mapowaniami sprzętu i E-STOP; NIEZWERYFIKOWANE NA SPRZĘCIE. CLI linumert-config build łączące walidację, backup, diff i zapis; golden tests. Uruchomienie wygenerowanych sim/Plant w LinuxCNC i pełne make lint test.
+Pozostaje: Wygenerowany Plant uruchomiony bezpośrednio w LinuxCNC (dziś przez równość z ręczną konfiguracją, którą testuje CI). Nazwy pinów Mesa i całe wyjście hardware: NIEZWERYFIKOWANE NA SPRZĘCIE. EtherCAT (063), wrzeciono PWM/mb2hal (064).
 
-Źródła: [core/linumert/machine/config_files.py](../../core/linumert/machine/config_files.py), [tests/test_config_files.py](../../tests/test_config_files.py), [prompts/sesja-062.md](../../prompts/sesja-062.md).
+Źródła: [core/linumert/machine/config_files.py](../../core/linumert/machine/config_files.py), [tests/test_config_files.py](../../tests/test_config_files.py), [core/linumert/machine/configgen.py](../../core/linumert/machine/configgen.py), [core/linumert/machine/configgen_hw.py](../../core/linumert/machine/configgen_hw.py), [core/linumert/machine/config_build.py](../../core/linumert/machine/config_build.py), [tests/test_configgen.py](../../tests/test_configgen.py), [tests/test_configgen_cli.py](../../tests/test_configgen_cli.py), [tests/test_configgen_hw.py](../../tests/test_configgen_hw.py), [config/hardware/router_gantry_mesa.example.yaml](../../config/hardware/router_gantry_mesa.example.yaml), [prompts/sesja-062.md](../../prompts/sesja-062.md).
 
 ### 063 — Generator EtherCAT (lcec, CiA 402)
 
