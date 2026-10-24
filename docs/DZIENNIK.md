@@ -973,3 +973,8 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
 - Poprawka: CSafeLoader, cache biblioteki wg mtime/rozmiaru plików (kopia głęboka), `sys.setswitchinterval(0.0005)` w `serve`.
 - Odtworzenie lokalne (Plant + lrtnet_probe 1 kHz + odpytywanie endpointów): przed RTT maks. 242 ms, 130 utraconych, watchdog; po 11,9 ms, 0 utraconych.
 - Testy: tests/test_library_cache.py. Nie zmieniono timeout-cycles ani łańcucha E-STOP. Do potwierdzenia na pulpicie właściciela.
+
+## PLAN-27 — częściowy ręczny odbiór pulpitu — 2026-10-24 · Claude
+- Model-Author: Claude. Właściciel przeszedł checklistę na własnym pulpicie (HMI z Plant, SHA 4bc7a14 i 27b9245).
+- Potwierdzone: punkty 1–6 i 8; przełączanie kart panelu Plant nie zrywa łącza po poprawce LEGACY-RUNTIME.
+- Otwarte: punkt 7 (raport HTML), skróty QtDragon/Plant z menu, zrzuty i log. NIEZWERYFIKOWANE NA SPRZĘCIE.

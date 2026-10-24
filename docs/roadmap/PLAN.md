@@ -833,9 +833,9 @@ Pozostaje: Wykonanie po Abort/E-STOP/wymianie narzędzia i pełny odbiór; podgl
 
 ### PLAN-27 — Ręczny odbiór pulpitu
 
-**do odbioru**. Protokół przygotowany; brak zaliczonego ręcznego odbioru.
+**do odbioru**. Protokół przygotowany. Ręcznie potwierdzone przez właściciela 2026-10-24 (SHA 4bc7a14, potem 27b9245): punkty 1–6 i 8 (pełny ekran, Plant, bazowanie/JOG/MDI, M3/M5/M6, program z pauzą i wznowieniem, cykle .lnx, brak pozostałej instancji po zamknięciu). Punkt 7 (raport HTML) i skróty QtDragon/Plant z menu aplikacji niesprawdzone.
 
-Pozostaje: Wykonać checklistę na pulpicie właściciela i zapisać dowody.
+Pozostaje: Sprawdzić raport HTML (przycisk Raport w widoku symulacji, domyślnie ~/raport_symulacji.html), skróty QtDragon i Plant z menu oraz dołączyć zrzuty i log.
 
 Źródła: [docs/PLAN_TYGODNIA_2026-10-21.md](../PLAN_TYGODNIA_2026-10-21.md), [docs/raporty/prototypy/PLAN-21-27-2026-10-21.md](../raporty/prototypy/PLAN-21-27-2026-10-21.md).
 
@@ -963,9 +963,9 @@ Pozostaje: Zweryfikować obraz main, SHA-256, live/instalację; publikacja ręcz
 
 ### LEGACY-RUNTIME — Diagnostyka uruchomień z dawnych promptów startowych
 
-**częściowe**. Testy runtime i launchery rozwijano później; stare listy nie są nowym harmonogramem. 2026-10-24: przyczyna zrywania LRT-NET przy zakładkach panelu Plant znaleziona i usunięta (parsowanie biblioteki napędów w procesie Plant blokowało pętlę UDP przez GIL; teraz CSafeLoader, cache wg mtime, krótszy interwał GIL). Odtworzenie lokalne: przed poprawką RTT maks. 242 ms i 130 zgubionych ramek, po poprawce 11,9 ms i 0.
+**częściowe**. Testy runtime i launchery rozwijano później; stare listy nie są nowym harmonogramem. 2026-10-24: przyczyna zrywania LRT-NET przy zakładkach panelu Plant znaleziona i usunięta (parsowanie biblioteki napędów w procesie Plant blokowało pętlę UDP przez GIL; teraz CSafeLoader, cache wg mtime, krótszy interwał GIL). Odtworzenie lokalne: przed poprawką RTT maks. 242 ms i 130 zgubionych ramek, po poprawce 11,9 ms i 0. Właściciel potwierdził na pulpicie (2026-10-24): przełączanie kart panelu Plant nie zrywa już łącza.
 
-Pozostaje: Powtórzyć na pulpicie właściciela przełączanie zakładek po poprawce (błąd 'N cykli bez odpowiedzi'). 10× testy Plant z LinuxCNC: 1 z 10 przebiegów PASS (13/13), reszta do wykonania na wolnym pulpicie. Zmierzyć najdłuższe zamrożenie GUI i heartbeat (50 000 linii G1), VirtualBox na docelowym stanowisku.
+Pozostaje: 10× testy Plant z LinuxCNC: 1 z 10 przebiegów PASS (13/13), reszta do wykonania na wolnym pulpicie. Zmierzyć najdłuższe zamrożenie GUI i heartbeat (50 000 linii G1), VirtualBox na docelowym stanowisku.
 
 Źródła: [prompts/START-CODEX-HMI.md](../../prompts/START-CODEX-HMI.md), [prompts/START-CODEX-LINUX.md](../../prompts/START-CODEX-LINUX.md), [tests/test_library_cache.py](../../tests/test_library_cache.py), [plant/server/linumert_plant/drive_library.py](../../plant/server/linumert_plant/drive_library.py), [plant/server/linumert_plant/serve.py](../../plant/server/linumert_plant/serve.py).
 
