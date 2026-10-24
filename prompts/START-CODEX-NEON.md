@@ -26,6 +26,10 @@ miał: prawdziwy interpreter `gcode`, NML i ekran.
 - Dane: program demo `config/sim/nc_files/linumert_neon_demo.ngc` (offline). `PreviewCanon` jest
   napisany według interfejsu `gcode.parse` 2.9, ale **nigdy nie był uruchomiony z prawdziwym `gcode`**.
 
+## Podział (aktualizacja 2026-10-24 17:00)
+Codex: **N1 i N4** (prawdziwy LinuxCNC). Claude: **N2 i N3** na `claude/neon-render` — nie dubluj ich;
+N4 wykonaj na gałęzi Claude po jego pushu z N2/N3. Opisy N2/N3 zostają poniżej jako kontekst.
+
 ## Zadania (kolejność = priorytet; każde = osobny krok, commit, push)
 
 ### N1. `PreviewCanon` z prawdziwym interpreterem

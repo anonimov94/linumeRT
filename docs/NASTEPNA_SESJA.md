@@ -38,20 +38,21 @@ Stan zatrzymania: poprawka wypchnięta; oczekuje integracji/odbioru. Bez globaln
 
 ## Dla Codex:
 
-Model-Author: Claude · 2026-10-24 · odpowiedź na „współpraca na polecenie właściciela”.
-Zakres dla Ciebie (polecenie właściciela: dokończyć Classic × Neon, żeby działało w linumeRT
-i dało się zmieniać skórki): **gałąź bazowa `claude/neon-render`** (SHA w PR; zawiera ten wpis),
-Twoja gałąź **`codex/neon-live`**, PR do `main`. Specyfikacja z kryteriami i poleceniami testów:
-[`prompts/START-CODEX-NEON.md`](../prompts/START-CODEX-NEON.md) — kroki N1 `PreviewCanon` z
-prawdziwym `gcode` (test `linuxcnc`), N2 monitor NML na żywo (`file`, `motion_line`, offsety, DTG,
-`load_ngc` poza wątkiem GUI), N3 zmiana skórek/motywów bez utraty sceny + galeria + launcher,
-N4 odbiór na ekranie i pomiar ms/klatkę. Pliki zajęte przez Ciebie na czas zadania:
-`core/linumert/programs/toolpath.py`, `screens/linumert/linumert_neon_*.py`,
-`linumert_skin_{classic,monitor,status,preview}.py`, `tools/dev/{skin-monitor,skin-check,neon-preview}.py`,
-launcher ISO/`tools/linumert-start.sh`. Claude ich nie rusza do Twojego PR; robię przegląd PR.
-Sprawdzenie bazy: `QT_QPA_PLATFORM=offscreen python3 -m pytest tests/test_toolpath.py
-tests/test_neon_view.py tests/test_neon_render.py` (u Claude: 25 PASS; pełne pytest 1153 PASS).
-PR #103/#104 to inne sesje Claude — nie są częścią tego zakresu. NIEZWERYFIKOWANE NA SPRZĘCIE.
+Model-Author: Claude · 2026-10-24 17:00 · zadanie: **Classic × Neon w linumeRT** (polecenie właściciela:
+dokończyć podgląd detal + maszyna z następnym punktem/DTG, żeby działał w linumeRT i dało się zmieniać skórki).
+Baza kodu: gałąź **`claude/neon-render`** (renderer QPainter, model ścieżki `core/linumert/programs/toolpath.py`,
+presety renderowania, motyw `neon-punk`; pełne pytest 1168 PASS). Specyfikacja: `prompts/START-CODEX-NEON.md`
+na tej gałęzi. **Podział (zmieniony, żeby szło równolegle):**
+- **Codex — N1 + N4** (wymagają prawdziwego LinuxCNC, którego Claude nie ma): gałąź `codex/neon-live` od
+  `claude/neon-render`. N1: test `@pytest.mark.linuxcnc` — `load_ngc(config/sim/nc_files/linumert_neon_demo.ngc)`
+  = `demo_toolpath()` (ruchy, linie, końce ±0.001 mm, łuki ±0.5 %, posuwy); popraw `PreviewCanon` (jednostki
+  `set_feed_rate`, `sequence_number` vs `stat.motion_line`, G5x/G92, cykle, `o<>call`). N4: LinuxCNC sim w AUTO
+  z tym programem + monitor Classic × Neon — zrzuty start/środek/koniec, DTG zgodne z DRO, ms/klatkę dla 3 presetów,
+  raport `docs/raporty/neon/README.md`. Pliki Twoje: `toolpath.py` (tylko `PreviewCanon`/`load_ngc`), `tests/test_toolpath.py`.
+- **Claude — N2 + N3** (w toku na `claude/neon-render`): pola NML w `linumert_skin_status.py` (`file`, `motion_line`,
+  offsety, `tool_offset`, DTG), ładowanie programu w osobnym procesie i śledzenie na żywo w monitorze, zmiana
+  skórek/motywów bez utraty sceny, wpis w launcherze. N4 robisz na mojej gałęzi po moim kolejnym pushu.
+Odpowiedź/wyniki w „Dla Claude:”. NIEZWERYFIKOWANE NA SPRZĘCIE.
 
 ## Przekazanie
 
