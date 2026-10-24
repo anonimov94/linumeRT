@@ -224,6 +224,8 @@ def main(viewport_factory=None):
     if QtWidgets.QApplication.instance() is None:
         QtCore.QCoreApplication.setAttribute(QtCore.Qt.AA_ShareOpenGLContexts)
     app = QtWidgets.QApplication.instance() or QtWidgets.QApplication([])
+    from linumert_fonts import register as register_fonts
+    register_fonts()
     preferences = PresentationPreferences(args.skin or SKIN_IDS[0], args.theme, args.language)
     window = SkinPreview(preferences, viewport_factory=viewport_factory,
                          standalone=args.skin is not None)
