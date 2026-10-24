@@ -93,3 +93,10 @@ mechanics:
 stepper:
   full_steps_per_rev: 200
   damping_ratio: 0.2      # względne tłumienie wirnika, ograniczone w rdzeniu do 20 % amplitudy
+
+# Napęd rzeczywisty (REQ-VD-06, sesja 061): sterownik LinuxCNC; skala impulsów na mm/° wynika
+# z motor.encoder_counts_per_rev i mechanics.ratio. Czasy impulsów przykładowe dla typowych
+# sterowników krokowych. NIEZWERYFIKOWANE NA SPRZĘCIE.
+real:
+  driver: stepgen
+  timing_ns: {steplen: 2500, stepspace: 2500, dirsetup: 10000, dirhold: 10000}

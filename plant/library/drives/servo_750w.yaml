@@ -88,3 +88,9 @@ mechanics:
   backlash: 1.0000e-05      # [m]
   contact_stiffness: 8000.0   # [N·m/rad] na wale
   gravity_force: 0.0
+
+# Napęd rzeczywisty (REQ-VD-06, sesja 061): CSP przez linuxcnc-ethercat; 60C2h (okres
+# interpolacji) ustawia generator równy okresowi wątku serwo. NIEZWERYFIKOWANE NA SPRZĘCIE.
+real:
+  driver: ethercat_cia402
+  pdo: [6040h, 6041h, 6060h, 6061h, 607Ah, 6064h, 603Fh]

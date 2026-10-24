@@ -302,8 +302,36 @@ class IO(Strict):
     estop: EStop
 
 
+class Hardware(Strict):
+    """Sprzęt rzeczywisty (sesja 061, REQ-VD-06): interfejs i kanały napędów.
+
+    `channels`: id napędu → numer kanału stepgen (parport/Mesa) albo pozycja slave EtherCAT.
+    Sterownik i skalę napędu podaje szablon (sekcja `real:`). NIEZWERYFIKOWANE NA SPRZĘCIE.
+    """
+
+    interface: Literal["parport", "mesa", "ethercat"]
+    board: Literal["7i96s", "7i76e"] | None = None       # karta Mesa
+    address: str | None = None                            # parport: 0x378; Mesa: adres IP
+    channels: dict[str, int] = Field(min_length=1)
+    spindle_device: str | None = None                     # port falownika, np. /dev/ttyUSB0
+
+    @model_validator(mode="after")
+    def _board(self) -> Hardware:
+        if self.interface == "mesa" and self.board is None:
+            raise ValueError("interfejs mesa wymaga pola board (7i96s albo 7i76e)")
+        if self.interface != "mesa" and self.board is not None:
+            raise ValueError("pole board dotyczy tylko interfejsu mesa")
+        if any(value < 0 for value in self.channels.values()):
+            raise ValueError("numery kanałów muszą być nieujemne")
+        return self
+
+
 class MachineConfig(Strict):
     schema_version: Literal[1] = 1
+    # Cel konfiguracji (sesja 061): plant (wirtualna obrabiarka), sim (LinuxCNC sim), hardware.
+    # Reszta opisu maszyny jest wspólna; hardware wymaga sekcji `hardware:`.
+    target: Literal["plant", "sim", "hardware"] = "plant"
+    hardware: Hardware | None = None
     machine: MachineInfo
     kinematics: Kinematics
     axes: list[Axis] = Field(min_length=3, max_length=6)
@@ -318,6 +346,17 @@ class MachineConfig(Strict):
 
     def axis(self, letter: str) -> Axis | None:
         return next((axis for axis in self.axes if axis.letter == letter), None)
+
+    @model_validator(mode="after")
+    def _target(self) -> MachineConfig:
+        if self.target == "hardware" and self.hardware is None:
+            raise ValueError("target: hardware wymaga sekcji hardware (interfejs i kanały napędów)")
+        if self.hardware is not None:
+            known = {d.name for d in self.drives}
+            unknown = sorted(set(self.hardware.channels) - known)
+            if unknown:
+                raise ValueError(f"hardware.channels: nieznane napędy {', '.join(unknown)}")
+        return self
 
 
 # ---- ladowanie i bledy po polsku -----------------------------------------

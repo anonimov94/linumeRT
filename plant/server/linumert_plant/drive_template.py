@@ -306,8 +306,12 @@ def _normalize(data: Any, issues: list[Issue]) -> dict[str, Any]:
         return out
     for key in data:
         if key == "real":
-            issues.append(Issue("real", "sekcja real: (mapowanie na sprzęt) jest przewidziana "
-                                        "w sesji 061 i na razie niedozwolona"))
+            # Napęd rzeczywisty (REQ-VD-06, sesja 061): opcjonalna sekcja, osobny walidator.
+            from .drive_real import check_real
+
+            real = check_real(data["real"], data.get("type"), issues, Issue)
+            if real is not None:
+                out["real"] = real
         elif key not in TOP_FIELDS and key not in SECTIONS:
             issues.append(Issue(str(key), "nieznane pole"))
     _check_top(data, out, issues)
@@ -689,6 +693,9 @@ def json_schema() -> dict[str, Any]:
                           "required": list(sec_props), "additionalProperties": False}
         if section != "stepper":
             required.append(section)
+    from .drive_real import real_schema
+
+    props["real"] = real_schema()
     return {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "$id": "https://github.com/anonimov94/linumeRT/plant/library/drives/drive_template",
