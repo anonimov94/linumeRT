@@ -1156,3 +1156,8 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
   frezarka serwo → EtherCAT; reguły sekcji hardware; walidacja `real:`. Wymagania 22/22.
 - **Decyzje:** skala nie jest wpisywana osobno (jedno źródło: mechanika szablonu); nazwy pinów HAL dopiero w 062/063.
 - **Długi:** pulpit/MPG i E-STOP rzeczywisty w `hardware:`. Model-Author: Claude. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## D38 — histereza dotrzymania pozycji (poprawka) · 2026-10-24 · Claude
+- **Zrobione:** próg |błąd nadążania| przed wycofaniem Z: wejście ≤ 5 µm, wyjście > 10 µm; przyczyna niestabilnego
+  `test_retract_returns_to_compensated_path[plant]` i odmowy przy aktywnym przycisku. Test `tests/test_pause_settled.py`;
+  test LinuxCNC + Plant PASS lokalnie. Model-Author: Claude. NIEZWERYFIKOWANE NA SPRZĘCIE.

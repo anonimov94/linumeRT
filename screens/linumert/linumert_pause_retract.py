@@ -33,6 +33,7 @@ class RetractControl(QtCore.QObject):
         self.height_mm, self.feed_mm = 10.0, 200.0
         self._time = time.monotonic()
         self._pending = None
+        self._settled = False  # histereza dotrzymania pozycji (settled_now)
         self.config = configparser.ConfigParser(strict=False, interpolation=None)
         ini = os.environ.get("INI_FILE_NAME") or getattr(shell.info, "INIPATH", "")
         try:
@@ -121,9 +122,18 @@ class RetractControl(QtCore.QObject):
                              self.config.getfloat("AXIS_Z", "MIN_LIMIT"),
                              self.config.getfloat("AXIS_Z", "MAX_LIMIT"),
                              bool(value("motion.eoffset-limited")),
-                             all(math.isfinite(j["ferror_current"])
-                                 and abs(j["ferror_current"]) <= 0.005 * self.native
-                                 for j in s.joint), bool(value("axis.z.eoffset-enable")))
+                             self.settled_now(s.joint), bool(value("axis.z.eoffset-enable")))
+
+    def settled_now(self, joints):
+        """Napędy dotrzymują pozycji: wejście przy |błąd| ≤ 5 µm, wyjście dopiero > 10 µm.
+
+        Bez histerezy szum serwa na postoju przełączał stan między taktem odświeżenia przycisku
+        a próbką przy kliknięciu („Poczekaj na dotrzymanie pozycji” przy aktywnym przycisku).
+        """
+        limit = (0.010 if self._settled else 0.005) * self.native
+        self._settled = all(math.isfinite(j["ferror_current"])
+                            and abs(j["ferror_current"]) <= limit for j in joints)
+        return self._settled
 
     def withdraw(self, height, feed):
         try:
