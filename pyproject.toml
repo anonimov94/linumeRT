@@ -19,6 +19,10 @@ dependencies = [
     "pyyaml",
 ]
 
+[project.scripts]
+# Generator konfiguracji LinuxCNC z machine.yaml (sesja 062)
+linumert-config = "linumert.machine.config_build:main"
+
 [project.optional-dependencies]
 # Panel web Plant (sesja 022); bez tej grupy Plant działa, a panel zgłasza brak zależności.
 panel = [

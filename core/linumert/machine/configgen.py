@@ -198,8 +198,10 @@ def render_ini(cfg: MachineConfig, js: list[Joint], target: str, opt: Options) -
     else:
         out += ["HALFILE = linumert_sim.hal"]
     out += [f"HALFILE = {opt.hal_dir}/linumert_hmi_estop.hal",
-            f"HALFILE = {opt.hal_dir}/linumert_pause_retract.hal",
-            f"POSTGUI_HALFILE = {opt.postgui}", "", "[HALUI]", "",
+            f"HALFILE = {opt.hal_dir}/linumert_pause_retract.hal"]
+    if opt.postgui:
+        out.append(f"POSTGUI_HALFILE = {opt.postgui}")
+    out += ["", "[HALUI]", "",
             "# Osie: zakres = soft_limits z machine.yaml"]
     for a in cfg.axes:
         out += [f"[AXIS_{a.letter}]", f"MIN_LIMIT = {_f(a.soft_limits[0])}",
