@@ -11,6 +11,7 @@ graficznego/fontu w repozytorium. Nowy zasób = nowy wiersz w tym samym commicie
 
 | Zasób | Typ | Autor | Data | Źródło | Licencja | Zakres użycia | Ścieżka |
 |---|---|---|---|---|---|---|---|
+| kamienie-milowe.png | zrzut (PNG) | projekt linumeRT (Claude na zlecenie właściciela) | 2026-10-24 | zrzut własnej strony stanu projektu generowanej z `docs/roadmap/plan.json` | GPL-2.0-or-later | grafika stanu kamieni milowych na górze README | `docs/raporty/kamienie-milowe.png` |
 | baner.png | marka | projekt linumeRT (agent AI na zlecenie właściciela) | 2026-10-17 | rysowane od zera | GPL-2.0-or-later | znak, logotyp i baner linumeRT | `docs/design/marka/baner.png` |
 | logotyp.svg | marka | projekt linumeRT (agent AI na zlecenie właściciela) | 2026-10-17 | rysowane od zera | GPL-2.0-or-later | znak, logotyp i baner linumeRT | `docs/design/marka/logotyp.svg` |
 | tablica_marki.png | marka | projekt linumeRT (agent AI na zlecenie właściciela) | 2026-10-17 | rysowane od zera | GPL-2.0-or-later | znak, logotyp i baner linumeRT | `docs/design/marka/tablica_marki.png` |
