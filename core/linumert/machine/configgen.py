@@ -9,7 +9,9 @@ tych liczb. Wyjścia (`render(cfg, target)` → {nazwa pliku: treść}):
 
 - `plant` — LinuxCNC + wirtualna obrabiarka przez `lrt_net` (wzorzec:
   config/plant/linumert_plant_xyz, sprawdzony w LinuxCNC; test golden porównuje wynik z nim),
-- `sim` — LinuxCNC sim: napędy jako idealne nadążanie, czujniki bazy z porównania pozycji.
+- `sim` — LinuxCNC sim: napędy jako idealne nadążanie, czujniki bazy z porównania pozycji,
+- `hardware` — step/dir: port równoległy albo Mesa 7i96S/7i76E (`configgen_hw.py`, z kontraktem
+  bezpieczeństwa; odmawia bez pinu E-STOP).
 
 Kontrakt sygnałów D05 (`linumert.jN.*`, `linumert.spindle.*`, `linumert.io.*`) jest ten sam
 dla każdego wyjścia; zmienia się tylko blok „napędy” i źródło wejść. DISPLAY = ekran linumert.
@@ -24,7 +26,7 @@ from typing import Any
 
 from .schema import Axis, MachineConfig
 
-TARGETS = ("plant", "sim")
+TARGETS = ("plant", "sim", "hardware")
 HOME_INSET = 4.0          # [mm|°] HOME: tyle do środka od programowej granicy po stronie bazy
 FERROR, MIN_FERROR = 2.0, 0.5
 
@@ -115,13 +117,16 @@ def _joint_section(j: Joint, target: str) -> list[str]:
     a, h = j.axis, j.axis.homing
     latch = 1 if h.latch == "approach" else -1
     shared = a.home_sensor is not None and a.home_sensor.shared_with is not None
-    # Indeks wymaga ramki LRT-NET v2 (DECYZJE, sesja 017): w Plant i sim bazowanie bez indeksu.
-    use_index = h.method == "switch_index" and target not in ("plant", "sim")
+    # Indeks: LRT-NET v1 (Plant) go nie przenosi (DECYZJE, sesja 017), sim i stepgen go nie mają;
+    # bazowanie na indeksie enkodera wróci z napędami EtherCAT (063).
+    use_index = False
     sequence = -h.order if j.gantry and h.order > 0 else h.order
     lines = [f"[JOINT_{j.index}]", f"AXIS = {a.letter}",
              f"TYPE = {'ANGULAR' if a.rotary else 'LINEAR'}"]
-    if target == "plant":
+    if target in ("plant", "hardware"):
         lines.append(f"SCALE = {j.scale:.6f}")
+    if target == "hardware":
+        lines.append(f"STEPGEN_MAXACCEL = {_f(round(a.max_acceleration * 1.25, 3))}")
     lines += [
         f"MIN_LIMIT = {_f(a.travel[0])}", f"MAX_LIMIT = {_f(a.travel[1])}",
         f"MAX_VELOCITY = {_f(a.max_velocity)}", f"MAX_ACCELERATION = {_f(a.max_acceleration)}",
@@ -135,7 +140,8 @@ def _joint_section(j: Joint, target: str) -> list[str]:
     return lines
 
 
-def render_ini(cfg: MachineConfig, js: list[Joint], target: str, opt: Options) -> str:
+def render_ini(cfg: MachineConfig, js: list[Joint], target: str, opt: Options,
+               extra: dict[str, list[str]] | None = None) -> str:
     coords = "".join(j.axis.letter for j in js)
     duplicated = len(set(coords)) != len(coords)
     vmax = max(a.max_velocity for a in cfg.axes if not a.rotary)
@@ -144,7 +150,11 @@ def render_ini(cfg: MachineConfig, js: list[Joint], target: str, opt: Options) -
     safe_z = cfg.positions.safe_z
     centre = " ".join(f"{k}{_g((xs[k].travel[0] + xs[k].travel[1]) / 2)}" for k in "XY" if k in xs)
     home = " ".join(f"{k}{_g(home_position(xs[k]))}" for k in "XY" if k in xs)
-    title = "Plant" if target == "plant" else "sim"
+    title = {"plant": "Plant", "sim": "sim", "hardware": "maszyna"}[target]
+    hw = cfg.hardware
+    # Wątek bazowy tylko dla programowego stepgen na porcie równoległym.
+    parport = target == "hardware" and hw is not None and hw.interface == "parport"
+    base_period = hw.base_period_ns if parport else 0
     kins = f"trivkins coordinates={coords}" + (" kinstype=BOTH" if duplicated else "")
     out = [
         "# SPDX-License-Identifier: GPL-2.0-or-later",
@@ -179,14 +189,19 @@ def render_ini(cfg: MachineConfig, js: list[Joint], target: str, opt: Options) -
             "[LINUMERT]", f"MACHINE_PROFILE = {target}"]
     if target == "sim":
         out.append("VIRTUAL_MODE = 1")
+    if target == "hardware":
+        out.append("VIRTUAL_MODE = 0")
+    out += ["HMI_HEARTBEAT_TIMEOUT = 2.0", "HMI_ESTOP_BYPASS = 0", ""]
+    for section, lines in (extra or {}).items():
+        out += [f"[{section}]", *lines, ""]
     out += [
-        "HMI_HEARTBEAT_TIMEOUT = 2.0", "HMI_ESTOP_BYPASS = 0", "",
         "[EMCIO]", "EMCIO = io", "CYCLE_TIME = 0.100", f"TOOL_TABLE = {opt.tool_table}", "",
         "[RS274NGC]", "PARAMETER_FILE = linumert.var",
         "RS274NGC_STARTUP_CODE = G17 G21 G40 G43H0 G54 G64P0.01 G80 G90 G94 G97 M5 M9",
         f"SUBROUTINE_PATH = {opt.subroutine_path}", "REMAP = M6 modalgroup=6 ngc=lrt_m6", "",
         "[EMCMOT]", "EMCMOT = motmod", "SERVO_PERIOD = 1000000", "COMM_TIMEOUT = 1.0",
-        "BASE_PERIOD = 0", "",
+        f"BASE_PERIOD = {base_period}",
+        "",
         "[TASK]", "TASK = milltask", "CYCLE_TIME = 0.010", "",
         "[TRAJ]", f"COORDINATES = {coords}", "LINEAR_UNITS = mm", "ANGULAR_UNITS = degree",
         f"MAX_LINEAR_VELOCITY = {_f(vmax)}", f"DEFAULT_LINEAR_VELOCITY = {_f(vmax / 4)}",
@@ -195,11 +210,15 @@ def render_ini(cfg: MachineConfig, js: list[Joint], target: str, opt: Options) -
     ]
     if target == "plant":
         out += ["HALFILE = linumert_plant.hal", "HALFILE = spindle_sim.hal"]
+    elif target == "hardware":
+        out += ["HALFILE = linumert_hw.hal", "HALFILE = spindle_vfd.hal"]
     else:
         out += ["HALFILE = linumert_sim.hal"]
     out += [f"HALFILE = {opt.hal_dir}/linumert_hmi_estop.hal",
             f"HALFILE = {opt.hal_dir}/linumert_pause_retract.hal"]
-    if opt.postgui:
+    if target == "hardware":
+        out.append("POSTGUI_HALFILE = linumert_hw_postgui.hal")
+    elif opt.postgui:
         out.append(f"POSTGUI_HALFILE = {opt.postgui}")
     out += ["", "[HALUI]", "",
             "# Osie: zakres = soft_limits z machine.yaml"]
@@ -437,6 +456,22 @@ def render(cfg: MachineConfig, target: str, opt: Options | None = None,
     if target not in TARGETS:
         raise ValueError(f"nieznany cel {target}; dozwolone: {', '.join(TARGETS)}")
     opt = opt or Options()
+    if target == "hardware":
+        from . import configgen_hw as hwgen
+
+        if cfg.target != "hardware" or cfg.hardware is None:
+            raise hwgen.HardwareConfigError(["cel hardware wymaga target: hardware i sekcji "
+                                             "hardware: w machine.yaml"])
+        plan = hwgen.hardware_plan(cfg)
+        errors = hwgen.check(cfg, plan)
+        if errors:
+            raise hwgen.HardwareConfigError(errors)
+        js = joints(cfg, {e["drive"]: e["scale"] for e in plan if e["axis"] != "S"})
+        return {f"{cfg.machine.name}.ini": render_ini(cfg, js, target, opt,
+                                                      hwgen.ini_extra(cfg, plan)),
+                "linumert_hw.hal": hwgen.render_hal(cfg, js, plan),
+                "spindle_vfd.hal": hwgen.render_spindle(cfg),
+                "linumert_hw_postgui.hal": hwgen.render_postgui(cfg)}
     if scales is None:
         scales = plant_scales(cfg) if target == "plant" else {}
     js = joints(cfg, scales)
