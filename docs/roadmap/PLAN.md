@@ -1,7 +1,7 @@
 <!-- Generowane przez python3 tools/roadmap.py; edytuj docs/roadmap/plan.json. -->
 # Wspólny plan linumeRT
 
-Pierwotny plan: **84 sesje M0–M6**, commit `796c6a2`. Stan na 2026-10-24: planowane: 17; w toku: 0; częściowe: 35; do odbioru: 0; ukończone: 32; zablokowane: 0.
+Pierwotny plan: **84 sesje M0–M6**, commit `796c6a2`. Stan na 2026-10-24: planowane: 17; w toku: 0; częściowe: 34; do odbioru: 0; ukończone: 33; zablokowane: 0.
 
 Zakończenie części implementacji nie oznacza odbioru całej funkcji ani sprzętu.
 
@@ -69,7 +69,7 @@ Zakończenie części implementacji nie oznacza odbioru całej funkcji ani sprz�
 | 046 | M3 | [Podglądy 2D w formularzach](../../prompts/sesja-046.md) | częściowe |
 | 047 | M3 | [Menedżer programów i pliki .lnx](../../prompts/sesja-047.md) | częściowe |
 | 048 | M3 | [Biblioteka podprogramów o-word](../../prompts/sesja-048.md) | częściowe |
-| 049 | M3 | [Test technologiczny na Plant](../../prompts/sesja-049.md) | częściowe |
+| 049 | M3 | [Test technologiczny na Plant](../../prompts/sesja-049.md) | ukończone |
 | 050 | M3 | [Bufor i bramka G3 (prototyp v0.2)](../../prompts/sesja-050.md) | planowane |
 | 051 | M4 | [Ścieżka z programu](../../prompts/sesja-051.md) | częściowe |
 | 052 | M4 | [Proces symulacji](../../prompts/sesja-052.md) | częściowe |
@@ -481,11 +481,11 @@ Pozostaje: Brak podprogramów kieszeni i rowków; zależności 041/043.
 
 ### 049 — Test technologiczny na Plant
 
-**częściowe**. Wybrane cykle wykonane na LinuxCNC + Plant (#58/#60).
+**ukończone**. Wybrane cykle na LinuxCNC + Plant (#58/#60); tools/suite_cycles.py: 10 przypadków generatorów (planowanie, wiercenie G81/G83, kieszenie, rowki, czopy, kontur) × router_gantry_steppers i mill_servo_table, warianty A (G0 z machine.yaml) i B (G0 ≤ 3000 mm/min): 40/40 PASS po poprawce Plant (interpolacja celu CSP w podkrokach, PLANT-SUBSTEPS). Wcześniejsze zgubione kroki routera i E-4201 frezarki przy G0 były artefaktem modelu, nie generatorów.
 
-Pozostaje: suite_cycles dla każdego generatora na router_steppers i mill_servo.
+Pozostaje: Kontur z korekcją G41.1/G42.1 na Plant z LinuxCNC (atrapa jedzie bez korekcji; rs274 w CI).
 
-Źródła: [docs/DZIENNIK.md](../DZIENNIK.md), [prompts/sesja-049.md](../../prompts/sesja-049.md).
+Źródła: [tools/suite_cycles.py](../../tools/suite_cycles.py), [tests/test_suite_cycles.py](../../tests/test_suite_cycles.py), [docs/raporty/suite_cycles.md](../raporty/suite_cycles.md), [docs/raporty/plant_substeps.md](../raporty/plant_substeps.md), [docs/DZIENNIK.md](../DZIENNIK.md), [prompts/sesja-049.md](../../prompts/sesja-049.md).
 
 ### 050 — Bufor i bramka G3 (prototyp v0.2)
 

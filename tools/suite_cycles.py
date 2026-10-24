@@ -35,11 +35,7 @@ MACHINES = {
     "mill_servo_table": "plant/scenarios/machines/mill_servo_table_y2.yaml",
 }
 WINDOW_MM = 0.2                       # okno błędu nadążania dla kryterium (jak test kieszeni)
-RAPID_LIMIT = 3000.0
-# Krok całkowania jak domyślne scenariusze i macierz Plant. Wynik atrapy silnie zależy od
-# `substeps` (ustalenie 2026-10-24: przy >1 serwo Z frezarki i krokowce routera zachowują się
-# inaczej) — opis w raporcie; rozstrzygnięcie w rdzeniu Plant (M1).
-SUBSTEPS = 1                  # [mm/min] wariant B: G0 jak przy obniżonym MAX_VELOCITY w INI
+RAPID_LIMIT = 3000.0                  # [mm/min] wariant B: G0 jak przy obniżonym MAX_VELOCITY w INI
 PART = {"z_top": -20.0, "safe_z": -15.0}
 
 # Typowe parametry: detal przy X/Y 100–200 mm, wierzch Z −20 mm w układzie maszyny.
@@ -210,7 +206,7 @@ def run_case(name, params, machine, tmp: Path, mode="A") -> Row:
     path = tmp / f"{name}_{machine}_{mode}.ngc"
     path.write_text("G90\n" + "\n".join(program) + "\n", encoding="utf-8")
     scenario = Scenario(f"suite_{name}", None, ROOT / MACHINES[machine],
-                        duration=240, substeps=SUBSTEPS, program=path,
+                        duration=240, program=path,
                         steps=[Step("enable", at=0), Step("home", at=0.01),
                                Step("program", at=0.1)])
     scenario.expect = ([{"completed": True}, {"no_alarm": True}] +
@@ -247,16 +243,16 @@ def report(rows: list[Row]) -> str:
            "(jak obniżone MAX_VELOCITY w INI)",
            ""] + table("B") + [
            "", "## Ustalenia", "",
-           "- Próby kontrolne bez generatorów: na `router_gantry_steppers` sam `G0 X10` gubi "
-           "kroki (24), `G0 X100` ok. 1800, a `G1 X10 F600` i dłuższe posuwy — 0; na "
-           "`mill_servo_table` sam `G0 Z-15` daje błąd nadążania ok. 0,72 mm i E-4201, "
-           "a `G1 Z-15 F600` przechodzi (0,07 mm). Przyczyna leży w profilu G0 atrapy i modelu "
-           "napędów/konfiguracji maszyn, nie w generatorach — do sprawdzenia w M1 (Plant).",
-           "- Wynik atrapy zależy od kroku całkowania `substeps` (prosty program G0/G1, "
-           "z bazowaniem): frezarka przy 1 — 0,05 mm, przy 2–10 — E-4201 i Z ok. 0,7 mm; "
-           "router przy 1 — 44 kroki Z, przy 4–10 — ok. 1600–1800 kroków X/Y. Suite używa "
-           "`substeps = 1` jak scenariusze i macierz Plant; zależność do wyjaśnienia w M1.",
-           "- Generatory ocenia wariant B: posuwy i dojazdy w granicach napędów.",
+           "- Próby kontrolne bez generatorów (G0 X10/X100 na routerze, G0 Z-15 na frezarce) "
+           "przed poprawką Plant gubiły kroki lub dawały E-4201; po poprawce przechodzą — był to "
+           "artefakt modelu (cel w pierwszym podkroku), nie cecha G0 ani konfiguracji maszyn.",
+           "- Podkroki całkowania: Plant interpoluje cel CSP w cyklu mastera i domyślnie liczy "
+           "4 podkroki; wynik nie zależy od podkroków ≥ 2. Przed poprawką (cel w pierwszym "
+           "podkroku) frezarka przy ≥ 2 dawała E-4201 na G0 Z, a router przy ≥ 4 gubił ok. 1560 "
+           "kroków na G0; przy 1 podkroku router gubił kroki na każdym generatorze (krok 1 ms za "
+           "gruby dla krokowca). Opis i pomiar: `docs/raporty/plant_substeps.md`.",
+           "- Generatory ocenia wariant B (posuwy i dojazdy w granicach napędów); po poprawce "
+           "Plant przechodzą też w wariancie A. Generator nie wymagał zmian.",
            "- Atrapa wykonuje tylko G0/G1: łuki rozbite na cięciwy ≤ 3°, cykle wiercenia "
            "rozwinięte; kontur z korekcją G41.1/G42.1 tylko w teście rs274 (CI).",
            "", "Wynik nie zastępuje testu z LinuxCNC ani maszyny. "

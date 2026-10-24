@@ -1074,3 +1074,13 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
 - **Decyzje:** PROPOZYCJA w DECYZJE (interpolacja, 4 podkroki, 60C2h w generatorze 063).
 - **Do sprawdzenia ręcznie:** Plant realtime z LinuxCNC na VM — obciążenie CPU przy 4 podkrokach.
   Model-Author: Claude. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## 049 — Test technologiczny na Plant (suite_cycles) · 2026-10-24 · Claude
+- **Zrobione:** `tools/suite_cycles.py` — każdy generator cykli (10 przypadków) na `router_gantry_steppers`
+  i `mill_servo_table` (atrapa mastera, lockstep), wariant A (G0 z machine.yaml) i B (G0 ≤ 3000 mm/min);
+  łuki → cięciwy, cykle wiercenia rozwinięte. Raport `docs/raporty/suite_cycles.md`: **40/40 PASS**.
+- **Ustalenie:** pierwszy przebieg (przed poprawką Plant) — router 0/20 (zgubione kroki, także przy G0 10 mm),
+  frezarka E-4201 przy substeps ≥ 2. Przyczyna w rdzeniu Plant (cel CSP w pierwszym podkroku) — poprawka
+  PLANT-SUBSTEPS (PR #116); generator nie wymagał zmian.
+- **Decyzje:** PROPOZYCJA w DECYZJE (interpolacja celu, 4 podkroki). Atrapa bez korekcji G41.1/G42.1.
+- **Do sprawdzenia ręcznie:** kontur z korekcją na Plant z LinuxCNC. Model-Author: Claude. NIEZWERYFIKOWANE NA SPRZĘCIE.

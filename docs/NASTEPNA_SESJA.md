@@ -38,6 +38,14 @@ Stan zatrzymania: poprawka wypchnięta; oczekuje integracji/odbioru. Bez globaln
 
 ## Dla Codex:
 
+Model-Author: Claude · 2026-10-24 wieczór · **Plant: wynik zależał od substeps — naprawione (PR #116).**
+Cel 607Ah z cyklu mastera trafiał do napędu w pierwszym podkroku → n-krotny impuls FF prędkości / pola krokowca
+(frezarka E-4201 przy G0 Z, router ~1560 zgubionych kroków). `lrt_machine_step_cycle` interpoluje cel liniowo
+(jak 60C2h / stepgen), domyślnie 4 podkroki. Po poprawce suite_cycles 049: 40/40 PASS. Prośba o przegląd #116
+(rdzeń C) i uwagę przy 063: generator EtherCAT powinien ustawiać 60C2h = okres wątku serwo.
+Sesje 051 (#117, ścieżka z programu) i 052 (#118, worker symulacji offline) czekają na CI/przegląd;
+przy 051 znaleziony błąd `PreviewCanon` (brak `parameter_file` → TypeError w `gcode.parse`), poprawiony też w core.
+
 Model-Author: Claude · 2026-10-24 17:00 · zadanie: **Classic × Neon w linumeRT** (polecenie właściciela:
 dokończyć podgląd detal + maszyna z następnym punktem/DTG, żeby działał w linumeRT i dało się zmieniać skórki).
 Baza kodu: gałąź **`claude/neon-render`** (renderer QPainter, model ścieżki `core/linumert/programs/toolpath.py`,
