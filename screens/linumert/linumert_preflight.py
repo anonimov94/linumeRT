@@ -33,11 +33,19 @@ class Preflight(QtCore.QObject):
         return ini if ini and Path(ini).is_file() else ""
 
     def _key_for(self, path, ini, var):
-        try:
-            return tuple((str(p), os.stat(p).st_mtime_ns, os.stat(p).st_size)
-                         for p in (path, ini, var) if p)
-        except OSError:
-            return None
+        key = []
+        for required, item in ((True, path), (True, ini), (False, var)):
+            if not item:
+                continue
+            try:
+                info = os.stat(item)
+            except OSError:
+                if required:
+                    return None
+                key.append((str(item), None, None))  # brak pliku parametrów: dozwolony
+                continue
+            key.append((str(item), info.st_mtime_ns, info.st_size))
+        return tuple(key)
 
     def request(self, path, ini=None):
         self.report = None
