@@ -3,6 +3,7 @@
 #   linumert            # symulator
 #   linumert --plant    # + wirtualna obrabiarka Plant (LRT-NET) i panel http://127.0.0.1:8080/
 #   linumert --monitor  # odrębny monitor skórek, read-only obok uruchomionego LinuxCNC
+#   linumert --neon     # monitor Classic × Neon: detal + maszyna, następny punkt z DTG (read-only)
 # Model-Author: Claude · 2026-10-19. NIEZWERYFIKOWANE NA SPRZĘCIE.
 set -euo pipefail
 R=/opt/linumeRT
@@ -15,6 +16,11 @@ case "${1:-}" in
     --monitor)
         exec env PYTHONPATH="$R/core" /opt/linumert/bin/python \
             "$R/tools/dev/skin-monitor.py" --skin industrial-pro --theme reactor-green --language pl
+        ;;
+    --neon)
+        # Classic × Neon (Model-Author: Claude): skórka/motyw zmienia się w „Ustawienia”.
+        exec env PYTHONPATH="$R/core:$R/simulation" /opt/linumert/bin/python \
+            "$R/tools/dev/skin-monitor.py" --skin classic-digital --theme neon-punk --language pl
         ;;
     --plant)
         cfg=config/plant/linumert_plant_xyz
@@ -30,7 +36,7 @@ case "${1:-}" in
             --expect-profile plant "$R/$cfg/linumert_plant_xyz.ini"
         ;;
     *)
-        printf 'Użycie: linumert [--plant|--monitor]\n' >&2
+        printf 'Użycie: linumert [--plant|--monitor|--neon]\n' >&2
         exit 2
         ;;
 esac

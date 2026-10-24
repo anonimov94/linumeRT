@@ -65,6 +65,9 @@ def test_launcher_paths_exist() -> None:
         assert "Exec=/usr/local/bin/linumert" in body and "Type=Application" in body
     monitor = (desktops / "linumert-monitor.desktop").read_text()
     assert "--monitor" in monitor and "read-only" in monitor
+    neon = (desktops / "linumert-neon.desktop").read_text()
+    assert "--neon" in neon and "read-only" in neon
+    assert "--neon)" in text and "--theme neon-punk" in text
 
 
 def test_workflow_builds_and_publishes() -> None:

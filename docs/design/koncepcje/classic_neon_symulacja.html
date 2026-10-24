@@ -1,0 +1,967 @@
+<title>linumeRT Classic × Neon</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<style>
+/* Układ: kompozycja Classic Digital (DRO+program | ścieżka-zbliżenie | maszyna) w ramie nowego HMI
+   (lewa szyna obszarów, górny pasek trybu, dolny pasek dużych akcji). Paleta Neon Punk — jeden ciemny świat. */
+:root {
+  color-scheme: dark;
+  --void: #07050d;
+  --panel: #0e0a18;
+  --raise: #161026;
+  --line: #2a2140;
+  --line2: #3d3060;
+  --fg: #f3eeff;
+  --fg2: #ab9fcc;
+  --fg3: #6f6494;
+  --cyan: #00f0ff;     /* posuw, akcent Classic */
+  --lime: #b6ff00;     /* strefa START */
+  --magenta: #ff2bd6;  /* strefa KONIEC */
+  --yellow: #ffe600;   /* następny punkt, DTG */
+  --orange: #ff8a00;   /* G0 */
+  --violet: #8a5cff;   /* ścieżka do wykonania */
+  --red: #ff3355;
+  --f-ui: "IBM Plex Sans", system-ui, sans-serif;
+  --f-head: "IBM Plex Sans Condensed", "IBM Plex Sans", system-ui, sans-serif;
+  --f-num: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --r-card: 14px;
+  --r-btn: 12px;
+}
+html, body { height: 100%; }
+body {
+  background: var(--void);
+  color: var(--fg);
+  font: 14px/1.4 var(--f-ui);
+  overflow: hidden;
+}
+button { font: inherit; color: inherit; }
+button:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--yellow); outline-offset: 2px; }
+
+.app {
+  height: 100%;
+  display: grid;
+  grid-template-columns: 76px minmax(0, 1fr);
+  grid-template-rows: 56px minmax(0, 1fr) 84px;
+  grid-template-areas: "top top" "rail main" "rail bottom";
+  background:
+    radial-gradient(900px 500px at 70% -10%, color-mix(in srgb, var(--magenta) 9%, transparent), transparent 70%),
+    radial-gradient(800px 600px at 10% 110%, color-mix(in srgb, var(--cyan) 7%, transparent), transparent 70%),
+    var(--void);
+}
+
+/* ---------- górny pasek ---------- */
+.top {
+  grid-area: top; display: flex; align-items: center; gap: 16px;
+  padding-block: 0;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  border-bottom: 1px solid var(--line);
+  background: color-mix(in srgb, var(--panel) 85%, transparent);
+  min-width: 0;
+}
+.brand { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.brand svg { width: 30px; height: 30px; filter: drop-shadow(0 0 6px color-mix(in srgb, var(--cyan) 60%, transparent)); }
+.brand b { font: 600 19px var(--f-ui); letter-spacing: .01em; }
+.brand b span { color: var(--cyan); }
+.skin {
+  font: 600 11px var(--f-head); letter-spacing: .18em; text-transform: uppercase;
+  padding: 5px 10px; border-radius: 6px; border: 1px solid var(--line2);
+  background: linear-gradient(90deg, color-mix(in srgb, var(--cyan) 14%, transparent), color-mix(in srgb, var(--magenta) 14%, transparent));
+  white-space: nowrap;
+}
+.skin i { font-style: normal; color: var(--magenta); }
+.modes { display: flex; gap: 4px; padding: 3px; border: 1px solid var(--line); border-radius: 10px; background: var(--void); }
+.modes span { font: 600 12px var(--f-head); letter-spacing: .1em; padding: 6px 12px; border-radius: 7px; color: var(--fg3); }
+.modes span.on { color: var(--void); background: var(--cyan); box-shadow: 0 0 14px color-mix(in srgb, var(--cyan) 55%, transparent); }
+.prog-name { min-width: 0; display: grid; }
+.prog-name small { font: 600 10px var(--f-head); letter-spacing: .14em; color: var(--fg3); text-transform: uppercase; }
+.prog-name code { font: 500 13px var(--f-num); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.top .spacer { flex: 1; }
+.pill { display: inline-flex; align-items: center; gap: 8px; font: 500 12px var(--f-ui); color: var(--fg2); padding: 6px 12px; border: 1px solid var(--line); border-radius: 999px; white-space: nowrap; }
+.pill .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--lime); box-shadow: 0 0 8px var(--lime); }
+.clock { font: 500 20px var(--f-num); letter-spacing: .04em; }
+
+/* ---------- szyna ---------- */
+.rail {
+  grid-area: rail; display: flex; flex-direction: column; gap: 6px; padding: 12px 8px;
+  border-right: 1px solid var(--line); background: color-mix(in srgb, var(--panel) 70%, transparent);
+}
+.rail a {
+  display: grid; justify-items: center; gap: 4px; padding: 9px 2px; border-radius: 12px;
+  font: 500 10.5px var(--f-ui); color: var(--fg3); text-decoration: none;
+}
+.rail a svg { width: 22px; height: 22px; }
+.rail a.on { color: var(--cyan); background: color-mix(in srgb, var(--cyan) 10%, transparent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--cyan) 35%, transparent); }
+
+/* ---------- główny obszar ---------- */
+.main {
+  grid-area: main; min-height: 0; min-width: 0;
+  display: grid; gap: 10px; padding: 10px;
+  grid-template-columns: minmax(300px, 340px) minmax(0, 1.3fr) minmax(0, 1fr);
+}
+.col { display: flex; flex-direction: column; gap: 10px; min-height: 0; min-width: 0; }
+
+.card {
+  background: linear-gradient(180deg, var(--raise), var(--panel));
+  border: 1px solid var(--line); border-radius: var(--r-card);
+  position: relative; min-width: 0;
+}
+.card-h {
+  display: flex; align-items: center; gap: 8px; padding: 9px 12px 7px;
+  font: 600 11.5px var(--f-head); letter-spacing: .14em; text-transform: uppercase; color: var(--fg2);
+  border-bottom: 1px solid var(--line);
+}
+.card-h .grow { flex: 1; }
+.seg { display: flex; gap: 2px; padding: 2px; background: var(--void); border: 1px solid var(--line); border-radius: 7px; }
+.seg button { border: 0; background: none; padding: 3px 8px; border-radius: 5px; font: 600 10.5px var(--f-head); letter-spacing: .08em; color: var(--fg3); cursor: pointer; }
+.seg button.on { background: var(--line2); color: var(--fg); }
+
+/* DRO w stylu Classic: cyfry z „duchem” segmentów LED */
+.dro { display: grid; }
+.dro-row {
+  display: grid; grid-template-columns: 34px 1fr auto; align-items: center; gap: 8px;
+  padding: 6px 12px; border-bottom: 1px solid color-mix(in srgb, var(--line) 60%, transparent);
+}
+.dro-row:last-child { border-bottom: 0; }
+.dro-ax { font: 700 26px var(--f-num); color: var(--cyan); text-shadow: 0 0 12px color-mix(in srgb, var(--cyan) 70%, transparent); }
+.led { position: relative; font: 500 30px/1.1 var(--f-num); text-align: right; font-variant-numeric: tabular-nums; white-space: pre; }
+.led .ghost { position: absolute; inset: 0; color: color-mix(in srgb, var(--cyan) 8%, transparent); }
+.led .val { position: relative; color: var(--fg); text-shadow: 0 0 10px color-mix(in srgb, var(--cyan) 45%, transparent); }
+.dtg-ax { display: grid; justify-items: end; min-width: 74px; }
+.dtg-ax small { font: 600 9.5px var(--f-head); letter-spacing: .14em; color: var(--fg3); }
+.dtg-ax span { font: 500 13px var(--f-num); color: var(--yellow); font-variant-numeric: tabular-nums; }
+
+/* Następny punkt */
+.next {
+  border-color: color-mix(in srgb, var(--yellow) 45%, var(--line));
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--yellow) 12%, transparent), 0 0 24px -6px color-mix(in srgb, var(--yellow) 35%, transparent);
+}
+.next .card-h { color: var(--yellow); }
+.zone-tag { font: 700 10px var(--f-head); letter-spacing: .12em; padding: 2px 7px; border-radius: 5px; color: var(--void); }
+.zone-tag[data-z="start"] { background: var(--lime); }
+.zone-tag[data-z="end"] { background: var(--magenta); }
+.zone-tag[data-z="mid"] { background: var(--line2); color: var(--fg2); }
+.next-body { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; padding: 10px 12px 12px; align-items: end; }
+.next-id { font: 600 13px var(--f-num); color: var(--fg2); }
+.next-id b { color: var(--fg); font-weight: 700; }
+.next-code { grid-column: 1 / -1; font: 500 12.5px var(--f-num); color: var(--fg); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dtg-big { grid-row: 1 / 3; grid-column: 2; text-align: right; }
+.dtg-big small { display: block; font: 600 10px var(--f-head); letter-spacing: .16em; color: var(--fg3); }
+.dtg-big span { font: 700 30px/1 var(--f-num); color: var(--yellow); text-shadow: 0 0 14px color-mix(in srgb, var(--yellow) 60%, transparent); font-variant-numeric: tabular-nums; }
+.dtg-big em { font: 500 12px var(--f-num); color: var(--fg2); font-style: normal; }
+.bar { grid-column: 1 / -1; height: 4px; border-radius: 2px; background: var(--line); overflow: hidden; }
+.bar i { display: block; height: 100%; width: 0; background: var(--yellow); box-shadow: 0 0 8px var(--yellow); }
+.next-meta { grid-column: 1 / -1; display: flex; justify-content: space-between; font: 500 11.5px var(--f-num); color: var(--fg2); }
+
+/* Lista programu */
+.prog { flex: 1; min-height: 140px; display: flex; flex-direction: column; }
+.prog-list { flex: 1; overflow: auto; padding: 4px 0; font: 12.5px/1 var(--f-num); scrollbar-width: thin; scrollbar-color: var(--line2) transparent; }
+.ln {
+  display: grid; grid-template-columns: 30px 44px 1fr; gap: 6px; align-items: center;
+  padding: 4px 10px 4px 8px; border-left: 3px solid transparent; white-space: nowrap; cursor: pointer; color: var(--fg2);
+}
+.ln:hover { background: color-mix(in srgb, var(--fg) 4%, transparent); }
+.ln .pt { font-size: 10.5px; color: var(--fg3); text-align: right; }
+.ln .nn { color: var(--fg3); }
+.ln .cd { overflow: hidden; text-overflow: ellipsis; }
+.ln.meta .cd { color: var(--fg3); }
+.ln.done .cd { color: color-mix(in srgb, var(--fg2) 65%, transparent); }
+.ln.z-start { border-left-color: var(--lime); }
+.ln.z-start .pt { color: var(--void); background: var(--lime); border-radius: 4px; padding: 2px 3px; font-weight: 700; }
+.ln.z-start .cd { color: var(--lime); }
+.ln.z-end { border-left-color: var(--magenta); }
+.ln.z-end .pt { color: var(--void); background: var(--magenta); border-radius: 4px; padding: 2px 3px; font-weight: 700; }
+.ln.z-end .cd { color: var(--magenta); }
+.ln.cur { background: color-mix(in srgb, var(--cyan) 13%, transparent); color: var(--fg); }
+.ln.cur .cd { color: var(--fg); }
+.ln.nxt { background: color-mix(in srgb, var(--yellow) 14%, transparent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--yellow) 50%, transparent); }
+.ln.nxt .nn::before { content: "▶ "; color: var(--yellow); }
+
+/* Okna widoków */
+.view { flex: 1; min-height: 0; display: flex; flex-direction: column; overflow: hidden; }
+.view-body { position: relative; flex: 1; min-height: 0; }
+.view canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; cursor: grab; }
+.view canvas:active { cursor: grabbing; }
+.hud { position: absolute; font: 500 11px var(--f-num); color: var(--fg2); pointer-events: none; }
+.hud.tl { top: 10px; left: 12px; display: grid; gap: 2px; }
+.hud.tl b { color: var(--fg); font-weight: 500; }
+.hud.br { right: 12px; bottom: 10px; text-align: right; }
+.legend { position: absolute; left: 12px; bottom: 10px; display: flex; flex-wrap: wrap; gap: 4px 12px; font: 500 10.5px var(--f-ui); color: var(--fg2); pointer-events: none; }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend i { width: 14px; height: 3px; border-radius: 2px; display: inline-block; }
+.zoom { position: absolute; right: 10px; top: 10px; display: grid; gap: 6px; }
+.zoom button {
+  width: 34px; height: 34px; border-radius: 9px; border: 1px solid var(--line2);
+  background: color-mix(in srgb, var(--void) 70%, transparent); cursor: pointer; font: 600 16px var(--f-num);
+}
+.zoom button.on { border-color: var(--cyan); color: var(--cyan); }
+
+.timeline { padding: 8px 12px 10px; border-top: 1px solid var(--line); display: grid; gap: 6px; }
+.timeline canvas { width: 100%; height: 30px; display: block; cursor: pointer; touch-action: none; }
+.tl-meta { display: flex; justify-content: space-between; gap: 8px; font: 500 11.5px var(--f-num); color: var(--fg2); flex-wrap: wrap; }
+.tl-meta b { color: var(--fg); font-weight: 500; }
+
+/* karty pod maszyną */
+.stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.kv { padding: 10px 12px; display: grid; gap: 2px; }
+.kv small { font: 600 10px var(--f-head); letter-spacing: .14em; text-transform: uppercase; color: var(--fg3); }
+.kv span { font: 600 20px var(--f-num); font-variant-numeric: tabular-nums; }
+.kv em { font: 500 11.5px var(--f-ui); color: var(--fg2); font-style: normal; }
+.zones { padding: 10px 12px; display: grid; gap: 8px; }
+.zrow { display: grid; grid-template-columns: 12px 1fr auto; gap: 8px; align-items: center; font-size: 12.5px; color: var(--fg2); }
+.zrow i { width: 12px; height: 12px; border-radius: 50%; }
+.zrow b { font: 500 12px var(--f-num); color: var(--fg); }
+.stepper { display: flex; align-items: center; gap: 6px; }
+.stepper button { width: 26px; height: 26px; border-radius: 7px; border: 1px solid var(--line2); background: var(--void); cursor: pointer; font: 600 14px var(--f-num); }
+.stepper output { font: 600 13px var(--f-num); min-width: 18px; text-align: center; }
+
+/* ---------- dolny pasek ---------- */
+.bottom {
+  grid-area: bottom; display: flex; align-items: center; gap: 10px;
+  padding-block: 0;
+  padding-left: 10px;
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  border-top: 1px solid var(--line); background: color-mix(in srgb, var(--panel) 85%, transparent);
+  overflow-x: auto;
+}
+.act {
+  display: flex; align-items: center; gap: 10px; min-height: 60px; padding: 8px 16px; flex-shrink: 0;
+  border-radius: var(--r-btn); border: 1px solid var(--line2); background: var(--raise); cursor: pointer; text-align: left;
+}
+.act svg { width: 22px; height: 22px; flex-shrink: 0; }
+.act b { display: block; font: 600 15px var(--f-ui); }
+.act small { display: block; font: 500 11.5px var(--f-num); color: var(--fg2); }
+.act.primary { background: var(--cyan); color: var(--void); border-color: var(--cyan); box-shadow: 0 0 22px -4px color-mix(in srgb, var(--cyan) 70%, transparent); }
+.act.primary small { color: color-mix(in srgb, var(--void) 70%, transparent); }
+.act.next-btn { border-color: color-mix(in srgb, var(--yellow) 55%, var(--line2)); }
+.act.next-btn svg { color: var(--yellow); }
+.bottom .spacer { flex: 1; min-width: 8px; }
+.safety { display: flex; align-items: center; gap: 12px; flex-shrink: 0; text-align: right; }
+.safety small { display: block; font: 500 11px var(--f-ui); color: var(--fg3); }
+.safety b { font: 600 13px var(--f-ui); color: var(--lime); }
+.mushroom { width: 50px; height: 50px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #ff7a8c, var(--red) 55%, #7a0018); box-shadow: 0 0 0 4px var(--yellow), 0 0 22px color-mix(in srgb, var(--red) 70%, transparent); }
+
+kbd { font: 500 10.5px var(--f-num); padding: 1px 5px; border: 1px solid var(--line2); border-radius: 4px; color: var(--fg2); }
+
+/* ---------- węższe ekrany ---------- */
+@media (max-width: 1180px) {
+  .main { grid-template-columns: minmax(280px, 320px) minmax(0, 1fr); grid-template-rows: minmax(0, 1.25fr) minmax(0, 1fr); }
+  .col.left { grid-row: 1 / span 2; grid-column: 1; }
+  .col.center { grid-row: 1; grid-column: 2; }
+  .col.right { grid-row: 2; grid-column: 2; display: grid; grid-template-columns: minmax(0, 1fr) 240px; grid-template-rows: auto auto minmax(0, 1fr); }
+  .col.right .view { grid-row: 1 / span 3; }
+  .col.right .stats { grid-template-columns: 1fr; }
+}
+@media (max-width: 860px) {
+  body { overflow: auto; }
+  .app { height: auto; grid-template-columns: minmax(0, 1fr); grid-template-rows: auto auto auto auto; grid-template-areas: "top" "rail" "main" "bottom"; }
+  .top { flex-wrap: wrap; padding-block: 10px; gap: 10px 14px; }
+  .top .spacer, .pill, .modes { display: none; }
+  .rail { flex-direction: row; overflow-x: auto; border-right: 0; border-bottom: 1px solid var(--line); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  .rail a { min-width: 72px; }
+  .main { display: flex; flex-direction: column; overflow: visible; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  .view { flex: none; height: min(78vw, 440px); }
+  .prog { flex: none; height: 300px; }
+  .bottom { flex-wrap: wrap; padding-block: 10px; padding-left: max(16px, env(safe-area-inset-left, 0px)); overflow: visible; }
+  .act { flex: 1 1 140px; }
+  .bottom .spacer { display: none; }
+  .safety { width: 100%; justify-content: flex-end; }
+  .led { font-size: 26px; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="app">
+  <header class="top">
+    <div class="brand">
+      <svg viewBox="0 0 64 64" aria-hidden="true"><path d="M14 50V16h36v34H22V24h20v18H30v-10h6" fill="none" stroke="#00f0ff" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="36" cy="32" r="4.6" fill="#ff2bd6"/></svg>
+      <b>linume<span>RT</span></b>
+    </div>
+    <div class="skin">Classic <i>×</i> Neon</div>
+    <div class="modes" aria-label="Tryb pracy"><span>JOG</span><span>MDI</span><span class="on">AUTO</span></div>
+    <div class="prog-name"><small>Program</small><code>/nc/korpus_neon.ngc</code></div>
+    <div class="spacer"></div>
+    <div class="pill"><span class="dot"></span>Plant · LRT-NET · 1.000 ms</div>
+    <div class="clock" id="clock">14:32</div>
+  </header>
+
+  <nav class="rail" aria-label="Obszary">
+    <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18M5 20V7h14v13M5 7l2-3h10l2 3"/><path d="M12 7v6"/><path d="M10.5 13h3l-1.5 3z"/></svg>Maszyna</a>
+    <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l4 4v14H6z"/><path d="M15 3v4h4"/><path d="M9 12h7M9 15.5h7M9 9h3"/></svg>Program</a>
+    <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6v5H9z"/><path d="M10 8v5l2 2 2-2V8"/><path d="M12 15v6"/><path d="M10.5 17.5 13.5 16M10.5 20l3-1.5"/></svg>Narzędzia</a>
+    <a href="#" class="on" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 20 7.5v9L12 21l-8-4.5v-9z"/><path d="M4 7.5 12 12l8-4.5M12 12v9"/><path d="M7 14.5l2.5 1 2-3"/></svg>Symulacja</a>
+    <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l2-6 4 12 2-6h6"/></svg>Diagnostyka</a>
+    <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"/></svg>Konfiguracja</a>
+  </nav>
+
+  <main class="main">
+    <!-- lewa kolumna: Classic DRO + następny punkt + program -->
+    <section class="col left">
+      <div class="card">
+        <div class="card-h">Pozycja · mm<span class="grow"></span>
+          <div class="seg" role="group" aria-label="Układ współrzędnych">
+            <button id="sysWork" class="on">G54</button><button id="sysMach">MASZ</button>
+          </div>
+        </div>
+        <div class="dro" id="dro"></div>
+      </div>
+
+      <div class="card next">
+        <div class="card-h">Następny punkt<span class="grow"></span><span class="zone-tag" id="nxZone" data-z="start">START</span></div>
+        <div class="next-body">
+          <div class="next-id" id="nxId"><b>P001</b> · N0070</div>
+          <div class="dtg-big"><small>DTG</small><span id="nxDtg">0.000</span><em> mm</em></div>
+          <div class="next-code" id="nxCode">G0 X10.000 Y10.000</div>
+          <div class="bar"><i id="nxBar"></i></div>
+          <div class="next-meta"><span id="nxTarget">X — Y — Z —</span><span id="nxEta">ETA 0.0 s</span></div>
+        </div>
+      </div>
+
+      <div class="card prog">
+        <div class="card-h">Program<span class="grow"></span><span id="progCount" style="font-family:var(--f-num);letter-spacing:0">P 0 / 0</span></div>
+        <div class="prog-list" id="progList" tabindex="0" aria-label="Lista bloków programu"></div>
+      </div>
+    </section>
+
+    <!-- środek: zbliżenie na detal -->
+    <section class="col center">
+      <div class="card view">
+        <div class="card-h">Detal · zbliżenie<span class="grow"></span>
+          <div class="seg" role="group" aria-label="Kamera detalu">
+            <button id="camFollow" class="on">Śledź narzędzie</button><button id="camFit">Cały detal</button>
+          </div>
+        </div>
+        <div class="view-body">
+          <canvas id="cvDetail" aria-label="Zbliżenie na detal i ścieżkę narzędzia"></canvas>
+          <div class="hud tl"><span>T1 · Ø6.000 frez palcowy</span><span>G54 · stal 1.0503 · 120×80×30</span><span id="hudScale">zoom <b>8.0</b> px/mm</span></div>
+          <div class="zoom"><button id="zIn" aria-label="Przybliż">+</button><button id="zOut" aria-label="Oddal">−</button></div>
+          <div class="legend">
+            <span><i style="background:var(--lime)"></i>pierwsze punkty</span>
+            <span><i style="background:var(--magenta)"></i>ostatnie punkty</span>
+            <span><i style="background:var(--cyan)"></i>posuw wykonany</span>
+            <span><i style="background:var(--violet)"></i>posuw do wykonania</span>
+            <span><i style="background:var(--orange)"></i>G0</span>
+            <span><i style="background:var(--yellow)"></i>następny punkt</span>
+          </div>
+        </div>
+        <div class="timeline">
+          <canvas id="cvTime" aria-label="Oś czasu programu, kliknij aby przewinąć"></canvas>
+          <div class="tl-meta"><span>Czas <b id="tElapsed">00:00</b> / <b id="tTotal">00:00</b></span><span>Droga <b id="tDist">0</b> mm</span><span>Podgląd <b id="tFps">30</b> FPS</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- prawo: cała maszyna -->
+    <section class="col right">
+      <div class="card view">
+        <div class="card-h">Maszyna · całość<span class="grow"></span><span style="font-family:var(--f-num);letter-spacing:0;text-transform:none;color:var(--fg3)">linumert_xyz</span></div>
+        <div class="view-body">
+          <canvas id="cvMachine" aria-label="Widok całej maszyny z podświetlonym następnym punktem"></canvas>
+          <div class="hud br" id="hudMach">X 0 · Y 0 · Z 0 (G53)</div>
+        </div>
+      </div>
+      <div class="stats">
+        <div class="card kv"><small>Posuw</small><span id="kvFeed">0</span><em>mm/min · korekcja 100%</em></div>
+        <div class="card kv"><small>Wrzeciono</small><span>12 000</span><em>obr/min · M3 · M8</em></div>
+      </div>
+      <div class="card zones">
+        <div class="zrow"><i style="background:var(--lime);box-shadow:0 0 8px var(--lime)"></i><span>Strefa START: pierwsze punkty</span><b id="zStart">P1–P6</b></div>
+        <div class="zrow"><i style="background:var(--magenta);box-shadow:0 0 8px var(--magenta)"></i><span>Strefa KONIEC: ostatnie punkty</span><b id="zEnd">—</b></div>
+        <div class="zrow"><i style="background:var(--yellow);box-shadow:0 0 8px var(--yellow)"></i><span>Liczba wyróżnionych punktów</span>
+          <div class="stepper"><button id="kMinus" aria-label="Mniej">−</button><output id="kOut">6</output><button id="kPlus" aria-label="Więcej">+</button></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="bottom">
+    <button class="act primary" id="btnPlay">
+      <svg id="icPlay" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4.5v15l12-7.5z"/></svg>
+      <span><b id="playLbl">Odtwarzaj</b><small><kbd>Spacja</kbd></small></span>
+    </button>
+    <button class="act" id="btnPrev">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M17 5 9 12l8 7M7 5v14"/></svg>
+      <span><b>Punkt wstecz</b><small><kbd>←</kbd></small></span>
+    </button>
+    <button class="act next-btn" id="btnNext">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M7 5l8 7-8 7M17 5v14"/></svg>
+      <span><b>Do następnego punktu</b><small><kbd>→</kbd></small></span>
+    </button>
+    <button class="act" id="btnSpeed">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 18a8 8 0 1 1 16 0"/><path d="M12 18l4-6"/></svg>
+      <span><b>Tempo <span id="speedLbl">8×</span></b><small>czasu rzeczywistego</small></span>
+    </button>
+    <button class="act" id="btnRestart">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 1 0 2.3-5.7M4 4v5h5"/></svg>
+      <span><b>Od początku</b><small>P1</small></span>
+    </button>
+    <div class="spacer"></div>
+    <div class="safety">
+      <span><small>Symulacja · ruch tylko w podglądzie</small><b>Obwód E-STOP zamknięty</b></span>
+      <span class="mushroom" aria-hidden="true"></span>
+    </div>
+  </footer>
+</div>
+
+<script>
+(() => {
+  const css = getComputedStyle(document.documentElement);
+  const C = {};
+  for (const k of ["void","panel","raise","line","line2","fg","fg2","fg3","cyan","lime","magenta","yellow","orange","violet","red"]) C[k] = css.getPropertyValue("--" + k).trim();
+  const MONO = '"JetBrains Mono", ui-monospace, monospace';
+  const G54 = [100, 100, -150];              // G54 w układzie maszyny (jak starter symulatora)
+  const STOCK = [120, 80, 30];
+  const TOOL_D = 6, RAPID_F = 6000;
+
+  // ---------- program: wiersze G-code + ruchy z polilinią ----------
+  const rows = [];   // {n, code, mi}
+  const moves = [];  // {x,y,z, poly:[[x,y,z]..], cum:[], len, rapid, f, row}
+  const START = [-20, -20, 25];
+  let pos = START.slice(), n = 10, modal = { f: 0 };
+  const fmt = v => v.toFixed(3);
+  function meta(code) { rows.push({ n: n, code, mi: -1 }); n += 10; }
+  function pushMove(poly, code, rapid, f) {
+    const tgt = poly[poly.length - 1];
+    const cum = [0];
+    for (let i = 1; i < poly.length; i++) cum.push(cum[i - 1] + Math.hypot(poly[i][0] - poly[i - 1][0], poly[i][1] - poly[i - 1][1], poly[i][2] - poly[i - 1][2]));
+    const m = { x: tgt[0], y: tgt[1], z: tgt[2], poly, cum, len: cum[cum.length - 1], rapid, f: rapid ? RAPID_F : f, row: rows.length };
+    rows.push({ n, code, mi: moves.length }); n += 10;
+    moves.push(m); pos = tgt.slice();
+  }
+  function lin(g, x, y, z, f) {
+    x = x ?? pos[0]; y = y ?? pos[1]; z = z ?? pos[2];
+    let code = g === 0 ? "G0" : "G1";
+    if (x !== pos[0]) code += " X" + fmt(x);
+    if (y !== pos[1]) code += " Y" + fmt(y);
+    if (z !== pos[2]) code += " Z" + fmt(z);
+    if (g === 1 && f && f !== modal.f) { code += " F" + f; modal.f = f; }
+    pushMove([pos.slice(), [x, y, z]], code, g === 0, f || modal.f);
+  }
+  // łuk w płaszczyźnie XY (G2 = CW, G3 = CCW), opcjonalnie z ruchem Z (helisa), turns = pełne obroty
+  function arc(g, cx, cy, ex, ey, ez, f, turns) {
+    const r = Math.hypot(pos[0] - cx, pos[1] - cy);
+    const a0 = Math.atan2(pos[1] - cy, pos[0] - cx);
+    let a1 = Math.atan2(ey - cy, ex - cx);
+    const ccw = g === 3;
+    let sweep = a1 - a0;
+    if (ccw) { while (sweep <= 0) sweep += 2 * Math.PI; } else { while (sweep >= 0) sweep -= 2 * Math.PI; }
+    if (turns) sweep = (ccw ? 1 : -1) * 2 * Math.PI * turns;
+    const steps = Math.max(8, Math.ceil(Math.abs(sweep) / (Math.PI / 24)));
+    const z0 = pos[2], poly = [];
+    for (let i = 0; i <= steps; i++) {
+      const t = i / steps, a = a0 + sweep * t;
+      poly.push([cx + r * Math.cos(a), cy + r * Math.sin(a), z0 + (ez - z0) * t]);
+    }
+    poly[steps] = [ex, ey, ez];
+    let code = `G${g} X${fmt(ex)} Y${fmt(ey)}` + (ez !== z0 ? ` Z${fmt(ez)}` : "") + ` I${fmt(cx - pos[0])} J${fmt(cy - pos[1])}`;
+    if (f && f !== modal.f) { code += " F" + f; modal.f = f; }
+    pushMove(poly, code, false, f || modal.f);
+  }
+
+  meta("(linumeRT · KORPUS NEON · 120x80x30)");
+  meta(";@STOCK BOX X120 Y80 Z30 ORIGIN TOP");
+  meta("G21 G90 G54 G17 G40 G49");
+  meta("T1 M6 (FREZ PALCOWY D6)");
+  meta("S12000 M3");
+  meta("M8");
+  lin(0, 10, 10); lin(0, null, null, 5);
+  // kieszeń 60x40, dwa przejścia, spirala od środka
+  for (const depth of [-3, -6]) {
+    meta(`(KIESZEN Z${depth})`);
+    lin(0, 49, 39); lin(0, null, null, 2); lin(1, null, null, depth, 300);
+    for (let k = 4; k >= 0; k--) {
+      const x0 = 33 + 4 * k, x1 = 87 - 4 * k, y0 = 23 + 4 * k, y1 = 57 - 4 * k;
+      lin(1, x0, y0, null, 1200); lin(1, x1, y0); lin(1, x1, y1); lin(1, x0, y1); lin(1, x0, y0);
+    }
+    lin(0, null, null, 5);
+  }
+  meta("(OTWOR HELIKALNY D20)");
+  lin(0, 67, 40); lin(0, null, null, 2); lin(1, null, null, -6, 300);
+  arc(2, 60, 40, 67, 40, -9, 600, 1); arc(2, 60, 40, 67, 40, -12, null, 1); arc(2, 60, 40, 67, 40, -12, null, 1);
+  lin(1, 60, 40); lin(0, null, null, 5);
+  meta("(KONTUR ZEWNETRZNY R10 Z-8)");
+  lin(0, -6, 13); lin(1, null, null, -8, 300); lin(1, 3, 13, null, 1000);
+  arc(3, 13, 13, 13, 3, -8); lin(1, 107, 3); arc(3, 107, 13, 117, 13, -8);
+  lin(1, 117, 67); arc(3, 107, 67, 107, 77, -8); lin(1, 13, 77); arc(3, 13, 67, 3, 67, -8);
+  lin(1, 3, 13); lin(1, -6, 13); lin(0, null, null, 5);
+  meta("(WIERCENIE 4x D6 G0/G1)");
+  for (const [hx, hy] of [[15, 15], [105, 15], [105, 65], [15, 65]]) {
+    lin(0, hx, hy); lin(0, null, null, 2); lin(1, null, null, -14, 250); lin(0, null, null, 2);
+  }
+  lin(0, null, null, 25); lin(0, -20, 100);
+  meta("M9"); meta("M5"); meta("M30");
+
+  const M = moves.length;
+  const cumDist = [0], cumTime = [0];
+  for (const m of moves) { cumDist.push(cumDist[cumDist.length - 1] + m.len); cumTime.push(cumTime[cumTime.length - 1] + m.len / m.f * 60); }
+  const TOTAL_D = cumDist[M], TOTAL_T = cumTime[M];
+
+  // ---------- stan ----------
+  const S = { mi: 0, s: 0, playing: true, speed: 8, K: 6, sys: "work" };
+  const SPEEDS = [1, 2, 4, 8, 16, 32, 64];
+  const zoneOf = i => i < S.K ? "start" : i >= M - S.K ? "end" : "mid";
+
+  function polyAt(m, s) {
+    const c = m.cum, p = m.poly;
+    if (s <= 0) return p[0].slice();
+    if (s >= m.len) return p[p.length - 1].slice();
+    let i = 1; while (c[i] < s) i++;
+    const t = (s - c[i - 1]) / (c[i] - c[i - 1] || 1);
+    return [p[i - 1][0] + (p[i][0] - p[i - 1][0]) * t, p[i - 1][1] + (p[i][1] - p[i - 1][1]) * t, p[i - 1][2] + (p[i][2] - p[i - 1][2]) * t];
+  }
+  function toolPos() {
+    if (S.mi >= M) return [moves[M - 1].x, moves[M - 1].y, moves[M - 1].z];
+    return polyAt(moves[S.mi], S.s);
+  }
+  function seekDist(d) {
+    d = Math.max(0, Math.min(TOTAL_D, d));
+    let i = 0; while (i < M && cumDist[i + 1] <= d) i++;
+    S.mi = i; S.s = i < M ? d - cumDist[i] : 0;
+    // ruchy zerowej długości przeskakujemy
+    while (S.mi < M && moves[S.mi].len === 0) S.mi++;
+  }
+  function advance(dt) {
+    let budget = dt * S.speed; // sekundy czasu maszyny
+    while (budget > 0 && S.mi < M) {
+      const m = moves[S.mi], v = m.f / 60, rem = m.len - S.s;
+      if (rem / v > budget) { S.s += v * budget; budget = 0; }
+      else { budget -= rem / v; S.mi++; S.s = 0; }
+    }
+    if (S.mi >= M) { S.playing = false; syncPlay(); }
+  }
+
+  // ---------- DRO ----------
+  const droEl = document.getElementById("dro");
+  const dro = {};
+  for (const ax of ["X", "Y", "Z"]) {
+    const r = document.createElement("div");
+    r.className = "dro-row";
+    r.innerHTML = `<span class="dro-ax">${ax}</span><span class="led"><span class="ghost">-888.888</span><span class="val">   0.000</span></span><span class="dtg-ax"><small>DTG</small><span>0.000</span></span>`;
+    droEl.appendChild(r);
+    dro[ax] = { val: r.querySelector(".val"), dtg: r.querySelector(".dtg-ax span") };
+  }
+  const pad8 = v => v.toFixed(3).padStart(8, " ");
+
+  // ---------- lista programu ----------
+  const list = document.getElementById("progList");
+  const rowEls = rows.map((r, i) => {
+    const el = document.createElement("div");
+    el.className = "ln" + (r.mi < 0 ? " meta" : "");
+    el.innerHTML = `<span class="pt">${r.mi < 0 ? "" : "P" + (r.mi + 1)}</span><span class="nn">N${String(r.n).padStart(4, "0")}</span><span class="cd"></span>`;
+    el.querySelector(".cd").textContent = r.code;
+    if (r.mi >= 0) el.addEventListener("click", () => { S.mi = r.mi; S.s = 0; S.playing = false; syncPlay(); lastMi = -2; });
+    list.appendChild(el);
+    return el;
+  });
+  let lastMi = -2, lastK = -1;
+  function updateList() {
+    if (lastMi === S.mi && lastK === S.K) return;
+    rows.forEach((r, i) => {
+      const el = rowEls[i];
+      if (r.mi < 0) return;
+      const z = zoneOf(r.mi);
+      el.classList.toggle("z-start", z === "start");
+      el.classList.toggle("z-end", z === "end");
+      el.classList.toggle("done", r.mi < S.mi);
+      el.classList.toggle("nxt", r.mi === S.mi);
+    });
+    const row = S.mi < M ? rowEls[moves[S.mi].row] : rowEls[rows.length - 1];
+    list.scrollTop = row.offsetTop - list.clientHeight / 2 + row.offsetHeight / 2;
+    lastMi = S.mi; lastK = S.K;
+    document.getElementById("progCount").textContent = `P ${Math.min(S.mi + 1, M)} / ${M}`;
+    document.getElementById("zStart").textContent = `P1–P${S.K}`;
+    document.getElementById("zEnd").textContent = `P${M - S.K + 1}–P${M}`;
+    document.getElementById("kOut").textContent = S.K;
+  }
+
+  // ---------- projekcja ----------
+  function proj(cam, w, h) {
+    const cy = Math.cos(cam.yaw), sy = Math.sin(cam.yaw), cp = Math.cos(cam.pitch), sp = Math.sin(cam.pitch);
+    const t = cam.t, s = cam.s, ox = w / 2, oy = h / 2 + (cam.oy || 0);
+    return p => {
+      const x = p[0] - t[0], y = p[1] - t[1], z = p[2] - t[2];
+      const u = x * cy - y * sy, v = x * sy + y * cy;
+      return [ox + u * s, oy - (z * cp + v * sp) * s];
+    };
+  }
+  function fitCanvas(cv) {
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    const r = cv.getBoundingClientRect();
+    const w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
+    if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+    const ctx = cv.getContext("2d");
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    return { ctx, w: r.width, h: r.height };
+  }
+  const alpha = (hex, a) => hex + Math.round(a * 255).toString(16).padStart(2, "0");
+
+  function boxCorners(a, b) {
+    return [[a[0], a[1], a[2]], [b[0], a[1], a[2]], [b[0], b[1], a[2]], [a[0], b[1], a[2]],
+            [a[0], a[1], b[2]], [b[0], a[1], b[2]], [b[0], b[1], b[2]], [a[0], b[1], b[2]]];
+  }
+  const BOX_E = [[0,1],[1,2],[2,3],[3,0],[4,5],[5,6],[6,7],[7,4],[0,4],[1,5],[2,6],[3,7]];
+  const BOX_F = [[0,1,2,3],[4,5,6,7],[0,1,5,4],[1,2,6,5],[2,3,7,6],[3,0,4,7]];
+  function drawBox(ctx, P, a, b, stroke, fillA, lw) {
+    const q = boxCorners(a, b).map(P);
+    ctx.fillStyle = alpha(stroke, fillA);
+    for (const f of BOX_F) { ctx.beginPath(); f.forEach((i, k) => k ? ctx.lineTo(q[i][0], q[i][1]) : ctx.moveTo(q[i][0], q[i][1])); ctx.closePath(); ctx.fill(); }
+    ctx.strokeStyle = stroke; ctx.lineWidth = lw || 1; ctx.beginPath();
+    for (const [i, j] of BOX_E) { ctx.moveTo(q[i][0], q[i][1]); ctx.lineTo(q[j][0], q[j][1]); }
+    ctx.stroke();
+  }
+  function drawCyl(ctx, P, c, r, z0, z1, stroke, fillA) {
+    const N = 20, bot = [], top = [];
+    for (let i = 0; i < N; i++) { const a = i / N * Math.PI * 2; bot.push(P([c[0] + r * Math.cos(a), c[1] + r * Math.sin(a), z0])); top.push(P([c[0] + r * Math.cos(a), c[1] + r * Math.sin(a), z1])); }
+    // obrys boczny: skrajne punkty elips
+    let li = 0, ri = 0; bot.forEach((p, i) => { if (p[0] < bot[li][0]) li = i; if (p[0] > bot[ri][0]) ri = i; });
+    ctx.fillStyle = alpha(stroke, fillA);
+    ctx.beginPath(); ctx.moveTo(bot[li][0], bot[li][1]); ctx.lineTo(top[li][0], top[li][1]); ctx.lineTo(top[ri][0], top[ri][1]); ctx.lineTo(bot[ri][0], bot[ri][1]); ctx.closePath(); ctx.fill();
+    ctx.strokeStyle = stroke; ctx.lineWidth = 1.2;
+    for (const ring of [bot, top]) { ctx.beginPath(); ring.forEach((p, i) => i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])); ctx.closePath(); ctx.fill(); ctx.stroke(); }
+    ctx.beginPath(); ctx.moveTo(bot[li][0], bot[li][1]); ctx.lineTo(top[li][0], top[li][1]); ctx.moveTo(bot[ri][0], bot[ri][1]); ctx.lineTo(top[ri][0], top[ri][1]); ctx.stroke();
+  }
+
+  // ścieżka: partie po klasie, poświata przez 'lighter'
+  function drawPath(ctx, P, off, opts) {
+    const cls = { done: [], todo: [], rapid: [], rapidDone: [], start: [], end: [] };
+    const cur = toolPos();
+    for (let i = 0; i < M; i++) {
+      const m = moves[i], z = zoneOf(i);
+      let pts = m.poly;
+      const isDone = i < S.mi;
+      const k = z !== "mid" ? z : m.rapid ? (isDone ? "rapidDone" : "rapid") : isDone ? "done" : "todo";
+      if (i === S.mi && !m.rapid && z === "mid") {
+        // bieżący ruch: część wykonana + reszta
+        const c = m.cum; let j = 1; while (j < c.length - 1 && c[j] < S.s) j++;
+        cls.done.push(pts.slice(0, j).concat([cur]));
+        cls.todo.push([cur].concat(pts.slice(j)));
+        continue;
+      }
+      cls[k].push(pts);
+    }
+    const strokeSet = (sets, color, w, a, dash) => {
+      ctx.strokeStyle = alpha(color, a); ctx.lineWidth = w; ctx.setLineDash(dash || []);
+      ctx.beginPath();
+      for (const pl of sets) { pl.forEach((p, i) => { const q = P([p[0] + off[0], p[1] + off[1], p[2] + off[2]]); i ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1]); }); }
+      ctx.stroke();
+    };
+    ctx.save(); ctx.globalCompositeOperation = "lighter"; ctx.lineJoin = "round"; ctx.lineCap = "round";
+    const g = opts.glow;
+    if (opts.swept) strokeSet(cls.done.concat(cls.start.filter((_, i) => i < S.mi)), C.cyan, TOOL_D * opts.scale, 0.07);
+    strokeSet(cls.todo, C.violet, 1.2 * g, 0.5);
+    strokeSet(cls.rapid, C.orange, 1.1 * g, 0.55, [5, 5]);
+    strokeSet(cls.rapidDone, C.orange, 1.1 * g, 0.25, [5, 5]);
+    strokeSet(cls.done, C.cyan, 6 * g, 0.16); strokeSet(cls.done, C.cyan, 1.6 * g, 1);
+    strokeSet(cls.start, C.lime, 7 * g, 0.2); strokeSet(cls.start, C.lime, 2 * g, 1);
+    strokeSet(cls.end, C.magenta, 7 * g, 0.2); strokeSet(cls.end, C.magenta, 2 * g, 1);
+    ctx.restore(); ctx.setLineDash([]);
+  }
+  function drawZoneDots(ctx, P, off, labels) {
+    ctx.save(); ctx.font = `700 9.5px ${MONO}`; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    const seen = [];
+    for (let i = 0; i < M; i++) {
+      const z = zoneOf(i); if (z === "mid") continue;
+      const m = moves[i], q = P([m.x + off[0], m.y + off[1], m.z + off[2]]);
+      const col = z === "start" ? C.lime : C.magenta;
+      if (!labels) { ctx.fillStyle = col; ctx.beginPath(); ctx.arc(q[0], q[1], 2.6, 0, 7); ctx.fill(); continue; }
+      // przesunięcie etykiet nakładających się punktów
+      let dy = 0; for (const s of seen) if (Math.hypot(s[0] - q[0], s[1] - q[1] - dy) < 16) dy -= 17;
+      seen.push([q[0], q[1] + dy]);
+      const lbl = z === "start" ? String(i + 1) : (i === M - 1 ? "END" : "−" + (M - i));
+      const wv = Math.max(18, ctx.measureText(lbl).width + 10);
+      if (dy) { ctx.strokeStyle = alpha(col, 0.5); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(q[0], q[1]); ctx.lineTo(q[0], q[1] + dy); ctx.stroke(); }
+      ctx.fillStyle = col; ctx.shadowColor = col; ctx.shadowBlur = 10;
+      ctx.beginPath(); ctx.roundRect(q[0] - wv / 2, q[1] + dy - 8, wv, 16, 8); ctx.fill();
+      ctx.shadowBlur = 0; ctx.fillStyle = C.void; ctx.fillText(lbl, q[0], q[1] + dy + 0.5);
+    }
+    ctx.restore();
+  }
+  function drawNext(ctx, P, off, t, big) {
+    if (S.mi >= M) return;
+    const m = moves[S.mi], tp = toolPos();
+    const q = P([m.x + off[0], m.y + off[1], m.z + off[2]]), qt = P([tp[0] + off[0], tp[1] + off[1], tp[2] + off[2]]);
+    const pulse = 0.5 + 0.5 * Math.sin(t * 6);
+    ctx.save();
+    ctx.strokeStyle = alpha(C.yellow, 0.85); ctx.lineWidth = 1.2; ctx.setLineDash([3, 4]);
+    ctx.beginPath(); ctx.moveTo(qt[0], qt[1]); ctx.lineTo(q[0], q[1]); ctx.stroke(); ctx.setLineDash([]);
+    const R = (big ? 11 : 8) + pulse * 4;
+    ctx.shadowColor = C.yellow; ctx.shadowBlur = 16;
+    ctx.strokeStyle = C.yellow; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(q[0], q[1], R, 0, 7); ctx.stroke();
+    ctx.beginPath();
+    for (const [dx, dy] of [[1,0],[-1,0],[0,1],[0,-1]]) { ctx.moveTo(q[0] + dx * (R + 3), q[1] + dy * (R + 3)); ctx.lineTo(q[0] + dx * (R + 9), q[1] + dy * (R + 9)); }
+    ctx.stroke();
+    ctx.fillStyle = C.yellow; ctx.beginPath(); ctx.arc(q[0], q[1], 2.5, 0, 7); ctx.fill();
+    ctx.shadowBlur = 0;
+    // etykieta z DTG
+    const dtg = m.len - S.s;
+    const l1 = `P${String(S.mi + 1).padStart(3, "0")} · N${String(rows[m.row].n).padStart(4, "0")}`;
+    const l2 = `DTG ${dtg.toFixed(3)} mm`;
+    ctx.font = `600 11px ${MONO}`;
+    const bw = Math.max(ctx.measureText(l1).width, ctx.measureText(l2).width) + 16, bh = 38;
+    let bx = q[0] + R + 14, by = q[1] - bh - 8;
+    const cw = ctx.canvas.width / Math.min(2, window.devicePixelRatio || 1);
+    if (bx + bw > cw - 8) bx = q[0] - R - 14 - bw;
+    if (by < 8) by = q[1] + R + 8;
+    ctx.strokeStyle = alpha(C.yellow, 0.6); ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(q[0], q[1]); ctx.lineTo(bx + (bx > q[0] ? 0 : bw), by + bh / 2); ctx.stroke();
+    ctx.fillStyle = alpha(C.void, 0.88); ctx.beginPath(); ctx.roundRect(bx, by, bw, bh, 7); ctx.fill();
+    ctx.strokeStyle = C.yellow; ctx.stroke();
+    ctx.fillStyle = C.fg2; ctx.textBaseline = "top"; ctx.fillText(l1, bx + 8, by + 6);
+    ctx.fillStyle = C.yellow; ctx.fillText(l2, bx + 8, by + 21);
+    ctx.restore();
+  }
+  function drawTool(ctx, P, tip, scaleHint) {
+    drawCyl(ctx, P, tip, TOOL_D / 2, tip[2], tip[2] + 26, C.cyan, 0.18);
+    drawCyl(ctx, P, tip, 11, tip[2] + 26, tip[2] + 48, C.fg2, 0.1);
+    drawCyl(ctx, P, tip, 20, tip[2] + 48, tip[2] + 110, C.fg3, 0.08);
+    const q = P(tip);
+    ctx.save(); ctx.globalCompositeOperation = "lighter";
+    const g = ctx.createRadialGradient(q[0], q[1], 0, q[0], q[1], 18 + scaleHint);
+    g.addColorStop(0, alpha(C.cyan, 0.75)); g.addColorStop(1, alpha(C.cyan, 0));
+    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(q[0], q[1], 18 + scaleHint, 0, 7); ctx.fill();
+    ctx.restore();
+  }
+
+  // ---------- widok detalu ----------
+  const cvD = document.getElementById("cvDetail");
+  const camD = { yaw: 0.62, pitch: 0.62, s: 8, t: [60, 40, -10], follow: true };
+  function renderDetail(t) {
+    const { ctx, w, h } = fitCanvas(cvD);
+    ctx.fillStyle = C.void; ctx.fillRect(0, 0, w, h);
+    const tp = toolPos();
+    const target = camD.follow ? tp : [STOCK[0] / 2, STOCK[1] / 2, -STOCK[2] / 2];
+    const s = camD.follow ? camD.s : Math.min(w, h) / 150;
+    for (let i = 0; i < 3; i++) camD.t[i] += (target[i] - camD.t[i]) * 0.18;
+    camD.cur = s;
+    const P = proj({ yaw: camD.yaw, pitch: camD.pitch, s, t: camD.t }, w, h);
+    // siatka stołu pod detalem
+    ctx.strokeStyle = alpha(C.line2, 0.55); ctx.lineWidth = 1; ctx.beginPath();
+    for (let x = -60; x <= 180; x += 10) { const a = P([x, -60, -30]), b = P([x, 140, -30]); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); }
+    for (let y = -60; y <= 140; y += 10) { const a = P([-60, y, -30]), b = P([180, y, -30]); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); }
+    ctx.stroke();
+    drawBox(ctx, P, [0, 0, -30], [120, 80, 0], C.fg3, 0.05, 1);
+    // siatka 10 mm na wierzchu przygotówki
+    ctx.strokeStyle = alpha(C.fg3, 0.35); ctx.beginPath();
+    for (let x = 10; x < 120; x += 10) { const a = P([x, 0, 0]), b = P([x, 80, 0]); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); }
+    for (let y = 10; y < 80; y += 10) { const a = P([0, y, 0]), b = P([120, y, 0]); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); }
+    ctx.stroke();
+    // zero G54
+    const o = P([0, 0, 0]);
+    ctx.lineWidth = 2;
+    for (const [d, col] of [[[12, 0, 0], C.red], [[0, 12, 0], C.lime], [[0, 0, 12], C.cyan]]) { const e = P(d); ctx.strokeStyle = col; ctx.beginPath(); ctx.moveTo(o[0], o[1]); ctx.lineTo(e[0], e[1]); ctx.stroke(); }
+    drawPath(ctx, P, [0, 0, 0], { glow: 1, swept: true, scale: s });
+    drawZoneDots(ctx, P, [0, 0, 0], true);
+    drawTool(ctx, P, tp, s);
+    drawNext(ctx, P, [0, 0, 0], t, true);
+    // podziałka
+    const len = 10 * s; ctx.strokeStyle = C.fg2; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(w - 16 - len, h - 46); ctx.lineTo(w - 16, h - 46); ctx.moveTo(w - 16 - len, h - 50); ctx.lineTo(w - 16 - len, h - 42); ctx.moveTo(w - 16, h - 50); ctx.lineTo(w - 16, h - 42); ctx.stroke();
+    ctx.fillStyle = C.fg2; ctx.font = `500 10.5px ${MONO}`; ctx.textAlign = "right"; ctx.fillText("10 mm", w - 16, h - 54);
+    document.getElementById("hudScale").innerHTML = `zoom <b>${s.toFixed(1)}</b> px/mm`;
+  }
+
+  // ---------- widok maszyny ----------
+  const cvM = document.getElementById("cvMachine");
+  const camM = { yaw: 0.72, pitch: 0.5, zoom: 1 };
+  const MB = { x0: -40, x1: 460, y0: -20, y1: 340, z0: -230, z1: 110 }; // obrys bryły maszyny
+  function renderMachine(t) {
+    const { ctx, w, h } = fitCanvas(cvM);
+    ctx.fillStyle = C.void; ctx.fillRect(0, 0, w, h);
+    const center = [(MB.x0 + MB.x1) / 2, (MB.y0 + MB.y1) / 2, (MB.z0 + MB.z1) / 2];
+    const P1 = proj({ yaw: camM.yaw, pitch: camM.pitch, s: 1, t: center }, 0, 0);
+    let ex = 0, ey = 0;
+    for (const c of boxCorners([MB.x0, MB.y0, MB.z0], [MB.x1, MB.y1, MB.z1])) { const q = P1(c); ex = Math.max(ex, Math.abs(q[0])); ey = Math.max(ey, Math.abs(q[1])); }
+    const s = Math.min((w - 24) / (2 * ex), (h - 24) / (2 * ey)) * camM.zoom;
+    const P = proj({ yaw: camM.yaw, pitch: camM.pitch, s, t: center }, w, h);
+    const tp = toolPos();
+    const tm = [tp[0] + G54[0], tp[1] + G54[1], tp[2] + G54[2]];
+    // podłoga
+    ctx.strokeStyle = alpha(C.line, 0.9); ctx.lineWidth = 1; ctx.beginPath();
+    for (let x = -100; x <= 520; x += 40) { const a = P([x, -80, -300]), b = P([x, 400, -300]); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); }
+    for (let y = -80; y <= 400; y += 40) { const a = P([-100, y, -300]), b = P([520, y, -300]); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); }
+    ctx.stroke();
+    // podstawa i stół z rowkami T
+    drawBox(ctx, P, [0, 0, -300], [420, 320, -200], C.violet, 0.06, 1);
+    drawBox(ctx, P, [10, 10, -200], [410, 310, -182], C.fg3, 0.08, 1);
+    ctx.strokeStyle = alpha(C.fg3, 0.6); ctx.beginPath();
+    for (let y = 50; y < 310; y += 50) { const a = P([10, y, -182]), b = P([410, y, -182]); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); }
+    ctx.stroke();
+    // prowadnice Y
+    for (const x of [-30, 440]) drawBox(ctx, P, [x - 8, 0, -200], [x + 8, 320, -188], C.fg3, 0.1, 1);
+    // przygotówka + dociski
+    drawBox(ctx, P, [G54[0], G54[1], G54[2] - 30], [G54[0] + 120, G54[1] + 80, G54[2]], C.fg2, 0.1, 1);
+    for (const [cx, cy] of [[G54[0] - 18, G54[1] + 20], [G54[0] - 18, G54[1] + 60], [G54[0] + 128, G54[1] + 20], [G54[0] + 128, G54[1] + 60]])
+      drawBox(ctx, P, [cx, cy - 6, -182], [cx + 10, cy + 6, -160], C.orange, 0.12, 1);
+    drawPath(ctx, P, G54, { glow: 0.7, swept: false, scale: s });
+    drawZoneDots(ctx, P, G54, false);
+    // brama (Y), wózek (X), wrzeciennik (Z)
+    const gy = tm[1] + 40;
+    const sideCol = C.cyan;
+    drawBox(ctx, P, [-46, gy - 25, -188], [-14, gy + 25, 70], sideCol, 0.06, 1.2);
+    drawBox(ctx, P, [424, gy - 25, -188], [456, gy + 25, 70], sideCol, 0.06, 1.2);
+    drawBox(ctx, P, [-46, gy - 10, 40], [456, gy + 25, 100], sideCol, 0.07, 1.4);
+    drawBox(ctx, P, [tm[0] - 35, gy - 26, 0], [tm[0] + 35, gy - 10, 110], C.magenta, 0.08, 1.2);
+    drawBox(ctx, P, [tm[0] - 22, tm[1] - 22, tm[2] + 70], [tm[0] + 22, tm[1] + 22, tm[2] + 190], C.magenta, 0.08, 1.2);
+    drawTool(ctx, P, tm, 0);
+    drawNext(ctx, P, G54, t, false);
+    // etykieta START/END
+    ctx.font = `700 10px ${MONO}`; ctx.textBaseline = "middle";
+    const qs = P([moves[0].x + G54[0], moves[0].y + G54[1], moves[0].z + G54[2]]);
+    const qe = P([moves[M - 1].x + G54[0], moves[M - 1].y + G54[1], moves[M - 1].z + G54[2]]);
+    ctx.fillStyle = C.lime; ctx.fillText("START", qs[0] + 8, qs[1]);
+    ctx.fillStyle = C.magenta; ctx.fillText("END", qe[0] + 8, qe[1]);
+    document.getElementById("hudMach").textContent = `G53  X ${tm[0].toFixed(3)}  Y ${tm[1].toFixed(3)}  Z ${tm[2].toFixed(3)}`;
+  }
+
+  // ---------- oś czasu ----------
+  const cvT = document.getElementById("cvTime");
+  function renderTimeline() {
+    const { ctx, w, h } = fitCanvas(cvT);
+    ctx.clearRect(0, 0, w, h);
+    const X = d => 2 + (w - 4) * d / TOTAL_D;
+    ctx.fillStyle = C.void; ctx.beginPath(); ctx.roundRect(0, 6, w, h - 12, 6); ctx.fill();
+    ctx.strokeStyle = C.line; ctx.stroke();
+    const cur = (S.mi >= M ? TOTAL_D : cumDist[S.mi] + S.s);
+    ctx.fillStyle = alpha(C.cyan, 0.22); ctx.fillRect(X(0), 7, X(cur) - X(0), h - 14);
+    // segmenty ruchów G0
+    ctx.fillStyle = alpha(C.orange, 0.55);
+    for (let i = 0; i < M; i++) if (moves[i].rapid && zoneOf(i) === "mid") ctx.fillRect(X(cumDist[i]), h - 10, Math.max(1, X(cumDist[i + 1]) - X(cumDist[i])), 3);
+    // strefy
+    const zs = [[0, S.K, C.lime], [M - S.K, M, C.magenta]];
+    for (const [a, b, col] of zs) {
+      const xa = X(cumDist[a]), xb = Math.max(xa + 3, X(cumDist[b]));
+      ctx.fillStyle = col; ctx.shadowColor = col; ctx.shadowBlur = 8; ctx.fillRect(xa, 8, xb - xa, 4); ctx.shadowBlur = 0;
+      ctx.fillStyle = alpha(col, 0.8);
+      for (let i = a; i < b; i++) ctx.fillRect(X(cumDist[i + 1]) - 0.5, 12, 1, h - 24);
+    }
+    // następny punkt
+    if (S.mi < M) {
+      const xn = X(cumDist[S.mi + 1]);
+      ctx.fillStyle = C.yellow; ctx.beginPath(); ctx.moveTo(xn, 6); ctx.lineTo(xn - 4, 1); ctx.lineTo(xn + 4, 1); ctx.closePath(); ctx.fill();
+      ctx.fillRect(xn - 0.5, 6, 1, h - 12);
+    }
+    const xc = X(cur);
+    ctx.fillStyle = C.cyan; ctx.shadowColor = C.cyan; ctx.shadowBlur = 10; ctx.fillRect(xc - 1.5, 3, 3, h - 6); ctx.shadowBlur = 0;
+  }
+  function timeSeek(e) {
+    const r = cvT.getBoundingClientRect();
+    seekDist((e.clientX - r.left) / r.width * TOTAL_D);
+  }
+  cvT.addEventListener("pointerdown", e => { cvT.setPointerCapture(e.pointerId); timeSeek(e); cvT.onpointermove = timeSeek; });
+  cvT.addEventListener("pointerup", () => { cvT.onpointermove = null; });
+
+  // ---------- orbitowanie i zoom ----------
+  function orbit(cv, cam) {
+    let last = null;
+    cv.addEventListener("pointerdown", e => { cv.setPointerCapture(e.pointerId); last = [e.clientX, e.clientY]; });
+    cv.addEventListener("pointermove", e => {
+      if (!last) return;
+      cam.yaw += (e.clientX - last[0]) * 0.008;
+      cam.pitch = Math.max(0.1, Math.min(1.45, cam.pitch + (e.clientY - last[1]) * 0.006));
+      last = [e.clientX, e.clientY];
+    });
+    cv.addEventListener("pointerup", () => { last = null; });
+    cv.addEventListener("pointercancel", () => { last = null; });
+  }
+  orbit(cvD, camD); orbit(cvM, camM);
+  const zoomD = f => { camD.s = Math.max(2, Math.min(30, camD.s * f)); if (!camD.follow) setFollow(true); };
+  cvD.addEventListener("wheel", e => { e.preventDefault(); zoomD(e.deltaY < 0 ? 1.12 : 1 / 1.12); }, { passive: false });
+  cvM.addEventListener("wheel", e => { e.preventDefault(); camM.zoom = Math.max(0.6, Math.min(3, camM.zoom * (e.deltaY < 0 ? 1.1 : 1 / 1.1))); }, { passive: false });
+  document.getElementById("zIn").onclick = () => zoomD(1.25);
+  document.getElementById("zOut").onclick = () => zoomD(0.8);
+  function setFollow(v) {
+    camD.follow = v;
+    document.getElementById("camFollow").classList.toggle("on", v);
+    document.getElementById("camFit").classList.toggle("on", !v);
+  }
+  document.getElementById("camFollow").onclick = () => setFollow(true);
+  document.getElementById("camFit").onclick = () => setFollow(false);
+
+  // ---------- sterowanie ----------
+  const playLbl = document.getElementById("playLbl"), icPlay = document.getElementById("icPlay");
+  function syncPlay() {
+    playLbl.textContent = S.playing ? "Pauza" : S.mi >= M ? "Koniec programu" : "Odtwarzaj";
+    icPlay.innerHTML = S.playing ? '<path d="M8 5v14M16 5v14"/>' : '<path d="M7 4.5v15l12-7.5z"/>';
+  }
+  function togglePlay() { if (S.mi >= M) { S.mi = 0; S.s = 0; } S.playing = !S.playing; syncPlay(); }
+  function stepNext() { if (S.mi < M) { S.mi++; S.s = 0; } S.playing = false; syncPlay(); }
+  function stepPrev() { if (S.s > 0.001 && S.mi < M) S.s = 0; else if (S.mi > 0) { S.mi--; S.s = 0; } S.playing = false; syncPlay(); }
+  document.getElementById("btnPlay").onclick = togglePlay;
+  document.getElementById("btnNext").onclick = stepNext;
+  document.getElementById("btnPrev").onclick = stepPrev;
+  document.getElementById("btnRestart").onclick = () => { S.mi = 0; S.s = 0; S.playing = true; syncPlay(); };
+  document.getElementById("btnSpeed").onclick = () => { S.speed = SPEEDS[(SPEEDS.indexOf(S.speed) + 1) % SPEEDS.length]; document.getElementById("speedLbl").textContent = S.speed + "×"; };
+  document.getElementById("kMinus").onclick = () => { S.K = Math.max(1, S.K - 1); };
+  document.getElementById("kPlus").onclick = () => { S.K = Math.min(15, S.K + 1); };
+  document.getElementById("sysWork").onclick = () => { S.sys = "work"; sysBtns(); };
+  document.getElementById("sysMach").onclick = () => { S.sys = "mach"; sysBtns(); };
+  function sysBtns() { document.getElementById("sysWork").classList.toggle("on", S.sys === "work"); document.getElementById("sysMach").classList.toggle("on", S.sys === "mach"); }
+  window.addEventListener("keydown", e => {
+    if (e.target.closest && e.target.closest("button") && (e.key === " " || e.key === "Enter")) return;
+    if (e.key === " ") { e.preventDefault(); togglePlay(); }
+    else if (e.key === "ArrowRight") { e.preventDefault(); stepNext(); }
+    else if (e.key === "ArrowLeft") { e.preventDefault(); stepPrev(); }
+  });
+
+  // ---------- panele tekstowe ----------
+  const mmss = sec => { sec = Math.max(0, Math.round(sec)); return String(Math.floor(sec / 60)).padStart(2, "0") + ":" + String(sec % 60).padStart(2, "0"); };
+  document.getElementById("tTotal").textContent = mmss(TOTAL_T);
+  function updatePanels() {
+    const tp = toolPos();
+    const off = S.sys === "mach" ? G54 : [0, 0, 0];
+    const m = S.mi < M ? moves[S.mi] : null;
+    const tgt = m ? [m.x, m.y, m.z] : tp;
+    ["X", "Y", "Z"].forEach((ax, i) => {
+      dro[ax].val.textContent = pad8(tp[i] + off[i]);
+      dro[ax].dtg.textContent = (tgt[i] - tp[i]).toFixed(3);
+    });
+    const z = m ? zoneOf(S.mi) : "end";
+    const tag = document.getElementById("nxZone");
+    tag.dataset.z = z; tag.textContent = z === "start" ? `START ${S.mi + 1}/${S.K}` : z === "end" ? (m ? `KONIEC −${M - S.mi}` : "KONIEC") : "PROGRAM";
+    if (m) {
+      const dtg = m.len - S.s;
+      document.getElementById("nxId").innerHTML = `<b>P${String(S.mi + 1).padStart(3, "0")}</b> · N${String(rows[m.row].n).padStart(4, "0")} · ${m.rapid ? "G0" : "posuw " + m.f}`;
+      document.getElementById("nxDtg").textContent = dtg.toFixed(3);
+      document.getElementById("nxCode").textContent = rows[m.row].code;
+      document.getElementById("nxBar").style.width = (m.len ? 100 * S.s / m.len : 100).toFixed(1) + "%";
+      document.getElementById("nxTarget").textContent = `X${(m.x + off[0]).toFixed(3)} Y${(m.y + off[1]).toFixed(3)} Z${(m.z + off[2]).toFixed(3)}`;
+      document.getElementById("nxEta").textContent = `ETA ${(dtg / m.f * 60).toFixed(1)} s`;
+      document.getElementById("kvFeed").textContent = S.playing ? m.f.toLocaleString("pl-PL") : "0";
+    } else {
+      document.getElementById("nxId").innerHTML = "<b>—</b> · M30";
+      document.getElementById("nxDtg").textContent = "0.000";
+      document.getElementById("nxCode").textContent = "Program zakończony";
+      document.getElementById("nxBar").style.width = "100%";
+      document.getElementById("nxTarget").textContent = "—";
+      document.getElementById("nxEta").textContent = "ETA 0.0 s";
+      document.getElementById("kvFeed").textContent = "0";
+    }
+    const el = S.mi >= M ? TOTAL_T : cumTime[S.mi] + S.s / moves[S.mi].f * 60;
+    document.getElementById("tElapsed").textContent = mmss(el);
+    document.getElementById("tDist").textContent = Math.round(S.mi >= M ? TOTAL_D : cumDist[S.mi] + S.s).toLocaleString("pl-PL") + " / " + Math.round(TOTAL_D).toLocaleString("pl-PL");
+    const d = new Date();
+    document.getElementById("clock").textContent = String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0");
+  }
+
+  // ---------- pętla, maks. 30 FPS jak w kontrakcie widoku 3D ----------
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (reduce) { S.playing = false; seekDist(cumDist[S.K] + 4); }
+  syncPlay();
+  let prev = performance.now(), lastFrame = 0, fpsAcc = 0, fpsN = 0, fpsT = 0;
+  function frame(now) {
+    requestAnimationFrame(frame);
+    if (now - lastFrame < 1000 / 30 - 2) return;
+    const dt = Math.min(0.1, (now - prev) / 1000); prev = now;
+    fpsN++; fpsT += now - lastFrame; lastFrame = now;
+    if (fpsT > 1000) { document.getElementById("tFps").textContent = Math.round(fpsN * 1000 / fpsT); fpsN = 0; fpsT = 0; }
+    if (S.playing) advance(dt);
+    const t = reduce ? 0 : now / 1000;
+    renderDetail(t); renderMachine(t); renderTimeline();
+    updateList(); updatePanels();
+  }
+  requestAnimationFrame(frame);
+})();
+</script>

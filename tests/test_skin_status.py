@@ -20,7 +20,11 @@ def fake_status():
                           INTERP_IDLE=1, INTERP_READING=2, INTERP_PAUSED=3, INTERP_WAITING=4)
     status = SimpleNamespace(poll=lambda: None, actual_position=(1, 2, 3, 4, 5, 6, 7, 8, 9),
                              linear_units=1.0, angular_units=1.0, axis_mask=511,
-                             task_mode=1, task_state=1, interp_state=1, estop=1, enabled=False)
+                             task_mode=1, task_state=1, interp_state=1, estop=1, enabled=False,
+                             file='/nc/a.ngc', motion_line=12,
+                             g5x_offset=(100, 100, -150) + (0,) * 6,
+                             g92_offset=(0,) * 9, tool_offset=(0, 0, 50) + (0,) * 6,
+                             rotation_xy=0.0, distance_to_go=4.0, dtg=(3, 0, 0) + (0,) * 6)
     return status, api
 
 
@@ -39,6 +43,9 @@ def test_read_only_normalizes_all_axes_and_retains_estop():
 
 
 @pytest.mark.parametrize(('field', 'value'), [
+    ('file', 7), ('file', 'x' * 5000), ('file', 'a\x00b'), ('motion_line', -1),
+    ('motion_line', 1.5), ('g5x_offset', (float('nan'),) * 9), ('dtg', (1,)),
+    ('distance_to_go', float('inf')),
     ('linear_units', 0), ('angular_units', float('nan')), ('axis_mask', 0),
     ('axis_mask', True), ('axis_mask', 512), ('actual_position', (0,)),
     ('actual_position', (float('inf'),) * 9), ('task_mode', 99),
@@ -143,3 +150,15 @@ def test_reader_deadline_clears_a_previously_valid_sample():
         assert seen[-1] == (None, 'reader-timeout')
     finally:
         reader.stop()
+
+
+def test_program_line_offsets_and_work_position():
+    status, api = fake_status()
+    status.actual_position = (110, 120, -95) + (0,) * 6
+    sample = decode_sample(json.dumps(read_status(status, api)).encode(), time.monotonic())
+    assert sample.file == '/nc/a.ngc' and sample.motion_line == 12
+    assert sample.work_position() == pytest.approx((10, 20, 5))   # G53 − G54 − narzędzie
+    assert sample.distance_to_go == pytest.approx(4) and sample.dtg == pytest.approx((3, 0, 0))
+    status.linear_units = 1 / 25.4                                # maszyna w calach → mm
+    inch = decode_sample(json.dumps(read_status(status, api)).encode(), time.monotonic())
+    assert inch.g5x_offset[0] == pytest.approx(2540) and inch.distance_to_go == pytest.approx(101.6)
