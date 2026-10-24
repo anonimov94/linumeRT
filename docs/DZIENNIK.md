@@ -946,5 +946,5 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
 - ISO: zachowano poprawki user-setup/sudo, konto linumert, autologin i test realnego tworzenia konta.
 - Debian 12: konto, UID 1000, hasło, home, sudo i drugie uruchomienie testu PASS; 8 testów ISO PASS.
 - Pięć lokalnych gałęzi ma wyłącznie poprawki równoważne main; historia scalona, drzewo bez zmian.
-- Raport: docs/raporty/ZAMKNIECIE_GALEZI_2026-10-24.md; końcowe kontrole i SHA w PR.
+- Raport: docs/raporty/ZAMKNIECIE_GALEZI_2026-10-24.md; końcowe kontrole i SHA w PR #101.
 - Bez publikacji wydania i odbioru sprzętu; autokontrola, bez niezależnego przeglądu.

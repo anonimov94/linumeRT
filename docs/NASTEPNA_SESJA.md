@@ -1,6 +1,6 @@
 # Przekazanie i środowisko
 
-Tura: Codex · 2026-10-24 · stan: w toku; zamykanie istniejących gałęzi na polecenie właściciela.
+Tura: Codex · 2026-10-24 · stan: oddana; domknięcie gałęzi w PR #98 i #101, wyniki/scalenia w PR.
 
 Model-Author: Codex. Bez globalnego LOCK; zasady współpracy wyłącznie w
 [WSPOLPRACA_MODELI.md](WSPOLPRACA_MODELI.md).
@@ -31,7 +31,10 @@ main: 60 testów Qt/rejestru/IP w Debianie PASS, zrzut `build/editor-closeout/ed
 ISO i stare historie gałęzi: `iso/fix-live-login`, checkout `/tmp/linumert-iso-login-closeout`.
 Test tworzenia konta Live Debian 12 PASS, 8 testów ISO PASS; raport zamknięcia w
 [ZAMKNIECIE_GALEZI_2026-10-24.md](raporty/ZAMKNIECIE_GALEZI_2026-10-24.md).
-Gałąź zawiera także gotowy edytor #98; kolejność scalenia: #98, następnie ISO.
+Gałąź zawiera także gotowy edytor #98; kolejność scalenia: #98, następnie
+[PR #101](https://github.com/anonimov94/linumeRT/pull/101). Końcowe SHA i wyniki CI w obu PR.
+Po scaleniu wrócić do najwcześniejszych otwartych kryteriów rejestru i blokera OD-01;
+nie kontynuować dawnych gałęzi jako nowych tematów.
 
 ## Środowisko i odbiór
 

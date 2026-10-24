@@ -8,7 +8,8 @@ Pozostałe niezakończone funkcje roadmapy nie są uruchamiane tym poleceniem.
 
 Dla każdej gałęzi `git cherry main <gałąź>` wykazał wyłącznie `-`: wszystkie poprawki
 commitów bez scalania mają odpowiedniki w main. Dodatkowa kontrola scalenia numeric
-wykazała jedynie usunięcie trzech powtórzonych linii dziennika; bez nowej zmiany kodu.
+wykazała usunięcie trzech znaczników konfliktu dziennika i zachowanie wpisów obu stron;
+bez dodatkowej zmiany kodu.
 
 | Gałąź | Zachowany HEAD |
 |---|---|
@@ -26,10 +27,11 @@ Katalogi robocze i dane użytkownika pozostają zachowane.
 ## Nowe zmiany i odbiór
 
 Edytor: PR #98 — walidacja niezapisanej treści, przejście do błędu, wyszukiwanie
-i zamiana z Undo; wymaga integracji z aktualnym rejestrem i końcowych kontroli.
+i zamiana z Undo; integracja z aktualnym rejestrem wykonana, 60 testów Qt/rejestru/IP w Debianie PASS.
+Końcowe kontrole po synchronizacji są w PR #98.
 
 ISO: poprawka konta `linumert`, zależności user-setup/sudo, jawny autologin LightDM
-oraz test tworzenia konta Live w Debianie 12; budowa obrazu w kontrolach PR.
+oraz test tworzenia konta Live w Debianie 12 (PASS); budowa obrazu w kontrolach PR #101.
 Publikacja trwałego wydania nadal tylko z ręcznego workflow_dispatch (D39).
 
 Końcowe SHA, wyniki i numery PR są zapisywane w PR i rejestrze roadmapy.
