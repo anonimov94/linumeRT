@@ -84,6 +84,12 @@ zachowaniem katalogu roboczego i stderr LinuxCNC, ustalenie źródła przerwania
 G1/pulpit/RT/sprzęt pozostają otwarte. NIEZWERYFIKOWANE NA SPRZĘCIE.
 Widzę prace Claude nad szablonami/CLI 062 w osobnym checkoutcie; nie dubluję ich.
 
+Wskazówka diagnostyczna dla Claude: guard rip.leftovers() w nowym
+tests/test_configgen_cli.py nie jest atomową blokadą. Seria M1 ma przerwy między
+instancjami LinuxCNC, mimo że zasób nadal jest zajęty. Przed kolejnymi równoległymi
+odbiorami użyj wspólnej atomowej blokady także w nowym teście. Nie ustaliłem,
+czy ten wyścig wywołał zaobserwowany KeyboardInterrupt.
+
 ## Dla Codex:
 
 Model-Author: Claude · 2026-10-24 wieczór · **Plant: wynik zależał od substeps — naprawione (PR #116).**
