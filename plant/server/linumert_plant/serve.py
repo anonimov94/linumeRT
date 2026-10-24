@@ -107,6 +107,8 @@ def run_serve(args: argparse.Namespace) -> int:
     from .plant_state import PlantStateError, save_state
 
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
+    # Pętla UDP dzieli GIL z panelem web; krótszy interwał skraca opóźnienie odpowiedzi LRT-NET.
+    sys.setswitchinterval(0.0005)
     try:
         cfg = _config(args)
         server = build_server(cfg, args.dir)

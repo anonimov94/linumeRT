@@ -965,3 +965,11 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
 - matrix_smoke wymaga teraz `event: CRASH` i `COVER_CRASH` z `present: false`; przed poprawką FAIL 2/4, po niej 5 maszyn × 4/4.
 - Testy: nowy tests/test_start_collision.py, 1116 PASS; test_sim_engine::test_sample_programs_stock_lines pada przez plik bez ;@STOCK w config/sim/nc_files (poza zakresem).
 - Autokontrola, bez niezależnego przeglądu; ponowny odbiór A3 na stanowisku właściciela osobno.
+
+## LEGACY-RUNTIME — zrywanie LRT-NET przy zakładkach panelu Plant — 2026-10-24 · Claude
+- Model-Author: Claude. Zgłoszenie właściciela: przełączanie zakładek Praca/Napędy/Maszyna daje „N cykli bez odpowiedzi” (do 335).
+- Pomiar na żywo: serie 70–350 zgubionych cykli; wątek RT LinuxCNC i ekran nie głodowały (opóźnienie kolejki 0–2 ms), więc zatrzymywał się proces Plant.
+- Przyczyna: endpointy zakładek wołały `load_library` (102 ms czystego Pythona, 7 szablonów YAML) w wątku panelu; GIL opóźniał odpowiedzi pętli UDP.
+- Poprawka: CSafeLoader, cache biblioteki wg mtime/rozmiaru plików (kopia głęboka), `sys.setswitchinterval(0.0005)` w `serve`.
+- Odtworzenie lokalne (Plant + lrtnet_probe 1 kHz + odpytywanie endpointów): przed RTT maks. 242 ms, 130 utraconych, watchdog; po 11,9 ms, 0 utraconych.
+- Testy: tests/test_library_cache.py. Nie zmieniono timeout-cycles ani łańcucha E-STOP. Do potwierdzenia na pulpicie właściciela.

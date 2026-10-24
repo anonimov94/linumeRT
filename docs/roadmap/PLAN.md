@@ -963,11 +963,11 @@ Pozostaje: Zweryfikować obraz main, SHA-256, live/instalację; publikacja ręcz
 
 ### LEGACY-RUNTIME — Diagnostyka uruchomień z dawnych promptów startowych
 
-**częściowe**. Testy runtime i launchery rozwijano później; stare listy nie są nowym harmonogramem.
+**częściowe**. Testy runtime i launchery rozwijano później; stare listy nie są nowym harmonogramem. 2026-10-24: przyczyna zrywania LRT-NET przy zakładkach panelu Plant znaleziona i usunięta (parsowanie biblioteki napędów w procesie Plant blokowało pętlę UDP przez GIL; teraz CSafeLoader, cache wg mtime, krótszy interwał GIL). Odtworzenie lokalne: przed poprawką RTT maks. 242 ms i 130 zgubionych ramek, po poprawce 11,9 ms i 0.
 
-Pozostaje: Rozliczyć niepotwierdzone kryteria: 10× LRT-NET, długie blokady GUI/heartbeat i VirtualBox na docelowym stanowisku.
+Pozostaje: Powtórzyć na pulpicie właściciela przełączanie zakładek po poprawce (błąd 'N cykli bez odpowiedzi'). 10× testy Plant z LinuxCNC: 1 z 10 przebiegów PASS (13/13), reszta do wykonania na wolnym pulpicie. Zmierzyć najdłuższe zamrożenie GUI i heartbeat (50 000 linii G1), VirtualBox na docelowym stanowisku.
 
-Źródła: [prompts/START-CODEX-HMI.md](../../prompts/START-CODEX-HMI.md), [prompts/START-CODEX-LINUX.md](../../prompts/START-CODEX-LINUX.md).
+Źródła: [prompts/START-CODEX-HMI.md](../../prompts/START-CODEX-HMI.md), [prompts/START-CODEX-LINUX.md](../../prompts/START-CODEX-LINUX.md), [tests/test_library_cache.py](../../tests/test_library_cache.py), [plant/server/linumert_plant/drive_library.py](../../plant/server/linumert_plant/drive_library.py), [plant/server/linumert_plant/serve.py](../../plant/server/linumert_plant/serve.py).
 
 ### ROADMAP-UNIFICATION — Jeden rejestr planu i migracja statusów
 
