@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=linumeRT — Classic × Neon (read-only)
+Comment=Podgląd detalu i całej maszyny z następnym punktem i DTG, tylko do odczytu obok uruchomionego LinuxCNC
+Exec=/usr/local/bin/linumert --neon
+Icon=/opt/linumeRT/docs/design/marka/znak.svg
+Terminal=false
+Categories=Utility;

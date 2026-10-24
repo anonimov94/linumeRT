@@ -11,6 +11,9 @@ from linumert_skin_readouts import AxisReadout, ProgramView
 from linumert_skin_status import AXES, MAX_AGE, decode_sample
 from PyQt5 import QtCore, QtWidgets
 
+LOADER = Path(__file__).with_name("linumert_neon_loader.py")
+MAX_SOURCE = 4 * 1024 * 1024
+
 
 class StatusReader(QtCore.QObject):
     changed = QtCore.pyqtSignal(object, str)
@@ -71,13 +74,94 @@ class StatusReader(QtCore.QObject):
         self.process.waitForFinished(1000)
 
 
+class ProgramLoader(QtCore.QObject):
+    """Ścieżka aktywnego programu z interpretera LinuxCNC w jednorazowym procesie (poza GUI).
+
+    Model-Author: Claude. Tylko odczyt pliku; brak komend LinuxCNC. NIEZWERYFIKOWANE NA SPRZĘCIE.
+    """
+
+    loaded = QtCore.pyqtSignal(object, str)    # (Toolpath | None, opis dla operatora)
+
+    def __init__(self, parent=None, timeout_s=None):
+        super().__init__(parent)
+        from linumert_neon_loader import TIMEOUT_S
+        self.path = ""
+        self.process = QtCore.QProcess(self)
+        self.process.setProcessChannelMode(QtCore.QProcess.SeparateChannels)
+        self.process.finished.connect(self._finished)
+        self.process.errorOccurred.connect(self._failed)
+        self.deadline = QtCore.QTimer(self)
+        self.deadline.setSingleShot(True)
+        self.deadline.timeout.connect(self._timeout)
+        self.timeout_ms = int((timeout_s or TIMEOUT_S) * 1000)
+
+    def start(self, path):
+        self.stop()
+        self.path = path
+        self.process.start(sys.executable, [str(LOADER), path])
+        self.deadline.start(self.timeout_ms)
+
+    def stop(self):
+        self.deadline.stop()
+        if self.process.state() != QtCore.QProcess.NotRunning:
+            self.process.blockSignals(True)
+            self.process.kill()
+            self.process.waitForFinished(1000)
+            self.process.blockSignals(False)
+
+    def _timeout(self):
+        self.stop()
+        self.loaded.emit(None, "Przekroczono czas wczytywania ścieżki programu.")
+
+    def _failed(self, error):
+        if error == QtCore.QProcess.FailedToStart:
+            self.deadline.stop()
+            self.loaded.emit(None, "Nie można uruchomić wczytywania ścieżki programu.")
+
+    def _finished(self, code, exit_status):
+        from linumert_neon_loader import toolpath_from_json
+        self.deadline.stop()
+        payload = bytes(self.process.readAllStandardOutput())
+        self.process.readAllStandardError()
+        try:
+            with open(self.path, encoding="utf-8", errors="replace") as fh:
+                source = fh.read(MAX_SOURCE).splitlines()
+        except OSError:
+            source = []
+        try:
+            toolpath = toolpath_from_json(payload, source)
+        except (ValueError, TypeError) as exc:
+            self.loaded.emit(None, f"Ścieżka niewczytana: {exc}")
+            return
+        self.loaded.emit(toolpath, f"{Path(self.path).name} · {len(toolpath)} ruchów")
+
+
 class SkinMonitor(SkinPreview):
     def __init__(self, preferences=None):
         self.sample = None
         self.reason = "waiting"
+        self.program_file = None
         super().__init__(preferences, standalone=True)  # No offline scenes in a live host.
+        self.shared["program_note"] = "Program niewczytany w LinuxCNC"
+        self.loader = ProgramLoader(self)
+        self.loader.loaded.connect(self.program_loaded)
         self.reader = StatusReader(self)
         self.reader.changed.connect(self.present)
+
+    def program_loaded(self, toolpath, note):
+        """Nowa scena Classic × Neon na żywo (albo uczciwy opis błędu) i przebudowa ekranu."""
+        from linumert_neon_view import PathScene, stock_box_for
+        old = self.shared.pop("path_scene", None)
+        if old is not None:
+            old.timer.stop()
+            old.deleteLater()
+        self.shared["program_note"] = note
+        if toolpath is not None and len(toolpath):
+            self.shared["path_scene"] = PathScene(toolpath, live=True, parent=self,
+                                                  stock_box=stock_box_for(toolpath))
+        elif toolpath is not None:
+            self.shared["program_note"] = note + " · brak ruchów"
+        self.refresh()
 
     def refresh(self):
         super().refresh()
@@ -138,7 +222,28 @@ class SkinMonitor(SkinPreview):
         values = dict(zip(AXES, sample.positions, strict=True)) if sample else {}
         for view in self.workspace.findChildren(AxisReadout):
             view.set_positions(values)
+        self.follow_program(sample)
+
+    def follow_program(self, sample):
+        """Classic × Neon: aktywny plik → wczytanie ścieżki; linia i pozycja → następny punkt."""
+        if sample is None or not hasattr(self, "loader"):
+            return
+        if sample.file != self.program_file:
+            self.program_file = sample.file
+            if sample.file:
+                self.shared["program_note"] = "Wczytywanie ścieżki programu…"
+                self.loader.start(sample.file)
+            else:
+                self.loader.stop()
+                self.program_loaded(None, "Program niewczytany w LinuxCNC")
+                return
+        scene = self.shared.get("path_scene")
+        position = sample.work_position()
+        if scene is not None and position is not None:
+            scene.follow(sample.motion_line, position)
+            scene.reported_dtg = sample.distance_to_go
 
     def closeEvent(self, event):
         self.reader.stop()
+        self.loader.stop()
         super().closeEvent(event)

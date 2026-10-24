@@ -14,6 +14,8 @@ from typing import Protocol
 
 AXES = "XYZABCUVW"
 MAX_AGE = 0.5
+MAX_PAYLOAD = 16384
+MAX_PATH = 4096
 
 
 class StatusPort(Protocol):
@@ -26,6 +28,15 @@ class StatusPort(Protocol):
     interp_state: int
     estop: int
     enabled: bool
+    # Classic × Neon (Claude, 2026-10-24): program i pozycja na ścieżce, tylko odczyt.
+    file: str
+    motion_line: int
+    g5x_offset: tuple[float, ...]
+    g92_offset: tuple[float, ...]
+    tool_offset: tuple[float, ...]
+    rotation_xy: float
+    distance_to_go: float
+    dtg: tuple[float, ...]
 
     def poll(self) -> None: ...
 
@@ -40,6 +51,22 @@ class MachineSample:
     interpreter: str
     estop: bool
     enabled: bool
+    # Program i ścieżka (mm, XYZ). Pozycja w układzie detalu = G53 − g5x − g92 − tool_offset
+    # (obrót XY pominięty w podglądzie). NIEZWERYFIKOWANE NA SPRZĘCIE.
+    file: str = ""
+    motion_line: int = 0
+    g5x_offset: tuple[float, float, float] = (0.0, 0.0, 0.0)
+    g92_offset: tuple[float, float, float] = (0.0, 0.0, 0.0)
+    tool_offset: tuple[float, float, float] = (0.0, 0.0, 0.0)
+    rotation_xy: float = 0.0
+    distance_to_go: float = 0.0
+    dtg: tuple[float, float, float] = (0.0, 0.0, 0.0)
+
+    def work_position(self) -> tuple[float, float, float] | None:
+        if any(v is None for v in self.positions[:3]):
+            return None
+        return tuple(p - a - b - c for p, a, b, c in zip(
+            self.positions[:3], self.g5x_offset, self.g92_offset, self.tool_offset, strict=True))
 
     def fresh(self, now: float) -> bool:
         return 0 <= now - self.acquired_at <= MAX_AGE
@@ -77,7 +104,22 @@ def read_status(status: StatusPort, api: object) -> dict:
             if value == getattr(api, name):
                 return name
         raise ValueError("unknown " + field)
+    def xyz(field):
+        values = getattr(status, field)
+        if len(values) < 3:
+            raise ValueError("invalid " + field)
+        return [number(v) / linear for v in values[:3]]
+    path = status.file
+    if type(path) is not str or len(path) > MAX_PATH or "\x00" in path:
+        raise ValueError("invalid file")
+    line = status.motion_line
+    if type(line) is not int or line < 0:
+        raise ValueError("invalid motion_line")
     return dict(
+        file=path, motion_line=line, g5x_offset=xyz("g5x_offset"),
+        g92_offset=xyz("g92_offset"), tool_offset=xyz("tool_offset"),
+        rotation_xy=number(status.rotation_xy),
+        distance_to_go=number(status.distance_to_go) / linear, dtg=xyz("dtg"),
         acquired_at=time.monotonic(), positions=positions,
         mode=enum("task_mode", ("MODE_MANUAL", "MODE_MDI", "MODE_AUTO")),
         task=enum("task_state", ("STATE_ESTOP", "STATE_ESTOP_RESET", "STATE_OFF", "STATE_ON")),
@@ -87,7 +129,7 @@ def read_status(status: StatusPort, api: object) -> dict:
 
 
 def decode_sample(payload: bytes, now: float) -> MachineSample:
-    if len(payload) > 4096:
+    if len(payload) > MAX_PAYLOAD:
         raise ValueError("oversized status")
     data = json.loads(payload)
     if set(data) != set(MachineSample.__dataclass_fields__):
@@ -106,6 +148,17 @@ def decode_sample(payload: bytes, now: float) -> MachineSample:
             raise ValueError("invalid " + field)
     if type(data["estop"]) is not bool or type(data["enabled"]) is not bool:
         raise ValueError("invalid boolean status")
+    if type(data["file"]) is not str or len(data["file"]) > MAX_PATH or "\x00" in data["file"]:
+        raise ValueError("invalid file")
+    if type(data["motion_line"]) is not int or data["motion_line"] < 0:
+        raise ValueError("invalid motion_line")
+    for field in ("g5x_offset", "g92_offset", "tool_offset", "dtg"):
+        values = data[field]
+        if not isinstance(values, list) or len(values) != 3:
+            raise ValueError("invalid " + field)
+        data[field] = tuple(number(v) for v in values)
+    data["rotation_xy"] = number(data["rotation_xy"])
+    data["distance_to_go"] = number(data["distance_to_go"])
     result = MachineSample(**data)
     if not result.fresh(now):
         raise ValueError("expired status")

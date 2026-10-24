@@ -33,3 +33,20 @@ ikony:
   siatka_px: 24
   obrys: 1.75
   styl: liniowe, zaokrąglone końce
+motywy:
+  # PROPOZYCJA 2026-10-24 (Model-Author: Claude): motyw skórek Classic × Neon, patrz DECYZJE.
+  neon-punk:
+    bg: '#07050d'
+    panel: '#0e0a18'
+    raise: '#161026'
+    fg: '#f3eeff'
+    fg2: '#ab9fcc'
+    akcent: '#00f0ff'
+  # Role ścieżki w podglądzie Classic × Neon, wspólne dla wszystkich motywów.
+  sciezka:
+    start: '#b6ff00'      # pierwsze punkty programu
+    koniec: '#ff2bd6'     # ostatnie punkty programu
+    nastepny: '#ffe600'   # następny punkt i DTG
+    g0: '#ff8a00'
+    do_wykonania: '#8a5cff'
+    os_x: '#ff3355'

@@ -13,10 +13,13 @@ class SkinScreen(QtWidgets.QWidget):
     AXES = "XYZA"
     STATUS_LOCATION = "header"
 
-    def __init__(self, preferences, palette, viewport_factory=None):
+    def __init__(self, preferences, palette, viewport_factory=None, shared=None):
         super().__init__()
         self.preferences, self.palette = preferences, palette
         self.viewport_factory = viewport_factory
+        # Stan hosta przeżywający przebudowę ekranu przy zmianie skórki/motywu/języka
+        # (np. scena ścieżki Classic × Neon). Model-Author: Claude.
+        self.shared = {} if shared is None else shared
         self.cards, self.viewports, self.expand_buttons = {}, {}, {}
         self.maximized = None
         self.grid = QtWidgets.QGridLayout(self)

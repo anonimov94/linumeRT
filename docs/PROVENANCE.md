@@ -485,6 +485,13 @@ współdzielą rysowanie bez zależności podglądu od kompilatora/pydantic.
 Poprawka środowiska `core/linumert/machine/launch.py` i testy regresji:
 własny kod Codex, 2026-10-24, GPL-2.0-or-later, bez nowych zależności.
 
+Classic × Neon (Model-Author: Claude, 2026-10-24, GPL-2.0-or-later, kod pisany od zera):
+`docs/design/koncepcje/classic_neon_symulacja.html` — koncepcja HTML/Canvas 2D skórki Classic
+z paletą neon; znak i ikony wstawione inline z `docs/design/marka/` i `docs/design/ikony/`,
+fonty IBM Plex i JetBrains Mono (OFL-1.1, już w tokens.yaml) ładowane z Google Fonts tylko w podglądzie.
+`screens/linumert/linumert_neon_view.py` i `linumert_neon_render.py` (renderer QPainter, presety), `core/linumert/programs/toolpath.py`
+(model ścieżki), `tools/dev/neon-preview.py` i program `config/sim/nc_files/linumert_neon_demo.ngc`.
+Bez nowych zależności i bez cudzych grafik.
 
 ## Fonty ekranu — sesja 027 (Model-Author: Claude, 2026-10-24)
 
