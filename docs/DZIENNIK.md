@@ -986,3 +986,9 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
 - Odtworzono zgłoszony błąd: G54 Z=-150, `G0 Z20` → linia 3, Z=-130 < -120; po offsecie -50 brak naruszeń (rs274 w Debianie 12).
 - Nie zmieniono zachowania LinuxCNC ani limitów; sprawdzane tylko punkty końcowe (łuki, obrót XY, osie ABC pominięte).
 - Testy: tests/test_limits.py (7 + 1 z rs274), test GUI w tests/test_hmi_workflow_widgets.py (42 PASS w Debianie).
+
+## Starter — jedna instancja linumeRT — 2026-10-24 · Claude
+- Model-Author: Claude. Zgłoszenie właściciela: aplikacja padła po uruchomieniu drugiej kopii.
+- Dowód w logu: druga instancja LinuxCNC dostała „tpmod/homemod/trivkins: already exists” (wspólne zasoby), po czym obie zostały zatrzymane.
+- Kontener ma teraz stałą nazwę `linumert-hmi`; starter odmawia drugiego startu komunikatem i podaje `podman stop linumert-hmi`. Tryb `--shell` bez blokady.
+- Test z atrapą podmana (nazwa kontenera, odmowa, brak `podman run`); 11 PASS. Nieprzetestowane na pulpicie właściciela.
