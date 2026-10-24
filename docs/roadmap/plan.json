@@ -1687,13 +1687,13 @@
         "044",
         "047"
       ],
-      "status": "in_progress",
-      "progress": "Otwarty PR #98 na oddzielnej gałęzi; nie jest częścią sprawdzonego main.",
-      "remaining": [
-        "Odbiór CI i scalenie PR #98; nie zaliczać jako wdrożone."
-      ],
+      "status": "done",
+      "progress": "PR #98: walidacja niezapisanej treści, lista błędów z przejściem do linii i wyszukiwanie/zamiana z Undo; Qt w Debianie: 60 testów zakresu PASS, zrzut rzeczywistego dialogu. Końcowe CI i SHA w PR.",
+      "remaining": [],
       "evidence": [
-        "https://github.com/anonimov94/linumeRT/pull/98"
+        "https://github.com/anonimov94/linumeRT/pull/98",
+        "screens/linumert/linumert_program_editor.py",
+        "tests/test_hmi_workflow_widgets.py"
       ]
     },
     {

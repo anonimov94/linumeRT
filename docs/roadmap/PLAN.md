@@ -143,7 +143,7 @@ Nie są kolejnym harmonogramem. Ich status dotyczy tylko wskazanego kroku.
 | ISO-INTEGRATION (K05) | 077 | Bramka sim/Plant i monitor w obrazie ISO | ukończone |
 | ISO-ACCEPTANCE | 077, 078 | Odbiór i publikacja obrazu | do odbioru |
 | OD-01 | 024, 066, 072, 082 | Macierz Plant nie może przechodzić z nieoczekiwaną kolizją | planowane |
-| EDITOR-VALIDATION | 044, 047 | Walidacja bieżącej treści i wyszukiwanie | w toku |
+| EDITOR-VALIDATION | 044, 047 | Walidacja bieżącej treści i wyszukiwanie | ukończone |
 | LEGACY-RUNTIME | 017, 025, 026, 070, 077, 082 | Diagnostyka uruchomień z dawnych promptów startowych | częściowe |
 | ROADMAP-UNIFICATION | 001, 084 | Jeden rejestr planu i migracja statusów | ukończone |
 
@@ -959,11 +959,9 @@ Pozostaje: Dodać kryteria kolizji i uzyskać poprawny odbiór A3.
 
 ### EDITOR-VALIDATION — Walidacja bieżącej treści i wyszukiwanie
 
-**w toku**. Otwarty PR #98 na oddzielnej gałęzi; nie jest częścią sprawdzonego main.
+**ukończone**. PR #98: walidacja niezapisanej treści, lista błędów z przejściem do linii i wyszukiwanie/zamiana z Undo; Qt w Debianie: 60 testów zakresu PASS, zrzut rzeczywistego dialogu. Końcowe CI i SHA w PR.
 
-Pozostaje: Odbiór CI i scalenie PR #98; nie zaliczać jako wdrożone.
-
-Źródła: [PR](https://github.com/anonimov94/linumeRT/pull/98).
+Źródła: [PR](https://github.com/anonimov94/linumeRT/pull/98), [screens/linumert/linumert_program_editor.py](../../screens/linumert/linumert_program_editor.py), [tests/test_hmi_workflow_widgets.py](../../tests/test_hmi_workflow_widgets.py).
 
 ### LEGACY-RUNTIME — Diagnostyka uruchomień z dawnych promptów startowych
 

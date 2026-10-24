@@ -933,3 +933,10 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
 - 10 testów Qt PASS, ruff i kontrola wymagań PASS; zrzut build/editor-preview.png.
 - Szerszy zestaw Windows ujawnił ograniczenia lokalizacji, kodowania i dowiązań; odbiór LinuxCNC przez CI.
 - Kontrola składni do 64 KiB nie jest kontrolą semantyki/ruchu. Bez nowych zależności produkcyjnych.
+
+## Domknięcie edytora PR #98 — 2026-10-24 · Codex
+- Model-Author: Codex. Polecenie właściciela: dokończyć wszystkie rozpoczęte gałęzie i scalić.
+- 044/047, EDITOR-VALIDATION: zachowano walidację, wyszukiwanie i Undo; integracja z nowym rejestrem.
+- Zachowano obie historie dziennika/provenance; przekazanie korzysta z bieżącego dokumentu main.
+- Debian 12/Qt: 60 testów zakresu PASS; rzeczywisty dialog zapisany w build/editor-closeout/.
+- Pełne kontrole i SHA w PR #98; autokontrola, bez niezależnego przeglądu.
