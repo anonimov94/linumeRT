@@ -324,7 +324,7 @@ def render_plant_hal(cfg: MachineConfig, js: list[Joint]) -> str:
     if cfg.positions.tool_setter is not None:
         out.append(f"net linumert.io.toolsetter   "
                    f"lrt-net.0.din-{inputs[cfg.positions.tool_setter.input]:02d}")
-    out += ["", "# ---- E-STOP: obwód NC z Plant (kanały A/B, lrt_estop2), łączność, grzyb HMI ----"]
+    out += ["", "# ---- E-STOP: obwód NC z Plant (kanały A/B), łączność, grzyb HMI ----"]
     if estop_b is None:
         out += ["# Jeden kanał w machine.yaml: ten sam sygnał na oba wejścia lrt_estop2.",
                 f"net linumert.io.estop-button lrt-net.0.din-{estop_a:02d} => lrt-estop2.0.ch-a "
