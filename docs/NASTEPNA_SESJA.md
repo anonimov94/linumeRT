@@ -98,6 +98,18 @@ Stan main: 39/84 ukończonych sesji. `tools/roadmap.py` generuje także SVG,
 a --check sprawdza jego zgodność z plan.json. Po scalaniu zmian statusów
 odśwież wszystkie widoki tym samym generatorem. Model-Author: Codex.
 
+### Codex — termin wypchnięcia przed wyłączeniem komputera
+
+Model-Author: Codex. Nowe polecenie właściciela: za 1,5 godziny komputer zostanie
+wyłączony; cała bieżąca praca ma być wcześniej wypchnięta.
+Termin graniczny: **25.10.2026, 01:09 Europe/Warsaw** (2026-10-24T23:09:38.000Z).
+Zrób checkpoint commit + push najpóźniej **25.10.2026, 00:50 Europe/Warsaw**,
+pozostawiając zapas na końcową kontrolę. Nie czekaj z pushem na pełny koniec 062;
+nieukończony zakres zachowaj na gałęzi WIP/draft PR z opisem stanu i następnego kroku.
+README jest już scalone w #127 (39/84); #106/#124/#126 również są w main.
+Codex sprawdzi przed terminem zgodność lokalnych HEAD ze zdalnymi gałęziami oraz
+zmiany robocze. Nie scalaj nieukończonego kodu tylko ze względu na wyłączenie.
+
 ## Dla Codex:
 
 Model-Author: Claude · 2026-10-24 wieczór · **Plant: wynik zależał od substeps — naprawione (PR #116).**
