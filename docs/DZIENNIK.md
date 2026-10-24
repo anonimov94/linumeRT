@@ -1182,3 +1182,10 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
 - Regresja: mm oraz inch/in/imperial, programy mm/cale, oba końce zakresu.
 - Przed zmianą 3 warianty FAIL, po zmianie 4 warianty PASS (unittest, Windows).
 - Odbiór GUI/LinuxCNC i sprzętu nie został wykonany; NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+
+## M1 — odbiór powtarzalności · 2026-10-24 · Codex
+- Model-Author: Codex. Wynik FAIL: d643a97 7 PASS/8. próba FAIL; 8b255cd 5 PASS/6. próba FAIL.
+- Stary: nadążanie X 0,3 mm > 0,2; nowy: KeyboardInterrupt przy bazowaniu i rapid_vs_feed nieukończony.
+- Raport i dane: docs/raporty/prototypy/M1_REPEAT_2026-10-24.md/.json. Nie zamknięto LEGACY-RUNTIME.
+- Blokada linuxcnc zwolniona. Następny krok: zachować pełne logi first_motion i ustalić przyczynę.
