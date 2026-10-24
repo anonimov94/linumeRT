@@ -66,6 +66,9 @@ FAULT_COMM_WATCHDOG = 11  # drive.h: LRT_DRIVE_FAULT_COMM_WATCHDOG (E-4003, 8130
 SW_FAULT = 0x0008
 ERR_MODEL = 0xFF00  # 603Fh awarii ogólnej (E-4200) zgłaszany po wyjątku modelu
 DT_MIN, DT_MAX = 100_000, 10_000_000  # [ns], docs/PLANT.md §3 reguła 3
+# Podkroki rdzenia C na cykl mastera: krokowiec przy G0 wymaga kroku ≤ 0,5 ms (sesja 049,
+# docs/raporty/plant_substeps.md); cel 607Ah jest interpolowany, więc wynik nie zależy od n ≥ 2.
+DEFAULT_SUBSTEPS = 4
 JITTER_WINDOW = 100
 MODES = ("lockstep", "realtime")
 PANEL_PORT = 8080
@@ -83,7 +86,7 @@ class PlantConfig:
     listen: str = "127.0.0.1"
     port: int = PORT
     cycle_ns: int = 1_000_000
-    substeps: int = 1
+    substeps: int = DEFAULT_SUBSTEPS
     watchdog_ms: float = 50.0
     mode: str = "lockstep"
     seed: int = 1
@@ -160,7 +163,7 @@ def load_plant_config(path: Path | str) -> PlantConfig:
         cfg = PlantConfig(
             machine=rel(data.get("machine")), listen=str(net.get("listen", "127.0.0.1")),
             port=int(net.get("port", PORT)), cycle_ns=int(timing.get("cycle_ns", 1_000_000)),
-            substeps=int(timing.get("substeps", 1)),
+            substeps=int(timing.get("substeps", DEFAULT_SUBSTEPS)),
             watchdog_ms=float(timing.get("watchdog_ms", 50)),
             mode=str(data.get("mode", "lockstep")), seed=int(data.get("seed", 1)),
             state_file=rel(data.get("state_file")),
@@ -450,7 +453,7 @@ class PlantServer:
                 try:
                     self._apply(cmd)
                     sub = self.cfg.substeps
-                    self.machine.step(dt_ns / 1e9 / sub, sub)
+                    self.machine.step_cycle(dt_ns / 1e9, sub)
                     self.stats.steps += 1
                     for v in self.oracle.check(self.machine, cmd, self.drives):
                         if self.oracle.total <= 20:

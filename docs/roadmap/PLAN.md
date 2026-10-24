@@ -149,6 +149,7 @@ Nie są kolejnym harmonogramem. Ich status dotyczy tylko wskazanego kroku.
 | LIMITS-PREFLIGHT | 031, 051 | Kontrola limitów osi przed startem programu | częściowe |
 | ORIGIN-WIZARD | 033, 054 | Kreator zera detalu na przygotówce | częściowe |
 | M6-G43 | 034, 066 | Automatyczna korekta długości narzędzia po M6 | częściowe |
+| PLANT-SUBSTEPS | 049, 063 | Plant: wynik niezależny od podkroków całkowania | ukończone |
 
 ## Postęp, pozostały zakres i dowody
 
@@ -1001,4 +1002,12 @@ Pozostaje: Odbiór na pulpicie właściciela i na maszynie wirtualnej (G10 L2 po
 Pozostaje: Odbiór na pulpicie właściciela, w tym ręczna wymiana w oknie QtDragon. Program Facing z QtDragon (kod upstream) ma G49 i nie wywołuje M6, więc korekta nie jest włączana; osobna decyzja. Remap dla ATC (066) razem z magazynem narzędzi.
 
 Źródła: [config/sim/linumert_xyz/macros/lrt_m6.ngc](../../config/sim/linumert_xyz/macros/lrt_m6.ngc), [tests/test_m6_remap.py](../../tests/test_m6_remap.py), [core/linumert/programs/linuxcnc_check.py](../../core/linumert/programs/linuxcnc_check.py).
+
+### PLANT-SUBSTEPS — Plant: wynik niezależny od podkroków całkowania
+
+**ukończone**. Cel CSP z cyklu mastera interpolowany liniowo w podkrokach rdzenia C (lrt_machine_step_cycle, jak 60C2h/stepgen); domyślnie 4 podkroki. Atrapa: frezarka i router PASS dla n = 2–16 (wcześniej E-4201 i ~1560 zgubionych kroków przy n ≥ 2–4). Raport docs/raporty/plant_substeps.md.
+
+Pozostaje: Obciążenie CPU Plant realtime przy 4 podkrokach na VM-B (odbiór właściciela). Generator EtherCAT (063): 60C2h = okres wątku serwo.
+
+Źródła: [plant/core/machine.c](../../plant/core/machine.c), [plant/core/tests/test_machine.c](../../plant/core/tests/test_machine.c), [tools/plant_substeps.py](../../tools/plant_substeps.py), [docs/raporty/plant_substeps.md](../raporty/plant_substeps.md).
 

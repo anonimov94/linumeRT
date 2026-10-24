@@ -1063,3 +1063,14 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
 - **Decyzje:** tor środka narzędzia; kontur z korekcją dynamiczną LinuxCNC (bez tabeli narzędzi).
 - **Do sprawdzenia ręcznie:** kontur z korekcją na Plant; czopy przy realnym marginesie przygotówki.
   Model-Author: Claude. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## PLANT-SUBSTEPS — zależność Plant od substeps (M1) · 2026-10-24 · Claude
+- **Zrobione:** diagnoza ustalenia z 049: cel CSP przykładany w pierwszym podkroku → n-krotny impuls FF
+  (frezarka E-4201 przy G0 Z, router ~1560 zgubionych kroków przy G0). `lrt_machine_step_cycle` interpoluje cel
+  liniowo w cyklu (z poprawką ramki przy bazowaniu); `PlantServer`, `HomingMaster` na nowej funkcji; domyślne
+  `substeps` = 4 (wzory plant.yaml, lib.sh VM). `tools/plant_substeps.py`, raport `docs/raporty/plant_substeps.md`.
+- **Testy:** C 29/59/21 (+ sanitizery), test `step_cycle` (bez interpolacji n=8: napęd w FAULT, 49 mm zadana −
+  stojąca oś; z interpolacją 0,013 mm); pełne pytest PASS; macierz Plant 14/14; ruff, REQ PASS.
+- **Decyzje:** PROPOZYCJA w DECYZJE (interpolacja, 4 podkroki, 60C2h w generatorze 063).
+- **Do sprawdzenia ręcznie:** Plant realtime z LinuxCNC na VM — obciążenie CPU przy 4 podkrokach.
+  Model-Author: Claude. NIEZWERYFIKOWANE NA SPRZĘCIE.
