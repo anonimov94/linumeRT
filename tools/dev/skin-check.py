@@ -55,9 +55,15 @@ def main():
             assert window.size() == QtCore.QSize(*size), (skin, theme, language, window.size())
             reports = {}
             for role, view in window.viewports.items():
-                reports[role] = view.context_report()
-                assert reports[role]["depth_bits"] >= 24
-                frame = view.grabFramebuffer().convertToFormat(QtGui.QImage.Format_RGBA8888)
+                if hasattr(view, "context_report"):
+                    reports[role] = view.context_report()
+                    assert reports[role]["depth_bits"] >= 24
+                    frame = view.grabFramebuffer()
+                else:
+                    # Classic × Neon (Claude): widoki QPainter, bez kontekstu GL i bufora głębi.
+                    reports[role] = {"renderer": "QPainter", "depth_bits": None}
+                    frame = view.grab().toImage()
+                frame = frame.convertToFormat(QtGui.QImage.Format_RGBA8888)
                 assert not frame.isNull(), (skin, role)
                 data = frame.bits()
                 data.setsize(frame.byteCount())

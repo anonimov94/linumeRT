@@ -35,6 +35,9 @@ _EN = {
     "machine_on": "Machine enabled", "machine_off": "Machine disabled",
     "renderer_pending": "3D renderer not connected",
     "offline_scene": "Illustrative model · drag to orbit · wheel to zoom",
+    "neon_live": ("LinuxCNC program, read only · drag: orbit · wheel: zoom · ⚙: rendering"),
+    "neon_scene": ("Demo program, not the controller's · drag: orbit · wheel: zoom · "
+                   "space/arrows: play and step points"),
     "sample_program": "Sample program — not loaded into CNC",
     "demo_controls": "Preview only — machine commands disabled",
 }
@@ -64,6 +67,10 @@ _PL = {
     "machine_on": "Maszyna włączona", "machine_off": "Maszyna wyłączona",
     "renderer_pending": "Renderer 3D niepodłączony",
     "offline_scene": "Model poglądowy · przeciągnij, aby obrócić · kółko: zoom",
+    "neon_live": ("Program z LinuxCNC, tylko odczyt · przeciągnij: obrót · kółko: zoom · "
+                  "⚙: renderowanie"),
+    "neon_scene": ("Program demonstracyjny, nie ze sterowania · przeciągnij: obrót · "
+                   "kółko: zoom · spacja/strzałki: odtwarzanie i punkty"),
     "sample_program": "Program przykładowy — niewczytany do CNC",
     "demo_controls": "Tylko podgląd — komendy maszyny wyłączone",
 }
