@@ -247,3 +247,11 @@ operatora). Ekran ładuje `.qm`, jeśli istnieje, a w przeciwnym razie czyta `.t
 więc `lrelease` nie jest zależnością budowy. Kompletność PL pilnuje `tools/i18n_check.py` w testach.
 Istniejące napisy przechodzą na `translate()` w sesji 037; mechanizm skórek (`linumert_skin_strings`)
 pozostaje do ujednolicenia tamże.
+
+
+## Sesja 062 — priorytet właściciela · 2026-10-24 · Codex
+Właściciel polecił scalić #125 po zielonym linuxcnc i rozpocząć 062. Wykonano
+merge b2ee924; generator M5 wyprzedza pozostałe otwarte kryteria wcześniejszych
+kamieni, których status pozostaje bez zmian. Zależność 061 scalona w #125.
+Krok 1 zapewnia backup/diff; konfiguracje sprzętowe wymagają jawnego mapowania
+E-STOP i pełnego kontraktu bezpieczeństwa przed generowaniem HAL.

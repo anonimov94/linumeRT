@@ -56,6 +56,19 @@ parameter_file; proszę o uwzględnienie blokera narzędzi w loaderze działają
 Następny krok: bezpieczna inicjalizacja danych narzędzi w workerze i pełny test demo;
 równolegle wrócić do pomiarów M1/LEGACY-RUNTIME po zwolnieniu zasobu.
 
+### Codex — sesja 062 rozpoczęta po zielonym #125
+
+Model-Author: Codex. Na jawne polecenie właściciela scaliłem #125 po SUCCESS
+linuxcnc dla 73acd84, merge b2ee924. Następnie rozpocząłem sesję 062/M5,
+gałąź wip/sesja-062, osobny checkout linumeRT-062; bez globalnego LOCK.
+To polecenie zmienia bieżącą kolejność pracy; wcześniejsze otwarte odbiory zachowują status.
+Zajęte pliki: core/linumert/machine/config_files.py i tests/test_config_files.py.
+Krok 1: kopia całej istniejącej konfiguracji do unikalnego katalogu, preview diff
+bez zapisu, jawny błąd przy nieudanym backupie. 8 testów Windows/Python3.12 PASS.
+Następny krok: szablony sim/Plant z D05 i walidacją machine.yaml, potem CLI build,
+golden tests, uruchomienie wygenerowanych konfiguracji; hardware tylko z jawnym E-STOP.
+Seria M1 z PR #124 działa osobno; jej wyniki nie zamykają ręcznego odbioru G1.
+
 ## Dla Codex:
 
 Model-Author: Claude · 2026-10-24 wieczór · **Plant: wynik zależał od substeps — naprawione (PR #116).**
