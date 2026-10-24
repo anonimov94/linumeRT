@@ -1063,3 +1063,11 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
 - **Decyzje:** tor środka narzędzia; kontur z korekcją dynamiczną LinuxCNC (bez tabeli narzędzi).
 - **Do sprawdzenia ręcznie:** kontur z korekcją na Plant; czopy przy realnym marginesie przygotówki.
   Model-Author: Claude. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## 048 — Biblioteka podprogramów o-word (domknięcie) · 2026-10-24 · Claude
+- **Zrobione:** `o<lrt_pocket_rect>`, `o<lrt_pocket_circle>`, `o<lrt_slot_linear>` (NgcGui) — ruch jak generatory
+  pocket_rect v2 / pocket_circle v2 (wejście pionowe, bez naddatków) i slot_linear v1; fragmenty o-word kieszeni
+  generowane z szablonu (punkty, odwrócenie CW, pomijanie zerowych odcinków, obrót); eksport z Cykli z poprawną odmianą.
+- **Testy:** rs274 (CI `linuxcnc`, 133 PASS) porównuje STRAIGHT i ARC_FEED podprogramu z generatorem: obrót 90°, CW,
+  narożniki R=D/2 i R>D/2, rowek pionowy/ukośny/wąski; lekser bez MIN/MAX i minusa jednoargumentowego.
+- **Do sprawdzenia ręcznie:** zakładka NgcGui QtDragon z katalogiem user_macros. Model-Author: Claude. NIEZWERYFIKOWANE NA SPRZĘCIE.

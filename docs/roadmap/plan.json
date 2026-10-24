@@ -710,13 +710,13 @@
       "milestone": "M3",
       "title": "Biblioteka podprogramów o-word",
       "prompt": "prompts/sesja-048.md",
-      "status": "partial",
-      "progress": "Podprogramy planowania i wiercenia oraz eksport NgcGui wdrożone.",
-      "remaining": [
-        "Brak podprogramów kieszeni i rowków; zależności 041/043."
-      ],
+      "status": "done",
+      "progress": "2026-10-24 | 6 podprogramów o<lrt_...> z nagłówkiem NgcGui (planowanie, wiercenie siatka/okrąg, kieszeń prostokątna i okrągła, rowek prosty), zgodność ruchu z generatorami w rs274 (CI), eksport z Cykli, docs/user/PODPROGRAMY.md; Claude",
+      "remaining": [],
       "evidence": [
-        "docs/DZIENNIK.md"
+        "docs/DZIENNIK.md",
+        "tests/test_subroutines.py",
+        "docs/user/PODPROGRAMY.md"
       ],
       "historical_completion": "2026-10-20 | Podprogramy o<lrt_face_mill>, o<lrt_drill_grid>, o<lrt_drill_circle> (NgcGui), eksport do user_macros, PODPROGRAMY.md; ruch zgodny z generatorami w rs274 (część: kieszenie/rowki później); Claude"
     },

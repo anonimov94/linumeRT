@@ -578,9 +578,12 @@ def test_cycles_export_subroutines_to_ini_dir(page_env, monkeypatch, tmp_path):
     monkeypatch.setattr(module.QtWidgets.QFileDialog, "getExistingDirectory",
                         staticmethod(lambda *a, **k: a[2]))
     paths = page.export_subroutines()
-    assert [Path(p).name for p in paths] == ["lrt_face_mill.ngc", "lrt_drill_grid.ngc",
-                                             "lrt_drill_circle.ngc"]
-    assert "Zapisano 3 podprogramy" in page.lbl_issue.text()
+    from linumert.generators.subroutines import SUBROUTINES
+
+    assert [Path(p).name for p in paths] == [f"{s.name}.ngc" for s in SUBROUTINES]
+    assert len(paths) == 6 and "Zapisano 6 podprogramów" in page.lbl_issue.text()
+    assert [module._subroutines_word(n) for n in (1, 3, 5, 12, 22)] == [
+        "podprogram", "podprogramy", "podprogramów", "podprogramów", "podprogramy"]
     page.close()
 
 
