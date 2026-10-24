@@ -69,34 +69,20 @@ Następny krok: szablony sim/Plant z D05 i walidacją machine.yaml, potem CLI bu
 golden tests, uruchomienie wygenerowanych konfiguracji; hardware tylko z jawnym E-STOP.
 Seria M1 z PR #124 działa osobno; jej wyniki nie zamykają ręcznego odbioru G1.
 
-### Codex — M1 / LEGACY-RUNTIME, przebiegi odbioru
+### Codex — M1 / LEGACY-RUNTIME: raport końcowy FAIL
 
-Model-Author: Codex. Kontynuuję najwcześniejszy niedomknięty zakres M1/G1:
-LEGACY-RUNTIME, 10 kolejnych przebiegów 13 testów Plant + LinuxCNC (bazowanie/ruch,
-scenariusze, VFD). Źródło d643a97, osobna kopia w Debianie12:
-/home/codex/linumert-m1-runtime-20261024. Zasób linuxcnc zajęty przez tools/lock.py,
-LINUMERT_LOCK_DIR=/home/codex/.cache/linumert-preview-locks; bez globalnego LOCK.
-Logi, JUnit i status: build/m1-repeat/ w tej kopii. Seria zatrzyma się po pierwszym
-FAIL; nie uznaję samego rozpoczęcia testów za PASS. Pozostałe kryteria ręczne G1
-pozostają otwarte. Gałąź wyników codex/m1-runtime-repeat, proces uruchomiony.
-N1/Neon jest osobno w PR #123; nie wyprzedza zamknięcia odbioru M1.
-
-Aktualizacja Codex: pierwszy przebieg zatrzymał się na brakującym uvicorn
-w starym venv (4 FAIL scenariuszy, 9 PASS). Nie uznaję tego za regresję kodu.
-Utworzyłem osobny .venv w kopii odbioru i zainstalowałem .[dev,panel];
-seria uruchomiona ponownie, wyniki w build/m1-repeat-ready/.
-Pierwotne logi zachowane w build/m1-repeat/; oczekiwany wynik 10×13 pozostaje otwarty.
-
-Aktualizacja Codex: #126 scalony po zielonym linuxcnc jako 8b255cd; #106 także oznaczony jako scalony. Pozostaje publikacja wyników tej serii M1.
-
-Aktualizacja Codex — seria historyczna zatrzymana na 8. próbie:
-7×13 PASS, następnie 12 PASS / 1 FAIL: first_motion, nadążanie X 0,3 mm > 0,2 mm.
-Źródło d643a97 nie zawierało naprawy interpolacji celu Plant z #125.
-Nie zmieniam kryteriów ani nie uznaję serii za zaliczoną. Pełna nowa seria działa
-na aktualnym main 8b255cd w /home/codex/linumert-m1-current-20261024,
-wyniki build/m1-repeat-ready/, proces 77914. Biblioteki z kompletnego dedykowanego
-venv poprzedniej kopii; PYTHONPATH i kompilacja C wskazują nowe źródła.
-Poprzednia blokada została zwolniona; nowa seria zajęła ten sam zasób linuxcnc.
+Model-Author: Codex. #106 i #126 scalone; main 8b255cd. PR #124 kończę jako
+publikację wyników odbioru, bez deklaracji zaliczenia kryterium stabilności.
+Raport: docs/raporty/prototypy/M1_REPEAT_2026-10-24.md oraz sąsiedni JSON.
+- d643a97: 7×13 PASS, próba8: 12 PASS/1 FAIL (first_motion, X 0,3 mm > 0,2 mm).
+- 8b255cd z #125: 5×13 PASS, próba6: 11 PASS/2 FAIL (KeyboardInterrupt podczas
+  bazowania first_motion; rapid_vs_feed — program nieukończony). Przyczyna nieustalona.
+- Stary niekompletny venv (brak uvicorn) jest opisany osobno; próby zachowano.
+Obie serie zatrzymano po pierwszym FAIL, blokada linuxcnc zwolniona; bez zmiany progów.
+Nie uruchamiam kolejnej pełnej serii w ciemno. Następne zadanie: first_motion z
+zachowaniem katalogu roboczego i stderr LinuxCNC, ustalenie źródła przerwania.
+G1/pulpit/RT/sprzęt pozostają otwarte. NIEZWERYFIKOWANE NA SPRZĘCIE.
+Widzę prace Claude nad szablonami/CLI 062 w osobnym checkoutcie; nie dubluję ich.
 
 ## Dla Codex:
 
