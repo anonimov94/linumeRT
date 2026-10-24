@@ -1,11 +1,13 @@
-# Wykonane sesje
+<!-- Generowane przez python3 tools/roadmap.py; edytuj docs/roadmap/plan.json. -->
+# Ukończone zakresy — widok rejestru
 
-Format linii: `NNN | RRRR-MM-DD | opis; PR; model`. Linie są posortowane według numeru sesji. Agent dopisuje
-linię dopiero po spełnieniu kryteriów akceptacji sesji i wstawia ją we właściwe miejsce. Harmonogram bierze
-najniższy numer, którego tu nie ma (teraz: **027**). Szczegóły każdej sesji: [`docs/DZIENNIK.md`](../docs/DZIENNIK.md),
-stan scalania PR: [`docs/NASTEPNA_SESJA.md`](../docs/NASTEPNA_SESJA.md).
+Pierwotny plan: **84 sesje M0–M6**, commit `796c6a2`. Stan na 2026-10-24: planowane: 18; w toku: 0; częściowe: 35; do odbioru: 0; ukończone: 31.
 
-Wykonane: 33 z 84.
+Zakończenie części implementacji nie oznacza odbioru całej funkcji ani sprzętu.
+
+To wynik generatora, nie lista do ręcznego dopisywania. Wybór pracy i statusy są w [plan.json](../docs/roadmap/plan.json); częściowe zakresy w [PLAN.md](../docs/roadmap/PLAN.md).
+
+Ukończone pierwotne sesje: **31 z 84**.
 
 001 | 2026-10-17 | Szkielet monorepo: pyproject, katalogi z README, Makefile, CI, LICENSE (GPL-2), LICENCJE, PROVENANCE, testy licencji/IP/układu; Claude
 002 | 2026-10-17 | Proces IP, słownik, rejestr pochodzenia (52 wpisy), lista przed wydaniem, rozszerzony strażnik IP; Claude
@@ -13,7 +15,6 @@ Wykonane: 33 z 84.
 004 | 2026-10-18 | Konfiguracja sim linumert_xyz (QtDragon, kontrakt sygnałów D05, bazowanie latch release), HAL_KONTRAKT, SIM_WSL; PR #24; Claude (D31)
 005 | 2026-10-18 | Ekran screens/linumert: kopia QtDragon 2.9.10 (commit 86cdca7), handler-patch, UPSTREAM.md, DISPLAY = qtvcp linumert, zrzut G0; PR #25; Claude (D31)
 006 | 2026-10-18 | Rdzeń cnc: niezmienna migawka stanu, czytnik linuxcnc.stat (wstrzykiwany moduł), atrapa z wirtualnym zegarem, 30 testów, docs/RDZEN.md; PR #5; Claude
-007 | 2026-10-18 | Katalog alarmów (56 kodów PL/EN) z walidacją, AlarmManager, 23 testy; tłumaczenia Qt (.ts, i18n.sh) odłożone do sesji ekranu; PR #6; Claude
 008 | 2026-10-18 | Bramka G0: sprzątanie po testach LinuxCNC (61/61 w jednym przebiegu), czytnik rdzenia na RIP (zaległość 006), docs/raporty/G0.md, architektura w README; PR #35; Claude
 009 | 2026-10-18 | Specyfikacja Plant (docs/PLANT.md), protokół LRT-NET v1, macierz 22 REQ, testy spójności; PR #7; Claude
 010 | 2026-10-18 | Schemat machine.yaml (Pydantic v2), 24 reguły spójności, 5 przykładowych maszyn, 42 testy; PR #8; Claude
@@ -38,18 +39,26 @@ Wykonane: 33 z 84.
 040 | 2026-10-20 | Generatory header/program_end/tool_change/face_mill (#47) + walidacja kroków z bazą narzędzi (typ, średnica, skok, długość ostrza, obroty, kierunek; P-5207…P-5211, compile_program(tools=…)); Claude
 041 | 2026-10-21 | Kieszenie v2: pionowo/rampa/helisa, naroża, obrót, CW/CCW, naddatki i wykańczanie; v1 niezmienne; golden, materiał bez wysp, rs274 i wykonanie na LinuxCNC + Plant; 882 + 94 LinuxCNC PASS; PR #58; Codex
 044 | 2026-10-18 | Lekser G-code LinuxCNC (P-5101…P-5111, linia/kolumna, słowa O), kontrola w rs274; 44 próbki zgodne z LinuxCNC 2.9; przycisk Sprawdź w sesji ekranu; PR #15; Claude
-048 | 2026-10-20 | Podprogramy o<lrt_face_mill>, o<lrt_drill_grid>, o<lrt_drill_circle> (NgcGui), eksport do user_macros, PODPROGRAMY.md; ruch zgodny z generatorami w rs274 (część: kieszenie/rowki później); Claude
 054 | 2026-10-20 | Przygotówka: ;@STOCK, dialog Symulacja, K-321 (wcześniej) + cel sondy Plant z przygotówki (tools/stock_probe.py); Claude
 
-085 | 2026-10-23 | SKIN-01: reprodukcja zasłaniania i windingu brył, podgląd OpenGL na Radeon/Mesa i Debian/LinuxCNC; PR #87; Codex
-086 | 2026-10-23 | Podgląd skórek według czterech makiet właściciela, sceny 3D i powiększanie, odbiór GL 64 wariantów; nie kończy SKIN-02…06; PR #89; Codex
-087 | 2026-10-23 | Nowe zrzuty skórek i rzeczywistej symulacji w README/raporcie hmi_sym, poprawka komentarza demo i potwierdzenie T11; PR #90; Codex
-088 | 2026-10-23 | Cztery osobne ekrany offline, układy i kontrolki według wizji, launcher --skin, 128 wariantów GL, nowa galeria; nie kończy integracji CNC; PR #91; Codex
-K04 | 2026-10-23 | Konkurs: typowany adapter read-only NML, cztery skórki, G53, timeout i reconnect LinuxCNC 2.9.10/Xvfb; PR #96 gotowy do oceny, bez scalania; raport raporty/04.md; Codex
+## Ukończone rozszerzenia (nie zamykają automatycznie sesji)
 
-K05 | 2026-10-23 | Obraz ISO: uruchomienia sim/Plant przez bramkę profilu, monitor skórek read-only z menu, build PR bez publikacji; budowa obrazu na main do wykonania; Codex
+D38-A | PR #62: external offsets, zachowanie modalności i testy sim/Plant PASS.
+PLAN-21-22 | Rampa/helisa, geometria i wykańczanie; #58, odbiór automatyczny PASS.
+PLAN-23 | PR #59: odbiór automatyczny wskazanego kroku PASS.
+PLAN-24 | PR #60: odbiór podglądu PASS; wykonanie pozostaje w D38-B.
+PLAN-25 | PR #60: pomiary i testy ETA PASS.
+PLAN-26 | PR #60: odbiór raportu PASS.
+SKIN-01 | PR #87: prototyp i testy GPU/Mesa PASS; odbiór docelowego HMI należy do SKIN-06.
+SKIN-PREVIEW | PR #89: podgląd i odbiór 64 wariantów GL.
+SKIN-GALLERY | PR #90: nowe zrzuty i README.
+SKIN-OFFLINE | PR #91: launcher --skin i 128 wariantów GL; bez integracji sterowania.
+KONKURS-01 | PR #93 scalony: bramka profilu i ograniczony audyt HAL.
+KONKURS-02 | PR #94 scalony: procedura i dowody; odbiór A3 FAIL OD-01, T1–T7 otwarte.
+KONKURS-03 | PR #95 scalony: odrzucanie NaN/inf; real mapping i geometria ATC nadal otwarte.
+KONKURS-04 | PR #96 scalony: odczyt NML; nie kończy SKIN-02/04…06.
+ISO-INTEGRATION | PR #97 scalony: integracja menu/launchera i walidacja budowy bez publikacji.
 
+## Korekty historycznego rejestru
 
-Konkurs-01 | 2026-10-23 | Bramka przed exec LinuxCNC: deklaracje hardware + audyt HAL, integracja startera sim/Plant; 41 testów zakresu PASS, pełne lint/test 1033 PASS; PR #93 do oceny bez scalenia; Codex
-
-KONKURS-03 | 2026-10-23 | Audyt trzech luk poza GUI, odmowa NaN/inf w machine.yaml; Debian 1104 PASS, 108 C/ASan PASS, REQ bez błędów; PR #95 do wspólnej oceny, bez scalenia; Model-Author: Codex
+007 i 048 były wpisane jako wykonane mimo odłożonego zakresu; teraz są częściowe. Dawne wpisy zachowano w polu `historical_completion` rejestru i historii Git. Numery 085–088 i oznaczenia konkursowe są aliasami rozszerzeń, nie nowymi sesjami pierwotnego planu.

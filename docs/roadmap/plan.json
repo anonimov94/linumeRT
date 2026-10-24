@@ -1,0 +1,1720 @@
+{
+  "schema_version": 1,
+  "updated": "2026-10-24",
+  "model_author": "Codex",
+  "original_count": 84,
+  "origin_commit": "796c6a2",
+  "policy": {
+    "source": "docs/roadmap/plan.json",
+    "status_labels": {
+      "planned": "planowane",
+      "in_progress": "w toku",
+      "partial": "częściowe",
+      "acceptance": "do odbioru",
+      "done": "ukończone"
+    },
+    "completion": "done oznacza ukończony zakres danego wiersza; ukończone rozszerzenie nie zamyka automatycznie sesji nadrzędnej ani bramki.",
+    "selection": "Wybierz najniższe nieukończone ID 001–084, uwzględniając rozszerzenia, zależności i jawne bieżące polecenie właściciela.",
+    "hardware": "NIEZWERYFIKOWANE NA SPRZĘCIE; wyniki automatyczne, pulpit, RT i sprzęt są odrębnymi odbiorami."
+  },
+  "milestones": [
+    {
+      "id": "M0",
+      "name": "Fundament, prawo, środowisko",
+      "proto": "—",
+      "goal": "Repozytorium, CI, wytyczne IP i rejestr pochodzenia, budowa LinuxCNC w środowisku agenta, kopia bazowa QtDragon, rdzeń z atrapą.",
+      "gate": "G0: CI zielone; ekran `linumert` (kopia QtDragon) startuje w LinuxCNC sim; wynik spike'a budowania LinuxCNC zapisany.",
+      "you": "Uruchom config/sim w WSL albo w VM-A (instrukcja docs/VM.md po M1) i zobacz ekran."
+    },
+    {
+      "id": "M1",
+      "name": "Wirtualna obrabiarka Plant",
+      "proto": "P0 — pierwszy ruch",
+      "goal": "Osobna VM symulująca fizyczną obrabiarkę: biblioteka kopiowalnych, parametryzowanych napędów wirtualnych; konfigurowalna kinematyka, liczba osi, przejazdy, zderzaki, krańcówki, ograniczenia programowe i strefy zakazane, magazyn narzędzi z położeniem i pozycjami wymiany, bazowanie po rozruchu (krańcówka, indeks, twardy zderzak, enkoder absolutny, bazowanie w napędzie); dynamika z bezwładnością i ograniczeniem przyspieszenia; panel z edytorem i awariami.",
+      "gate": "G1: LinuxCNC (VM-A) bazuje każdą metodą i wykonuje program na Plant (VM-B); wszystkie REQ-VD/VM/QA z WIRTUALNA_OBRABIARKA.md mają zielone testy (check_requirements.py).",
+      "you": "Zbuduj obie VM, skopiuj napęd w edytorze, przesuń magazyn, uruchom scenariusze bazowania i first_motion; wypełnij docs/raporty/G1.md."
+    },
+    {
+      "id": "M2",
+      "name": "Ekran linumeRT na bazie QtDragon",
+      "proto": "v0.1 — obsługa ręczna",
+      "goal": "Własny system projektowy i kompozycja ekranu, tryby, JOG/MPG, MDI, AUTO, narzędzia, zerowanie i sonda, zmiana narzędzia, alarmy, role, PL/EN.",
+      "gate": "G2: prototyp v0.1 przechodzi zestaw scenariuszy operatora na Plant; przegląd podobieństwa ekranów wykonany.",
+      "you": "Przeklikaj v0.1 na VM-A z Plant; wykonaj przegląd podobieństwa wg docs/prawne (świeże oko)."
+    },
+    {
+      "id": "M3",
+      "name": "Programowanie dialogowe",
+      "proto": "v0.2 — programy z formularzy",
+      "goal": "Format .lnx, generatory cykli, panel dialogowy z podglądem 2D, biblioteka podprogramów o-word, integracja z plikami QtDragon.",
+      "gate": "G3: program z 5 krokami generuje .ngc, który wykonuje się na Plant bez alarmów; czasy i błędy nadążania w raporcie.",
+      "you": "Zbuduj własny program dialogowy i uruchom na Plant; oceń ścieżki."
+    },
+    {
+      "id": "M4",
+      "name": "Symulacja i kolizje",
+      "proto": "v0.3 — sprawdzanie przed obróbką",
+      "goal": "Ścieżka, czas obróbki, przygotówka, materiał 2.5D, reguły kolizji lite, widok 3D 30 FPS, raport; walidacja czasu względem Plant.",
+      "gate": "G4: szacowany czas różni się od czasu na Plant o ≤ 10 %; K-301/K-302 wykrywane na plikach testowych.",
+      "you": "Porównaj symulację z wykonaniem na Plant dla 3 programów."
+    },
+    {
+      "id": "M5",
+      "name": "Konfiguracja maszyn hobbystów",
+      "proto": "v0.4 — dowolna maszyna DIY",
+      "goal": "machine.yaml → INI/HAL dla sim, Plant, step/dir, EtherCAT, VFD; 4/5 osi; ATC; kreator; diagnostyka napędów; asystent strojenia na Plant.",
+      "gate": "G5: 5 przykładowych maszyn działa na Plant (w tym 5 osi i ATC); konfiguracje sprzętowe oznaczone jako niezweryfikowane.",
+      "you": "Skonfiguruj kreatorem „swoją” maszynę i dostrój ją asystentem na Plant."
+    },
+    {
+      "id": "M6",
+      "name": "Wtyczki, instalator, alfa",
+      "proto": "v0.5-alpha",
+      "goal": "Wtyczki deklaratywne, instalator dla Debiana 12 + LinuxCNC 2.9, dokumentacja, przegląd IP przed wydaniem, regresja na Plant, wydanie alfa.",
+      "gate": "G6: instalacja na czystej VM, pełna regresja scenariuszy zielona, lista kontrolna IP §9 wypełniona, nazwa linumeRT sprawdzona w rejestrach.",
+      "you": "Sprawdź wyniki wyszukania nazwy linumeRT i zdecyduj o ewentualnej konsultacji prawnej przed publikacją."
+    }
+  ],
+  "sessions": [
+    {
+      "id": "001",
+      "milestone": "M0",
+      "title": "Szkielet repozytorium, CI i licencja",
+      "prompt": "prompts/sesja-001.md",
+      "status": "done",
+      "progress": "2026-10-17 | Szkielet monorepo: pyproject, katalogi z README, Makefile, CI, LICENSE (GPL-2), LICENCJE, PROVENANCE, testy licencji/IP/układu; Claude",
+      "remaining": [],
+      "evidence": [
+        "docs/DZIENNIK.md"
+      ],
+      "historical_completion": "2026-10-17 | Szkielet monorepo: pyproject, katalogi z README, Makefile, CI, LICENSE (GPL-2), LICENCJE, PROVENANCE, testy licencji/IP/układu; Claude"
+    },
+    {
+      "id": "002",
+      "milestone": "M0",
+      "title": "Wytyczne IP i rejestr pochodzenia",
+      "prompt": "prompts/sesja-002.md",
+      "status": "done",
+      "progress": "2026-10-17 | Proces IP, słownik, rejestr pochodzenia (52 wpisy), lista przed wydaniem, rozszerzony strażnik IP; Claude",
+      "remaining": [],
+      "evidence": [
+        "docs/DZIENNIK.md"
+      ],
+      "historical_completion": "2026-10-17 | Proces IP, słownik, rejestr pochodzenia (52 wpisy), lista przed wydaniem, rozszerzony strażnik IP; Claude"
+    },
+    {
+      "id": "003",
+      "milestone": "M0",
+      "title": "Spike: LinuxCNC 2.9 w środowisku agenta",
+      "prompt": "prompts/sesja-003.md",
+      "status": "done",
+      "progress": "2026-10-18 | LinuxCNC 2.9 RIP (uspace) w środowisku agenta: budowa, testy, CI na Debianie 12 (debian:bookworm); PR #3 i #26; Codex, dokończenie Claude (D31)",
+      "remaining": [],
+      "evidence": [
+        "docs/DZIENNIK.md"
+      ],
+      "historical_completion": "2026-10-18 | LinuxCNC 2.9 RIP (uspace) w środowisku agenta: budowa, testy, CI na Debianie 12 (debian:bookworm); PR #3 i #26; Codex, dokończenie Claude (D31)"
+    },
+    {
+      "id": "004",
+      "milestone": "M0",
+      "title": "Konfiguracja sim 3 osie z QtDragon",
+      "prompt": "prompts/sesja-004.md",
+      "status": "done",
+      "progress": "2026-10-18 | Konfiguracja sim linumert_xyz (QtDragon, kontrakt sygnałów D05, bazowanie latch release), HAL_KONTRAKT, SIM_WSL; PR #24; Claude (D31)",
+      "remaining": [],
+      "evidence": [
+        "docs/DZIENNIK.md"
+      ],
+      "historical_completion": "2026-10-18 | Konfiguracja sim linumert_xyz (QtDragon, kontrakt sygnałów D05, bazowanie latch release), HAL_KONTRAKT, SIM_WSL; PR #24; Claude (D31)"
+    },
+    {
+      "id": "005",
+      "milestone": "M0",
+      "title": "Kopia bazowa ekranu QtDragon",
+      "prompt": "prompts/sesja-005.md",
+      "status": "done",
+      "progress": "2026-10-18 | Ekran screens/linumert: kopia QtDragon 2.9.10 (commit 86cdca7), handler-patch, UPSTREAM.md, DISPLAY = qtvcp linumert, zrzut G0; PR #25; Claude (D31)",
+      "remaining": [],
+      "evidence": [
+        "docs/DZIENNIK.md"
+      ],
+      "historical_completion": "2026-10-18 | Ekran screens/linumert: kopia QtDragon 2.9.10 (commit 86cdca7), handler-patch, UPSTREAM.md, DISPLAY = qtvcp linumert, zrzut G0; PR #25; Claude (D31)"
+    },
+    {
+      "id": "006",
+      "milestone": "M0",
+      "title": "Rdzeń: model stanu maszyny i atrapa",
+      "prompt": "prompts/sesja-006.md",
+      "status": "done",
+      "progress": "2026-10-18 | Rdzeń cnc: niezmienna migawka stanu, czytnik linuxcnc.stat (wstrzykiwany moduł), atrapa z wirtualnym zegarem, 30 testów, docs/RDZEN.md; PR #5; Claude",
+      "remaining": [],
+      "evidence": [
+        "docs/DZIENNIK.md"
+      ],
+      "historical_completion": "2026-10-18 | Rdzeń cnc: niezmienna migawka stanu, czytnik linuxcnc.stat (wstrzykiwany moduł), atrapa z wirtualnym zegarem, 30 testów, docs/RDZEN.md; PR #5; Claude"
+    },
+    {
+      "id": "007",
+      "milestone": "M0",
+      "title": "Katalog alarmów i tłumaczenia",
+      "prompt": "prompts/sesja-007.md",
+      "status": "partial",
+      "progress": "Katalog alarmów i manager PL/EN gotowe.",
+      "remaining": [
+        "Brakuje pełnego mechanizmu Qt .ts/.qm i tools/i18n.sh; powiązane z 037."
+      ],
+      "evidence": [
+        "docs/DZIENNIK.md"
+      ],
+      "historical_completion": "2026-10-18 | Katalog alarmów (56 kodów PL/EN) z walidacją, AlarmManager, 23 testy; tłumaczenia Qt (.ts, i18n.sh) odłożone do sesji ekranu; PR #6; Claude"
+    },
+    {
+      "id": "008",
+      "milestone": "M0",
+      "title": "Bufor i bramka G0",
+      "prompt": "prompts/sesja-008.md",
+      "status": "done",
+      "progress": "2026-10-18 | Bramka G0: sprzątanie po testach LinuxCNC (61/61 w jednym przebiegu), czytnik rdzenia na RIP (zaległość 006), docs/raporty/G0.md, architektura w README; PR #35; Claude",
+      "remaining": [],
+      "evidence": [
+        "docs/DZIENNIK.md",
+        "docs/raporty/G0.md"
+      ],
+      "historical_completion": "2026-10-18 | Bramka G0: sprzątanie po testach LinuxCNC (61/61 w jednym przebiegu), czytnik rdzenia na RIP (zaległość 006), docs/raporty/G0.md, architektura w README; PR #35; Claude",
+      "gate": "automatic_pass"
+    },
+    {
+      "id": "009",
+      "milestone": "M1",
+      "title": "Specyfikacja wirtualnej maszyny Plant",
+      "prompt": "prompts/sesja-009.md",
+      "status": "done",
+      "progress": "2026-10-18 | Specyfikacja Plant (docs/PLANT.md), protokół LRT-NET v1, macierz 22 REQ, testy spójności; PR #7; Claude",
+      "remaining": [],
+      "evidence": [
+        "docs/DZIENNIK.md"
+      ],
+      "historical_completion": "2026-10-18 | Specyfikacja Plant (docs/PLANT.md), protokół LRT-NET v1, macierz 22 REQ, testy spójności; PR #7; Claude"
+    },
+    {
+      "id": "010",
+      "milestone": "M1",
+      "title": "Model obrabiarki machine.yaml (jedno źródło prawdy)",
+      "prompt": "prompts/sesja-010.md",
+      "status": "done",
+      "progress": "2026-10-18 | Schemat machine.yaml (Pydantic v2), 24 reguły spójności, 5 przykładowych maszyn, 42 testy; PR #8; Claude",
+      "remaining": [],
+      "evidence": [
+        "docs/DZIENNIK.md"
+      ],
+      "historical_completion": "2026-10-18 | Schemat machine.yaml (Pydantic v2), 24 reguły spójności, 5 przykładowych maszyn, 42 testy; PR #8; Claude"
+    },
+    {
+      "id": "011",
+      "milestone": "M1",
+      "title": "Plant: rdzeń dynamiki osi (C)",
+      "prompt": "prompts/sesja-011.md",
+      "status": "done",
+      "progress": "2026-10-18 | Plant: rdzeń dynamiki osi w C (bezwładność, krzywa momentu, tarcie, grawitacja, luz, zderzaki), 23 testy C, make test-c w CI; PR #9; Claude",
+      "remaining": [],
+      "evidence": [
+        "docs/DZIENNIK.md"
+      ],
+      "historical_completion": "2026-10-18 | Plant: rdzeń dynamiki osi w C (bezwładność, krzywa momentu, tarcie, grawitacja, luz, zderzaki), 23 testy C, make test-c w CI; PR #9; Claude"
+    },
+    {
+      "id": "012",
+      "milestone": "M1",
+      "title": "Plant: emulacja napędów CiA 402 i krokowców",
+      "prompt": "prompts/sesja-012.md",
+      "status": "done",
+      "progress": "2026-10-18 | Plant: napęd CiA 402 (CSP, krokowiec otwarty/zamknięty, awarie E-42xx) w C, 49 testów; PR #10; Claude",
+      "remaining": [],
+      "evidence": [
+        "docs/DZIENNIK.md"
+      ],
+      "historical_completion": "2026-10-18 | Plant: napęd CiA 402 (CSP, krokowiec otwarty/zamknięty, awarie E-42xx) w C, 49 testów; PR #10; Claude"
+    },
+    {
+      "id": "013",
+      "milestone": "M1",
+      "title": "Biblioteka napędów wirtualnych: szablony, kopiowanie, parametryzacja",
+      "prompt": "prompts/sesja-013.md",
+      "status": "done",
+      "progress": "2026-10-18 | Biblioteka napędów wirtualnych: 7 szablonów YAML + JSON Schema, instancje drives: w machine.yaml (id/template/overrides), CLI drive clone, parametry w locie; REQ-VD-01…05; PR #11; Claude",
+      "remaining": [],
+      "evidence": [
+        "docs/DZIENNIK.md"
+      ],
+      "historical_completion": "2026-10-18 | Biblioteka napędów wirtualnych: 7 szablonów YAML + JSON Schema, instancje drives: w machine.yaml (id/template/overrides), CLI drive clone, parametry w locie; REQ-VD-01…05; PR #11; Claude"
+    },
+    {
+      "id": "014",
+      "milestone": "M1",
+      "title": "Plant: łańcuch kinematyczny, przejazdy, zderzaki, krańcówki, I/O",
+      "prompt": "prompts/sesja-014.md",
+      "status": "done",
+      "progress": "2026-10-18 | Plant: machine.c (osie i napędy, gantry z alarmem rozjazdu, łańcuch kinematyczny, zderzaki, krańcówki, indeks, E-STOP, sonda, I/O 32 bity), build_machine.py + ctypes; REQ-VM-02…05; PR #12; Claude",
+      "remaining": [],
+      "evidence": [
+        "docs/DZIENNIK.md"
+      ],
+      "historical_completion": "2026-10-18 | Plant: machine.c (osie i napędy, gantry z alarmem rozjazdu, łańcuch kinematyczny, zderzaki, krańcówki, indeks, E-STOP, sonda, I/O 32 bity), build_machine.py + ctypes; REQ-VM-02…05; PR #12; Claude"
+    },
+    {
+      "id": "015",
+      "milestone": "M1",
+      "title": "Bazowanie po rozruchu: krańcówka, indeks, twardy zderzak, absolut, napęd",
+      "prompt": "prompts/sesja-015.md",
+      "status": "done",
+      "progress": "2026-10-18 | Bazowanie po rozruchu (REQ-VM-07): enkoder przyrostowy/absolutny z baterią (E-4211), tryb 6 w napędzie, start losowy, plik stanu, gantry, atrapa mastera, hal/lrt_hardstop_home.comp; PR #13; Claude",
+      "remaining": [],
+      "evidence": [
+        "docs/DZIENNIK.md"
+      ],
+      "historical_completion": "2026-10-18 | Bazowanie po rozruchu (REQ-VM-07): enkoder przyrostowy/absolutny z baterią (E-4211), tryb 6 w napędzie, start losowy, plik stanu, gantry, atrapa mastera, hal/lrt_hardstop_home.comp; PR #13; Claude"
+    },
+    {
+      "id": "016",
+      "milestone": "M1",
+      "title": "Plant: serwer LRT-NET",
+      "prompt": "prompts/sesja-016.md",
+      "status": "done",
+      "progress": "2026-10-18 | Plant: serwer LRT-NET (kodek v1, UDP lockstep/realtime, watchdog E-4003, stan bezpieczny, SHA-256 śladu, ślad CSV/JSONL, master testowy); 10 000 ramek bez strat; REQ-QA-03/04; PR #17; Claude",
+      "remaining": [],
+      "evidence": [
+        "docs/DZIENNIK.md"
+      ],
+      "historical_completion": "2026-10-18 | Plant: serwer LRT-NET (kodek v1, UDP lockstep/realtime, watchdog E-4003, stan bezpieczny, SHA-256 śladu, ślad CSV/JSONL, master testowy); 10 000 ramek bez strat; REQ-QA-03/04; PR #17; Claude"
+    },
+    {
+      "id": "017",
+      "milestone": "M1",
+      "title": "Komponent HAL lrt_net",
+      "prompt": "prompts/sesja-017.md",
+      "status": "done",
+      "progress": "2026-10-18 | Komponenty HAL lrt_net + lrt_cia402 (LRT-NET v1 w C), test halrun + Plant; PR #27; Claude (D31)",
+      "remaining": [],
+      "evidence": [
+        "docs/DZIENNIK.md"
+      ],
+      "historical_completion": "2026-10-18 | Komponenty HAL lrt_net + lrt_cia402 (LRT-NET v1 w C), test halrun + Plant; PR #27; Claude (D31)"
+    },
+    {
+      "id": "018",
+      "milestone": "M1",
+      "title": "Konfiguracja LinuxCNC dla Plant (3 osie)",
+      "prompt": "prompts/sesja-018.md",
+      "status": "done",
+      "progress": "2026-10-18 | config/plant/linumert_plant_xyz: LinuxCNC ↔ Plant, bazowanie na krańcówkach, test e2e, tools/dev/plant-gui.sh; PR #28; Claude (D31)",
+      "remaining": [],
+      "evidence": [
+        "docs/DZIENNIK.md"
+      ],
+      "historical_completion": "2026-10-18 | config/plant/linumert_plant_xyz: LinuxCNC ↔ Plant, bazowanie na krańcówkach, test e2e, tools/dev/plant-gui.sh; PR #28; Claude (D31)"
+    },
+    {
+      "id": "019",
+      "milestone": "M1",
+      "title": "Ograniczenia programowe, strefy zakazane i wyrocznia testowa",
+      "prompt": "prompts/sesja-019.md",
+      "status": "done",
+      "progress": "2026-10-18 | Wyrocznia Plant REQ-VM-06: soft limits i strefy zakazane, scenariusze softlimit/forbidden_zone z LinuxCNC; PR #29; Claude (D31)",
+      "remaining": [],
+      "evidence": [
+        "docs/DZIENNIK.md"
+      ],
+      "historical_completion": "2026-10-18 | Wyrocznia Plant REQ-VM-06: soft limits i strefy zakazane, scenariusze softlimit/forbidden_zone z LinuxCNC; PR #29; Claude (D31)"
+    },
+    {
+      "id": "020",
+      "milestone": "M1",
+      "title": "Magazyn narzędzi, pozycje wymiany i kolizje w Plant",
+      "prompt": "prompts/sesja-020.md",
+      "status": "done",
+      "progress": "2026-10-18 | Plant: magazyn narzędzi (regał/karuzela/parasol), zacisk, osłona, czujnik długości, kolizje CRASH; REQ-VM-08…10; PR #30; Claude (D31)",
+      "remaining": [],
+      "evidence": [
+        "docs/DZIENNIK.md"
+      ],
+      "historical_completion": "2026-10-18 | Plant: magazyn narzędzi (regał/karuzela/parasol), zacisk, osłona, czujnik długości, kolizje CRASH; REQ-VM-08…10; PR #30; Claude (D31)"
+    },
+    {
+      "id": "021",
+      "milestone": "M1",
+      "title": "Plant: wrzeciono VFD przez Modbus",
+      "prompt": "prompts/sesja-021.md",
+      "status": "done",
+      "progress": "2026-10-18 | Plant: wrzeciono VFD — model, hy_vfd (pty), Modbus TCP, usterki; wariant LinuxCNC _vfd z prawdziwym hy_vfd (M3/M4/M5); PR #32; Claude (D31)",
+      "remaining": [],
+      "evidence": [
+        "docs/DZIENNIK.md"
+      ],
+      "historical_completion": "2026-10-18 | Plant: wrzeciono VFD — model, hy_vfd (pty), Modbus TCP, usterki; wariant LinuxCNC _vfd z prawdziwym hy_vfd (M3/M4/M5); PR #32; Claude (D31)"
+    },
+    {
+      "id": "022",
+      "milestone": "M1",
+      "title": "Plant: panel sterowania i pulpit MPG",
+      "prompt": "prompts/sesja-022.md",
+      "status": "done",
+      "progress": "2026-10-18 | Plant: panel web (FastAPI/WS, uPlot) — telemetria 10 s, parametry live i presety, CSV, wirtualny pulpit MPG jako bity LRT-NET; PR #37; Claude (Opus 5.5)",
+      "remaining": [],
+      "evidence": [
+        "docs/DZIENNIK.md"
+      ],
+      "historical_completion": "2026-10-18 | Plant: panel web (FastAPI/WS, uPlot) — telemetria 10 s, parametry live i presety, CSV, wirtualny pulpit MPG jako bity LRT-NET; PR #37; Claude (Opus 5.5)"
+    },
+    {
+      "id": "023",
+      "milestone": "M1",
+      "title": "Edytor wirtualnej obrabiarki w panelu Plant",
+      "prompt": "prompts/sesja-023.md",
+      "status": "done",
+      "progress": "2026-10-18 | Plant: edytor maszyny (drzewo, walidacja, wersje, przeładowanie bez restartu), widok 3D z modelu, zakładki Napędy i Awarie, scenariusz edit_reload; PR #39; Claude (Opus 5.5)",
+      "remaining": [],
+      "evidence": [
+        "docs/DZIENNIK.md"
+      ],
+      "historical_completion": "2026-10-18 | Plant: edytor maszyny (drzewo, walidacja, wersje, przeładowanie bez restartu), widok 3D z modelu, zakładki Napędy i Awarie, scenariusz edit_reload; PR #39; Claude (Opus 5.5)"
+    },
+    {
+      "id": "024",
+      "milestone": "M1",
+      "title": "Plant: scenariusze i raport prototypu",
+      "prompt": "prompts/sesja-024.md",
+      "status": "done",
+      "progress": "2026-10-18 | Plant: awarie (faults.py), scenariusze z atrapą mastera i z LinuxCNC, raport HTML/SVG, run_scenario, check_requirements w make test, job plant-matrix; PR #38; Claude (Opus 5.5)",
+      "remaining": [],
+      "evidence": [
+        "docs/DZIENNIK.md"
+      ],
+      "historical_completion": "2026-10-18 | Plant: awarie (faults.py), scenariusze z atrapą mastera i z LinuxCNC, raport HTML/SVG, run_scenario, check_requirements w make test, job plant-matrix; PR #38; Claude (Opus 5.5)"
+    },
+    {
+      "id": "025",
+      "milestone": "M1",
+      "title": "Skrypty maszyn wirtualnych (VirtualBox)",
+      "prompt": "prompts/sesja-025.md",
+      "status": "done",
+      "progress": "2026-10-19 | Skrypty VM: create-vms.ps1 (VBoxManage, SHA-256, unattended VM-B), post-install ctl/plant (usługa linumert-plant, socat dla hy_vfd), docs/VM.md, lrtnet_probe; Plant przyjmuje nową sesję mastera; PR #41; Claude (Opus 5.5)",
+      "remaining": [],
+      "evidence": [
+        "docs/DZIENNIK.md"
+      ],
+      "historical_completion": "2026-10-19 | Skrypty VM: create-vms.ps1 (VBoxManage, SHA-256, unattended VM-B), post-install ctl/plant (usługa linumert-plant, socat dla hy_vfd), docs/VM.md, lrtnet_probe; Plant przyjmuje nową sesję mastera; PR #41; Claude (Opus 5.5)"
+    },
+    {
+      "id": "026",
+      "milestone": "M1",
+      "title": "Bufor i bramka G1 (prototyp P0)",
+      "prompt": "prompts/sesja-026.md",
+      "status": "done",
+      "progress": "2026-10-20 | Odbiór automatyczny Plant P0/G1: pełne CI Debian 12/LinuxCNC, C+ASan/UBSan, scenariusze, raport P0 i checklista ręczna; PR #56; Codex",
+      "remaining": [
+        "Odbiór ręczny VM/Plant pozostaje otwarty; automatyczny P0 PASS nie zamyka odbioru stanowiska ani sprzętu."
+      ],
+      "evidence": [
+        "docs/DZIENNIK.md",
+        "docs/raporty/G1.md"
+      ],
+      "historical_completion": "2026-10-20 | Odbiór automatyczny Plant P0/G1: pełne CI Debian 12/LinuxCNC, C+ASan/UBSan, scenariusze, raport P0 i checklista ręczna; PR #56; Codex",
+      "gate": "automatic_pass"
+    },
+    {
+      "id": "027",
+      "milestone": "M2",
+      "title": "Własny system projektowy ekranu",
+      "prompt": "prompts/sesja-027.md",
+      "status": "partial",
+      "progress": "Tokeny, ikony i makiety istnieją; później dodano koncepcję skórek.",
+      "remaining": [
+        "Rozliczyć kryteria oryginalnego promptu oraz kontrakt nowych skórek."
+      ],
+      "evidence": [
+        "docs/DZIENNIK.md"
+      ]
+    },
+    {
+      "id": "028",
+      "milestone": "M2",
+      "title": "Kompozycja ekranu głównego",
+      "prompt": "prompts/sesja-028.md",
+      "status": "partial",
+      "progress": "Powłoka HMI i nawigacja działają.",
+      "remaining": [
+        "Pełny odbiór kompozycji i nowych skórek; HMI-02, SKIN-04…06."
+      ],
+      "evidence": [
+        "docs/DZIENNIK.md"
+      ]
+    },
+    {
+      "id": "029",
+      "milestone": "M2",
+      "title": "Tryby, JOG i pulpit MPG",
+      "prompt": "prompts/sesja-029.md",
+      "status": "partial",
+      "progress": "JOG, tryby i edytowalny krok dostępne w HMI.",
+      "remaining": [
+        "Rozliczyć MPG i pełny scenariusz odbioru 029."
+      ],
+      "evidence": [
+        "docs/DZIENNIK.md"
+      ]
+    },
+    {
+      "id": "030",
+      "milestone": "M2",
+      "title": "MDI i klawiatura ekranowa",
+      "prompt": "prompts/sesja-030.md",
+      "status": "partial",
+      "progress": "MDI i klawiatura dostępne.",
+      "remaining": [
+        "Potwierdzić cały zakres oryginalnego promptu na docelowym pulpicie."
+      ],
+      "evidence": [
+        "docs/DZIENNIK.md"
+      ]
+    },
+    {
+      "id": "031",
+      "milestone": "M2",
+      "title": "AUTO i wznowienie od linii",
+      "prompt": "prompts/sesja-031.md",
+      "status": "partial",
+      "progress": "AUTO, ETA oraz wycofanie/powrót w pauzie D38-A wdrożone (#62).",
+      "remaining": [
+        "D38-B: odzyskiwanie po Abort/E-STOP lub wymianie narzędzia i wykonanie helisy/łuku z zakładką; pełny odbiór run-from-line."
+      ],
+      "evidence": [
+        "docs/DZIENNIK.md"
+      ]
+    },
+    {
+      "id": "032",
+      "milestone": "M2",
+      "title": "Baza narzędzi z typami",
+      "prompt": "prompts/sesja-032.md",
+      "status": "done",
+      "progress": "2026-10-18 | Baza narzędzi (rdzeń): 10 typów z walidacją, SQLite z migracjami i historią, tool.tbl bez strat (sprawdzone w rs274 LinuxCNC 2.9), CSV; ekran w sesji ekranu; PR #16; Claude",
+      "remaining": [],
+      "evidence": [
+        "docs/DZIENNIK.md"
+      ],
+      "historical_completion": "2026-10-18 | Baza narzędzi (rdzeń): 10 typów z walidacją, SQLite z migracjami i historią, tool.tbl bez strat (sprawdzone w rs274 LinuxCNC 2.9), CSV; ekran w sesji ekranu; PR #16; Claude"
+    },
+    {
+      "id": "033",
+      "milestone": "M2",
+      "title": "Zerowanie detalu i sonda",
+      "prompt": "prompts/sesja-033.md",
+      "status": "partial",
+      "progress": "Zero detalu G54–G59 i model przygotówki dostępne.",
+      "remaining": [
+        "Pełne G54–G59.3 oraz odbiór sondowania Z/narożnika i logiki sondy QtDragon."
+      ],
+      "evidence": [
+        "docs/DZIENNIK.md"
+      ]
+    },
+    {
+      "id": "034",
+      "milestone": "M2",
+      "title": "Ręczna zmiana narzędzia",
+      "prompt": "prompts/sesja-034.md",
+      "status": "partial",
+      "progress": "M6 i integracja sim_toolchange z Plant dostępne.",
+      "remaining": [
+        "Rozliczyć dialog ToolDB, anulowanie W-2130 i opcjonalne wycofanie Z."
+      ],
+      "evidence": [
+        "docs/DZIENNIK.md"
+      ]
+    },
+    {
+      "id": "035",
+      "milestone": "M2",
+      "title": "Alarmy na ekranie",
+      "prompt": "prompts/sesja-035.md",
+      "status": "partial",
+      "progress": "Panel alarmów i trwała historia diagnostyczna z filtrami/CSV (#68).",
+      "remaining": [
+        "Pełne mapowanie kodów napędów/VFD i scenariusze alarmów z promptu."
+      ],
+      "evidence": [
+        "docs/DZIENNIK.md"
+      ]
+    },
+    {
+      "id": "036",
+      "milestone": "M2",
+      "title": "Poziomy dostępu",
+      "prompt": "prompts/sesja-036.md",
+      "status": "planned",
+      "progress": "Brak potwierdzonego zakończenia zakresu.",
+      "remaining": [],
+      "evidence": []
+    },
+    {
+      "id": "037",
+      "milestone": "M2",
+      "title": "Język polski i angielski",
+      "prompt": "prompts/sesja-037.md",
+      "status": "partial",
+      "progress": "Katalog EN/PL prototypu skórek istnieje.",
+      "remaining": [
+        "Pełne tłumaczenie produkcyjnego HMI .ts/.qm, przełącznik i formaty jednostek; dług 007."
+      ],
+      "evidence": [
+        "docs/DZIENNIK.md"
+      ]
+    },
+    {
+      "id": "038",
+      "milestone": "M2",
+      "title": "Bufor i bramka G2 (prototyp v0.1)",
+      "prompt": "prompts/sesja-038.md",
+      "status": "planned",
+      "progress": "Brak potwierdzonego zakończenia zakresu.",
+      "remaining": [],
+      "evidence": [],
+      "gate": "open"
+    },
+    {
+      "id": "039",
+      "milestone": "M3",
+      "title": "Format .lnx i BaseMacroGenerator",
+      "prompt": "prompts/sesja-039.md",
+      "status": "done",
+      "progress": "2026-10-18 | Format .lnx (Pydantic + lnx_schema.json), ;@STOCK, BaseMacroGenerator, deterministyczny kompilator .lnx → .ngc (golden, rs274), alarmy P-5011…P-5015; PR #14; Claude",
+      "remaining": [],
+      "evidence": [
+        "docs/DZIENNIK.md"
+      ],
+      "historical_completion": "2026-10-18 | Format .lnx (Pydantic + lnx_schema.json), ;@STOCK, BaseMacroGenerator, deterministyczny kompilator .lnx → .ngc (golden, rs274), alarmy P-5011…P-5015; PR #14; Claude"
+    },
+    {
+      "id": "040",
+      "milestone": "M3",
+      "title": "Generatory: nagłówek, koniec, narzędzie, planowanie",
+      "prompt": "prompts/sesja-040.md",
+      "status": "done",
+      "progress": "2026-10-20 | Generatory header/program_end/tool_change/face_mill (#47) + walidacja kroków z bazą narzędzi (typ, średnica, skok, długość ostrza, obroty, kierunek; P-5207…P-5211, compile_program(tools=…)); Claude",
+      "remaining": [],
+      "evidence": [
+        "docs/DZIENNIK.md"
+      ],
+      "historical_completion": "2026-10-20 | Generatory header/program_end/tool_change/face_mill (#47) + walidacja kroków z bazą narzędzi (typ, średnica, skok, długość ostrza, obroty, kierunek; P-5207…P-5211, compile_program(tools=…)); Claude"
+    },
+    {
+      "id": "041",
+      "milestone": "M3",
+      "title": "Generatory: kieszenie",
+      "prompt": "prompts/sesja-041.md",
+      "status": "done",
+      "progress": "2026-10-21 | Kieszenie v2: pionowo/rampa/helisa, naroża, obrót, CW/CCW, naddatki i wykańczanie; v1 niezmienne; golden, materiał bez wysp, rs274 i wykonanie na LinuxCNC + Plant; 882 + 94 LinuxCNC PASS; PR #58; Codex",
+      "remaining": [],
+      "evidence": [
+        "docs/DZIENNIK.md"
+      ],
+      "historical_completion": "2026-10-21 | Kieszenie v2: pionowo/rampa/helisa, naroża, obrót, CW/CCW, naddatki i wykańczanie; v1 niezmienne; golden, materiał bez wysp, rs274 i wykonanie na LinuxCNC + Plant; 882 + 94 LinuxCNC PASS; PR #58; Codex"
+    },
+    {
+      "id": "042",
+      "milestone": "M3",
+      "title": "Generatory: wiercenie i gwintowanie",
+      "prompt": "prompts/sesja-042.md",
+      "status": "partial",
+      "progress": "Generatory wiercenia/gwintowania istnieją.",
+      "remaining": [
+        "Odbiór wszystkich wzorów, cykli, walidacji i podglądu przez GUI."
+      ],
+      "evidence": [
+        "docs/DZIENNIK.md"
+      ]
+    },
+    {
+      "id": "043",
+      "milestone": "M3",
+      "title": "Generatory: rowki, czopy, kontur",
+      "prompt": "prompts/sesja-043.md",
+      "status": "planned",
+      "progress": "Brak potwierdzonego zakończenia zakresu.",
+      "remaining": [],
+      "evidence": []
+    },
+    {
+      "id": "044",
+      "milestone": "M3",
+      "title": "Lekser G-code i walidacja w edytorze",
+      "prompt": "prompts/sesja-044.md",
+      "status": "done",
+      "progress": "2026-10-18 | Lekser G-code LinuxCNC (P-5101…P-5111, linia/kolumna, słowa O), kontrola w rs274; 44 próbki zgodne z LinuxCNC 2.9; przycisk Sprawdź w sesji ekranu; PR #15; Claude",
+      "remaining": [],
+      "evidence": [
+        "docs/DZIENNIK.md"
+      ],
+      "historical_completion": "2026-10-18 | Lekser G-code LinuxCNC (P-5101…P-5111, linia/kolumna, słowa O), kontrola w rs274; 44 próbki zgodne z LinuxCNC 2.9; przycisk Sprawdź w sesji ekranu; PR #15; Claude"
+    },
+    {
+      "id": "045",
+      "milestone": "M3",
+      "title": "Panel programu dialogowego",
+      "prompt": "prompts/sesja-045.md",
+      "status": "partial",
+      "progress": "Panel Cykle: formularze, lista, edycja i pliki .lnx (#59).",
+      "remaining": [
+        "Komplet operacji kroków, walidacja przy polach i kryteria oryginalnego promptu."
+      ],
+      "evidence": [
+        "docs/DZIENNIK.md"
+      ]
+    },
+    {
+      "id": "046",
+      "milestone": "M3",
+      "title": "Podglądy 2D w formularzach",
+      "prompt": "prompts/sesja-046.md",
+      "status": "partial",
+      "progress": "Widżet Preview2D i podgląd ścieżek dostępne.",
+      "remaining": [
+        "Wszystkie prymitywy, wymiary i preview_2d wszystkich generatorów."
+      ],
+      "evidence": [
+        "docs/DZIENNIK.md"
+      ]
+    },
+    {
+      "id": "047",
+      "milestone": "M3",
+      "title": "Menedżer programów i pliki .lnx",
+      "prompt": "prompts/sesja-047.md",
+      "status": "partial",
+      "progress": "Wybór programów i odczyt/zapis .lnx dostępne.",
+      "remaining": [
+        "Pełny menedżer, szablony i odbiór bezpiecznych operacji plikowych."
+      ],
+      "evidence": [
+        "docs/DZIENNIK.md"
+      ]
+    },
+    {
+      "id": "048",
+      "milestone": "M3",
+      "title": "Biblioteka podprogramów o-word",
+      "prompt": "prompts/sesja-048.md",
+      "status": "partial",
+      "progress": "Podprogramy planowania i wiercenia oraz eksport NgcGui wdrożone.",
+      "remaining": [
+        "Brak podprogramów kieszeni i rowków; zależności 041/043."
+      ],
+      "evidence": [
+        "docs/DZIENNIK.md"
+      ],
+      "historical_completion": "2026-10-20 | Podprogramy o<lrt_face_mill>, o<lrt_drill_grid>, o<lrt_drill_circle> (NgcGui), eksport do user_macros, PODPROGRAMY.md; ruch zgodny z generatorami w rs274 (część: kieszenie/rowki później); Claude"
+    },
+    {
+      "id": "049",
+      "milestone": "M3",
+      "title": "Test technologiczny na Plant",
+      "prompt": "prompts/sesja-049.md",
+      "status": "partial",
+      "progress": "Wybrane cykle wykonane na LinuxCNC + Plant (#58/#60).",
+      "remaining": [
+        "suite_cycles dla każdego generatora na router_steppers i mill_servo."
+      ],
+      "evidence": [
+        "docs/DZIENNIK.md"
+      ]
+    },
+    {
+      "id": "050",
+      "milestone": "M3",
+      "title": "Bufor i bramka G3 (prototyp v0.2)",
+      "prompt": "prompts/sesja-050.md",
+      "status": "planned",
+      "progress": "Brak potwierdzonego zakończenia zakresu.",
+      "remaining": [],
+      "evidence": [],
+      "gate": "open"
+    },
+    {
+      "id": "051",
+      "milestone": "M4",
+      "title": "Ścieżka z programu",
+      "prompt": "prompts/sesja-051.md",
+      "status": "partial",
+      "progress": "Działa ścieżka rs274 i pomiar na żywo.",
+      "remaining": [
+        "Rozliczyć MoveList, canon, łuki i pełną macierz 10 programów."
+      ],
+      "evidence": [
+        "docs/DZIENNIK.md"
+      ]
+    },
+    {
+      "id": "052",
+      "milestone": "M4",
+      "title": "Proces symulacji",
+      "prompt": "prompts/sesja-052.md",
+      "status": "partial",
+      "progress": "Symulacja live działa w osobnym procesie nice 10.",
+      "remaining": [
+        "Rozliczyć anulowanie, cache SHA-256 i pełne API offline."
+      ],
+      "evidence": [
+        "docs/DZIENNIK.md"
+      ]
+    },
+    {
+      "id": "053",
+      "milestone": "M4",
+      "title": "Czas obróbki i porównanie z Plant",
+      "prompt": "prompts/sesja-053.md",
+      "status": "partial",
+      "progress": "ETA oraz porównanie trzech programów z Plant: błąd 2,22–4,46% (#60).",
+      "remaining": [
+        "Pełny wynik per narzędzie/krok i odbiór zakresu modelu; wyniki nie są ogólną gwarancją ±10%."
+      ],
+      "evidence": [
+        "docs/DZIENNIK.md"
+      ]
+    },
+    {
+      "id": "054",
+      "milestone": "M4",
+      "title": "Przygotówka",
+      "prompt": "prompts/sesja-054.md",
+      "status": "done",
+      "progress": "2026-10-20 | Przygotówka: ;@STOCK, dialog Symulacja, K-321 (wcześniej) + cel sondy Plant z przygotówki (tools/stock_probe.py); Claude",
+      "remaining": [],
+      "evidence": [
+        "docs/DZIENNIK.md"
+      ],
+      "historical_completion": "2026-10-20 | Przygotówka: ;@STOCK, dialog Symulacja, K-321 (wcześniej) + cel sondy Plant z przygotówki (tools/stock_probe.py); Claude"
+    },
+    {
+      "id": "055",
+      "milestone": "M4",
+      "title": "Materiał 2.5D",
+      "prompt": "prompts/sesja-055.md",
+      "status": "partial",
+      "progress": "Materiał 2.5D i obróbka na żywo działają.",
+      "remaining": [
+        "Pełny odbiór dokładności objętości ±2% i wydajności."
+      ],
+      "evidence": [
+        "docs/DZIENNIK.md"
+      ]
+    },
+    {
+      "id": "056",
+      "milestone": "M4",
+      "title": "Reguły kolizji lite",
+      "prompt": "prompts/sesja-056.md",
+      "status": "partial",
+      "progress": "Kolizje diagnostyczne na żywo działają.",
+      "remaining": [
+        "Pełna macierz reguł i tryb offline; nie przywracać komend E-STOP z symulacji."
+      ],
+      "evidence": [
+        "docs/DZIENNIK.md"
+      ]
+    },
+    {
+      "id": "057",
+      "milestone": "M4",
+      "title": "Widok 3D symulacji",
+      "prompt": "prompts/sesja-057.md",
+      "status": "partial",
+      "progress": "Widok 3D, kamery i raportowa oś zdarzeń działają.",
+      "remaining": [
+        "Interaktywna oś czasu/skok do linii i benchmark 100 000 segmentów; SKIN-01/06."
+      ],
+      "evidence": [
+        "docs/DZIENNIK.md"
+      ]
+    },
+    {
+      "id": "058",
+      "milestone": "M4",
+      "title": "Typy narzędzi w symulacji",
+      "prompt": "prompts/sesja-058.md",
+      "status": "partial",
+      "progress": "Profile narzędzi działają; specjalne STL używa walca zastępczego.",
+      "remaining": [
+        "Pełne profile i K-303, obwiednia STL oraz odbiór stemplowania."
+      ],
+      "evidence": [
+        "docs/DZIENNIK.md"
+      ]
+    },
+    {
+      "id": "059",
+      "milestone": "M4",
+      "title": "Raport symulacji i eksport STL",
+      "prompt": "prompts/sesja-059.md",
+      "status": "partial",
+      "progress": "Eksport HTML z aktualnym obrazem, osią zdarzeń oraz STL istnieje (#60).",
+      "remaining": [
+        "Spójna droga offline „Symuluj” z panelu dialogowego i plików."
+      ],
+      "evidence": [
+        "docs/DZIENNIK.md"
+      ]
+    },
+    {
+      "id": "060",
+      "milestone": "M4",
+      "title": "Bufor i bramka G4 (prototyp v0.3)",
+      "prompt": "prompts/sesja-060.md",
+      "status": "planned",
+      "progress": "Brak potwierdzonego zakończenia zakresu.",
+      "remaining": [],
+      "evidence": [],
+      "gate": "open"
+    },
+    {
+      "id": "061",
+      "milestone": "M5",
+      "title": "machine.yaml: napędy i wejścia rzeczywiste",
+      "prompt": "prompts/sesja-061.md",
+      "status": "partial",
+      "progress": "Schemat maszyny oraz deklaracje wdrożenia hardware istnieją.",
+      "remaining": [
+        "Real mapping napędów REQ-VD-06 i generator sprzętowy; raport konkursu 03."
+      ],
+      "evidence": [
+        "docs/DZIENNIK.md"
+      ]
+    },
+    {
+      "id": "062",
+      "milestone": "M5",
+      "title": "Generator INI/HAL: sim, Plant, step/dir",
+      "prompt": "prompts/sesja-062.md",
+      "status": "planned",
+      "progress": "Brak potwierdzonego zakończenia zakresu.",
+      "remaining": [],
+      "evidence": []
+    },
+    {
+      "id": "063",
+      "milestone": "M5",
+      "title": "Generator EtherCAT (lcec, CiA 402)",
+      "prompt": "prompts/sesja-063.md",
+      "status": "planned",
+      "progress": "Brak potwierdzonego zakończenia zakresu.",
+      "remaining": [],
+      "evidence": []
+    },
+    {
+      "id": "064",
+      "milestone": "M5",
+      "title": "Wrzeciono RS485 w generatorze",
+      "prompt": "prompts/sesja-064.md",
+      "status": "planned",
+      "progress": "Brak potwierdzonego zakończenia zakresu.",
+      "remaining": [],
+      "evidence": []
+    },
+    {
+      "id": "065",
+      "milestone": "M5",
+      "title": "Kinematyki 4 i 5 osi",
+      "prompt": "prompts/sesja-065.md",
+      "status": "partial",
+      "progress": "Plant ma bazową kinematykę maszyn wieloosiowych.",
+      "remaining": [
+        "Pełna fizyka osi obrotowych, generator kinematyk, DRO/TCP i five_axis_demo."
+      ],
+      "evidence": [
+        "docs/DZIENNIK.md"
+      ]
+    },
+    {
+      "id": "066",
+      "milestone": "M5",
+      "title": "Automatyczna zmiana narzędzia",
+      "prompt": "prompts/sesja-066.md",
+      "status": "partial",
+      "progress": "Model magazynu i zacisku Plant istnieje.",
+      "remaining": [
+        "Remap M6, widok magazynu, scenariusze ATC i walidacja geometrii/stref wymiany."
+      ],
+      "evidence": [
+        "docs/DZIENNIK.md"
+      ]
+    },
+    {
+      "id": "067",
+      "milestone": "M5",
+      "title": "Kreator konfiguracji maszyny",
+      "prompt": "prompts/sesja-067.md",
+      "status": "planned",
+      "progress": "Brak potwierdzonego zakończenia zakresu.",
+      "remaining": [],
+      "evidence": []
+    },
+    {
+      "id": "068",
+      "milestone": "M5",
+      "title": "Test latencji i raport kwalifikacji",
+      "prompt": "prompts/sesja-068.md",
+      "status": "planned",
+      "progress": "Brak potwierdzonego zakończenia zakresu.",
+      "remaining": [],
+      "evidence": []
+    },
+    {
+      "id": "069",
+      "milestone": "M5",
+      "title": "Diagnostyka napędów",
+      "prompt": "prompts/sesja-069.md",
+      "status": "partial",
+      "progress": "Diagnostyka HMI i historia komunikatów dostępne.",
+      "remaining": [
+        "Dekoder CiA402, wykresy napędów, ethercat slaves/master i test fault."
+      ],
+      "evidence": [
+        "docs/DZIENNIK.md"
+      ]
+    },
+    {
+      "id": "070",
+      "milestone": "M5",
+      "title": "Łańcuch E-STOP i bezpieczeństwo",
+      "prompt": "prompts/sesja-070.md",
+      "status": "partial",
+      "progress": "Łańcuch HMI/HAL, watchdog, audyt i bramka przed startem wdrożone (#93).",
+      "remaining": [
+        "Pełny generator i odbiór toru sprzętowego oraz niezależnego nadzoru PC; bez osłabiania kontraktu safety."
+      ],
+      "evidence": [
+        "docs/DZIENNIK.md"
+      ]
+    },
+    {
+      "id": "071",
+      "milestone": "M5",
+      "title": "Asystent strojenia na Plant",
+      "prompt": "prompts/sesja-071.md",
+      "status": "planned",
+      "progress": "Brak potwierdzonego zakończenia zakresu.",
+      "remaining": [],
+      "evidence": []
+    },
+    {
+      "id": "072",
+      "milestone": "M5",
+      "title": "Bufor i bramka G5 (prototyp v0.4)",
+      "prompt": "prompts/sesja-072.md",
+      "status": "planned",
+      "progress": "Brak potwierdzonego zakończenia zakresu.",
+      "remaining": [],
+      "evidence": [],
+      "gate": "open"
+    },
+    {
+      "id": "073",
+      "milestone": "M6",
+      "title": "Wtyczki deklaratywne: format i silnik",
+      "prompt": "prompts/sesja-073.md",
+      "status": "planned",
+      "progress": "Brak potwierdzonego zakończenia zakresu.",
+      "remaining": [],
+      "evidence": []
+    },
+    {
+      "id": "074",
+      "milestone": "M6",
+      "title": "Menedżer wtyczek",
+      "prompt": "prompts/sesja-074.md",
+      "status": "planned",
+      "progress": "Brak potwierdzonego zakończenia zakresu.",
+      "remaining": [],
+      "evidence": []
+    },
+    {
+      "id": "075",
+      "milestone": "M6",
+      "title": "Panel cykli i skryptów",
+      "prompt": "prompts/sesja-075.md",
+      "status": "planned",
+      "progress": "Brak potwierdzonego zakończenia zakresu.",
+      "remaining": [],
+      "evidence": []
+    },
+    {
+      "id": "076",
+      "milestone": "M6",
+      "title": "Repozytorium społeczności i przykłady",
+      "prompt": "prompts/sesja-076.md",
+      "status": "planned",
+      "progress": "Brak potwierdzonego zakończenia zakresu.",
+      "remaining": [],
+      "evidence": []
+    },
+    {
+      "id": "077",
+      "milestone": "M6",
+      "title": "Instalator dla Debiana 12 + LinuxCNC 2.9",
+      "prompt": "prompts/sesja-077.md",
+      "status": "partial",
+      "progress": "Starter kontenerowy, live-build ISO i integracja sim/Plant/monitora (#97).",
+      "remaining": [
+        "Instalator /opt, update/rollback/uninstall, idempotencja, odbiór live USB/instalacji i latencji."
+      ],
+      "evidence": [
+        "docs/DZIENNIK.md"
+      ]
+    },
+    {
+      "id": "078",
+      "milestone": "M6",
+      "title": "Pierwsze uruchomienie i linumert doctor",
+      "prompt": "prompts/sesja-078.md",
+      "status": "partial",
+      "progress": "Raport środowiska doctor działa offline i w HMI.",
+      "remaining": [
+        "Wersje/działanie LinuxCNC/HAL, uprawnienia, Plant, latencja i kreator pierwszego uruchomienia."
+      ],
+      "evidence": [
+        "docs/DZIENNIK.md"
+      ]
+    },
+    {
+      "id": "079",
+      "milestone": "M6",
+      "title": "Dokumentacja użytkownika",
+      "prompt": "prompts/sesja-079.md",
+      "status": "partial",
+      "progress": "Instrukcje uruchomienia, wybranych funkcji i zrzuty istnieją.",
+      "remaining": [
+        "Komplet podręcznika dla zakresu 079; nie dokumentować planowanych funkcji jako działających."
+      ],
+      "evidence": [
+        "docs/DZIENNIK.md"
+      ]
+    },
+    {
+      "id": "080",
+      "milestone": "M6",
+      "title": "Przegląd IP przed wydaniem",
+      "prompt": "prompts/sesja-080.md",
+      "status": "partial",
+      "progress": "Strażnik IP, licencje i provenance istnieją.",
+      "remaining": [
+        "Pełny audyt przed wydaniem, przegląd podobieństwa i wyniki sprawdzenia nazwy."
+      ],
+      "evidence": [
+        "docs/DZIENNIK.md"
+      ]
+    },
+    {
+      "id": "081",
+      "milestone": "M6",
+      "title": "Twardnienie",
+      "prompt": "prompts/sesja-081.md",
+      "status": "partial",
+      "progress": "Część walidacji, ograniczeń i bezpiecznych operacji plikowych wdrożona.",
+      "remaining": [
+        "Pełny przegląd uprawnień/nasłuchu/limitów oraz pip-audit i raport."
+      ],
+      "evidence": [
+        "docs/DZIENNIK.md"
+      ]
+    },
+    {
+      "id": "082",
+      "milestone": "M6",
+      "title": "Pełna regresja na Plant",
+      "prompt": "prompts/sesja-082.md",
+      "status": "partial",
+      "progress": "CI Python/C/LinuxCNC i macierz Plant istnieją.",
+      "remaining": [
+        "suite_all 3× PASS i naprawa OD-01: zielona macierz mimo CRASH/COVER_CRASH."
+      ],
+      "evidence": [
+        "docs/DZIENNIK.md"
+      ]
+    },
+    {
+      "id": "083",
+      "milestone": "M6",
+      "title": "Wydanie v0.5.0-alpha",
+      "prompt": "prompts/sesja-083.md",
+      "status": "planned",
+      "progress": "Brak potwierdzonego zakończenia zakresu.",
+      "remaining": [],
+      "evidence": [],
+      "gate": "open"
+    },
+    {
+      "id": "084",
+      "milestone": "M6",
+      "title": "Retrospektywa i kolejne półrocze",
+      "prompt": "prompts/sesja-084.md",
+      "status": "planned",
+      "progress": "Brak potwierdzonego zakończenia zakresu.",
+      "remaining": [],
+      "evidence": []
+    }
+  ],
+  "extensions": [
+    {
+      "id": "HMI-01",
+      "title": "Mapa widgetów i kontrakt QtDragon",
+      "parents": [
+        "005",
+        "027"
+      ],
+      "status": "partial",
+      "progress": "Handler-patch i powłoka istnieją.",
+      "remaining": [
+        "Rozliczyć pełną inwentaryzację i odbiór etapu."
+      ],
+      "evidence": [
+        "docs/design/HMI_WORKFLOW.md",
+        "screens/linumert/UPSTREAM.md"
+      ]
+    },
+    {
+      "id": "HMI-02",
+      "title": "Powłoka i nawigacja",
+      "parents": [
+        "028",
+        "029",
+        "030"
+      ],
+      "status": "partial",
+      "progress": "Działające widoki i testy automatyczne opisano w dzienniku.",
+      "remaining": [
+        "Pełne kryteria HMI i odbiór pulpitu pozostają do rozliczenia."
+      ],
+      "evidence": [
+        "docs/design/HMI_WORKFLOW.md",
+        "docs/raporty/prototypy/PLAN-21-27-2026-10-21.md"
+      ]
+    },
+    {
+      "id": "HMI-03",
+      "title": "Zero detalu i narzędzia",
+      "parents": [
+        "032",
+        "033",
+        "034"
+      ],
+      "status": "partial",
+      "progress": "Działające widoki i testy automatyczne opisano w dzienniku.",
+      "remaining": [
+        "Pełne kryteria HMI i odbiór pulpitu pozostają do rozliczenia."
+      ],
+      "evidence": [
+        "docs/design/HMI_WORKFLOW.md",
+        "docs/raporty/prototypy/PLAN-21-27-2026-10-21.md"
+      ]
+    },
+    {
+      "id": "HMI-04",
+      "title": "Program, symulacja i produkcja",
+      "parents": [
+        "031",
+        "044",
+        "045",
+        "047",
+        "057"
+      ],
+      "status": "partial",
+      "progress": "Działające widoki i testy automatyczne opisano w dzienniku.",
+      "remaining": [
+        "Pełne kryteria HMI i odbiór pulpitu pozostają do rozliczenia."
+      ],
+      "evidence": [
+        "docs/design/HMI_WORKFLOW.md",
+        "docs/raporty/prototypy/PLAN-21-27-2026-10-21.md"
+      ]
+    },
+    {
+      "id": "HMI-05",
+      "title": "Diagnostyka i alarmy",
+      "parents": [
+        "035",
+        "069"
+      ],
+      "status": "partial",
+      "progress": "Działające widoki i testy automatyczne opisano w dzienniku.",
+      "remaining": [
+        "Pełne kryteria HMI i odbiór pulpitu pozostają do rozliczenia."
+      ],
+      "evidence": [
+        "docs/design/HMI_WORKFLOW.md",
+        "docs/raporty/prototypy/PLAN-21-27-2026-10-21.md"
+      ]
+    },
+    {
+      "id": "HMI-06",
+      "title": "Odbiór ekranów",
+      "parents": [
+        "038"
+      ],
+      "status": "partial",
+      "progress": "Działające widoki i testy automatyczne opisano w dzienniku.",
+      "remaining": [
+        "Pełne kryteria HMI i odbiór pulpitu pozostają do rozliczenia."
+      ],
+      "evidence": [
+        "docs/design/HMI_WORKFLOW.md",
+        "docs/raporty/prototypy/PLAN-21-27-2026-10-21.md"
+      ]
+    },
+    {
+      "id": "D38-A",
+      "title": "Wycofanie i powrót w pauzie",
+      "parents": [
+        "031"
+      ],
+      "status": "done",
+      "progress": "PR #62: external offsets, zachowanie modalności i testy sim/Plant PASS.",
+      "remaining": [],
+      "evidence": [
+        "docs/raporty/prototypy/PLAN-21-27-2026-10-21.md"
+      ]
+    },
+    {
+      "id": "D38-B",
+      "title": "Odzyskiwanie i powrót helisą z zakładką",
+      "parents": [
+        "031"
+      ],
+      "status": "partial",
+      "progress": "Geometria i diagnostyczny podgląd istnieją.",
+      "remaining": [
+        "Wykonanie po Abort/E-STOP/wymianie narzędzia i pełny odbiór; podgląd nie wykonuje ruchu."
+      ],
+      "evidence": [
+        "docs/design/WZNOWIENIE.md",
+        "docs/raporty/prototypy/PLAN-21-27-2026-10-21.md"
+      ]
+    },
+    {
+      "id": "PLAN-21-22",
+      "title": "Kieszenie v2",
+      "parents": [
+        "041"
+      ],
+      "status": "done",
+      "progress": "Rampa/helisa, geometria i wykańczanie; #58, odbiór automatyczny PASS.",
+      "remaining": [],
+      "evidence": [
+        "docs/PLAN_TYGODNIA_2026-10-21.md",
+        "docs/raporty/prototypy/PLAN-21-27-2026-10-21.md"
+      ]
+    },
+    {
+      "id": "PLAN-23",
+      "title": "Pliki .lnx i edycja kroków",
+      "parents": [
+        "045",
+        "047"
+      ],
+      "status": "done",
+      "progress": "PR #59: odbiór automatyczny wskazanego kroku PASS.",
+      "remaining": [],
+      "evidence": [
+        "docs/PLAN_TYGODNIA_2026-10-21.md",
+        "docs/raporty/prototypy/PLAN-21-27-2026-10-21.md"
+      ]
+    },
+    {
+      "id": "PLAN-24",
+      "title": "Podgląd D38",
+      "parents": [
+        "031"
+      ],
+      "status": "done",
+      "progress": "PR #60: odbiór podglądu PASS; wykonanie pozostaje w D38-B.",
+      "remaining": [],
+      "evidence": [
+        "docs/PLAN_TYGODNIA_2026-10-21.md",
+        "docs/raporty/prototypy/PLAN-21-27-2026-10-21.md"
+      ]
+    },
+    {
+      "id": "PLAN-25",
+      "title": "ETA i kalibracja trzech programów",
+      "parents": [
+        "053"
+      ],
+      "status": "done",
+      "progress": "PR #60: pomiary i testy ETA PASS.",
+      "remaining": [],
+      "evidence": [
+        "docs/PLAN_TYGODNIA_2026-10-21.md",
+        "docs/raporty/prototypy/PLAN-21-27-2026-10-21.md"
+      ]
+    },
+    {
+      "id": "PLAN-26",
+      "title": "Raport z aktualnym widokiem i osią zdarzeń",
+      "parents": [
+        "057",
+        "059"
+      ],
+      "status": "done",
+      "progress": "PR #60: odbiór raportu PASS.",
+      "remaining": [],
+      "evidence": [
+        "docs/PLAN_TYGODNIA_2026-10-21.md",
+        "docs/raporty/prototypy/PLAN-21-27-2026-10-21.md"
+      ]
+    },
+    {
+      "id": "PLAN-27",
+      "title": "Ręczny odbiór pulpitu",
+      "parents": [
+        "026",
+        "038",
+        "077"
+      ],
+      "status": "acceptance",
+      "progress": "Protokół przygotowany; brak zaliczonego ręcznego odbioru.",
+      "remaining": [
+        "Wykonać checklistę na pulpicie właściciela i zapisać dowody."
+      ],
+      "evidence": [
+        "docs/PLAN_TYGODNIA_2026-10-21.md",
+        "docs/raporty/prototypy/PLAN-21-27-2026-10-21.md"
+      ]
+    },
+    {
+      "id": "SKIN-00",
+      "title": "Audyt kontraktów i decyzja architektoniczna",
+      "parents": [
+        "027"
+      ],
+      "status": "partial",
+      "progress": "Audyt i niezależne kontrakty istnieją.",
+      "remaining": [
+        "Rozstrzygnąć propozycję zmiany prezentacji; nie zmienia zamrożonego stosu."
+      ],
+      "evidence": [
+        "docs/design/SKIN_SYSTEM_ROADMAP.md",
+        "docs/design/SKIN_AUDIT.md"
+      ]
+    },
+    {
+      "id": "SKIN-01",
+      "title": "Prototyp renderera 3D",
+      "parents": [
+        "057"
+      ],
+      "status": "done",
+      "progress": "PR #87: prototyp i testy GPU/Mesa PASS; odbiór docelowego HMI należy do SKIN-06.",
+      "remaining": [],
+      "evidence": [
+        "docs/design/SKIN_SYSTEM_ROADMAP.md",
+        "docs/design/SKIN_AUDIT.md"
+      ],
+      "aliases": [
+        "085"
+      ],
+      "prompt": "prompts/sesja-085.md"
+    },
+    {
+      "id": "SKIN-02",
+      "title": "Skin API, host i kanały CNC",
+      "parents": [
+        "028",
+        "070"
+      ],
+      "status": "partial",
+      "progress": "Manifesty, kontrola przełączenia i monitor read-only istnieją.",
+      "remaining": [
+        "Produkcyjny host, kanał poleceń i potwierdzenie świeżości danych."
+      ],
+      "evidence": [
+        "docs/design/SKIN_SYSTEM_ROADMAP.md",
+        "docs/design/SKIN_AUDIT.md"
+      ]
+    },
+    {
+      "id": "SKIN-03",
+      "title": "Palety, EN/PL i preferencje",
+      "parents": [
+        "027",
+        "037"
+      ],
+      "status": "partial",
+      "progress": "Prototyp palet, tłumaczeń i preferencji istnieje.",
+      "remaining": [
+        "Pełna integracja i odbiór produkcyjnego GUI."
+      ],
+      "evidence": [
+        "docs/design/SKIN_SYSTEM_ROADMAP.md",
+        "docs/design/SKIN_AUDIT.md"
+      ]
+    },
+    {
+      "id": "SKIN-04",
+      "title": "Classic Digital i Industrial Pro",
+      "parents": [
+        "028"
+      ],
+      "status": "partial",
+      "progress": "Odrębne ekrany offline i monitor read-only.",
+      "remaining": [
+        "Pełne sterowanie i komplet widoków produkcyjnych."
+      ],
+      "evidence": [
+        "docs/design/SKIN_SYSTEM_ROADMAP.md",
+        "docs/design/SKIN_AUDIT.md"
+      ]
+    },
+    {
+      "id": "SKIN-05",
+      "title": "Cyberdeck i Organic Vector",
+      "parents": [
+        "028"
+      ],
+      "status": "partial",
+      "progress": "Odrębne ekrany offline i monitor read-only.",
+      "remaining": [
+        "Pełne sterowanie, komplet widoków i adaptacyjne układy."
+      ],
+      "evidence": [
+        "docs/design/SKIN_SYSTEM_ROADMAP.md",
+        "docs/design/SKIN_AUDIT.md"
+      ]
+    },
+    {
+      "id": "SKIN-06",
+      "title": "Odbiór skórek i renderera",
+      "parents": [
+        "038",
+        "060"
+      ],
+      "status": "partial",
+      "progress": "Macierze prototypów GL testowane.",
+      "remaining": [
+        "Pełny odbiór 4×4×2, rozdzielczości/dotyk, LinuxCNC/Plant, safety i pulpit."
+      ],
+      "evidence": [
+        "docs/design/SKIN_SYSTEM_ROADMAP.md",
+        "docs/design/SKIN_AUDIT.md"
+      ]
+    },
+    {
+      "id": "SKIN-PREVIEW",
+      "title": "Podgląd czterech kompozycji",
+      "parents": [
+        "028",
+        "057"
+      ],
+      "status": "done",
+      "progress": "PR #89: podgląd i odbiór 64 wariantów GL.",
+      "remaining": [],
+      "evidence": [
+        "docs/design/SKIN_AUDIT.md",
+        "docs/DZIENNIK.md"
+      ],
+      "aliases": [
+        "086"
+      ]
+    },
+    {
+      "id": "SKIN-GALLERY",
+      "title": "Zrzuty i galeria",
+      "parents": [
+        "079"
+      ],
+      "status": "done",
+      "progress": "PR #90: nowe zrzuty i README.",
+      "remaining": [],
+      "evidence": [
+        "docs/design/SKIN_AUDIT.md",
+        "docs/DZIENNIK.md"
+      ],
+      "aliases": [
+        "087"
+      ]
+    },
+    {
+      "id": "SKIN-OFFLINE",
+      "title": "Cztery osobne ekrany offline",
+      "parents": [
+        "028"
+      ],
+      "status": "done",
+      "progress": "PR #91: launcher --skin i 128 wariantów GL; bez integracji sterowania.",
+      "remaining": [],
+      "evidence": [
+        "docs/design/SKIN_AUDIT.md",
+        "docs/DZIENNIK.md"
+      ],
+      "aliases": [
+        "088"
+      ]
+    },
+    {
+      "id": "KONKURS-01",
+      "title": "Bramka konfiguracji przed exec LinuxCNC",
+      "parents": [
+        "061",
+        "070"
+      ],
+      "status": "done",
+      "progress": "PR #93 scalony: bramka profilu i ograniczony audyt HAL.",
+      "remaining": [],
+      "evidence": [
+        "prompts/konkurs-2026-10/raporty/01.md"
+      ],
+      "aliases": [
+        "Konkurs-01"
+      ],
+      "prompt": "prompts/konkurs-2026-10/01-bezpieczenstwo.md"
+    },
+    {
+      "id": "KONKURS-02",
+      "title": "Procedura i audyt odbioru stanowiska",
+      "parents": [
+        "026",
+        "068",
+        "072",
+        "082"
+      ],
+      "status": "done",
+      "progress": "PR #94 scalony: procedura i dowody; odbiór A3 FAIL OD-01, T1–T7 otwarte.",
+      "remaining": [],
+      "evidence": [
+        "prompts/konkurs-2026-10/raporty/02.md"
+      ],
+      "prompt": "prompts/konkurs-2026-10/02-odbior-stanowiska.md"
+    },
+    {
+      "id": "KONKURS-03",
+      "title": "Audyt luk i odrzucanie NaN/inf",
+      "parents": [
+        "010",
+        "061",
+        "066"
+      ],
+      "status": "done",
+      "progress": "PR #95 scalony: odrzucanie NaN/inf; real mapping i geometria ATC nadal otwarte.",
+      "remaining": [],
+      "evidence": [
+        "raporty/03.md"
+      ],
+      "prompt": "prompts/konkurs-2026-10/03-pokrycie-wymagan.md"
+    },
+    {
+      "id": "KONKURS-04",
+      "title": "Monitor skórek read-only",
+      "parents": [
+        "028",
+        "037"
+      ],
+      "status": "done",
+      "progress": "PR #96 scalony: odczyt NML; nie kończy SKIN-02/04…06.",
+      "remaining": [],
+      "evidence": [
+        "raporty/04.md"
+      ],
+      "aliases": [
+        "K04"
+      ],
+      "prompt": "prompts/konkurs-2026-10/04-integracja-skorek.md"
+    },
+    {
+      "id": "ISO-INTEGRATION",
+      "title": "Bramka sim/Plant i monitor w obrazie ISO",
+      "parents": [
+        "077"
+      ],
+      "status": "done",
+      "progress": "PR #97 scalony: integracja menu/launchera i walidacja budowy bez publikacji.",
+      "remaining": [],
+      "evidence": [
+        "docs/DZIENNIK.md",
+        ".github/workflows/iso.yml"
+      ],
+      "aliases": [
+        "K05"
+      ]
+    },
+    {
+      "id": "ISO-ACCEPTANCE",
+      "title": "Odbiór i publikacja obrazu",
+      "parents": [
+        "077",
+        "078"
+      ],
+      "status": "acceptance",
+      "progress": "Implementacja ISO istnieje.",
+      "remaining": [
+        "Zweryfikować obraz main, SHA-256, live/instalację; publikacja ręczna zgodnie z D39."
+      ],
+      "evidence": [
+        "tools/iso/build.sh",
+        ".github/workflows/iso.yml"
+      ]
+    },
+    {
+      "id": "OD-01",
+      "title": "Macierz Plant nie może przechodzić z nieoczekiwaną kolizją",
+      "parents": [
+        "024",
+        "066",
+        "072",
+        "082"
+      ],
+      "status": "planned",
+      "progress": "Audyt konkursu 02 wykazał CRASH/COVER_CRASH mimo zielonego smoke.",
+      "remaining": [
+        "Dodać kryteria kolizji i uzyskać poprawny odbiór A3."
+      ],
+      "evidence": [
+        "prompts/konkurs-2026-10/raporty/02.md"
+      ]
+    },
+    {
+      "id": "EDITOR-VALIDATION",
+      "title": "Walidacja bieżącej treści i wyszukiwanie",
+      "parents": [
+        "044",
+        "047"
+      ],
+      "status": "in_progress",
+      "progress": "Otwarty PR #98 na oddzielnej gałęzi; nie jest częścią sprawdzonego main.",
+      "remaining": [
+        "Odbiór CI i scalenie PR #98; nie zaliczać jako wdrożone."
+      ],
+      "evidence": [
+        "https://github.com/anonimov94/linumeRT/pull/98"
+      ]
+    },
+    {
+      "id": "LEGACY-RUNTIME",
+      "title": "Diagnostyka uruchomień z dawnych promptów startowych",
+      "parents": [
+        "017",
+        "025",
+        "026",
+        "070",
+        "077",
+        "082"
+      ],
+      "status": "partial",
+      "progress": "Testy runtime i launchery rozwijano później; stare listy nie są nowym harmonogramem.",
+      "remaining": [
+        "Rozliczyć niepotwierdzone kryteria: 10× LRT-NET, długie blokady GUI/heartbeat i VirtualBox na docelowym stanowisku."
+      ],
+      "evidence": [
+        "prompts/START-CODEX-HMI.md",
+        "prompts/START-CODEX-LINUX.md"
+      ]
+    }
+  ]
+}

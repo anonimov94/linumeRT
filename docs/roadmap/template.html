@@ -1,0 +1,70 @@
+<!doctype html>
+<!-- Szablon widoku; statusy i treść pochodzą wyłącznie z plan.json. Model-Author: Codex. -->
+<html lang="pl">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>linumeRT — wspólna roadmapa</title>
+<style>
+:root{color-scheme:dark;font:16px system-ui;background:#111820;color:#edf3f6}
+body{max-width:1200px;margin:auto;padding:24px}a{color:#65ddcf}h1,h2{color:#65ddcf}
+nav,.toolbar{display:flex;gap:16px;flex-wrap:wrap;align-items:center;margin:20px 0}
+input,select,button{font:inherit;color:inherit;background:#202e3a;border:1px solid #526675;padding:10px;border-radius:5px}
+article{background:#1a2530;border:1px solid #3b4d5b;border-radius:8px;padding:18px;margin:14px 0}
+article h3{margin:0 0 10px}.status{font-weight:bold;color:#ffd479}.done .status{color:#65ddcf}
+small{color:#b6c7d3}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#111820;padding:16px}
+summary{cursor:pointer;padding:8px 0}button{cursor:pointer}p{line-height:1.6}.stats{font-weight:bold}
+</style>
+<header><h1>linumeRT — wspólna roadmapa</h1>
+<p>Pierwotne 84 sesje M0–M6 wraz z późniejszymi rozszerzeniami. Numery sesji pozostają stałe.</p>
+<nav><a href="plan.json">Rejestr źródłowy</a><a href="PLAN.md">Pełny plan i dowody</a>
+<a href="README.md">Zasady aktualizacji</a><a href="../../prompts/README.md">Prompty</a></nav>
+<p id="stats" class="stats"></p>
+<p>Statusy pochodzą z repozytorium. Ukończony krok nie zamyka automatycznie nadrzędnej sesji,
+bramki ani odbioru sprzętu. Dane przeglądarki nie zmieniają postępu projektu.</p></header>
+<main><div class="toolbar"><label>Szukaj <input id="search" type="search"></label>
+<label>Kamień <select id="milestone"><option value="">Wszystkie</option></select></label>
+<label>Stan <select id="status"><option value="">Wszystkie</option></select></label></div>
+<div id="sessions"></div></main>
+<noscript>Lista bez JavaScript: <a href="PLAN.md">pełny plan</a>.</noscript>
+<!-- ROADMAP_DATA -->
+<script>
+'use strict';
+const plan = JSON.parse(document.getElementById('plan').textContent);
+const labels = plan.policy.status_labels;
+const $ = id => document.getElementById(id);
+const escapeHTML = value => String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const href = ref => ref.startsWith('https://') ? ref : '../../' + ref;
+const links = row => [...row.evidence, ...(row.prompt ? [row.prompt] : [])].map(ref =>
+  `<a href="${escapeHTML(href(ref))}">${escapeHTML(ref)}</a>`).join(' · ');
+for (const m of plan.milestones) $('milestone').add(new Option(m.id + ' — ' + m.name, m.id));
+for (const [status, label] of Object.entries(labels)) $('status').add(new Option(label, status));
+$('stats').textContent = 'Stan na ' + plan.updated + ' · sesje: ' + Object.entries(labels).map(([status,label]) =>
+  label + ': ' + plan.sessions.filter(s => s.status === status).length).join(' · ') +
+  ' · rozszerzenia: ' + plan.extensions.length;
+function card(row, extension=false) {
+  const aliases = row.aliases?.length ? ' · dawne ID: ' + row.aliases.join(', ') : '';
+  return `<article class="${escapeHTML(row.status)}"><h3>${escapeHTML(row.id)} — ${escapeHTML(row.title)}</h3>
+    <div class="status">${escapeHTML(labels[row.status])}</div>
+    <small>${extension ? 'Sesje nadrzędne: ' + row.parents.join(', ') : row.milestone}${escapeHTML(aliases)}</small>
+    <p>${escapeHTML(row.progress)}</p>
+    ${row.remaining.length ? '<p><b>Pozostaje:</b> ' + escapeHTML(row.remaining.join(' ')) + '</p>' : ''}
+    ${row.gate ? '<p>Bramka automatyczna: ' + escapeHTML(row.gate) + '; odbiór stanowiska osobno.</p>' : ''}
+    <p>${links(row)}</p>
+    ${row.prompt_text ? '<details><summary>Prompt</summary><pre>' + escapeHTML(row.prompt_text) + '</pre></details>' : ''}
+    </article>`;
+}
+function render() {
+  const query = $('search').value.trim().toLocaleLowerCase('pl');
+  const status = $('status').value, milestone = $('milestone').value;
+  const matches = row => (!status || row.status === status) &&
+    (!query || [row.id,row.title,row.progress,...row.remaining,...(row.aliases || [])].join(' ').toLocaleLowerCase('pl').includes(query));
+  const sessions = plan.sessions.filter(s => (!milestone || s.milestone === milestone) && matches(s));
+  const parentIds = new Set(plan.sessions.filter(s => !milestone || s.milestone === milestone).map(s => s.id));
+  const extensions = plan.extensions.filter(s => s.parents.some(id => parentIds.has(id)) && matches(s));
+  $('sessions').innerHTML = '<h2>Sesje pierwotne</h2>' + (sessions.map(s => card(s)).join('') || '<p>Brak wyników.</p>') +
+    '<h2>Rozszerzenia przypisane do sesji</h2>' + (extensions.map(s => card(s,true)).join('') || '<p>Brak wyników.</p>');
+}
+for (const id of ['search','milestone','status']) $(id).addEventListener('input',render);
+render();
+</script>
+</html>
