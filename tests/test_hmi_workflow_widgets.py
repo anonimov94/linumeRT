@@ -920,3 +920,63 @@ def test_editor_axis_limit_check_runs_off_the_gui_thread(page_env, tmp_path, mon
     assert "Ruchy poza limitami" in editor.validation.text()
     assert editor.editor.textCursor().blockNumber() == 2 and not action.mock_calls
     editor.deleteLater()
+
+
+def test_origin_wizard_moves_zero_not_stock_and_checks_limits(page_env):
+    from linumert.programs.workpiece import Workpiece
+    from PyQt5 import QtCore, QtTest
+
+    _home, _shell, _status, action = page_env
+    module = importlib.import_module("linumert_origin_wizard")
+    spec = Workpiece(x=100, y=60, height=30, anchor="top-front-left", position=(100, 100, -50))
+    limits = {"X": (0.0, 600.0), "Y": (0.0, 400.0), "Z": (-120.0, 0.0)}
+    wizard = module.OriginWizard(spec, limits, lambda: (300.0, 200.0, -40.0))
+    def flat(b):
+        return [*b[0], *b[1]]
+
+    bounds = flat(spec.bounds())
+    wizard.view.resize(400, 300)
+    rect = wizard.view._rect()
+    QtTest.QTest.mouseClick(wizard.view, QtCore.Qt.LeftButton,
+                            pos=wizard.view._pos(rect, 1, 1).toPoint())
+    assert wizard.spec.anchor == "top-back-right"
+    assert wizard.spec.position == pytest.approx((200, 160, -50))
+    assert flat(wizard.spec.bounds()) == pytest.approx(bounds)  # przygotówka stoi w miejscu
+    wizard.bottom_button.setChecked(True)
+    assert wizard.spec.anchor == "bottom-back-right"
+    assert wizard.spec.position == pytest.approx((200, 160, -80))
+    assert flat(wizard.spec.bounds()) == pytest.approx(bounds)
+    wizard.corner[0].setValue(150)  # przesunięcie przygotówki o 50 mm w X
+    assert wizard.spec.bounds()[0][0] == pytest.approx(150)
+    assert "mieści" in wizard.result.text()
+    wizard.corner[0].setValue(590)
+    assert "PROBLEM" in wizard.result.text() and "osi X" in wizard.result.text()
+    wizard.tool_button.click()
+    assert wizard.spec.position == pytest.approx((300, 200, -40))
+    assert "Zero w G53: X 300.000" in wizard.result.text()
+    wizard.use_button.click()
+    assert wizard.result_spec is wizard.spec and not action.mock_calls
+    wizard.deleteLater()
+
+
+def test_zero_detalu_wizard_fills_form_without_machine_commands(page_env, monkeypatch):
+    from PyQt5 import QtWidgets
+
+    _home, shell, _status, action = page_env
+    shell.c = importlib.import_module("linumert_shell_model").load_tokens()["kolory"]
+    wizard_module = importlib.import_module("linumert_origin_wizard")
+    module = importlib.import_module("linumert_offsets_page")
+    page = module.OffsetsPage(shell)
+
+    def fake_exec(self):
+        self.pick(1, -1)
+        self.use_button.click()
+        return QtWidgets.QDialog.Accepted
+
+    monkeypatch.setattr(wizard_module.OriginWizard, "exec_", fake_exec)
+    before = [*page.build_spec().bounds()[0], *page.build_spec().bounds()[1]]
+    page.open_wizard()
+    assert page.anchor.currentData() == "top-front-right"
+    assert [*page.build_spec().bounds()[0], *page.build_spec().bounds()[1]] == pytest.approx(before)
+    assert "Kreator ustawił" in page.message.text() and not action.mock_calls
+    page.close()

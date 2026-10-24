@@ -9,6 +9,28 @@ from math import isfinite
 
 import numpy as np
 
+ANCHOR_TITLES = {
+    "top-center": "Środek górnej powierzchni", "bottom-center": "Środek dolnej powierzchni",
+    "top-front-left": "Lewy przedni narożnik na górze",
+    "top-front-right": "Prawy przedni narożnik na górze",
+    "top-back-left": "Lewy tylny narożnik na górze",
+    "top-back-right": "Prawy tylny narożnik na górze",
+    "bottom-front-left": "Lewy przedni narożnik na dole",
+    "bottom-front-right": "Prawy przedni narożnik na dole",
+    "bottom-back-left": "Lewy tylny narożnik na dole",
+    "bottom-back-right": "Prawy tylny narożnik na dole",
+}
+ANCHOR_NAMES = tuple(ANCHOR_TITLES)
+
+
+def anchor_name(face, fx, fy):
+    """Nazwa punktu zera: face top/bottom, fx -1/0/1 (lewo/środek/prawo), fy -1/0/1 (przód/tył)."""
+    if fx == 0 and fy == 0:
+        return f"{face}-center"
+    if fx == 0 or fy == 0:
+        raise ValueError("Zero na przygotówce: narożnik albo środek")
+    return f"{face}-{'front' if fy < 0 else 'back'}-{'left' if fx < 0 else 'right'}"
+
 
 @dataclass(frozen=True)
 class Workpiece:
@@ -32,7 +54,7 @@ class Workpiece:
             raise ValueError("Wymiary muszą być dodatnimi liczbami do 100000 mm")
         if self.shape == "tube" and self.bore >= self.diameter:
             raise ValueError("Otwór rury musi być mniejszy niż średnica zewnętrzna")
-        if self.anchor not in ("top-center", "bottom-center", "top-front-left"):
+        if self.anchor not in ANCHOR_NAMES:
             raise ValueError("Nieznany punkt zerowy przygotówki")
         if self.offset not in ("G54", "G55", "G56", "G57", "G58", "G59"):
             raise ValueError("Wybierz układ od G54 do G59")
@@ -75,13 +97,34 @@ class Workpiece:
                 profile = [(0, outer[0][1]), *outer, (0, outer[-1][1])]
             vertices, faces = revolve(profile, segments)
         low, high = vertices.min(axis=0), vertices.max(axis=0)
-        if self.anchor == "bottom-center":
-            anchor = np.array([0, 0, low[2]])
-        elif self.anchor == "top-front-left":
-            anchor = np.array([low[0], low[1], high[2]])
-        else:
-            anchor = np.array([0, 0, high[2]])
+        face, _, rest = self.anchor.partition("-")
+        pick_x = {"left": low[0], "right": high[0]}
+        pick_y = {"front": low[1], "back": high[1]}
+        parts = rest.split("-")
+        anchor = np.array([pick_x.get(parts[-1], 0.0) if len(parts) == 2 else 0.0,
+                           pick_y.get(parts[0], 0.0) if len(parts) == 2 else 0.0,
+                           high[2] if face == "top" else low[2]])
         return vertices - anchor + np.asarray(self.position), faces
+
+    def bounds(self):
+        """Najmniejszy i największy punkt przygotówki w G53 (mm): ((x, y, z), (x, y, z))."""
+        vertices, _faces = self.mesh()
+        return tuple(vertices.min(axis=0)), tuple(vertices.max(axis=0))
+
+    def fit_issues(self, limits):
+        """Komunikaty, gdy przygotówka lub jej zero wychodzą poza zakresy osi {oś: (min, max)}."""
+        low, high = self.bounds()
+        issues = []
+        for i, axis in enumerate("XYZ"):
+            if axis not in limits:
+                continue
+            lo, hi = limits[axis]
+            if low[i] < lo - 1e-6 or high[i] > hi + 1e-6:
+                issues.append(f"Przygotówka wychodzi poza zakres osi {axis} "
+                              f"({low[i]:.1f}…{high[i]:.1f} mm przy limitach {lo:.1f}…{hi:.1f})")
+            elif not lo - 1e-6 <= self.position[i] <= hi + 1e-6:
+                issues.append(f"Zero {axis} = {self.position[i]:.1f} mm jest poza zakresem osi")
+        return issues
 
 
 def revolve(profile, segments):

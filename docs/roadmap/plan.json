@@ -1765,6 +1765,27 @@
         "tests/test_hmi_workflow_widgets.py",
         "screens/linumert/linumert_program_editor.py"
       ]
+    },
+    {
+      "id": "ORIGIN-WIZARD",
+      "title": "Kreator zera detalu na przygotówce",
+      "parents": [
+        "033",
+        "054"
+      ],
+      "status": "partial",
+      "progress": "Przycisk 'Kreator zera detalu…' na stronie Zero detalu: klikalny widok przygotówki z góry (4 narożniki i środek, góra/dół), położenie przygotówki na stole (narożnik X/Y, wierzch Z), pobranie pozycji narzędzia jako zera, kontrola zakresów osi z INI; wynik trafia do formularza, osobny przycisk zapisuje G5x. 10 punktów zera w Workpiece (bounds, fit_issues); testy rdzenia i GUI (Debian 12), zrzut dialogu.",
+      "remaining": [
+        "Odbiór na pulpicie właściciela i na maszynie wirtualnej (G10 L2 po kreatorze).",
+        "Środki krawędzi, przygotówki obrócone i wizualne przesuwanie myszą w widoku 3D.",
+        "Powiązanie z linią ;@STOCK programu (ORIGIN/OFFSET) i sondowaniem narożnika (033)."
+      ],
+      "evidence": [
+        "screens/linumert/linumert_origin_wizard.py",
+        "core/linumert/programs/workpiece.py",
+        "tests/test_workpiece.py",
+        "tests/test_hmi_workflow_widgets.py"
+      ]
     }
   ]
 }

@@ -992,3 +992,10 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
 - Dowód w logu: druga instancja LinuxCNC dostała „tpmod/homemod/trivkins: already exists” (wspólne zasoby), po czym obie zostały zatrzymane.
 - Kontener ma teraz stałą nazwę `linumert-hmi`; starter odmawia drugiego startu komunikatem i podaje `podman stop linumert-hmi`. Tryb `--shell` bez blokady.
 - Test z atrapą podmana (nazwa kontenera, odmowa, brak `podman run`); 11 PASS. Nieprzetestowane na pulpicie właściciela.
+
+## ORIGIN-WIZARD — kreator zera detalu na przygotówce — 2026-10-24 · Claude
+- Model-Author: Claude. Polecenie właściciela: kreator wyboru punktu zera na przygotówce jak w programach CAM.
+- Rdzeń: `Workpiece` ma 10 punktów zera (narożniki i środek, góra/dół), `bounds()` i `fit_issues(limits)`; `anchor_name()` z kliknięcia.
+- GUI: „Kreator zera detalu…” w Zero detalu: widok z góry, klik punktu, narożnik i wierzch przygotówki na stole w G53, pobranie pozycji narzędzia jako zera, kontrola zakresów osi z INI.
+- Zmiana punktu zera nie rusza przygotówki (przelicza zero); przesunięcie narożnika przesuwa przygotówkę. Wynik trafia do formularza, G5x zapisuje osobny przycisk.
+- Testy: 65 PASS (rdzeń + GUI w Debianie 12), zrzut build/kreator/kreator.png. Do sprawdzenia na pulpicie.

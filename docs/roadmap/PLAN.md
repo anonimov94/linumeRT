@@ -147,6 +147,7 @@ Nie są kolejnym harmonogramem. Ich status dotyczy tylko wskazanego kroku.
 | LEGACY-RUNTIME | 017, 025, 026, 070, 077, 082 | Diagnostyka uruchomień z dawnych promptów startowych | częściowe |
 | ROADMAP-UNIFICATION | 001, 084 | Jeden rejestr planu i migracja statusów | ukończone |
 | LIMITS-PREFLIGHT | 031, 051 | Kontrola limitów osi przed startem programu | częściowe |
+| ORIGIN-WIZARD | 033, 054 | Kreator zera detalu na przygotówce | częściowe |
 
 ## Postęp, pozostały zakres i dowody
 
@@ -983,4 +984,12 @@ Pozostaje: 10× testy Plant z LinuxCNC: 1 z 10 przebiegów PASS (13/13), reszta 
 Pozostaje: Łuki między punktami końcowymi, obrót XY i limity osi obrotowych nie są sprawdzane. Wywołanie kontroli automatycznie przy wczytaniu programu do AUTO oraz odbiór na pulpicie właściciela.
 
 Źródła: [core/linumert/programs/limits.py](../../core/linumert/programs/limits.py), [tests/test_limits.py](../../tests/test_limits.py), [tests/test_hmi_workflow_widgets.py](../../tests/test_hmi_workflow_widgets.py), [screens/linumert/linumert_program_editor.py](../../screens/linumert/linumert_program_editor.py).
+
+### ORIGIN-WIZARD — Kreator zera detalu na przygotówce
+
+**częściowe**. Przycisk 'Kreator zera detalu…' na stronie Zero detalu: klikalny widok przygotówki z góry (4 narożniki i środek, góra/dół), położenie przygotówki na stole (narożnik X/Y, wierzch Z), pobranie pozycji narzędzia jako zera, kontrola zakresów osi z INI; wynik trafia do formularza, osobny przycisk zapisuje G5x. 10 punktów zera w Workpiece (bounds, fit_issues); testy rdzenia i GUI (Debian 12), zrzut dialogu.
+
+Pozostaje: Odbiór na pulpicie właściciela i na maszynie wirtualnej (G10 L2 po kreatorze). Środki krawędzi, przygotówki obrócone i wizualne przesuwanie myszą w widoku 3D. Powiązanie z linią ;@STOCK programu (ORIGIN/OFFSET) i sondowaniem narożnika (033).
+
+Źródła: [screens/linumert/linumert_origin_wizard.py](../../screens/linumert/linumert_origin_wizard.py), [core/linumert/programs/workpiece.py](../../core/linumert/programs/workpiece.py), [tests/test_workpiece.py](../../tests/test_workpiece.py), [tests/test_hmi_workflow_widgets.py](../../tests/test_hmi_workflow_widgets.py).
 
