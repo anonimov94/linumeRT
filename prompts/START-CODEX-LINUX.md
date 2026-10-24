@@ -1,5 +1,10 @@
 # Prompt startowy dla Codex CLI na laptopie z Linuksem (EndeavourOS)
 
+> Historyczne zlecenie, nie aktualna kolejka ani zasady pracy. Nierozliczone kryteria
+> przeniesiono do `LEGACY-RUNTIME` i sesji nadrzędnych we
+> [wspólnym rejestrze](../docs/roadmap/plan.json). Nową sesję zacznij od
+> [promptu wejściowego](../docs/PROMPT_NOWEJ_SESJI.md).
+
 Model-Author: Claude · 2026-10-19. Właściciel uruchamia Codex CLI lokalnie:
 
 ```bash

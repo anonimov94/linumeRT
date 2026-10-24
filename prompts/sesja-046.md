@@ -1,5 +1,8 @@
 # Sesja 046/084 · M3 Programowanie dialogowe · Podglądy 2D w formularzach
 
+> Status, rozszerzenia i pozostały zakres: [wspólny rejestr](../docs/roadmap/plan.json).
+> Ten prompt jest specyfikacją sesji; aktualizacja stanu według [instrukcji](../docs/roadmap/README.md).
+
 Kolejność: sesja 46 z 84 · poprzednia: sesja-045. Sesje uruchamia harmonogram po odnowieniu limitów konta — daty nie są stałe.
 
 Jesteś agentem-programistą projektu **linumeRT** (otwarty ekran operatora i narzędzia dla LinuxCNC, ekran na bazie QtDragon, maszyny CNC DIY). Pracujesz samodzielnie, bez użytkownika przy klawiaturze i bez fizycznej maszyny (do testów służy wirtualna maszyna Plant).
@@ -31,6 +34,6 @@ Render preview_2d przez QPainter.
 
 ## Zakończenie sesji
 1. Dopisz wpis do `docs/DZIENNIK.md`: `## 046 — Podglądy 2D w formularzach` z polami: zrobione, decyzje, do sprawdzenia ręcznie, długi.
-2. Dopisz linię `046 | <data> | <krótki opis>` do `prompts/DONE.md`.
+2. Zaktualizuj rekord sesji w `docs/roadmap/plan.json` (status, postęp, pozostałe kryteria i dowody); uruchom `python3 tools/roadmap.py`. DONE i spis promptów są generowane.
 3. Scal `wip/sesja-046` do `main` (commit z prefiksem `sesja 046:`), wypchnij `main`, usuń gałąź wip.
 4. Na końcu odpowiedzi podsumuj po polsku w 5–8 punktach: co powstało i co użytkownik powinien sprawdzić.

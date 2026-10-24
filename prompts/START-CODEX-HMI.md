@@ -1,5 +1,10 @@
 # Prompt startowy dla Codex: trudne problemy po HMI-PoC i D35
 
+> Historyczne zlecenie, nie aktualna kolejka ani zasady pracy. Nierozliczone kryteria
+> przeniesiono do `LEGACY-RUNTIME` i sesji nadrzędnych we
+> [wspólnym rejestrze](../docs/roadmap/plan.json). Nową sesję zacznij od
+> [promptu wejściowego](../docs/PROMPT_NOWEJ_SESJI.md).
+
 Model-Author: Claude · 2026-10-19. Wklej Codexowi całość od linii „---”.
 
 ---

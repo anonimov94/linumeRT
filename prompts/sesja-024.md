@@ -1,5 +1,8 @@
 # Sesja 024/084 · M1 Wirtualna obrabiarka Plant · Plant: scenariusze i raport prototypu
 
+> Status, rozszerzenia i pozostały zakres: [wspólny rejestr](../docs/roadmap/plan.json).
+> Ten prompt jest specyfikacją sesji; aktualizacja stanu według [instrukcji](../docs/roadmap/README.md).
+
 Kolejność: sesja 24 z 84 · poprzednia: sesja-023. Sesje uruchamia harmonogram po odnowieniu limitów konta — daty nie są stałe.
 
 Jesteś agentem-programistą projektu **linumeRT** (otwarty ekran operatora i narzędzia dla LinuxCNC, ekran na bazie QtDragon, maszyny CNC DIY). Pracujesz samodzielnie, bez użytkownika przy klawiaturze i bez fizycznej maszyny (do testów służy wirtualna maszyna Plant).
@@ -34,6 +37,6 @@ Runner scenariuszy i raport HTML.
 
 ## Zakończenie sesji
 1. Dopisz wpis do `docs/DZIENNIK.md`: `## 024 — Plant: scenariusze i raport prototypu` z polami: zrobione, decyzje, do sprawdzenia ręcznie, długi.
-2. Dopisz linię `024 | <data> | <krótki opis>` do `prompts/DONE.md`.
+2. Zaktualizuj rekord sesji w `docs/roadmap/plan.json` (status, postęp, pozostałe kryteria i dowody); uruchom `python3 tools/roadmap.py`. DONE i spis promptów są generowane.
 3. Scal `wip/sesja-024` do `main` (commit z prefiksem `sesja 024:`), wypchnij `main`, usuń gałąź wip.
 4. Na końcu odpowiedzi podsumuj po polsku w 5–8 punktach: co powstało i co użytkownik powinien sprawdzić.

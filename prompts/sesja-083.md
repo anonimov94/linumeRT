@@ -1,5 +1,8 @@
 # Sesja 083/084 · M6 Wtyczki, instalator, alfa · Wydanie v0.5.0-alpha
 
+> Status, rozszerzenia i pozostały zakres: [wspólny rejestr](../docs/roadmap/plan.json).
+> Ten prompt jest specyfikacją sesji; aktualizacja stanu według [instrukcji](../docs/roadmap/README.md).
+
 Kolejność: sesja 83 z 84 · poprzednia: sesja-082. Sesje uruchamia harmonogram po odnowieniu limitów konta — daty nie są stałe.
 
 Jesteś agentem-programistą projektu **linumeRT** (otwarty ekran operatora i narzędzia dla LinuxCNC, ekran na bazie QtDragon, maszyny CNC DIY). Pracujesz samodzielnie, bez użytkownika przy klawiaturze i bez fizycznej maszyny (do testów służy wirtualna maszyna Plant).
@@ -30,6 +33,6 @@ Notatki wydania.
 
 ## Zakończenie sesji
 1. Dopisz wpis do `docs/DZIENNIK.md`: `## 083 — Wydanie v0.5.0-alpha` z polami: zrobione, decyzje, do sprawdzenia ręcznie, długi.
-2. Dopisz linię `083 | <data> | <krótki opis>` do `prompts/DONE.md`.
+2. Zaktualizuj rekord sesji w `docs/roadmap/plan.json` (status, postęp, pozostałe kryteria i dowody); uruchom `python3 tools/roadmap.py`. DONE i spis promptów są generowane.
 3. Scal `wip/sesja-083` do `main` (commit z prefiksem `sesja 083:`), wypchnij `main`, usuń gałąź wip.
 4. Na końcu odpowiedzi podsumuj po polsku w 5–8 punktach: co powstało i co użytkownik powinien sprawdzić.

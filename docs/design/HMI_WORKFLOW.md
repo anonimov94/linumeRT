@@ -1,22 +1,14 @@
 # linumeRT HMI — architektura ekranów workflow (projekt v0.1)
 
+> Specyfikacja i historia realizacji; nie jest osobnym harmonogramem.
+> Bieżący status, pozostały zakres i powiązania (HMI-01…06 i sesje 027–038):
+> [wspólna roadmapa](../roadmap/PLAN.md), [rejestr](../roadmap/plan.json).
+> Niższe datowane opisy stanu są zapisem historycznym; status aktualizuj wyłącznie w rejestrze.
+
 Status: własne widoki operatora na QtVCP / LinuxCNC 2.9. Kontrakt obsługi i dalszych zmian:
 [`OBSLUGA_OPERATORA.md`](../OBSLUGA_OPERATORA.md), D36/D37. Sprzęt fizyczny niezweryfikowany.
 
-## Stan realizacji
-
-Dostępne: Start, Maszyna, Bazowanie, Zero detalu 3D, Narzędzia, Program (wybór i podgląd),
-Symulacja, Produkcja i Diagnostyka. Bazowy QtDragon jest osobną stroną zaplecza.
-Na samej górze: trzy alarmy i Reset; niżej stan maszyny i tryb JOG/MDI/AUTO.
-Maszyna i Symulacja współdzielą panel JOG/MDI, M3/M4/M5 i potwierdzanej wymiany M6.
-Specjalista umożliwia wolne wycofanie; fizyczne safety i limity LinuxCNC pozostają nadrzędne.
-Wirtualny bliźniak jest jawnie oznaczony `VIRTUAL_MODE=1`; ma reset materiału i HOME.
-
 ## Cel
-Stan po integracji PR #45/#46 (2026-10-19): własne widoki Bazowanie (stawy i czujniki),
-Program (wybór, podgląd i jawne wczytanie), Symulacja i Narzędzia. Własne Zero detalu oferuje
-maszynę 3D, cztery przygotówki, profil odlewu i G54–G59 ([instrukcja](../ZERO_DETALU.md)).
-Edycja i sprawdzanie G-code w widoku Program pozostają kolejnymi krokami.
 
 Rozdzielić monolityczny QtDragon na dedykowane widoki operatora bez przepisywania sterowania LinuxCNC. Nawigacja nie może wykonywać komend ruchu ani zmieniać trybu pracy automatycznie.
 

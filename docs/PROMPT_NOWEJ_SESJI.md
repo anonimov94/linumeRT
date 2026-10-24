@@ -1,7 +1,7 @@
 # Prompt startowy sesji (Claude lub Codex)
 
-Model-Author: Claude · 2026-10-18. Stały tekst: **nie zawiera stanu** (stan jest w
-[`NASTEPNA_SESJA.md`](NASTEPNA_SESJA.md)). Zmieniaj go tylko wtedy, gdy zmieniają się zasady.
+Model-Author: Claude · 2026-10-18. Stały tekst: **nie zawiera stanu** (statusy są w
+[`roadmap/plan.json`](roadmap/plan.json), przekazanie w [`NASTEPNA_SESJA.md`](NASTEPNA_SESJA.md)). Zmieniaj go tylko wtedy, gdy zmieniają się zasady.
 
 Wklej na początku sesji:
 
@@ -13,8 +13,13 @@ Wklej na początku sesji:
 2. `docs/NASTEPNA_SESJA.md`: linia `Tura:`, stan PR, następna praca, środowisko, otwarte sprawy.
 3. `prompts/LOCK` i otwarte PR (`gh pr list`). Nie wchodź w świeżą turę drugiego modelu (≤ 2 h od pushu).
 4. `docs/DECYZJE.md` (część dotycząca zakresu sesji) i ostatnie trzy wpisy `docs/DZIENNIK.md`.
-5. Prompt sesji `prompts/sesja-NNN.md`, gdzie NNN to najniższy numer nieobecny w `prompts/DONE.md`,
-   chyba że `NASTEPNA_SESJA.md` §3 wskazuje inaczej. Jeśli istnieje gałąź `wip/sesja-NNN`, kontynuuj ją.
+5. Przeczytaj `docs/roadmap/plan.json`: jedyne źródło statusów i powiązań zakresu. Wybierz najniższą
+   nieukończoną sesję 001–084, jej rozszerzenia i prompt `prompts/sesja-NNN.md`, uwzględniając zależności
+   oraz bieżące polecenie właściciela. DONE jest widokiem generowanym, nie harmonogramem.
+   Zastosuj sekcję „Lekcja projektu — pilnowanie założeń i kolejności” w `WSPOLPRACA_MODELI.md`.
+   Przed kodowaniem podaj ID pierwotnej sesji, kryterium/bramkę, otwarte zależności i mały rezultat.
+   Nowy pomysł zapisany jako rozszerzenie nie zmienia kolejności; jawne polecenie właściciela
+   odnotuj wraz z wpływem na wcześniejsze bramki. Jeśli istnieje gałąź `wip/sesja-NNN`, kontynuuj ją.
 6. Zajmij turę: `prompts/LOCK` = `<model> · sesja NNN · <UTC> · <opis>`, linia `Tura:` = w toku; commit, push.
 
 ## 2. Praca
@@ -28,11 +33,13 @@ Wklej na początku sesji:
 
 ## 3. Zamknięcie sesji (obowiązkowe)
 1. `make lint test` (oraz `test-c`, testy `-m linuxcnc`, jeśli dotyczy) zielone; wszystko wypchnięte; PR gotowy.
-2. Wpis w `docs/DZIENNIK.md` (format w nagłówku pliku, na końcu) i linia w `prompts/DONE.md` (we właściwym
-   miejscu według numeru); decyzje w `docs/DECYZJE.md` (sekcja sesji, według numeru).
-3. `docs/NASTEPNA_SESJA.md`: §1–§5 zaktualizowane, „Stan zatrzymania” wyczyszczony do bieżącej tury,
+2. Wpis w `docs/DZIENNIK.md` i aktualizacja właściwego rekordu `docs/roadmap/plan.json`
+   (status, postęp, pozostały zakres i dowody), następnie `python3 tools/roadmap.py`;
+   decyzje w `docs/DECYZJE.md`. DONE, spis promptów i widoki roadmapy są generowane.
+3. `docs/NASTEPNA_SESJA.md`: przekazanie i środowisko zaktualizowane, bez powielania statusów roadmapy;
    `Tura:` = oddana; `prompts/LOCK` pusty; blokady zasobów zwolnione.
-4. Użytkownikowi: co powstało, link do PR, co sprawdzić ręcznie, jeden następny krok.
+4. Użytkownikowi: jakie kryterium pierwotnego planu domknięto, co nadal pozostaje,
+   link do PR, co sprawdzić ręcznie i jeden następny krok zgodny z kolejnością planu.
 
 Sesję przerwaną w połowie opisz dodatkowo w `prompts/START-NNN.md` (kroki do zrobienia); po jej ukończeniu
 przenieś plik do `prompts/archiwum/`.
