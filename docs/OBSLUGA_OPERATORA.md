@@ -289,3 +289,14 @@ wcześniejszych zmian już zapisanych w bazie.
 Jeśli wybrany rekord zniknie z bazy podczas dialogu albo nie można go odczytać,
 ekran zachowuje dotychczasowy formularz i pokazuje powód. Po udanym zapisie klonu
 lub nowego T zaznaczenie dotyczy zapisanego numeru. Model-Author: Codex.
+
+## Edycja kopii G-code
+W Program wybierz plik i „Edytuj kopię…”. „Sprawdź bieżącą treść” kontroluje także
+niezapisane zmiany (do 64 KiB). Kliknięcie błędu lub Enter na liście przenosi kursor
+do jego pozycji. Każda zmiana tekstu usuwa poprzedni wynik. To kontrola składni,
+nie semantyki LinuxCNC ani bezpieczeństwa ruchu.
+Ctrl+F wybiera pole wyszukiwania. Wyszukiwanie jest dosłowne, rozróżnia wielkość
+liter i wraca na początek po ostatnim trafieniu. „Zamień” zmienia zaznaczone trafienie;
+bez trafienia najpierw je wyszukuje. „Zamień wszystkie” działa w całej kopii, również
+w komentarzach. Ctrl+Z w edytorze cofa całą zamianę. Wynik zamiany musi mieścić się
+w 256 KiB. Zapis nadal tworzy nową kopię, nie uruchamia ani nie wczytuje programu.
