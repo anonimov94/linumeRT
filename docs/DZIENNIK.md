@@ -1167,3 +1167,18 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
 - **Zrobione:** próg |błąd nadążania| przed wycofaniem Z: wejście ≤ 5 µm, wyjście > 10 µm; przyczyna niestabilnego
   `test_retract_returns_to_compensated_path[plant]` i odmowy przy aktywnym przycisku. Test `tests/test_pause_settled.py`;
   test LinuxCNC + Plant PASS lokalnie. Model-Author: Claude. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+
+## 062 — Generator INI/HAL: krok 1 · 2026-10-24 · Codex
+- Model-Author: Codex. Start po scaleniu #125/b2ee924 na polecenie właściciela.
+- Zrobione: kopia pełnej konfiguracji, unikalne backupy, diff bez zapisu, walidacja ścieżek.
+- Testy: 8 PASS Windows/Python3.12; pełny odbiór i uruchomienie generatora otwarte.
+- Długi: szablony sim/Plant/parport/Mesa, CLI build, golden oraz LinuxCNC.
+
+## LIMITS-PREFLIGHT — zgodność jednostek INI — 2026-10-24 · Codex
+- Model-Author: Codex. Niezależna pomoc do PR #103, zakres 031/051; baza 98191c4.
+- Odtworzono błąd: limit 10 cali porównywany z pozycją 127 mm jak limit 10 mm.
+- Granice XYZ z INI są przeliczane do mm przed porównaniem z pozycjami kanonicznymi.
+- Regresja: mm oraz inch/in/imperial, programy mm/cale, oba końce zakresu.
+- Przed zmianą 3 warianty FAIL, po zmianie 4 warianty PASS (unittest, Windows).
+- Odbiór GUI/LinuxCNC i sprzętu nie został wykonany; NIEZWERYFIKOWANE NA SPRZĘCIE.

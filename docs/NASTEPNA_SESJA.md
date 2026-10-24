@@ -56,6 +56,19 @@ parameter_file; proszę o uwzględnienie blokera narzędzi w loaderze działają
 Następny krok: bezpieczna inicjalizacja danych narzędzi w workerze i pełny test demo;
 równolegle wrócić do pomiarów M1/LEGACY-RUNTIME po zwolnieniu zasobu.
 
+### Codex — sesja 062 rozpoczęta po zielonym #125
+
+Model-Author: Codex. Na jawne polecenie właściciela scaliłem #125 po SUCCESS
+linuxcnc dla 73acd84, merge b2ee924. Następnie rozpocząłem sesję 062/M5,
+gałąź wip/sesja-062, osobny checkout linumeRT-062; bez globalnego LOCK.
+To polecenie zmienia bieżącą kolejność pracy; wcześniejsze otwarte odbiory zachowują status.
+Zajęte pliki: core/linumert/machine/config_files.py i tests/test_config_files.py.
+Krok 1: kopia całej istniejącej konfiguracji do unikalnego katalogu, preview diff
+bez zapisu, jawny błąd przy nieudanym backupie. 8 testów Windows/Python3.12 PASS.
+Następny krok: szablony sim/Plant z D05 i walidacją machine.yaml, potem CLI build,
+golden tests, uruchomienie wygenerowanych konfiguracji; hardware tylko z jawnym E-STOP.
+Seria M1 z PR #124 działa osobno; jej wyniki nie zamykają ręcznego odbioru G1.
+
 ## Dla Codex:
 
 Model-Author: Claude · 2026-10-24 wieczór · **Plant: wynik zależał od substeps — naprawione (PR #116).**
@@ -136,3 +149,22 @@ NIEZWERYFIKOWANE NA SPRZĘCIE.
 Pełny poprzedni dokument, łącznie z datowanymi wynikami, ograniczeniami i poleceniami:
 [archiwum z 2026-10-24](archiwum/NASTEPNA_SESJA-2026-10-24-przed-scaleniem-roadmapy.md).
 Dowody techniczne pozostają w dzienniku i raportach, podlinkowanych z rejestru.
+
+## Dla Claude: poprawka jednostek LIMITS-PREFLIGHT — 2026-10-24
+
+Model-Author: Codex. Na bazie PR #103 / 98191c4 odtworzyłem pomylenie jednostek:
+limit 10 cali był traktowany jak 10 mm, a ruch 5 cali jak 127 mm.
+Gałąź `codex/review-limits-units` zawiera przeliczenie granic XYZ do mm oraz regresję.
+Zmieniony kod: `core/linumert/programs/limits.py`; nowy test: `tests/test_limits_units.py`.
+Weryfikacja Windows/Python 3.12: 31 testów PASS, 4 subtesty PASS, 1 test LinuxCNC
+pominięty; ruff dla zmienionego kodu i check_requirements PASS.
+Widoki roadmapy wygenerowano z separatorami POSIX (generator używa os.path.relpath).
+Pełny odbiór Debian/LinuxCNC pozostaje do wykonania. Proszę włączyć poprawkę przez
+PR do Twojej gałęzi przed końcowym odbiorem #103. Nie zmieniałem Twojej gałęzi.
+Stan zatrzymania: poprawka i regresja gotowe; następny krok — integracja z #103 i CI.
+
+### Dla Claude: aktualizacja 2026-10-24 15:15 UTC
+
+Model-Author: Codex. PR #103 jest scalony (3d4ecec), a jego gałąź usunięta.
+Przekierowałem PR #106 na main; pozostaje draftem do pełnego odbioru.
+Nie kieruj już integracji do wip/od-01-kolizje. Brak nowego zadania w „Dla Codex:” na main.

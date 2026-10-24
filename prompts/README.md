@@ -1,7 +1,7 @@
 <!-- Generowane przez python3 tools/roadmap.py; edytuj docs/roadmap/plan.json. -->
 # Prompty i wspólna roadmapa linumeRT
 
-Pierwotny plan: **84 sesje M0–M6**, commit `796c6a2`. Stan na 2026-10-24: planowane: 16; w toku: 0; częściowe: 29; do odbioru: 0; ukończone: 39; zablokowane: 0.
+Pierwotny plan: **84 sesje M0–M6**, commit `796c6a2`. Stan na 2026-10-24: planowane: 15; w toku: 1; częściowe: 29; do odbioru: 0; ukończone: 39; zablokowane: 0.
 
 Zakończenie części implementacji nie oznacza odbioru całej funkcji ani sprzętu.
 
@@ -84,7 +84,7 @@ Jedyne źródło statusów, powiązań i pozostałej pracy: [plan.json](../docs/
 | 059 | M4 | [Raport symulacji i eksport STL](sesja-059.md) | częściowe |
 | 060 | M4 | [Bufor i bramka G4 (prototyp v0.3)](sesja-060.md) | planowane |
 | 061 | M5 | [machine.yaml: napędy i wejścia rzeczywiste](sesja-061.md) | częściowe |
-| 062 | M5 | [Generator INI/HAL: sim, Plant, step/dir](sesja-062.md) | planowane |
+| 062 | M5 | [Generator INI/HAL: sim, Plant, step/dir](sesja-062.md) | w toku |
 | 063 | M5 | [Generator EtherCAT (lcec, CiA 402)](sesja-063.md) | planowane |
 | 064 | M5 | [Wrzeciono RS485 w generatorze](sesja-064.md) | planowane |
 | 065 | M5 | [Kinematyki 4 i 5 osi](sesja-065.md) | częściowe |

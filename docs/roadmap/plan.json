@@ -924,10 +924,18 @@
       "milestone": "M5",
       "title": "Generator INI/HAL: sim, Plant, step/dir",
       "prompt": "prompts/sesja-062.md",
-      "status": "planned",
-      "progress": "Brak potwierdzonego zakończenia zakresu.",
-      "remaining": [],
-      "evidence": []
+      "status": "in_progress",
+      "progress": "Codex: rozpoczęto po scaleniu integracji #125 (b2ee924), na jawne polecenie właściciela. Krok 1: kopia całej istniejącej konfiguracji do unikalnego katalogu, diff bez zapisu, odmowa nieprawidłowych ścieżek i dowiązań; 8 testów Windows/Python3.12 PASS.",
+      "remaining": [
+        "Szablony INI/HAL sim i Plant oraz zgodność D05, DISPLAY linumert.",
+        "Wyjścia stepgen parport i Mesa 7i96S/7i76E z jawnymi mapowaniami sprzętu i E-STOP; NIEZWERYFIKOWANE NA SPRZĘCIE.",
+        "CLI linumert-config build łączące walidację, backup, diff i zapis; golden tests.",
+        "Uruchomienie wygenerowanych sim/Plant w LinuxCNC i pełne make lint test."
+      ],
+      "evidence": [
+        "core/linumert/machine/config_files.py",
+        "tests/test_config_files.py"
+      ]
     },
     {
       "id": "063",
@@ -1792,6 +1800,7 @@
       "evidence": [
         "core/linumert/programs/limits.py",
         "tests/test_limits.py",
+        "tests/test_limits_units.py",
         "tests/test_hmi_workflow_widgets.py",
         "screens/linumert/linumert_program_editor.py",
         "screens/linumert/linumert_preflight.py",
