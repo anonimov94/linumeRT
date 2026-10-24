@@ -123,6 +123,9 @@ def test_load_ngc_with_linuxcnc_interpreter():
     path = Path(__file__).parent / "golden" / "pocket_helix.ngc"
     tp = load_ngc(path)
     assert len(tp) > 5 and tp.length > 0
+
+
+@pytest.mark.linuxcnc
 def test_load_ngc_real_interpreter_units_and_file_lines(tmp_path):
     from linumert.programs.toolpath import load_ngc
 
