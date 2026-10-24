@@ -3,6 +3,12 @@
 # Model-Author: Claude · 2026-10-19. NIEZWERYFIKOWANE NA SPRZĘCIE.
 set -e
 R=/opt/linumeRT
+# Bez recommends live-config nie instaluje kreatora konta Live.
+test -x /usr/lib/user-setup/user-setup-apply || {
+    echo 'Brak user-setup: konto linumert nie powstanie przy starcie Live' >&2
+    exit 1
+}
+command -v sudo >/dev/null
 python3 -m venv --system-site-packages /opt/linumert
 /opt/linumert/bin/pip install -q "pydantic>=2" "fastapi>=0.100" "uvicorn>=0.23" "websockets>=11"
 T=$(mktemp -d)
@@ -18,5 +24,10 @@ make -s -C "$R/plant/core" shared
 cp -n "$R/config/sim/linumert_xyz/linumert.var.default" "$R/config/sim/linumert_xyz/linumert.var"
 # Urządzenie do jednej pracy: konfiguracje i bazy narzędzi zapisywalne dla operatora
 chmod -R a+rwX "$R/config" "$R/screens"
-sed -i 's/^#\?\s*autologin-user=.*/autologin-user=operator/' /etc/lightdm/lightdm.conf || true
+mkdir -p /etc/lightdm/lightdm.conf.d
+cat > /etc/lightdm/lightdm.conf.d/90-linumert-live.conf <<'EOF'
+[Seat:*]
+autologin-user=linumert
+autologin-user-timeout=0
+EOF
 echo "linumeRT $(cat "$R/VERSION" 2>/dev/null)" > /etc/linumert-release

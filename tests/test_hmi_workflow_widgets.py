@@ -117,6 +117,26 @@ def test_editor_replace_handles_empty_missing_and_expanding_text(page_env, tmp_p
     editor.deleteLater()
 
 
+def test_resume_preview_does_not_load_cycle_compiler(page_env, monkeypatch):
+    from PyQt5 import QtWidgets
+
+    _home, _shell, _status, action = page_env
+    module = importlib.import_module("linumert_sim_page")
+    # Actual QtVCP used system Python without pydantic. Geometry must not load Cycles.
+    monkeypatch.setitem(sys.modules, "linumert_cycles_page", None)
+    page = module.SimPage.__new__(module.SimPage)
+    QtWidgets.QWidget.__init__(page)
+    page.c = {"bg2": "#171d26", "fg3": "#dce2eb", "teal": "#31cbb0"}
+    page.on_message({"ev": "resume_preview", "ok": True, "text": "Podgląd bez wykonania",
+                     "overlap": 2, "feed": 100,
+                     "points": [(0, 0, 1), (1, 0, 0), (2, 0, 0)]})
+    assert page._resume_dialog.isVisible()
+    assert not action.mock_calls
+    page._resume_dialog.close()
+    page.close()
+    page.deleteLater()
+
+
 @pytest.fixture
 def page_env(monkeypatch):
     monkeypatch.setenv("QT_QPA_PLATFORM", "offscreen")

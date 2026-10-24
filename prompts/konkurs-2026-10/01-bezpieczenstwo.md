@@ -1,5 +1,8 @@
 # Konkurs 1 — tor bezpieczeństwa profilu sprzętowego
 
+> Specyfikacja historycznego kroku konkursowego. Status i powiązania z pierwotnymi
+> sesjami: [wspólny rejestr](../../docs/roadmap/plan.json).
+
 Model-Author: Codex · 2026-10-23
 
 ## Cel

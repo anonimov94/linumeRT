@@ -909,6 +909,23 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
 - Uruchomienie i obraz: symulacja, NIEZWERYFIKOWANE NA SPRZĘCIE.
 - Model-Author: Codex.
 
+## Wspólna roadmapa — 2026-10-24 · Codex
+- Model-Author: Codex. Na polecenie właściciela: jeden rejestr 84 sesji i późniejszych rozszerzeń.
+- `plan.json` → generator → spis promptów, DONE, pełny plan i HTML; brak statusów w localStorage.
+- Zachowano numerację, aliasy i historyczne dowody; 007/048 skorygowano na częściowe.
+- Instrukcje sesji korzystają z rejestru; dawne plany są specyfikacjami/historią, przekazanie odchudzono.
+- Lokalnie: lint, 1071 pytest PASS (88 skip bez GUI), REQ 21/22 bez błędów; odbiór DOM PASS.
+- Końcowy generator/IP: 20 testów PASS; pełne CI i SHA w PR #99 (LinuxCNC/Plant osobno).
+- Autokontrola, bez niezależnego przeglądu. Bez zmiany funkcji CNC i odbioru sprzętowego.
+
+## Lekcja AI — dyscyplina pierwotnego planu · 2026-10-24 · Codex
+- Model-Author: Codex. Polecenie właściciela: zachować wnioski audytu dla następnych sesji.
+- Reguła w WSPOLPRACA_MODELI: cel i ID przed pracą, domykanie kryteriów/bramek M0–M6.
+- Nowe pomysły są rozszerzeniami; jawna zmiana priorytetu właściciela ma zapis wpływu na plan.
+- Prompt startowy i Savoir-vivre AI przypominają lekcję; bez nowej listy statusów i zmian funkcji CNC.
+- Walidacja: roadmapa i lint PASS; 1072 pytest PASS, 88 skip, REQ 21/22 bez błędów; PR #100.
+- Tylko dokumentacja; autokontrola, bez niezależnego przeglądu, scalanie według §5 WSPOLPRACA_MODELI.
+
 ## Edytor G-code — walidacja i wyszukiwanie · 2026-10-24 · Codex
 - Model-Author: Codex. Roadmapa 044/HMI-04: kontrola niezapisanej treści w Program → Edytuj kopię.
 - Lista błędów z przejściem do linii/kolumny (także Unicode); edycja unieważnia wynik.
@@ -916,6 +933,30 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
 - 10 testów Qt PASS, ruff i kontrola wymagań PASS; zrzut build/editor-preview.png.
 - Szerszy zestaw Windows ujawnił ograniczenia lokalizacji, kodowania i dowiązań; odbiór LinuxCNC przez CI.
 - Kontrola składni do 64 KiB nie jest kontrolą semantyki/ruchu. Bez nowych zależności produkcyjnych.
+
+## Domknięcie edytora PR #98 — 2026-10-24 · Codex
+- Model-Author: Codex. Polecenie właściciela: dokończyć wszystkie rozpoczęte gałęzie i scalić.
+- 044/047, EDITOR-VALIDATION: zachowano walidację, wyszukiwanie i Undo; integracja z nowym rejestrem.
+- Zachowano obie historie dziennika/provenance; przekazanie korzysta z bieżącego dokumentu main.
+- Debian 12/Qt: 60 testów zakresu PASS; rzeczywisty dialog zapisany w build/editor-closeout/.
+- Pełne kontrole i SHA w PR #98; autokontrola, bez niezależnego przeglądu.
+
+## Domknięcie ISO i historii gałęzi — 2026-10-24 · Codex
+- Model-Author: Codex. Polecenie właściciela: ukończyć i scalić istniejące gałęzie; zakres 044/047/077.
+- ISO: zachowano poprawki user-setup/sudo, konto linumert, autologin i test realnego tworzenia konta.
+- Debian 12: konto, UID 1000, hasło, home, sudo i drugie uruchomienie testu PASS; 8 testów ISO PASS.
+- Pięć lokalnych gałęzi ma wyłącznie poprawki równoważne main; historia scalona, drzewo bez zmian.
+- Raport: docs/raporty/ZAMKNIECIE_GALEZI_2026-10-24.md; końcowe kontrole i SHA w PR #101.
+- Bez publikacji wydania i odbioru sprzętu; autokontrola, bez niezależnego przeglądu.
+
+## Awaria HMI przy podglądzie powrotu w pauzie — 2026-10-24 · Codex
+- Model-Author: Codex. Zakres 031/045/057: naprawa zgłoszonego błędu bieżącego HMI.
+- Log operatora: QtVCP /usr/bin/python3 nie widzi pydantic z venv startera; wyjątek w podglądzie D38.
+- Bramka exec przekazuje ścieżki zależności venv; wspólny Preview2D nie importuje kompilatora cykli.
+- Przed poprawką 2 regresje FAIL; po poprawce 94 testy zakresu i 10 subtestów PASS w Debianie 12.
+- Pełny HMI z bramki startera: 15 kroków PASS (42,72 s), pauza/podgląd/raport/Z+2 mm/powrót/wznowienie.
+- Nowy test integracyjny wewnątrz QtVCP, zrzuty i raport; brak zmian progów oraz zabezpieczeń ruchu.
+- Autokontrola, bez niezależnego przeglądu; końcowe SHA i pełny odbiór w PR #102.
 
 ## Classic × Neon — renderer detal + maszyna · 2026-10-24 · Claude
 - Model-Author: Claude. Gałąź `claude/neon-render` (worktree), polecenie właściciela: render jak w koncepcji HTML.

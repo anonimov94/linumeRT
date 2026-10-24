@@ -19,7 +19,7 @@ lb config --distribution bookworm --archive-areas "main contrib non-free non-fre
     --linux-flavours rt-amd64 --debian-installer none --binary-images iso-hybrid \
     --bootloaders "syslinux,grub-efi" --memtest none --apt-recommends false \
     --iso-application linumeRT --iso-publisher "linumeRT (GPL-2.0)" --iso-volume "linumeRT" \
-    --bootappend-live "boot=live components quiet splash locales=pl_PL.UTF-8 keyboard-layouts=pl username=operator hostname=linumert" \
+    --bootappend-live "boot=live components quiet splash locales=pl_PL.UTF-8 keyboard-layouts=pl username=linumert hostname=linumert" \
     >/dev/null
 cp -r "$SRC/tools/iso/config/." config/
 mkdir -p config/archives

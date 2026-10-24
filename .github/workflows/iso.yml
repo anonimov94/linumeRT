@@ -6,12 +6,19 @@ on:
   workflow_dispatch:
   push:
     tags: ['v*']
+    branches: ['main', 'iso/**']
+    paths:
+      - 'tools/iso/**'
+      - '.github/workflows/iso.yml'
   pull_request:
     paths:
       - 'tools/iso/**'
       - '.github/workflows/iso.yml'
 permissions:
   contents: write
+concurrency:
+  group: iso-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   iso:
     runs-on: ubuntu-24.04
@@ -26,6 +33,8 @@ jobs:
           df -h /
       - name: Budowa obrazu (live-build w Debianie 12)
         run: |
+          docker run --rm -v "$PWD:/work:ro" debian:bookworm \
+            sh /work/tools/iso/test-live-login.sh
           docker run --rm --privileged -e LINUMERT_VERSION="${GITHUB_REF_NAME//\//-}" \
             -v "$PWD:/work" debian:bookworm bash /work/tools/iso/build.sh
           sudo chown -R "$(id -u):$(id -g)" build

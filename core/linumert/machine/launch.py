@@ -10,6 +10,7 @@ import configparser
 import json
 import os
 import sys
+import sysconfig
 from pathlib import Path
 
 from .deployment import PROFILES, check_deployment, hal_files_from_ini, read_deployment
@@ -42,6 +43,24 @@ def preflight(path: Path, expected_profile: str | None = None) -> dict:
     return report
 
 
+def cnc_environment() -> dict[str, str]:
+    """Keep venv packages visible to QtVCP's absolute /usr/bin/python3 shebang.
+
+    LinuxCNC/QtVCP still use Debian's Python. The starter's venv has matching
+    Python 3.11 and --system-site-packages; forward its dependency directories
+    without replacing the caller's core/module paths or changing the parent env.
+    """
+    env = dict(os.environ)
+    if sys.prefix != sys.base_prefix:
+        paths = env["PYTHONPATH"].split(os.pathsep) if env.get("PYTHONPATH") else []
+        for key in ("purelib", "platlib"):
+            path = sysconfig.get_path(key)
+            if path not in paths:
+                paths.append(path)
+        env["PYTHONPATH"] = os.pathsep.join(paths)
+    return env
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("ini", type=Path)
@@ -56,7 +75,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.check_only:
         return 0
     try:
-        os.execvp("linuxcnc", ["linuxcnc", str(path.resolve())])
+        os.execvpe("linuxcnc", ["linuxcnc", str(path.resolve())], cnc_environment())
     except (OSError, RuntimeError) as exc:
         print(f"Nie uruchomiono LinuxCNC: {exc}", file=sys.stderr)
         return 2

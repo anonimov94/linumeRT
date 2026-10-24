@@ -128,7 +128,8 @@ Nie deklaruj przeglądu drugiego modelu bez jego rzeczywistej oceny konkretnego 
    `wip/sesja-NNN`** — limit konta może przerwać sesję w każdej chwili, a kolejna sesja wznowi pracę.
 3. Na końcu `make lint test` (i testy C/ekranu, jeśli dotyczy); gdy zielone — oznacz PR jako gotowy i scal
    do `main` według `docs/WSPOLPRACA_MODELI.md` §5 (przegląd drugiego modelu albo autokontrola z adnotacją, D25/D26/D29).
-4. Wpis do `docs/DZIENNIK.md` i `prompts/DONE.md`, commit `sesja NNN: ...`.
+4. Wpis do `docs/DZIENNIK.md`, aktualizacja `docs/roadmap/plan.json` i `python3 tools/roadmap.py`;
+   `prompts/DONE.md`, spis promptów i widoki roadmapy są generowane. Commit `sesja NNN: ...`.
 5. Dylemat architektoniczny → wybierz rozwiązanie zgodne z ogólną praktyką inżynierską, zapisz w
    `docs/DECYZJE.md` jako PROPOZYCJA i idź dalej.
 

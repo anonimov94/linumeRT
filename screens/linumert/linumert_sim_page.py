@@ -489,7 +489,7 @@ class SimPage(QtWidgets.QWidget):
         if not msg.get("ok"):
             self._add_event("warn", f"Powrót D38: {msg.get('text')}")
             return
-        from linumert_cycles_page import Preview2D
+        from linumert_preview2d import Preview2D
 
         dialog = QtWidgets.QDialog(self)
         dialog.setWindowTitle("Podgląd powrotu D38 — bez wykonania")

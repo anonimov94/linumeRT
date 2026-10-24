@@ -456,11 +456,33 @@ Wyłącznie dowody testów programowych; bez pomiarów fizycznego stanowiska.
 GitHub Actions 40001235761 dla ffb7037, Codex, 2026-10-23, GPL-2.0-or-later;
 manifest SHA-256, bez binariów LinuxCNC i bez nowych zależności.
 
+## Wspólna roadmapa — 2026-10-24
+
+`tools/roadmap.py`, `tests/test_roadmap.py`, `docs/roadmap/plan.json`,
+`docs/roadmap/template.html`, `docs/roadmap/README.md` i generowane widoki:
+własne opracowanie Codex na polecenie właściciela, GPL-2.0-or-later.
+Źródła danych: pierwotny plan z commita `796c6a2`, prompty, dziennik i raporty repozytorium;
+bez zasobów zewnętrznych i nowych zależności runtime. Zastępują dawny HTML
+z osadzonymi makietami; makiety źródłowe w `docs/design/makiety/` pozostają zachowane.
+
 Edytor G-code: kontrola bieżącej treści, wyszukiwanie/zamiana i testy Qt.
 Autor: projekt linumeRT / Codex, 2026-10-24, GPL-2.0-or-later, własny kod
 w screens/linumert/linumert_program_editor.py oraz tests/test_hmi_workflow_widgets.py.
 Bez nowych bibliotek i zasobów produkcyjnych. Lokalny zrzut build/editor-preview.png
 korzysta z fontu systemowego wyłącznie do odbioru, bez jego redystrybucji.
+
+Poprawka logowania Live ISO i raport domknięcia gałęzi: Codex, 2026-10-24,
+GPL-2.0-or-later; własny kod `tools/iso/test-live-login.sh`, istniejące skrypty ISO
+i `docs/raporty/ZAMKNIECIE_GALEZI_2026-10-24.md`. Test wykorzystuje pakiety
+Debiana 12 w jednorazowym kontenerze, bez nowych zależności produkcyjnych poza
+user-setup/sudo z Debiana wymaganymi dla konta Live.
+
+`linumert_preview2d.py`: widżet Preview2D wydzielony bez zmiany wyglądu z
+`screens/linumert/linumert_cycles_page.py`, autor oryginału Claude (2026-10-19),
+wydzielenie Codex (2026-10-24), GPL-2.0-or-later. Podgląd D38 i Cykle
+współdzielą rysowanie bez zależności podglądu od kompilatora/pydantic.
+Poprawka środowiska `core/linumert/machine/launch.py` i testy regresji:
+własny kod Codex, 2026-10-24, GPL-2.0-or-later, bez nowych zależności.
 
 Classic × Neon (Model-Author: Claude, 2026-10-24, GPL-2.0-or-later, kod pisany od zera):
 `docs/design/koncepcje/classic_neon_symulacja.html` — koncepcja HTML/Canvas 2D skórki Classic
