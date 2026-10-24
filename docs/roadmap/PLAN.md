@@ -981,7 +981,7 @@ Pozostaje: 10× testy Plant z LinuxCNC: 1 z 10 przebiegów PASS (13/13), reszta 
 
 Pozostaje: Łuki między punktami końcowymi, obrót XY i limity osi obrotowych nie są sprawdzane. Automatyczne G43 po M6 (remap) i poprawne G43 w programie Facing z QtDragon (kod upstream) — osobna decyzja. Odbiór na pulpicie właściciela.
 
-Źródła: [core/linumert/programs/limits.py](../../core/linumert/programs/limits.py), [tests/test_limits.py](../../tests/test_limits.py), [tests/test_hmi_workflow_widgets.py](../../tests/test_hmi_workflow_widgets.py), [screens/linumert/linumert_program_editor.py](../../screens/linumert/linumert_program_editor.py), [screens/linumert/linumert_preflight.py](../../screens/linumert/linumert_preflight.py), [screens/linumert/linumert_shell.py](../../screens/linumert/linumert_shell.py).
+Źródła: [core/linumert/programs/limits.py](../../core/linumert/programs/limits.py), [tests/test_limits.py](../../tests/test_limits.py), [tests/test_limits_units.py](../../tests/test_limits_units.py), [tests/test_hmi_workflow_widgets.py](../../tests/test_hmi_workflow_widgets.py), [screens/linumert/linumert_program_editor.py](../../screens/linumert/linumert_program_editor.py), [screens/linumert/linumert_preflight.py](../../screens/linumert/linumert_preflight.py), [screens/linumert/linumert_shell.py](../../screens/linumert/linumert_shell.py).
 
 ### ORIGIN-WIZARD — Kreator zera detalu na przygotówce
 

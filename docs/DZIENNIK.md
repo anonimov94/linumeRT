@@ -1174,3 +1174,11 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
 - Zrobione: kopia pełnej konfiguracji, unikalne backupy, diff bez zapisu, walidacja ścieżek.
 - Testy: 8 PASS Windows/Python3.12; pełny odbiór i uruchomienie generatora otwarte.
 - Długi: szablony sim/Plant/parport/Mesa, CLI build, golden oraz LinuxCNC.
+
+## LIMITS-PREFLIGHT — zgodność jednostek INI — 2026-10-24 · Codex
+- Model-Author: Codex. Niezależna pomoc do PR #103, zakres 031/051; baza 98191c4.
+- Odtworzono błąd: limit 10 cali porównywany z pozycją 127 mm jak limit 10 mm.
+- Granice XYZ z INI są przeliczane do mm przed porównaniem z pozycjami kanonicznymi.
+- Regresja: mm oraz inch/in/imperial, programy mm/cale, oba końce zakresu.
+- Przed zmianą 3 warianty FAIL, po zmianie 4 warianty PASS (unittest, Windows).
+- Odbiór GUI/LinuxCNC i sprzętu nie został wykonany; NIEZWERYFIKOWANE NA SPRZĘCIE.

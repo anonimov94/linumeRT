@@ -57,9 +57,11 @@ class LimitReport:
 
 
 def limits_from_ini(path: Path | str) -> dict[str, tuple[float, float]]:
+    """Granice XYZ w mm, tak jak pozycje porównywane przez analyze_canon."""
     ini = configparser.ConfigParser(strict=False, interpolation=None)
     if not ini.read(path, encoding="utf-8"):
         raise ValueError("Brak pliku INI maszyny.")
+    scale = INCH if _linear_units(path) == "inch" else 1.0
     out: dict[str, tuple[float, float]] = {}
     for axis in AXES:
         try:
@@ -67,7 +69,7 @@ def limits_from_ini(path: Path | str) -> dict[str, tuple[float, float]]:
             hi = float(ini.get(f"AXIS_{axis}", "MAX_LIMIT").split()[0])
         except (configparser.Error, ValueError, IndexError):
             continue
-        out[axis] = (lo, hi)
+        out[axis] = (lo * scale, hi * scale)
     if not out:
         raise ValueError("INI nie zawiera MIN_LIMIT/MAX_LIMIT osi XYZ.")
     return out
