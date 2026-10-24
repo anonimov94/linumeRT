@@ -16,7 +16,10 @@ Wklej na początku sesji:
 5. Przeczytaj `docs/roadmap/plan.json`: jedyne źródło statusów i powiązań zakresu. Wybierz najniższą
    nieukończoną sesję 001–084, jej rozszerzenia i prompt `prompts/sesja-NNN.md`, uwzględniając zależności
    oraz bieżące polecenie właściciela. DONE jest widokiem generowanym, nie harmonogramem.
-   Jeśli istnieje gałąź `wip/sesja-NNN`, kontynuuj ją.
+   Zastosuj sekcję „Lekcja projektu — pilnowanie założeń i kolejności” w `WSPOLPRACA_MODELI.md`.
+   Przed kodowaniem podaj ID pierwotnej sesji, kryterium/bramkę, otwarte zależności i mały rezultat.
+   Nowy pomysł zapisany jako rozszerzenie nie zmienia kolejności; jawne polecenie właściciela
+   odnotuj wraz z wpływem na wcześniejsze bramki. Jeśli istnieje gałąź `wip/sesja-NNN`, kontynuuj ją.
 6. Zajmij turę: `prompts/LOCK` = `<model> · sesja NNN · <UTC> · <opis>`, linia `Tura:` = w toku; commit, push.
 
 ## 2. Praca
@@ -35,7 +38,8 @@ Wklej na początku sesji:
    decyzje w `docs/DECYZJE.md`. DONE, spis promptów i widoki roadmapy są generowane.
 3. `docs/NASTEPNA_SESJA.md`: przekazanie i środowisko zaktualizowane, bez powielania statusów roadmapy;
    `Tura:` = oddana; `prompts/LOCK` pusty; blokady zasobów zwolnione.
-4. Użytkownikowi: co powstało, link do PR, co sprawdzić ręcznie, jeden następny krok.
+4. Użytkownikowi: jakie kryterium pierwotnego planu domknięto, co nadal pozostaje,
+   link do PR, co sprawdzić ręcznie i jeden następny krok zgodny z kolejnością planu.
 
 Sesję przerwaną w połowie opisz dodatkowo w `prompts/START-NNN.md` (kroki do zrobienia); po jej ukończeniu
 przenieś plik do `prompts/archiwum/`.

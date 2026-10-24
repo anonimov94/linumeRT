@@ -917,3 +917,10 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
 - Lokalnie: lint, 1071 pytest PASS (88 skip bez GUI), REQ 21/22 bez błędów; odbiór DOM PASS.
 - Końcowy generator/IP: 20 testów PASS; pełne CI i SHA w PR #99 (LinuxCNC/Plant osobno).
 - Autokontrola, bez niezależnego przeglądu. Bez zmiany funkcji CNC i odbioru sprzętowego.
+
+## Lekcja AI — dyscyplina pierwotnego planu · 2026-10-24 · Codex
+- Model-Author: Codex. Polecenie właściciela: zachować wnioski audytu dla następnych sesji.
+- Reguła w WSPOLPRACA_MODELI: cel i ID przed pracą, domykanie kryteriów/bramek M0–M6.
+- Nowe pomysły są rozszerzeniami; jawna zmiana priorytetu właściciela ma zapis wpływu na plan.
+- Prompt startowy i Savoir-vivre AI przypominają lekcję; bez nowej listy statusów i zmian funkcji CNC.
+- Walidacja: kontrola roadmapy, lint i testy według wyniku PR; autokontrola, bez niezależnego przeglądu.
