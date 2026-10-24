@@ -476,3 +476,10 @@ GPL-2.0-or-later; własny kod `tools/iso/test-live-login.sh`, istniejące skrypt
 i `docs/raporty/ZAMKNIECIE_GALEZI_2026-10-24.md`. Test wykorzystuje pakiety
 Debiana 12 w jednorazowym kontenerze, bez nowych zależności produkcyjnych poza
 user-setup/sudo z Debiana wymaganymi dla konta Live.
+
+`linumert_preview2d.py`: widżet Preview2D wydzielony bez zmiany wyglądu z
+`screens/linumert/linumert_cycles_page.py`, autor oryginału Claude (2026-10-19),
+wydzielenie Codex (2026-10-24), GPL-2.0-or-later. Podgląd D38 i Cykle
+współdzielą rysowanie bez zależności podglądu od kompilatora/pydantic.
+Poprawka środowiska `core/linumert/machine/launch.py` i testy regresji:
+własny kod Codex, 2026-10-24, GPL-2.0-or-later, bez nowych zależności.

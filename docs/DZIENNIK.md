@@ -948,3 +948,11 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
 - Pięć lokalnych gałęzi ma wyłącznie poprawki równoważne main; historia scalona, drzewo bez zmian.
 - Raport: docs/raporty/ZAMKNIECIE_GALEZI_2026-10-24.md; końcowe kontrole i SHA w PR #101.
 - Bez publikacji wydania i odbioru sprzętu; autokontrola, bez niezależnego przeglądu.
+
+## Awaria HMI przy podglądzie powrotu w pauzie — 2026-10-24 · Codex
+- Model-Author: Codex. Zakres 031/045/057: naprawa zgłoszonego błędu bieżącego HMI.
+- Log operatora: QtVCP /usr/bin/python3 nie widzi pydantic z venv startera; wyjątek w podglądzie D38.
+- Bramka exec przekazuje ścieżki zależności venv; wspólny Preview2D nie importuje kompilatora cykli.
+- Przed poprawką 2 regresje FAIL; po poprawce 94 testy zakresu i 10 subtestów PASS w Debianie 12.
+- Rzeczywista pauza/retrakcja oraz odbiór startera w toku; brak zmian progów i zabezpieczeń ruchu.
+- Autokontrola, bez niezależnego przeglądu; końcowe SHA i odbiór w PR.

@@ -1,0 +1,39 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+"""Shared geometry preview without cycle/compiler dependencies.
+
+Model-Author: Claude (original Preview2D); Codex (extracted for D38, 2026-10-24).
+"""
+from PyQt5 import QtCore, QtGui, QtWidgets
+
+
+class Preview2D(QtWidgets.QWidget):
+    """Łamane XY generatora w skali okna (oś Y w górę)."""
+
+    def __init__(self, colors):
+        super().__init__()
+        self.c = colors
+        self.lines: list = []
+        self.setMinimumHeight(180)
+
+    def set_lines(self, lines) -> None:
+        self.lines = [ln for ln in lines if len(ln) >= 2]
+        self.update()
+
+    def paintEvent(self, _event) -> None:  # noqa: N802 - API Qt
+        p = QtGui.QPainter(self)
+        p.fillRect(self.rect(), QtGui.QColor(self.c["bg2"]))
+        pts = [pt for ln in self.lines for pt in ln]
+        if not pts:
+            p.setPen(QtGui.QColor(self.c["fg3"]))
+            p.drawText(self.rect(), QtCore.Qt.AlignCenter, "brak podglądu 2D")
+            return
+        xs, ys = [x for x, _ in pts], [y for _, y in pts]
+        w, h = max(max(xs) - min(xs), 1e-6), max(max(ys) - min(ys), 1e-6)
+        k = min((self.width() - 20) / w, (self.height() - 20) / h)
+        ox = (self.width() - w * k) / 2 - min(xs) * k
+        oy = (self.height() + h * k) / 2 + min(ys) * k
+        p.setPen(QtGui.QPen(QtGui.QColor(self.c["teal"]), 1.5))
+        for ln in self.lines:
+            poly = QtGui.QPolygonF([QtCore.QPointF(ox + x * k, oy - y * k) for x, y in ln])
+            p.drawPolyline(poly)
+        p.end()
