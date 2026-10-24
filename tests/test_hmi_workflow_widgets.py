@@ -13,6 +13,55 @@ from unittest.mock import Mock, patch
 import pytest
 
 
+def test_editor_checks_unsaved_text_and_invalidates_result(page_env, tmp_path):
+    _, _, _, action = page_env
+    module = importlib.import_module("linumert_program_editor")
+    path = tmp_path / "original.ngc"
+    path.write_text("M2\n")
+    editor = module.ProgramEditor(path, "M2\n")
+    editor.editor.setPlainText("G1 X\nM2\n")
+    editor.check_button.click()
+    assert editor.issues.count() > 0
+    assert editor.editor.textCursor().blockNumber() == 0
+    assert path.read_text() == "M2\n" and not action.mock_calls
+    editor.editor.insertPlainText("10")
+    assert editor.issues.count() == 0
+    assert not editor.editor.extraSelections()
+    assert "nie została sprawdzona" in editor.validation.text()
+    editor.editor.setPlainText("G1 X10 F100\nM2\n")
+    editor.check_button.click()
+    assert "Nie wykryto" in editor.validation.text()
+    editor.deleteLater()
+
+
+def test_editor_check_limits_and_failure_are_explicit(page_env, tmp_path):
+    module = importlib.import_module("linumert_program_editor")
+    editor = module.ProgramEditor(tmp_path / "part.ngc", "G1 X\n" * 120)
+    editor.check_button.click()
+    assert editor.issues.count() == 100
+    assert "pierwsze 100" in editor.validation.text()
+    editor.editor.setPlainText(";ą" * module.CHECK_BYTES)
+    editor.check_button.click()
+    assert "64 KiB" in editor.validation.text() and not editor.issues.count()
+    editor.editor.setPlainText("M2\n")
+    with patch("linumert.programs.lexer.check", side_effect=RecursionError("limit")):
+        editor.check_button.click()
+    assert "Nie ukończono" in editor.validation.text()
+    editor.deleteLater()
+
+
+def test_editor_issue_unicode_column_and_keyboard_activation(page_env, tmp_path):
+    module = importlib.import_module("linumert_program_editor")
+    editor = module.ProgramEditor(tmp_path / "part.ngc", "(😀) G1 X\nM2")
+    editor.check_button.click()
+    item = editor.issues.item(0)
+    line, col = item.data(module.QtCore.Qt.UserRole)
+    editor.issues.itemActivated.emit(item)
+    prefix = editor.editor.toPlainText().splitlines()[line - 1][:col - 1]
+    assert editor.editor.textCursor().positionInBlock() == len(prefix.encode("utf-16-le")) // 2
+    editor.deleteLater()
+
+
 @pytest.fixture
 def page_env(monkeypatch):
     monkeypatch.setenv("QT_QPA_PLATFORM", "offscreen")
