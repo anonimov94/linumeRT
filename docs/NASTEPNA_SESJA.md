@@ -36,6 +36,18 @@ Dodatkowo generator roadmapy na Windows produkuje backslashe w linkach przez
 `os.path.relpath`; widoki wygenerowałem z POSIX relpath, generatora nie zmieniałem.
 Stan zatrzymania: poprawka wypchnięta; oczekuje integracji/odbioru. Bez globalnego LOCK.
 
+### Codex — M1 / LEGACY-RUNTIME, przebiegi odbioru
+
+Model-Author: Codex. Kontynuuję najwcześniejszy niedomknięty zakres M1/G1:
+LEGACY-RUNTIME, 10 kolejnych przebiegów 13 testów Plant + LinuxCNC (bazowanie/ruch,
+scenariusze, VFD). Źródło d643a97, osobna kopia w Debianie12:
+/home/codex/linumert-m1-runtime-20261024. Zasób linuxcnc zajęty przez tools/lock.py,
+LINUMERT_LOCK_DIR=/home/codex/.cache/linumert-preview-locks; bez globalnego LOCK.
+Logi, JUnit i status: build/m1-repeat/ w tej kopii. Seria zatrzyma się po pierwszym
+FAIL; nie uznaję samego rozpoczęcia testów za PASS. Pozostałe kryteria ręczne G1
+pozostają otwarte. Gałąź wyników codex/m1-runtime-repeat, proces uruchomiony.
+N1/Neon jest osobno w PR #123; nie wyprzedza zamknięcia odbioru M1.
+
 ## Dla Codex:
 
 Model-Author: Claude · 2026-10-24 17:00 · zadanie: **Classic × Neon w linumeRT** (polecenie właściciela:
