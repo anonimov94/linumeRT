@@ -79,7 +79,11 @@ potem `digital_in` u32, `spindle_actual` f32, statystyki (`frames_lost` u32, `fr
   dwa jointy LinuxCNC); inna liczba osi w ramce = ramka odrzucona. `mode` zmienia 6060h tylko przy
   zmianie; `target_pos` trafia do 607Ah wyłącznie w CSP (8); `mode_display` = 6061h;
   `following_error` = ostatnie 607Ah − 6064h (poza CSP 0); `torque_pct` = 6077h.
-- Krok modelu: `dt` z reguły 3 dzielone na `timing.substeps` podkroków rdzenia C.
+- Krok modelu: `dt` z reguły 3 dzielone na `timing.substeps` podkroków rdzenia C (domyślnie 4).
+  Cel 607Ah z ramki napędy CSP dostają liniowo rozłożony na podkroki (`lrt_machine_step_cycle`,
+  jak interpolacja 60C2h w napędzie i stepgen rozkładający impulsy w okresie). Wynik nie zależy
+  od `substeps` ≥ 2; przy 1 krokowiec przy G0 gubi kroki z powodu zbyt grubego kroku całkowania
+  (raport `docs/raporty/plant_substeps.md`).
 - Zegar odbioru: lockstep = `time_ns` ramki, realtime = zegar monotoniczny hosta. Watchdog działa
   w obu trybach (lockstep: luka `time_ns` między ramkami > `watchdog_ms`; realtime: także bez ramek,
   sprawdzany w pętli co `watchdog_ms/4`). Awaria napędu `COMM_WATCHDOG` = 603Fh **8130h**, alarm

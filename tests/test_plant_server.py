@@ -236,7 +236,7 @@ def test_model_exception_gives_safe_state(core, monkeypatch) -> None:  # REQ-QA-
     def broken(dt, n=1):
         raise RuntimeError("symulowany błąd modelu")
 
-    monkeypatch.setattr(server.machine, "step", broken)
+    monkeypatch.setattr(server.machine, "step_cycle", broken)
     master.exchange()
     rep = master.last
     assert server.model_failed and rep.flags & FLAG_FAULT

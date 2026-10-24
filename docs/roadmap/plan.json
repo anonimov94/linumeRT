@@ -1813,6 +1813,26 @@
         "tests/test_m6_remap.py",
         "core/linumert/programs/linuxcnc_check.py"
       ]
+    },
+    {
+      "id": "PLANT-SUBSTEPS",
+      "title": "Plant: wynik niezależny od podkroków całkowania",
+      "parents": [
+        "049",
+        "063"
+      ],
+      "status": "done",
+      "progress": "Cel CSP z cyklu mastera interpolowany liniowo w podkrokach rdzenia C (lrt_machine_step_cycle, jak 60C2h/stepgen); domyślnie 4 podkroki. Atrapa: frezarka i router PASS dla n = 2–16 (wcześniej E-4201 i ~1560 zgubionych kroków przy n ≥ 2–4). Raport docs/raporty/plant_substeps.md.",
+      "remaining": [
+        "Obciążenie CPU Plant realtime przy 4 podkrokach na VM-B (odbiór właściciela).",
+        "Generator EtherCAT (063): 60C2h = okres wątku serwo."
+      ],
+      "evidence": [
+        "plant/core/machine.c",
+        "plant/core/tests/test_machine.c",
+        "tools/plant_substeps.py",
+        "docs/raporty/plant_substeps.md"
+      ]
     }
   ]
 }

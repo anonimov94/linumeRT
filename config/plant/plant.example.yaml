@@ -3,7 +3,7 @@
 # Ścieżki względne liczone od katalogu tego pliku.
 machine: ../machines/mill_servo_table.yaml
 network: {listen: 127.0.0.1, port: 47700, panel_port: 8080}   # VM-B w sieci lrtnet: listen 0.0.0.0
-timing: {cycle_ns: 1000000, substeps: 1, watchdog_ms: 50}
+timing: {cycle_ns: 1000000, substeps: 4, watchdog_ms: 50}
 mode: lockstep            # lockstep (testy, CI, deterministyczny) | realtime (VM-B)
 seed: 1
 state_file: ../../state/plant_state.json
