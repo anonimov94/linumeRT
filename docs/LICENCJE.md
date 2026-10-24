@@ -66,3 +66,8 @@ Model-Author: Codex. LinuxCNC 2.9 jest pobierany do cache z oficjalnego repozyto
 Model-Author: Codex. Własne procedury, szablon, raport konkursu i archiwum
 dowodów programowych: GPL-2.0-or-later; ścieżki i pochodzenie w PROVENANCE.md.
 Bez nowych zależności ani zewnętrznych materiałów.
+
+## Fonty ekranu — sesja 027, 2026-10-24
+Model-Author: Claude. IBM Plex Sans (IBM Corp.) i JetBrains Mono (The JetBrains Mono Project Authors),
+SIL Open Font License 1.1 — dołączone w `screens/linumert/fonts/` z plikami licencji. OFL pozwala na
+dołączanie do oprogramowania GPL; nazwy fontów zarezerwowane („Plex”) — pliki niezmienione.

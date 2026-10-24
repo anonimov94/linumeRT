@@ -155,6 +155,10 @@ class LinumertShell(QtCore.QObject):
 
     # ---- budowa ---------------------------------------------------------------------------
     def install(self) -> LinumertShell:
+        # Sesja 027: fonty z tokens.yaml dołączone do ekranu (OFL), przed zastosowaniem QSS.
+        from linumert_fonts import register as register_fonts
+
+        self.fonts = register_fonts()
         classic = self.w.takeCentralWidget()
         root = QtWidgets.QWidget()
         root.setObjectName("lrtRoot")

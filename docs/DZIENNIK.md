@@ -1022,3 +1022,12 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
 - Kontrola limitów (`run_interpreter(machine_ini=…)`) wczytuje remapy i SUBROUTINE_PATH z INI maszyny, żeby nie zgłaszać fałszywego „bez korekty długości”.
 - Testy: 5 w tests/test_m6_remap.py (w tym rs274 z INI maszyny: T2 M6 → 80 mm, T0 M6 → 0), e2e `sim-e2e.sh` PASS (demo 306 s, 6 wymian, bez kolizji).
 - Nie obejmuje Facing z QtDragon (G49, bez M6) ani ATC. NIEZWERYFIKOWANE NA SPRZĘCIE; do sprawdzenia ręcznie wymiana M6 w oknie QtDragon.
+
+## 027 — Własny system projektowy ekranu (domknięcie) · 2026-10-24 · Claude
+- **Zrobione:** rozliczenie promptu: QSS powłoki z tokenów już generowany w czasie działania (`shell_qss`, test
+  kolorów i celu 44 px) — dodano `tools/gen_qss.py` (zrzut tego samego stylu); fonty IBM Plex Sans (Regular,
+  SemiBold, Bold) i JetBrains Mono (Regular, Bold) z licencjami OFL w `screens/linumert/fonts/`, rejestrowane
+  przez `linumert_fonts.register()` w powłoce HMI i podglądzie skórek; PROVENANCE z sumami SHA-256.
+- **Decyzje:** `linumert.qss` (arkusz bazy QtDragon) nie jest nadpisywany — źródłem stylu jest `shell_qss(tokens)`.
+- **Do sprawdzenia ręcznie:** HMI w LinuxCNC rysuje teksty fontem IBM Plex Sans, a DRO JetBrains Mono.
+- **Długi:** brak. Testy: pełne pytest, ruff, REQ — wynik w PR. Model-Author: Claude. NIEZWERYFIKOWANE NA SPRZĘCIE.

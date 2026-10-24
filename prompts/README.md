@@ -1,7 +1,7 @@
 <!-- Generowane przez python3 tools/roadmap.py; edytuj docs/roadmap/plan.json. -->
 # Prompty i wspólna roadmapa linumeRT
 
-Pierwotny plan: **84 sesje M0–M6**, commit `796c6a2`. Stan na 2026-10-24: planowane: 18; w toku: 0; częściowe: 35; do odbioru: 0; ukończone: 31; zablokowane: 0.
+Pierwotny plan: **84 sesje M0–M6**, commit `796c6a2`. Stan na 2026-10-24: planowane: 18; w toku: 0; częściowe: 34; do odbioru: 0; ukończone: 32; zablokowane: 0.
 
 Zakończenie części implementacji nie oznacza odbioru całej funkcji ani sprzętu.
 
@@ -49,7 +49,7 @@ Jedyne źródło statusów, powiązań i pozostałej pracy: [plan.json](../docs/
 | 024 | M1 | [Plant: scenariusze i raport prototypu](sesja-024.md) | ukończone |
 | 025 | M1 | [Skrypty maszyn wirtualnych (VirtualBox)](sesja-025.md) | ukończone |
 | 026 | M1 | [Bufor i bramka G1 (prototyp P0)](sesja-026.md) | ukończone |
-| 027 | M2 | [Własny system projektowy ekranu](sesja-027.md) | częściowe |
+| 027 | M2 | [Własny system projektowy ekranu](sesja-027.md) | ukończone |
 | 028 | M2 | [Kompozycja ekranu głównego](sesja-028.md) | częściowe |
 | 029 | M2 | [Tryby, JOG i pulpit MPG](sesja-029.md) | częściowe |
 | 030 | M2 | [MDI i klawiatura ekranowa](sesja-030.md) | częściowe |
