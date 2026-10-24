@@ -28,7 +28,10 @@ Kolejny zakres wybierz z rejestru zgodnie z bieżącym poleceniem właściciela.
 Polecenie właściciela 2026-10-24: dokończyć rozpoczęte gałęzie i scalić.
 Edytor PR #98 ma uzupełniony rekord `EDITOR-VALIDATION`; kontrola po aktualizacji
 main: 60 testów Qt/rejestru/IP w Debianie PASS, zrzut `build/editor-closeout/editor-validation.png`.
-ISO i stare historie gałęzi są domykane osobno; wyniki scalania sprawdzaj w PR.
+ISO i stare historie gałęzi: `iso/fix-live-login`, checkout `/tmp/linumert-iso-login-closeout`.
+Test tworzenia konta Live Debian 12 PASS, 8 testów ISO PASS; raport zamknięcia w
+[ZAMKNIECIE_GALEZI_2026-10-24.md](raporty/ZAMKNIECIE_GALEZI_2026-10-24.md).
+Gałąź zawiera także gotowy edytor #98; kolejność scalenia: #98, następnie ISO.
 
 ## Środowisko i odbiór
 
