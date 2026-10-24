@@ -219,6 +219,9 @@ class LinumertShell(QtCore.QObject):
             self.w.resize(min(max(self.w.width(), 1440), area.width()),
                           min(max(self.w.height(), 960), area.height()))
         self._connect_status()
+        loaded = getattr(getattr(STATUS, "stat", None), "file", "")
+        if isinstance(loaded, str) and loaded and not self.s.file:
+            self._file(loaded)  # program wczytany przy starcie, zanim ekran podłączył status
         self._timer = QtCore.QTimer(self)
         self._timer.timeout.connect(self._tick)
         self._timer.start(500)

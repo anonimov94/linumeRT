@@ -103,6 +103,7 @@ def analyze_canon(text: str, limits: dict[str, tuple[float, float]]) -> LimitRep
     seen: dict[tuple[str, str], int] = {}
     scale = 1.0
     g5x = g92 = tlo = (0.0, 0.0, 0.0)  # przesunięcia układu, G92 i korekta długości (XYZ)
+    touched: set[str] = set()  # interpreter startuje w zerze maszyny: oś nieruszona = bez oceny
     for raw in text.splitlines():
         m = _CALL.match(raw)
         if m is None:
@@ -134,6 +135,10 @@ def analyze_canon(text: str, limits: dict[str, tuple[float, float]]) -> LimitRep
             if axis not in limits:
                 continue
             value = (value + g5x[i] + g92[i] + tlo[i]) * scale
+            if axis not in touched:
+                if abs(value) < EPS:
+                    continue
+                touched.add(axis)
             lo, hi = limits[axis]
             for side, limit, bad in (("min", lo, value < lo - EPS), ("max", hi, value > hi + EPS)):
                 key = (axis, side)

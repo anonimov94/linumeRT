@@ -1007,3 +1007,10 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
 - Ostrzeżenie informacyjne, gdy program tnie przy nieaktywnej korekcie długości (G49). Nic nie blokuje sterownika; ekran nie jest funkcją bezpieczeństwa.
 - Raport grupuje powtórzenia (jeden wiersz + licznik); kreator zera wyraźnie oznacza wynik poza zakresem osi.
 - Testy: 54 PASS w Debianie (GUI + rdzeń); do sprawdzenia na pulpicie. Poza zakresem: automatyczne G43 po M6 (remap).
+
+## LIMITS-PREFLIGHT — poprawki po uwadze właściciela — 2026-10-24 · Claude
+- Model-Author: Claude. Uwaga właściciela: g54 wczytuje się automatycznie przy starcie.
+- Kontrola uruchamia się też dla programu wczytanego przed podłączeniem statusu (start ekranu).
+- Błąd własny: oś jeszcze nieruszona przez program (interpreter startuje w zerze maszyny) dawała fałszywe „X=0 poniżej limitu 1” w konfiguracji Plant; teraz oś jest oceniana od pierwszego ruchu.
+- Na g54: sim — linia 13, Z=-130 < -120 (i 81 ruchów); Plant — linia 9, Z=-134 < -119 (i 85 ruchów); G49 bez G43.
+- Testy: 55 PASS (GUI + rdzeń), 3 PASS z prawdziwym LinuxCNC (start ekranu).

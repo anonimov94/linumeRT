@@ -55,6 +55,15 @@ def test_cutting_without_tool_length_offset_is_flagged():
     assert analyze_canon(_canon("STRAIGHT_TRAVERSE(0, 0, -5.0, 0, 0, 0)"), LIM).ok
 
 
+def test_axis_not_yet_moved_is_not_judged():
+    limits = {"X": (1.0, 599.0), "Z": (-119.0, -1.0)}
+    first = _canon("STRAIGHT_TRAVERSE(0.0, 0, -5.0, 0, 0, 0)")  # X zostaje w zerze interpretera
+    assert check_canon(first, limits) == []
+    later = _canon("STRAIGHT_TRAVERSE(50.0, 0, -5.0, 0, 0, 0)",
+                   "STRAIGHT_TRAVERSE(0.0, 0, -5.0, 0, 0, 0)")
+    assert [(v.line, v.axis) for v in check_canon(later, limits)] == [(10, "X")]
+
+
 def test_inches_are_converted():
     canon = _canon("USE_LENGTH_UNITS(CANON_UNITS_INCHES)",
                    "STRAIGHT_FEED(30.0, 0, 0, 0, 0, 0)")
