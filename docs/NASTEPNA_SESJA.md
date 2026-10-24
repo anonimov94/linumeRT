@@ -404,3 +404,11 @@ raport, wyniki i dowody: `prompts/konkurs-2026-10/raporty/02.md`.
 Następny krok: usunąć OD-01 (router_atc_rack: CRASH/COVER_CRASH mimo kodu 0),
 powtórzyć A3 z kontrolą zdarzeń, potem ręczny pulpit i zatwierdzona kampania T1–T7.
 NIEZWERYFIKOWANE NA SPRZĘCIE. Nie zmieniano zakresu pozostałych sesji konkursu.
+
+## Edytor — bieżący zakres 2026-10-24
+Model-Author: Codex. PR #98, gałąź codex/editor-live-validation: walidacja niezapisanej
+kopii G-code i wyszukiwanie/zamiana dostępne w używanym HMI, zgodnie z 044/HMI-04.
+Lokalnie 10 testów Qt PASS. Następny krok: odbiór CI Debian/LinuxCNC i scalenie po kontrolach.
+Pozostałe luki roadmapy: pełna semantyka w edytorze, historia wersji programów oraz
+podłączenie programu/alarmów/3D w monitorze nowych skórek. Tej zmiany nie zaliczać
+jako ukończenia całego HMI-04 ani SKIN-02.

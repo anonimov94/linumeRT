@@ -455,3 +455,9 @@ Wyłącznie dowody testów programowych; bez pomiarów fizycznego stanowiska.
 `docs/raporty/odbior-2026-10-23-ci.tar.gz`: pełny log i metadane własnego przebiegu
 GitHub Actions 40001235761 dla ffb7037, Codex, 2026-10-23, GPL-2.0-or-later;
 manifest SHA-256, bez binariów LinuxCNC i bez nowych zależności.
+
+Edytor G-code: kontrola bieżącej treści, wyszukiwanie/zamiana i testy Qt.
+Autor: projekt linumeRT / Codex, 2026-10-24, GPL-2.0-or-later, własny kod
+w screens/linumert/linumert_program_editor.py oraz tests/test_hmi_workflow_widgets.py.
+Bez nowych bibliotek i zasobów produkcyjnych. Lokalny zrzut build/editor-preview.png
+korzysta z fontu systemowego wyłącznie do odbioru, bez jego redystrybucji.

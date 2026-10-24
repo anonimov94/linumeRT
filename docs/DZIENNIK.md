@@ -908,3 +908,11 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
 - README i provenance opisują aktualny zakres obrazu. Budowa ISO i testy CI pozostają do zakończenia PR.
 - Uruchomienie i obraz: symulacja, NIEZWERYFIKOWANE NA SPRZĘCIE.
 - Model-Author: Codex.
+
+## Edytor G-code — walidacja i wyszukiwanie · 2026-10-24 · Codex
+- Model-Author: Codex. Roadmapa 044/HMI-04: kontrola niezapisanej treści w Program → Edytuj kopię.
+- Lista błędów z przejściem do linii/kolumny (także Unicode); edycja unieważnia wynik.
+- Wyszukiwanie dosłowne, zamiana pojedyncza/wszystkich, jedna operacja Cofnij; limit wyniku 256 KiB.
+- 10 testów Qt PASS, ruff i kontrola wymagań PASS; zrzut build/editor-preview.png.
+- Szerszy zestaw Windows ujawnił ograniczenia lokalizacji, kodowania i dowiązań; odbiór LinuxCNC przez CI.
+- Kontrola składni do 64 KiB nie jest kontrolą semantyki/ruchu. Bez nowych zależności produkcyjnych.

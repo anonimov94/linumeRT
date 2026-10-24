@@ -62,6 +62,61 @@ def test_editor_issue_unicode_column_and_keyboard_activation(page_env, tmp_path)
     editor.deleteLater()
 
 
+def test_editor_search_wrap_replace_and_undo(page_env, tmp_path):
+    from PyQt5 import QtCore, QtTest
+
+    module = importlib.import_module("linumert_program_editor")
+    original = "G1 X10\nG1 X10\n; x10 😀\nM2"
+    editor = module.ProgramEditor(tmp_path / "part.ngc", original)
+    editor.find_text.setText("X10")
+    editor.find_next.click()
+    first = editor.editor.textCursor().selectionStart()
+    editor.find_next.click()
+    assert editor.editor.textCursor().selectionStart() > first
+    QtTest.QTest.keyClick(editor.find_text, QtCore.Qt.Key_Return)
+    assert editor.editor.textCursor().selectionStart() == first
+    assert editor.result() == 0 and editor.saved_path is None
+    editor.replace_text.setText("X20")
+    editor.replace_one.click()
+    assert editor.editor.toPlainText().count("X20") == 1
+    editor.editor.undo()
+    assert editor.editor.toPlainText() == original
+    editor.check_button.click()
+    editor.replace_all.click()
+    assert editor.editor.toPlainText().count("X20") == 2
+    assert "; x10 😀" in editor.editor.toPlainText()
+    assert "nie została sprawdzona" in editor.validation.text()
+    editor.editor.undo()
+    assert editor.editor.toPlainText() == original
+    editor.deleteLater()
+
+
+def test_editor_replace_handles_empty_missing_and_expanding_text(page_env, tmp_path):
+    module = importlib.import_module("linumert_program_editor")
+    editor = module.ProgramEditor(tmp_path / "part.ngc", "G1 X10\nM2")
+    editor.replace_all.click()
+    assert "Wpisz" in editor.search_result.text()
+    editor.find_text.setText("absent")
+    editor.find_next.click()
+    assert "Nie znaleziono" in editor.search_result.text()
+    editor.find_text.setText("X10")
+    editor.replace_text.setText("X10 X10")
+    editor.replace_all.click()
+    assert editor.editor.toPlainText() == "G1 X10 X10\nM2"
+    editor.editor.setPlainText("X" * 10000)
+    editor.find_text.setText("X")
+    editor.replace_text.setText("ą" * 20)
+    editor.replace_all.click()
+    assert editor.editor.toPlainText() == "X" * 10000
+    assert "256 KiB" in editor.search_result.text()
+    editor.replace_text.clear()
+    editor.replace_all.click()
+    assert not editor.editor.toPlainText()
+    editor.editor.undo()
+    assert editor.editor.toPlainText() == "X" * 10000
+    editor.deleteLater()
+
+
 @pytest.fixture
 def page_env(monkeypatch):
     monkeypatch.setenv("QT_QPA_PLATFORM", "offscreen")
