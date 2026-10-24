@@ -1065,6 +1065,15 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
 - **Do sprawdzenia ręcznie:** ustawić PIN serwisu CLI, w HMI zalogować się, sprawdzić odmowę dla Operatora.
 - **Długi:** pin HAL klucza pulpitu (API gotowe). Testy: 12 nowych; pełne pytest w PR. NIEZWERYFIKOWANE NA SPRZĘCIE.
 
+## 027 — Własny system projektowy ekranu (domknięcie) · 2026-10-24 · Claude
+- **Zrobione:** rozliczenie promptu: QSS powłoki z tokenów już generowany w czasie działania (`shell_qss`, test
+  kolorów i celu 44 px) — dodano `tools/gen_qss.py` (zrzut tego samego stylu); fonty IBM Plex Sans (Regular,
+  SemiBold, Bold) i JetBrains Mono (Regular, Bold) z licencjami OFL w `screens/linumert/fonts/`, rejestrowane
+  przez `linumert_fonts.register()` w powłoce HMI i podglądzie skórek; PROVENANCE z sumami SHA-256.
+- **Decyzje:** `linumert.qss` (arkusz bazy QtDragon) nie jest nadpisywany — źródłem stylu jest `shell_qss(tokens)`.
+- **Do sprawdzenia ręcznie:** HMI w LinuxCNC rysuje teksty fontem IBM Plex Sans, a DRO JetBrains Mono.
+- **Długi:** brak. Testy: pełne pytest, ruff, REQ — wynik w PR. Model-Author: Claude. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
 ## 007 — Katalog alarmów i tłumaczenia (domknięcie) · 2026-10-24 · Claude
 - **Zrobione:** `linumert_i18n.py` (`translate()`, `TsTranslator` czyta `.ts` bez lrelease, `.qm` gdy jest,
   język z env/INI, domyślnie PL), `i18n/linumert_pl.ts`, `tools/i18n.sh` (pylupdate5 + opcjonalnie lrelease),
