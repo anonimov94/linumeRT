@@ -65,6 +65,7 @@ ISO-INTEGRATION | PR #97: bramka sim/Plant i monitor; PR #101 (iso/fix-live-logi
 OD-01 | Przyczyna: losowy start (seed 1) w router_atc_rack lądował wewnątrz magazynu. Start omija bryły kolizyjne (emulacja xorshift rdzenia C, zmiana tylko przy kolizji), a matrix_smoke wymaga braku CRASH i COVER_CRASH; macierz 5/5 po 4 kryteria, 1116 testów PASS.
 EDITOR-VALIDATION | PR #98: walidacja niezapisanej treści, lista błędów z przejściem do linii i wyszukiwanie/zamiana z Undo; Qt w Debianie: 60 testów zakresu PASS, zrzut rzeczywistego dialogu. Końcowe CI i SHA w PR.
 ROADMAP-UNIFICATION | PR #99: jeden rejestr, generowane widoki, kontrola CI, instrukcje i migracja historii; lokalne testy i odbiór DOM PASS. Wynik CI i SHA w PR.
+PLANT-SUBSTEPS | Cel CSP z cyklu mastera interpolowany liniowo w podkrokach rdzenia C (lrt_machine_step_cycle, jak 60C2h/stepgen); domyślnie 4 podkroki. Atrapa: frezarka i router PASS dla n = 2–16 (wcześniej E-4201 i ~1560 zgubionych kroków przy n ≥ 2–4). Raport docs/raporty/plant_substeps.md.
 
 ## Korekty historycznego rejestru
 

@@ -217,6 +217,16 @@ z histerezą (bez klatek jednorazowego wypiekania), 10 Hz w bezczynności. Pomia
 offscreen, 700×640, ruch 3 mm/klatkę): detal mediana 2,9 / 6,5 / 6,8 ms, maks. ≤ 20 ms;
 maszyna 3,0–3,8 ms. Poglądowe, nie model kolizji. NIEZWERYFIKOWANE NA SPRZĘCIE. Do oceny Codex.
 
+## Plant: cel CSP interpolowany w podkrokach, domyślnie 4 podkroki · 2026-10-24 · Claude · PROPOZYCJA
+
+Wynik atrapy zależał od `timing.substeps`, bo cel 607Ah z cyklu mastera trafiał do napędu
+w pierwszym podkroku (n-krotny impuls FF prędkości i pola krokowca). Rdzeń C dostaje
+`lrt_machine_step_cycle(m, dt, n)`: napędy w CSP w stanie „praca” widzą cel liniowo rozłożony na
+podkroki (jak interpolacja 60C2h w napędzie i stepgen). Domyślne `substeps` = 4 — przy 1 krok
+całkowania 1 ms jest za gruby dla krokowca przy G0. Wynik zbieżny dla n ≥ 2 (raport
+`docs/raporty/plant_substeps.md`). Konsekwencja dla M5: generator EtherCAT ustawia 60C2h równe
+okresowi wątku serwo. Model, nie maszyna. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
 ## Sesja 007 — tłumaczenia Qt ekranu · 2026-10-24 · Claude · PROPOZYCJA
 
 Teksty operatora przez `translate(kontekst, tekst)` z `screens/linumert/linumert_i18n.py`
