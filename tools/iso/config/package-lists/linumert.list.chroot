@@ -3,6 +3,8 @@ linux-image-rt-amd64
 live-boot
 live-config
 live-config-systemd
+user-setup
+sudo
 xorg
 xfce4
 xfce4-terminal

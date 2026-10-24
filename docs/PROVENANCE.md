@@ -470,3 +470,9 @@ Autor: projekt linumeRT / Codex, 2026-10-24, GPL-2.0-or-later, własny kod
 w screens/linumert/linumert_program_editor.py oraz tests/test_hmi_workflow_widgets.py.
 Bez nowych bibliotek i zasobów produkcyjnych. Lokalny zrzut build/editor-preview.png
 korzysta z fontu systemowego wyłącznie do odbioru, bez jego redystrybucji.
+
+Poprawka logowania Live ISO i raport domknięcia gałęzi: Codex, 2026-10-24,
+GPL-2.0-or-later; własny kod `tools/iso/test-live-login.sh`, istniejące skrypty ISO
+i `docs/raporty/ZAMKNIECIE_GALEZI_2026-10-24.md`. Test wykorzystuje pakiety
+Debiana 12 w jednorazowym kontenerze, bez nowych zależności produkcyjnych poza
+user-setup/sudo z Debiana wymaganymi dla konta Live.

@@ -937,9 +937,9 @@ Pozostaje: Pełny odbiór 4×4×2, rozdzielczości/dotyk, LinuxCNC/Plant, safety
 
 ### ISO-INTEGRATION — Bramka sim/Plant i monitor w obrazie ISO
 
-**ukończone**. PR #97 scalony: integracja menu/launchera i walidacja budowy bez publikacji.
+**ukończone**. PR #97: bramka sim/Plant i monitor; PR #101 (iso/fix-live-login) dodaje konto linumert, user-setup/sudo i jawny autologin. Debian 12: rzeczywiste tworzenie konta, hasło, UID i idempotencja PASS; budowa końcowego ISO w kontrolach PR #101.
 
-Źródła: [docs/DZIENNIK.md](../DZIENNIK.md), [.github/workflows/iso.yml](../../.github/workflows/iso.yml).
+Źródła: [docs/DZIENNIK.md](../DZIENNIK.md), [.github/workflows/iso.yml](../../.github/workflows/iso.yml), [tools/iso/test-live-login.sh](../../tools/iso/test-live-login.sh), [docs/raporty/ZAMKNIECIE_GALEZI_2026-10-24.md](../raporty/ZAMKNIECIE_GALEZI_2026-10-24.md), [PR](https://github.com/anonimov94/linumeRT/pull/101).
 
 ### ISO-ACCEPTANCE — Odbiór i publikacja obrazu
 
