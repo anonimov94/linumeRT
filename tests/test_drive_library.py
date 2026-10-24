@@ -224,7 +224,7 @@ def test_drive_template_schema_type_rules(library: dict[str, dict]) -> None:
     assert any("wymaga osi obrotowej" in i.message for i in template_issues(rotary))
     real = copy.deepcopy(library["servo_400w"])
     real["real"] = {"lcec": {}}
-    assert any("sesji 061" in i.message for i in template_issues(real))
+    assert any(i.path == "real.driver" for i in template_issues(real))  # sesja 061: walidacja
     assert template_issues("nie słownik")[0].message.startswith("szablon musi być słownikiem")
 
 

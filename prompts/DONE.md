@@ -1,13 +1,13 @@
 <!-- Generowane przez python3 tools/roadmap.py; edytuj docs/roadmap/plan.json. -->
 # Ukończone zakresy — widok rejestru
 
-Pierwotny plan: **84 sesje M0–M6**, commit `796c6a2`. Stan na 2026-10-24: planowane: 17; w toku: 0; częściowe: 32; do odbioru: 0; ukończone: 35; zablokowane: 0.
+Pierwotny plan: **84 sesje M0–M6**, commit `796c6a2`. Stan na 2026-10-24: planowane: 16; w toku: 0; częściowe: 29; do odbioru: 0; ukończone: 39; zablokowane: 0.
 
 Zakończenie części implementacji nie oznacza odbioru całej funkcji ani sprzętu.
 
 To wynik generatora, nie lista do ręcznego dopisywania. Wybór pracy i statusy są w [plan.json](../docs/roadmap/plan.json); częściowe zakresy w [PLAN.md](../docs/roadmap/PLAN.md).
 
-Ukończone pierwotne sesje: **35 z 84**.
+Ukończone pierwotne sesje: **39 z 84**.
 
 001 | 2026-10-17 | Szkielet monorepo: pyproject, katalogi z README, Makefile, CI, LICENSE (GPL-2), LICENCJE, PROVENANCE, testy licencji/IP/układu; Claude
 002 | 2026-10-17 | Proces IP, słownik, rejestr pochodzenia (52 wpisy), lista przed wydaniem, rozszerzony strażnik IP; Claude
@@ -37,12 +37,16 @@ Ukończone pierwotne sesje: **35 z 84**.
 026 | 2026-10-20 | Odbiór automatyczny Plant P0/G1: pełne CI Debian 12/LinuxCNC, C+ASan/UBSan, scenariusze, raport P0 i checklista ręczna; PR #56; Codex
 027 | 2026-10-24 | Rozliczenie promptu 027: tokens.yaml źródłem prawdy; QSS powłoki generowany z tokenów (linumert_shell_model.shell_qss, test kolorów/44 px) + tools/gen_qss.py do zrzutu; fonty IBM Plex Sans i JetBrains Mono (OFL) w screens/linumert/fonts, rejestrowane przy starcie ekranu i podglądu skórek; 31 ikon z wpisami PROVENANCE (test_ip_guard); skórki korzystają z kontraktu palet (linumert_skin_contract); Claude
 032 | 2026-10-18 | Baza narzędzi (rdzeń): 10 typów z walidacją, SQLite z migracjami i historią, tool.tbl bez strat (sprawdzone w rs274 LinuxCNC 2.9), CSV; ekran w sesji ekranu; PR #16; Claude
+036 | 2026-10-24 | Role operator/technolog/serwis, PIN scrypt w SQLite (nigdy jawnie), blokada po błędach, audyt, CLI; przycisk roli i logowanie PIN w HMI; blokada edycji narzędzi/offsetów (technolog) i Konfiguracji/pełnego QtDragon (serwis). Opcjonalny klucz pulpitu: API Session.set_key, pin HAL do podłączenia z pulpitem; Claude
 039 | 2026-10-18 | Format .lnx (Pydantic + lnx_schema.json), ;@STOCK, BaseMacroGenerator, deterministyczny kompilator .lnx → .ngc (golden, rs274), alarmy P-5011…P-5015; PR #14; Claude
 040 | 2026-10-20 | Generatory header/program_end/tool_change/face_mill (#47) + walidacja kroków z bazą narzędzi (typ, średnica, skok, długość ostrza, obroty, kierunek; P-5207…P-5211, compile_program(tools=…)); Claude
 041 | 2026-10-21 | Kieszenie v2: pionowo/rampa/helisa, naroża, obrót, CW/CCW, naddatki i wykańczanie; v1 niezmienne; golden, materiał bez wysp, rs274 i wykonanie na LinuxCNC + Plant; 882 + 94 LinuxCNC PASS; PR #58; Codex
 043 | 2026-10-24 | contours.py: slot_linear, slot_arc, stud_rect, stud_circle, contour (G41.1/G42.1, dojazd/odjazd styczny, P-5010 z numerem segmentu), preview_2d, w menu Cykli; golden 5 programów, weryfikacja materiałem StockMap, test rs274 w CI; Claude
 044 | 2026-10-18 | Lekser G-code LinuxCNC (P-5101…P-5111, linia/kolumna, słowa O), kontrola w rs274; 44 próbki zgodne z LinuxCNC 2.9; przycisk Sprawdź w sesji ekranu; PR #15; Claude
 048 | 2026-10-20 | Podprogramy o<lrt_face_mill>, o<lrt_drill_grid>, o<lrt_drill_circle> (NgcGui), eksport do user_macros, PODPROGRAMY.md; ruch zgodny z generatorami w rs274 (część: kieszenie/rowki później); Claude
+049 | Wybrane cykle na LinuxCNC + Plant (#58/#60); tools/suite_cycles.py: 10 przypadków generatorów (planowanie, wiercenie G81/G83, kieszenie, rowki, czopy, kontur) × router_gantry_steppers i mill_servo_table, warianty A (G0 z machine.yaml) i B (G0 ≤ 3000 mm/min): 40/40 PASS po poprawce Plant (interpolacja celu CSP w podkrokach, PLANT-SUBSTEPS). Wcześniejsze zgubione kroki routera i E-4201 frezarki przy G0 były artefaktem modelu, nie generatorów.
+051 | simulation/linumert_sim/path.py: MoveList (start/end float32, line/tool int32, kind int8, feed float32), łuki G17/G18/G19 z linią śrubową na cięciwach z błędem ≤ 0,01 mm, PathCanon dla gcode.parse oraz zapasowy interpreter podzbioru (G0–G3, IJK/R, G20/21, G90/91, G90.1/91.1, T/M6, G81/82/83/73 z G98/G99) z notatkami zamiast zgadywania. 10 programów golden z M3; z LinuxCNC 2.9 (RIP) 9 programów bez korekcji zgodnych z rs274 co do linii, końców i długości. Naprawiony brak canon.parameter_file (TypeError w gcode.parse, także w core load_ngc).
+052 | Symulacja live (osobny proces, nice 10) z wcześniejszych sesji, a teraz także offline: simulation/linumert_sim/offline.py (ścieżka 051 → SimEngine: materiał, K-3xx, czas G0/G1, objętość usunięta) i worker.py — proces potomny spawn z nice ≥ 10, kolejka zadań, anulowanie zadania bieżącego i oczekującego, cache wyników po SHA-256 wejścia (pamięć + pliki JSON), wątek pomocniczy z callbackiem; most sygnałów Qt screens/linumert/linumert_sim_worker.py. MoveList z obrotami wrzeciona (S, M3/M4/M5; rs274 przez LineCode.spindle/speed).
 054 | 2026-10-20 | Przygotówka: ;@STOCK, dialog Symulacja, K-321 (wcześniej) + cel sondy Plant z przygotówki (tools/stock_probe.py); Claude
 
 ## Ukończone rozszerzenia (nie zamykają automatycznie sesji)
@@ -65,6 +69,7 @@ ISO-INTEGRATION | PR #97: bramka sim/Plant i monitor; PR #101 (iso/fix-live-logi
 OD-01 | Przyczyna: losowy start (seed 1) w router_atc_rack lądował wewnątrz magazynu. Start omija bryły kolizyjne (emulacja xorshift rdzenia C, zmiana tylko przy kolizji), a matrix_smoke wymaga braku CRASH i COVER_CRASH; macierz 5/5 po 4 kryteria, 1116 testów PASS.
 EDITOR-VALIDATION | PR #98: walidacja niezapisanej treści, lista błędów z przejściem do linii i wyszukiwanie/zamiana z Undo; Qt w Debianie: 60 testów zakresu PASS, zrzut rzeczywistego dialogu. Końcowe CI i SHA w PR.
 ROADMAP-UNIFICATION | PR #99: jeden rejestr, generowane widoki, kontrola CI, instrukcje i migracja historii; lokalne testy i odbiór DOM PASS. Wynik CI i SHA w PR.
+PLANT-SUBSTEPS | Cel CSP z cyklu mastera interpolowany liniowo w podkrokach rdzenia C (lrt_machine_step_cycle, jak 60C2h/stepgen); domyślnie 4 podkroki. Atrapa: frezarka i router PASS dla n = 2–16 (wcześniej E-4201 i ~1560 zgubionych kroków przy n ≥ 2–4). Raport docs/raporty/plant_substeps.md.
 
 ## Korekty historycznego rejestru
 

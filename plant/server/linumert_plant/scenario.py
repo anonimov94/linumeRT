@@ -28,6 +28,7 @@ from typing import Any
 import yaml
 
 from .lrtnet import FLAG_ESTOP_OPEN, FLAG_FAULT
+from .server import DEFAULT_SUBSTEPS
 
 ROOT = Path(__file__).resolve().parents[3]
 ACTIONS = ("enable", "home", "move", "mdi", "program", "wait", "fault", "clear", "set_param",
@@ -63,7 +64,7 @@ class Scenario:
     description: str = ""
     duration: float = 5.0
     seed: int = 1
-    substeps: int = 1
+    substeps: int = DEFAULT_SUBSTEPS
     cycle_ns: int = 1_000_000
     program: Path | None = None
     master: str = "mock"
@@ -98,7 +99,7 @@ def load_scenario(path: Path | str, machine: Path | None = None) -> Scenario:
                     requirements=[str(r) for r in data.get("requirements") or []],
                     description=str(data.get("description", "")),
                     duration=float(data.get("duration", 5.0)), seed=int(data.get("seed", 1)),
-                    substeps=int(timing.get("substeps", 1)),
+                    substeps=int(timing.get("substeps", DEFAULT_SUBSTEPS)),
                     cycle_ns=int(timing.get("cycle_ns", 1_000_000)),
                     program=rel(data.get("program")), master=str(data.get("master", "mock")),
                     linuxcnc=dict(data.get("linuxcnc") or {}))

@@ -69,6 +69,7 @@ extern "C" {
 
 #define LRT_MACHINE_MAX_JOINTS 6
 #define LRT_MACHINE_MAX_DRIVES 13 /* 6 osi x 2 napedy + wrzeciono */
+#define LRT_MACHINE_MAX_SUBSTEPS 100
 #define LRT_MACHINE_MAX_LINKS 12
 #define LRT_MACHINE_MAX_SWITCHES 24
 #define LRT_MACHINE_MAX_IO 32
@@ -179,6 +180,10 @@ typedef struct {
     lrt_axis axis;
     uint16_t controlword;
     int32_t target;
+    int32_t applied;      /* cel 607Ah przekazany napedowi w ostatnim kroku (ramka napedu) */
+    int32_t cycle_from;   /* applied na poczatku cyklu mastera (interpolacja podkrokow) */
+    int32_t cycle_offset; /* przesuniecie ramki napedu na poczatku cyklu */
+    int cycle_interp;     /* 1 = cel interpolowany w tym cyklu (CSP, praca) */
     int was_fault;
     int in_stop;       /* kontakt ze zderzakiem w poprzednim kroku */
     long rev;          /* numer obrotu silnika (floor(theta/2pi)) */
@@ -217,6 +222,7 @@ typedef struct {
     double time;
     uint32_t rng;
     lrt_live_log log;
+    int ip_k, ip_n; /* podkrok k z n w lrt_machine_step_cycle (ip_n = 0: bez interpolacji) */
 
     int err_index;  /* element, ktorego dotyczy ostatni blad init/step (-1 = brak) */
     int err_detail; /* kod bledu osi/napedu dla ERR_DRIVE/ERR_MECH/ERR_STEP */
@@ -234,6 +240,12 @@ int lrt_machine_cfg_curve(lrt_machine_cfg *c, int drive, double omega, double to
 int lrt_machine_init(lrt_machine *m, const lrt_machine_cfg *c);
 /* Jeden krok dt [s] wszystkich napedow i osi, potem czujniki, kinematyka i wejscia. */
 int lrt_machine_step(lrt_machine *m, double dt);
+/* Jeden cykl mastera dt [s] w n podkrokach dt/n (1..LRT_MACHINE_MAX_SUBSTEPS). Cel ustawiony
+ * na ten cykl napedy w CSP dostaja liniowo rozlozony na podkroki (jak interpolacja 60C2h
+ * w napedzie CSP albo stepgen rozkladajacy impulsy w okresie) - wynik nie zalezy od n poza
+ * dokladnoscia calkowania. Bez interpolacji skok celu trafia do pierwszego podkroku i FF
+ * predkosci napedu widzi n-krotny impuls (ustalenie sesji 049). */
+int lrt_machine_step_cycle(lrt_machine *m, double dt, int n);
 const char *lrt_machine_strerror(int status);
 /* Element i kod szczegolowy ostatniego bledu init/step (dla wiazania bez dostepu do struktury). */
 int lrt_machine_err_index(const lrt_machine *m);

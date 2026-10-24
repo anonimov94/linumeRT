@@ -79,7 +79,11 @@ potem `digital_in` u32, `spindle_actual` f32, statystyki (`frames_lost` u32, `fr
   dwa jointy LinuxCNC); inna liczba osi w ramce = ramka odrzucona. `mode` zmienia 6060h tylko przy
   zmianie; `target_pos` trafia do 607Ah wyłącznie w CSP (8); `mode_display` = 6061h;
   `following_error` = ostatnie 607Ah − 6064h (poza CSP 0); `torque_pct` = 6077h.
-- Krok modelu: `dt` z reguły 3 dzielone na `timing.substeps` podkroków rdzenia C.
+- Krok modelu: `dt` z reguły 3 dzielone na `timing.substeps` podkroków rdzenia C (domyślnie 4).
+  Cel 607Ah z ramki napędy CSP dostają liniowo rozłożony na podkroki (`lrt_machine_step_cycle`,
+  jak interpolacja 60C2h w napędzie i stepgen rozkładający impulsy w okresie). Wynik nie zależy
+  od `substeps` ≥ 2; przy 1 krokowiec przy G0 gubi kroki z powodu zbyt grubego kroku całkowania
+  (raport `docs/raporty/plant_substeps.md`).
 - Zegar odbioru: lockstep = `time_ns` ramki, realtime = zegar monotoniczny hosta. Watchdog działa
   w obu trybach (lockstep: luka `time_ns` między ramkami > `watchdog_ms`; realtime: także bez ramek,
   sprawdzany w pętli co `watchdog_ms/4`). Awaria napędu `COMM_WATCHDOG` = 603Fh **8130h**, alarm
@@ -164,8 +168,9 @@ on_fault: quick_stop      # quick_stop | disable | brake
 params:
   friction_viscous: {value: 0.0004, live: true}
   rotor_inertia_kgm2: {live: true}
-real:                     # REQ-VD-06: mapowanie na sprzęt, to samo źródło
-  lcec: {vendor: null, product: null, pdo_profile: cia402_csp}
+real:                     # REQ-VD-06: napęd rzeczywisty, to samo źródło (sesja 061)
+  driver: ethercat_cia402
+  pdo: [6040h, 6041h, 6060h, 6061h, 607Ah, 6064h, 603Fh]
 ```
 
 **Kopiowanie (REQ-VD-03):** `plant drive clone <źródło> <nowe_id>` (i panel) zapisuje nowy
@@ -173,8 +178,12 @@ szablon z `version: 1` i `based_on: <źródło>`; kopia jest niezależna od oryg
 **Biblioteka startowa (REQ-VD-05):** krokowiec NEMA 23 (≈3 N·m), krokowiec NEMA 34 (≈8,5 N·m),
 serwo krokowe (≈2,2 N·m), serwo 400 W, serwo 750 W, stół obrotowy ze ślimakiem 1:90,
 wrzeciono 2,2 kW z falownikiem; bez nazw producentów.
-**Sprzęt (REQ-VD-06):** sekcja `real:` w tym samym formacie szablonu przenosi konfigurację
-z Plant na lcec/stepgen (sesja 061).
+**Sprzęt (REQ-VD-06, sesja 061):** sekcja `real:` w tym samym formacie szablonu przenosi konfigurację
+z Plant na stepgen (parport/Mesa), EtherCAT CiA 402, falownik Modbus albo PWM (format: README biblioteki).
+W `machine.yaml` `target: plant | sim | hardware` (domyślnie plant) i dla sprzętu sekcja
+`hardware: {interface: parport|mesa|ethercat, board, address, channels: {napęd: kanał}, spindle_device}`.
+`drive_real.hardware_plan()` daje dla każdego napędu sterownik, kanał i skalę impulsów — wejście
+generatora INI/HAL (062/063). NIEZWERYFIKOWANE NA SPRZĘCIE.
 
 ## 5a. Wrzeciono z falownikiem (sesja 021)
 Kod: `plant/server/linumert_plant/vfd.py`, testy `tests/test_vfd.py`, `tests/test_plant_vfd_linuxcnc.py`.

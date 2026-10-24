@@ -93,7 +93,7 @@ plant_yaml() {
 # Zmiany ręczne znikną po ponownym uruchomieniu skryptu.
 machine: $REPO_DIR/config/machines/mill_servo_table.yaml
 network: {listen: $LRTNET_PLANT_IP, port: $LRTNET_PORT, panel_listen: 0.0.0.0, panel_port: $PANEL_PORT}
-timing: {cycle_ns: 1000000, substeps: 1, watchdog_ms: 50}
+timing: {cycle_ns: 1000000, substeps: 4, watchdog_ms: 50}
 mode: realtime
 seed: 1
 state_file: /var/lib/linumert-plant/plant_state.json

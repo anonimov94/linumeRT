@@ -653,6 +653,51 @@ static void test_step_rejects_bad_dt_and_is_deterministic(void)
     LRT_CHECK(lrt_machine_size() == sizeof(lrt_machine));
 }
 
+/* ---- cykl mastera w podkrokach (sesja 049) ------------------------------------------- */
+
+/* Ruch osi X z rampa predkosci do 0,1 m/s; cel ustawiany raz na cykl 1 ms, n podkrokow.
+ * Zwraca najwiekszy blad nadazania [m] na granicach cykli. */
+static double ramp_x_peak_error(int n)
+{
+    lrt_machine_cfg c;
+    double pos;
+    double peak = 0.0;
+    int i;
+
+    cfg_xyz(&c);
+    LRT_CHECK(init_ok(&c));
+    enable_all();
+    pos = M.joint_pos[0];
+    for (i = 0; i < 600; i++) {
+        double v = 0.1 * (i < 200 ? i / 200.0 : 1.0);
+        double err;
+
+        pos += v * DT;
+        lrt_machine_set_target(&M, 0, lrt_machine_counts_for(&M, 0, pos));
+        LRT_CHECK(lrt_machine_step_cycle(&M, DT, n) == LRT_MACHINE_OK);
+        LRT_CHECK(M.slots[0].applied == M.slots[0].target);
+        err = fabs(pos - M.joint_pos[0]);
+        peak = err > peak ? err : peak;
+    }
+    return peak;
+}
+
+static void test_step_cycle_interpolates_target(void)
+{
+    double e1 = ramp_x_peak_error(1);
+    double e8 = ramp_x_peak_error(8);
+
+    /* Bez interpolacji skok celu w pierwszym podkroku dawal n-krotny impuls FF predkosci:
+     * przy n = 8 blad ok. 49 mm (E-4201 przy G0, sesja 049). Z interpolacja drobniejszy krok
+     * nie pogarsza nadazania (n = 1: ok. 0,1 mm, n = 8: ok. 0,013 mm). */
+    LRT_CHECK(e1 < 1e-3);
+    LRT_CHECK(e8 <= e1);
+    LRT_CHECK(lrt_machine_step_cycle(&M, DT, 0) == LRT_MACHINE_ERR_DT);
+    LRT_CHECK(lrt_machine_step_cycle(&M, DT, LRT_MACHINE_MAX_SUBSTEPS + 1) == LRT_MACHINE_ERR_DT);
+    LRT_CHECK(lrt_machine_step_cycle(&M, 0.1, 4) == LRT_MACHINE_ERR_DT); /* dt/n > max */
+    LRT_CHECK(lrt_machine_step_cycle(NULL, DT, 4) == LRT_MACHINE_ERR_NULL);
+}
+
 /* ---- bazowanie po rozruchu (REQ-VM-07, sesja 015) ------------------------------------ */
 
 static void test_random_start_is_seeded_and_in_range(void) /* REQ-VM-07 */
@@ -793,6 +838,7 @@ int main(void)
     LRT_RUN(test_estop_sto_and_quick_stop);
     LRT_RUN(test_probe_box_and_plate);
     LRT_RUN(test_step_rejects_bad_dt_and_is_deterministic);
+    LRT_RUN(test_step_cycle_interpolates_target);
     LRT_RUN(test_random_start_is_seeded_and_in_range);
     LRT_RUN(test_incremental_encoder_counts_for_follows_offset);
     LRT_RUN(test_gantry_square_with_drive_homing_on_two_sensors);

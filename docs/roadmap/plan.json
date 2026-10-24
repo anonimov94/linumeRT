@@ -554,10 +554,15 @@
       "milestone": "M2",
       "title": "Poziomy dostępu",
       "prompt": "prompts/sesja-036.md",
-      "status": "planned",
-      "progress": "Brak potwierdzonego zakończenia zakresu.",
+      "status": "done",
+      "progress": "2026-10-24 | Role operator/technolog/serwis, PIN scrypt w SQLite (nigdy jawnie), blokada po błędach, audyt, CLI; przycisk roli i logowanie PIN w HMI; blokada edycji narzędzi/offsetów (technolog) i Konfiguracji/pełnego QtDragon (serwis). Opcjonalny klucz pulpitu: API Session.set_key, pin HAL do podłączenia z pulpitem; Claude",
       "remaining": [],
-      "evidence": []
+      "evidence": [
+        "docs/DZIENNIK.md",
+        "tests/test_access.py",
+        "tests/test_access_ui.py",
+        "docs/OBSLUGA_OPERATORA.md"
+      ]
     },
     {
       "id": "037",
@@ -726,12 +731,16 @@
       "milestone": "M3",
       "title": "Test technologiczny na Plant",
       "prompt": "prompts/sesja-049.md",
-      "status": "partial",
-      "progress": "Wybrane cykle wykonane na LinuxCNC + Plant (#58/#60).",
+      "status": "done",
+      "progress": "Wybrane cykle na LinuxCNC + Plant (#58/#60); tools/suite_cycles.py: 10 przypadków generatorów (planowanie, wiercenie G81/G83, kieszenie, rowki, czopy, kontur) × router_gantry_steppers i mill_servo_table, warianty A (G0 z machine.yaml) i B (G0 ≤ 3000 mm/min): 40/40 PASS po poprawce Plant (interpolacja celu CSP w podkrokach, PLANT-SUBSTEPS). Wcześniejsze zgubione kroki routera i E-4201 frezarki przy G0 były artefaktem modelu, nie generatorów.",
       "remaining": [
-        "suite_cycles dla każdego generatora na router_steppers i mill_servo."
+        "Kontur z korekcją G41.1/G42.1 na Plant z LinuxCNC (atrapa jedzie bez korekcji; rs274 w CI)."
       ],
       "evidence": [
+        "tools/suite_cycles.py",
+        "tests/test_suite_cycles.py",
+        "docs/raporty/suite_cycles.md",
+        "docs/raporty/plant_substeps.md",
         "docs/DZIENNIK.md"
       ]
     },
@@ -751,12 +760,16 @@
       "milestone": "M4",
       "title": "Ścieżka z programu",
       "prompt": "prompts/sesja-051.md",
-      "status": "partial",
-      "progress": "Działa ścieżka rs274 i pomiar na żywo.",
+      "status": "done",
+      "progress": "simulation/linumert_sim/path.py: MoveList (start/end float32, line/tool int32, kind int8, feed float32), łuki G17/G18/G19 z linią śrubową na cięciwach z błędem ≤ 0,01 mm, PathCanon dla gcode.parse oraz zapasowy interpreter podzbioru (G0–G3, IJK/R, G20/21, G90/91, G90.1/91.1, T/M6, G81/82/83/73 z G98/G99) z notatkami zamiast zgadywania. 10 programów golden z M3; z LinuxCNC 2.9 (RIP) 9 programów bez korekcji zgodnych z rs274 co do linii, końców i długości. Naprawiony brak canon.parameter_file (TypeError w gcode.parse, także w core load_ngc).",
       "remaining": [
-        "Rozliczyć MoveList, canon, łuki i pełną macierz 10 programów."
+        "Podłączenie MoveList do procesu symulacji i widoku 3D (052/057).",
+        "Korekcja G41/G42 i o-word call tylko przez rs274 (podzbiór zapisuje notatkę)."
       ],
       "evidence": [
+        "simulation/linumert_sim/path.py",
+        "tests/test_sim_path.py",
+        "tests/test_toolpath.py",
         "docs/DZIENNIK.md"
       ]
     },
@@ -765,12 +778,17 @@
       "milestone": "M4",
       "title": "Proces symulacji",
       "prompt": "prompts/sesja-052.md",
-      "status": "partial",
-      "progress": "Symulacja live działa w osobnym procesie nice 10.",
+      "status": "done",
+      "progress": "Symulacja live (osobny proces, nice 10) z wcześniejszych sesji, a teraz także offline: simulation/linumert_sim/offline.py (ścieżka 051 → SimEngine: materiał, K-3xx, czas G0/G1, objętość usunięta) i worker.py — proces potomny spawn z nice ≥ 10, kolejka zadań, anulowanie zadania bieżącego i oczekującego, cache wyników po SHA-256 wejścia (pamięć + pliki JSON), wątek pomocniczy z callbackiem; most sygnałów Qt screens/linumert/linumert_sim_worker.py. MoveList z obrotami wrzeciona (S, M3/M4/M5; rs274 przez LineCode.spindle/speed).",
       "remaining": [
-        "Rozliczyć anulowanie, cache SHA-256 i pełne API offline."
+        "Podłączenie workera offline do strony Symulacja ekranu i widoku 3D (057).",
+        "Czas z przyspieszeniami i porównanie z Plant (053)."
       ],
       "evidence": [
+        "simulation/linumert_sim/offline.py",
+        "simulation/linumert_sim/worker.py",
+        "screens/linumert/linumert_sim_worker.py",
+        "tests/test_sim_worker.py",
         "docs/DZIENNIK.md"
       ]
     },
@@ -888,11 +906,16 @@
       "title": "machine.yaml: napędy i wejścia rzeczywiste",
       "prompt": "prompts/sesja-061.md",
       "status": "partial",
-      "progress": "Schemat maszyny oraz deklaracje wdrożenia hardware istnieją.",
+      "progress": "Schemat maszyny i deklaracje wdrożenia hardware; sekcja real: szablonów napędów (REQ-VD-06): stepgen z czasami impulsów, ethercat_cia402 z PDO, vfd_modbus (hy_vfd/mb2hal), pwm — we wszystkich 7 szablonach biblioteki; machine.yaml: target plant|sim|hardware i sekcja hardware (interfejs parport/mesa/ethercat, karta 7i96s/7i76e, kanały napędów, port falownika); hardware_plan() — sterownik, kanał i skala impulsów z mechaniki szablonu. 22/22 wymagań pokrytych.",
       "remaining": [
-        "Real mapping napędów REQ-VD-06 i generator sprzętowy; raport konkursu 03."
+        "Pulpit (MPG, przyciski) i E-STOP rzeczywisty w sekcji hardware.",
+        "Raport konkursu 03."
       ],
       "evidence": [
+        "plant/server/linumert_plant/drive_real.py",
+        "core/linumert/machine/schema.py",
+        "plant/library/drives/README.md",
+        "tests/test_drive_real.py",
         "docs/DZIENNIK.md"
       ]
     },
@@ -1441,13 +1464,14 @@
         "070"
       ],
       "status": "partial",
-      "progress": "Manifesty, kontrola przełączenia i monitor read-only istnieją.",
+      "progress": "Manifesty, kontrola przełączenia i monitor read-only istnieją. N1/Codex: prawdziwy gcode potwierdza posuwy G20/G21 i fizyczne numery linii; naprawiony parameter_file. Demo z T1 M6 ujawnia SIGSEGV w tooldata, pełny odbiór pozostaje otwarty.",
       "remaining": [
         "Produkcyjny host, kanał poleceń i potwierdzenie świeżości danych."
       ],
       "evidence": [
         "docs/design/SKIN_SYSTEM_ROADMAP.md",
-        "docs/design/SKIN_AUDIT.md"
+        "docs/design/SKIN_AUDIT.md",
+        "tests/test_toolpath.py"
       ]
     },
     {
@@ -1813,6 +1837,26 @@
         "config/sim/linumert_xyz/macros/lrt_m6.ngc",
         "tests/test_m6_remap.py",
         "core/linumert/programs/linuxcnc_check.py"
+      ]
+    },
+    {
+      "id": "PLANT-SUBSTEPS",
+      "title": "Plant: wynik niezależny od podkroków całkowania",
+      "parents": [
+        "049",
+        "063"
+      ],
+      "status": "done",
+      "progress": "Cel CSP z cyklu mastera interpolowany liniowo w podkrokach rdzenia C (lrt_machine_step_cycle, jak 60C2h/stepgen); domyślnie 4 podkroki. Atrapa: frezarka i router PASS dla n = 2–16 (wcześniej E-4201 i ~1560 zgubionych kroków przy n ≥ 2–4). Raport docs/raporty/plant_substeps.md.",
+      "remaining": [
+        "Obciążenie CPU Plant realtime przy 4 podkrokach na VM-B (odbiór właściciela).",
+        "Generator EtherCAT (063): 60C2h = okres wątku serwo."
+      ],
+      "evidence": [
+        "plant/core/machine.c",
+        "plant/core/tests/test_machine.c",
+        "tools/plant_substeps.py",
+        "docs/raporty/plant_substeps.md"
       ]
     }
   ]

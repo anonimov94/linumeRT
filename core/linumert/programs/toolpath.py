@@ -17,6 +17,7 @@ NIEZWERYFIKOWANE NA SPRZĘCIE.
 from __future__ import annotations
 
 import math
+import tempfile
 from collections.abc import Iterable, Sequence
 from dataclasses import dataclass
 from pathlib import Path
@@ -207,7 +208,8 @@ class PreviewCanon:
     Interpreter przekazuje współrzędne programu w calach (jednostki wewnętrzne),
     bez G5x/G92 — tak jak podgląd LinuxCNC; offsety trafiają do `set_g5x_offset`.
     Łuki poza płaszczyzną G17 i obrót G10 L2 R są pokazywane uproszczenie (`notes`).
-    NIEZWERYFIKOWANE z prawdziwym interpreterem w środowisku autora.
+    Współrzędne i set_feed_rate z gcode 2.9 używają cali i cali/min;
+    odbiornik przelicza je do mm oraz mm/min. Model-Author: Codex (weryfikacja N1).
     """
 
     def __init__(self, axis_mask: int = 0x7):
@@ -220,6 +222,7 @@ class PreviewCanon:
         self.g5x = np.zeros(3)
         self.g92 = np.zeros(3)
         self.axis_mask = axis_mask
+        self.parameter_file = ""
 
     # --- zapytania interpretera ---
     def check_abort(self):
@@ -321,7 +324,11 @@ def load_ngc(path: Path | str, unitcode: str = "G21",
         raise InterpreterUnavailable("Brak modułu gcode z LinuxCNC 2.9.") from exc
     path = Path(path)
     canon = PreviewCanon()
-    result, seq = gcode.parse(str(path), canon, unitcode, initcode)
+    # gcode reads this attribute as a string, not a callback. Keep interpreter
+    # parameter writes private to this analysis, away from the operator's state.
+    with tempfile.TemporaryDirectory(prefix="linumert-preview-") as directory:
+        canon.parameter_file = str(Path(directory) / "preview.var")
+        result, seq = gcode.parse(str(path), canon, unitcode, initcode)
     if result > gcode.MIN_ERROR:
         raise ValueError(f"linia {seq}: {gcode.strerror(result)}")
     source = path.read_text(encoding="utf-8", errors="replace").splitlines()
