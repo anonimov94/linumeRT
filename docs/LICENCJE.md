@@ -71,6 +71,7 @@ Bez nowych zależności ani zewnętrznych materiałów.
 Model-Author: Claude. IBM Plex Sans (IBM Corp.) i JetBrains Mono (The JetBrains Mono Project Authors),
 SIL Open Font License 1.1 — dołączone w `screens/linumert/fonts/` z plikami licencji. OFL pozwala na
 dołączanie do oprogramowania GPL; nazwy fontów zarezerwowane („Plex”) — pliki niezmienione.
+
 ## Tłumaczenia Qt — sesja 007, 2026-10-24
 Model-Author: Claude. `tools/i18n.sh` wywołuje narzędzia deweloperskie `pylupdate5` (pakiet Debiana
 `pyqt5-dev-tools`, GPL-3.0, jak PyQt5) i opcjonalnie `lrelease` (`qttools5-dev-tools`, Qt — LGPL-3.0/GPL).
