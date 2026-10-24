@@ -1065,6 +1065,12 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
 - **Do sprawdzenia ręcznie:** ustawić PIN serwisu CLI, w HMI zalogować się, sprawdzić odmowę dla Operatora.
 - **Długi:** pin HAL klucza pulpitu (API gotowe). Testy: 12 nowych; pełne pytest w PR. NIEZWERYFIKOWANE NA SPRZĘCIE.
 
+## N1 — rzeczywisty interpreter podglądu · 2026-10-24 · Codex
+- Model-Author: Codex. Naprawiono TypeError: jawny parameter_file i prywatny plik parametrów.
+- Debian12/RIP: 6 testów PASS, G20/G21 i fizyczne linie przy N900 potwierdzone; ruff i REQ PASS.
+- Demo z T1 M6: SIGSEGV w tool_mmap_mutex_get (gdb); pełny N1/N4 pozostają otwarte.
+- M1: ręczny odbiór oraz LEGACY-RUNTIME nadal otwarte; cudzych procesów LinuxCNC nie przerwano.
+
 ## 027 — Własny system projektowy ekranu (domknięcie) · 2026-10-24 · Claude
 - **Zrobione:** rozliczenie promptu: QSS powłoki z tokenów już generowany w czasie działania (`shell_qss`, test
   kolorów i celu 44 px) — dodano `tools/gen_qss.py` (zrzut tego samego stylu); fonty IBM Plex Sans (Regular,

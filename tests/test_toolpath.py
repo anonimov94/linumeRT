@@ -123,3 +123,17 @@ def test_load_ngc_with_linuxcnc_interpreter():
     path = Path(__file__).parent / "golden" / "pocket_helix.ngc"
     tp = load_ngc(path)
     assert len(tp) > 5 and tp.length > 0
+def test_load_ngc_real_interpreter_units_and_file_lines(tmp_path):
+    from linumert.programs.toolpath import load_ngc
+
+    for units, distance, feed in (("G21", 25.4, 254), ("G20", 1, 10)):
+        program = tmp_path / "units.ngc"
+        program.write_text(
+            f"{units} G90 G17 G94\nG0 X0 Y0 Z0\n"
+            f"N900 G1 X{distance} F{feed}\nM2\n", encoding="utf-8",
+        )
+        actual = load_ngc(program)
+        move = actual.moves[-1]
+        assert move.end == pytest.approx((25.4, 0, 0), abs=0.001)
+        assert move.feed == pytest.approx(254)
+        assert move.line == 3  # physical file line, not the explicit N900 word
