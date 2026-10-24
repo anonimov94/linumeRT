@@ -160,13 +160,13 @@
       "milestone": "M0",
       "title": "Katalog alarmów i tłumaczenia",
       "prompt": "prompts/sesja-007.md",
-      "status": "partial",
-      "progress": "Katalog alarmów i manager PL/EN gotowe.",
-      "remaining": [
-        "Brakuje pełnego mechanizmu Qt .ts/.qm i tools/i18n.sh; powiązane z 037."
-      ],
+      "status": "done",
+      "progress": "2026-10-24 | Katalog alarmów i manager PL/EN (2026-10-18) oraz mechanizm Qt: screens/linumert/linumert_i18n.py (translate(), .qm albo .ts bez lrelease, język z INI/env), screens/linumert/i18n/linumert_pl.ts, tools/i18n.sh (pylupdate5/lrelease), tools/i18n_check.py; pierwsze teksty przez translate(): panel alarmów; Claude",
+      "remaining": [],
       "evidence": [
-        "docs/DZIENNIK.md"
+        "docs/DZIENNIK.md",
+        "tests/test_alarms.py",
+        "tests/test_i18n.py"
       ],
       "historical_completion": "2026-10-18 | Katalog alarmów (56 kodów PL/EN) z walidacją, AlarmManager, 23 testy; tłumaczenia Qt (.ts, i18n.sh) odłożone do sesji ekranu; PR #6; Claude"
     },
@@ -565,7 +565,7 @@
       "title": "Język polski i angielski",
       "prompt": "prompts/sesja-037.md",
       "status": "partial",
-      "progress": "Katalog EN/PL prototypu skórek istnieje.",
+      "progress": "Katalog EN/PL prototypu skórek istnieje. Mechanizm .ts/translate() z sesji 007 gotowy (Claude, 2026-10-24).",
       "remaining": [
         "Pełne tłumaczenie produkcyjnego HMI .ts/.qm, przełącznik i formaty jednostek; dług 007."
       ],
@@ -642,10 +642,14 @@
       "milestone": "M3",
       "title": "Generatory: rowki, czopy, kontur",
       "prompt": "prompts/sesja-043.md",
-      "status": "planned",
-      "progress": "Brak potwierdzonego zakończenia zakresu.",
+      "status": "done",
+      "progress": "2026-10-24 | contours.py: slot_linear, slot_arc, stud_rect, stud_circle, contour (G41.1/G42.1, dojazd/odjazd styczny, P-5010 z numerem segmentu), preview_2d, w menu Cykli; golden 5 programów, weryfikacja materiałem StockMap, test rs274 w CI; Claude",
       "remaining": [],
-      "evidence": []
+      "evidence": [
+        "docs/DZIENNIK.md",
+        "tests/test_gen_contours.py",
+        "tests/golden/contours_contour.ngc"
+      ]
     },
     {
       "id": "044",

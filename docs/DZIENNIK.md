@@ -1062,3 +1062,21 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
 - **Decyzje:** `linumert.qss` (arkusz bazy QtDragon) nie jest nadpisywany — źródłem stylu jest `shell_qss(tokens)`.
 - **Do sprawdzenia ręcznie:** HMI w LinuxCNC rysuje teksty fontem IBM Plex Sans, a DRO JetBrains Mono.
 - **Długi:** brak. Testy: pełne pytest, ruff, REQ — wynik w PR. Model-Author: Claude. NIEZWERYFIKOWANE NA SPRZĘCIE.
+## 007 — Katalog alarmów i tłumaczenia (domknięcie) · 2026-10-24 · Claude
+- **Zrobione:** `linumert_i18n.py` (`translate()`, `TsTranslator` czyta `.ts` bez lrelease, `.qm` gdy jest,
+  język z env/INI, domyślnie PL), `i18n/linumert_pl.ts`, `tools/i18n.sh` (pylupdate5 + opcjonalnie lrelease),
+  `tools/i18n_check.py` (kompletność PL); powłoka HMI instaluje język przed budową widoków; panel alarmów
+  przez `translate()`. Katalog W/E/K/P i AlarmManager z 2026-10-18 bez zmian.
+- **Decyzje:** źródło EN + `.ts` PL, forma `translate()` (PROPOZYCJA w DECYZJE).
+- **Do sprawdzenia ręcznie:** HMI w LinuxCNC pokazuje polską podpowiedź Resetu; `LINUMERT_LANG=en` — angielską.
+- **Długi:** pozostałe napisy ekranu i skórek → sesja 037. Testy: pełne pytest 1230 PASS; ruff, REQ PASS.
+  Model-Author: Claude. Autokontrola. NIEZWERYFIKOWANE NA SPRZĘCIE.
+## 043 — Generatory: rowki, czopy, kontur · 2026-10-24 · Claude
+- **Zrobione:** `core/linumert/generators/contours.py`: slot_linear, slot_arc, stud_rect, stud_circle, contour
+  (segmenty L/A z tekstu, G41.1/G42.1 D=średnica, styczny dojazd/odjazd, P-5010 z numerem segmentu, promień łuku),
+  preview_2d; na stronie Cykle (menu + rejestr). Zrzut: build/contours/cycles-contours.png.
+- **Testy:** golden 5 programów; materiał `StockMap`: rowek tnie dokładnie szerokość, czop nietknięty, rowek łukowy
+  bez cięciwy, G0 bez materiału, rampa bez zagłębienia pionowego; walidacje; GUI Cykli; test rs274 (`linuxcnc`, CI).
+- **Decyzje:** tor środka narzędzia; kontur z korekcją dynamiczną LinuxCNC (bez tabeli narzędzi).
+- **Do sprawdzenia ręcznie:** kontur z korekcją na Plant; czopy przy realnym marginesie przygotówki.
+  Model-Author: Claude. NIEZWERYFIKOWANE NA SPRZĘCIE.

@@ -1,7 +1,7 @@
 <!-- Generowane przez python3 tools/roadmap.py; edytuj docs/roadmap/plan.json. -->
 # Prompty i wspólna roadmapa linumeRT
 
-Pierwotny plan: **84 sesje M0–M6**, commit `796c6a2`. Stan na 2026-10-24: planowane: 18; w toku: 0; częściowe: 34; do odbioru: 0; ukończone: 32; zablokowane: 0.
+Pierwotny plan: **84 sesje M0–M6**, commit `796c6a2`. Stan na 2026-10-24: planowane: 17; w toku: 0; częściowe: 33; do odbioru: 0; ukończone: 34; zablokowane: 0.
 
 Zakończenie części implementacji nie oznacza odbioru całej funkcji ani sprzętu.
 
@@ -29,7 +29,7 @@ Jedyne źródło statusów, powiązań i pozostałej pracy: [plan.json](../docs/
 | 004 | M0 | [Konfiguracja sim 3 osie z QtDragon](sesja-004.md) | ukończone |
 | 005 | M0 | [Kopia bazowa ekranu QtDragon](sesja-005.md) | ukończone |
 | 006 | M0 | [Rdzeń: model stanu maszyny i atrapa](sesja-006.md) | ukończone |
-| 007 | M0 | [Katalog alarmów i tłumaczenia](sesja-007.md) | częściowe |
+| 007 | M0 | [Katalog alarmów i tłumaczenia](sesja-007.md) | ukończone |
 | 008 | M0 | [Bufor i bramka G0](sesja-008.md) | ukończone |
 | 009 | M1 | [Specyfikacja wirtualnej maszyny Plant](sesja-009.md) | ukończone |
 | 010 | M1 | [Model obrabiarki machine.yaml (jedno źródło prawdy)](sesja-010.md) | ukończone |
@@ -65,7 +65,7 @@ Jedyne źródło statusów, powiązań i pozostałej pracy: [plan.json](../docs/
 | 040 | M3 | [Generatory: nagłówek, koniec, narzędzie, planowanie](sesja-040.md) | ukończone |
 | 041 | M3 | [Generatory: kieszenie](sesja-041.md) | ukończone |
 | 042 | M3 | [Generatory: wiercenie i gwintowanie](sesja-042.md) | częściowe |
-| 043 | M3 | [Generatory: rowki, czopy, kontur](sesja-043.md) | planowane |
+| 043 | M3 | [Generatory: rowki, czopy, kontur](sesja-043.md) | ukończone |
 | 044 | M3 | [Lekser G-code i walidacja w edytorze](sesja-044.md) | ukończone |
 | 045 | M3 | [Panel programu dialogowego](sesja-045.md) | częściowe |
 | 046 | M3 | [Podglądy 2D w formularzach](sesja-046.md) | częściowe |
