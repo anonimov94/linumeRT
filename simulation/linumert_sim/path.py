@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import math
 import re
+import tempfile
 from collections.abc import Iterable, Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -177,8 +178,8 @@ class PathCanon:
     trafiają do `set_g5x_offset`/`set_g92_offset` i są tylko zapamiętywane (`offset`).
     """
 
-    # gcodemodule czyta ten atrybut jako tekst (bez pliku parametrów: ""); bez niego
-    # __getattr__ zwraca funkcję i parse() kończy się TypeError.
+    # gcodemodule czyta ten atrybut jako tekst; bez niego __getattr__ zwraca funkcję
+    # i parse() kończy się TypeError. parse_rs274 ustawia plik w katalogu tymczasowym.
     parameter_file = ""
 
     def __init__(self, axis_mask: int = 0x7):
@@ -299,7 +300,11 @@ def parse_rs274(path: Path | str, unitcode: str = "G21",
     except ImportError as exc:
         raise InterpreterUnavailable("Brak modułu gcode z LinuxCNC 2.9.") from exc
     canon = PathCanon()
-    result, seq = gcode.parse(str(path), canon, unitcode, initcode)
+    # Zapisy parametrów interpretera zostają w analizie, z dala od stanu operatora
+    # (jak load_ngc po poprawce N1 Codex, PR #123).
+    with tempfile.TemporaryDirectory(prefix="linumert-path-") as directory:
+        canon.parameter_file = str(Path(directory) / "path.var")
+        result, seq = gcode.parse(str(path), canon, unitcode, initcode)
     if result > gcode.MIN_ERROR:
         raise ValueError(f"linia {seq}: {gcode.strerror(result)}")
     return canon.movelist()
