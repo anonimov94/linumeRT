@@ -212,7 +212,7 @@ def clone_instance(instance: DriveInstance, new_id: str, *, name: str | None = N
 def dump_template(tpl: dict[str, Any]) -> str:
     """Serializuje szablon do YAML w kolejności kanonicznej (bez komentarzy)."""
     ordered: dict[str, Any] = {k: tpl[k] for k in TOP_FIELDS if k in tpl}
-    for section in SECTIONS:
+    for section in (*SECTIONS, "real"):     # real: napęd rzeczywisty (sesja 061)
         if section in tpl:
             ordered[section] = tpl[section]
     body = yaml.safe_dump(ordered, sort_keys=False, allow_unicode=True, width=100)

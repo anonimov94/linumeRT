@@ -86,3 +86,9 @@ mechanics:
   backlash: 0.0      # [rad]
   contact_stiffness: 0.0   # [N·m/rad] na wale
   gravity_force: 0.0
+
+# Napęd rzeczywisty (REQ-VD-06, sesja 061): falownik po RS485 (Modbus RTU, poza RT).
+# NIEZWERYFIKOWANE NA SPRZĘCIE.
+real:
+  driver: vfd_modbus
+  vfd: {protocol: hy_vfd, baud: 19200, address: 1}

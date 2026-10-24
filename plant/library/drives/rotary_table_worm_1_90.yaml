@@ -88,3 +88,10 @@ mechanics:
   backlash: 3.0000e-04      # [rad]
   contact_stiffness: 1500.0   # [N·m/rad] na wale
   gravity_force: 0.0
+
+# Napęd rzeczywisty (REQ-VD-06, sesja 061): sterownik LinuxCNC; skala impulsów na mm/° wynika
+# z motor.encoder_counts_per_rev i mechanics.ratio. Czasy impulsów przykładowe dla typowych
+# sterowników krokowych. NIEZWERYFIKOWANE NA SPRZĘCIE.
+real:
+  driver: stepgen
+  timing_ns: {steplen: 5000, stepspace: 5000, dirsetup: 20000, dirhold: 20000}

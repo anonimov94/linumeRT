@@ -526,6 +526,120 @@
         "damping_ratio"
       ],
       "additionalProperties": false
+    },
+    "real": {
+      "type": "object",
+      "required": [
+        "driver"
+      ],
+      "additionalProperties": false,
+      "description": "Napęd rzeczywisty (REQ-VD-06): sterownik LinuxCNC i jego parametry.",
+      "properties": {
+        "driver": {
+          "enum": [
+            "stepgen",
+            "ethercat_cia402",
+            "vfd_modbus",
+            "pwm"
+          ]
+        },
+        "timing_ns": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "steplen",
+            "stepspace",
+            "dirsetup",
+            "dirhold"
+          ],
+          "properties": {
+            "steplen": {
+              "type": "integer",
+              "minimum": 100,
+              "maximum": 1000000
+            },
+            "stepspace": {
+              "type": "integer",
+              "minimum": 100,
+              "maximum": 1000000
+            },
+            "dirsetup": {
+              "type": "integer",
+              "minimum": 100,
+              "maximum": 1000000
+            },
+            "dirhold": {
+              "type": "integer",
+              "minimum": 100,
+              "maximum": 1000000
+            }
+          }
+        },
+        "pdo": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "6040h",
+              "6041h",
+              "607Ah",
+              "6064h",
+              "6060h",
+              "6061h",
+              "603Fh",
+              "606Ch",
+              "6077h",
+              "60FDh"
+            ]
+          },
+          "uniqueItems": true
+        },
+        "vfd": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "protocol",
+            "baud",
+            "address"
+          ],
+          "properties": {
+            "protocol": {
+              "enum": [
+                "hy_vfd",
+                "mb2hal"
+              ]
+            },
+            "baud": {
+              "enum": [
+                4800,
+                9600,
+                19200,
+                38400,
+                57600,
+                115200
+              ]
+            },
+            "address": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 247
+            }
+          }
+        },
+        "pwm": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "frequency_hz"
+          ],
+          "properties": {
+            "frequency_hz": {
+              "type": "integer",
+              "minimum": 10,
+              "maximum": 100000
+            }
+          }
+        }
+      }
     }
   },
   "required": [

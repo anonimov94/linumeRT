@@ -570,11 +570,11 @@ Bramka automatyczna: `open`; odbiór stanowiska osobno.
 
 ### 061 — machine.yaml: napędy i wejścia rzeczywiste
 
-**częściowe**. Schemat maszyny oraz deklaracje wdrożenia hardware istnieją.
+**częściowe**. Schemat maszyny i deklaracje wdrożenia hardware; sekcja real: szablonów napędów (REQ-VD-06): stepgen z czasami impulsów, ethercat_cia402 z PDO, vfd_modbus (hy_vfd/mb2hal), pwm — we wszystkich 7 szablonach biblioteki; machine.yaml: target plant|sim|hardware i sekcja hardware (interfejs parport/mesa/ethercat, karta 7i96s/7i76e, kanały napędów, port falownika); hardware_plan() — sterownik, kanał i skala impulsów z mechaniki szablonu. 22/22 wymagań pokrytych.
 
-Pozostaje: Real mapping napędów REQ-VD-06 i generator sprzętowy; raport konkursu 03.
+Pozostaje: Pulpit (MPG, przyciski) i E-STOP rzeczywisty w sekcji hardware. Raport konkursu 03.
 
-Źródła: [docs/DZIENNIK.md](../DZIENNIK.md), [prompts/sesja-061.md](../../prompts/sesja-061.md).
+Źródła: [plant/server/linumert_plant/drive_real.py](../../plant/server/linumert_plant/drive_real.py), [core/linumert/machine/schema.py](../../core/linumert/machine/schema.py), [plant/library/drives/README.md](../../plant/library/drives/README.md), [tests/test_drive_real.py](../../tests/test_drive_real.py), [docs/DZIENNIK.md](../DZIENNIK.md), [prompts/sesja-061.md](../../prompts/sesja-061.md).
 
 ### 062 — Generator INI/HAL: sim, Plant, step/dir
 

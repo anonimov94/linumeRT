@@ -1084,3 +1084,13 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
 - **Decyzje:** tor środka narzędzia; kontur z korekcją dynamiczną LinuxCNC (bez tabeli narzędzi).
 - **Do sprawdzenia ręcznie:** kontur z korekcją na Plant; czopy przy realnym marginesie przygotówki.
   Model-Author: Claude. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## 061 — machine.yaml: napędy rzeczywiste (REQ-VD-06) · 2026-10-24 · Claude
+- **Zrobione:** sekcja `real:` szablonów napędów (`drive_real.py`): `stepgen` (czasy impulsów), `ethercat_cia402`
+  (PDO CSP), `vfd_modbus` (hy_vfd/mb2hal), `pwm`; zgodność typ ↔ sterownik; JSON Schema; wpisy w 7 szablonach.
+  `machine.yaml`: `target: plant | sim | hardware` i `hardware:` (parport/mesa 7i96s/7i76e/ethercat, kanały,
+  port falownika). `hardware_plan()` — sterownik, kanał, skala impulsów z `encoder_counts_per_rev` i `ratio`.
+- **Testy:** `test_template_real_mapping` (REQ-VD-06): ten sam plik → Plant i plan sprzętu, NEMA 23 = 640 kroków/mm;
+  frezarka serwo → EtherCAT; reguły sekcji hardware; walidacja `real:`. Wymagania 22/22.
+- **Decyzje:** skala nie jest wpisywana osobno (jedno źródło: mechanika szablonu); nazwy pinów HAL dopiero w 062/063.
+- **Długi:** pulpit/MPG i E-STOP rzeczywisty w `hardware:`. Model-Author: Claude. NIEZWERYFIKOWANE NA SPRZĘCIE.
