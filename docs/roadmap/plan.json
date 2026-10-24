@@ -1789,6 +1789,26 @@
         "tests/test_workpiece.py",
         "tests/test_hmi_workflow_widgets.py"
       ]
+    },
+    {
+      "id": "M6-G43",
+      "title": "Automatyczna korekta długości narzędzia po M6",
+      "parents": [
+        "034",
+        "066"
+      ],
+      "status": "partial",
+      "progress": "Remap M6 w INI sim i Plant (macros/lrt_m6.ngc): wbudowane M6, potem G43 H<narzędzie z T> albo G49 dla T0, jak w sterownikach przemysłowych. Kontrola limitów uwzględnia remap maszyny. Test rs274 z INI maszyny (T2 M6 -> 80 mm, T0 M6 -> 0), pełny przebieg e2e programu demo z 6 wymianami (306 s, bez kolizji).",
+      "remaining": [
+        "Odbiór na pulpicie właściciela, w tym ręczna wymiana w oknie QtDragon.",
+        "Program Facing z QtDragon (kod upstream) ma G49 i nie wywołuje M6, więc korekta nie jest włączana; osobna decyzja.",
+        "Remap dla ATC (066) razem z magazynem narzędzi."
+      ],
+      "evidence": [
+        "config/sim/linumert_xyz/macros/lrt_m6.ngc",
+        "tests/test_m6_remap.py",
+        "core/linumert/programs/linuxcnc_check.py"
+      ]
     }
   ]
 }

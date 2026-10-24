@@ -1,5 +1,7 @@
 <div align="center">
 
+<a href="docs/roadmap/PLAN.md"><img src="docs/raporty/kamienie-milowe.png" alt="linumeRT — stan kamieni milowych M0–M6 (rejestr docs/roadmap/plan.json, 2026-10-24)" width="100%"></a>
+
 <img src="docs/design/marka/baner.png" alt="linumeRT — CNC Control System" width="100%">
 
 # THE NEXT FACE OF CNC CONTROL

@@ -1015,6 +1015,14 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
 - Na g54: sim — linia 13, Z=-130 < -120 (i 81 ruchów); Plant — linia 9, Z=-134 < -119 (i 85 ruchów); G49 bez G43.
 - Testy: 55 PASS (GUI + rdzeń), 3 PASS z prawdziwym LinuxCNC (start ekranu).
 
+## M6-G43 — automatyczna korekta długości po wymianie narzędzia — 2026-10-24 · Claude
+- Model-Author: Claude. Polecenie właściciela: automatyczne G43 po M6.
+- Remap `REMAP = M6 modalgroup=6 ngc=lrt_m6` w INI sim, Plant i Plant+VFD; `macros/lrt_m6.ngc` w każdej konfiguracji (kopie pilnowane testem) czyta numer z T, wykonuje wbudowane M6 i `G43 H<n>` (T0 → G49).
+- Powód kopii w katalogu konfiguracji: testy i instalacje kopiują katalog `config/...`, względne `../../` się rozjeżdża.
+- Kontrola limitów (`run_interpreter(machine_ini=…)`) wczytuje remapy i SUBROUTINE_PATH z INI maszyny, żeby nie zgłaszać fałszywego „bez korekty długości”.
+- Testy: 5 w tests/test_m6_remap.py (w tym rs274 z INI maszyny: T2 M6 → 80 mm, T0 M6 → 0), e2e `sim-e2e.sh` PASS (demo 306 s, 6 wymian, bez kolizji).
+- Nie obejmuje Facing z QtDragon (G49, bez M6) ani ATC. NIEZWERYFIKOWANE NA SPRZĘCIE; do sprawdzenia ręcznie wymiana M6 w oknie QtDragon.
+
 ## Classic × Neon — renderer detal + maszyna · 2026-10-24 · Claude
 - Model-Author: Claude. Gałąź `claude/neon-render` (worktree), polecenie właściciela: render jak w koncepcji HTML.
 - Rdzeń `programs/toolpath.py`: ruchy z liniami programu, łuki ARC_FEED, strefy START/KONIEC, DTG,
