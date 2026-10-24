@@ -71,14 +71,14 @@ Prompt startowy następnej sesji: [`prompts/START-008.md`](../prompts/START-008.
 
 ## 6. Dla Codex:
 
-**HMI według kolejności pracy (D32), w wolnej chwili.** Specyfikacja: `docs/design/HMI_WORKFLOW.md`.
-- Kolejność: HMI-01 (inwentaryzacja widgetów `screens/linumert/linumert.ui`, kontrakt sygnałów, zrzut bazowy) →
+**HMI według kolejności pracy (D32), osobny checkout bez blokowania Claude (D33).** Specyfikacja: `docs/design/HMI_WORKFLOW.md`.
+- HMI-01 ukończone: `docs/design/HMI_BASELINE.md` i generowana `HMI_WIDGET_MAP.md` (421 widgetów, sygnały, ACTION, zależności i indeksy). Zrzut odniesienia: istniejący G0. Następnie:
   HMI-02 (pasek stanu, nawigacja, Start, Bazowanie, Ręczne) → HMI-03 … HMI-06; każdy etap = osobny PR do `main`.
 - Zasady: `linumert_upstream_handler.py` bez zmian; logika w `linumert_handler.py` i osobnych modułach;
   zmiana zakładki nie wykonuje ruchu ani zmiany trybu; wygląd z `docs/design/tokens.yaml` (CLAUDE.md §6a).
 - Odbiór: testy QtVCP pod Xvfb i z LinuxCNC RIP z Plant (`tools/dev/plant-gui.sh`, `HEADLESS=1`), zrzuty
   wszystkich widoków w `docs/raporty/`, 1280×768, obsługa klawiaturą; wpis w DZIENNIK.
-- Środowisko: §4 (laptop z podmanem albo WSL); blokada `python tools/lock.py acquire linuxcnc --model Codex`.
+- Środowisko: §4. Codex używa osobnego WSL/checkoutu (D33), nie zajmuje globalnej tury ani LOCK Claude. Po testach autor od razu scala PR.
 
 ## 7. Dla Claude:
 
