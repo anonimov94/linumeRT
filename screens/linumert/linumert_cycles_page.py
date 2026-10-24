@@ -30,7 +30,7 @@ for _p in (os.path.join(ROOT, "core"),):
     if _p not in sys.path:
         sys.path.insert(0, _p)
 
-from linumert.generators import basic, drilling, pockets, subroutines  # noqa: E402
+from linumert.generators import basic, contours, drilling, pockets, subroutines  # noqa: E402
 from linumert.generators.registry import GeneratorRegistry  # noqa: E402
 from linumert.generators.tooling import check_steps  # noqa: E402
 from linumert.programs.compiler import CompileError, compile_program  # noqa: E402
@@ -39,7 +39,8 @@ from linumert.programs.lnx import LnxError, LnxProgram, Step, load_lnx, save_lnx
 ACTION = Action()
 GENERATORS = (basic.Header, basic.ToolChange, basic.FaceMill, drilling.DrillHoles,
               pockets.PocketRect, pockets.PocketCircle,
-              basic.ProgramEnd)
+              contours.SlotLinear, contours.SlotArc, contours.StudRect, contours.StudCircle,
+              contours.Contour, basic.ProgramEnd)
 
 
 
@@ -55,7 +56,7 @@ class CyclesPage(QtWidgets.QWidget):
         self.shell = shell
         self.program = LnxProgram(name="Program z cykli")
         self.registry = GeneratorRegistry()
-        for group in (basic, drilling, pockets):
+        for group in (basic, drilling, pockets, contours):
             group.register(self.registry)
         self.lnx_path = None
         self._dirty = False

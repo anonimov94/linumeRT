@@ -226,3 +226,14 @@ wyłączona (zgodność wstecz, uczciwy napis w GUI); PIN ustawia CLI. Uprawnien
 `offsets.edit` (technolog), `settings`, `classic` (serwis — pełny QtDragon zawiera jego ustawienia).
 Klucz z pulpitu: API `Session.set_key()`; pin HAL do podłączenia przy pulpicie. Role nie są funkcją
 bezpieczeństwa (CLAUDE.md §6).
+
+## Sesja 007 — tłumaczenia Qt ekranu · 2026-10-24 · Claude · PROPOZYCJA
+
+Teksty operatora przez `translate(kontekst, tekst)` z `screens/linumert/linumert_i18n.py`
+(forma rozpoznawana przez pylupdate5; `tr(kontekst, tekst)` jest odczytywana błędnie). Tekst źródłowy
+po angielsku (docelowy język domyślny skórek), tłumaczenie PL w `screens/linumert/i18n/linumert_pl.ts`.
+Język: `LINUMERT_LANG`, potem `[LINUMERT]LANGUAGE` w INI, domyślnie `pl` (bez zmiany zachowania dla
+operatora). Ekran ładuje `.qm`, jeśli istnieje, a w przeciwnym razie czyta `.ts` wprost (`TsTranslator`),
+więc `lrelease` nie jest zależnością budowy. Kompletność PL pilnuje `tools/i18n_check.py` w testach.
+Istniejące napisy przechodzą na `translate()` w sesji 037; mechanizm skórek (`linumert_skin_strings`)
+pozostaje do ujednolicenia tamże.
