@@ -1012,14 +1012,26 @@ def test_preflight_checks_in_background_and_blocks_only_current_file(page_env, t
     assert preflight.violations(str(program))[0].count == 4
     program.write_text("G0 Z20\nM2\n(zmiana)\n")  # zmieniony plik: stary wynik nie blokuje
     assert preflight.violations(str(program)) == []
+
+
+def test_start_asks_before_running_a_program_outside_axis_limits(page_env, tmp_path, monkeypatch):
+    from unittest.mock import patch
+
+    from linumert.programs.limits import LimitReport, Violation, parameter_file
+
+    pytest.importorskip("linuxcnc")
+    importlib.import_module("linumert_shell_model")
+    module = importlib.import_module("linumert_preflight")
+    ini = Path(__file__).resolve().parents[1] / "config/sim/linumert_xyz/linumert_xyz.ini"
+    monkeypatch.setenv("INI_FILE_NAME", str(ini))
+    program = tmp_path / "p.ngc"
+    program.write_text("G0 Z20\nM2\n")
+    preflight = module.Preflight(analyze=lambda *a: None)
     shell_module = importlib.import_module("linumert_shell")
-    box = Mock()
     fake_shell = SimpleNamespace(preflight=preflight, s=SimpleNamespace(file=str(program)),
-                                 h=Mock(), _confirm_limits=None)
+                                 h=Mock())
     preflight.report = LimitReport([Violation(3, "Z", -130.0, -120.0, "min")])
-    preflight._key = preflight._key_for(str(program), str(ini),
-                                        __import__("linumert.programs.limits", fromlist=["x"])
-                                        .parameter_file(str(ini)))
+    preflight._key = preflight._key_for(str(program), str(ini), parameter_file(str(ini)))
     with patch.object(shell_module.QtWidgets.QMessageBox, "question",
                       return_value=shell_module.QtWidgets.QMessageBox.No) as ask:
         assert not shell_module.LinumertShell._confirm_limits(fake_shell)
@@ -1027,4 +1039,3 @@ def test_preflight_checks_in_background_and_blocks_only_current_file(page_env, t
     with patch.object(shell_module.QtWidgets.QMessageBox, "question",
                       return_value=shell_module.QtWidgets.QMessageBox.Yes):
         assert shell_module.LinumertShell._confirm_limits(fake_shell)
-    del box
