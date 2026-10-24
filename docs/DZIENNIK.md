@@ -352,6 +352,7 @@ Uzupełnienie: README plant/core (liczby testów 29/59/20, bazowanie, parametry 
 - Własny widok Program: katalog z ustawień INI, podgląd do 2000 linii, informacja o źródle .lnx, osobne wczytanie przez ACTION.
 - Wybór pliku nie zmienia programu ani trybu; wczytanie zablokowane podczas programu i pauzy.
 - Testy Qt offscreen i modelu: 58 OK; lint czysty.
+
 ## Organizacja — HMI: symulacja materiału i kolizji, tabela narzędzi (PR #45) · 2026-10-19 · Claude (Opus 5.5)
 - Na polecenie właściciela (PoC HMI w symulacji dziś): `simulation/linumert_sim` — materiał 2.5D (mapa wysokości), profile wszystkich typów narzędzi, reguły K-301…K-309 (nowe K-306 wrzeciono, K-307 oś, K-308 kierunek obrotów, K-309 obroty > max, K-322 podcięcie), granice obciążenia z szablonów napędów w `machine.yaml`; proces `linumert_sim.live` przy LinuxCNC (nice 10) wywołuje E-STOP przy każdej kolizji i przeciążeniu, reset grzybem (D35).
 - HMI: obszary Symulacja (pyqtgraph 3D, przygotówka `;@STOCK` z programu albo z formularza, model maszyny, obciążenia, zdarzenia) i Narzędzia (baza narzędzi → tool.tbl → LinuxCNC i symulacja). Typy narzędzi: wspólne pola `flutes`, `max_rpm`, `hand`, `d_wear` (±1 mm), `holder_d`, `holder_l`; nowy typ `tap`.
@@ -388,6 +389,7 @@ Specjalista nie omija fizycznego safety ani limitów. Testy wykryły i poprawion
 przeciążenia po zatrzymaniu wrzeciona oraz brak sygnałów kontraktu HAL wymiany wirtualnej.
 Samotest GUI rozszerzony do 42 kroków; pełne CI w toku. Dokumentacja i README ujednolicone.
 Model-Author: Codex.
+
 ## Organizacja — punkty roadmapy na szybko: 040, 042, 059 (części) · 2026-10-19 · Claude (Opus 5.5)
 - 040: generatory `header`, `program_end`, `tool_change`, `face_mill` (zygzak / jednokierunkowo, warstwy, wybieg, podgląd 2D) — `core/linumert/generators/basic.py`; poprawka `fmt(x, 0)` (obcinało zera: S8000 → S8).
 - 042: generator `drill_holes` — wzory pojedynczy/lista/rząd/siatka/okrąg/łuk, G81/G82/G83/G73, G33.1 tylko przy `spindle_sync` (G84 nie istnieje w LinuxCNC 2.9), walidacja, podgląd 2D.
@@ -1054,6 +1056,15 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
   launcher ISO `linumert --neon` + skrót pulpitu. Uruchomienie z prawdziwym `gcode`: zadanie N4 Codex.
 - Testy: pełne pytest 1181 PASS, 12 skip; ruff, wymagania PASS. NIEZWERYFIKOWANE NA SPRZĘCIE.
 
+## 027 — Własny system projektowy ekranu (domknięcie) · 2026-10-24 · Claude
+- **Zrobione:** rozliczenie promptu: QSS powłoki z tokenów już generowany w czasie działania (`shell_qss`, test
+  kolorów i celu 44 px) — dodano `tools/gen_qss.py` (zrzut tego samego stylu); fonty IBM Plex Sans (Regular,
+  SemiBold, Bold) i JetBrains Mono (Regular, Bold) z licencjami OFL w `screens/linumert/fonts/`, rejestrowane
+  przez `linumert_fonts.register()` w powłoce HMI i podglądzie skórek; PROVENANCE z sumami SHA-256.
+- **Decyzje:** `linumert.qss` (arkusz bazy QtDragon) nie jest nadpisywany — źródłem stylu jest `shell_qss(tokens)`.
+- **Do sprawdzenia ręcznie:** HMI w LinuxCNC rysuje teksty fontem IBM Plex Sans, a DRO JetBrains Mono.
+- **Długi:** brak. Testy: pełne pytest, ruff, REQ — wynik w PR. Model-Author: Claude. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
 ## 007 — Katalog alarmów i tłumaczenia (domknięcie) · 2026-10-24 · Claude
 - **Zrobione:** `linumert_i18n.py` (`translate()`, `TsTranslator` czyta `.ts` bez lrelease, `.qm` gdy jest,
   język z env/INI, domyślnie PL), `i18n/linumert_pl.ts`, `tools/i18n.sh` (pylupdate5 + opcjonalnie lrelease),
@@ -1063,6 +1074,7 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
 - **Do sprawdzenia ręcznie:** HMI w LinuxCNC pokazuje polską podpowiedź Resetu; `LINUMERT_LANG=en` — angielską.
 - **Długi:** pozostałe napisy ekranu i skórek → sesja 037. Testy: pełne pytest 1230 PASS; ruff, REQ PASS.
   Model-Author: Claude. Autokontrola. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
 ## 043 — Generatory: rowki, czopy, kontur · 2026-10-24 · Claude
 - **Zrobione:** `core/linumert/generators/contours.py`: slot_linear, slot_arc, stud_rect, stud_circle, contour
   (segmenty L/A z tekstu, G41.1/G42.1 D=średnica, styczny dojazd/odjazd, P-5010 z numerem segmentu, promień łuku),

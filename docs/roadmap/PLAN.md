@@ -1,7 +1,7 @@
 <!-- Generowane przez python3 tools/roadmap.py; edytuj docs/roadmap/plan.json. -->
 # Wspólny plan linumeRT
 
-Pierwotny plan: **84 sesje M0–M6**, commit `796c6a2`. Stan na 2026-10-24: planowane: 17; w toku: 0; częściowe: 33; do odbioru: 0; ukończone: 34; zablokowane: 0.
+Pierwotny plan: **84 sesje M0–M6**, commit `796c6a2`. Stan na 2026-10-24: planowane: 17; w toku: 0; częściowe: 32; do odbioru: 0; ukończone: 35; zablokowane: 0.
 
 Zakończenie części implementacji nie oznacza odbioru całej funkcji ani sprzętu.
 
@@ -47,7 +47,7 @@ Zakończenie części implementacji nie oznacza odbioru całej funkcji ani sprz�
 | 024 | M1 | [Plant: scenariusze i raport prototypu](../../prompts/sesja-024.md) | ukończone |
 | 025 | M1 | [Skrypty maszyn wirtualnych (VirtualBox)](../../prompts/sesja-025.md) | ukończone |
 | 026 | M1 | [Bufor i bramka G1 (prototyp P0)](../../prompts/sesja-026.md) | ukończone |
-| 027 | M2 | [Własny system projektowy ekranu](../../prompts/sesja-027.md) | częściowe |
+| 027 | M2 | [Własny system projektowy ekranu](../../prompts/sesja-027.md) | ukończone |
 | 028 | M2 | [Kompozycja ekranu głównego](../../prompts/sesja-028.md) | częściowe |
 | 029 | M2 | [Tryby, JOG i pulpit MPG](../../prompts/sesja-029.md) | częściowe |
 | 030 | M2 | [MDI i klawiatura ekranowa](../../prompts/sesja-030.md) | częściowe |
@@ -316,11 +316,9 @@ Pozostaje: Odbiór ręczny VM/Plant pozostaje otwarty; automatyczny P0 PASS nie 
 
 ### 027 — Własny system projektowy ekranu
 
-**częściowe**. Tokeny, ikony i makiety istnieją; później dodano koncepcję skórek.
+**ukończone**. 2026-10-24 | Rozliczenie promptu 027: tokens.yaml źródłem prawdy; QSS powłoki generowany z tokenów (linumert_shell_model.shell_qss, test kolorów/44 px) + tools/gen_qss.py do zrzutu; fonty IBM Plex Sans i JetBrains Mono (OFL) w screens/linumert/fonts, rejestrowane przy starcie ekranu i podglądu skórek; 31 ikon z wpisami PROVENANCE (test_ip_guard); skórki korzystają z kontraktu palet (linumert_skin_contract); Claude
 
-Pozostaje: Rozliczyć kryteria oryginalnego promptu oraz kontrakt nowych skórek.
-
-Źródła: [docs/DZIENNIK.md](../DZIENNIK.md), [prompts/sesja-027.md](../../prompts/sesja-027.md).
+Źródła: [docs/DZIENNIK.md](../DZIENNIK.md), [tests/test_design_system.py](../../tests/test_design_system.py), [tests/test_hmi_shell_model.py](../../tests/test_hmi_shell_model.py), [tests/test_ip_guard.py](../../tests/test_ip_guard.py), [prompts/sesja-027.md](../../prompts/sesja-027.md).
 
 ### 028 — Kompozycja ekranu głównego
 

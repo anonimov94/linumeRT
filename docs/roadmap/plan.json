@@ -428,13 +428,14 @@
       "milestone": "M2",
       "title": "Własny system projektowy ekranu",
       "prompt": "prompts/sesja-027.md",
-      "status": "partial",
-      "progress": "Tokeny, ikony i makiety istnieją; później dodano koncepcję skórek.",
-      "remaining": [
-        "Rozliczyć kryteria oryginalnego promptu oraz kontrakt nowych skórek."
-      ],
+      "status": "done",
+      "progress": "2026-10-24 | Rozliczenie promptu 027: tokens.yaml źródłem prawdy; QSS powłoki generowany z tokenów (linumert_shell_model.shell_qss, test kolorów/44 px) + tools/gen_qss.py do zrzutu; fonty IBM Plex Sans i JetBrains Mono (OFL) w screens/linumert/fonts, rejestrowane przy starcie ekranu i podglądu skórek; 31 ikon z wpisami PROVENANCE (test_ip_guard); skórki korzystają z kontraktu palet (linumert_skin_contract); Claude",
+      "remaining": [],
       "evidence": [
-        "docs/DZIENNIK.md"
+        "docs/DZIENNIK.md",
+        "tests/test_design_system.py",
+        "tests/test_hmi_shell_model.py",
+        "tests/test_ip_guard.py"
       ]
     },
     {
