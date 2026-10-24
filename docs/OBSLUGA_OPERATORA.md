@@ -300,3 +300,12 @@ liter i wraca na początek po ostatnim trafieniu. „Zamień” zmienia zaznaczo
 bez trafienia najpierw je wyszukuje. „Zamień wszystkie” działa w całej kopii, również
 w komentarzach. Ctrl+Z w edytorze cofa całą zamianę. Wynik zamiany musi mieścić się
 w 256 KiB. Zapis nadal tworzy nową kopię, nie uruchamia ani nie wczytuje programu.
+
+## Poziomy dostępu (sesja 036)
+
+Role: **Operator** (domyślna, bez logowania), **Technolog** (edycja narzędzi, zera detalu i przygotówki),
+**Serwis** (dodatkowo Konfiguracja i pełny QtDragon). Przycisk roli jest w górnym pasku; logowanie PIN-em
+z klawiatury ekranowej. Pięć błędnych PIN-ów blokuje logowanie na 30 s. Odmowa pokazuje wymaganą rolę.
+Dopóki serwis nie ustawi PIN-u, kontrola jest wyłączona (przycisk: „Dostęp: bez PIN-ów”). PIN ustawia się
+poza ekranem: `python -m linumert.access set-pin --db <katalog INI>/linumert_access.sqlite --role serwis`;
+historia: `... audit`. Role porządkują edycję danych — nie zastępują E-STOP, limitów ani interlocków.

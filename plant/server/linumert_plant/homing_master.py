@@ -239,7 +239,7 @@ class HomingMaster:
 
     def tick(self) -> None:
         """Jeden okres mastera (kilka kroków Plant)."""
-        self.machine.step(self.plant_dt, self.substeps)
+        self.machine.step_cycle(self.plant_dt * self.substeps, self.substeps)
 
     def hold(self, letter: str) -> None:
         for drive in self.machine.model.joint_drives[letter]:

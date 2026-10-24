@@ -217,6 +217,26 @@ z histerezą (bez klatek jednorazowego wypiekania), 10 Hz w bezczynności. Pomia
 offscreen, 700×640, ruch 3 mm/klatkę): detal mediana 2,9 / 6,5 / 6,8 ms, maks. ≤ 20 ms;
 maszyna 3,0–3,8 ms. Poglądowe, nie model kolizji. NIEZWERYFIKOWANE NA SPRZĘCIE. Do oceny Codex.
 
+## Plant: cel CSP interpolowany w podkrokach, domyślnie 4 podkroki · 2026-10-24 · Claude · PROPOZYCJA
+
+Wynik atrapy zależał od `timing.substeps`, bo cel 607Ah z cyklu mastera trafiał do napędu
+w pierwszym podkroku (n-krotny impuls FF prędkości i pola krokowca). Rdzeń C dostaje
+`lrt_machine_step_cycle(m, dt, n)`: napędy w CSP w stanie „praca” widzą cel liniowo rozłożony na
+podkroki (jak interpolacja 60C2h w napędzie i stepgen). Domyślne `substeps` = 4 — przy 1 krok
+całkowania 1 ms jest za gruby dla krokowca przy G0. Wynik zbieżny dla n ≥ 2 (raport
+`docs/raporty/plant_substeps.md`). Konsekwencja dla M5: generator EtherCAT ustawia 60C2h równe
+okresowi wątku serwo. Model, nie maszyna. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## Sesja 036 — poziomy dostępu · 2026-10-24 · Claude · PROPOZYCJA
+
+Role operator < technolog < serwis w `core/linumert/access` (bez UI). PIN tylko jako `hashlib.scrypt`
+(n=2^14, r=8, p=1, sól 16 B), porównanie `hmac.compare_digest`, blokada 30 s po 5 błędach, audyt w tej
+samej bazie SQLite obok INI (`[LINUMERT]ACCESS_DB`). Bez domyślnych PIN-ów: brak PIN-ów = kontrola
+wyłączona (zgodność wstecz, uczciwy napis w GUI); PIN ustawia CLI. Uprawnienia: `tools.edit`,
+`offsets.edit` (technolog), `settings`, `classic` (serwis — pełny QtDragon zawiera jego ustawienia).
+Klucz z pulpitu: API `Session.set_key()`; pin HAL do podłączenia przy pulpicie. Role nie są funkcją
+bezpieczeństwa (CLAUDE.md §6).
+
 ## Sesja 007 — tłumaczenia Qt ekranu · 2026-10-24 · Claude · PROPOZYCJA
 
 Teksty operatora przez `translate(kontekst, tekst)` z `screens/linumert/linumert_i18n.py`
@@ -227,3 +247,11 @@ operatora). Ekran ładuje `.qm`, jeśli istnieje, a w przeciwnym razie czyta `.t
 więc `lrelease` nie jest zależnością budowy. Kompletność PL pilnuje `tools/i18n_check.py` w testach.
 Istniejące napisy przechodzą na `translate()` w sesji 037; mechanizm skórek (`linumert_skin_strings`)
 pozostaje do ujednolicenia tamże.
+
+
+## Sesja 062 — priorytet właściciela · 2026-10-24 · Codex
+Właściciel polecił scalić #125 po zielonym linuxcnc i rozpocząć 062. Wykonano
+merge b2ee924; generator M5 wyprzedza pozostałe otwarte kryteria wcześniejszych
+kamieni, których status pozostaje bez zmian. Zależność 061 scalona w #125.
+Krok 1 zapewnia backup/diff; konfiguracje sprzętowe wymagają jawnego mapowania
+E-STOP i pełnego kontraktu bezpieczeństwa przed generowaniem HAL.

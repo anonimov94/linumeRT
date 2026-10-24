@@ -83,6 +83,7 @@ def _signatures(lib: ctypes.CDLL) -> ctypes.CDLL:
         "lrt_machine_cfg_curve": ([vp, i, d, d], i),
         "lrt_machine_init": ([vp, vp], i),
         "lrt_machine_step": ([vp, d], i),
+        "lrt_machine_step_cycle": ([vp, d, i], i),
         "lrt_machine_strerror": ([i], c),
         "lrt_machine_set_controlword": ([vp, i, ctypes.c_uint16], i),
         "lrt_machine_set_target": ([vp, i, ctypes.c_int32], i),
@@ -228,6 +229,10 @@ class PlantMachine:
     def step(self, dt: float, n: int = 1) -> None:
         for _ in range(n):
             self._check(self.lib.lrt_machine_step(self._m, dt))
+
+    def step_cycle(self, dt: float, n: int = 1) -> None:
+        """Cykl mastera `dt` w `n` podkrokach; cel napędów CSP rozłożony liniowo na podkroki."""
+        self._check(self.lib.lrt_machine_step_cycle(self._m, dt, n))
 
     @property
     def time(self) -> float:

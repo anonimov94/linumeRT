@@ -38,7 +38,15 @@ Wszystkie pola są jawne — brak ukrytych wartości domyślnych. Zakresy i jedn
 
 Typy → model w rdzeniu C: `servo_csp`, `rotary_geared`, `spindle_vfd` → serwo CSP (oś obrotowa albo
 przybliżenie momentowe wrzeciona); `stepper_open` → krokowiec bez sprzężenia; `servo_stepper` → krokowiec
-z pętlą zamkniętą. Sekcji `real:` (mapowanie na lcec/stepgen, REQ-VD-06) na razie nie wolno używać (sesja 061).
+z pętlą zamkniętą.
+
+Sekcja `real:` (opcjonalna, REQ-VD-06, sesja 061) opisuje napęd rzeczywisty: `driver` (`stepgen` z `timing_ns`
+{steplen, stepspace, dirsetup, dirhold}; `ethercat_cia402` z `pdo` (co najmniej 6040h, 6041h, 607Ah, 6064h);
+`vfd_modbus` z `vfd` {protocol hy_vfd|mb2hal, baud, address}; `pwm` z `pwm.frequency_hz`). Typ napędu ogranicza
+sterowniki (krokowiec: stepgen albo EtherCAT; serwo: EtherCAT albo step/dir; wrzeciono: Modbus, PWM, EtherCAT).
+Skala impulsów na mm/° wynika z `motor.encoder_counts_per_rev` i `mechanics.ratio` — nie wpisuje się jej
+osobno. Kanały napędów podaje `machine.yaml` (`hardware:`); plan sprzętu: `linumert_plant.drive_real.hardware_plan`.
+NIEZWERYFIKOWANE NA SPRZĘCIE.
 
 ### Reguły między polami (sprawdza `validate_template`)
 - moment szczytowy ≥ znamionowy, prąd szczytowy ≥ znamionowy; stała momentu × prąd znamionowy = moment

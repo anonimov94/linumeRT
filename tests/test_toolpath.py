@@ -112,3 +112,31 @@ def test_demo_program_matches_file_and_has_distinct_zones():
     assert lo == pytest.approx((-20, -20, -14)) and hi[2] == pytest.approx(25)
     t = tp.seconds(6000)
     assert t[-1] > 60 and np.all(np.diff(t) >= 0)
+
+
+@pytest.mark.linuxcnc
+def test_load_ngc_with_linuxcnc_interpreter():
+    """gcodemodule czyta canon.parameter_file jako tekst (sesja 051: wcześniej TypeError)."""
+    pytest.importorskip("gcode")
+    from linumert.programs.toolpath import load_ngc
+
+    path = Path(__file__).parent / "golden" / "pocket_helix.ngc"
+    tp = load_ngc(path)
+    assert len(tp) > 5 and tp.length > 0
+
+
+@pytest.mark.linuxcnc
+def test_load_ngc_real_interpreter_units_and_file_lines(tmp_path):
+    from linumert.programs.toolpath import load_ngc
+
+    for units, distance, feed in (("G21", 25.4, 254), ("G20", 1, 10)):
+        program = tmp_path / "units.ngc"
+        program.write_text(
+            f"{units} G90 G17 G94\nG0 X0 Y0 Z0\n"
+            f"N900 G1 X{distance} F{feed}\nM2\n", encoding="utf-8",
+        )
+        actual = load_ngc(program)
+        move = actual.moves[-1]
+        assert move.end == pytest.approx((25.4, 0, 0), abs=0.001)
+        assert move.feed == pytest.approx(254)
+        assert move.line == 3  # physical file line, not the explicit N900 word

@@ -1,7 +1,7 @@
 <!-- Generowane przez python3 tools/roadmap.py; edytuj docs/roadmap/plan.json. -->
 # Prompty i wspólna roadmapa linumeRT
 
-Pierwotny plan: **84 sesje M0–M6**, commit `796c6a2`. Stan na 2026-10-24: planowane: 17; w toku: 0; częściowe: 32; do odbioru: 0; ukończone: 35; zablokowane: 0.
+Pierwotny plan: **84 sesje M0–M6**, commit `796c6a2`. Stan na 2026-10-24: planowane: 15; w toku: 1; częściowe: 29; do odbioru: 0; ukończone: 39; zablokowane: 0.
 
 Zakończenie części implementacji nie oznacza odbioru całej funkcji ani sprzętu.
 
@@ -58,7 +58,7 @@ Jedyne źródło statusów, powiązań i pozostałej pracy: [plan.json](../docs/
 | 033 | M2 | [Zerowanie detalu i sonda](sesja-033.md) | częściowe |
 | 034 | M2 | [Ręczna zmiana narzędzia](sesja-034.md) | częściowe |
 | 035 | M2 | [Alarmy na ekranie](sesja-035.md) | częściowe |
-| 036 | M2 | [Poziomy dostępu](sesja-036.md) | planowane |
+| 036 | M2 | [Poziomy dostępu](sesja-036.md) | ukończone |
 | 037 | M2 | [Język polski i angielski](sesja-037.md) | częściowe |
 | 038 | M2 | [Bufor i bramka G2 (prototyp v0.1)](sesja-038.md) | planowane |
 | 039 | M3 | [Format .lnx i BaseMacroGenerator](sesja-039.md) | ukończone |
@@ -71,10 +71,10 @@ Jedyne źródło statusów, powiązań i pozostałej pracy: [plan.json](../docs/
 | 046 | M3 | [Podglądy 2D w formularzach](sesja-046.md) | częściowe |
 | 047 | M3 | [Menedżer programów i pliki .lnx](sesja-047.md) | częściowe |
 | 048 | M3 | [Biblioteka podprogramów o-word](sesja-048.md) | ukończone |
-| 049 | M3 | [Test technologiczny na Plant](sesja-049.md) | częściowe |
+| 049 | M3 | [Test technologiczny na Plant](sesja-049.md) | ukończone |
 | 050 | M3 | [Bufor i bramka G3 (prototyp v0.2)](sesja-050.md) | planowane |
-| 051 | M4 | [Ścieżka z programu](sesja-051.md) | częściowe |
-| 052 | M4 | [Proces symulacji](sesja-052.md) | częściowe |
+| 051 | M4 | [Ścieżka z programu](sesja-051.md) | ukończone |
+| 052 | M4 | [Proces symulacji](sesja-052.md) | ukończone |
 | 053 | M4 | [Czas obróbki i porównanie z Plant](sesja-053.md) | częściowe |
 | 054 | M4 | [Przygotówka](sesja-054.md) | ukończone |
 | 055 | M4 | [Materiał 2.5D](sesja-055.md) | częściowe |
@@ -84,7 +84,7 @@ Jedyne źródło statusów, powiązań i pozostałej pracy: [plan.json](../docs/
 | 059 | M4 | [Raport symulacji i eksport STL](sesja-059.md) | częściowe |
 | 060 | M4 | [Bufor i bramka G4 (prototyp v0.3)](sesja-060.md) | planowane |
 | 061 | M5 | [machine.yaml: napędy i wejścia rzeczywiste](sesja-061.md) | częściowe |
-| 062 | M5 | [Generator INI/HAL: sim, Plant, step/dir](sesja-062.md) | planowane |
+| 062 | M5 | [Generator INI/HAL: sim, Plant, step/dir](sesja-062.md) | w toku |
 | 063 | M5 | [Generator EtherCAT (lcec, CiA 402)](sesja-063.md) | planowane |
 | 064 | M5 | [Wrzeciono RS485 w generatorze](sesja-064.md) | planowane |
 | 065 | M5 | [Kinematyki 4 i 5 osi](sesja-065.md) | częściowe |
@@ -151,3 +151,4 @@ Nie są kolejnym harmonogramem. Ich status dotyczy tylko wskazanego kroku.
 | LIMITS-PREFLIGHT | 031, 051 | Kontrola limitów osi przed startem programu | częściowe |
 | ORIGIN-WIZARD | 033, 054 | Kreator zera detalu na przygotówce | częściowe |
 | M6-G43 | 034, 066 | Automatyczna korekta długości narzędzia po M6 | częściowe |
+| PLANT-SUBSTEPS | 049, 063 | Plant: wynik niezależny od podkroków całkowania | ukończone |

@@ -929,6 +929,7 @@ int lrt_machine_init(lrt_machine *m, const lrt_machine_cfg *c)
             return fail(m, LRT_MACHINE_ERR_MECH, s, rc);
         }
         sl->target = 0;
+        sl->applied = 0;
     }
     m->rng = c->seed ? c->seed : 0x2545F491u;
     for (j = 0; j < c->n_joints; j++) {
@@ -1165,6 +1166,50 @@ static void update_inputs(lrt_machine *m)
     m->inputs = in;
 }
 
+/* Cel napedu w biezacym podkroku: poza lrt_machine_step_cycle albo poza CSP - cel mastera;
+ * w cyklu - liniowo od celu z poczatku cyklu (w ramce przesunietej przez baze w napedzie). */
+static int32_t substep_target(const lrt_machine *m, const lrt_machine_slot *sl)
+{
+    double from;
+
+    if (m->ip_n <= 1 || !sl->cycle_interp) {
+        return sl->target;
+    }
+    from = (double)sl->cycle_from -
+           ((double)lrt_drive_position_offset(&sl->drive) - (double)sl->cycle_offset);
+    return (int32_t)lround(from + ((double)sl->target - from) * m->ip_k / m->ip_n);
+}
+
+int lrt_machine_step_cycle(lrt_machine *m, double dt, int n)
+{
+    int s;
+    int k;
+    int rc = LRT_MACHINE_OK;
+
+    if (m == NULL) {
+        return LRT_MACHINE_ERR_NULL;
+    }
+    if (n < 1 || n > LRT_MACHINE_MAX_SUBSTEPS || !(dt > 0.0) || !isfinite(dt)) {
+        return fail(m, LRT_MACHINE_ERR_DT, -1, 0);
+    }
+    for (s = 0; s < m->c.n_drives; s++) {
+        lrt_machine_slot *sl = &m->slots[s];
+
+        sl->cycle_from = sl->applied;
+        sl->cycle_offset = lrt_drive_position_offset(&sl->drive);
+        sl->cycle_interp = lrt_drive_get_state(&sl->drive) == LRT_DRIVE_OPERATION_ENABLED &&
+                           sl->drive.mode_of_operation == LRT_MODE_CSP;
+    }
+    m->ip_n = n;
+    for (k = 1; k <= n && rc == LRT_MACHINE_OK; k++) {
+        m->ip_k = k;
+        rc = lrt_machine_step(m, dt / n);
+    }
+    m->ip_n = 0;
+    m->ip_k = 0;
+    return rc;
+}
+
 int lrt_machine_step(lrt_machine *m, double dt)
 {
     int s;
@@ -1189,7 +1234,7 @@ int lrt_machine_step(lrt_machine *m, double dt)
             cw = (uint16_t)(cw & ~LRT_CW_QUICK_STOP);
         }
         lrt_drive_set_controlword(&sl->drive, cw);
-        lrt_drive_set_target_position(&sl->drive, sl->target);
+        lrt_drive_set_target_position(&sl->drive, substep_target(m, sl));
         lrt_drive_set_inputs(&sl->drive, drive_inputs(m, s));
         fb.theta_m = sl->axis.th_m;
         fb.omega_m = sl->axis.w_m;
@@ -1199,6 +1244,7 @@ int lrt_machine_step(lrt_machine *m, double dt)
         if (rc != LRT_DRIVE_OK) {
             return fail(m, LRT_MACHINE_ERR_STEP, s, rc);
         }
+        sl->applied = sl->drive.target_counts; /* po ewentualnym przesunieciu ramki (baza) */
         rc = lrt_axis_step(&sl->axis, tau, dt);
         if (rc != LRT_AXIS_OK) {
             return fail(m, LRT_MACHINE_ERR_STEP, s, rc);

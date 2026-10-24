@@ -1056,6 +1056,21 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
   launcher ISO `linumert --neon` + skrót pulpitu. Uruchomienie z prawdziwym `gcode`: zadanie N4 Codex.
 - Testy: pełne pytest 1181 PASS, 12 skip; ruff, wymagania PASS. NIEZWERYFIKOWANE NA SPRZĘCIE.
 
+## 036 — Poziomy dostępu · 2026-10-24 · Claude
+- **Zrobione:** `core/linumert/access` (role, PIN scrypt w SQLite, blokada po błędach, audyt, CLI
+  `python -m linumert.access`); ekran: `linumert_access_ui` (przycisk roli w górnym pasku, okno PIN z keypadem
+  44 px, `require()`/`audit()`); strażnicy: zapis/usuwanie narzędzi, zero detalu i zapis przygotówki
+  (technolog), Konfiguracja i pełny QtDragon (serwis). Zrzut: build/access/pin-dialog.png.
+- **Decyzje:** bez domyślnych PIN-ów, brak PIN-ów = kontrola wyłączona (PROPOZYCJA w DECYZJE).
+- **Do sprawdzenia ręcznie:** ustawić PIN serwisu CLI, w HMI zalogować się, sprawdzić odmowę dla Operatora.
+- **Długi:** pin HAL klucza pulpitu (API gotowe). Testy: 12 nowych; pełne pytest w PR. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## N1 — rzeczywisty interpreter podglądu · 2026-10-24 · Codex
+- Model-Author: Codex. Naprawiono TypeError: jawny parameter_file i prywatny plik parametrów.
+- Debian12/RIP: 6 testów PASS, G20/G21 i fizyczne linie przy N900 potwierdzone; ruff i REQ PASS.
+- Demo z T1 M6: SIGSEGV w tool_mmap_mutex_get (gdb); pełny N1/N4 pozostają otwarte.
+- M1: ręczny odbiór oraz LEGACY-RUNTIME nadal otwarte; cudzych procesów LinuxCNC nie przerwano.
+
 ## 027 — Własny system projektowy ekranu (domknięcie) · 2026-10-24 · Claude
 - **Zrobione:** rozliczenie promptu: QSS powłoki z tokenów już generowany w czasie działania (`shell_qss`, test
   kolorów i celu 44 px) — dodano `tools/gen_qss.py` (zrzut tego samego stylu); fonty IBM Plex Sans (Regular,
@@ -1085,6 +1100,30 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
 - **Do sprawdzenia ręcznie:** kontur z korekcją na Plant; czopy przy realnym marginesie przygotówki.
   Model-Author: Claude. NIEZWERYFIKOWANE NA SPRZĘCIE.
 
+## 051 — Ścieżka z programu · 2026-10-24 · Claude
+- **Zrobione:** `simulation/linumert_sim/path.py`: `MoveList` w tablicach (float32/int32/int8), `PathCanon` dla
+  `gcode.parse`, `SubsetInterpreter` dla CI (G0–G3 w G17/G18/G19, IJK/R, linia śrubowa, G20/21, G90/91, G90.1/91.1,
+  T/M6, G81/G82/G83/G73 z G98/G99 i Q); łuki na cięciwach z błędem ≤ 0,01 mm; `load_path(prefer=auto|rs274|subset)`.
+  Nieobsługiwane (o-word call, G41/G42, G28/G30/G53, G5.1…) → notatka, ruch pominięty.
+- **Błąd znaleziony przy okazji:** canon bez atrybutu `parameter_file` → `gcode.parse` kończył się TypeError
+  (gcodemodule czyta go jako tekst). Dotyczyło też `core/linumert/programs/toolpath.py` (`load_ngc`, Classic × Neon).
+- **Testy:** 10 programów golden (M3): ciągłość, końce linii, posuwy, błąd cięciwy; R krótki/długi, płaszczyzny,
+  pełny okrąg, G91/G20, cykle; z LinuxCNC 2.9 RIP: 9 programów bez korekcji = rs274 (linie, końce, długości).
+- **Decyzje:** współrzędne programu bez G5x/G92 (jak podgląd LinuxCNC); start podzbioru 0,0,0.
+- **Długi:** podłączenie do procesu symulacji/widoku (052/057). Model-Author: Claude. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## 052 — Proces symulacji (offline, worker) · 2026-10-24 · Claude
+- **Zrobione:** `offline.py`: `OfflineJob` (program, ;@STOCK, narzędzia T/długość/średnica, układ detalu, G0, krok)
+  z kluczem SHA-256; `simulate()` prowadzi `SimEngine` po ścieżce z 051 (materiał, K-301/302/…, czas G0/G1, objętość
+  usunięta), anulowanie co odcinek, postęp. `worker.py`: `SimWorker` — proces `spawn`, nice ≥ 10, kolejka, anulowanie
+  bieżącego i oczekującego zadania, cache (pamięć + `<sha256>.json`), `start_listener` (wątek pomocniczy).
+  `linumert_sim_worker.py`: sygnały Qt progress/finished/cancelled/failed. MoveList dostał `spindle` (S, M3/M4/M5).
+- **Testy:** reguły i czas na programie z M3/M5 i G0 w materiał; brak ;@STOCK; klucz cache; anulowanie w procesie
+  i w workerze (bieżące + w kolejce, worker działa dalej, wynik anulowany nie trafia do cache); cache z pliku w nowym
+  procesie; błąd programu; most Qt — sygnał w wątku GUI.
+- **Decyzje:** pierwszy ruch programu tylko do czasu (pozycja startowa nieznana); czas bez przyspieszeń (053).
+- **Długi:** strona Symulacja na workerze offline, widok 3D (057). Model-Author: Claude. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
 ## 048 — Biblioteka podprogramów o-word (domknięcie) · 2026-10-24 · Claude
 - **Zrobione:** `o<lrt_pocket_rect>`, `o<lrt_pocket_circle>`, `o<lrt_slot_linear>` (NgcGui) — ruch jak generatory
   pocket_rect v2 / pocket_circle v2 (wejście pionowe, bez naddatków) i slot_linear v1; fragmenty o-word kieszeni
@@ -1092,3 +1131,54 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
 - **Testy:** rs274 (CI `linuxcnc`, 133 PASS) porównuje STRAIGHT i ARC_FEED podprogramu z generatorem: obrót 90°, CW,
   narożniki R=D/2 i R>D/2, rowek pionowy/ukośny/wąski; lekser bez MIN/MAX i minusa jednoargumentowego.
 - **Do sprawdzenia ręcznie:** zakładka NgcGui QtDragon z katalogiem user_macros. Model-Author: Claude. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## PLANT-SUBSTEPS — zależność Plant od substeps (M1) · 2026-10-24 · Claude
+- **Zrobione:** diagnoza ustalenia z 049: cel CSP przykładany w pierwszym podkroku → n-krotny impuls FF
+  (frezarka E-4201 przy G0 Z, router ~1560 zgubionych kroków przy G0). `lrt_machine_step_cycle` interpoluje cel
+  liniowo w cyklu (z poprawką ramki przy bazowaniu); `PlantServer`, `HomingMaster` na nowej funkcji; domyślne
+  `substeps` = 4 (wzory plant.yaml, lib.sh VM). `tools/plant_substeps.py`, raport `docs/raporty/plant_substeps.md`.
+- **Testy:** C 29/59/21 (+ sanitizery), test `step_cycle` (bez interpolacji n=8: napęd w FAULT, 49 mm zadana −
+  stojąca oś; z interpolacją 0,013 mm); pełne pytest PASS; macierz Plant 14/14; ruff, REQ PASS.
+- **Decyzje:** PROPOZYCJA w DECYZJE (interpolacja, 4 podkroki, 60C2h w generatorze 063).
+- **Do sprawdzenia ręcznie:** Plant realtime z LinuxCNC na VM — obciążenie CPU przy 4 podkrokach.
+  Model-Author: Claude. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## 049 — Test technologiczny na Plant (suite_cycles) · 2026-10-24 · Claude
+- **Zrobione:** `tools/suite_cycles.py` — każdy generator cykli (10 przypadków) na `router_gantry_steppers`
+  i `mill_servo_table` (atrapa mastera, lockstep), wariant A (G0 z machine.yaml) i B (G0 ≤ 3000 mm/min);
+  łuki → cięciwy, cykle wiercenia rozwinięte. Raport `docs/raporty/suite_cycles.md`: **40/40 PASS**.
+- **Ustalenie:** pierwszy przebieg (przed poprawką Plant) — router 0/20 (zgubione kroki, także przy G0 10 mm),
+  frezarka E-4201 przy substeps ≥ 2. Przyczyna w rdzeniu Plant (cel CSP w pierwszym podkroku) — poprawka
+  PLANT-SUBSTEPS (PR #116); generator nie wymagał zmian.
+- **Decyzje:** PROPOZYCJA w DECYZJE (interpolacja celu, 4 podkroki). Atrapa bez korekcji G41.1/G42.1.
+- **Do sprawdzenia ręcznie:** kontur z korekcją na Plant z LinuxCNC. Model-Author: Claude. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## 061 — machine.yaml: napędy rzeczywiste (REQ-VD-06) · 2026-10-24 · Claude
+- **Zrobione:** sekcja `real:` szablonów napędów (`drive_real.py`): `stepgen` (czasy impulsów), `ethercat_cia402`
+  (PDO CSP), `vfd_modbus` (hy_vfd/mb2hal), `pwm`; zgodność typ ↔ sterownik; JSON Schema; wpisy w 7 szablonach.
+  `machine.yaml`: `target: plant | sim | hardware` i `hardware:` (parport/mesa 7i96s/7i76e/ethercat, kanały,
+  port falownika). `hardware_plan()` — sterownik, kanał, skala impulsów z `encoder_counts_per_rev` i `ratio`.
+- **Testy:** `test_template_real_mapping` (REQ-VD-06): ten sam plik → Plant i plan sprzętu, NEMA 23 = 640 kroków/mm;
+  frezarka serwo → EtherCAT; reguły sekcji hardware; walidacja `real:`. Wymagania 22/22.
+- **Decyzje:** skala nie jest wpisywana osobno (jedno źródło: mechanika szablonu); nazwy pinów HAL dopiero w 062/063.
+- **Długi:** pulpit/MPG i E-STOP rzeczywisty w `hardware:`. Model-Author: Claude. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## D38 — histereza dotrzymania pozycji (poprawka) · 2026-10-24 · Claude
+- **Zrobione:** próg |błąd nadążania| przed wycofaniem Z: wejście ≤ 5 µm, wyjście > 10 µm; przyczyna niestabilnego
+  `test_retract_returns_to_compensated_path[plant]` i odmowy przy aktywnym przycisku. Test `tests/test_pause_settled.py`;
+  test LinuxCNC + Plant PASS lokalnie. Model-Author: Claude. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+
+## 062 — Generator INI/HAL: krok 1 · 2026-10-24 · Codex
+- Model-Author: Codex. Start po scaleniu #125/b2ee924 na polecenie właściciela.
+- Zrobione: kopia pełnej konfiguracji, unikalne backupy, diff bez zapisu, walidacja ścieżek.
+- Testy: 8 PASS Windows/Python3.12; pełny odbiór i uruchomienie generatora otwarte.
+- Długi: szablony sim/Plant/parport/Mesa, CLI build, golden oraz LinuxCNC.
+
+## LIMITS-PREFLIGHT — zgodność jednostek INI — 2026-10-24 · Codex
+- Model-Author: Codex. Niezależna pomoc do PR #103, zakres 031/051; baza 98191c4.
+- Odtworzono błąd: limit 10 cali porównywany z pozycją 127 mm jak limit 10 mm.
+- Granice XYZ z INI są przeliczane do mm przed porównaniem z pozycjami kanonicznymi.
+- Regresja: mm oraz inch/in/imperial, programy mm/cale, oba końce zakresu.
+- Przed zmianą 3 warianty FAIL, po zmianie 4 warianty PASS (unittest, Windows).
+- Odbiór GUI/LinuxCNC i sprzętu nie został wykonany; NIEZWERYFIKOWANE NA SPRZĘCIE.

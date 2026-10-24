@@ -12,7 +12,7 @@ Tabela jest zgodna z wymaganiami (pilnuje tego `tests/test_plant_spec.py`).
 | REQ-VD-03 | 013, 023 | `test_drive_clone_independent`, scenariusz `drive_clone_tuning` | zielone |
 | REQ-VD-04 | 013, 022 | `test_live_params`, scenariusz `heavy_table_live` | zielone |
 | REQ-VD-05 | 013 | `test_library_loads_all` | zielone |
-| REQ-VD-06 | 061 | `test_template_real_mapping` | planowane |
+| REQ-VD-06 | 061 | `test_template_real_mapping`, `test_servo_machine_maps_to_ethercat` (`tests/test_drive_real.py`) | zielone |
 | REQ-VM-01 | 010 | `test_single_source` | zielone |
 | REQ-VM-02 | 010, 014 | scenariusze `kin_gantry`, `kin_xyza`, `kin_trunnion` | zielone |
 | REQ-VM-03 | 010, 014 | `gantry_skew_alarm` | zielone |

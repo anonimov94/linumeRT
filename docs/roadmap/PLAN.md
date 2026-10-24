@@ -1,7 +1,7 @@
 <!-- Generowane przez python3 tools/roadmap.py; edytuj docs/roadmap/plan.json. -->
 # Wspólny plan linumeRT
 
-Pierwotny plan: **84 sesje M0–M6**, commit `796c6a2`. Stan na 2026-10-24: planowane: 17; w toku: 0; częściowe: 32; do odbioru: 0; ukończone: 35; zablokowane: 0.
+Pierwotny plan: **84 sesje M0–M6**, commit `796c6a2`. Stan na 2026-10-24: planowane: 15; w toku: 1; częściowe: 29; do odbioru: 0; ukończone: 39; zablokowane: 0.
 
 Zakończenie części implementacji nie oznacza odbioru całej funkcji ani sprzętu.
 
@@ -56,7 +56,7 @@ Zakończenie części implementacji nie oznacza odbioru całej funkcji ani sprz�
 | 033 | M2 | [Zerowanie detalu i sonda](../../prompts/sesja-033.md) | częściowe |
 | 034 | M2 | [Ręczna zmiana narzędzia](../../prompts/sesja-034.md) | częściowe |
 | 035 | M2 | [Alarmy na ekranie](../../prompts/sesja-035.md) | częściowe |
-| 036 | M2 | [Poziomy dostępu](../../prompts/sesja-036.md) | planowane |
+| 036 | M2 | [Poziomy dostępu](../../prompts/sesja-036.md) | ukończone |
 | 037 | M2 | [Język polski i angielski](../../prompts/sesja-037.md) | częściowe |
 | 038 | M2 | [Bufor i bramka G2 (prototyp v0.1)](../../prompts/sesja-038.md) | planowane |
 | 039 | M3 | [Format .lnx i BaseMacroGenerator](../../prompts/sesja-039.md) | ukończone |
@@ -69,10 +69,10 @@ Zakończenie części implementacji nie oznacza odbioru całej funkcji ani sprz�
 | 046 | M3 | [Podglądy 2D w formularzach](../../prompts/sesja-046.md) | częściowe |
 | 047 | M3 | [Menedżer programów i pliki .lnx](../../prompts/sesja-047.md) | częściowe |
 | 048 | M3 | [Biblioteka podprogramów o-word](../../prompts/sesja-048.md) | ukończone |
-| 049 | M3 | [Test technologiczny na Plant](../../prompts/sesja-049.md) | częściowe |
+| 049 | M3 | [Test technologiczny na Plant](../../prompts/sesja-049.md) | ukończone |
 | 050 | M3 | [Bufor i bramka G3 (prototyp v0.2)](../../prompts/sesja-050.md) | planowane |
-| 051 | M4 | [Ścieżka z programu](../../prompts/sesja-051.md) | częściowe |
-| 052 | M4 | [Proces symulacji](../../prompts/sesja-052.md) | częściowe |
+| 051 | M4 | [Ścieżka z programu](../../prompts/sesja-051.md) | ukończone |
+| 052 | M4 | [Proces symulacji](../../prompts/sesja-052.md) | ukończone |
 | 053 | M4 | [Czas obróbki i porównanie z Plant](../../prompts/sesja-053.md) | częściowe |
 | 054 | M4 | [Przygotówka](../../prompts/sesja-054.md) | ukończone |
 | 055 | M4 | [Materiał 2.5D](../../prompts/sesja-055.md) | częściowe |
@@ -82,7 +82,7 @@ Zakończenie części implementacji nie oznacza odbioru całej funkcji ani sprz�
 | 059 | M4 | [Raport symulacji i eksport STL](../../prompts/sesja-059.md) | częściowe |
 | 060 | M4 | [Bufor i bramka G4 (prototyp v0.3)](../../prompts/sesja-060.md) | planowane |
 | 061 | M5 | [machine.yaml: napędy i wejścia rzeczywiste](../../prompts/sesja-061.md) | częściowe |
-| 062 | M5 | [Generator INI/HAL: sim, Plant, step/dir](../../prompts/sesja-062.md) | planowane |
+| 062 | M5 | [Generator INI/HAL: sim, Plant, step/dir](../../prompts/sesja-062.md) | w toku |
 | 063 | M5 | [Generator EtherCAT (lcec, CiA 402)](../../prompts/sesja-063.md) | planowane |
 | 064 | M5 | [Wrzeciono RS485 w generatorze](../../prompts/sesja-064.md) | planowane |
 | 065 | M5 | [Kinematyki 4 i 5 osi](../../prompts/sesja-065.md) | częściowe |
@@ -149,6 +149,7 @@ Nie są kolejnym harmonogramem. Ich status dotyczy tylko wskazanego kroku.
 | LIMITS-PREFLIGHT | 031, 051 | Kontrola limitów osi przed startem programu | częściowe |
 | ORIGIN-WIZARD | 033, 054 | Kreator zera detalu na przygotówce | częściowe |
 | M6-G43 | 034, 066 | Automatyczna korekta długości narzędzia po M6 | częściowe |
+| PLANT-SUBSTEPS | 049, 063 | Plant: wynik niezależny od podkroków całkowania | ukończone |
 
 ## Postęp, pozostały zakres i dowody
 
@@ -384,9 +385,9 @@ Pozostaje: Pełne mapowanie kodów napędów/VFD i scenariusze alarmów z prompt
 
 ### 036 — Poziomy dostępu
 
-**planowane**. Brak potwierdzonego zakończenia zakresu.
+**ukończone**. 2026-10-24 | Role operator/technolog/serwis, PIN scrypt w SQLite (nigdy jawnie), blokada po błędach, audyt, CLI; przycisk roli i logowanie PIN w HMI; blokada edycji narzędzi/offsetów (technolog) i Konfiguracji/pełnego QtDragon (serwis). Opcjonalny klucz pulpitu: API Session.set_key, pin HAL do podłączenia z pulpitem; Claude
 
-Źródła: [prompts/sesja-036.md](../../prompts/sesja-036.md).
+Źródła: [docs/DZIENNIK.md](../DZIENNIK.md), [tests/test_access.py](../../tests/test_access.py), [tests/test_access_ui.py](../../tests/test_access_ui.py), [docs/OBSLUGA_OPERATORA.md](../OBSLUGA_OPERATORA.md), [prompts/sesja-036.md](../../prompts/sesja-036.md).
 
 ### 037 — Język polski i angielski
 
@@ -474,11 +475,11 @@ Pozostaje: Pełny menedżer, szablony i odbiór bezpiecznych operacji plikowych.
 
 ### 049 — Test technologiczny na Plant
 
-**częściowe**. Wybrane cykle wykonane na LinuxCNC + Plant (#58/#60).
+**ukończone**. Wybrane cykle na LinuxCNC + Plant (#58/#60); tools/suite_cycles.py: 10 przypadków generatorów (planowanie, wiercenie G81/G83, kieszenie, rowki, czopy, kontur) × router_gantry_steppers i mill_servo_table, warianty A (G0 z machine.yaml) i B (G0 ≤ 3000 mm/min): 40/40 PASS po poprawce Plant (interpolacja celu CSP w podkrokach, PLANT-SUBSTEPS). Wcześniejsze zgubione kroki routera i E-4201 frezarki przy G0 były artefaktem modelu, nie generatorów.
 
-Pozostaje: suite_cycles dla każdego generatora na router_steppers i mill_servo.
+Pozostaje: Kontur z korekcją G41.1/G42.1 na Plant z LinuxCNC (atrapa jedzie bez korekcji; rs274 w CI).
 
-Źródła: [docs/DZIENNIK.md](../DZIENNIK.md), [prompts/sesja-049.md](../../prompts/sesja-049.md).
+Źródła: [tools/suite_cycles.py](../../tools/suite_cycles.py), [tests/test_suite_cycles.py](../../tests/test_suite_cycles.py), [docs/raporty/suite_cycles.md](../raporty/suite_cycles.md), [docs/raporty/plant_substeps.md](../raporty/plant_substeps.md), [docs/DZIENNIK.md](../DZIENNIK.md), [prompts/sesja-049.md](../../prompts/sesja-049.md).
 
 ### 050 — Bufor i bramka G3 (prototyp v0.2)
 
@@ -490,19 +491,19 @@ Bramka automatyczna: `open`; odbiór stanowiska osobno.
 
 ### 051 — Ścieżka z programu
 
-**częściowe**. Działa ścieżka rs274 i pomiar na żywo.
+**ukończone**. simulation/linumert_sim/path.py: MoveList (start/end float32, line/tool int32, kind int8, feed float32), łuki G17/G18/G19 z linią śrubową na cięciwach z błędem ≤ 0,01 mm, PathCanon dla gcode.parse oraz zapasowy interpreter podzbioru (G0–G3, IJK/R, G20/21, G90/91, G90.1/91.1, T/M6, G81/82/83/73 z G98/G99) z notatkami zamiast zgadywania. 10 programów golden z M3; z LinuxCNC 2.9 (RIP) 9 programów bez korekcji zgodnych z rs274 co do linii, końców i długości. Naprawiony brak canon.parameter_file (TypeError w gcode.parse, także w core load_ngc).
 
-Pozostaje: Rozliczyć MoveList, canon, łuki i pełną macierz 10 programów.
+Pozostaje: Podłączenie MoveList do procesu symulacji i widoku 3D (052/057). Korekcja G41/G42 i o-word call tylko przez rs274 (podzbiór zapisuje notatkę).
 
-Źródła: [docs/DZIENNIK.md](../DZIENNIK.md), [prompts/sesja-051.md](../../prompts/sesja-051.md).
+Źródła: [simulation/linumert_sim/path.py](../../simulation/linumert_sim/path.py), [tests/test_sim_path.py](../../tests/test_sim_path.py), [tests/test_toolpath.py](../../tests/test_toolpath.py), [docs/DZIENNIK.md](../DZIENNIK.md), [prompts/sesja-051.md](../../prompts/sesja-051.md).
 
 ### 052 — Proces symulacji
 
-**częściowe**. Symulacja live działa w osobnym procesie nice 10.
+**ukończone**. Symulacja live (osobny proces, nice 10) z wcześniejszych sesji, a teraz także offline: simulation/linumert_sim/offline.py (ścieżka 051 → SimEngine: materiał, K-3xx, czas G0/G1, objętość usunięta) i worker.py — proces potomny spawn z nice ≥ 10, kolejka zadań, anulowanie zadania bieżącego i oczekującego, cache wyników po SHA-256 wejścia (pamięć + pliki JSON), wątek pomocniczy z callbackiem; most sygnałów Qt screens/linumert/linumert_sim_worker.py. MoveList z obrotami wrzeciona (S, M3/M4/M5; rs274 przez LineCode.spindle/speed).
 
-Pozostaje: Rozliczyć anulowanie, cache SHA-256 i pełne API offline.
+Pozostaje: Podłączenie workera offline do strony Symulacja ekranu i widoku 3D (057). Czas z przyspieszeniami i porównanie z Plant (053).
 
-Źródła: [docs/DZIENNIK.md](../DZIENNIK.md), [prompts/sesja-052.md](../../prompts/sesja-052.md).
+Źródła: [simulation/linumert_sim/offline.py](../../simulation/linumert_sim/offline.py), [simulation/linumert_sim/worker.py](../../simulation/linumert_sim/worker.py), [screens/linumert/linumert_sim_worker.py](../../screens/linumert/linumert_sim_worker.py), [tests/test_sim_worker.py](../../tests/test_sim_worker.py), [docs/DZIENNIK.md](../DZIENNIK.md), [prompts/sesja-052.md](../../prompts/sesja-052.md).
 
 ### 053 — Czas obróbki i porównanie z Plant
 
@@ -568,17 +569,19 @@ Bramka automatyczna: `open`; odbiór stanowiska osobno.
 
 ### 061 — machine.yaml: napędy i wejścia rzeczywiste
 
-**częściowe**. Schemat maszyny oraz deklaracje wdrożenia hardware istnieją.
+**częściowe**. Schemat maszyny i deklaracje wdrożenia hardware; sekcja real: szablonów napędów (REQ-VD-06): stepgen z czasami impulsów, ethercat_cia402 z PDO, vfd_modbus (hy_vfd/mb2hal), pwm — we wszystkich 7 szablonach biblioteki; machine.yaml: target plant|sim|hardware i sekcja hardware (interfejs parport/mesa/ethercat, karta 7i96s/7i76e, kanały napędów, port falownika); hardware_plan() — sterownik, kanał i skala impulsów z mechaniki szablonu. 22/22 wymagań pokrytych.
 
-Pozostaje: Real mapping napędów REQ-VD-06 i generator sprzętowy; raport konkursu 03.
+Pozostaje: Pulpit (MPG, przyciski) i E-STOP rzeczywisty w sekcji hardware. Raport konkursu 03.
 
-Źródła: [docs/DZIENNIK.md](../DZIENNIK.md), [prompts/sesja-061.md](../../prompts/sesja-061.md).
+Źródła: [plant/server/linumert_plant/drive_real.py](../../plant/server/linumert_plant/drive_real.py), [core/linumert/machine/schema.py](../../core/linumert/machine/schema.py), [plant/library/drives/README.md](../../plant/library/drives/README.md), [tests/test_drive_real.py](../../tests/test_drive_real.py), [docs/DZIENNIK.md](../DZIENNIK.md), [prompts/sesja-061.md](../../prompts/sesja-061.md).
 
 ### 062 — Generator INI/HAL: sim, Plant, step/dir
 
-**planowane**. Brak potwierdzonego zakończenia zakresu.
+**w toku**. Codex: rozpoczęto po scaleniu integracji #125 (b2ee924), na jawne polecenie właściciela. Krok 1: kopia całej istniejącej konfiguracji do unikalnego katalogu, diff bez zapisu, odmowa nieprawidłowych ścieżek i dowiązań; 8 testów Windows/Python3.12 PASS.
 
-Źródła: [prompts/sesja-062.md](../../prompts/sesja-062.md).
+Pozostaje: Szablony INI/HAL sim i Plant oraz zgodność D05, DISPLAY linumert. Wyjścia stepgen parport i Mesa 7i96S/7i76E z jawnymi mapowaniami sprzętu i E-STOP; NIEZWERYFIKOWANE NA SPRZĘCIE. CLI linumert-config build łączące walidację, backup, diff i zapis; golden tests. Uruchomienie wygenerowanych sim/Plant w LinuxCNC i pełne make lint test.
+
+Źródła: [core/linumert/machine/config_files.py](../../core/linumert/machine/config_files.py), [tests/test_config_files.py](../../tests/test_config_files.py), [prompts/sesja-062.md](../../prompts/sesja-062.md).
 
 ### 063 — Generator EtherCAT (lcec, CiA 402)
 
@@ -852,11 +855,11 @@ Pozostaje: Rozstrzygnąć propozycję zmiany prezentacji; nie zmienia zamrożone
 
 ### SKIN-02 — Skin API, host i kanały CNC
 
-**częściowe**. Manifesty, kontrola przełączenia i monitor read-only istnieją.
+**częściowe**. Manifesty, kontrola przełączenia i monitor read-only istnieją. N1/Codex: prawdziwy gcode potwierdza posuwy G20/G21 i fizyczne numery linii; naprawiony parameter_file. Demo z T1 M6 ujawnia SIGSEGV w tooldata, pełny odbiór pozostaje otwarty.
 
 Pozostaje: Produkcyjny host, kanał poleceń i potwierdzenie świeżości danych.
 
-Źródła: [docs/design/SKIN_SYSTEM_ROADMAP.md](../design/SKIN_SYSTEM_ROADMAP.md), [docs/design/SKIN_AUDIT.md](../design/SKIN_AUDIT.md).
+Źródła: [docs/design/SKIN_SYSTEM_ROADMAP.md](../design/SKIN_SYSTEM_ROADMAP.md), [docs/design/SKIN_AUDIT.md](../design/SKIN_AUDIT.md), [tests/test_toolpath.py](../../tests/test_toolpath.py).
 
 ### SKIN-03 — Palety, EN/PL i preferencje
 
@@ -978,7 +981,7 @@ Pozostaje: 10× testy Plant z LinuxCNC: 1 z 10 przebiegów PASS (13/13), reszta 
 
 Pozostaje: Łuki między punktami końcowymi, obrót XY i limity osi obrotowych nie są sprawdzane. Automatyczne G43 po M6 (remap) i poprawne G43 w programie Facing z QtDragon (kod upstream) — osobna decyzja. Odbiór na pulpicie właściciela.
 
-Źródła: [core/linumert/programs/limits.py](../../core/linumert/programs/limits.py), [tests/test_limits.py](../../tests/test_limits.py), [tests/test_hmi_workflow_widgets.py](../../tests/test_hmi_workflow_widgets.py), [screens/linumert/linumert_program_editor.py](../../screens/linumert/linumert_program_editor.py), [screens/linumert/linumert_preflight.py](../../screens/linumert/linumert_preflight.py), [screens/linumert/linumert_shell.py](../../screens/linumert/linumert_shell.py).
+Źródła: [core/linumert/programs/limits.py](../../core/linumert/programs/limits.py), [tests/test_limits.py](../../tests/test_limits.py), [tests/test_limits_units.py](../../tests/test_limits_units.py), [tests/test_hmi_workflow_widgets.py](../../tests/test_hmi_workflow_widgets.py), [screens/linumert/linumert_program_editor.py](../../screens/linumert/linumert_program_editor.py), [screens/linumert/linumert_preflight.py](../../screens/linumert/linumert_preflight.py), [screens/linumert/linumert_shell.py](../../screens/linumert/linumert_shell.py).
 
 ### ORIGIN-WIZARD — Kreator zera detalu na przygotówce
 
@@ -995,4 +998,12 @@ Pozostaje: Odbiór na pulpicie właściciela i na maszynie wirtualnej (G10 L2 po
 Pozostaje: Odbiór na pulpicie właściciela, w tym ręczna wymiana w oknie QtDragon. Program Facing z QtDragon (kod upstream) ma G49 i nie wywołuje M6, więc korekta nie jest włączana; osobna decyzja. Remap dla ATC (066) razem z magazynem narzędzi.
 
 Źródła: [config/sim/linumert_xyz/macros/lrt_m6.ngc](../../config/sim/linumert_xyz/macros/lrt_m6.ngc), [tests/test_m6_remap.py](../../tests/test_m6_remap.py), [core/linumert/programs/linuxcnc_check.py](../../core/linumert/programs/linuxcnc_check.py).
+
+### PLANT-SUBSTEPS — Plant: wynik niezależny od podkroków całkowania
+
+**ukończone**. Cel CSP z cyklu mastera interpolowany liniowo w podkrokach rdzenia C (lrt_machine_step_cycle, jak 60C2h/stepgen); domyślnie 4 podkroki. Atrapa: frezarka i router PASS dla n = 2–16 (wcześniej E-4201 i ~1560 zgubionych kroków przy n ≥ 2–4). Raport docs/raporty/plant_substeps.md.
+
+Pozostaje: Obciążenie CPU Plant realtime przy 4 podkrokach na VM-B (odbiór właściciela). Generator EtherCAT (063): 60C2h = okres wątku serwo.
+
+Źródła: [plant/core/machine.c](../../plant/core/machine.c), [plant/core/tests/test_machine.c](../../plant/core/tests/test_machine.c), [tools/plant_substeps.py](../../tools/plant_substeps.py), [docs/raporty/plant_substeps.md](../raporty/plant_substeps.md).
 

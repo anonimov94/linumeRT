@@ -20,6 +20,8 @@ if os.path.join(ROOT, "core") not in sys.path:
 from linumert.programs.workpiece import ANCHOR_TITLES, Workpiece, offset_command
 from linumert_workpiece_view import WorkpieceView
 
+import linumert_access_ui as access_ui
+
 SHAPES = (("Prostopadłościan", "box"), ("Walec", "cylinder"),
           ("Rura", "tube"), ("Odlew", "casting"))
 ANCHORS = tuple((title, name) for name, title in ANCHOR_TITLES.items())
@@ -257,6 +259,8 @@ class OffsetsPage(QtWidgets.QWidget):
             self.save_button.setEnabled(self.valid)
 
     def apply_zero(self, confirm=True):
+        if not access_ui.require(self.shell, "offsets.edit", "zero detalu"):
+            return False
         if (getattr(self.shell, "preview", False) or not self.valid or
                 not model.gates(self.shell.s)["mdi"].enabled):
             return False
@@ -268,11 +272,12 @@ class OffsetsPage(QtWidgets.QWidget):
                 QtWidgets.QMessageBox.No) != QtWidgets.QMessageBox.Yes:
             return False
         self.shell.action.CALL_MDI(offset_command(spec, self.shell.s.metric))
+        access_ui.audit(self.shell, "offsets.edit", f"{spec.offset} w G53 {spec.position}")
         self.message.setText(f"Zlecono ustawienie {spec.offset}. Sprawdź wskazanie DRO.")
         return True
 
     def save(self):
-        if not self.valid:
+        if not self.valid or not access_ui.require(self.shell, "offsets.edit", "przygotówka"):
             return False
         try:
             data = json.dumps(self.build_spec().to_dict(), ensure_ascii=False, indent=2).encode()
