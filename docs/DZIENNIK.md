@@ -916,3 +916,14 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
 - 10 testów Qt PASS, ruff i kontrola wymagań PASS; zrzut build/editor-preview.png.
 - Szerszy zestaw Windows ujawnił ograniczenia lokalizacji, kodowania i dowiązań; odbiór LinuxCNC przez CI.
 - Kontrola składni do 64 KiB nie jest kontrolą semantyki/ruchu. Bez nowych zależności produkcyjnych.
+
+## Classic × Neon — renderer detal + maszyna · 2026-10-24 · Claude
+- Model-Author: Claude. Gałąź `claude/neon-render` (worktree), polecenie właściciela: render jak w koncepcji HTML.
+- Rdzeń `programs/toolpath.py`: ruchy z liniami programu, łuki ARC_FEED, strefy START/KONIEC, DTG,
+  `locate(motion_line, pozycja)`; odbiornik `PreviewCanon` dla `gcode.parse` (bez LinuxCNC nietestowany z interpreterem).
+- `linumert_neon_view.py`: scena wspólna, widok detalu (śledzi narzędzie), widok maszyny, oś programu;
+  Classic używa go dla ról toolpath/machine, gdy host ma fabrykę widoków. Motyw `neon-punk`.
+- `tools/dev/neon-preview.py` (okno i `--png`), program `linumert_neon_demo.ngc`, koncepcja HTML w `docs/design/koncepcje/`.
+- Testy: 10 nowych (model + Qt offscreen), pełne pytest lokalnie (WSL, Python 3.11, bez LinuxCNC): 1143 PASS, 12 skip; ruff PASS.
+- Otwarte: podłączenie do `stat.motion_line`/`stat.file` w monitorze NML, test `PreviewCanon` z prawdziwym `gcode`.
+- Autokontrola, bez niezależnego przeglądu. NIEZWERYFIKOWANE NA SPRZĘCIE.

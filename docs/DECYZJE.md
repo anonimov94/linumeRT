@@ -148,3 +148,17 @@ Raport: `../raporty/04.md`. Bez scalania przed wspólną oceną konkursu.
   kontrola nie potwierdza fizycznego sprzętu. Raport: `prompts/konkurs-2026-10/raporty/01.md`.
   Nie scalać PR #93 przed oceną konkursu (bieżące polecenie właściciela).
   Model-Author: Codex · implementacja do oceny, NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## Classic × Neon — renderer ścieżki QPainter · 2026-10-24 · Claude · PROPOZYCJA
+
+Na polecenie właściciela skórka Classic Digital rysuje role `toolpath` (zbliżenie na detal) i
+`machine` (cała maszyna) szybkim rendererem QPainter (`linumert_neon_view.py`): tylko linie i
+półprzezroczyste bryły szkieletowe, bez trójkątów i sortowania głębią, ścieżka partiami po klasie
+koloru, ≤ 30 Hz. Obie ramki mają wspólną scenę: pierwsze i ostatnie N punktów programu wyróżnione
+(lime/magenta), następny punkt — żółty celownik z DTG. Bez nowych zależności; HTML/WebEngine
+odrzucony (zmiana stosu, osobny proces Chromium obok sygnału życia D35). Piąty motyw `neon-punk`
+i role ścieżki dopisane do `tokens.yaml` (`motywy`) jako PROPOZYCJA odstępstwa od jednej palety
+z §6a. Ścieżka z interpretera LinuxCNC (`gcode.parse` → `PreviewCanon`), nie z własnego parsera.
+Etap 1 = program demo offline; śledzenie `stat.motion_line`/pozycji w monitorze NML jest
+przygotowane w modelu (`Toolpath.locate`, `PathScene.follow`), ale niepodłączone.
+NIEZWERYFIKOWANE NA SPRZĘCIE. Do oceny Codex.

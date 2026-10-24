@@ -9,7 +9,7 @@ from dataclasses import dataclass
 from types import MappingProxyType
 
 SKIN_IDS = ("classic-digital", "industrial-pro", "cyberdeck", "organic-vector")
-THEME_IDS = ("classic-turquoise", "graphite-gray", "reactor-green", "ion-blue")
+THEME_IDS = ("classic-turquoise", "graphite-gray", "reactor-green", "ion-blue", "neon-punk")
 LANGUAGE_IDS = ("en", "pl")
 
 
@@ -70,6 +70,9 @@ PALETTES = MappingProxyType({
                               "#a4b9a8", "#8bea76"),
     "ion-blue": Palette("#0c111a", "#151f2e", "#202e42", "#edf3ff",
                          "#a7b7d1", "#70b7ff"),
+    # Classic × Neon (Claude, 2026-10-24, PROPOZYCJA): docs/design/tokens.yaml → motywy.
+    "neon-punk": Palette("#07050d", "#0e0a18", "#161026", "#f3eeff",
+                          "#ab9fcc", "#00f0ff"),
 })
 
 
