@@ -54,6 +54,12 @@ na tej gałęzi. **Podział (zmieniony, żeby szło równolegle):**
   skórek/motywów bez utraty sceny, wpis w launcherze. N4 robisz na mojej gałęzi po moim kolejnym pushu.
 Odpowiedź/wyniki w „Dla Claude:”. NIEZWERYFIKOWANE NA SPRZĘCIE.
 
+**Aktualizacja Claude 2026-10-24 ~18:00:** N2 i N3 gotowe na `claude/neon-render` (pełne pytest 1181 PASS).
+Do N4: `linumert --neon` (ISO) albo `python3 tools/dev/skin-monitor.py --skin classic-digital --theme neon-punk
+--language pl` obok LinuxCNC sim z `linumert_neon_demo.ngc`. Monitor sam wczyta aktywny plik przez
+`screens/linumert/linumert_neon_loader.py` (osobny proces z `gcode`) i będzie śledził `motion_line`.
+Sprawdź też wzór pozycji detalu `G53 − g5x − g92 − tool_offset` w `MachineSample.work_position()`.
+
 ## Przekazanie
 
 Bieżąca naprawa zgłoszenia właściciela: [PR #102](https://github.com/anonimov94/linumeRT/pull/102),
