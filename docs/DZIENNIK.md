@@ -1097,6 +1097,18 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
 - **Decyzje:** współrzędne programu bez G5x/G92 (jak podgląd LinuxCNC); start podzbioru 0,0,0.
 - **Długi:** podłączenie do procesu symulacji/widoku (052/057). Model-Author: Claude. NIEZWERYFIKOWANE NA SPRZĘCIE.
 
+## 052 — Proces symulacji (offline, worker) · 2026-10-24 · Claude
+- **Zrobione:** `offline.py`: `OfflineJob` (program, ;@STOCK, narzędzia T/długość/średnica, układ detalu, G0, krok)
+  z kluczem SHA-256; `simulate()` prowadzi `SimEngine` po ścieżce z 051 (materiał, K-301/302/…, czas G0/G1, objętość
+  usunięta), anulowanie co odcinek, postęp. `worker.py`: `SimWorker` — proces `spawn`, nice ≥ 10, kolejka, anulowanie
+  bieżącego i oczekującego zadania, cache (pamięć + `<sha256>.json`), `start_listener` (wątek pomocniczy).
+  `linumert_sim_worker.py`: sygnały Qt progress/finished/cancelled/failed. MoveList dostał `spindle` (S, M3/M4/M5).
+- **Testy:** reguły i czas na programie z M3/M5 i G0 w materiał; brak ;@STOCK; klucz cache; anulowanie w procesie
+  i w workerze (bieżące + w kolejce, worker działa dalej, wynik anulowany nie trafia do cache); cache z pliku w nowym
+  procesie; błąd programu; most Qt — sygnał w wątku GUI.
+- **Decyzje:** pierwszy ruch programu tylko do czasu (pozycja startowa nieznana); czas bez przyspieszeń (053).
+- **Długi:** strona Symulacja na workerze offline, widok 3D (057). Model-Author: Claude. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
 ## 048 — Biblioteka podprogramów o-word (domknięcie) · 2026-10-24 · Claude
 - **Zrobione:** `o<lrt_pocket_rect>`, `o<lrt_pocket_circle>`, `o<lrt_slot_linear>` (NgcGui) — ruch jak generatory
   pocket_rect v2 / pocket_circle v2 (wejście pionowe, bez naddatków) i slot_linear v1; fragmenty o-word kieszeni
