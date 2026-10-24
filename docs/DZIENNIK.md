@@ -1014,3 +1014,11 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
 - Błąd własny: oś jeszcze nieruszona przez program (interpreter startuje w zerze maszyny) dawała fałszywe „X=0 poniżej limitu 1” w konfiguracji Plant; teraz oś jest oceniana od pierwszego ruchu.
 - Na g54: sim — linia 13, Z=-130 < -120 (i 81 ruchów); Plant — linia 9, Z=-134 < -119 (i 85 ruchów); G49 bez G43.
 - Testy: 55 PASS (GUI + rdzeń), 3 PASS z prawdziwym LinuxCNC (start ekranu).
+
+## LIMITS-PREFLIGHT — zgodność jednostek INI — 2026-10-24 · Codex
+- Model-Author: Codex. Niezależna pomoc do PR #103, zakres 031/051; baza 98191c4.
+- Odtworzono błąd: limit 10 cali porównywany z pozycją 127 mm jak limit 10 mm.
+- Granice XYZ z INI są przeliczane do mm przed porównaniem z pozycjami kanonicznymi.
+- Regresja: mm oraz inch/in/imperial, programy mm/cale, oba końce zakresu.
+- Przed zmianą 3 warianty FAIL, po zmianie 4 warianty PASS (unittest, Windows).
+- Odbiór GUI/LinuxCNC i sprzętu nie został wykonany; NIEZWERYFIKOWANE NA SPRZĘCIE.
