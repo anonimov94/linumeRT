@@ -1189,3 +1189,9 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
 - Stary: nadążanie X 0,3 mm > 0,2; nowy: KeyboardInterrupt przy bazowaniu i rapid_vs_feed nieukończony.
 - Raport i dane: docs/raporty/prototypy/M1_REPEAT_2026-10-24.md/.json. Nie zamknięto LEGACY-RUNTIME.
 - Blokada linuxcnc zwolniona. Następny krok: zachować pełne logi first_motion i ustalić przyczynę.
+
+
+## README — aktualny postęp sesji · 2026-10-24 · Codex
+- Zastąpiono statyczne 31/84 grafiką SVG generowaną z plan.json: obecnie 39/84 (46,4%).
+- Model-Author: Codex. Rozkład M0–M6 liczy sesje, bez deklarowania odbioru bramek.
+- Generator i --check obejmują grafikę; odnośniki Markdown są identyczne na Windows/Linux.

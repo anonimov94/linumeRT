@@ -1,6 +1,8 @@
 <div align="center">
 
-<a href="docs/roadmap/PLAN.md"><img src="docs/raporty/kamienie-milowe.png" alt="linumeRT — stan kamieni milowych M0–M6 (rejestr docs/roadmap/plan.json, 2026-10-24)" width="100%"></a>
+<a href="docs/roadmap/PLAN.md"><img src="docs/raporty/postep-sesji.svg" alt="linumeRT — postęp ukończonych sesji M0–M6 z rejestru plan.json" width="100%"></a>
+
+[Aktualny rejestr sesji i kryteria odbioru →](docs/roadmap/PLAN.md)
 
 <img src="docs/design/marka/baner.png" alt="linumeRT — CNC Control System" width="100%">
 
@@ -11,7 +13,7 @@
 **An open-source CNC operator environment built on LinuxCNC.**  
 From machining and toolpaths to machine simulation, diagnostics and digital twins.
 
-[**⚡ Quick Start**](#szybki-start-linux-z-podmanem-np-endeavouros) · [**🎛️ Skin System Vision**](#control-has-a-new-face) · [**🧩 Project Roadmap**](docs/design/SKIN_SYSTEM_ROADMAP.md) · [**💻 Source Code**](https://github.com/anonimov94/linumeRT)
+[**⚡ Quick Start**](#szybki-start-linux-z-podmanem-np-endeavouros) · [**🎛️ Skin System Vision**](#control-has-a-new-face) · [**🧩 Project Roadmap**](docs/roadmap/PLAN.md) · [**💻 Source Code**](https://github.com/anonimov94/linumeRT)
 
 ![LinuxCNC](https://img.shields.io/badge/CONTROL-LinuxCNC%202.9-1a2130?style=for-the-badge&labelColor=111822)
 ![Platform](https://img.shields.io/badge/PLATFORM-Debian%2012-2dd4bf?style=for-the-badge&labelColor=111822)

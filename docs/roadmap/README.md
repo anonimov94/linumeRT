@@ -29,7 +29,9 @@ nie każda poprawka musi tworzyć nowe zadanie.
    Ukończone rozszerzenie nie zamyka automatycznie sesji nadrzędnej ani bramki.
 4. Uruchom `python3 tools/roadmap.py`, a następnie `python3 tools/roadmap.py --check`.
    Generator aktualizuje [pełny plan](PLAN.md), [HTML](index.html),
-   [spis promptów](../../prompts/README.md) i [DONE](../../prompts/DONE.md).
+   [spis promptów](../../prompts/README.md), [DONE](../../prompts/DONE.md)
+   oraz [grafikę postępu w README](../raporty/postep-sesji.svg). Grafika liczy wyłącznie pierwotne
+   sesje ze statusem `done`; `make lint` wykrywa jej nieaktualność.
    Nie edytuj tych widoków ręcznie. HTML działa także lokalnie, bez serwera.
 5. Zapisz wyniki, SHA i ograniczenia w raporcie/dzienniku; dodaj odsyłacz w rejestrze.
    `NASTEPNA_SESJA.md` przechowuje przekazanie i środowisko, nie alternatywną listę statusów.

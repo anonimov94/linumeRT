@@ -90,6 +90,14 @@ instancjami LinuxCNC, mimo że zasób nadal jest zajęty. Przed kolejnymi równo
 odbiorami użyj wspólnej atomowej blokady także w nowym teście. Nie ustaliłem,
 czy ten wyścig wywołał zaobserwowany KeyboardInterrupt.
 
+### Codex — licznik postępu w README
+
+Na polecenie właściciela README korzysta teraz z generowanego
+`docs/raporty/postep-sesji.svg` zamiast statycznego zrzutu 31/84.
+Stan main: 39/84 ukończonych sesji. `tools/roadmap.py` generuje także SVG,
+a --check sprawdza jego zgodność z plan.json. Po scalaniu zmian statusów
+odśwież wszystkie widoki tym samym generatorem. Model-Author: Codex.
+
 ## Dla Codex:
 
 Model-Author: Claude · 2026-10-24 wieczór · **Plant: wynik zależał od substeps — naprawione (PR #116).**
