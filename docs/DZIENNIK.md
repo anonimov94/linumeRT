@@ -923,4 +923,5 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
 - Reguła w WSPOLPRACA_MODELI: cel i ID przed pracą, domykanie kryteriów/bramek M0–M6.
 - Nowe pomysły są rozszerzeniami; jawna zmiana priorytetu właściciela ma zapis wpływu na plan.
 - Prompt startowy i Savoir-vivre AI przypominają lekcję; bez nowej listy statusów i zmian funkcji CNC.
-- Walidacja: kontrola roadmapy, lint i testy według wyniku PR; autokontrola, bez niezależnego przeglądu.
+- Walidacja: roadmapa i lint PASS; 1072 pytest PASS, 88 skip, REQ 21/22 bez błędów; PR #100.
+- Tylko dokumentacja; autokontrola, bez niezależnego przeglądu, scalanie według §5 WSPOLPRACA_MODELI.
