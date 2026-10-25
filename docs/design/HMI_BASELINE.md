@@ -65,3 +65,11 @@ bez zmian upstream. Sprawdzić przejścia w ESTOP, MANUAL, MDI, AUTO idle i AUTO
 zmiana strony nie wysyła ACTION, nie zmienia trybu, nie powoduje ruchu. Zweryfikować
 powrót do produkcji, ładowanie programu, alarmy, edycję tekstu i puszczanie klawiszy JOG.
 Testy QtVCP/RIP i zrzuty 1280×768 są wymagane po zmianie zachowania ekranu.
+
+## Aktualizacja 2026-10-25
+
+Model-Author: Claude. Inwentaryzacja z archiwalnej gałęzi (draft #130) przeniesiona na aktualny main
+i odświeżona: handler zyskał grzyb E-STOP i sygnał życia (D35) oraz obejście limitów, więc zmieniły się
+sumy źródeł i wpisy handlera (421 widgetów bez zmian). `tests/test_hmi_inventory.py` pilnuje, żeby mapa
+zawsze zgadzała się ze źródłami; po zmianie `linumert.ui` albo handlerów uruchom `python tools/hmi_inventory.py`.
+Mapa opisuje ekran bazowy QtDragon (kontrakt migracji HMI-01), nie nową powłokę HMI.

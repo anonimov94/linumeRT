@@ -8,7 +8,7 @@ Pełny kontrakt i ograniczenia: [HMI_BASELINE.md](HMI_BASELINE.md).
 | Plik | SHA-256 |
 | --- | --- |
 | screens/linumert/linumert.ui | 281d62c70697f30b00aadb419b3143111a4508c3a57467ea7130d5da2488ec67 |
-| screens/linumert/linumert_handler.py | 61c5bf9054ab11ffb61d90d4b1973ff7a3cda58279518d0fe5d475b308783c86 |
+| screens/linumert/linumert_handler.py | ca147ceffdfcf3b85bfeb6190c5c87ffe0d25163db1dc7099de453f96fac915f |
 | screens/linumert/linumert_upstream_handler.py | 0f86be6c0eb7c275ac104b60365cda277b76e68cf1ec2bc815cc2f0ffb0ccc51 |
 
 ## Widgety (421)
@@ -569,12 +569,16 @@ Pełny kontrakt i ograniczenia: [HMI_BASELINE.md](HMI_BASELINE.md).
 
 | Linia | Nazwa / wyrażenie | Dostęp |
 | --- | --- | --- |
-| 33 | setWindowTitle | atrybut |
+| 41 | setWindowTitle | atrybut |
+| 57 | action_estop | atrybut |
+| 112 | chk_override_limits | atrybut |
+| 114 | chk_override_limits | atrybut |
 
 ## linumert_handler.py: sygnały i ACTION
 
 | Linia | Wywołanie |
 | --- | --- |
+| 82 | self._hb_timer.timeout.connect(beat) |
 
 ## linumert_upstream_handler.py: zależności self.w
 

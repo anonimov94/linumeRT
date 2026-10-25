@@ -1294,3 +1294,8 @@ poprawce ≤ 0,01 mm. Model napędów bez zmian. Brak ekranu w HMI (D36 do domkn
 ## M1 — historyczna baza X · 2026-10-25 · Codex
 - Model-Author: Codex. d643a97: substeps=1, przed #116; obecnie substeps=4. Ancestry, hashe starego checkoutu i niezmienionych plików testu zweryfikowane.
 - Sama zmiana integracji nie ustala przyczyny 0,3 mm; bez live testów, bez zmiany progów/modelu. Raport M1_X_BASELINE_2026-10-25.md/JSON.
+
+## 2026-10-25 — Claude: inwentaryzacja HMI-01 z archiwum #130 na main
+Model-Author: Claude. Commit z archiwalnej gałęzi `codex/poweroff-hmi-inventory` (Codex, 2026-10-18) przeniesiony na aktualny main
+(`tools/hmi_inventory.py`, `HMI_WIDGET_MAP.md`, `HMI_BASELINE.md`, test). Mapa była nieaktualna względem handlera (D35: E-STOP, sygnał życia);
+odświeżona, test jej zgodności ze źródłami przechodzi. Zmiany `NASTEPNA_SESJA.md` z archiwum pominięte (przestarzałe). #130 zamykam jako zastąpiony.
