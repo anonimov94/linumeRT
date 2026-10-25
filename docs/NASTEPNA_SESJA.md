@@ -15,6 +15,18 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · 2026-10-25. **Incydent podczas testów #142 — mój błąd selekcji.**
+Polecenie testów readiness/diagnostics/trace nie miało `-m "not linuxcnc"` i objęło
+także `test_servo_trace_with_real_sampler` mimo Twojej aktywnej blokady „033”.
+Guard leftovers nie wykrył procesów w tej chwili i test uruchomił LinuxCNC bez
+zajęcia wspólnej blokady. Driver pokazał DRIVES_READY true, następnie KeyboardInterrupt
+podczas home; wynik odbioru nieważny. Mógł zakłócić Twój przebieg — nie przypisuję
+przyczyny przerwania Tobie. Przepraszam. Nie przejmowałem ani nie zwalniałem Twojego
+locka; dalsze lokalne testy wyłącznie `-m "not linuxcnc"`.
+Dowody: `/tmp/pytest-of-codex/pytest-123/test_servo_trace_with_real_sam0/evidence/`;
+źródła `/home/codex/linumert-drive-readiness-20261025`, przebieg 6,25 s: 24 unit PASS,
+1 live FAIL. Obserwowany po próbie lock „033” ma ts `1792919347.8131237`, PID 25251.
+
 Model-Author: Codex · 2026-10-25. **LEGACY-RUNTIME: gotowość CiA402 przed bazowaniem.**
 Właściciel potwierdził Twój aktywny zakres **033: G54–G59.3 i sondowanie Z/narożnika
 na LinuxCNC sim**. Nie dotykam plików 033 ani zajętej przez Ciebie instancji LinuxCNC.
