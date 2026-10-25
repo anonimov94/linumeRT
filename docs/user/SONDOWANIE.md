@@ -35,3 +35,10 @@ metodą (szybki przejazd, odjazd, dokładny F10 dwa razy) ściany wzorca o znany
 własnej poprawki jest odrzucany. W teście na Plant poprawki wyznaczone w jednym miejscu ściany dały błąd
 ≤ 0,01 mm w innym miejscu (przesunięcie 20 mm). Poprawka nie zmienia modelu napędów ani LinuxCNC. Na razie
 jest to moduł i test; ekranu kalibracji w HMI jeszcze nie ma. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## Scenariusze sondowania (Plant + LinuxCNC)
+`plant/scenarios/probe_z_touchplate.yaml` (górna ściana celu, powtarzalność, pomiar w innym miejscu z kalibracją, sonda w powietrzu)
+i `probe_corner.yaml` (ściany X min i Y min). Oczekiwane wartości wynikają z geometrii celu w `machine.yaml`
+(Z = `target.max.z` + `tip_length`, X/Y = `target.min`). Kryteria: błąd bezwzględny ±0,02 mm (luz napędu), powtarzalność ≤ 0,002 mm
+i **błąd po kalibracji na wzorcu ≤ 0,01 mm**. Uruchomienie (wymaga RIP): `tools/run_scenario.py plant/scenarios/probe_corner.yaml`
+albo `tests/test_scenario_linuxcnc.py -k linuxcnc_only_scenario` (ok. 17 min). Surowy błąd bezwzględny nadal bywa > 0,01 mm; spełnia je dopiero kalibracja.

@@ -59,7 +59,12 @@ def test_starter_scenarios_exist() -> None:
         assert scen.name == path.stem
 
 
-@pytest.mark.parametrize("path", _scenarios(), ids=lambda p: p.stem)
+def _mock_scenarios() -> list[Path]:
+    """Scenariusze wykonalne na atrapie (`master: linuxcnc` wymaga G38 i LinuxCNC RIP)."""
+    return [p for p in _scenarios() if load_scenario(p).master != "linuxcnc"]
+
+
+@pytest.mark.parametrize("path", _mock_scenarios(), ids=lambda p: p.stem)
 def test_scenario_passes_with_mock_master(core, path: Path) -> None:
     res = run_mock(load_scenario(path))
     failed = [f"{c.name}: {c.detail}" for c in res.criteria if not c.passed]
