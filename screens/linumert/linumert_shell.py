@@ -190,7 +190,7 @@ class LinumertShell(QtCore.QObject):
         root = QtWidgets.QWidget()
         root.setObjectName("lrtRoot")
         self.root = root
-        root.setStyleSheet(model.shell_qss(self.tokens))
+        root.setStyleSheet(self._presentation_qss())
         grid = QtWidgets.QVBoxLayout(root)
         grid.setContentsMargins(0, 0, 0, 0)
         grid.setSpacing(0)
@@ -300,6 +300,7 @@ class LinumertShell(QtCore.QObject):
         modes = QtWidgets.QButtonGroup(bar)
         for mode in model.MODES:
             btn = QtWidgets.QPushButton(model.MODE_LABEL[mode])
+            btn.setObjectName("lrtModeBtn")
             btn.setCheckable(True)
             btn.setToolTip({"manual": "Tryb ręczny (JOG)", "mdi": "Tryb MDI",
                             "auto": "Tryb automatyczny"}[mode])
@@ -341,7 +342,12 @@ class LinumertShell(QtCore.QObject):
         lay.setSpacing(6)
         group = QtWidgets.QButtonGroup(rail)
         for area, text, icon, _btn in AREAS:
-            btn = QtWidgets.QToolButton()
+            if self.active_skin == "shell":
+                btn = QtWidgets.QToolButton()
+            else:
+                from linumert_skin_navigation import FamilyNavigationButton
+
+                btn = FamilyNavigationButton(self.active_skin, self.c)
             btn.setText(text.replace(" ", "\n", 1) if len(text) > 11 else text)
             btn.setObjectName("lrtRailBtn")
             btn.setCheckable(True)
@@ -816,11 +822,17 @@ class LinumertShell(QtCore.QObject):
         self.tokens = tokens
         self.c.clear()
         self.c.update(tokens["kolory"])       # widoki trzymają odwołanie do tego słownika
-        self.root.setStyleSheet(model.shell_qss(tokens))
+        self.root.setStyleSheet(self._presentation_qss())
         self._paint_content()
         for area, _text, icon, _btn in AREAS:
             self.areas[area].setIcon(_icon(icon, self.c["fg2"]))
+            self.areas[area].update()
         self._refresh_dro()
+
+    def _presentation_qss(self):
+        from linumert_skin_navigation import frame_qss
+
+        return model.shell_qss(self.tokens) + frame_qss(self.active_skin, self.c)
 
     def set_dro_view(self, view: str) -> None:
         self.dro_view = view
