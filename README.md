@@ -134,15 +134,17 @@ W ekranie: **Start → potwierdzenie E-STOP → Włącz → Bazuj wszystkie**. D
 
 Stan rejestru: **2026-10-25 · 39/84 ukończonych sesji**.
 
-| Kamień | Zakres | Sesje ukończone | Rekordy z otwartymi kryteriami |
-|---|---|---:|---:|
-| M0 | Fundament, prawo, środowisko | 8/8 | 1 |
-| M1 | Wirtualna obrabiarka Plant | 18/18 | 3 |
-| M2 | Ekran linumeRT na bazie QtDragon | 3/12 | 25 |
-| M3 | Programowanie dialogowe | 7/12 | 7 |
-| M4 | Symulacja i kolizje | 3/10 | 12 |
-| M5 | Konfiguracja maszyn hobbystów | 0/12 | 11 |
-| M6 | Wtyczki, instalator, alfa | 0/12 | 9 |
+Dodatkowo ukończono **19/38 rozszerzeń**. Wśród sesji: 30 częściowych i 15 planowanych. Rozszerzenia liczymy osobno, bez zwiększania licznika 84 sesji.
+
+| Kamień | Zakres | Sesje ukończone | Rozszerzenia ukończone | Rekordy z otwartymi kryteriami |
+|---|---|---:|---:|---:|
+| M0 | Fundament, prawo, środowisko | 8/8 | 1/2 | 1 |
+| M1 | Wirtualna obrabiarka Plant | 18/18 | 3/5 | 3 |
+| M2 | Ekran linumeRT na bazie QtDragon | 3/12 | 5/22 | 25 |
+| M3 | Programowanie dialogowe | 7/12 | 4/5 | 7 |
+| M4 | Symulacja i kolizje | 3/10 | 4/8 | 12 |
+| M5 | Konfiguracja maszyn hobbystów | 0/12 | 5/9 | 11 |
+| M6 | Wtyczki, instalator, alfa | 0/12 | 5/8 | 9 |
 
 Licznik sesji nie oznacza zaliczenia bramki, odbioru stanowiska ani sprzętu. Otwarte kryteria obejmują sesje i powiązane rozszerzenia; jedno rozszerzenie może dotyczyć kilku kamieni.
 
@@ -150,6 +152,14 @@ Licznik sesji nie oznacza zaliczenia bramki, odbioru stanowiska ani sprzętu. Ot
 <!-- MILESTONES:END -->
 
 Wcześniejsze bramki pozostają priorytetem rozwoju. Automatyczne testy, odbiór pulpitu, kwalifikacja RT i sprawdzenie na sprzęcie mają osobne wyniki. Bieżące zadania są opisane przy odpowiednich rekordach planu.
+
+### Ostatnie zweryfikowane zmiany — 25 października 2026
+
+- **Gotowość napędów przed bazowaniem:** runner czeka na potwierdzenie wszystkich czterech napędów; odbiór CI obejmował 147 testów LinuxCNC PASS, w tym pierwsze bazowanie bez ponowienia. [Raport gotowości](docs/raporty/prototypy/M1_DRIVE_READY_2026-10-25.md).
+- **Diagnostyka Plant:** dodano rejestrację próbek HAL i analizę fazy command/feedback. Trzy celowane próby pierwszego ruchu przeszły po 5/5 kryteriów. [Pomiary aktualnej bazy](docs/raporty/prototypy/M1_CURRENT_X_2026-10-25.md).
+- **Pełna powtarzalność M1 pozostaje do odbioru:** trzy pełne przebiegi po 13 testów PASS, czwarty zakończony błędem setup przed testem soft limit. Wymaganych dziesięciu kolejnych PASS nie uzyskano; raport zachowuje wynik FAIL. [Raport serii](docs/raporty/prototypy/M1_REPEAT_2026-10-25.md).
+
+Są to wyniki konkretnych prac i prób. Ukończone sesje oraz rozszerzenia można przejrzeć w [wykazie wykonanych zakresów](prompts/DONE.md); stan wszystkich bramek i pozostałe kryteria znajdują się w [rejestrze projektu](docs/roadmap/PLAN.md).
 
 ## Cztery kierunki interfejsu
 
