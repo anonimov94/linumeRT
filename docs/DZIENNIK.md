@@ -1344,6 +1344,16 @@ NIEZWERYFIKOWANE NA SPRZĘCIE.
 - Dodano odnośniki do ostatnich odbiorów gotowości, pomiarów X oraz wyniku FAIL pełnej serii M1. Nie zaliczono nieodebranych kryteriów ani sprzętu.
 - Istniejące testy roadmapy, ruff, roadmap --check, diff --check i zachowanie Dla Codex PASS. Bez zmian ISO lub kodu diagnostyki #153.
 
+## M2 / ISO — QtVCP SIGSEGV na laptopie właściciela · 2026-10-25 · Codex
+- Model-Author: Codex. Raporty linuxcnc_info.txt/linuxcnc.report potwierdzają SIGSEGV DISPLAY QtVCP w profilu Plant, LinuxCNC 2.9.10. SHA ISO niepodany, przyczyna nieustalona.
+- Podgląd skórek i Plant działają według właściciela; normalne HMI nieodebrane. ISO-ACCEPTANCE wraca z acceptance do partial. Surowe dane/hashe zachowane.
+- #156: faulthandler w launcherze i dokładniejszy opis --safe, 11 istniejących testów ISO PASS. Bez zmian HAL/sterowania i bez deklaracji naprawy laptopa. Próba --safe z tracebackiem oczekuje wyniku właściciela.
+
+## ISO / M2 — kontekst GL w trybie awaryjnym · 2026-10-25 · Codex
+- Model-Author: Codex. Próba rzeczywistego QGLWidget: programowe Mesa + integracja none → kontekst nieważny; xcb_glx → prawidłowy. QtDragon nadal wymaga GL.
+- --safe zachowuje podgląd linumeRT 2D, lecz korzysta z programowego Mesa + xcb_glx, zamiast wyłączać integrację Qt. Regresja uruchamia atrapę launchera i rzeczywisty widget bez CNC.
+- 12 testów ISO PASS, ruff i diff PASS; wynik sprzętowy oczekiwany. To potwierdzona poprawka trybu awaryjnego, nie przypisanie przyczyny pierwotnemu SIGSEGV.
+
 ## ISO — SIGSEGV ekranu przy starcie na laptopie · 2026-10-25 · Claude
 - Model-Author: Claude. Odtworzone w VirtualBox na ISO z PR #156: `qtvcp` kończy się kodem 139 w pętli zdarzeń Qt; backtrace z core dumpu: `dbus_connection_dispatch` → `pthread_mutex_lock` (libdbus, `dbus.mainloop.pyqt5`). Przed awarią log QtVCP: „Desktop Notify not available … ServiceUnknown”.
 - Przyczyna: obraz nie ma demona powiadomień D-Bus (`--apt-recommends false`). To nie GPU ani WebEngine; zmienne programowego GL nie pomagały (potwierdził właściciel).

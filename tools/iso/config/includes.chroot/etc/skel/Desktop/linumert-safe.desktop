@@ -1,7 +1,7 @@
 [Desktop Entry]
 Type=Application
 Name=linumeRT (tryb awaryjny)
-Comment=Bez OpenGL i z renderowaniem programowym; użyj, gdy zwykły ekran zawiesza się lub kończy błędem pamięci
+Comment=Ograniczona grafika i renderowanie programowe; pomoc w diagnozie błędu zwykłego ekranu
 Exec=/usr/local/bin/linumert-gui --restart --safe
 Icon=/opt/linumeRT/docs/design/marka/znak.svg
 Terminal=false
