@@ -73,6 +73,8 @@ AREAS = (
     ("settings", "Konfiguracja", "konfiguracja", "btn_settings"),
     ("classic", "Pełny QtDragon", "wtyczka", "btn_main"),
 )
+if os.environ.get("LINUMERT_OPERATOR_SKIN"):
+    AREAS = (("skin", "HMI", "maszyna", "page:skin"), *AREAS)
 
 
 def _icon(name: str, color: str) -> QtGui.QIcon:
@@ -243,6 +245,16 @@ class LinumertShell(QtCore.QObject):
         self._timer.timeout.connect(self._tick)
         self._timer.start(500)
         self._start_mushroom()
+        if os.environ.get("LINUMERT_OPERATOR_SKIN"):
+            from linumert_skin_contract import PresentationPreferences
+            from linumert_skin_qtvcp import OperatorSkin
+
+            preferences = PresentationPreferences(
+                skin=os.environ["LINUMERT_OPERATOR_SKIN"],
+                theme=os.environ.get("LINUMERT_OPERATOR_THEME", "classic-turquoise"),
+                language=self.language)
+            self.skin_host = OperatorSkin(self, preferences)
+            self.pages["skin"] = self.stack.addWidget(self.skin_host)
         if TOOLS_ERROR:
             self.diag.add_log("warn", f"Strona Narzędzia linumeRT niedostępna ({TOOLS_ERROR}); "
                                       "obszar Narzędzia = tabela QtDragon")
@@ -250,7 +262,8 @@ class LinumertShell(QtCore.QObject):
         if ini:
             self.sim.start(ini)  # proces symulacji materiału i kolizji (nice 10)
         # po uruchomieniu Start (HMI_WORKFLOW); LINUMERT_START_AREA tylko do testów i pokazów
-        area = os.environ.get("LINUMERT_START_AREA", "start")
+        area = os.environ.get("LINUMERT_START_AREA", "skin" if hasattr(self, "skin_host")
+                              else "start")
         self.select_area(area if area in self.areas else "start")
         self.refresh()
         return self
@@ -917,6 +930,8 @@ class LinumertShell(QtCore.QObject):
                 btn.setEnabled(jog_ok.enabled)
                 btn.setToolTip(jog_ok.reason or btn.toolTip())
         self.lbl_jog_side.setText("" if jog_ok.enabled else jog_ok.reason)
+        if getattr(self, "skin_host", None) is not None:
+            self.skin_host.sync()
 
     def _tool_info(self, tool: int) -> str:
         if not tool:
