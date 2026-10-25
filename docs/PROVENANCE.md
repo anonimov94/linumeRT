@@ -532,3 +532,6 @@ w środowisku wykonującym zrzuty, bez nowych zależności produktu.
 
 ## Kolejne zrzuty M2 / 028 — 2026-10-25
 - `docs/raporty/G2/M2_028_2026-10-25_v3_01_start.png`, `docs/raporty/G2/M2_028_2026-10-25_v3_16_obszar_narzedzia.png`, `docs/raporty/G2/M2_028_2026-10-25_v3_19_diagnostyka.png` — wykonanie Codex, LinuxCNC sim + QtVCP pod Xvfb 1280×768, źródła e2dde87, bez retuszu; linumeRT i QtDragon/LinuxCNC, GPL-2.0-or-later. Hashe w raporcie followup JSON.
+
+## Dopasowanie kart M2 — 2026-10-25
+- `docs/raporty/G2/M2_RESPONSIVE_start.png`, `docs/raporty/G2/M2_RESPONSIVE_tools.png` — Codex, surowe zrzuty rzeczywistego Qt/offscreen, pełna powłoka linumeRT z atrapą CNC, 1280×768, źródła f76554f; własne zasoby projektu i QtDragon/LinuxCNC (GPL-2.0), całość GPL-2.0-or-later. Nie są dowodem wykonania CNC.

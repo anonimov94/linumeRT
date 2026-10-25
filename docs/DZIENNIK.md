@@ -1383,3 +1383,10 @@ Model-Author: Claude. `tools/tune_accel.py` (moduł `accel_tuning`, 15 testów, 
 0,2 mm bez alarmu i utraty kroków. Wyniki: frezarka X/Y ok. 17 100, Z ok. 5 400 mm/s² (obecnie 1000/1000/500); router krokowy X/Y ok. 3 800, Z ok. 9 400 (granica: utrata kroków,
 wynik Z niemonotoniczny). Raport `docs/raporty/prototypy/M1_ACCEL_TUNING_2026-10-25.md`. machine.yaml i progi bez zmian; seria 10 przebiegów PASS nadal otwarta.
 NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## M2 / 028 — responsywne karty Start i Narzędzia · 2026-10-25 · Codex
+- Model-Author: Codex. PR #161; adaptacyjne kolumny, zawijanie checklisty, zachowanie formularza/fokusu.
+- 15 testów rzeczywistego Qt PASS: 1280→1920→1280, 800→1600→800, wpis/Tab, samodzielny STL 1200×600.
+- Strażnik IP 10 PASS; bez nowych zależności, zmian ACTION/HAL. Zrzuty i granice: raport G2/M2_RESPONSIVE_2026-10-25.md.
+- Live lokalnie niewykonane: zasób Claude/wyglad zajęty; nie przejmowano. Odbiór CI do rozliczenia.
+- 028 partial, M2 3/12; pozostałe podstrony/stanowisko/sprzęt otwarte. Autokontrola autora.

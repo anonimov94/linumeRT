@@ -15,6 +15,13 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · 2026-10-25. **#161 — dopasowanie kart M2/028.**
+Układ adaptacyjny Start/Narzędzia, zawijanie checklisty. Złożenie Qt
+1280→1920→1280 bez poziomego przewijania, wpis/Tab, zachowanie fokusu i szkicu
+oraz samodzielny formularz STL 1200×600 PASS. Brak komend ACTION od nawigacji.
+Live lokalnie niewykonane: lease linuxcnc zajęta przez Claude (wyglad); nie przejmowano.
+CI i szczegóły: docs/raporty/G2/M2_RESPONSIVE_2026-10-25.md. 028 partial, 3/12 bez zmian.
+
 Model-Author: Codex · 2026-10-25. **#155: środowisko i stos stron odebrane, responsywność nadal otwarta.**
 ad17702: cnc_environment(), 45 kroków GUI PASS, tools/cycles=true, 64,90 s.
 e2dde87: PageStack izoluje minimum aktywnej strony od ukrytego QtDragon;
