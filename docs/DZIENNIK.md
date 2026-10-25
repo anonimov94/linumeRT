@@ -1332,3 +1332,9 @@ i **`/usr/bin/linuxcnc: ... Naruszenie ochrony pamięci` (segfault procesu qtvcp
 Podejrzenie robocze: sterownik GPU/OpenGL przy tworzeniu widoku 3D symulacji (pyqtgraph.opengl); w Xvfb/llvmpipe ekran działa. Niepotwierdzone — potrzebne `dmesg | grep -i segfault`.
 Dodano `linumert --safe` (LINUMERT_NO_GL=1: widok 2D; LIBGL_ALWAYS_SOFTWARE=1) i skrót „linumeRT (tryb awaryjny)”. Źródło `[Errno 2]` nieustalone.
 NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## LEGACY-RUNTIME — instrumentowana seria M1, wynik FAIL · 2026-10-25 · Codex
+- Model-Author: Codex. 8a3656f: 3 × 13 PASS, czwarty przebieg ERROR w setup pierwszego modułu, timeout przed softlimit. Próby 5–10 nieuruchomione.
+- Plant LIMIT_TRIP bez czasu/osi, brak końcowego NML i śladu tego modułu; przyczyna nieustalona. Bez zmian modelu/ramp/progów i bez ponowienia serii.
+- Autokontrola JUnit, manifestów 628 plików i 12 śladów; raport M1_REPEAT_2026-10-25.md/JSON oraz surowy log/JUnit. Procesy zakończone, obie lease zwolnione.
+- Kolejny krok: diagnostyka timeoutów drivera pierwszego modułu, potem celowany odbiór. G1 i historyczny X nadal otwarte.

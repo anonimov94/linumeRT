@@ -15,6 +15,40 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · 2026-10-25. **#152 zakończony FAIL; zasób zwolniony.**
+Źródła 8a3656f: trzy pełne przebiegi po 13 PASS, czwarty ERROR w setup pierwszego
+modułu. Timeout driver.py:57 przed softlimit: po G61 G1 X100 nie spełniono w 60 s
+łącznego warunku IDLE / current_vel < 1e-7 / X100 ±0,005 mm. Brak RESULT i końcowego
+snapshotu; nie wiadomo, który człon zawiódł. Plant machine_events LIMIT_TRIP,
+lost/late/rejected 0, ale bez osi/czasu nie przypisuję przyczyny. Sampler dotyczył
+scenariuszy, do których próba 4 nie doszła. Raport/JSON M1_REPEAT_2026-10-25 oraz
+log/JUnit zachowane; autokontrola wszystkich manifestów i 12 śladów PASS.
+Helper i dziecko zakończone, obie własne lease zwolnione, katalogi puste.
+Serii nie wznowiono; G1 i historyczny X otwarte. Następny krok: diagnostyka timeoutu
+tego drivera (NML/błędy/etap i log LinuxCNC), potem celowana próba, bez zmian progów.
+Nie naruszono Twoich procesów ani checkoutu. Starszy wpis „w toku” poniżej to historia.
+
+Model-Author: Codex · 2026-10-25. **#152 uruchomiony, odbiór M1 w toku.**
+Kolekcja potwierdziła 13 testów. Start 13:03:02 UTC, źródła `8a3656f`, własny
+rdzeń C i przypięty LINUMERT_PLANT_LIB. Obie lease: `Codex/m1-repeat-47170`;
+nie uruchamiaj równoległego LinuxCNC do ich zwolnienia. Stan/każdy ukończony
+przebieg: `/home/codex/linumert-m1-repeat-20261025/build/repeat/status.json`.
+Pierwszy FAIL/skip/error/nieciągłość zatrzymuje serię. Brak końcowego wyniku;
+draft #152 nie jest odbiorem G1. Nie ruszałem Twojego checkoutu ani procesów.
+
+Model-Author: Codex · 2026-10-25. **LEGACY-RUNTIME: instrumentowany odbiór powtarzalności M1.**
+#151 scalony jako `8a3656f`; konflikt dziennika rozwiązano z zachowaniem obu wpisów.
+Zakres `codex/m1-instrumented-repeat`: 10 kolejnych przebiegów istniejącego zestawu
+test_plant_linuxcnc.py, test_scenario_linuxcnc.py, test_plant_vfd_linuxcnc.py
+(historycznie 13 testów; najpierw sprawdzenie kolekcji). Źródła main `8a3656f`,
+osobny snapshot WSL, pełny venv, Xvfb, bez zmian modelu/ramp/progów.
+Każda próba: JUnit/log, trwałe tmp/HOME, diagnostyka i sampler scenariuszy;
+zatrzymanie po pierwszym FAIL, skip/error, braku testów lub nieciągłym śladzie.
+Obie wspólne lease z unikalnym właścicielem tylko na czas odbioru; przy zajęciu
+nie startuję. Rezultat: raport M1_REPEAT_2026-10-25.md/JSON i rejestr.
+To odbiór aktualnego zestawu WSL, nie deklaracja przyczyny historycznego X,
+zamknięcie G1/GUI/VirtualBox/RT lub sprzętu. Nie uruchamiaj równoległego LinuxCNC.
+
 Model-Author: Codex · 2026-10-25. **Wynik trzech celowanych first_motion na `2a0ce52`.**
 Każda próba 5/5 kryteriów PASS; maksimum X 0,109818 / 0,108127 / 0,112558 mm.
 Każde pierwsze bazowanie bez retry/setup_errors, jeden DRIVES_READY ready=true;

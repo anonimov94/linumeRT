@@ -1,0 +1,292 @@
+{
+  "model_author": "Codex",
+  "source_sha": "8a3656fc161df3d85210f9bbc39b8f14fda66c5d",
+  "owner": "Codex/m1-repeat-47170",
+  "pid": 47170,
+  "planned_trials": 10,
+  "tests": [
+    "tests/test_plant_linuxcnc.py",
+    "tests/test_scenario_linuxcnc.py",
+    "tests/test_plant_vfd_linuxcnc.py"
+  ],
+  "python": "3.11.2",
+  "system": "6.18.54.1-microsoft-standard-WSL2",
+  "started_utc": "2026-10-25T13:03:02Z",
+  "status": "FAIL",
+  "trials": [
+    {
+      "number": 1,
+      "passed": true,
+      "returncode": 0,
+      "tests": 13,
+      "bad_cases": [],
+      "setup_clean": true,
+      "traces": [
+        {
+          "path": "/home/codex/linumert-m1-repeat-20261025/build/repeat/trial-1/evidence/lrt_scen_6dj8c2fx",
+          "valid": true,
+          "samples": 9741
+        },
+        {
+          "path": "/home/codex/linumert-m1-repeat-20261025/build/repeat/trial-1/evidence/lrt_scen_jlaga3xb",
+          "valid": true,
+          "samples": 15747
+        },
+        {
+          "path": "/home/codex/linumert-m1-repeat-20261025/build/repeat/trial-1/evidence/lrt_scen_juphpphe",
+          "valid": true,
+          "samples": 10758
+        },
+        {
+          "path": "/home/codex/linumert-m1-repeat-20261025/build/repeat/trial-1/evidence/lrt_scen_np9magoc",
+          "valid": true,
+          "samples": 8727
+        }
+      ],
+      "elapsed": 206.41645709899967,
+      "artifact_dir": "/home/codex/linumert-m1-repeat-20261025/build/repeat/trial-1",
+      "manifest_sha256": "859ff502d8c2041b7d9c7fc118d13ae3da55f2aec1c86579cbd2c4a290c1fdab",
+      "junit_sha256": "96716ec948d4e5e769db5645b873c09c605318bde678a99ca4873a2bdd675ac3",
+      "log_sha256": "3a81268fda52a63cef5193d437f0e62c757666a59527ad6393731eeffb40bbae"
+    },
+    {
+      "number": 2,
+      "passed": true,
+      "returncode": 0,
+      "tests": 13,
+      "bad_cases": [],
+      "setup_clean": true,
+      "traces": [
+        {
+          "path": "/home/codex/linumert-m1-repeat-20261025/build/repeat/trial-2/evidence/lrt_scen_1ic8uo77",
+          "valid": true,
+          "samples": 15747
+        },
+        {
+          "path": "/home/codex/linumert-m1-repeat-20261025/build/repeat/trial-2/evidence/lrt_scen_bcm2fccd",
+          "valid": true,
+          "samples": 10730
+        },
+        {
+          "path": "/home/codex/linumert-m1-repeat-20261025/build/repeat/trial-2/evidence/lrt_scen_doc952hi",
+          "valid": true,
+          "samples": 9719
+        },
+        {
+          "path": "/home/codex/linumert-m1-repeat-20261025/build/repeat/trial-2/evidence/lrt_scen_i4ahcx0x",
+          "valid": true,
+          "samples": 8735
+        }
+      ],
+      "elapsed": 206.52290194099987,
+      "artifact_dir": "/home/codex/linumert-m1-repeat-20261025/build/repeat/trial-2",
+      "manifest_sha256": "adf46495efcb550d206227fce04aac83db6f5e64d8613d16f712a7d4dd1867f0",
+      "junit_sha256": "a69fd47126f48f3d43daa9c5fcffe01c4cdf24ff02930f724f27217a7bc73620",
+      "log_sha256": "8dc02d9c2ebfca4a478a2da413f93d7dd3ebbb600dc7b07a0eded28282b99012"
+    },
+    {
+      "number": 3,
+      "passed": true,
+      "returncode": 0,
+      "tests": 13,
+      "bad_cases": [],
+      "setup_clean": true,
+      "traces": [
+        {
+          "path": "/home/codex/linumert-m1-repeat-20261025/build/repeat/trial-3/evidence/lrt_scen_261kro_l",
+          "valid": true,
+          "samples": 10767
+        },
+        {
+          "path": "/home/codex/linumert-m1-repeat-20261025/build/repeat/trial-3/evidence/lrt_scen_jvqbhfbq",
+          "valid": true,
+          "samples": 8753
+        },
+        {
+          "path": "/home/codex/linumert-m1-repeat-20261025/build/repeat/trial-3/evidence/lrt_scen_lmljqki2",
+          "valid": true,
+          "samples": 15754
+        },
+        {
+          "path": "/home/codex/linumert-m1-repeat-20261025/build/repeat/trial-3/evidence/lrt_scen_yu0el1em",
+          "valid": true,
+          "samples": 9793
+        }
+      ],
+      "elapsed": 206.3428946469976,
+      "artifact_dir": "/home/codex/linumert-m1-repeat-20261025/build/repeat/trial-3",
+      "manifest_sha256": "e386e3bdf6c0b7ace2bffe61ce9d455cc911eedd7bc8a132a74ca089b46e5593",
+      "junit_sha256": "74ed9e4f57ef499533928158db804c75995cc7247727c74366aab57860318214",
+      "log_sha256": "113863f5472c4244e86cbd62ff318a05dfaec4bbeaec544e74f6aa10ebcb000b"
+    },
+    {
+      "number": 4,
+      "passed": false,
+      "returncode": 1,
+      "tests": 1,
+      "bad_cases": [
+        {
+          "name": "test_plant_linuxcnc_home_and_move",
+          "kind": "error",
+          "message": "failed on setup with \"AssertionError: Traceback (most recent call last):\n    File \"/home/codex/linumert-m1-repeat-20261025/build/repeat/trial-4/tmp/plant_cnc0/driver.py\", line 57, in <module>\n      assert wait(lambda: s.interp_state == linuxcnc.INTERP_IDLE and abs(s.current_vel) < 1e-7\n  AssertionError\n  \nassert None\"",
+          "text": "tmp_path_factory = TempPathFactory(_given_basetemp=PosixPath('/home/codex/linumert-m1-repeat-20261025/build/repeat/trial-4/tmp'), _trace=...xPath('/home/codex/linumert-m1-repeat-20261025/build/repeat/trial-4/tmp'), _retention_count=3, _retention_policy='all')\n\n    @pytest.fixture(scope=\"module\")\n    def session(tmp_path_factory):\n        \"\"\"Jedna sesja LinuxCNC + Plant dla wszystkich testów modułu (ok. 90 s).\"\"\"\n        root = rip_root()\n        tmp_path = tmp_path_factory.mktemp(\"plant_cnc\")\n        ini = _prepare(tmp_path)\n        (tmp_path / \"driver.py\").write_text(DRIVER, encoding=\"utf-8\")\n        from linumert.generators.basic import FaceMill\n        from linumert.generators.pockets import PocketCircle, PocketRect\n    \n        programs = []\n        for cls, dims in [(PocketRect, {\"width\": 20, \"height\": 16, \"rotation\": 37,\n                                        \"corner_radius\": 5}), (PocketCircle, {\"diameter\": 18})]:\n            path = tmp_path / f\"{cls.name}.ngc\"\n            path.write_text(\"S3000 M3\\n\" + cls().generate_ngc({\"depth\": 1, \"tool_d\": 8,\n                                               \"cx\": 100, \"cy\": 200,\n                                               \"z_top\": -20, \"safe_z\": -15, \"feed\": 600,\n                                               \"plunge\": 300, \"entry\": \"helix\", \"entry_angle\": 5,\n                                               \"direction\": \"cw\", \"wall_allowance\": 0.5,\n                                               \"floor_allowance\": 0.2, \"finish\": True, **dims},\n                                              path.name))\n            programs.append(str(path))\n        face = tmp_path / \"face_mill.ngc\"\n        face.write_text(\"G61\\nS3000 M3\\n\" + FaceMill().generate_ngc({\n            \"x0\": 100, \"y0\": 200, \"x1\": 125, \"y1\": 220, \"depth\": 1, \"tool_d\": 8,\n            \"z_top\": -20, \"safe_z\": -15, \"feed\": 600, \"plunge\": 300}, face.name))\n        programs.append(str(face))\n        report = tmp_path / \"plant_report.json\"\n        plant_yaml = CFG / \"plant.yaml\"  # ścieżka machine względem oryginału\n        with installed_modules(root, tmp_path, (\"lrt_net\", \"lrt_cia402\", \"lrt_estop2\")), \\\n                plant_server(plant_yaml, PORT, \"--seed\", \"5\", \"--report\", str(report)):\n            env = {**os.environ, \"PATH\": f\"{ini.parent}:{os.environ.get('PATH', '')}\"}\n            cnc = start_linuxcnc(root, ini, env)\n            try:\n                ready = False\n                for _ in range(60):  # LinuxCNC gotowy, gdy halcmd widzi połączenie lrt-net\n                    time.sleep(0.5)\n                    if cnc.poll() is not None:\n                        break\n                    probe = rip_run(root, \"halcmd getp lrt-net.0.connected\", ini.parent, env=env)\n                    if probe.stdout.strip() == \"TRUE\":\n                        ready = True\n                        break\n                assert ready, (cnc.stdout.read() if cnc.poll() is not None else \"brak połączenia\")\n                time.sleep(1.0)\n                run = rip_run(root, f\"python3 {tmp_path / 'driver.py'} {' '.join(programs)}\",\n                              ini.parent, timeout=420,\n                              env=env)\n                hal = rip_run(root, \"halcmd getp lrt-net.0.axis.0.ferror; \"\n                              \"halcmd getp lrt-net.0.plant-lost; halcmd getp lrt-net.0.bad-frames\",\n                              ini.parent, env=env).stdout.split()\n            finally:\n                stop_linuxcnc(cnc, root, ini.parent)\n        line = next((x for x in run.stdout.splitlines() if x.startswith(\"RESULT \")), None)\n>       assert line, run.stdout + run.stderr\nE       AssertionError: Traceback (most recent call last):\nE           File \"/home/codex/linumert-m1-repeat-20261025/build/repeat/trial-4/tmp/plant_cnc0/driver.py\", line 57, in <module>\nE             assert wait(lambda: s.interp_state == linuxcnc.INTERP_IDLE and abs(s.current_vel) < 1e-7\nE         AssertionError\nE         \nE       assert None\n\ntests/test_plant_linuxcnc.py:197: AssertionError"
+        }
+      ],
+      "setup_clean": true,
+      "traces": [],
+      "elapsed": 138.9024008109991,
+      "artifact_dir": "/home/codex/linumert-m1-repeat-20261025/build/repeat/trial-4",
+      "manifest_sha256": "27d2e0f38a01d0c2959fbf341f4eb46358ad027ef85605f8620ecf9b50bf373a",
+      "junit_sha256": "0f39f4e51f046ba8c3ef74e54e22eb9e8b08d197cfeffb43893367246856bd1c",
+      "log_sha256": "524fe1e6575f83888cd9e6b6cdd5182a728e0db2b7323e55736104364bd6b4de"
+    }
+  ],
+  "plant_library_sha256": "00f62d5d954bb630805c2d32f215515760051fcce050f232e8b67a8c64f1d15e",
+  "rip_sha": "a33293f46575c809e082e0806e79ab996f982513",
+  "collected_nodes": [
+    "tests/test_plant_linuxcnc.py::test_plant_linuxcnc_home_and_move",
+    "tests/test_plant_linuxcnc.py::test_pocket_helix_and_finishing_on_real_linuxcnc_plant",
+    "tests/test_plant_linuxcnc.py::test_time_model_calibrated_against_linuxcnc_plant",
+    "tests/test_plant_linuxcnc.py::test_softlimit_oracle",
+    "tests/test_plant_linuxcnc.py::test_forbidden_zone_oracle",
+    "tests/test_scenario_linuxcnc.py::test_scenario_with_linuxcnc[drive_fault_mid_program]",
+    "tests/test_scenario_linuxcnc.py::test_scenario_with_linuxcnc[estop_mid_program]",
+    "tests/test_scenario_linuxcnc.py::test_scenario_with_linuxcnc[first_motion]",
+    "tests/test_scenario_linuxcnc.py::test_scenario_with_linuxcnc[rapid_vs_feed]",
+    "tests/test_scenario_linuxcnc.py::test_linuxcnc_master_rejects_other_machine",
+    "tests/test_plant_vfd_linuxcnc.py::test_hy_vfd_m3_at_speed",
+    "tests/test_plant_vfd_linuxcnc.py::test_hy_vfd_m4_reverse",
+    "tests/test_plant_vfd_linuxcnc.py::test_hy_vfd_m5_stops"
+  ],
+  "active_trial": 4,
+  "active_pytest_pid": 52978,
+  "elapsed": 759.8815192539987,
+  "leases_released": true,
+  "autocontrol": {
+    "model_author": "Codex",
+    "independent_review": false,
+    "trials": [
+      {
+        "trial": 1,
+        "testcases": 13,
+        "bad_cases": [],
+        "manifest_files_verified": 199,
+        "traces": [
+          {
+            "samples": 9741,
+            "sha256": "6a00057844f161d9be6d22d87935f5c1fa6b7f1a7c59cb085e42c35527c15eee"
+          },
+          {
+            "samples": 15747,
+            "sha256": "8a83929937b68ec986a4c249e9d655ca504b3f3ba7d7f2375e5f24bf40b36901"
+          },
+          {
+            "samples": 10758,
+            "sha256": "cc4376519d0f942b90dbd39a468053f04a722a95e929f870262cc24affe9b4a9"
+          },
+          {
+            "samples": 8727,
+            "sha256": "851bf5bb503d4a8de29c2b19def65b52732c640740387d112900ba077d419511"
+          }
+        ]
+      },
+      {
+        "trial": 2,
+        "testcases": 13,
+        "bad_cases": [],
+        "manifest_files_verified": 199,
+        "traces": [
+          {
+            "samples": 15747,
+            "sha256": "8968e4f1be0c47e60dbb9776f1f4c73990d8cd913db6007e5dfebdf90c68ad49"
+          },
+          {
+            "samples": 10730,
+            "sha256": "21b1ca67a69bb22d739d782ee505e9839f028f896354321cafdbf5dba59ceb54"
+          },
+          {
+            "samples": 9719,
+            "sha256": "7848b8facfbfb07841716f2a469d16eed614963ccdab47976193079f631486f0"
+          },
+          {
+            "samples": 8735,
+            "sha256": "275f733f292436250d5c633c5f331027effd783b3ab1bb3a78351cdca948674d"
+          }
+        ]
+      },
+      {
+        "trial": 3,
+        "testcases": 13,
+        "bad_cases": [],
+        "manifest_files_verified": 199,
+        "traces": [
+          {
+            "samples": 10767,
+            "sha256": "d6506e88e5a5d4b967c9d1ca522b37b303da34602c7ce1bd4a12188b54b0e836"
+          },
+          {
+            "samples": 8753,
+            "sha256": "bf3314077d7b6f9934bea73156add11112cc844a2ba0be939c000acae75b6599"
+          },
+          {
+            "samples": 15754,
+            "sha256": "994b1d3c2c1014f0cdc2353f718428606d82d10d992416ca59b3d4214a87a8a5"
+          },
+          {
+            "samples": 9793,
+            "sha256": "e8d4fc20db30bf4b878748f4fc2e28f8bf7c227dc7d649ed9d2a0c09d0c70d1e"
+          }
+        ]
+      },
+      {
+        "trial": 4,
+        "testcases": 1,
+        "bad_cases": [
+          {
+            "name": "test_plant_linuxcnc_home_and_move",
+            "kind": "error"
+          }
+        ],
+        "manifest_files_verified": 31,
+        "traces": []
+      }
+    ],
+    "manifest_sha256_verified": true,
+    "junit_reparsed": true
+  },
+  "failure_plant_report": {
+    "machine": "mill_servo_table",
+    "frames": 136537,
+    "rejected": 0,
+    "lost": 0,
+    "late": 0,
+    "steps": 136537,
+    "watchdog_tripped": false,
+    "model_failed": false,
+    "digest": "ad75f3c737ca9d0bbe2cd8ad8294a082c3aec76451a0550fc4c63e733ce023de",
+    "oracle": {
+      "result": "PASS",
+      "violations_total": 0,
+      "frames_checked": 130036,
+      "arm_bit": 31,
+      "violations": []
+    },
+    "events": [],
+    "machine_events": [
+      "LIMIT_TRIP"
+    ],
+    "drive_states": {
+      "drv_x": "READY_TO_SWITCH_ON",
+      "drv_y1": "READY_TO_SWITCH_ON",
+      "drv_y2": "READY_TO_SWITCH_ON",
+      "drv_z": "READY_TO_SWITCH_ON"
+    },
+    "faults_active": [],
+    "spindle_tool": null,
+    "slots": [],
+    "spindle": {
+      "rpm": 0.0,
+      "fault": 0
+    }
+  }
+}
