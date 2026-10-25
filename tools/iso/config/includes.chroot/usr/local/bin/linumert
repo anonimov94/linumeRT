@@ -6,11 +6,13 @@
 #   linumert --neon     # monitor Classic × Neon: detal + maszyna, następny punkt z DTG (read-only)
 #   linumert --restart [--plant]  # zatrzymaj działający LinuxCNC/Plant i uruchom od nowa
 #   linumert --stop     # zatrzymaj działający LinuxCNC i Plant
-#   linumert --safe     # tryb awaryjny: bez OpenGL (widok 2D) i z renderowaniem programowym Mesa;
-#                       # gdy ekran kończy się „Naruszenie ochrony pamięci” (błąd sterownika GPU)
+#   linumert --safe     # ograniczona grafika: podgląd linumeRT 2D i programowe Mesa;
+#                       # bazowy widget QtDragon nadal używa GL; SIGSEGV wymaga diagnozy
 # Ekran startuje przy logowaniu (autostart), więc kolejne `linumert` bez --restart zgłasza, że już działa.
 # Model-Author: Claude · 2026-10-19; --restart/--stop: 2026-10-25. NIEZWERYFIKOWANE NA SPRZĘCIE.
 set -euo pipefail
+# Model-Author: Codex — include Python frames in native QtVCP crash reports.
+export PYTHONFAULTHANDLER=1
 R=/opt/linumeRT
 
 running() {

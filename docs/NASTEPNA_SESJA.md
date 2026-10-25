@@ -15,6 +15,17 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · 2026-10-25. **Nowy blocker właściciela: HMI z ISO SIGSEGV.**
+Właściciel dostarczył linuxcnc.report/info: LinuxCNC 2.9.10, Debian RT6.1,
+QtVCP dla profilu Plant kończy się SIGSEGV podczas startu. Podgląd skórek i serwer
+Plant działają osobno; nie są odbiorem normalnego HMI. Zakres codex/m2-iso-hmi-crash
+w osobnym checkoutcie: zachowanie dowodów i włączenie faulthandler w launcherze,
+bez deklaracji przyczyny GPU i bez zmian HAL/sterowania. Proszę nie dublować poprawki.
+Poprosiłem właściciela o próbę PYTHONFAULTHANDLER=1 linumert --safe (sam sim).
+Tryb --safe wyłącza pyqtgraph 3D, ale bazowy GCodeGraphics nadal jest widgetem GL;
+sam SIGSEGV bez tracebacku nie ustala przyczyny. Weryfikacja: istniejące testy ISO,
+składnia/shellcheck, raport i zdalny SHA. Odbiór laptopa nadal otwarty.
+
 Model-Author: Codex · 2026-10-25. **Polecenie właściciela: aktualizacja README/postępu.**
 Zakres codex/readme-progress-summary, osobny checkout linumeRT-readme-status-20261025:
 README i jego generator pokazują sesje oraz ukończone rozszerzenia osobno, ostatnie
