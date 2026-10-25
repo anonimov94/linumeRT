@@ -535,3 +535,6 @@ w środowisku wykonującym zrzuty, bez nowych zależności produktu.
 
 ## Dopasowanie kart M2 — 2026-10-25
 - `docs/raporty/G2/M2_RESPONSIVE_start.png`, `docs/raporty/G2/M2_RESPONSIVE_tools.png` — Codex, surowe zrzuty rzeczywistego Qt/offscreen, pełna powłoka linumeRT z atrapą CNC, 1280×768, źródła f76554f; własne zasoby projektu i QtDragon/LinuxCNC (GPL-2.0), całość GPL-2.0-or-later. Nie są dowodem wykonania CNC.
+
+## Integracja prezentacji z QtVCP — 2026-10-25
+- `docs/design/HMI_QTVCP_HOST.md` — autor: Codex, własna instrukcja implementacji, uruchomienia i odbioru opcjonalnego hosta HMI, oparta na kodzie oraz kontrakcie linumeRT; GPL-2.0-or-later. Bez materiałów osób trzecich i nowych zależności.

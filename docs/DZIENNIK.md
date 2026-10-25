@@ -1397,3 +1397,9 @@ NIEZWERYFIKOWANE NA SPRZĘCIE.
 - Zachowane globalne alarmy/E-STOP/watchdog/tryby, nawigacja do działających stron; brak nowych komend ACTION i pinów HAL.
 - Kod po przeglądzie i kontroli składni. Nowego hosta nie uruchamiano; odbiór powierzony Claude. Instrukcja: docs/design/HMI_QTVCP_HOST.md.
 - Draft do odbioru; brak zamknięcia 028/SKIN-02…06 i brak deklaracji odbioru sprzętu.
+
+## HMI — kontrola stanu CI i odbioru · 2026-10-25 · Codex
+- Model-Author: Codex. #163/d00f76b: python CI 1364 PASS, 104 SKIP, 151 deselected; jedyny FAIL to brak HMI_QTVCP_HOST.md w PROVENANCE. Uzupełniono wpis.
+- #161/a572f9c: python i plant-matrix PASS, linuxcnc w toku. #163: plant-matrix PASS, linuxcnc w toku.
+- Brak opublikowanego odbioru Claude dla #161/#163. #162 zawiera osobne palety/edytor kolorów i własne 23 testy, nie jest odbiorem hosta #163.
+- Bez scalenia lub deklaracji PASS laptopa; nowe kontrole CI po poprawce dokumentacyjnej.
