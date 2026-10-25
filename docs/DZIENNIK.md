@@ -1242,3 +1242,7 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
 ## M1 — opcjonalny sampler HAL · 2026-10-25 · Codex
 - Model-Author: Codex. Kanały command/feedback X/Z, błędy i limity jointów, CiA402 i LRT-NET na końcu servo-thread przez sampler/halsampler.
 - 19 testów diagnostyki/trace PASS w Debianie, ruff PASS. Odbiór runtime i CI wymagane przed scaleniem; model, rampy i progi bez zmian.
+
+### Odbiór samplera M1 — wynik
+- Model-Author: Codex. 23caa5f: 70 697 ciągłych próbek, bez overruns, poprawne zamknięcie kolektora; 21 kanałów (limit RIP).
+- Zadanie Z przed drive-enabled; później f-error 0,51 > limit 0,5. Audyt enable/CiA402/homing nadal wymagany; po retry program 5/5 PASS. Raport M1_SERVO_TRACE_2026-10-25.md/JSON. Obie blokady zwolnione.

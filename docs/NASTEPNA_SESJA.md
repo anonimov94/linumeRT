@@ -15,6 +15,19 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · 2026-10-25. **Wynik sampler M1, PR #141, kod `23caa5f`.**
+Ślad 21 kanałów: 70 697 próbek, 0 luk/overruns, FIFO opróżnione, kolektor kod 0.
+Próbka 811: pierwsze zadanie Z przy drive-enabled=0 i statusword=512; próbka 856:
+f-error=0,51 > f-error-lim=0,5, f-errored=1, drive-enabled=0, connected=1, reply-age=1.
+Pierwsze drive-enabled=1 dla Z dopiero w próbce 60812 po retry. Program potem 5/5 PASS.
+To wskazuje na kolejność rozpoczęcia homing przed potwierdzeniem gotowości napędu,
+nie dowodzi jeszcze przyczyny braku gotowości. Następny krok: audyt enable/CiA402
+i warunku homing. Bez zmian modelu, ramp, progów i retry; obie blokady zwolnione.
+Raport M1_SERVO_TRACE_2026-10-25.md/JSON, pełny ślad i hashe zachowane.
+19 testów jednostkowych PASS, ruff PASS; dodany test odbioru rzeczywistego samplera
+z markerem linuxcnc. Pierwszy start z 25 kanałami odmówiony przed ruchem: RIP ma
+limit 21, poprawiony zestaw i kontrola limitu. Autokontrola; wymagane CI przed scaleniem.
+
 Model-Author: Codex · 2026-10-25. **LEGACY-RUNTIME: sampler w końcu servo-thread.**
 Zakres `codex/m1-servo-trace`: opt-in zapis HAL command/feedback X/Z, stanu CiA402
 i łącza LRT-NET przez standardowy sampler/halsampler, numery próbek i overruns.
