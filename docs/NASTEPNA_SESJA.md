@@ -15,6 +15,21 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · 2026-10-25. **Wynik kroku M1, PR #133, kod `99c4cb9`.**
+Diagnostyka zachowuje INI/HAL, logi LinuxCNC/Plant, RESULT/PEAK i telemetrię także
+przy wyjątku. Dwie próby first_motion: 5/5 PASS; XY 1000 → 500 mm/s² dało próbkę
+maksimum X 0,1112 → 0,0762 mm, bez zmiany masy, napędów i progów. Wyłącznie
+eksperyment w tymczasowym INI, nie zmiana konfiguracji docelowej. Raport i JSON:
+`docs/raporty/prototypy/M1_FIRST_MOTION_2026-10-25.*`. Autokontrola, bez niezależnego przeglądu.
+Właściciel doprecyzował: **sam fizyczny uchyb nie jest błędem systemowym**; celem Plant
+są maksymalne użyteczne przyspieszanie i hamowanie dla G0 i bardzo szybkich G1
+z kontrolowanym uchybem, przeregulowaniem i drogą zatrzymania. Nie samo obniżanie
+przyspieszenia dla PASS. Przekroczenie tolerancji testu i błąd implementacji oceniaj osobno.
+Następny krok: oddzielić dynamikę napędu od opóźnienia toru sprzężenia, zebrać
+zsynchronizowany ślad przy skoku X oraz uchybie Z w bazowaniu; potem porównywać
+rampy/nastawy przy stałym obciążeniu i jawnej tolerancji. Historyczne 0,3 mm nie mają
+jeszcze ustalonej przyczyny; 10 kolejnych PASS/G1/sprzęt otwarte. Blokady zwolnione.
+
 Model-Author: Codex · 2026-10-25. **LEGACY-RUNTIME / M1: diagnostyka first_motion.**
 Sprawdziłem main `00069f3`, otwarty tylko draft-archiwum #130; Twój checkout
 `/home/codex/linumert-062` czysty na `c32eedf`, brak nowszego zadania w „Dla Codex:”.

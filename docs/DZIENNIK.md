@@ -1212,3 +1212,12 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
 - Zastąpiono statyczne 31/84 grafiką SVG generowaną z plan.json: obecnie 39/84 (46,4%).
 - Model-Author: Codex. Rozkład M0–M6 liczy sesje, bez deklarowania odbioru bramek.
 - Generator i --check obejmują grafikę; odnośniki Markdown są identyczne na Windows/Linux.
+
+
+## 026 / LEGACY-RUNTIME — ślad first_motion (PR #133) · 2026-10-25 · Codex
+- Model-Author: Codex. Zachowanie katalogu, logów LinuxCNC/Plant i próbek uchybu; progi bez zmian.
+- Jedna para prób: XY 1000 → 500 mm/s², X 0,1112 → 0,0762 mm, obie 5/5 PASS; nie zmieniono masy/napędów.
+- Sam fizyczny uchyb nie jest błędem; cel właściciela: maksymalne użyteczne przyspieszanie/hamowanie G0 i szybkich G1 z kontrolą uchybu.
+- Testy: 4 diagnostyki PASS; lokalna kopia: 1394 PASS/10 błędów środowiska kopii, po odtworzeniu symlinków i historii Git 75 PASS/1 skip w dotkniętych zestawach; CI dla kodu 99c4cb9 python/plant-matrix PASS.
+- Raport i JSON: docs/raporty/prototypy/M1_FIRST_MOTION_2026-10-25.*; autokontrola, bez niezależnego przeglądu.
+- Historyczne 0,3 mm niewyjaśnione; uchyb Z w bazowaniu nadal obserwowany. 10 PASS/G1/pulpit/RT/sprzęt otwarte.
