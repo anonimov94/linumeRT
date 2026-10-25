@@ -328,14 +328,14 @@ def tool_data_available() -> bool:
     """Czy interpreter może czytać dane narzędzi (LinuxCNC utworzył ~/.tool.mmap).
 
     `gcode.parse` bez zmapowanej tablicy narzędzi kończy się SIGSEGV przy słowie T/M6
-    (tool_mmap_mutex_get; potwierdzone gdb na LinuxCNC 2.9). Mapowanie robi `linuxcnc.stat()`.
+    (tool_mmap_mutex_get; potwierdzone gdb na LinuxCNC 2.9). Mapowanie robi `linuxcnc.stat().poll()`.
     """
     if not (Path(os.environ.get("HOME", "/tmp")) / TOOL_MMAP).exists():
         return False
     try:
         import linuxcnc  # type: ignore[import-not-found]
 
-        linuxcnc.stat()
+        linuxcnc.stat().poll()    # to poll() woła tool_mmap_user() (libtooldata jest współdzielona)
     except Exception:  # noqa: BLE001 - brak NML/modułu = brak danych narzędzi
         return False
     return True
@@ -385,7 +385,14 @@ def load_ngc(path: Path | str, unitcode: str = "G21",
             if skipped:
                 parse_path = Path(directory) / path.name
                 parse_path.write_text(stripped, encoding="utf-8")
-        result, seq = gcode.parse(str(parse_path), canon, unitcode, initcode)
+        # Interpreter czyta INI z INI_FILE_NAME (REMAP, SUBROUTINE_PATH względem cwd): podgląd ma
+        # być niezależny od katalogu uruchomienia, więc analizuje program bez INI maszyny.
+        saved = os.environ.pop("INI_FILE_NAME", None)
+        try:
+            result, seq = gcode.parse(str(parse_path), canon, unitcode, initcode)
+        finally:
+            if saved is not None:
+                os.environ["INI_FILE_NAME"] = saved
     if result > gcode.MIN_ERROR:
         raise ValueError(f"linia {seq}: {gcode.strerror(result)}")
     toolpath = canon.toolpath(source_text.splitlines())

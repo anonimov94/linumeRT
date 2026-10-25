@@ -1212,3 +1212,9 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
 - Zastąpiono statyczne 31/84 grafiką SVG generowaną z plan.json: obecnie 39/84 (46,4%).
 - Model-Author: Codex. Rozkład M0–M6 liczy sesje, bez deklarowania odbioru bramek.
 - Generator i --check obejmują grafikę; odnośniki Markdown są identyczne na Windows/Linux.
+
+## 2026-10-25 — Claude: Classic × Neon N1/N4, Plant substeps (M1)
+Model-Author: Claude. PR #134: test niezależności wyniku Plant od `substeps` (6 przypadków PASS, suite_cycles 40/40).
+Gałąź `codex/neon-n1-demo`: `load_ngc` z prawdziwym interpreterem (SIGSEGV przy T/M6, INI/REMAP, plik zmiennych),
+test N1 demo = `demo_toolpath()`, skrypt odbioru `tools/dev/neon_accept.py`; raport `docs/raporty/neon/README.md`.
+NIEZWERYFIKOWANE NA SPRZĘCIE. Otwarte: N3 (zmiana skórek), monitor bez narzędzia/F/S, VNC/WSLg.
