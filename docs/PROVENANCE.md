@@ -513,3 +513,13 @@ Pobrane z repozytoriów autorów, niezmienione; licencje obok plików: `screens/
 | Plik | Rodzaj | Autor | Data | Źródło | Licencja | Użycie | Ścieżka |
 |---|---|---|---|---|---|---|---|
 | postep-sesji.svg | SVG generowany z danych | projekt linumeRT (Codex) | 2026-10-24 | własny tools/roadmap.py + docs/roadmap/plan.json; paleta docs/design/tokens.yaml | GPL-2.0-or-later | aktualny licznik i podział sesji M0–M6 w README | `docs/raporty/postep-sesji.svg` |
+
+## Odświeżenie zrzutów README — 2026-10-25
+Model-Author: Claude, GPL-2.0-or-later. Nowe wersje `docs/raporty/hmi_sym/skin_classic-digital.png`,
+`docs/raporty/hmi_sym/skin_industrial-pro.png`, `docs/raporty/hmi_sym/skin_cyberdeck.png`,
+`docs/raporty/hmi_sym/skin_organic-vector.png` (`tools/dev/skin-check.py`, Xvfb/Mesa llvmpipe, 1920×1080) oraz
+`docs/raporty/hmi_sym/demo_w_trakcie.png`, `docs/raporty/hmi_sym/demo_po_obrobce.png`,
+`docs/raporty/hmi_sym/kolizja_k302.png` (`tools/dev/sim-e2e-rip.sh`: LinuxCNC 2.9 RIP + ekran linumeRT pod Xvfb,
+przycięte do okna 1700×1080 bez retuszu) i `docs/raporty/hmi_sym/wynik-2026-10-25.json`. Zawierają grafiki QtDragon/LinuxCNC
+(GPL-2.0) i własne zasoby projektu. Zastępują wersje z 2026-10-23; użyte biblioteki (pyyaml, pydantic, pyqtgraph) tylko
+w środowisku wykonującym zrzuty, bez nowych zależności produktu.

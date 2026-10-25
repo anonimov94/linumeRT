@@ -31,7 +31,9 @@ def step(name, ok=True, **extra):
 
 
 def shot(name):
-    subprocess.run(f"xwd -root -silent | convert xwd:- {OUT}/{name}.png", shell=True, check=False)
+    # xwd (x11-apps) w obrazie startera; ImageMagick `import` jako zamiennik poza kontenerem
+    subprocess.run(f"(xwd -root -silent | convert xwd:- {OUT}/{name}.png) 2>/dev/null"
+                   f" || import -window root {OUT}/{name}.png", shell=True, check=False)
 
 
 def poll():
