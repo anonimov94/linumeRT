@@ -1235,6 +1235,11 @@ NIEZWERYFIKOWANE NA SPRZĘCIE. Otwarte: N3 (zmiana skórek), monitor bez narzęd
 - Celowany lokalny LinuxCNC zajęty przez blokadę Claude „neon N4”; nie naruszono jej ani jego procesów. Wymagane końcowe CI.
 - Ograniczenie porównania ramp: równoległe testy Pythona, niekontrolowane obciążenie CPU; wynik nie jest benchmarkiem.
 
+## 2026-10-25 — Claude: sesja 062, odbiór wygenerowanego Plant w LinuxCNC
+Model-Author: Claude. `tests/test_configgen_plant_linuxcnc.py` (marker `linuxcnc`, pod blokadą): `linumert-config build
+--target plant` dla `mill_servo_table` → LinuxCNC 2.9 RIP + serwer Plant (lockstep, lrt_net): włączenie, bazowanie
+wszystkich osi, ruch MDI X50; PASS (13,5 s). Sesja 062 pozostaje `partial` (EtherCAT 063, wrzeciono 064, sprzęt).
+NIEZWERYFIKOWANE NA SPRZĘCIE.
 ## M1 — diagnostyka przed T0 · 2026-10-25 · Codex
 - Model-Author: Codex. Przy odebraniu błędu bazowania zachowuje snapshot jointów NML i sekwencyjne odczyty HAL w driver.log oraz RESULT.setup_samples.
 - 8 testów diagnostyki PASS w Debianie, ruff PASS; bez uruchamiania instancji LinuxCNC i bez zmiany modelu, progów lub retry.
@@ -1263,3 +1268,7 @@ NIEZWERYFIKOWANE NA SPRZĘCIE. Otwarte: N3 (zmiana skórek), monitor bez narzęd
 ## M1 — odbiór gotowości w CI · 2026-10-25 · Codex
 - Model-Author: Codex. d223909: LinuxCNC job 121128248228 SUCCESS, 147 live PASS, w tym pierwsze bazowanie bez retry i setup_errors oraz sampler.
 - #141/#142 scalone, zdalny main c028159 zweryfikowany. Nieważny lokalny incydent zachowany w raporcie; historyczny X, pełna seria i G1 nadal otwarte.
+
+## M1 — historyczna baza X · 2026-10-25 · Codex
+- Model-Author: Codex. d643a97: substeps=1, przed #116; obecnie substeps=4. Ancestry, hashe starego checkoutu i niezmienionych plików testu zweryfikowane.
+- Sama zmiana integracji nie ustala przyczyny 0,3 mm; bez live testów, bez zmiany progów/modelu. Raport M1_X_BASELINE_2026-10-25.md/JSON.
