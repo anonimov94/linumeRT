@@ -35,3 +35,13 @@ dowiązań przez git archive; wyników błędów tej kopii nie traktujemy jako o
 To ukończona porcja układu. Sesja 028 pozostaje partial; odbiór pozostałych
 podstron i skórek, stanowiska i sprzętu pozostaje otwarty. Autokontrola autora,
 bez niezależnego przeglądu. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## Uzupełnienie i przekazanie testów właściciela
+
+Po zwolnieniu zasobów wykonano próbę LinuxCNC f76554f: FAIL, 69,92 s.
+Pierwszy błąd: timeout 02_estop_zwolniony, następnie 22 błędy wynikające z aktywnego
+E-STOP. Bez diagnozy przyczyny i bez uznania odbioru. Obie lease zwolnione.
+Właściciel przekazał dalszy odbiór Claude na laptopie EndeavourOS. Rozpoczęty
+pełny zestaw lokalny przerwano SIGINT na polecenie właściciela; nie jest PASS.
+Zakres dla Claude: układ/fokus przy 1280×768, STL 1200×600, pełny samotest QtVCP
+oraz porównanie timeoutu E-STOP z main. Nie zmieniać blokad HAL dla zaliczenia testu.
