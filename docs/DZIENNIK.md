@@ -1383,3 +1383,9 @@ Model-Author: Claude. `tools/tune_accel.py` (moduł `accel_tuning`, 15 testów, 
 0,2 mm bez alarmu i utraty kroków. Wyniki: frezarka X/Y ok. 17 100, Z ok. 5 400 mm/s² (obecnie 1000/1000/500); router krokowy X/Y ok. 3 800, Z ok. 9 400 (granica: utrata kroków,
 wynik Z niemonotoniczny). Raport `docs/raporty/prototypy/M1_ACCEL_TUNING_2026-10-25.md`. machine.yaml i progi bez zmian; seria 10 przebiegów PASS nadal otwarta.
 NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## 2026-10-25 — Claude: M2, obszar „Wygląd” w HMI (palety i własne kolory)
+Model-Author: Claude. Prośba właściciela: zmiana kolorystyki działającego HMI. `linumert_appearance.py` (palety z kontraktu skórek, dziesięć ról, tokeny wyliczane,
+walidacja kontrastu WCAG i znaczenia czerwony/zielony/bursztynowy, zapis atomowy JSON), `linumert_appearance_page.py` (paleta, edytor kolorów, podgląd, zapis, reset)
+i integracja w powłoce (nowy obszar na szynie, wczytanie zapisu przy starcie, `apply_tokens`, tło kontenera stron w kolorze motywu). 23 testy, sprawdzone w LinuxCNC pod Xvfb
+(zrzuty `docs/raporty/hmi_appearance/`). Prawdziwe skórki (układy) i widoki rysowane własnym kodem (kolory po restarcie) otwarte. Opis: `docs/user/WYGLAD.md`. NIEZWERYFIKOWANE NA SPRZĘCIE.
