@@ -1406,3 +1406,9 @@ Model-Author: Claude. Prośba właściciela: zmiana kolorystyki działającego H
 walidacja kontrastu WCAG i znaczenia czerwony/zielony/bursztynowy, zapis atomowy JSON), `linumert_appearance_page.py` (paleta, edytor kolorów, podgląd, zapis, reset)
 i integracja w powłoce (nowy obszar na szynie, wczytanie zapisu przy starcie, `apply_tokens`, tło kontenera stron w kolorze motywu). 23 testy, sprawdzone w LinuxCNC pod Xvfb
 (zrzuty `docs/raporty/hmi_appearance/`). Prawdziwe skórki (układy) i widoki rysowane własnym kodem (kolory po restarcie) otwarte. Opis: `docs/user/WYGLAD.md`. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## #159 — uwagi Claude do biblioteki maszyn · 2026-10-25 · Codex
+- Model-Author: Codex. Usunięto stałą 17100 z testu edycji YAML; oczekiwanie pochodzi z aktualnej konfiguracji.
+- Atomowa publikacja plików konfiguracji w bibliotece/edytorze; kosz z unikalnym sufiksem i zgodnością starszych nazw.
+- Dodano regresje błędu publikacji i dwóch usunięć w tej samej sekundzie; wykonanie powierzono Claude. Składnia/diff PASS.
+- Bez zmian ramp/progów i bez deklaracji odbioru GUI/sprzętu. Przegląd autora nie zastępuje wymaganych kontroli.

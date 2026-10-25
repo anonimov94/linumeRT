@@ -18,17 +18,18 @@ from __future__ import annotations
 import re
 import shutil
 import time
+import uuid
 from pathlib import Path
 from typing import Any
 
 import yaml
 
 from ..drive_library import YAML_LOADER
-from .editor import EditorError, MachineEditor
+from .editor import EditorError, MachineEditor, atomic_write_text
 
 NAME_RE = re.compile(r"^[A-Za-z][A-Za-z0-9_\-]{0,63}$")
 FILE_RE = re.compile(r"^[A-Za-z][A-Za-z0-9_\-]{0,63}\.yaml$")
-TRASH_RE = re.compile(r"^\d{8}_\d{6}__[A-Za-z][A-Za-z0-9_\-]{0,63}\.yaml$")
+TRASH_RE = re.compile(r"^\d{8}_\d{6}(?:_[a-f0-9]{32})?__[A-Za-z][A-Za-z0-9_\-]{0,63}\.yaml$")
 
 
 class MachineLibrary:
@@ -79,7 +80,7 @@ class MachineLibrary:
         text = yaml.safe_dump(data, sort_keys=False, allow_unicode=True, width=100)
         header = (f"# linumeRT · machine.yaml zapisany w panelu Plant "
                   f"{time.strftime('%Y-%m-%d %H:%M:%S')} — {comment}\n")
-        path.write_text(header + text, encoding="utf-8", newline="\n")
+        atomic_write_text(path, header + text)
 
     # ---- lista -----------------------------------------------------------------------
     def catalog(self) -> list[dict[str, Any]]:
@@ -146,7 +147,7 @@ class MachineLibrary:
             raise EditorError("aktywnej maszyny nie można usunąć (najpierw aktywuj inną)")
         self.trash.mkdir(parents=True, exist_ok=True)
         stamp = time.strftime("%Y%m%d_%H%M%S")
-        target = self.trash / f"{stamp}__{path.name}"
+        target = self.trash / f"{stamp}_{uuid.uuid4().hex}__{path.name}"
         shutil.move(str(path), str(target))
         return {"trashed": target.name}
 
