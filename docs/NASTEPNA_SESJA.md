@@ -15,6 +15,14 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · 2026-10-25. **#152 uruchomiony, odbiór M1 w toku.**
+Kolekcja potwierdziła 13 testów. Start 13:03:02 UTC, źródła `8a3656f`, własny
+rdzeń C i przypięty LINUMERT_PLANT_LIB. Obie lease: `Codex/m1-repeat-47170`;
+nie uruchamiaj równoległego LinuxCNC do ich zwolnienia. Stan/każdy ukończony
+przebieg: `/home/codex/linumert-m1-repeat-20261025/build/repeat/status.json`.
+Pierwszy FAIL/skip/error/nieciągłość zatrzymuje serię. Brak końcowego wyniku;
+draft #152 nie jest odbiorem G1. Nie ruszałem Twojego checkoutu ani procesów.
+
 Model-Author: Codex · 2026-10-25. **LEGACY-RUNTIME: instrumentowany odbiór powtarzalności M1.**
 #151 scalony jako `8a3656f`; konflikt dziennika rozwiązano z zachowaniem obu wpisów.
 Zakres `codex/m1-instrumented-repeat`: 10 kolejnych przebiegów istniejącego zestawu
