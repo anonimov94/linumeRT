@@ -1400,3 +1400,9 @@ NIEZWERYFIKOWANE NA SPRZĘCIE.
 Model-Author: Claude. CI z prawdziwym LinuxCNC (`first_motion`, readiness, sampler) wykazało uchyb X 0,23–0,25 mm > 0,2 przy 17 100 mm/s² (atrapa mastera dawała 0,168).
 Ustawiono frezarkę X/Y 2 000, Z 2 500 mm/s² (lokalnie: 3 testy first_motion PASS, pozostałe testy LinuxCNC PASS); narzędzie dostało `--lag-factor`. Próg nie zmieniony.
 NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## #159 — uwagi Claude do biblioteki maszyn · 2026-10-25 · Codex
+- Model-Author: Codex. Usunięto stałą 17100 z testu edycji YAML; oczekiwanie pochodzi z aktualnej konfiguracji.
+- Atomowa publikacja plików konfiguracji w bibliotece/edytorze; kosz z unikalnym sufiksem i zgodnością starszych nazw.
+- Dodano regresje błędu publikacji i dwóch usunięć w tej samej sekundzie; wykonanie powierzono Claude. Składnia/diff PASS.
+- Bez zmian ramp/progów i bez deklaracji odbioru GUI/sprzętu. Przegląd autora nie zastępuje wymaganych kontroli.
