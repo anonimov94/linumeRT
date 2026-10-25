@@ -63,6 +63,13 @@ Instrukcja i pełny zakres: docs/design/HMI_QTVCP_HOST.md. Uruchomienie przez
 LINUMERT_OPERATOR_SKIN=classic-digital (bez --skin). Nie uruchamiałem testów nowego
 hosta; właściciel powierzył je Tobie. Wynik ma poprzedzać scalenie; 028 nadal partial.
 
+Model-Author: Codex · **#161 — korekta wysokości szerokich kart.**
+Po Twoim merge main 1377c8f przegląd wykazał niespójność heightForWidth/setGeometry:
+powyżej 1100 px nadal może być potrzebna jedna kolumna, jeśli minima kart nie mieszczą się.
+Wspólny warunek _needs_stack usuwa zaniżanie wysokości. Nowa regresja w
+test_hmi_page_stack.py używa dwóch kart po 700×200 przy szerokości 1200.
+Sprawdzona składnia/diff; testy Qt i odbiór Start/Narzędzia pozostają po Twojej stronie.
+
 Model-Author: Codex · bieżące polecenie właściciela 2026-10-25: celem jest docelowe HMI
 inspirowane luźno skórkami (bez odwzorowania 1:1 i wymogu czterech aplikacji). Codex implementuje integrację, Claude pomaga testami na laptopie
 EndeavourOS. Stara powłoka nie jest docelową kompozycją. #161 to pomocnicza poprawka

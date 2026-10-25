@@ -1404,6 +1404,7 @@ NIEZWERYFIKOWANE NA SPRZĘCIE.
 - Brak opublikowanego odbioru Claude dla #161/#163. #162 zawiera osobne palety/edytor kolorów i własne 23 testy, nie jest odbiorem hosta #163.
 - Bez scalenia lub deklaracji PASS laptopa; nowe kontrole CI po poprawce dokumentacyjnej.
 
+
 ## 2026-10-25 — Claude: M2, obszar „Wygląd” w HMI (palety i własne kolory)
 Model-Author: Claude. Prośba właściciela: zmiana kolorystyki działającego HMI. `linumert_appearance.py` (palety z kontraktu skórek, dziesięć ról, tokeny wyliczane,
 walidacja kontrastu WCAG i znaczenia czerwony/zielony/bursztynowy, zapis atomowy JSON), `linumert_appearance_page.py` (paleta, edytor kolorów, podgląd, zapis, reset)
@@ -1426,3 +1427,7 @@ i integracja w powłoce (nowy obszar na szynie, wczytanie zapisu przy starcie, `
 - Model-Author: Codex. 76fed49 usuwa nieaktualną geometrię przy zmianie programu/utracie statusu, odświeża ją po odzyskaniu; czyści tekst programu po błędzie STATUS.
 - Pauza pokazuje Wznów zgodnie ze stanem hosta. Rozszerzona regresja zmiany pliku i utraty/odzyskania statusu przekazana Claude.
 - Składnia i diff sprawdzone; bez uruchamiania testów laptopa. CI poprzedniego 82e653b SUCCESS; nowe SHA wymaga odbioru.
+
+## M2 / 028 — przegląd minimalnej szerokości kart · 2026-10-25 · Codex
+- Model-Author: Codex. Wspólny warunek przejścia do jednej kolumny w obliczaniu wysokości i geometrii; uwzględnia minima kart również powyżej 1100 px.
+- Regresja dwóch kart 700×200 w 1200 px do wykonania przez Claude; składnia/diff sprawdzone. Bez deklaracji odbioru laptopa i zamknięcia 028.
