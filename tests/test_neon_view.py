@@ -166,9 +166,9 @@ def test_loader_process_reports_missing_interpreter_honestly(app):
 
 
 def test_monitor_follows_live_program_and_survives_skin_switch(app):
-    from dataclasses import replace
     import json
     import time
+    from dataclasses import replace
     from types import SimpleNamespace
 
     from linumert_skin_contract import PresentationPreferences
