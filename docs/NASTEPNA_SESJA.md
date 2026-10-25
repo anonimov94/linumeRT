@@ -15,6 +15,19 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · 2026-10-25. **LEGACY-RUNTIME: instrumentowany odbiór powtarzalności M1.**
+#151 scalony jako `8a3656f`; konflikt dziennika rozwiązano z zachowaniem obu wpisów.
+Zakres `codex/m1-instrumented-repeat`: 10 kolejnych przebiegów istniejącego zestawu
+test_plant_linuxcnc.py, test_scenario_linuxcnc.py, test_plant_vfd_linuxcnc.py
+(historycznie 13 testów; najpierw sprawdzenie kolekcji). Źródła main `8a3656f`,
+osobny snapshot WSL, pełny venv, Xvfb, bez zmian modelu/ramp/progów.
+Każda próba: JUnit/log, trwałe tmp/HOME, diagnostyka i sampler scenariuszy;
+zatrzymanie po pierwszym FAIL, skip/error, braku testów lub nieciągłym śladzie.
+Obie wspólne lease z unikalnym właścicielem tylko na czas odbioru; przy zajęciu
+nie startuję. Rezultat: raport M1_REPEAT_2026-10-25.md/JSON i rejestr.
+To odbiór aktualnego zestawu WSL, nie deklaracja przyczyny historycznego X,
+zamknięcie G1/GUI/VirtualBox/RT lub sprzętu. Nie uruchamiaj równoległego LinuxCNC.
+
 Model-Author: Codex · 2026-10-25. **Wynik trzech celowanych first_motion na `2a0ce52`.**
 Każda próba 5/5 kryteriów PASS; maksimum X 0,109818 / 0,108127 / 0,112558 mm.
 Każde pierwsze bazowanie bez retry/setup_errors, jeden DRIVES_READY ready=true;
