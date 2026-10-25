@@ -1305,3 +1305,7 @@ Model-Author: Claude. Zrzuty HMI (demo w trakcie, po obróbce, K-302) i galeria 
 (WSL Debian 12, LinuxCNC 2.9 RIP, Xvfb): demo 306 s, materiał usunięty 673,8 cm³, K-302 bez E-STOP, `skin-check` 160 kombinacji PASS.
 Dodano `tools/dev/sim-e2e-rip.sh` (bez kontenera) i zrzut Classic × Neon w README. Okno HMI 1700×1080 (bez menedżera okien).
 NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## M1 — analiza fazy X offline · 2026-10-25 · Codex
+- Model-Author: Codex. Zachowany ślad #141: f-error odpowiada cmd-fb z poprzedniego końca cyklu, reszta około 0,000001 mm (zgodność liczb CSV, nie dokładność fizyczna). Kolejność sprawdzona w źródle LinuxCNC a33293f.
+- 18 testów analizy/trace PASS, 1 live jawnie deselected; ruff PASS. Bez nowego LinuxCNC i blokad. Analizator odmawia analizy luk, błędnych metadanych i braku ruchu. X historyczny i G1 otwarte.
