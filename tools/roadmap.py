@@ -95,7 +95,8 @@ def readme_milestones(plan: dict, text: str) -> str:
              f"Dodatkowo ukończono **{extensions_done}/{len(plan['extensions'])} rozszerzeń**. "
              f'Wśród sesji: {partial} częściowych i {planned} planowanych. '
              'Rozszerzenia liczymy osobno, bez zwiększania licznika 84 sesji.', '',
-             '| Kamień | Zakres | Sesje ukończone | Rozszerzenia ukończone | Rekordy z otwartymi kryteriami |',
+             '| Kamień | Zakres | Sesje ukończone | Rozszerzenia ukończone | '
+             'Rekordy z otwartymi kryteriami |',
              '|---|---|---:|---:|---:|']
     for milestone in plan['milestones']:
         group = [r for r in plan['sessions'] if r['milestone'] == milestone['id']]
