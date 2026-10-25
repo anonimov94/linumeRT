@@ -57,9 +57,6 @@ class ToolsPage(QtWidgets.QWidget):
         self._dirty = False
         self._loaded_number = None
         self.fields: dict[str, QtWidgets.QWidget] = {}
-        grid = QtWidgets.QGridLayout(self)
-        grid.setContentsMargins(16, 16, 16, 16)
-        grid.setSpacing(16)
         frame, lay, self.lbl_count = pages.card("Tabela narzędzi", "")
         # Model-Author: Codex. Read-only filters; never select or load another tool.
         filters = QtWidgets.QHBoxLayout()
@@ -108,14 +105,15 @@ class ToolsPage(QtWidgets.QWidget):
         actions.addWidget(self.history_button)
         actions.addWidget(self.export, 1)
         lay.addLayout(actions)
-        grid.addWidget(frame, 0, 0)
         self.editor_scroll = QtWidgets.QScrollArea()
         self.editor_scroll.setWidgetResizable(True)
         self.editor_scroll.setFrameShape(QtWidgets.QFrame.NoFrame)
         self.editor_scroll.setWidget(self._editor())
-        grid.addWidget(self.editor_scroll, 0, 1)
-        grid.setColumnStretch(0, 3)
-        grid.setColumnStretch(1, 2)
+        from linumert_layout import CardColumns
+
+        CardColumns(self, (frame, self.editor_scroll))
+        self.table.setMinimumHeight(220)
+        self.editor_scroll.setMinimumHeight(400)
         for widget in (self.spin_t, self.spin_p, self.spin_z, self.spin_life, self.spin_used,
                        *(spin for _label, spin in self.rows.values())):
             widget.valueChanged.connect(self._edited)
