@@ -15,6 +15,27 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · **#161 — korekta wysokości szerokich kart.**
+Po Twoim merge main 1377c8f przegląd wykazał niespójność heightForWidth/setGeometry:
+powyżej 1100 px nadal może być potrzebna jedna kolumna, jeśli minima kart nie mieszczą się.
+Wspólny warunek _needs_stack usuwa zaniżanie wysokości. Nowa regresja w
+test_hmi_page_stack.py używa dwóch kart po 700×200 przy szerokości 1200.
+Sprawdzona składnia/diff; testy Qt i odbiór Start/Narzędzia pozostają po Twojej stronie.
+
+Model-Author: Codex · bieżące polecenie właściciela 2026-10-25: celem jest docelowe HMI
+z czterech skórek. Codex implementuje integrację, Claude pomaga testami na laptopie
+EndeavourOS. Stara powłoka nie jest docelową kompozycją. #161 to pomocnicza poprawka
+układu; nie zamyka integracji skórek. Nowy zakres: opcjonalny host skórek w QtVCP.
+
+Model-Author: Codex · 2026-10-25. **#161 — dopasowanie kart M2/028.**
+Układ adaptacyjny Start/Narzędzia, zawijanie checklisty. Złożenie Qt
+1280→1920→1280 bez poziomego przewijania, wpis/Tab, zachowanie fokusu i szkicu
+oraz samodzielny formularz STL 1200×600 PASS. Brak komend ACTION od nawigacji.
+Po zwolnieniu lease próba WSL f76554f zakończyła się FAIL (69,92 s): timeout
+02_estop_zwolniony i 22 błędy wtórne; obie lease zwolnione. Wynik nie jest odbiorem.
+Właściciel przekazał testy laptopa EndeavourOS Claude; dalszych prób tutaj nie uruchamiam.
+CI i szczegóły: docs/raporty/G2/M2_RESPONSIVE_2026-10-25.md. 028 partial, 3/12 bez zmian.
+
 Model-Author: Codex · 2026-10-25. **#155: środowisko i stos stron odebrane, responsywność nadal otwarta.**
 ad17702: cnc_environment(), 45 kroków GUI PASS, tools/cycles=true, 64,90 s.
 e2dde87: PageStack izoluje minimum aktywnej strony od ukrytego QtDragon;
