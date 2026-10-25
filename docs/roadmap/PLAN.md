@@ -150,7 +150,7 @@ Nie są kolejnym harmonogramem. Ich status dotyczy tylko wskazanego kroku.
 | ORIGIN-WIZARD | 033, 054 | Kreator zera detalu na przygotówce | częściowe |
 | M6-G43 | 034, 066 | Automatyczna korekta długości narzędzia po M6 | częściowe |
 | PLANT-SUBSTEPS | 049, 063 | Plant: wynik niezależny od podkroków całkowania | ukończone |
-| HMI-OWNER-SKINS | 028 | Odrębny wygląd każdej skórki i główny ekran holograficzny | planowane |
+| HMI-OWNER-SKINS | 028 | Odrębny wygląd każdej skórki i główny ekran holograficzny | częściowe |
 
 ## Postęp, pozostały zakres i dowody
 
@@ -856,11 +856,11 @@ Pozostaje: Rozstrzygnąć propozycję zmiany prezentacji; nie zmienia zamrożone
 
 ### SKIN-02 — Skin API, host i kanały CNC
 
-**częściowe**. Manifesty, kontrola przełączenia i monitor read-only istnieją. N1/Codex: prawdziwy gcode potwierdza posuwy G20/G21 i fizyczne numery linii; naprawiony parameter_file. Demo z T1 M6 ujawnia SIGSEGV w tooldata, pełny odbiór pozostaje otwarty.
+**częściowe**. Manifesty, kontrola przełączenia i monitor read-only istnieją. N1/Codex: prawdziwy gcode potwierdza posuwy G20/G21 i fizyczne numery linii; naprawiony parameter_file. Demo z T1 M6 ujawnia SIGSEGV w tooldata, pełny odbiór pozostaje otwarty. Opcjonalny host QtVCP de6b06d: istniejące STATUS, przyciski cyklu i globalny tor alarmów/E-STOP; implementacja do odbioru Claude na EndeavourOS. Skórki są luźną inspiracją według uściślenia właściciela 2026-10-25. Claude/bab3866: start Classic Digital na EndeavourOS oraz lint/1359 offline/check_requirements PASS; pozostałe rodziny wizualnie otwarte. 9167442 dodaje wybór czterech rodzin z Wyglądu i zapis na następny start; nowy krok do ponownego odbioru Claude.
 
 Pozostaje: Produkcyjny host, kanał poleceń i potwierdzenie świeżości danych.
 
-Źródła: [docs/design/SKIN_SYSTEM_ROADMAP.md](../design/SKIN_SYSTEM_ROADMAP.md), [docs/design/SKIN_AUDIT.md](../design/SKIN_AUDIT.md), [tests/test_toolpath.py](../../tests/test_toolpath.py).
+Źródła: [docs/design/SKIN_SYSTEM_ROADMAP.md](../design/SKIN_SYSTEM_ROADMAP.md), [docs/design/SKIN_AUDIT.md](../design/SKIN_AUDIT.md), [tests/test_toolpath.py](../../tests/test_toolpath.py), [docs/design/HMI_QTVCP_HOST.md](../design/HMI_QTVCP_HOST.md).
 
 ### SKIN-03 — Palety, EN/PL i preferencje
 
@@ -944,7 +944,7 @@ Pozostaje: Pełny odbiór 4×4×2, rozdzielczości/dotyk, LinuxCNC/Plant, safety
 
 ### ISO-ACCEPTANCE — Odbiór i publikacja obrazu
 
-**częściowe**. Implementacja ISO istnieje. Na polecenie właściciela 2026-10-25 odświeżono README i generowaną z rejestru tabelę M0–M6; 23 testy roadmapy/konfiguracji ISO PASS w Debianie. Uruchomiono budowę obrazu do testów laptopa: workflow 40181951376, źródła main c0281596a54a6911b344edf8709edabed8748090. Budowa/publikacja i SHA-256 oczekują weryfikacji; boot/instalacja/RT laptopa pozostają osobnym odbiorem. Właściciel 2026-10-25 uruchomił najnowsze ISO na laptopie: podgląd skórek i serwer Plant działają, ale normalne HMI QtVCP kończy się SIGSEGV podczas startu Plant (LinuxCNC 2.9.10, Debian RT). SHA konkretnego ISO nie jest w raportach. Odbiór startu HMI niezaliczony; surowe raporty i hashe zachowano. Launcher w #156 włącza faulthandler, 11 testów ISO PASS; oczekiwanie na próbę --safe i nowy debug, bez deklaracji przyczyny GPU. Niezależna próba Qt potwierdziła usterkę --safe: QT_XCB_GL_INTEGRATION=none odbiera prawidłowy kontekst QGLWidget wymagany przez QtDragon; z programowym Mesa i xcb_glx kontekst jest prawidłowy. Poprawiono flagi --safe, regresja uruchamia atrapę launchera i rzeczywisty widget; 12 testów ISO PASS. Nie dowodzi to przyczyny pierwotnej awarii laptopa; weryfikacja właściciela nadal otwarta.
+**częściowe**. Implementacja ISO istnieje. Na polecenie właściciela 2026-10-25 odświeżono README i generowaną z rejestru tabelę M0–M6; 23 testy roadmapy/konfiguracji ISO PASS w Debianie. Uruchomiono budowę obrazu do testów laptopa: workflow 40181951376, źródła main c0281596a54a6911b344edf8709edabed8748090. Budowa/publikacja i SHA-256 oczekują weryfikacji; boot/instalacja/RT laptopa pozostają osobnym odbiorem. Właściciel 2026-10-25 uruchomił najnowsze ISO na laptopie: podgląd skórek i serwer Plant działają, ale normalne HMI QtVCP kończy się SIGSEGV podczas startu Plant (LinuxCNC 2.9.10, Debian RT). SHA konkretnego ISO nie jest w raportach. Odbiór startu HMI niezaliczony; surowe raporty i hashe zachowano. Launcher w #156 włącza faulthandler, 11 testów ISO PASS; oczekiwanie na próbę --safe i nowy debug, bez deklaracji przyczyny GPU. Niezależna próba Qt potwierdziła usterkę --safe: QT_XCB_GL_INTEGRATION=none odbiera prawidłowy kontekst QGLWidget wymagany przez QtDragon; z programowym Mesa i xcb_glx kontekst jest prawidłowy. Poprawiono flagi --safe, regresja uruchamia atrapę launchera i rzeczywisty widget; 12 testów ISO PASS. Nie dowodzi to przyczyny pierwotnej awarii laptopa; weryfikacja właściciela nadal otwarta. Właściciel potwierdził, że poprawiona próba bez --safe (software Mesa/xcb_glx/faulthandler) nadal się zamyka. Korekta GL nie rozwiązała zgłoszonego startu; oczekiwany nowy debug/report z tracebackiem. Nie uznaje się pierwotnego raportu za wynik nowej próby.
 
 Pozostaje: Zweryfikować obraz main, SHA-256, live/instalację; publikacja ręczna zgodnie z D39. Ustalić przyczynę SIGSEGV QtVCP na ISO właściciela i odebrać rzeczywisty start normalnego HMI; działający podgląd/serwer nie zastępują tego kryterium.
 
@@ -1010,9 +1010,9 @@ Pozostaje: Obciążenie CPU Plant realtime przy 4 podkrokach na VM-B (odbiór w�
 
 ### HMI-OWNER-SKINS — Odrębny wygląd każdej skórki i główny ekran holograficzny
 
-**planowane**. Polecenie właściciela 2026-10-25 po odbiorze #163 (SHA 2ae9103): selektor widoku HMI działa; wybór rodziny nie zmienia jeszcze wyraźnie wyglądu.
+**częściowe**. Polecenie właściciela 2026-10-25 po odbiorze #163 (SHA 2ae9103): selektor widoku HMI działa; wybór rodziny nie zmienia jeszcze wyraźnie wyglądu. 7dc2649: odmienne malowanie geometrii i typografii wspólnej nawigacji każdej rodziny, dopasowanie ram stałych pasków; te same strony i sygnały Qt. Kod po kontroli składni, odbiór wizualny/fokusu/kontrastu powierzony Claude; pełna kompozycja i podglądy nieukończone. Przegląd 76fed49: usuwanie starej sceny przy zmianie pliku/utracie STATUS, ponowne wczytanie po odzyskaniu i poprawny opis pauzy. Regresja do wykonania przez Claude; bez zmiany statusu odbioru.
 
 Pozostaje: Każda z rodzin classic-digital, industrial-pro, cyberdeck, organic-vector ma własny, wyraźnie odmienny wygląd zakładek i nawigacji. Główny ekran HMI w stylu sci-fi/cyberdeck: kształty i menu jako nakładka, pod spodem prostokątne podglądy: symulacja obróbki detalu z widocznym narzędziem oraz obok symulacja z widokiem na maszynę. Własne kształty, kolory i nazwy; bez kopiowania cudzych grafik i znaków (docs/prawne/WYTYCZNE_IP.md). Funkcje operatora od początku działają (D36); zwykły widok pozostaje dostępny. Odbiór: zrzuty 4 skórek × 1280×768 i 1920×1080 porównane ze sobą i z makietami; wydajność 3D z pyqtgraph na pulpicie.
 
-Źródła: [PR](https://github.com/anonimov94/linumeRT/pull/163#issuecomment-6401257406), [docs/design/SKIN_SYSTEM_ROADMAP.md](../design/SKIN_SYSTEM_ROADMAP.md).
+Źródła: [PR](https://github.com/anonimov94/linumeRT/pull/163#issuecomment-6401257406), [docs/design/SKIN_SYSTEM_ROADMAP.md](../design/SKIN_SYSTEM_ROADMAP.md), [screens/linumert/linumert_skin_navigation.py](../../screens/linumert/linumert_skin_navigation.py), [docs/design/HMI_QTVCP_HOST.md](../design/HMI_QTVCP_HOST.md).
 
