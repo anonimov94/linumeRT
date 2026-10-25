@@ -1343,3 +1343,8 @@ NIEZWERYFIKOWANE NA SPRZĘCIE.
 - Model-Author: Codex. Na polecenie właściciela README pokazuje osobno 39/84 sesji i 19/38 rozszerzeń, także w podziale M0–M6; liczniki generowane z plan.json.
 - Dodano odnośniki do ostatnich odbiorów gotowości, pomiarów X oraz wyniku FAIL pełnej serii M1. Nie zaliczono nieodebranych kryteriów ani sprzętu.
 - Istniejące testy roadmapy, ruff, roadmap --check, diff --check i zachowanie Dla Codex PASS. Bez zmian ISO lub kodu diagnostyki #153.
+
+## ISO — SIGSEGV ekranu przy starcie na laptopie · 2026-10-25 · Claude
+- Model-Author: Claude. Odtworzone w VirtualBox na ISO z PR #156: `qtvcp` kończy się kodem 139 w pętli zdarzeń Qt; backtrace z core dumpu: `dbus_connection_dispatch` → `pthread_mutex_lock` (libdbus, `dbus.mainloop.pyqt5`). Przed awarią log QtVCP: „Desktop Notify not available … ServiceUnknown”.
+- Przyczyna: obraz nie ma demona powiadomień D-Bus (`--apt-recommends false`). To nie GPU ani WebEngine; zmienne programowego GL nie pomagały (potwierdził właściciel).
+- Poprawka: `xfce4-notifyd` w `linumert.list.chroot`. W VM po ręcznej instalacji paczki ekran startuje (JOG, Symulacja). Obraz zbudowany z tą zmianą jeszcze nie sprawdzony. NIEZWERYFIKOWANE NA SPRZĘCIE.
