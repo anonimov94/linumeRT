@@ -1229,3 +1229,9 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
 - Diagnostyka rozwiązuje względną ścieżkę przed zmianą katalogu drivera; 5 testów PASS, ruff PASS.
 - Celowany lokalny LinuxCNC zajęty przez blokadę Claude „neon N4”; nie naruszono jej ani jego procesów. Wymagane końcowe CI.
 - Ograniczenie porównania ramp: równoległe testy Pythona, niekontrolowane obciążenie CPU; wynik nie jest benchmarkiem.
+
+## 2026-10-25 — Claude: sesja 062, odbiór wygenerowanego Plant w LinuxCNC
+Model-Author: Claude. `tests/test_configgen_plant_linuxcnc.py` (marker `linuxcnc`, pod blokadą): `linumert-config build
+--target plant` dla `mill_servo_table` → LinuxCNC 2.9 RIP + serwer Plant (lockstep, lrt_net): włączenie, bazowanie
+wszystkich osi, ruch MDI X50; PASS (13,5 s). Sesja 062 pozostaje `partial` (EtherCAT 063, wrzeciono 064, sprzęt).
+NIEZWERYFIKOWANE NA SPRZĘCIE.
