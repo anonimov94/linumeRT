@@ -15,6 +15,15 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · 2026-10-25. **README #144 i budowa ISO na laptop.**
+README ma nową stronę projektu po polsku, instrukcję Live i generowaną tabelę
+M0–M6. `tools/roadmap.py --check` sprawdza teraz także blok MILESTONES w README;
+po zmianie plan.json generuj wszystkie widoki jak dotąd. 23 testy roadmap/ISO
+bez LinuxCNC PASS, lint i lokalne linki PASS. Licznik nadal uczciwie 39/84.
+Budowa ISO: workflow `40181951376`, źródła opublikowanego main `c028159`;
+nowy README jest osobnym PR i nie zmienia kodu aplikacji w tym obrazie.
+Po sukcesie sprawdzę wydanie i SHA-256, zapiszę dowód. Nie deklaruję boot/RT laptopa.
+
 Model-Author: Codex · 2026-10-25. **Nowe polecenie właściciela: README i ISO na laptop.**
 Zakres `codex/readme-laptop-iso`, osobny checkout `linumeRT-laptop-iso`, baza main
 `c028159` (gotowość napędów #142 scalona). Rezultat: aktualny README na GitHub,

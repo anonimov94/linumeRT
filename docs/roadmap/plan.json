@@ -1703,13 +1703,15 @@
         "078"
       ],
       "status": "acceptance",
-      "progress": "Implementacja ISO istnieje.",
+      "progress": "Implementacja ISO istnieje. Na polecenie właściciela 2026-10-25 odświeżono README i generowaną z rejestru tabelę M0–M6; 23 testy roadmapy/konfiguracji ISO PASS w Debianie. Uruchomiono budowę obrazu do testów laptopa: workflow 40181951376, źródła main c0281596a54a6911b344edf8709edabed8748090. Budowa/publikacja i SHA-256 oczekują weryfikacji; boot/instalacja/RT laptopa pozostają osobnym odbiorem.",
       "remaining": [
         "Zweryfikować obraz main, SHA-256, live/instalację; publikacja ręczna zgodnie z D39."
       ],
       "evidence": [
         "tools/iso/build.sh",
-        ".github/workflows/iso.yml"
+        ".github/workflows/iso.yml",
+        "README.md",
+        "https://github.com/anonimov94/linumeRT/actions/runs/40181951376"
       ]
     },
     {

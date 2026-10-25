@@ -32,6 +32,10 @@ nie każda poprawka musi tworzyć nowe zadanie.
    [spis promptów](../../prompts/README.md), [DONE](../../prompts/DONE.md)
    oraz [grafikę postępu w README](../raporty/postep-sesji.svg). Grafika liczy wyłącznie pierwotne
    sesje ze statusem `done`; `make lint` wykrywa jej nieaktualność.
+   Tabela M0–M6 w głównym README jest generowana między znacznikami
+   `MILESTONES:START` / `MILESTONES:END`. Liczy ukończone sesje i rekordy z otwartymi
+   kryteriami (sesje oraz powiązane rozszerzenia), bez automatycznego zaliczania bramek.
+   Tekst README poza tym blokiem pozostaje redakcyjny; nie usuwaj znaczników.
    Nie edytuj tych widoków ręcznie. HTML działa także lokalnie, bez serwera.
 5. Zapisz wyniki, SHA i ograniczenia w raporcie/dzienniku; dodaj odsyłacz w rejestrze.
    `NASTEPNA_SESJA.md` przechowuje przekazanie i środowisko, nie alternatywną listę statusów.

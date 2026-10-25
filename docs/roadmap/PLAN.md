@@ -943,11 +943,11 @@ Pozostaje: Pełny odbiór 4×4×2, rozdzielczości/dotyk, LinuxCNC/Plant, safety
 
 ### ISO-ACCEPTANCE — Odbiór i publikacja obrazu
 
-**do odbioru**. Implementacja ISO istnieje.
+**do odbioru**. Implementacja ISO istnieje. Na polecenie właściciela 2026-10-25 odświeżono README i generowaną z rejestru tabelę M0–M6; 23 testy roadmapy/konfiguracji ISO PASS w Debianie. Uruchomiono budowę obrazu do testów laptopa: workflow 40181951376, źródła main c0281596a54a6911b344edf8709edabed8748090. Budowa/publikacja i SHA-256 oczekują weryfikacji; boot/instalacja/RT laptopa pozostają osobnym odbiorem.
 
 Pozostaje: Zweryfikować obraz main, SHA-256, live/instalację; publikacja ręczna zgodnie z D39.
 
-Źródła: [tools/iso/build.sh](../../tools/iso/build.sh), [.github/workflows/iso.yml](../../.github/workflows/iso.yml).
+Źródła: [tools/iso/build.sh](../../tools/iso/build.sh), [.github/workflows/iso.yml](../../.github/workflows/iso.yml), [README.md](../../README.md), [PR](https://github.com/anonimov94/linumeRT/actions/runs/40181951376).
 
 ### OD-01 — Macierz Plant nie może przechodzić z nieoczekiwaną kolizją
 
