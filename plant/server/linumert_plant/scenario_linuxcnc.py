@@ -58,6 +58,7 @@ _comp.ready()
 c, s, e = linuxcnc.command(), linuxcnc.stat(), linuxcnc.error_channel()
 out = {"errors": [], "setup_errors": [], "alarms": {}, "line_max": 0}
 T0 = None
+driver_started = time.monotonic()
 def now():
     return 0.0 if T0 is None else time.time() - T0
 def poll():
@@ -67,6 +68,21 @@ def poll():
         if not msg:
             break
         out["errors" if T0 is not None else "setup_errors"].append([round(now(), 3), msg[1]])
+        if T0 is None and plan.get("diagnostics"):
+            # Error-channel receipt time, not the servo cycle that caused the error.
+            # NML and subsequent HAL reads are sequential, never an atomic RT trace.
+            sample = {"elapsed": time.monotonic() - driver_started, "message": msg[1],
+                      "task_state": s.task_state,
+                      "joints": [dict(joint) for joint in s.joint]}
+            try:
+                sample["link"] = {name: hal.get_value("lrt-net.0." + name) for name in
+                                  ("sent", "received", "missed", "reply-age", "plant-lost",
+                                   "plant-late", "plant-jitter-us", "connected")}
+            except Exception as exc:
+                sample["hal_read_error"] = str(exc)
+            sample["read_finished"] = time.monotonic() - driver_started
+            out.setdefault("setup_samples", []).append(sample)
+            print("SETUP_ERROR " + json.dumps(sample), flush=True)
 def wait(cond, timeout):
     t = time.time()
     while time.time() - t < timeout:
@@ -79,8 +95,20 @@ def machine_on():
     c.state(linuxcnc.STATE_ESTOP_RESET)
     wait(lambda: s.task_state == linuxcnc.STATE_ESTOP_RESET, 5)
     c.state(linuxcnc.STATE_ON)
-    return wait(lambda: s.task_state == linuxcnc.STATE_ON, 5)
+    if not wait(lambda: s.task_state == linuxcnc.STATE_ON, 5):
+        return False
+    # STATE_ON is a LinuxCNC command state, not CiA402 OPERATION ENABLED.
+    # Plant drives can still be in NOT_READY while their boot timer is running.
+    ready = wait(lambda: s.task_state == linuxcnc.STATE_ON and all(
+        hal.get_value("lrt-cia402.%d.enabled" % j) for j in range(4)), 5)
+    if plan.get("diagnostics"):
+        sample = {"elapsed": time.monotonic() - driver_started, "ready": ready}
+        out.setdefault("drive_ready", []).append(sample)
+        print("DRIVES_READY " + json.dumps(sample), flush=True)
+    return ready
 out["machine_on"] = machine_on()
+if not out["machine_on"]:
+    raise RuntimeError("napędy niegotowe do bazowania (CiA402 OPERATION ENABLED)")
 c.mode(linuxcnc.MODE_MANUAL); c.wait_complete()
 c.teleop_enable(0); c.wait_complete()
 for attempt in range(2):  # WSL bez RT: pojedynczy błąd nadążania przy bazowaniu — ponów raz
@@ -89,6 +117,8 @@ for attempt in range(2):  # WSL bez RT: pojedynczy błąd nadążania przy bazow
     if out["homed"]:
         break
     out["machine_on"] = machine_on()
+    if not out["machine_on"]:
+        raise RuntimeError("napędy niegotowe do ponownego bazowania (CiA402 OPERATION ENABLED)")
     c.mode(linuxcnc.MODE_MANUAL); c.wait_complete()
     c.teleop_enable(0); c.wait_complete()
 c.teleop_enable(1); c.wait_complete()
@@ -318,9 +348,17 @@ def run_linuxcnc(scen: Scenario, port: int | None = None) -> ScenarioResult:
             "diagnostics": bool(os.environ.get("LINUMERT_SCENARIO_DIAGNOSTICS")),
             "error_alarms": {str(k): v for k, v in ERROR_ALARMS.items()},
             "program": str(scen.program) if scen.program else ""}
+    servo_trace = bool(os.environ.get("LINUMERT_SCENARIO_SERVO_TRACE"))
+    if servo_trace and not plan["diagnostics"]:
+        raise ScenarioError("servo trace wymaga LINUMERT_SCENARIO_DIAGNOSTICS (trwałe dowody)")
     with _workspace() as work:
         (work / "plan.json").write_text(json.dumps(plan, indent=2), encoding="utf-8")
         ini = _prepare(work, port)
+        trace = None
+        if servo_trace:
+            from .scenario_trace import Recorder
+
+            trace = Recorder(root, ini, work, rip)
         (work / "driver.py").write_text(DRIVER, encoding="utf-8")
         report = work / "plant_report.json"
         with rip.installed_modules(root, work, ("lrt_net", "lrt_cia402", "lrt_estop2")):
@@ -347,6 +385,8 @@ def run_linuxcnc(scen: Scenario, port: int | None = None) -> ScenarioResult:
                     output = ((work / "linuxcnc.log").read_text(encoding="utf-8")
                               if capture is not None else cnc.stdout.read())
                     raise ScenarioError("LinuxCNC nie wystartował: " + (output or ""))
+                if trace is not None:
+                    trace.start()
                 driver = subprocess.Popen(
                     ["bash", "-c", f"source '{root}/scripts/rip-environment' >/dev/null && "
                      f"exec python3 {work / 'driver.py'} '{json.dumps(plan)}'"],
@@ -378,8 +418,12 @@ def run_linuxcnc(scen: Scenario, port: int | None = None) -> ScenarioResult:
             finally:
                 if driver is not None and driver.poll() is None:
                     driver.kill()
-                rip.stop_linuxcnc(cnc, root, ini.parent)
-                plant.close()
+                try:
+                    if trace is not None:
+                        trace.stop()
+                finally:
+                    rip.stop_linuxcnc(cnc, root, ini.parent)
+                    plant.close()
                 if capture is not None:
                     capture.join(timeout=5)
                     (work / "driver.log").write_text("\n".join(lines) + "\n", encoding="utf-8")
