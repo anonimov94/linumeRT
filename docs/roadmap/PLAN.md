@@ -323,9 +323,9 @@ Pozostaje: Odbiór ręczny VM/Plant pozostaje otwarty; automatyczny P0 PASS nie 
 
 ### 028 — Kompozycja ekranu głównego
 
-**częściowe**. Powłoka HMI i nawigacja działają. Na polecenie właściciela 2026-10-25 priorytet przeniesiono na M2. Uzupełniono wymaganą specyfikację funkcjonalną SPEC_EKRAN_GLOWNY.md: dane operatora, hierarchia, brak ruchu od nawigacji i macierz dowodów odbioru. To specyfikacja, nie odbiór GUI ani zamknięcie skórek. Odbiór 6ecda95: 111 testów offline PASS, 1 SKIP, istniejący test GUI 45 kroków PASS na 1280×768. Zrzut ujawnił brak yaml w procesie QtVCP i zastępczą tabelę Narzędzia: pełny odbiór nadal otwarty. Samotest rozszerzono o obecność własnych stron tools/cycles, aby nie zaliczał fallbacku.
+**częściowe**. Powłoka HMI i nawigacja działają. Na polecenie właściciela 2026-10-25 priorytet przeniesiono na M2. Uzupełniono wymaganą specyfikację funkcjonalną SPEC_EKRAN_GLOWNY.md: dane operatora, hierarchia, brak ruchu od nawigacji i macierz dowodów odbioru. To specyfikacja, nie odbiór GUI ani zamknięcie skórek. Odbiór 6ecda95: 111 testów offline PASS, 1 SKIP, istniejący test GUI 45 kroków PASS na 1280×768. Zrzut ujawnił brak yaml w procesie QtVCP i zastępczą tabelę Narzędzia: pełny odbiór nadal otwarty. Samotest rozszerzono o obecność własnych stron tools/cycles, aby nie zaliczał fallbacku. Kolejny odbiór ad17702 po cnc_environment(): tools/cycles=true i 45 kroków PASS. PageStack e2dde87 izoluje rozmiar aktywnej strony; regresja Qt i złożenie HMI 2 PASS, ponowny test GUI 45 kroków PASS. Start nadal przewija poziomo; nie potwierdzono pełnego dopasowania 1280×768.
 
-Pozostaje: Pełny odbiór kompozycji i nowych skórek; HMI-02, SKIN-04…06. Poprawne środowisko QtVCP, test obecności własnych stron i wizualny odbiór wszystkich kluczowych podstron 1280×768, bez ukrycia fallbacku.
+Pozostaje: Pełny odbiór kompozycji i nowych skórek; HMI-02, SKIN-04…06. Responsywny układ kart Start/formularzy Narzędzia oraz wizualny i klawiaturowy odbiór kluczowych podstron 1280×768; środowisko QtVCP i obecność własnych stron odebrane osobno.
 
 Źródła: [docs/DZIENNIK.md](../DZIENNIK.md), [docs/design/SPEC_EKRAN_GLOWNY.md](../design/SPEC_EKRAN_GLOWNY.md), [docs/raporty/G2/M2_028_2026-10-25.md](../raporty/G2/M2_028_2026-10-25.md), [prompts/sesja-028.md](../../prompts/sesja-028.md).
 

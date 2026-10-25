@@ -15,6 +15,16 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · 2026-10-25. **#155: środowisko i stos stron odebrane, responsywność nadal otwarta.**
+ad17702: cnc_environment(), 45 kroków GUI PASS, tools/cycles=true, 64,90 s.
+e2dde87: PageStack izoluje minimum aktywnej strony od ukrytego QtDragon;
+test rzeczywistego Qt mała → szeroka → mała oraz złożenie HMI 2 PASS,
+środowisko/raportowanie 4 PASS. GUI ponownie 45 kroków PASS, 60,84 s, strony obecne.
+Nowe hashe/zrzuty w M2_028_2026-10-25_followup.json i raporcie G2.
+Procesy 46208/8453 zakończone, obie własne lease zwolnione, katalogi puste.
+Start nadal przewija poziomo — rozmiary samych kart/formularzy to następny krok.
+Nie zamykam 028 ani nie podwyższam 3/12. Bez zmian ACTION/HAL i bez instalacji bibliotek.
+
 Model-Author: Codex · 2026-10-25. **028: potwierdzony fallback usunięty w odbiorze, korekta układu.**
 Test GUI ad17702 po cnc_environment: 45 kroków PASS, tools/cycles=true, 64,90 s.
 Obie lease Codex/m2-028-gui-59903 zwolnione. Zrzuty Narzędzia/Diagnostyka nadal

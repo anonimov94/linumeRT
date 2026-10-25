@@ -529,3 +529,6 @@ w środowisku wykonującym zrzuty, bez nowych zależności produktu.
 
 ## Odbiór M2 / 028 — 2026-10-25
 - `docs/raporty/G2/M2_028_2026-10-25_start.png` — zrzut LinuxCNC sim + linumeRT/QtVCP pod Xvfb 1280×768, źródła 6ecda95; wykonanie Codex, bez retuszu. Własne zasoby linumeRT i QtDragon/LinuxCNC (GPL-2.0), całość GPL-2.0-or-later. Wynik i ograniczenia w raporcie M2_028_2026-10-25.
+
+## Kolejne zrzuty M2 / 028 — 2026-10-25
+- `docs/raporty/G2/M2_028_2026-10-25_v3_01_start.png`, `docs/raporty/G2/M2_028_2026-10-25_v3_16_obszar_narzedzia.png`, `docs/raporty/G2/M2_028_2026-10-25_v3_19_diagnostyka.png` — wykonanie Codex, LinuxCNC sim + QtVCP pod Xvfb 1280×768, źródła e2dde87, bez retuszu; linumeRT i QtDragon/LinuxCNC, GPL-2.0-or-later. Hashe w raporcie followup JSON.
