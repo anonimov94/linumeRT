@@ -1348,3 +1348,9 @@ NIEZWERYFIKOWANE NA SPRZĘCIE.
 - Model-Author: Claude. Odtworzone w VirtualBox na ISO z PR #156: `qtvcp` kończy się kodem 139 w pętli zdarzeń Qt; backtrace z core dumpu: `dbus_connection_dispatch` → `pthread_mutex_lock` (libdbus, `dbus.mainloop.pyqt5`). Przed awarią log QtVCP: „Desktop Notify not available … ServiceUnknown”.
 - Przyczyna: obraz nie ma demona powiadomień D-Bus (`--apt-recommends false`). To nie GPU ani WebEngine; zmienne programowego GL nie pomagały (potwierdził właściciel).
 - Poprawka: `xfce4-notifyd` w `linumert.list.chroot`. W VM po ręcznej instalacji paczki ekran startuje (JOG, Symulacja). Obraz zbudowany z tą zmianą jeszcze nie sprawdzony. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## 2026-10-25 — Claude: M1, dobór przyspieszeń z budżetu uchybu
+Model-Author: Claude. `tools/tune_accel.py` (moduł `accel_tuning`, 15 testów, w tym na rdzeniu Plant) szuka największego przyspieszenia osi w budżecie uchybu
+0,2 mm bez alarmu i utraty kroków. Wyniki: frezarka X/Y ok. 17 100, Z ok. 5 400 mm/s² (obecnie 1000/1000/500); router krokowy X/Y ok. 3 800, Z ok. 9 400 (granica: utrata kroków,
+wynik Z niemonotoniczny). Raport `docs/raporty/prototypy/M1_ACCEL_TUNING_2026-10-25.md`. machine.yaml i progi bez zmian; seria 10 przebiegów PASS nadal otwarta.
+NIEZWERYFIKOWANE NA SPRZĘCIE.
