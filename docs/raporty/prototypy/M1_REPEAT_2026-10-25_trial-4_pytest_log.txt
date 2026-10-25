@@ -1,0 +1,88 @@
+============================= test session starts ==============================
+platform linux -- Python 3.11.2, pytest-9.1.1, pluggy-1.7.0 -- /home/codex/linumert-m1-runtime-20261024/.venv/bin/python
+cachedir: .pytest_cache
+rootdir: /home/codex/linumert-m1-repeat-20261025
+configfile: pyproject.toml
+plugins: anyio-4.15.1
+collecting ... collected 13 items
+
+tests/test_plant_linuxcnc.py::test_plant_linuxcnc_home_and_move ERROR
+
+==================================== ERRORS ====================================
+_____________ ERROR at setup of test_plant_linuxcnc_home_and_move ______________
+
+tmp_path_factory = TempPathFactory(_given_basetemp=PosixPath('/home/codex/linumert-m1-repeat-20261025/build/repeat/trial-4/tmp'), _trace=...xPath('/home/codex/linumert-m1-repeat-20261025/build/repeat/trial-4/tmp'), _retention_count=3, _retention_policy='all')
+
+    @pytest.fixture(scope="module")
+    def session(tmp_path_factory):
+        """Jedna sesja LinuxCNC + Plant dla wszystkich testów modułu (ok. 90 s)."""
+        root = rip_root()
+        tmp_path = tmp_path_factory.mktemp("plant_cnc")
+        ini = _prepare(tmp_path)
+        (tmp_path / "driver.py").write_text(DRIVER, encoding="utf-8")
+        from linumert.generators.basic import FaceMill
+        from linumert.generators.pockets import PocketCircle, PocketRect
+    
+        programs = []
+        for cls, dims in [(PocketRect, {"width": 20, "height": 16, "rotation": 37,
+                                        "corner_radius": 5}), (PocketCircle, {"diameter": 18})]:
+            path = tmp_path / f"{cls.name}.ngc"
+            path.write_text("S3000 M3\n" + cls().generate_ngc({"depth": 1, "tool_d": 8,
+                                               "cx": 100, "cy": 200,
+                                               "z_top": -20, "safe_z": -15, "feed": 600,
+                                               "plunge": 300, "entry": "helix", "entry_angle": 5,
+                                               "direction": "cw", "wall_allowance": 0.5,
+                                               "floor_allowance": 0.2, "finish": True, **dims},
+                                              path.name))
+            programs.append(str(path))
+        face = tmp_path / "face_mill.ngc"
+        face.write_text("G61\nS3000 M3\n" + FaceMill().generate_ngc({
+            "x0": 100, "y0": 200, "x1": 125, "y1": 220, "depth": 1, "tool_d": 8,
+            "z_top": -20, "safe_z": -15, "feed": 600, "plunge": 300}, face.name))
+        programs.append(str(face))
+        report = tmp_path / "plant_report.json"
+        plant_yaml = CFG / "plant.yaml"  # ścieżka machine względem oryginału
+        with installed_modules(root, tmp_path, ("lrt_net", "lrt_cia402", "lrt_estop2")), \
+                plant_server(plant_yaml, PORT, "--seed", "5", "--report", str(report)):
+            env = {**os.environ, "PATH": f"{ini.parent}:{os.environ.get('PATH', '')}"}
+            cnc = start_linuxcnc(root, ini, env)
+            try:
+                ready = False
+                for _ in range(60):  # LinuxCNC gotowy, gdy halcmd widzi połączenie lrt-net
+                    time.sleep(0.5)
+                    if cnc.poll() is not None:
+                        break
+                    probe = rip_run(root, "halcmd getp lrt-net.0.connected", ini.parent, env=env)
+                    if probe.stdout.strip() == "TRUE":
+                        ready = True
+                        break
+                assert ready, (cnc.stdout.read() if cnc.poll() is not None else "brak połączenia")
+                time.sleep(1.0)
+                run = rip_run(root, f"python3 {tmp_path / 'driver.py'} {' '.join(programs)}",
+                              ini.parent, timeout=420,
+                              env=env)
+                hal = rip_run(root, "halcmd getp lrt-net.0.axis.0.ferror; "
+                              "halcmd getp lrt-net.0.plant-lost; halcmd getp lrt-net.0.bad-frames",
+                              ini.parent, env=env).stdout.split()
+            finally:
+                stop_linuxcnc(cnc, root, ini.parent)
+        line = next((x for x in run.stdout.splitlines() if x.startswith("RESULT ")), None)
+>       assert line, run.stdout + run.stderr
+E       AssertionError: Traceback (most recent call last):
+E           File "/home/codex/linumert-m1-repeat-20261025/build/repeat/trial-4/tmp/plant_cnc0/driver.py", line 57, in <module>
+E             assert wait(lambda: s.interp_state == linuxcnc.INTERP_IDLE and abs(s.current_vel) < 1e-7
+E         AssertionError
+E         
+E       assert None
+
+tests/test_plant_linuxcnc.py:197: AssertionError
+- generated xml file: /home/codex/linumert-m1-repeat-20261025/build/repeat/trial-4/junit.xml -
+=========================== short test summary info ============================
+ERROR tests/test_plant_linuxcnc.py::test_plant_linuxcnc_home_and_move - AssertionError: Traceback (most recent call last):
+    File "/home/codex/linumert-m1-repeat-20261025/build/repeat/trial-4/tmp/plant_cnc0/driver.py", line 57, in <module>
+      assert wait(lambda: s.interp_state == linuxcnc.INTERP_IDLE and abs(s.current_vel) < 1e-7
+  AssertionError
+  
+assert None
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+========================= 1 error in 138.59s (0:02:18) =========================

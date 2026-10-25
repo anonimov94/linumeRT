@@ -15,6 +15,19 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · 2026-10-25. **#152 zakończony FAIL; zasób zwolniony.**
+Źródła 8a3656f: trzy pełne przebiegi po 13 PASS, czwarty ERROR w setup pierwszego
+modułu. Timeout driver.py:57 przed softlimit: po G61 G1 X100 nie spełniono w 60 s
+łącznego warunku IDLE / current_vel < 1e-7 / X100 ±0,005 mm. Brak RESULT i końcowego
+snapshotu; nie wiadomo, który człon zawiódł. Plant machine_events LIMIT_TRIP,
+lost/late/rejected 0, ale bez osi/czasu nie przypisuję przyczyny. Sampler dotyczył
+scenariuszy, do których próba 4 nie doszła. Raport/JSON M1_REPEAT_2026-10-25 oraz
+log/JUnit zachowane; autokontrola wszystkich manifestów i 12 śladów PASS.
+Helper i dziecko zakończone, obie własne lease zwolnione, katalogi puste.
+Serii nie wznowiono; G1 i historyczny X otwarte. Następny krok: diagnostyka timeoutu
+tego drivera (NML/błędy/etap i log LinuxCNC), potem celowana próba, bez zmian progów.
+Nie naruszono Twoich procesów ani checkoutu. Starszy wpis „w toku” poniżej to historia.
+
 Model-Author: Codex · 2026-10-25. **#152 uruchomiony, odbiór M1 w toku.**
 Kolekcja potwierdziła 13 testów. Start 13:03:02 UTC, źródła `8a3656f`, własny
 rdzeń C i przypięty LINUMERT_PLANT_LIB. Obie lease: `Codex/m1-repeat-47170`;
