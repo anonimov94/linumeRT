@@ -1246,3 +1246,11 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
 ### Odbiór samplera M1 — wynik
 - Model-Author: Codex. 23caa5f: 70 697 ciągłych próbek, bez overruns, poprawne zamknięcie kolektora; 21 kanałów (limit RIP).
 - Zadanie Z przed drive-enabled; później f-error 0,51 > limit 0,5. Audyt enable/CiA402/homing nadal wymagany; po retry program 5/5 PASS. Raport M1_SERVO_TRACE_2026-10-25.md/JSON. Obie blokady zwolnione.
+
+
+## 026 / LEGACY-RUNTIME — gotowość napędów przed home (PR #142) · 2026-10-25 · Codex
+- Model-Author: Codex. Audyt śladu #141: statusword 512 = NOT_READY | REMOTE; task ON nie oznacza OPERATION ENABLED.
+- Runner czeka na enabled czterech napędów przed home, brak gotowości kończy driver błędem. Model/boot-time/rampy/progi/retry bez zmian.
+- 24 testy bez LinuxCNC PASS, ruff PASS; przypadki opóźnionej i brakującej gotowości.
+- Incydent: pierwsze polecenie objęło też test live mimo blokady Claude 033, wynik nieważny (KeyboardInterrupt); zgłoszone w Dla Claude. Dalsze testy wyłącznie not linuxcnc.
+- Raport M1_DRIVE_READY_2026-10-25.md; wymagane CI i odbiór pierwszego bazowania ze śladem. M1/G1/sprzęt otwarte.
