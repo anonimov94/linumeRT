@@ -1400,3 +1400,9 @@ NIEZWERYFIKOWANE NA SPRZĘCIE.
 Model-Author: Claude. CI z prawdziwym LinuxCNC (`first_motion`, readiness, sampler) wykazało uchyb X 0,23–0,25 mm > 0,2 przy 17 100 mm/s² (atrapa mastera dawała 0,168).
 Ustawiono frezarkę X/Y 2 000, Z 2 500 mm/s² (lokalnie: 3 testy first_motion PASS, pozostałe testy LinuxCNC PASS); narzędzie dostało `--lag-factor`. Próg nie zmieniony.
 NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## 2026-10-25 — Claude: M2, obszar „Wygląd” w HMI (palety i własne kolory)
+Model-Author: Claude. Prośba właściciela: zmiana kolorystyki działającego HMI. `linumert_appearance.py` (palety z kontraktu skórek, dziesięć ról, tokeny wyliczane,
+walidacja kontrastu WCAG i znaczenia czerwony/zielony/bursztynowy, zapis atomowy JSON), `linumert_appearance_page.py` (paleta, edytor kolorów, podgląd, zapis, reset)
+i integracja w powłoce (nowy obszar na szynie, wczytanie zapisu przy starcie, `apply_tokens`, tło kontenera stron w kolorze motywu). 23 testy, sprawdzone w LinuxCNC pod Xvfb
+(zrzuty `docs/raporty/hmi_appearance/`). Prawdziwe skórki (układy) i widoki rysowane własnym kodem (kolory po restarcie) otwarte. Opis: `docs/user/WYGLAD.md`. NIEZWERYFIKOWANE NA SPRZĘCIE.
