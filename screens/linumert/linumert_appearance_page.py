@@ -8,6 +8,7 @@ i znaczników oraz znaczenie czerwonego/zielonego/bursztynowego muszą zostać z
 """
 
 import linumert_appearance as ap
+from linumert_operator_view import FAMILIES, load_family, save_family
 from linumert_view_helpers import card
 from linumert_view_helpers import label as _label
 from PyQt5 import QtGui, QtWidgets
@@ -24,6 +25,28 @@ class AppearancePage(QtWidgets.QWidget):
         root = QtWidgets.QVBoxLayout(self)
         root.setContentsMargins(16, 16, 16, 16)
         root.setSpacing(12)
+
+        frame, body, _ = card("Widok HMI")
+        self.family_selector = QtWidgets.QComboBox()
+        self.family_selector.setMinimumHeight(44)
+        self.family_selector.setAccessibleName("Rodzina widoku HMI po restarcie")
+        for family in FAMILIES:
+            title = "Dotychczasowy widok" if family == "shell" else family.replace("-", " ").title()
+            self.family_selector.addItem(title, family)
+        self.family_selector.setCurrentIndex(self.family_selector.findData(load_family()))
+        body.addWidget(self.family_selector)
+        self.btn_save_family = QtWidgets.QPushButton("Zapisz widok na następne uruchomienie")
+        self.btn_save_family.setMinimumHeight(44)
+        self.btn_save_family.clicked.connect(self.save_family)
+        body.addWidget(self.btn_save_family)
+        active = getattr(shell, "active_skin", "shell")
+        self.family_status = _label(
+            f"Aktywny widok: {active}. Zmiana obowiązuje po ponownym uruchomieniu HMI. "
+            "Zapis nie przełącza ekranu ani nie restartuje sterowania. "
+            "Jawna zmienna LINUMERT_OPERATOR_SKIN ma pierwszeństwo przed zapisem.", "lrtMuted")
+        self.family_status.setWordWrap(True)
+        body.addWidget(self.family_status)
+        root.addWidget(frame)
 
         frame, body, _ = card("Paleta")
         row = QtWidgets.QHBoxLayout()
@@ -84,6 +107,17 @@ class AppearancePage(QtWidgets.QWidget):
         self.refresh()
 
     # ---- stan -------------------------------------------------------------------------------
+    def save_family(self):
+        try:
+            path = save_family(self.family_selector.currentData())
+        except (OSError, ValueError) as exc:
+            self.family_status.setText(f"Nie zapisano widoku: {exc}")
+            return
+        self.family_status.setText(
+            f"Zapisano: {self.family_selector.currentText()} ({path}). "
+            "Widok zmieni się po ponownym uruchomieniu HMI. "
+            "Jeżeli ustawiono LINUMERT_OPERATOR_SKIN, usuń tę zmienną, aby użyć zapisu.")
+
     def refresh(self) -> None:
         for role, edit in self.edits.items():
             color = self.colors[role]
