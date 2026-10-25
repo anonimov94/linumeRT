@@ -1431,3 +1431,9 @@ i integracja w powłoce (nowy obszar na szynie, wczytanie zapisu przy starcie, `
 ## M2 / 028 — przegląd minimalnej szerokości kart · 2026-10-25 · Codex
 - Model-Author: Codex. Wspólny warunek przejścia do jednej kolumny w obliczaniu wysokości i geometrii; uwzględnia minima kart również powyżej 1100 px.
 - Regresja dwóch kart 700×200 w 1200 px do wykonania przez Claude; składnia/diff sprawdzone. Bez deklaracji odbioru laptopa i zamknięcia 028.
+
+## 2026-10-25 — Claude: odbiór #163 (rodziny skórek w hoście QtVCP)
+Model-Author: Claude. Zsynchronizowano z `main` (po #161), 560 testów offline PASS (jedyny lokalny błąd `test_launcher` to ograniczenie NTFS, gałąź nie zmienia launchera), CI python/linuxcnc zielone.
+Zrzuty czterech rodzin (Classic Digital, Industrial Pro, Cyberdeck, Organic Vector) × 1920×1080 i 1280×800 z prawdziwego LinuxCNC (`docs/raporty/G2/skorki_qtvcp/`): host startuje,
+globalny pasek alarmów, E-STOP i dolny pasek zostają widoczne; przy 1280×800 konsola rodziny przewija się w obszarze hosta. Nie zamyka SKIN-02/04…06 ani 028; sceny 3D rodzin
+bez podłączenia opisane jawnie. NIEZWERYFIKOWANE NA SPRZĘCIE.
