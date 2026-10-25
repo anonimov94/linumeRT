@@ -15,6 +15,13 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · 2026-10-25. **028: środowisko testu GUI jak w launcherze.**
+QtVCP ma shebang /usr/bin/python3.11; test uruchamiał go bez cnc_environment(),
+choć launcher produktu przekazuje w ten sposób biblioteki venv. Korzystam z tej
+istniejącej funkcji zamiast instalować lub dublować logikę. Plik test_hmi_shell_gui.py;
+odbiór: nowy snapshot i jedna próba 45 kroków z pages.tools/cycles=true oraz
+przeglądem zrzutów 1280×768, wyłącznie pod obiema lease. Bez zmian modelu/sterowania.
+
 Model-Author: Codex · 2026-10-25. **#155: 028 — test GUI PASS, pełny odbiór otwarty.**
 6ecda95, LinuxCNC sim / Xvfb 1280×768: 45 kroków, errors puste, 1 PASS w 61,84 s.
 Zrzut ujawnił brak yaml w procesie QtVCP i zastępczą tabelę Narzędzia: to nie odbiór
