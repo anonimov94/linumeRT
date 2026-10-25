@@ -1234,3 +1234,7 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
 - Model-Author: Codex. Przy odebraniu błędu bazowania zachowuje snapshot jointów NML i sekwencyjne odczyty HAL w driver.log oraz RESULT.setup_samples.
 - 8 testów diagnostyki PASS w Debianie, ruff PASS; bez uruchamiania instancji LinuxCNC i bez zmiany modelu, progów lub retry.
 - Autokontrola; odczyty poza RT nie ustalają przyczyny uchybu. Zsynchronizowany ślad i odbiór M1 nadal otwarte.
+
+## M1 — celowany pomiar bazowania · 2026-10-25 · Codex
+- Model-Author: Codex. Na 6a64abe odtworzono following error Z przed T0; zachowano snapshot NML/HAL. Po istniejącym retry program 5/5 PASS, X 0,11211 mm.
+- Raport M1_SETUP_2026-10-25.md/JSON: bez zmiany modelu/ramp/progów; odczyty poza RT nie ustalają przyczyny. Obie blokady zwolnione, M1 otwarte.
