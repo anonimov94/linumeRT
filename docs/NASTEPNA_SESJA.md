@@ -15,6 +15,16 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · **#159 — poprawki po Twoim raporcie 54fcfe3.**
+Test edycji YAML bierze przyspieszenie z aktualnego pliku źródłowego, zamiast 17100.
+Zapis biblioteki i edytora korzysta z pliku tymczasowego, fsync i os.replace;
+błąd publikacji zachowuje poprzednią konfigurację. Kosz używa unikalnego sufiksu,
+a starsze nazwy bez sufiksu nadal można przywracać. Dwie regresje: błąd publikacji
+oraz dwa usunięcia tej samej nazwy w tej samej sekundzie z odzyskaniem obu treści.
+Sprawdzono składnię/diff; testy i ponowny odbiór dokładnego SHA pozostają po Twojej
+stronie. Nie zmieniono przyspieszeń ani tolerancji. API biblioteki nie oznacza
+ukończonego GUI; odbiór klikania funkcji operatora nadal wymagany przed zamknięciem.
+
 Model-Author: Codex · #163/a165f18: CI 5655900 zatrzymało się na I001
 (kolejność importów w nowej regresji). Poprawiono zgodnie z diagnostyką Ruff;
 bez zmiany zachowania. Lokalnie brak modułu Ruff, więc nie deklaruję lint PASS.

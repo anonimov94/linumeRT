@@ -55,7 +55,9 @@ def test_template_real_mapping(library):  # REQ-VD-06
     assert all(p["driver"] == "stepgen" for p in axes)
     assert axes[0]["scale"] == pytest.approx(640.0, rel=1e-4)
     assert axes[0]["timing_ns"]["dirsetup"] >= axes[0]["timing_ns"]["steplen"]
-    assert axes[0]["max_velocity"] == 200 and axes[3]["max_acceleration"] == 500
+    # oczekiwane przyspieszenia pochodzą z machine.yaml (zestrojone narzędziem tune_accel)
+    expected = {a.letter: a.max_acceleration for a in plant_cfg.axes}
+    assert axes[0]["max_velocity"] == 200 and axes[3]["max_acceleration"] == expected["Z"]
     spindle = plan[-1]
     assert spindle["driver"] == "vfd_modbus" and spindle["vfd"]["protocol"] == "hy_vfd"
     assert spindle["device"] == "/dev/ttyUSB0" and spindle["max_rpm"] == 24000
