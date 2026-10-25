@@ -64,6 +64,11 @@ class OperatorSkin(SkinMonitor):
             self.present(None, f"{type(exc).__name__}: {exc}"[:300])
             for button in self.controls.values():
                 button.setEnabled(False)
+            for view in self.workspace.findChildren(ProgramView):
+                view.findChild(QtWidgets.QPlainTextEdit).clear()
+                caption = view.findChild(QtWidgets.QLabel)
+                caption.setText("Status niedostępny" if self.preferences.language == "pl"
+                                else "Status unavailable")
             return
         self.present(sample, "qtvcp-status")
         gates = model.gates(self.shell.s)
@@ -72,6 +77,10 @@ class OperatorSkin(SkinMonitor):
             button.setEnabled(not sample.estop and sample.enabled and gates[target].enabled
                               and self.shell.buttons[target].isEnabled())
             button.setToolTip(gates[target].reason)
+        self.controls["feed_hold"].setText(
+            ("Wznów" if self.shell.s.interp == "paused" else "Wstrzymaj")
+            if self.preferences.language == "pl" else
+            ("Resume" if self.shell.s.interp == "paused" else "Feed hold"))
         # Show the controller's current source window, never the offline example.
         source = model.program_window(self.shell.program_lines, self.shell.s.line)
         for view in self.workspace.findChildren(ProgramView):

@@ -166,6 +166,7 @@ def test_loader_process_reports_missing_interpreter_honestly(app):
 
 
 def test_monitor_follows_live_program_and_survives_skin_switch(app):
+    from dataclasses import replace
     import json
     import time
     from types import SimpleNamespace
@@ -208,6 +209,21 @@ def test_monitor_follows_live_program_and_survives_skin_switch(app):
         window.select("theme", "classic-turquoise")
         assert window.shared["path_scene"] is scene    # zmiana skórki/motywu: ta sama scena
         assert window.viewports["toolpath"].scene is scene
+        # A new program must remove the previous geometry before asynchronous loading.
+        sample = replace(sample, file="/nc/next.ngc", acquired_at=time.monotonic())
+        window.present(sample, "sampled")
+        assert "path_scene" not in window.shared
+        assert "toolpath" not in window.viewports
+        window.program_loaded(tp, "next.ngc · test")
+        window.present(None, "read-failed")
+        assert window.program_file is None
+        assert "path_scene" not in window.shared
+        assert "toolpath" not in window.viewports
+        requests = []
+        window.loader.start = requests.append
+        window.present(replace(sample, acquired_at=time.monotonic()), "recovered")
+        assert requests == ["/nc/next.ngc"]
+        window.program_loaded(tp, "next.ngc · test")
         status.file = ""
         window.present(decode_sample(json.dumps(read_status(status, api)).encode(),
                                      time.monotonic()), "sampled")
