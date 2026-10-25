@@ -54,3 +54,25 @@ def test_missing_drive_readiness_stops_before_homing(monkeypatch):
     assert 5 <= clock.value < 5.1
     assert namespace["out"]["machine_on"] is False
     assert namespace["out"]["drive_ready"][-1]["ready"] is False
+
+
+@pytest.mark.linuxcnc
+def test_first_home_after_drive_readiness(monkeypatch, tmp_path):  # REQ-VM-07
+    """CI/externally locked LinuxCNC only; never part of the local unit subset."""
+    from linumert_plant.scenario import load_scenario
+    from linumert_plant.scenario_linuxcnc import ROOT, run_linuxcnc
+    from rip_support import leftovers, rip_root
+
+    rip_root()
+    if leftovers():
+        pytest.skip("another LinuxCNC process is active")
+    evidence = tmp_path / "evidence"
+    monkeypatch.setenv("LINUMERT_SCENARIO_DIAGNOSTICS", str(evidence))
+    result = run_linuxcnc(load_scenario(ROOT / "plant/scenarios/first_motion.yaml"), port=47827)
+    assert result.passed, result.criteria
+    log = next(evidence.glob("lrt_scen_*/driver.log")).read_text(encoding="utf-8")
+    out = json.loads(next(line[7:] for line in log.splitlines() if line.startswith("RESULT ")))
+    assert out["machine_on"] and out["homed"]
+    assert out["setup_errors"] == []
+    assert len(out["drive_ready"]) == 1, "first homing must succeed without retry"
+    assert out["drive_ready"][0]["ready"] is True
