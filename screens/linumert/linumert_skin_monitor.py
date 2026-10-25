@@ -226,12 +226,22 @@ class SkinMonitor(SkinPreview):
 
     def follow_program(self, sample):
         """Classic × Neon: aktywny plik → wczytanie ścieżki; linia i pozycja → następny punkt."""
-        if sample is None or not hasattr(self, "loader"):
+        if not hasattr(self, "loader"):
+            return
+        if sample is None:
+            self.loader.stop()
+            self.program_file = None  # Recovery must reload even the same filename.
+            if "path_scene" in self.shared:
+                self.program_loaded(None, "Status niedostępny · ścieżka nieaktualna")
             return
         if sample.file != self.program_file:
             self.program_file = sample.file
+            self.loader.stop()
             if sample.file:
                 self.shared["program_note"] = "Wczytywanie ścieżki programu…"
+                # Never follow program B's line/position on program A's geometry.
+                if "path_scene" in self.shared:
+                    self.program_loaded(None, self.shared["program_note"])
                 self.loader.start(sample.file)
             else:
                 self.loader.stop()

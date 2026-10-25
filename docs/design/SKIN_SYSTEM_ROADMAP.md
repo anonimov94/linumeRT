@@ -85,3 +85,10 @@ To część SKIN-02, nie zamknięcie SKIN-02 ani SKIN-04…06. Pozostają: host 
 ze stale dostępnymi globalnymi akcjami i alarmami, zweryfikowany kanał poleceń
 oraz kontrola świeżości producenta (API stat 2.9 nie udostępnia heartbeat).
 Monitor nie daje zgody na przełączanie produkcyjnego HMI ani na ruch.
+
+## Uściślenie właściciela — 2026-10-25
+Model-Author: Codex. Skórki są luźną inspiracją. Nie wymagamy odwzorowania obrazów
+1:1 ani budowy czterech kompletnych aplikacji jako warunku bieżącej integracji.
+Wybieramy układ według zadań operatora; zachowujemy charakter wizualny i użyteczne
+komponenty. Codex implementuje HMI, Claude pomaga testami na laptopie EndeavourOS.
+To uściślenie ma pierwszeństwo przed historycznym kryterium czterech aplikacji wyżej.

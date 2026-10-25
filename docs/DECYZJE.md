@@ -323,6 +323,22 @@ do rozliczenia, bez uruchamiania kolejnej pełnej serii. Claude/033 i ISO pozost
 odrębnymi zakresami. Pierwszy krok 028: wymagana specyfikacja funkcjonalna i audyt
 już istniejącej powłoki, potem brakujące funkcje i rzeczywisty odbiór GUI.
 
+## Kierunek HMI i pomoc Claude — decyzja właściciela 2026-10-25
+Model-Author: Codex. Skórki i obrazy są luźną inspiracją wizualną, a nie kontraktem
+wiernego odwzorowania czterech kompozycji. Docelowe HMI rozwijamy według pracy
+operatora, wykorzystując ich charakter i istniejące moduły prezentacji. Codex
+implementuje integrację z QtVCP; Claude pomaga odbiorem na laptopie EndeavourOS.
+Nie zastępuje to istniejących wymagań funkcjonalnych, kanału ACTION/STATUS ani HAL.
+Historyczne kryterium „cztery faktycznie odrębne aplikacje” z roadmapy skórek
+nie jest warunkiem bieżącego zlecenia. Nie zaliczamy nieodebranego zakresu.
+
+## Kontynuacja po odbiorze Claude — polecenie właściciela 2026-10-25
+Model-Author: Codex. Po pomyślnych testach Claude na laptopie EndeavourOS kontynuujemy
+rozwój HMI w M2; ukończone zmiany na końcu scalamy przez PR po wymaganych kontrolach.
+Nie trzeba ponownie pytać o zgodę na kontynuację lub scalenie. Wynik dotyczy konkretnego
+SHA i zakresu; zielone CI nie zastępuje odbioru Claude. Błędy poprawiamy i ponawiamy
+odbiór przed scaleniem. Skórki pozostają luźną inspiracją wizualną.
+
 ## Skórki HMI: odrębny wygląd i główny ekran holograficzny — decyzja właściciela 2026-10-25
 Model-Author: Claude. Po odbiorze #163 (2ae9103) właściciel potwierdził działanie selektora
 widoku i zażądał: (1) wyraźnie odmiennego wyglądu zakładek każdej z czterech rodzin skórek,
@@ -331,3 +347,11 @@ a pod spodem leżą prostokątne podglądy symulacji obróbki detalu (z narzędz
 z widokiem na maszynę. Wpisane jako rozszerzenie HMI-OWNER-SKINS sesji 028; nie zmienia
 kolejności M2 ani nie otwiera osobnej roadmapy. Kierunek wizualny nie oznacza kopiowania
 cudzych znaków i grafik (WYTYCZNE_IP.md). Prowadzi Codex (D32); Claude odbiera zrzutami.
+
+## Dopracowanie otwartych gałęzi — właściciel 2026-10-25
+Model-Author: Codex. Właściciel polecił kolejno dopracować wszystkie otwarte gałęzie,
+zaczynając od jednej i dopiero potem przechodząc do następnej. Bieżący zakres:
+#163 HMI, zależny #161, #160 raport ISO oraz #159 biblioteka maszyn.
+Każdy zakres otrzymuje przegląd i poprawki konkretnych problemów; testy laptopa
+nadal wykonuje Claude. Oczekiwanie na odbiór nie oznacza zakończenia ani zgody
+na scalenie nieodebranego SHA. Historyczne lokalne gałęzie nie są kasowane.
