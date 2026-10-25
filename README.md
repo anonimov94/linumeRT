@@ -22,8 +22,15 @@ Własny interfejs, podgląd detalu i ścieżki oraz Plant — model maszyny do b
 
 ![Symulacja obróbki w ekranie linumeRT](docs/raporty/hmi_sym/demo_po_obrobce.png)
 
-Rzeczywisty zrzut HMI z LinuxCNC, 23.10.2026 — nie makieta.
+Rzeczywisty zrzut HMI z LinuxCNC 2.9, 25.10.2026 (po obróbce programu demonstracyjnego, 673,8 cm³ materiału) — nie makieta.
 [Przebieg demonstracyjny i dowody](docs/raporty/hmi_sym/README.md).
+
+### Classic × Neon: podgląd programu na żywo
+
+![Monitor Classic × Neon obok LinuxCNC w AUTO](docs/raporty/neon/02-srodek.png)
+
+Monitor tylko do odczytu obok LinuxCNC (sim) w trybie AUTO, program wstrzymany w środku: numer linii, następny punkt
+i DTG (2,432 mm) oraz pozycja DRO zgadzają się z danymi LinuxCNC. Pomiary i opis: [raport odbioru](docs/raporty/neon/README.md).
 
 ## Co oferuje linumeRT
 
@@ -145,7 +152,7 @@ Wcześniejsze bramki pozostają priorytetem rozwoju. Automatyczne testy, odbiór
 | Cyberdeck | Organic Vector |
 | ![Podgląd Cyberdeck](docs/raporty/hmi_sym/skin_cyberdeck.png) | ![Podgląd Organic Vector](docs/raporty/hmi_sym/skin_organic-vector.png) |
 
-Zrzuty podglądów offline z 23.10.2026. [Raport i odtworzenie galerii](docs/raporty/hmi_sym/README.md) · [Specyfikacja skórek](docs/design/SKIN_SYSTEM_ROADMAP.md).
+Zrzuty podglądów offline z 25.10.2026 (`skin-check.py`, 160 kombinacji PASS). [Raport i odtworzenie galerii](docs/raporty/hmi_sym/README.md) · [Specyfikacja skórek](docs/design/SKIN_SYSTEM_ROADMAP.md).
 
 </details>
 

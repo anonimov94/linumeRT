@@ -1,6 +1,6 @@
 # Bieżące zrzuty HMI i podglądu skórek
 
-Model-Author: Codex · 2026-10-23. Kod ekranu: main `8483b81` (PR #89).
+Model-Author: Codex · 2026-10-23; odświeżone: Claude · 2026-10-25 (kod: main `fcc0580`).
 Obrazy są zrzutami uruchomionych aplikacji, bez montażu grafik koncepcyjnych.
 
 ## Cztery osobne ekrany skórek — offline
@@ -8,7 +8,7 @@ Obrazy są zrzutami uruchomionych aplikacji, bez montażu grafik koncepcyjnych.
 Kod ekranów: `ea2fc39`, 2026-10-23. Osobne moduły i klasy: Classic Digital,
 Industrial Pro, Cyberdeck, Organic Vector. Każdy ma własną kompozycję paneli,
 konsolę i geometrię kontrolek. Wspólne są komponenty odczytu, palety i renderer.
-Zrzuty 1920×1080 / English, wykonane bez retuszu przez `tools/dev/skin-check.py`.
+Zrzuty 1920×1080 / English, wykonane bez retuszu przez `tools/dev/skin-check.py` (stan 2026-10-25, WSL Debian 12, Xvfb, Mesa llvmpipe).
 Classic/Organic: Classic Turquoise; Industrial: Reactor Green; Cyberdeck: Ion Blue.
 Skórka, paleta i język pozostają niezależnymi ustawieniami.
 
@@ -50,9 +50,9 @@ integracja stanu i poleceń QtVCP pozostają dalszym etapem.
 
 ## Symulacja obróbki — aktualny ekran operatora
 
-Nowe ujęcia z 2026-10-23, Debian 12/LinuxCNC 2.9.10, osobny kontener i Xvfb,
-okno 1920×1080. UI z main `8483b81`; program demonstracyjny po poprawce komentarza
-`8675777`. Bez montażu, retuszu lub zastępowania widoku bitmapą wzorcową.
+Ujęcia z 2026-10-25, Debian 12 (WSL)/LinuxCNC 2.9 RIP bez kontenera, Xvfb 1920×1080 (okno
+HMI 1700×1080, przycięte do okna). UI z main `fcc0580`. Bez montażu, retuszu lub
+zastępowania widoku bitmapą wzorcową.
 
 | Przebieg | Zrzut |
 |:--|:--|
@@ -60,21 +60,22 @@ okno 1920×1080. UI z main `8483b81`; program demonstracyjny po poprawce komenta
 | Po całym programie, łącznie z ostatnim narzędziem T11 | ![Demo po obróbce](demo_po_obrobce.png) |
 | Diagnostyka K-302, bez odebrania stanu ON przez symulację | ![Diagnostyka K-302](kolizja_k302.png) |
 
-[Wynik przebiegu w JSON](wynik-2026-10-23.json) potwierdza bazowanie, działanie
+[Wynik przebiegu w JSON](wynik-2026-10-25.json) potwierdza bazowanie, działanie
 procesu symulacji, ukończenie demo bez kolizji, ubytek materiału i oczekiwane K-302.
 Końcowe narzędzie T11 oraz bezczynny interpreter są warunkiem zaliczenia demo.
 Podczas odświeżania wykryto zagnieżdżony komentarz przy operacji M4: poprzedni
 skrypt błędnie zaliczał przedwcześnie przerwany program. Poprawiono komentarz,
 wzmocniono kontrolę ukończenia i dodano test leksera dla obu dostarczonych programów.
 
-Odtworzenie:
+Odtworzenie w kontenerze: `tools/dev/sim-e2e.sh`. Bez kontenera (WSL/Debian z LinuxCNC RIP,
+bez uprawnień roota):
 
 ```sh
-tools/dev/sim-e2e.sh
+bash tools/dev/sim-e2e-rip.sh build/sim-e2e
 ```
 
 Wyniki i kolejne klatki: `build/sim-e2e/`. Do galerii wybrano ujęcie podczas
-programu, `02_po_demo.png` i `03_kolizja.png`; okno rozciągnięto do 1920×1080.
+programu, `02_po_demo.png` i `03_kolizja.png`; okno HMI ma 1700×1080 (`qtvcp -g 1920x1080`, bez menedżera okien).
 Konfiguracja testowa jest kopiowana do `/tmp` wewnątrz kontenera i używa
 `HMI_ESTOP_BYPASS=1` wyłącznie dla automatycznej próby bez operatora; konfiguracja
 operatora pozostaje bez zmian. Test nie korzysta z fizycznej obrabiarki.

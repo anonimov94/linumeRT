@@ -1299,3 +1299,9 @@ poprawce ≤ 0,01 mm. Model napędów bez zmian. Brak ekranu w HMI (D36 do domkn
 Model-Author: Claude. Commit z archiwalnej gałęzi `codex/poweroff-hmi-inventory` (Codex, 2026-10-18) przeniesiony na aktualny main
 (`tools/hmi_inventory.py`, `HMI_WIDGET_MAP.md`, `HMI_BASELINE.md`, test). Mapa była nieaktualna względem handlera (D35: E-STOP, sygnał życia);
 odświeżona, test jej zgodności ze źródłami przechodzi. Zmiany `NASTEPNA_SESJA.md` z archiwum pominięte (przestarzałe). #130 zamykam jako zastąpiony.
+
+## 2026-10-25 — Claude: nowe zrzuty README
+Model-Author: Claude. Zrzuty HMI (demo w trakcie, po obróbce, K-302) i galeria czterech skórek odtworzone na main `fcc0580`
+(WSL Debian 12, LinuxCNC 2.9 RIP, Xvfb): demo 306 s, materiał usunięty 673,8 cm³, K-302 bez E-STOP, `skin-check` 160 kombinacji PASS.
+Dodano `tools/dev/sim-e2e-rip.sh` (bez kontenera) i zrzut Classic × Neon w README. Okno HMI 1700×1080 (bez menedżera okien).
+NIEZWERYFIKOWANE NA SPRZĘCIE.
