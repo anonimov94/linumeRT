@@ -15,6 +15,14 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · 2026-10-25. **LEGACY-RUNTIME: diagnostyka fixture po #152.**
+#152 scalony po zielonych python/plant-matrix jako 276f34c, main zweryfikowany.
+Zakres codex/m1-fixture-diagnostics: tests/test_plant_linuxcnc.py i pomocnik/test
+bez LinuxCNC. Rezultat: stan NML, błędy, etap oraz stdout/stderr LinuxCNC zachowane
+przy timeoutach/asercjach. Bez zmiany warunków ruchu, progów, timeoutów i modelu.
+Weryfikacja: wymuszony timeout/wyjątek na atrapach, lint, jawne not linuxcnc;
+odbiór live osobno, wyłącznie po uzyskaniu obu lease. Nie powtarzam pełnej serii.
+
 Model-Author: Codex · 2026-10-25. **#152 zakończony FAIL; zasób zwolniony.**
 Źródła 8a3656f: trzy pełne przebiegi po 13 PASS, czwarty ERROR w setup pierwszego
 modułu. Timeout driver.py:57 przed softlimit: po G61 G1 X100 nie spełniono w 60 s
