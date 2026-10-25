@@ -63,6 +63,28 @@ def test_completed_extension_does_not_close_parent_or_gate(plan):
     assert next(s for s in plan['sessions'] if s['id'] == '038')['gate'] == 'open'
 
 
+def test_readme_tracks_registry_without_replacing_editorial_text(plan):
+    text = f'Introduction\n{roadmap.README_START}\nstale\n{roadmap.README_END}\nDownload ISO'
+    result = roadmap.readme_milestones(plan, text)
+    assert result.startswith('Introduction\n') and result.endswith('\nDownload ISO')
+    assert 'stale' not in result
+    assert '8/8' in result
+    plan['sessions'][0]['status'] = 'partial'
+    plan['sessions'][0]['remaining'] = ['acceptance still open']
+    updated = roadmap.readme_milestones(plan, result)
+    assert updated != result and '7/8' in updated
+    assert 'nie oznacza zaliczenia bramki' in updated
+    assert roadmap.readme_milestones(plan, updated) == updated
+
+
+@pytest.mark.parametrize('text', ['', roadmap.README_START,
+                                roadmap.README_END + roadmap.README_START,
+                                roadmap.README_START * 2 + roadmap.README_END])
+def test_readme_marker_errors_are_explicit(plan, text):
+    with pytest.raises(ValueError):
+        roadmap.readme_milestones(plan, text)
+
+
 def test_prompt_change_is_detected_and_html_script_is_not_injectable(plan, tmp_path):
     prompt = tmp_path / 'prompts/sesja-001.md'
     prompt.parent.mkdir()
@@ -70,6 +92,7 @@ def test_prompt_change_is_detected_and_html_script_is_not_injectable(plan, tmp_p
     template = tmp_path / 'docs/roadmap/template.html'
     template.parent.mkdir(parents=True)
     template.write_text(roadmap.MARKER)
+    (tmp_path / 'README.md').write_text(roadmap.README_START + '\n' + roadmap.README_END)
     plan['sessions'] = plan['sessions'][:1]
     plan['extensions'] = []
     page = roadmap.outputs(plan, tmp_path)['docs/roadmap/index.html']
