@@ -1254,3 +1254,7 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
 - 24 testy bez LinuxCNC PASS, ruff PASS; przypadki opóźnionej i brakującej gotowości.
 - Incydent: pierwsze polecenie objęło też test live mimo blokady Claude 033, wynik nieważny (KeyboardInterrupt); zgłoszone w Dla Claude. Dalsze testy wyłącznie not linuxcnc.
 - Raport M1_DRIVE_READY_2026-10-25.md; wymagane CI i odbiór pierwszego bazowania ze śladem. M1/G1/sprzęt otwarte.
+
+## M1 — odbiór gotowości w CI · 2026-10-25 · Codex
+- Model-Author: Codex. d223909: LinuxCNC job 121128248228 SUCCESS, 147 live PASS, w tym pierwsze bazowanie bez retry i setup_errors oraz sampler.
+- #141/#142 scalone, zdalny main c028159 zweryfikowany. Nieważny lokalny incydent zachowany w raporcie; historyczny X, pełna seria i G1 nadal otwarte.
