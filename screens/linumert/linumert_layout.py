@@ -6,6 +6,62 @@ Model-Author: Codex. Presentation only; no CNC actions or state changes.
 from PyQt5 import QtCore, QtWidgets
 
 
+class CardColumns(QtWidgets.QGridLayout):
+    """Keep two cards side by side only when both fit comfortably."""
+
+    def __init__(self, parent, cards, breakpoint=1100):
+        super().__init__(parent)
+        self.cards = tuple(cards)
+        self.breakpoint = breakpoint
+        self._stacked = None
+        self.setContentsMargins(16, 16, 16, 16)
+        self.setSpacing(16)
+        self._arrange(True)
+
+    def _arrange(self, stacked):
+        if stacked == self._stacked:
+            return
+        self._stacked = stacked
+        for card in self.cards:
+            self.removeWidget(card)
+        for index, card in enumerate(self.cards):
+            self.addWidget(card, index if stacked else 0, 0 if stacked else index)
+        self.setColumnStretch(0, 1 if stacked else 3)
+        self.setColumnStretch(1, 0 if stacked else 2)
+
+    def minimumSize(self):  # noqa: N802 - Qt virtual method
+        size = super().minimumSize()
+        margins = self.contentsMargins()
+        width = max(max(card.minimumWidth(), card.minimumSizeHint().width())
+                    for card in self.cards)
+        size.setWidth(width + margins.left() + margins.right())
+        size.setHeight(max(max(card.minimumHeight(), card.minimumSizeHint().height())
+                           for card in self.cards) + margins.top() + margins.bottom())
+        return size
+
+    def hasHeightForWidth(self):  # noqa: N802 - Qt virtual method
+        return True
+
+    def heightForWidth(self, width):  # noqa: N802 - Qt virtual method
+        margins = self.contentsMargins()
+        if not self._needs_stack(width):
+            return super().heightForWidth(width)
+        heights = [max(card.minimumHeight(), card.minimumSizeHint().height(),
+                       card.heightForWidth(width - margins.left() - margins.right()))
+                   for card in self.cards]
+        return sum(heights) + self.spacing() + margins.top() + margins.bottom()
+
+    def _needs_stack(self, available):
+        margins = self.contentsMargins()
+        width = sum(max(card.minimumWidth(), card.minimumSizeHint().width())
+                    for card in self.cards) + self.spacing() + margins.left() + margins.right()
+        return available < max(self.breakpoint, width)
+
+    def setGeometry(self, rect):  # noqa: N802 - Qt virtual method
+        self._arrange(self._needs_stack(rect.width()))
+        super().setGeometry(rect)
+
+
 class PageStack(QtWidgets.QStackedWidget):
     """Hidden classic widgets must not impose their minimum on every HMI page."""
 
