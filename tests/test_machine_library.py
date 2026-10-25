@@ -138,8 +138,11 @@ def test_activate_switches_machine_and_reverts_on_error(env) -> None:
 def test_yaml_text_edit_any_parameter_validated_and_versioned(env) -> None:
     client, machines, _ = env
     text = client.get("/api/machine/text").json()["text"]
-    assert "max_acceleration: 17100" in text
-    edited = text.replace("max_acceleration: 17100", "max_acceleration: 12345", 1)
+    original = yaml.safe_load(MILL.read_text(encoding="utf-8"))
+    data = yaml.safe_load(text)
+    assert data["axes"][0]["max_acceleration"] == original["axes"][0]["max_acceleration"]
+    data["axes"][0]["max_acceleration"] = 12345
+    edited = yaml.safe_dump(data, sort_keys=False)
     assert client.post("/api/machine/text/validate", json={"text": edited}).json()["errors"] == []
     assert client.post("/api/machine/text/validate", json={"text": "to: [nie yaml"}
                        ).json()["errors"]
@@ -153,3 +156,45 @@ def test_yaml_text_edit_any_parameter_validated_and_versioned(env) -> None:
     assert data["axes"][0]["max_acceleration"] == 12345
     # dodanie nowej osi / napędu to zwykła edycja YAML (każdy parametr, także listy)
     assert len(data["axes"]) == 3 and data["drives"]
+
+
+# REQ-VM-12
+def test_trash_preserves_two_deletions_with_same_name_and_timestamp(env, monkeypatch):
+    from linumert_plant.panel import machine_library
+
+    client, machines, _ = env
+    monkeypatch.setattr(machine_library.time, "strftime", lambda *args: "20261025_190000")
+    for name in ("first", "second"):
+        client.post("/api/machines/clone", json={"file": MILL.name, "name": "copy"})
+        path = machines / "copy.yaml"
+        data = yaml.safe_load(path.read_text(encoding="utf-8"))
+        data["machine"]["name"] = name
+        path.write_text(yaml.safe_dump(data), encoding="utf-8")
+        assert client.post("/api/machines/delete", json={"file": "copy.yaml"}).status_code == 200
+    trash = client.get("/api/machines").json()["trash"]
+    assert len(trash) == 2
+    recovered = set()
+    for item in trash:
+        assert client.post("/api/machines/restore", json={"file": item["file"]}).status_code == 200
+        recovered.add(yaml.safe_load((machines / "copy.yaml").read_text(encoding="utf-8"))[
+            "machine"]["name"])
+        (machines / "copy.yaml").unlink()
+    assert recovered == {"first", "second"}
+
+
+# REQ-VM-11
+def test_failed_atomic_publish_retains_previous_configuration(tmp_path, monkeypatch):
+    from linumert_plant.panel import editor
+
+    path = tmp_path / "machine.yaml"
+    path.write_text("previous", encoding="utf-8")
+
+    def fail(source, target):
+        assert Path(source).read_text(encoding="utf-8") == "replacement"
+        raise OSError("publication refused")
+
+    monkeypatch.setattr(editor.os, "replace", fail)
+    with pytest.raises(OSError, match="publication refused"):
+        editor.atomic_write_text(path, "replacement")
+    assert path.read_text(encoding="utf-8") == "previous"
+    assert list(tmp_path.iterdir()) == [path]
