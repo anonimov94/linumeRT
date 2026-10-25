@@ -13,7 +13,7 @@ axes:
     hardstops: {min: {position: -2}, max: {position: 602}}
     home_sensor: {shared_with: limit_min}
     max_velocity: 200
-    max_acceleration: 1000
+    max_acceleration: 3820
     homing: {method: switch, direction: -1, search_speed: 40, latch_speed: 4, order: 1}
   - letter: Y
     drives: [drv_y1, drv_y2]
@@ -25,7 +25,7 @@ axes:
     hardstops: {min: {position: -2}, max: {position: 902}}
     home_sensor: {shared_with: limit_min}
     max_velocity: 200
-    max_acceleration: 1000
+    max_acceleration: 3820
     homing: {method: switch, direction: -1, search_speed: 40, latch_speed: 4, order: 1, gantry_square: true}
     gantry_max_skew: 0.5
   - letter: Z
@@ -37,7 +37,7 @@ axes:
     hardstops: {max: {position: 2}}
     home_sensor: {shared_with: limit_max}
     max_velocity: 80
-    max_acceleration: 500
+    max_acceleration: 9440
     homing: {method: switch, direction: 1, search_speed: 20, latch_speed: 2, order: 0}
 drives:
   - {id: drv_x, template: stepper_nema23_3nm}

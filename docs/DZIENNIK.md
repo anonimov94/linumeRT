@@ -1383,3 +1383,10 @@ Model-Author: Claude. `tools/tune_accel.py` (moduł `accel_tuning`, 15 testów, 
 0,2 mm bez alarmu i utraty kroków. Wyniki: frezarka X/Y ok. 17 100, Z ok. 5 400 mm/s² (obecnie 1000/1000/500); router krokowy X/Y ok. 3 800, Z ok. 9 400 (granica: utrata kroków,
 wynik Z niemonotoniczny). Raport `docs/raporty/prototypy/M1_ACCEL_TUNING_2026-10-25.md`. machine.yaml i progi bez zmian; seria 10 przebiegów PASS nadal otwarta.
 NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## 2026-10-25 — Claude: przyspieszenia z doboru w machine.yaml i biblioteka maszyn (API)
+Model-Author: Claude. Na polecenie właściciela wpisano wyniki `tune_accel` do `config/machines/mill_servo_table.yaml`, `plant/scenarios/machines/mill_servo_table_y2.yaml`
+(X/Y 17100, Z 5400) i `config/machines/router_gantry_steppers.yaml` (X/Y 3820, Z 9440) oraz do ręcznych INI Plant (golden generatora). Scenariusze `heavy_table_live`
+i `edit_reload` dostały stały ruch porównawczy (`accel: 1000`), test niezależności od `substeps` — przyspieszenia referencyjne. Dodano `panel/machine_library.py` i endpointy
+(`/api/machines*`, `/api/machine/text*`): kopia, zmiana nazwy, kosz z przywracaniem, aktywacja, edycja YAML (każdy parametr, listy osi i napędów); 22 testy. Interfejs w panelu
+i seria 10 przebiegów M1 otwarte. NIEZWERYFIKOWANE NA SPRZĘCIE.
