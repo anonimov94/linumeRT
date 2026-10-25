@@ -67,3 +67,25 @@ def test_cards_reflow_without_recreating_fields_or_losing_keyboard_focus():
             assert all(card.geometry().right() < window.width() for card in cards)
     finally:
         window.close()
+
+
+def test_card_height_accounts_for_minimum_width_above_breakpoint():
+    os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+    QtWidgets = pytest.importorskip("PyQt5.QtWidgets")
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "screens/linumert"))
+    from linumert_layout import CardColumns
+
+    app = QtWidgets.QApplication.instance() or QtWidgets.QApplication([])
+    window = QtWidgets.QWidget()
+    cards = [QtWidgets.QWidget(), QtWidgets.QWidget()]
+    for card in cards:
+        card.setMinimumSize(700, 200)
+    layout = CardColumns(window, cards)
+    window.resize(1600, 600)
+    window.show()
+    app.processEvents()
+    try:
+        # 1200 exceeds the nominal breakpoint, but two 700px cards cannot fit.
+        assert layout.heightForWidth(1200) >= 200 + 200 + 16 + 32
+    finally:
+        window.close()
