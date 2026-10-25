@@ -19,7 +19,8 @@ Model-Author: Codex · 2026-10-25. **Właściciel: poprawiona próba software GL
 Odpowiedź na polecenie bez --safe (faulthandler + Mesa software + xcb_glx):
 „Nadal się zamyka”. Nie powtarzać tego pytania ani nie uznawać GL za przyczynę.
 W Downloads nadal tylko pierwotne raporty z 14:18 UTC, bez nowego tracebacku.
-Następny wymagany dowód: nowy linuxcnc.report lub ~/linuxcnc_debug.txt z tej próby.
+Historyczny brak tracebacku pozostaje odnotowany. Aktualny krok: odbiór nowego ISO
+z xfce4-notifyd po diagnozie Claude w VM; SHA obrazu i raport przy ponownej awarii.
 Zakres codex/m2-iso-crash-trace: zapisać negatywną próbę i rozróżnić wersje ISO;
 nie wprowadzać kolejnej spekulatywnej poprawki. Dotychczasowe #153/#155/#156 już
 scalone do main; to nie odbiór startu laptopa. Odbiór M2/ISO pozostaje partial.

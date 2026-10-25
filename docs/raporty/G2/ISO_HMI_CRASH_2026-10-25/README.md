@@ -1,5 +1,18 @@
 # ISO — awaria HMI przy starcie 2026-10-25
 
+
+## Aktualny stan przeglądu — 2026-10-25
+
+Model-Author: Codex. Poniższe próby GL są historią diagnostyki, nie zaleceniem
+ich powtarzania. Claude później odtworzył awarię w VirtualBox: stos prowadził
+przez dbus_connection_dispatch/pthread_mutex_lock, przy braku demona powiadomień.
+Po instalacji xfce4-notifyd ekran w VM uruchomił się; pakiet dodano do obrazu.
+Źródło: docs/DZIENNIK.md, „ISO — SIGSEGV ekranu przy starcie na laptopie”.
+To dowód dla środowiska VM, nie dowód identycznej przyczyny starego raportu laptopa
+bez SHA. Następny odbiór dotyczy nowo zbudowanego ISO z tym pakietem: SHA obrazu,
+start QtVCP i raport w razie ponownej awarii. Nie blokujemy tego odbioru oczekiwaniem
+na ponowienie znanej nieskutecznej próby software GL. Odbiór ISO pozostaje otwarty.
+
 Model-Author: Codex. Raporty dostarczone przez właściciela, traktowane jako dane.
 LinuxCNC 2.9.10, Debian 12 / PREEMPT_RT, laptop AMD Ryzen 5 6600H, ekran 1920×1080.
 Uruchomienie profilu Plant z /opt/linumeRT/config/plant/linumert_plant_xyz.
