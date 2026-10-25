@@ -23,10 +23,8 @@ def channels() -> list[tuple[str, str, str, str | None]]:
                 for kind in ("pos-cmd", "pos-fb")]
         out += [(f"j{j}.{kind}", typ, f"trace.j{j}.{kind}", f"joint.{j}.{kind}")
                 for kind, typ in (("f-error", "f"), ("f-error-lim", "f"), ("f-errored", "b"))]
-        out += [(f"j{j}.enable", "b", f"linumert.j{j}.enable", None),
-                (f"j{j}.drive-enabled", "b", f"trace.j{j}.drive-enabled",
+        out += [(f"j{j}.drive-enabled", "b", f"trace.j{j}.drive-enabled",
                  f"lrt-cia402.{j}.enabled"),
-                (f"j{j}.cw", "u", f"lrt.j{j}.cw", None),
                 (f"j{j}.sw", "u", f"lrt.j{j}.sw", None),
                 (f"j{j}.drive-ferror", "f", f"trace.j{j}.drive-ferror",
                  f"lrt-net.0.axis.{j}.ferror")]
@@ -39,6 +37,8 @@ def channels() -> list[tuple[str, str, str, str | None]]:
 def prepare(ini: Path) -> None:
     """Append the sampler after every existing HALFILE; leave control nets intact."""
     pins = channels()
+    if len(pins) > 21:  # LinuxCNC 2.9 HAL_STREAM_MAX_PINS
+        raise ValueError("sampler supports at most 21 channels")
     lines = ["# Model-Author: Codex. Diagnostic inputs only; end of servo-thread.",
              f"loadrt sampler depth=65536 cfg={''.join(c[1] for c in pins)}"]
     for i, (_, _, signal, source) in enumerate(pins):

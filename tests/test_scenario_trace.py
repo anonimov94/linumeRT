@@ -21,6 +21,7 @@ def test_sampler_appended_after_control_files_and_uses_existing_nets(tmp_path):
     assert "lrt-cia402.3.enabled => sampler.0.pin." in hal
     assert not any(line.startswith(("sets ", "setp ")) for line in hal.splitlines())
     assert len({c[0] for c in channels()}) == len(channels())
+    assert len(channels()) <= 21
 
 
 def _row(number):
