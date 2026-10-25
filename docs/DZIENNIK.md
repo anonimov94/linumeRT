@@ -1401,6 +1401,13 @@ Model-Author: Claude. CI z prawdziwym LinuxCNC (`first_motion`, readiness, sampl
 Ustawiono frezarkę X/Y 2 000, Z 2 500 mm/s² (lokalnie: 3 testy first_motion PASS, pozostałe testy LinuxCNC PASS); narzędzie dostało `--lag-factor`. Próg nie zmieniony.
 NIEZWERYFIKOWANE NA SPRZĘCIE.
 
+## M2 / 028 — responsywne karty Start i Narzędzia · 2026-10-25 · Codex
+- Model-Author: Codex. PR #161; adaptacyjne kolumny, zawijanie checklisty, zachowanie formularza/fokusu.
+- 15 testów rzeczywistego Qt PASS: 1280→1920→1280, 800→1600→800, wpis/Tab, samodzielny STL 1200×600.
+- Strażnik IP 10 PASS; bez nowych zależności, zmian ACTION/HAL. Zrzuty i granice: raport G2/M2_RESPONSIVE_2026-10-25.md.
+- Live lokalnie niewykonane: zasób Claude/wyglad zajęty; nie przejmowano. Odbiór CI do rozliczenia.
+- 028 partial, M2 3/12; pozostałe podstrony/stanowisko/sprzęt otwarte. Autokontrola autora.
+
 ## 2026-10-25 — Claude: M2, obszar „Wygląd” w HMI (palety i własne kolory)
 Model-Author: Claude. Prośba właściciela: zmiana kolorystyki działającego HMI. `linumert_appearance.py` (palety z kontraktu skórek, dziesięć ról, tokeny wyliczane,
 walidacja kontrastu WCAG i znaczenia czerwony/zielony/bursztynowy, zapis atomowy JSON), `linumert_appearance_page.py` (paleta, edytor kolorów, podgląd, zapis, reset)
@@ -1412,3 +1419,7 @@ i integracja w powłoce (nowy obszar na szynie, wczytanie zapisu przy starcie, `
 - Atomowa publikacja plików konfiguracji w bibliotece/edytorze; kosz z unikalnym sufiksem i zgodnością starszych nazw.
 - Dodano regresje błędu publikacji i dwóch usunięć w tej samej sekundzie; wykonanie powierzono Claude. Składnia/diff PASS.
 - Bez zmian ramp/progów i bez deklaracji odbioru GUI/sprzętu. Przegląd autora nie zastępuje wymaganych kontroli.
+
+## M2 / 028 — przegląd minimalnej szerokości kart · 2026-10-25 · Codex
+- Model-Author: Codex. Wspólny warunek przejścia do jednej kolumny w obliczaniu wysokości i geometrii; uwzględnia minima kart również powyżej 1100 px.
+- Regresja dwóch kart 700×200 w 1200 px do wykonania przez Claude; składnia/diff sprawdzone. Bez deklaracji odbioru laptopa i zamknięcia 028.
