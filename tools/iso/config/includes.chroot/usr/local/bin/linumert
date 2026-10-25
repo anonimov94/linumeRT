@@ -4,11 +4,56 @@
 #   linumert --plant    # + wirtualna obrabiarka Plant (LRT-NET) i panel http://127.0.0.1:8080/
 #   linumert --monitor  # odrębny monitor skórek, read-only obok uruchomionego LinuxCNC
 #   linumert --neon     # monitor Classic × Neon: detal + maszyna, następny punkt z DTG (read-only)
-# Model-Author: Claude · 2026-10-19. NIEZWERYFIKOWANE NA SPRZĘCIE.
+#   linumert --restart [--plant]  # zatrzymaj działający LinuxCNC/Plant i uruchom od nowa
+#   linumert --stop     # zatrzymaj działający LinuxCNC i Plant
+# Ekran startuje przy logowaniu (autostart), więc kolejne `linumert` bez --restart zgłasza, że już działa.
+# Model-Author: Claude · 2026-10-19; --restart/--stop: 2026-10-25. NIEZWERYFIKOWANE NA SPRZĘCIE.
 set -euo pipefail
 R=/opt/linumeRT
+
+running() {
+    pgrep -x linuxcncsvr >/dev/null || pgrep -x milltask >/dev/null || pgrep -x rtapi_app >/dev/null
+}
+
+stop_all() {
+    pkill -TERM -f 'linumert_plant serve' 2>/dev/null || true
+    pkill -TERM -x linuxcnc 2>/dev/null || true
+    for _ in 1 2 3 4 5 6 7 8 9 10; do running || break; sleep 1; done
+    if running; then
+        halrun -U >/dev/null 2>&1 || true
+        for n in linuxcncsvr milltask io iov2 halui rtapi_app linuxcnc; do pkill -KILL -x "$n" 2>/dev/null || true; done
+        sleep 1
+    fi
+    rm -f /tmp/linuxcnc.lock
+}
+
+restart=0
+mode=""
+for a in "$@"; do
+    case "$a" in
+        --restart) restart=1 ;;
+        --stop) stop_all; printf 'linumeRT zatrzymany.\n'; exit 0 ;;
+        --plant|--monitor|--neon) mode=$a ;;
+        *) printf 'Użycie: linumert [--restart] [--plant|--monitor|--neon] | linumert --stop\n' >&2; exit 2 ;;
+    esac
+done
 cd "$R"
-case "${1:-}" in
+case "$mode" in
+    --monitor|--neon) ;;                    # monitory działają obok LinuxCNC, nie konfliktują
+    *)
+        if running; then
+            if [ "$restart" = 1 ]; then
+                stop_all
+            else
+                printf 'linumeRT/LinuxCNC już działa (start przy logowaniu).\n' >&2
+                printf 'Uruchom od nowa: linumert --restart%s   albo zatrzymaj: linumert --stop\n' \
+                    "${mode:+ $mode}" >&2
+                exit 3
+            fi
+        fi
+        ;;
+esac
+case "$mode" in
     "")
         PYTHONPATH="$R/core" exec /opt/linumert/bin/python -m linumert.machine.launch \
             --expect-profile sim "$R/config/sim/linumert_xyz/linumert_xyz.ini"
@@ -34,9 +79,5 @@ case "${1:-}" in
         (sleep 20; xdg-open http://127.0.0.1:8080/ >/dev/null 2>&1) &
         PYTHONPATH="$R/core" /opt/linumert/bin/python -m linumert.machine.launch \
             --expect-profile plant "$R/$cfg/linumert_plant_xyz.ini"
-        ;;
-    *)
-        printf 'Użycie: linumert [--plant|--monitor|--neon]\n' >&2
-        exit 2
         ;;
 esac

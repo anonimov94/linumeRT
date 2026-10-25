@@ -71,7 +71,7 @@ Obraz **amd64 (Intel/AMD 64-bit)** zawiera Debian 12, jądro PREEMPT_RT, LinuxCN
 2. Sprawdź sumę SHA-256, a następnie zapisz ISO jako obraz na pendrive.
 3. Uruchom laptop z USB i wybierz tryb **Live**. Instalator Calamares jest osobną opcją.
 4. Pulpit loguje się automatycznie. Konto Live: **`linumert`**, hasło **`live`**.
-5. Zacznij od ekranu **linumeRT** i symulatora. Zamknij go przed uruchomieniem **linumeRT + Plant**.
+5. Na pulpicie są skróty: **linumeRT (symulator)**, **linumeRT + Plant**, **linumeRT Monitor Neon** i **linumeRT: zatrzymaj**. Symulator startuje sam po zalogowaniu; skrót Plant sam zatrzymuje go i uruchamia od nowa. Błąd startu pokazuje okno terminala z końcem dziennika.
 
 Weryfikacja w Linuxie, w katalogu pobranych plików:
 
@@ -91,6 +91,16 @@ Get-FileHash .\linumert-*-amd64.iso -Algorithm SHA256
 | linumeRT + Plant | Wirtualna obrabiarka i panel Plant w przeglądarce. |
 | Monitor skórek | Osobny monitor działającego LinuxCNC, tylko odczyt. |
 | Classic × Neon | Monitor detalu i maszyny z podglądem ścieżki, tylko odczyt. |
+
+Z terminala (po zalogowaniu jako `linumert`):
+
+```sh
+linumert --restart          # symulator od nowa
+linumert --restart --plant  # Plant + panel http://127.0.0.1:8080/
+linumert --stop             # zatrzymaj LinuxCNC i Plant
+```
+
+Samo `linumert` przy już działającym symulatorze (start przy logowaniu) kończy się komunikatem, że LinuxCNC już działa; użyj wtedy `--restart`.
 
 Najpierw uruchom symulator lub Plant, potem wybrany monitor. Próbę laptopa warto zacząć od grafiki, klawiatury, sieci, bazowania i krótkiego programu demonstracyjnego.
 

@@ -1309,3 +1309,9 @@ NIEZWERYFIKOWANE NA SPRZĘCIE.
 ## M1 — analiza fazy X offline · 2026-10-25 · Codex
 - Model-Author: Codex. Zachowany ślad #141: f-error odpowiada cmd-fb z poprzedniego końca cyklu, reszta około 0,000001 mm (zgodność liczb CSV, nie dokładność fizyczna). Kolejność sprawdzona w źródle LinuxCNC a33293f.
 - 18 testów analizy/trace PASS, 1 live jawnie deselected; ruff PASS. Bez nowego LinuxCNC i blokad. Analizator odmawia analizy luk, błędnych metadanych i braku ruchu. X historyczny i G1 otwarte.
+
+## 2026-10-25 — Claude: launchery ISO (skróty na pulpicie, restart, okno błędu)
+Model-Author: Claude. Obraz miał tylko wpisy w menu i autostart symulatora, a ponowne `linumert` przy działającym LinuxCNC kończyło się błędem.
+Dodano skróty `/etc/skel/Desktop` (symulator, Plant, monitor Neon, zatrzymaj), `linumert --restart/--stop`, wrapper `linumert-gui` z oknem terminala
+przy błędzie i test w `tests/test_iso.py`. Nie ustalono jeszcze źródła błędów zgłoszonych przez właściciela przy `linumert` (brak treści błędu);
+obraz nie był uruchamiany poza CI. NIEZWERYFIKOWANE NA SPRZĘCIE.

@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=linumeRT + Plant
+Comment=Ekran operatora z wirtualną obrabiarką Plant i panelem http://127.0.0.1:8080/
+Exec=/usr/local/bin/linumert-gui --restart --plant
+Icon=/opt/linumeRT/docs/design/marka/znak.svg
+Terminal=false
+Categories=Engineering;
