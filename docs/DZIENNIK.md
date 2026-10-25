@@ -1266,3 +1266,7 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
 ## M1 — odbiór gotowości w CI · 2026-10-25 · Codex
 - Model-Author: Codex. d223909: LinuxCNC job 121128248228 SUCCESS, 147 live PASS, w tym pierwsze bazowanie bez retry i setup_errors oraz sampler.
 - #141/#142 scalone, zdalny main c028159 zweryfikowany. Nieważny lokalny incydent zachowany w raporcie; historyczny X, pełna seria i G1 nadal otwarte.
+
+## M1 — historyczna baza X · 2026-10-25 · Codex
+- Model-Author: Codex. d643a97: substeps=1, przed #116; obecnie substeps=4. Ancestry, hashe starego checkoutu i niezmienionych plików testu zweryfikowane.
+- Sama zmiana integracji nie ustala przyczyny 0,3 mm; bez live testów, bez zmiany progów/modelu. Raport M1_X_BASELINE_2026-10-25.md/JSON.
