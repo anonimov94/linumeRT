@@ -16,6 +16,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = 'docs/roadmap/plan.json'
 MARKER = '<!-- ROADMAP_DATA -->'
+README_START = '<!-- MILESTONES:START -->'
+README_END = '<!-- MILESTONES:END -->'
 
 
 def validate(plan: dict, root: Path) -> None:
@@ -73,6 +75,37 @@ def summary(plan: dict) -> str:
     counts = Counter(s['status'] for s in plan['sessions'])
     labels = plan['policy']['status_labels']
     return '; '.join(f'{labels[status]}: {counts[status]}' for status in labels)
+
+
+def readme_milestones(plan: dict, text: str) -> str:
+    """Refresh only the marked public summary; counts never certify a gate."""
+    if text.count(README_START) != 1 or text.count(README_END) != 1:
+        raise ValueError('README wymaga jednej pary znaczników MILESTONES')
+    before, _, rest = text.partition(README_START)
+    old, _, after = rest.partition(README_END)
+    if README_START in old or README_END in before:
+        raise ValueError('Niepoprawna kolejność znaczników MILESTONES')
+    done = sum(r['status'] == 'done' for r in plan['sessions'])
+    lines = ['', '<!-- Generowane przez tools/roadmap.py z plan.json. -->', '',
+             f"Stan rejestru: **{plan['updated']} · {done}/{plan['original_count']} "
+             'ukończonych sesji**.', '',
+             '| Kamień | Zakres | Sesje ukończone | Rekordy z otwartymi kryteriami |',
+             '|---|---|---:|---:|']
+    for milestone in plan['milestones']:
+        group = [r for r in plan['sessions'] if r['milestone'] == milestone['id']]
+        ids = {r['id'] for r in group}
+        extensions = [r for r in plan['extensions'] if ids.intersection(r['parents'])]
+        count = sum(r['status'] == 'done' for r in group)
+        remaining = sum(bool(r['remaining']) for r in group + extensions)
+        lines.append(f"| {milestone['id']} | {milestone['name']} | {count}/{len(group)} "
+                     f'| {remaining} |')
+    lines += ['', 'Licznik sesji nie oznacza zaliczenia bramki, odbioru stanowiska ani sprzętu. '
+              'Otwarte kryteria obejmują sesje i powiązane rozszerzenia; jedno rozszerzenie '
+              'może dotyczyć kilku kamieni.', '',
+              '[Pełny plan, kryteria i dowody](docs/roadmap/PLAN.md) · '
+              '[Roadmapa HTML](docs/roadmap/index.html) · '
+              '[Źródłowy rejestr](docs/roadmap/plan.json)', '']
+    return before + README_START + '\n'.join(lines) + README_END + after
 
 
 def table(plan: dict, base: str, *, detailed: bool = False) -> str:
@@ -205,6 +238,7 @@ def outputs(plan: dict, root: Path) -> dict[str, str]:
         raise ValueError('Szablon wymaga dokładnie jednego znacznika danych')
     page = template.replace(MARKER, f'<script id="plan" type="application/json">{encoded}</script>')
     return {'prompts/README.md': readme, 'prompts/DONE.md': done,
+            'README.md': readme_milestones(plan, (root / 'README.md').read_text()),
             'docs/roadmap/PLAN.md': detail, 'docs/roadmap/index.html': page,
             'docs/raporty/postep-sesji.svg': progress_svg(plan)}
 
