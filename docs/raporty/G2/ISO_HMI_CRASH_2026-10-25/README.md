@@ -1,5 +1,24 @@
 # ISO — awaria HMI przy starcie 2026-10-25
 
+
+## Aktualny stan przeglądu — 2026-10-25
+
+Model-Author: Claude. **Przyczyna ustalona w VM: brak pakietu `xfce4-notifyd` w obrazie**
+(SIGSEGV w dbus_connection_dispatch przy powiadomieniach). Poprawka: #157 (scalony,
+`xfce4-notifyd` w `linumert.list.chroot`). Próby software GL poniżej nie były przyczyną.
+Obraz z poprawką jeszcze nie odebrany na laptopie właściciela.
+NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+Model-Author: Codex. Poniższe próby GL są historią diagnostyki, nie zaleceniem
+ich powtarzania. Claude później odtworzył awarię w VirtualBox: stos prowadził
+przez dbus_connection_dispatch/pthread_mutex_lock, przy braku demona powiadomień.
+Po instalacji xfce4-notifyd ekran w VM uruchomił się; pakiet dodano do obrazu.
+Źródło: docs/DZIENNIK.md, „ISO — SIGSEGV ekranu przy starcie na laptopie”.
+To dowód dla środowiska VM, nie dowód identycznej przyczyny starego raportu laptopa
+bez SHA. Następny odbiór dotyczy nowo zbudowanego ISO z tym pakietem: SHA obrazu,
+start QtVCP i raport w razie ponownej awarii. Nie blokujemy tego odbioru oczekiwaniem
+na ponowienie znanej nieskutecznej próby software GL. Odbiór ISO pozostaje otwarty.
+
 Model-Author: Codex. Raporty dostarczone przez właściciela, traktowane jako dane.
 LinuxCNC 2.9.10, Debian 12 / PREEMPT_RT, laptop AMD Ryzen 5 6600H, ekran 1920×1080.
 Uruchomienie profilu Plant z /opt/linumeRT/config/plant/linumert_plant_xyz.
@@ -55,3 +74,20 @@ QT_OPENGL=software QT_XCB_GL_INTEGRATION=xcb_glx linumert
 
 To nie uruchamia drugiego serwera Plant. Wynik laptopa nadal oczekiwany; poprawny
 kontekst Qt pod Xvfb nie dowodzi usunięcia pierwotnego SIGSEGV przy normalnym starcie.
+
+## Wynik próby właściciela: nadal się zamyka
+
+Właściciel odpowiedział na poprawioną próbę bez --safe (software Mesa, xcb_glx,
+faulthandler): **„Nadal się zamyka”**. Korekta integracji GL nie rozwiązała
+zgłoszonego problemu. To nadal wymaga nowego raportu z faulthandler; nie wiadomo,
+czy zakończenie ma ten sam stos co pierwotny SIGSEGV.
+
+W lokalnym Downloads są wyłącznie pierwotne linuxcnc.report/info z 14:18 UTC;
+nie traktujemy ich jako nowego wyniku. Wymagany plik z ISO właściciela:
+~/linuxcnc_debug.txt lub nowy linuxcnc.report po tej próbie. Bez ponownego pytania
+czy software GL uruchamia ekran — ten wynik już otrzymano.
+
+#156 jest scalony jako 6dc700f, a #153/#155 są również w main. Dostępny obraz
+iso-20261025-6dc700f nie jest automatycznie obrazem testowanym wcześniej przez
+właściciela; brak SHA w przesłanym raporcie. Żadne scalenie ani zielone CI nie
+stanowi potwierdzenia startu na jego laptopie.
