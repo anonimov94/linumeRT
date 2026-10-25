@@ -57,6 +57,60 @@ Pliki: docs/design/SPEC_EKRAN_GLOWNY.md, rejestr i raport 028; weryfikacja istni
 testami offline, IP guard, roadmap --check, a live wyłącznie pod obiema lease.
 Nie dubluję Twoich prac 033 ani ISO. #153 tylko do rozliczenia, bez nowej serii M1.
 
+Model-Author: Codex · 2026-10-25. **#153: odbiór diagnostyki w CI potwierdzony.**
+a78a2f1, run40199421896/job121187251141 SUCCESS: 151 live PASS. Fixture
+home_and_move PASS 14:06:35 UTC z wymaganym JSON/stage complete/brakiem snapshot_error.
+Raport/rejestr rozliczone; wcześniejsza lokalna próba bez JSON nadal nieważna.
+To wyłącznie domknięcie rozpoczętej poprawki, bez nowej serii i bez zamknięcia M1/G1.
+Priorytet właściciela nadal M2 i awaria startu ISO (#156); nie ruszam zakresu Claude.
+
+Model-Author: Codex · 2026-10-25. **#153: lokalny odbiór diagnostyki niezaliczony; poprawka wypchnięta.**
+110e7d6: jeden istniejący test ruchu PASS, lecz autokontrola wykryła brak JSON:
+atexit nie miał __file__. Log z wyjątkiem i hashe zachowane w raporcie
+M1_FIXTURE_DIAGNOSTICS_2026-10-25.md/JSON. Konsola LinuxCNC tej próby pusta.
+Obie lease Codex/m1-fixture-diagnostics-58277 zwolnione, proces zakończony.
+Poprawka c217745 zapamiętuje ścieżkę sys.argv[0] przed wyjściem i wymaga JSON
+w fixture; test offline usuwa __file__, 3 PASS i ruff PASS. Bez zmiany ruchu/progów.
+Draft #153 oczekuje rzeczywistego odbioru poprawki i zielonego CI właściwego HEAD;
+nie scalać na podstawie PASS starej wersji. Pełna seria M1 nadal FAIL, nie wznowiona.
+
+Model-Author: Codex · 2026-10-25. **#153: zapis diagnostyki gotowy do odbioru.**
+Driver fixture zapisuje etap i stan NML/błędy przy timeoutach oraz przez atexit
+również przy asercji; stdout/stderr drivera i scalony log LinuxCNC trafiają do tmp.
+Trzy testy offline wymuszają timeout/asercję, błąd NML i odbiór logu: PASS;
+ruff i diff --check PASS, jawne not linuxcnc. Brak zmian progów/timeoutów/ruchu.
+Następnie jeden celowany odbiór istniejącej fixture pod obiema lease, bez pełnej serii.
+
+Model-Author: Codex · 2026-10-25. **LEGACY-RUNTIME: diagnostyka fixture po #152.**
+#152 scalony po zielonych python/plant-matrix jako 276f34c, main zweryfikowany.
+Zakres codex/m1-fixture-diagnostics: tests/test_plant_linuxcnc.py i pomocnik/test
+bez LinuxCNC. Rezultat: stan NML, błędy, etap oraz stdout/stderr LinuxCNC zachowane
+przy timeoutach/asercjach. Bez zmiany warunków ruchu, progów, timeoutów i modelu.
+Weryfikacja: wymuszony timeout/wyjątek na atrapach, lint, jawne not linuxcnc;
+odbiór live osobno, wyłącznie po uzyskaniu obu lease. Nie powtarzam pełnej serii.
+
+Model-Author: Codex · 2026-10-25. **#156: potwierdzony błąd kontekstu w --safe.**
+Niezależna próba QGLWidget pod Xvfb, bez LinuxCNC: LIBGL_ALWAYS_SOFTWARE=1,
+QT_XCB_GL_INTEGRATION=none → isValid False; xcb_glx → True. QtDragon nadal ma
+GCodeGraphics, więc tryb awaryjny nie może odbierać mu integracji GL.
+Zakres: --safe zachowuje programowe Mesa i podgląd linumeRT 2D, ale używa xcb_glx;
+regresja uruchamia atrapę launchera i rzeczywisty QGLWidget bez CNC: 12 testów ISO PASS. Nie zmieniam
+HAL/modelu ani nie deklaruję przyczyny pierwotnego SIGSEGV. Odbiór laptopa otwarty.
+
+Model-Author: Codex · 2026-10-25. **Nowy blocker właściciela: HMI z ISO SIGSEGV.**
+Właściciel dostarczył linuxcnc.report/info: LinuxCNC 2.9.10, Debian RT6.1,
+QtVCP dla profilu Plant kończy się SIGSEGV podczas startu. Podgląd skórek i serwer
+Plant działają osobno; nie są odbiorem normalnego HMI. Zakres codex/m2-iso-hmi-crash
+w osobnym checkoutcie: zachowanie dowodów i włączenie faulthandler w launcherze,
+bez deklaracji przyczyny GPU i bez zmian HAL/sterowania. Proszę nie dublować poprawki. Właściciel dostał nową próbę bez --safe: jawne
+LINUMERT_NO_GL=1 LIBGL_ALWAYS_SOFTWARE=1 QT_OPENGL=software
+QT_XCB_GL_INTEGRATION=xcb_glx PYTHONFAULTHANDLER=1 linumert; poprzednia prośba
+o stary --safe jest zastąpiona tym poleceniem.
+Poprosiłem właściciela o próbę PYTHONFAULTHANDLER=1 linumert --safe (sam sim).
+Tryb --safe wyłącza pyqtgraph 3D, ale bazowy GCodeGraphics nadal jest widgetem GL;
+sam SIGSEGV bez tracebacku nie ustala przyczyny. Weryfikacja: 11 istniejących testów ISO PASS,
+składnia/shellcheck, raport i zdalny SHA. Draft #156. Odbiór laptopa nadal otwarty.
+
 Model-Author: Codex · 2026-10-25. **Polecenie właściciela: aktualizacja README/postępu.**
 Zakres codex/readme-progress-summary, osobny checkout linumeRT-readme-status-20261025:
 README i jego generator pokazują sesje oraz ukończone rozszerzenia osobno, ostatnie

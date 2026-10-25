@@ -293,6 +293,18 @@ Dowód porównawczy i ograniczenia: `raporty/prototypy/M1_FIRST_MOTION_2026-10-2
 NIEZWERYFIKOWANE NA SPRZĘCIE.
 
 
+## Plant — dobór przyspieszeń z budżetu uchybu · 2026-10-25 · Claude · PROPOZYCJA
+
+Wykonanie decyzji właściciela „Plant — cel strojenia dynamiki”: `tools/tune_accel.py` (moduł
+`linumert_plant.accel_tuning`) dla każdej osi szuka największego `max_acceleration`, przy którym test
+ruchu (bazowanie, szybki przejazd tam i z powrotem) kończy się bez alarmu napędu, bez zgubionych kroków
+i z uchybem osi w **jawnym budżecie** (domyślnie 0,2 mm, jak w `first_motion`). Uchyb z bezwładności
+nie jest błędem; budżet jest tolerancją odbioru, nie zerem. Zalecane przyspieszenie to 0,9 największego
+przechodzącego, sprawdzone osobnym przebiegiem. Wynik dotyczy modelu Plant, nie fizycznej maszyny.
+Bez wygładzania wyjścia modelu i bez zmiany progów scenariuszy; zmienia się tylko dana wejściowa
+`machine.yaml` (z `--write`). Ograniczenie zrywu i filtr tłumiący drgania (input shaping) to osobne,
+późniejsze kroki. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
 ## README i ISO do testów na laptopie · 2026-10-25 · decyzja właściciela
 Model-Author: Codex. Właściciel zlecił nowy README strony repozytorium, aktualizację
 kamieni milowych i nowe ISO do własnego testu na laptopie. To jawny priorytet

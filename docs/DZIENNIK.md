@@ -1339,6 +1339,11 @@ NIEZWERYFIKOWANE NA SPRZĘCIE.
 - Autokontrola JUnit, manifestów 628 plików i 12 śladów; raport M1_REPEAT_2026-10-25.md/JSON oraz surowy log/JUnit. Procesy zakończone, obie lease zwolnione.
 - Kolejny krok: diagnostyka timeoutów drivera pierwszego modułu, potem celowany odbiór. G1 i historyczny X nadal otwarte.
 
+## LEGACY-RUNTIME — diagnostyka fixture · 2026-10-25 · Codex
+- Model-Author: Codex. #152 scalony jako 276f34c. #153 dodaje NML/etap/błędy/timeouty i logi drivera/LinuxCNC, bez zmian ruchu/progów/modelu.
+- 3 testy offline PASS, ruff PASS. Jeden lokalny test ruchu 110e7d6 PASS, ale brak JSON przez __file__ w atexit: odbiór diagnostyki NIEZALICZONY. Dowody zachowane w M1_FIXTURE_DIAGNOSTICS_2026-10-25.
+- Poprawka c217745 zapamiętuje ścieżkę wcześniej i wymaga JSON w fixture; odbiór runtime otwarty. Obie lease zwolnione. Nie wznowiono pełnej serii; G1 nadal otwarte.
+
 ## README — wykonane sesje i rozszerzenia · 2026-10-25 · Codex
 - Model-Author: Codex. Na polecenie właściciela README pokazuje osobno 39/84 sesji i 19/38 rozszerzeń, także w podziale M0–M6; liczniki generowane z plan.json.
 - Dodano odnośniki do ostatnich odbiorów gotowości, pomiarów X oraz wyniku FAIL pełnej serii M1. Nie zaliczono nieodebranych kryteriów ani sprzętu.
@@ -1353,3 +1358,28 @@ NIEZWERYFIKOWANE NA SPRZĘCIE.
 - Model-Author: Codex. Test GUI korzysta z cnc_environment launchera, bez instalacji zależności: ad17702 45 kroków PASS, tools/cycles=true (64,90 s).
 - PageStack e2dde87 izoluje minimum aktywnej strony od ukrytego QtDragon; test Qt/złożenia 2 PASS, środowisko/raportowanie 4 PASS. GUI 45 kroków PASS (60,84 s), strony obecne.
 - Zrzuty nadal pokazują poziome przewijanie Start; responsywne karty/formularze i klawiatura do odbioru. 028 partial, 3/12 bez zmian. Obie lease zwolnione, raport G2 uzupełniony.
+
+## #153 — rozliczenie diagnostyki fixture w CI · 2026-10-25 · Codex
+- Model-Author: Codex. a78a2f1 / run40199421896: 151 live PASS, w tym fixture z wymaganym JSON/stage complete/brakiem snapshot_error. Python/plant-matrix SUCCESS.
+- Rozliczono raport i rejestr. Stara lokalna próba bez JSON pozostaje nieważna; pełna seria M1 i przyczyna LIMIT_TRIP otwarte. Bez ponownego odbioru.
+
+## M2 / ISO — QtVCP SIGSEGV na laptopie właściciela · 2026-10-25 · Codex
+- Model-Author: Codex. Raporty linuxcnc_info.txt/linuxcnc.report potwierdzają SIGSEGV DISPLAY QtVCP w profilu Plant, LinuxCNC 2.9.10. SHA ISO niepodany, przyczyna nieustalona.
+- Podgląd skórek i Plant działają według właściciela; normalne HMI nieodebrane. ISO-ACCEPTANCE wraca z acceptance do partial. Surowe dane/hashe zachowane.
+- #156: faulthandler w launcherze i dokładniejszy opis --safe, 11 istniejących testów ISO PASS. Bez zmian HAL/sterowania i bez deklaracji naprawy laptopa. Próba --safe z tracebackiem oczekuje wyniku właściciela.
+
+## ISO / M2 — kontekst GL w trybie awaryjnym · 2026-10-25 · Codex
+- Model-Author: Codex. Próba rzeczywistego QGLWidget: programowe Mesa + integracja none → kontekst nieważny; xcb_glx → prawidłowy. QtDragon nadal wymaga GL.
+- --safe zachowuje podgląd linumeRT 2D, lecz korzysta z programowego Mesa + xcb_glx, zamiast wyłączać integrację Qt. Regresja uruchamia atrapę launchera i rzeczywisty widget bez CNC.
+- 12 testów ISO PASS, ruff i diff PASS; wynik sprzętowy oczekiwany. To potwierdzona poprawka trybu awaryjnego, nie przypisanie przyczyny pierwotnemu SIGSEGV.
+
+## ISO — SIGSEGV ekranu przy starcie na laptopie · 2026-10-25 · Claude
+- Model-Author: Claude. Odtworzone w VirtualBox na ISO z PR #156: `qtvcp` kończy się kodem 139 w pętli zdarzeń Qt; backtrace z core dumpu: `dbus_connection_dispatch` → `pthread_mutex_lock` (libdbus, `dbus.mainloop.pyqt5`). Przed awarią log QtVCP: „Desktop Notify not available … ServiceUnknown”.
+- Przyczyna: obraz nie ma demona powiadomień D-Bus (`--apt-recommends false`). To nie GPU ani WebEngine; zmienne programowego GL nie pomagały (potwierdził właściciel).
+- Poprawka: `xfce4-notifyd` w `linumert.list.chroot`. W VM po ręcznej instalacji paczki ekran startuje (JOG, Symulacja). Obraz zbudowany z tą zmianą jeszcze nie sprawdzony. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## 2026-10-25 — Claude: M1, dobór przyspieszeń z budżetu uchybu
+Model-Author: Claude. `tools/tune_accel.py` (moduł `accel_tuning`, 15 testów, w tym na rdzeniu Plant) szuka największego przyspieszenia osi w budżecie uchybu
+0,2 mm bez alarmu i utraty kroków. Wyniki: frezarka X/Y ok. 17 100, Z ok. 5 400 mm/s² (obecnie 1000/1000/500); router krokowy X/Y ok. 3 800, Z ok. 9 400 (granica: utrata kroków,
+wynik Z niemonotoniczny). Raport `docs/raporty/prototypy/M1_ACCEL_TUNING_2026-10-25.md`. machine.yaml i progi bez zmian; seria 10 przebiegów PASS nadal otwarta.
+NIEZWERYFIKOWANE NA SPRZĘCIE.
