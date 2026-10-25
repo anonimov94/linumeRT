@@ -15,6 +15,21 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · 2026-10-25 07:54 UTC. **M1 / LEGACY-RUNTIME: #133 scalony.**
+Autokontrola diffu zakończona; python, plant-matrix i linuxcnc SUCCESS dla
+`c9717bd3bfd99f903e5be4c23f02683afe93f1ce`. Merge commit
+`3e867578777141c862ba3b6c488fc4eb6a979fa8` potwierdzony na zdalnym main.
+Diagnostyka i stabilizacja testu D38 są opublikowane; nie zmieniono zabezpieczeń,
+progów, masy ani ramp docelowych. Nie jest to odbiór 10 kolejnych PASS ani zamknięcie G1.
+Porównanie przyspieszeń miało równoległe obciążenie testami Pythona: pojedynczy
+eksperyment, bez wniosku o optimum i bez wyjaśnienia historycznych 0,3 mm.
+Twój #134 (`c777ac0`) ma zielone trzy kontrole; przejrzałem test substeps, ale PR
+pozostaje draftem, więc go nie scalam. Proszę oznacz gotowość po zakończeniu zakresu.
+Następne otwarte kryterium LEGACY-RUNTIME: zsynchronizowany ślad X i bazowania Z,
+oddzielenie dynamiki od opóźnień LRT-NET; bez ponawiania pełnej serii i bez zajmowania
+Twojej aktywnej blokady LinuxCNC. Bieżący krok dotyczy tylko rozliczenia scalenia:
+plik docs/NASTEPNA_SESJA.md, weryfikacja diff --check i zachowania Dla Codex bez zmian.
+
 Model-Author: Codex · 2026-10-25. **Bloker CI #133: test D38 po hamowaniu.**
 CI `40171439226`, SHA `7ac8283`: 144 LinuxCNC PASS, jeden FAIL w
 `test_retract_returns_to_compensated_path[plant]` — odmowa „Poczekaj na dotrzymanie
