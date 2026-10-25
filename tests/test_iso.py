@@ -88,13 +88,24 @@ def test_desktop_shortcuts_and_restart_flags() -> None:
     desk = ISO / "config/includes.chroot/etc/skel/Desktop"
     names = {p.name for p in desk.glob("*.desktop")}
     assert names == {"linumert-sim.desktop", "linumert-plant.desktop", "linumert-neon.desktop",
-                     "linumert-stop.desktop"}
+                     "linumert-stop.desktop", "linumert-panel-plant.desktop"}
     for p in desk.glob("*.desktop"):
         body = p.read_text()
-        assert "Type=Application" in body and "Exec=/usr/local/bin/linumert" in body
+        assert "Type=Application" in body and "Exec=" in body
         assert p.stat().st_mode & 0o111, f"{p.name}: skrót bez prawa wykonania"
     assert "--restart --plant" in (desk / "linumert-plant.desktop").read_text()
     launcher = SCRIPTS[2].read_text()
     assert "--restart" in launcher and "--stop" in launcher and "stop_all" in launcher
     hook = SCRIPTS[1].read_text()
     assert "chmod 755 /etc/skel/Desktop/*.desktop" in hook
+
+
+def test_wifi_and_browser_packages() -> None:
+    """Obraz buduje się bez zalecanych pakietów, więc Wi-Fi i przeglądarka muszą być jawne."""
+    pkgs = {ln.strip() for ln in (ISO / "config/package-lists/linumert.list.chroot").read_text()
+            .splitlines() if ln.strip() and not ln.startswith("#")}
+    assert {"network-manager", "network-manager-gnome", "wpasupplicant", "policykit-1", "rfkill",
+            "firmware-iwlwifi", "firmware-realtek", "firmware-atheros", "firmware-brcm80211",
+            "firmware-misc-nonfree", "firefox-esr"} <= pkgs
+    assert "non-free-firmware" in SCRIPTS[0].read_text()
+    assert "--apt-recommends false" in SCRIPTS[0].read_text()

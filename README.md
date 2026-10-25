@@ -92,6 +92,8 @@ Get-FileHash .\linumert-*-amd64.iso -Algorithm SHA256
 | Monitor skórek | Osobny monitor działającego LinuxCNC, tylko odczyt. |
 | Classic × Neon | Monitor detalu i maszyny z podglądem ścieżki, tylko odczyt. |
 
+**Wi-Fi i przeglądarka:** obraz ma NetworkManager z ikoną sieci w pasku (wybierz sieć i wpisz hasło), sterowniki Wi-Fi Intel, Realtek, Atheros, Broadcom i MediaTek (część `non-free-firmware`) oraz Firefox ESR. Skrót **Panel Plant (przeglądarka)** otwiera `http://127.0.0.1:8080/` po uruchomieniu **linumeRT + Plant**. Dzięki Wi-Fi można doinstalować brakujące pakiety (`sudo apt install …`; hasło użytkownika `live`). Karty Wi-Fi spoza tej listy mogą wymagać innego firmware'u. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
 Z terminala (po zalogowaniu jako `linumert`):
 
 ```sh

@@ -1315,3 +1315,9 @@ Model-Author: Claude. Obraz miał tylko wpisy w menu i autostart symulatora, a p
 Dodano skróty `/etc/skel/Desktop` (symulator, Plant, monitor Neon, zatrzymaj), `linumert --restart/--stop`, wrapper `linumert-gui` z oknem terminala
 przy błędzie i test w `tests/test_iso.py`. Nie ustalono jeszcze źródła błędów zgłoszonych przez właściciela przy `linumert` (brak treści błędu);
 obraz nie był uruchamiany poza CI. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## 2026-10-25 — Claude: Wi-Fi i przeglądarka w ISO
+Model-Author: Claude. Obraz budowany z `--apt-recommends false` miał tylko `network-manager-gnome` (bez demona NetworkManager, wpa_supplicant, polkit i firmware),
+więc Wi-Fi nie mogło działać. Dodano `network-manager`, `wpasupplicant`, `policykit-1`, `iw`, `rfkill`, `wireless-regdb`, firmware (iwlwifi, realtek, atheros,
+brcm80211, misc-nonfree) i `firefox-esr` (+pl) oraz skrót „Panel Plant (przeglądarka)”. Test `tests/test_iso.py` pilnuje listy. Rozmiar obrazu sprawdza workflow
+(limit 2 GiB). Obraz nie był uruchamiany; działanie Wi-Fi zależy od karty. NIEZWERYFIKOWANE NA SPRZĘCIE.
