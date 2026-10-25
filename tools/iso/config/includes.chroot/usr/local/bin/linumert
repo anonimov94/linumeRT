@@ -36,7 +36,7 @@ mode=""
 for a in "$@"; do
     case "$a" in
         --restart) restart=1 ;;
-        --safe) export LINUMERT_NO_GL=1 LIBGL_ALWAYS_SOFTWARE=1 QT_XCB_GL_INTEGRATION=none ;;
+        --safe) export LINUMERT_NO_GL=1 LIBGL_ALWAYS_SOFTWARE=1 QT_OPENGL=software QT_XCB_GL_INTEGRATION=xcb_glx ;;
         --stop) stop_all; printf 'linumeRT zatrzymany.\n'; exit 0 ;;
         --plant|--monitor|--neon) mode=$a ;;
         *) printf 'Użycie: linumert [--restart] [--safe] [--plant|--monitor|--neon] | linumert --stop\n' >&2; exit 2 ;;
