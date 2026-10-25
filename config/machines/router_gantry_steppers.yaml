@@ -37,7 +37,7 @@ axes:
     hardstops: {max: {position: 2}}
     home_sensor: {shared_with: limit_max}
     max_velocity: 80
-    max_acceleration: 9440
+    max_acceleration: 4000
     homing: {method: switch, direction: 1, search_speed: 20, latch_speed: 2, order: 0}
 drives:
   - {id: drv_x, template: stepper_nema23_3nm}
