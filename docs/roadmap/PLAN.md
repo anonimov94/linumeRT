@@ -150,7 +150,7 @@ Nie są kolejnym harmonogramem. Ich status dotyczy tylko wskazanego kroku.
 | ORIGIN-WIZARD | 033, 054 | Kreator zera detalu na przygotówce | częściowe |
 | M6-G43 | 034, 066 | Automatyczna korekta długości narzędzia po M6 | częściowe |
 | PLANT-SUBSTEPS | 049, 063 | Plant: wynik niezależny od podkroków całkowania | ukończone |
-| HMI-OWNER-SKINS | 028 | Odrębny wygląd każdej skórki i główny ekran holograficzny | planowane |
+| HMI-OWNER-SKINS | 028 | Odrębny wygląd każdej skórki i główny ekran holograficzny | częściowe |
 
 ## Postęp, pozostały zakres i dowody
 
@@ -1010,9 +1010,9 @@ Pozostaje: Obciążenie CPU Plant realtime przy 4 podkrokach na VM-B (odbiór w�
 
 ### HMI-OWNER-SKINS — Odrębny wygląd każdej skórki i główny ekran holograficzny
 
-**planowane**. Polecenie właściciela 2026-10-25 po odbiorze #163 (SHA 2ae9103): selektor widoku HMI działa; wybór rodziny nie zmienia jeszcze wyraźnie wyglądu.
+**częściowe**. Polecenie właściciela 2026-10-25 po odbiorze #163 (SHA 2ae9103): selektor widoku HMI działa; wybór rodziny nie zmienia jeszcze wyraźnie wyglądu. 7dc2649: odmienne malowanie geometrii i typografii wspólnej nawigacji każdej rodziny, dopasowanie ram stałych pasków; te same strony i sygnały Qt. Kod po kontroli składni, odbiór wizualny/fokusu/kontrastu powierzony Claude; pełna kompozycja i podglądy nieukończone.
 
 Pozostaje: Każda z rodzin classic-digital, industrial-pro, cyberdeck, organic-vector ma własny, wyraźnie odmienny wygląd zakładek i nawigacji. Główny ekran HMI w stylu sci-fi/cyberdeck: kształty i menu jako nakładka, pod spodem prostokątne podglądy: symulacja obróbki detalu z widocznym narzędziem oraz obok symulacja z widokiem na maszynę. Własne kształty, kolory i nazwy; bez kopiowania cudzych grafik i znaków (docs/prawne/WYTYCZNE_IP.md). Funkcje operatora od początku działają (D36); zwykły widok pozostaje dostępny. Odbiór: zrzuty 4 skórek × 1280×768 i 1920×1080 porównane ze sobą i z makietami; wydajność 3D z pyqtgraph na pulpicie.
 
-Źródła: [PR](https://github.com/anonimov94/linumeRT/pull/163#issuecomment-6401257406), [docs/design/SKIN_SYSTEM_ROADMAP.md](../design/SKIN_SYSTEM_ROADMAP.md).
+Źródła: [PR](https://github.com/anonimov94/linumeRT/pull/163#issuecomment-6401257406), [docs/design/SKIN_SYSTEM_ROADMAP.md](../design/SKIN_SYSTEM_ROADMAP.md), [screens/linumert/linumert_skin_navigation.py](../../screens/linumert/linumert_skin_navigation.py), [docs/design/HMI_QTVCP_HOST.md](../design/HMI_QTVCP_HOST.md).
 

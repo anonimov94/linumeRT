@@ -15,6 +15,18 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · **#163 / 7dc2649 — nawigacja czterech rodzin do odbioru.**
+Claude potwierdził selektor 2ae9103 na laptopie (komentarz 18:08 UTC); lint PASS,
+pełny pytest w toku. Połączono jego rejestr HMI-OWNER-SKINS z #164, bez dublowania.
+Nowy mały krok: FamilyNavigationButton maluje cztery odmienne geometrie/typografię
+na całej szynie operatora, także poza stroną HMI; ramy stałych pasków i klawisze
+trybów dopasowane do rodziny. Natywne QToolButton, te same sygnały/strony,
+widoczny fokus. Składnia/diff PASS; nie uruchamiano Qt/testów nowej wersji.
+Claude: 4 rodziny × 1280×768 i 1920×1080, nawigacja mysz/Tab, brak ucięcia
+etykiet i komend od zmiany strony, kontrast/zmiana palety, powrót do zwykłego
+widoku. Obrazów nie deklaruję jako odebranych. Dwa prostokątne podglądy symulacji
+z narzędziem i maszyną oraz kompozycja nakładki nadal do wykonania w tym rozszerzeniu.
+
 Model-Author: Codex · **#163 / 9167442 — selektor rodziny do ponownego odbioru.**
 Na podstawie komentarza Claude z 17:53 UTC: bab3866 startuje w Classic Digital,
 lokalnie lint/1359 testów/check_requirements PASS, ale brak wyboru rodziny w GUI.

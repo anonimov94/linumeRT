@@ -90,3 +90,20 @@ rzeczywistą rodzinę/DRO/program/konsolę i wrócić do dotychczasowego widoku.
 Sprawdzić błąd zapisu, uszkodzony plik, pierwszeństwo jawnej zmiennej i brak
 przełączenia/komend maszyny podczas zapisu. Parsowanie składni PASS; GUI i testy
 nowej wersji powierzono Claude, bez ponawiania lokalnych prób przez Codex.
+
+
+## Nawigacja rodzin — krok 7dc2649
+
+Po potwierdzeniu selektora 2ae9103 przez Claude dodano odmienne malowanie szyny
+na wszystkich stronach hosta: Classic ma cyfrową typografię i podkreślenie,
+Industrial ramy z gradientem i lampką, Cyberdeck cięte naroża i wersaliki,
+Organic obłe kształty i łuk. Pozostają natywne QToolButton i istniejące połączenia
+nawigacji. Fokus ma własny widoczny obrys. Ramy stałych pasków i promienie klawiszy
+trybu dopasowują się do rodziny; nie zmieniono osobnych selektorów E-STOP/alarmów.
+Paleta nawigacji korzysta z tego samego słownika kolorów co istniejąca powłoka.
+
+Do odbioru Claude: każda rodzina na 1280×768 i 1920×1080, widoczność różnic,
+pełne etykiety i fokus Tab, kliknięcia wszystkich obszarów, zmiana palety i powrót
+do dotychczasowego widoku. Składnia/diff sprawdzone; nowej wersji nie uruchamiano.
+Rozszerzenie HMI-OWNER-SKINS obejmuje również pełną kompozycję nakładki i dwa
+prostokątne podglądy symulacji. Ten krok ich nie implementuje ani nie zalicza.

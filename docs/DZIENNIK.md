@@ -1415,3 +1415,9 @@ i integracja w powłoce (nowy obszar na szynie, wczytanie zapisu przy starcie, `
 - Połączono main/#162; 9167442 dodaje selektor do Wyglądu, cztery rodziny + powrót, niezależny atomowy zapis i komunikat o następnym starcie. Bez przełączania w ruchu/nowych komend.
 - Składnia 4 modułów i diff PASS; odbiór GUI/testy nowego kroku powierzono Claude. Instrukcja i zakres w HMI_QTVCP_HOST.md, #163 nadal draft do odbioru.
 - M2/028 i pełny odbiór czterech rodzin pozostają otwarte. Bez scalenia nieodebranego kodu do main.
+
+## M2 / HMI-OWNER-SKINS — odrębna nawigacja rodzin · 2026-10-25 · Codex
+- Model-Author: Codex. Claude potwierdził selektor 2ae9103. Zachowano jego decyzję/rejestr z #164 przez merge.
+- 7dc2649: cztery warianty malowania szyny nawigacji i ram hosta, natywne przyciski/fokus i te same strony/sygnały; bez zmian ACTION/HAL.
+- Składnia/diff PASS; odbiór 4×2 rozmiary, czytelność, fokus i kolory powierzony Claude. Nowego kodu nie uruchamiano.
+- HMI-OWNER-SKINS partial; pełna nakładka i dwa podglądy symulacji pozostają otwarte. #163 draft, bez scalenia do main przed odbiorem.
