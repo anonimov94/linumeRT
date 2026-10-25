@@ -117,3 +117,16 @@ def test_probe_in_air_must_not_trip_and_missing_shots_fail() -> None:  # REQ-VM-
     # brak zrzutu albo sonda niezadziałana (pozycja sprzed próby) nie jest wynikiem pomiaru
     failed = _failed(_result("probe_z_touchplate", {"z1": _shot(z=-30.0, tripped=False)}))
     assert len(failed) >= 5
+
+
+def test_run_all_without_rip_skips_linuxcnc_only_scenarios() -> None:  # REQ-VM-09
+    """`tools/run_scenario.py` bez listy (CI: make plant-matrix) nie sięga po LinuxCNC RIP."""
+    import subprocess
+    import sys
+
+    out = subprocess.run([sys.executable, str(ROOT / "tools" / "run_scenario.py"), "--no-report"],
+                         capture_output=True, text=True, timeout=300, check=False,
+                         env={"PATH": "/usr/bin:/bin", "LINUXCNC_DIR": "/nonexistent"})
+    assert out.returncode == 0, out.stdout + out.stderr
+    assert "probe_corner" in out.stdout and "probe_z_touchplate" in out.stdout
+    assert "FAIL" not in out.stdout and "brak LinuxCNC RIP" not in out.stderr
