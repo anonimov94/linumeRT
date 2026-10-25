@@ -1409,3 +1409,9 @@ Model-Author: Claude. Prośba właściciela: zmiana kolorystyki działającego H
 walidacja kontrastu WCAG i znaczenia czerwony/zielony/bursztynowy, zapis atomowy JSON), `linumert_appearance_page.py` (paleta, edytor kolorów, podgląd, zapis, reset)
 i integracja w powłoce (nowy obszar na szynie, wczytanie zapisu przy starcie, `apply_tokens`, tło kontenera stron w kolorze motywu). 23 testy, sprawdzone w LinuxCNC pod Xvfb
 (zrzuty `docs/raporty/hmi_appearance/`). Prawdziwe skórki (układy) i widoki rysowane własnym kodem (kolory po restarcie) otwarte. Opis: `docs/user/WYGLAD.md`. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## M2 / SKIN-02 — wybór rodziny z poziomu HMI · 2026-10-25 · Codex
+- Model-Author: Codex. Claude odebrał start Classic Digital/bab3866 na EndeavourOS; lokalne lint, 1359 offline i wymagania PASS. Luka: brak wyboru rodziny w GUI.
+- Połączono main/#162; 9167442 dodaje selektor do Wyglądu, cztery rodziny + powrót, niezależny atomowy zapis i komunikat o następnym starcie. Bez przełączania w ruchu/nowych komend.
+- Składnia 4 modułów i diff PASS; odbiór GUI/testy nowego kroku powierzono Claude. Instrukcja i zakres w HMI_QTVCP_HOST.md, #163 nadal draft do odbioru.
+- M2/028 i pełny odbiór czterech rodzin pozostają otwarte. Bez scalenia nieodebranego kodu do main.

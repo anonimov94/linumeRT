@@ -9,7 +9,9 @@ w działającym hoście QtVCP. Docelową kompozycję rozwijamy według zadań op
 
 ## Co jest zaimplementowane
 
-- Opcjonalny widok HMI w nawigacji, startowo wybrany tylko po ustawieniu zmiennej.
+- Widok HMI wybierany w obszarze Wygląd; zapis jest stosowany przy kolejnym starcie.
+  Przy braku zapisu pozostaje dotychczasowy widok. Zmienna środowiskowa może jawnie
+  nadpisać wybór w odizolowanej próbie odbioru.
 - Stan z istniejącego STATUS QtVCP; bez drugiego procesu odczytu NML.
 - G53 w mm/°, bieżące okno kodu programu i alarm z istniejącej powłoki.
 - Start/Wstrzymaj/Stop przez istniejące przyciski hosta. Ponowny odczyt przed
@@ -19,7 +21,7 @@ w działającym hoście QtVCP. Docelową kompozycję rozwijamy według zadań op
   własnością powłoki. Grzyb wewnątrz inspiracyjnej konsoli jest opisowym wskaźnikiem;
   działający grzyb jest na stałym pasku hosta.
 - Nawigacja nagłówka prowadzi do istniejących stron Program/Narzędzia/Diagnostyka/
-  Konfiguracja/Maszyna, z dotychczasowymi uprawnieniami. Zmiana rodziny wyłącznie
+  Wygląd/Maszyna, z dotychczasowymi uprawnieniami. Konfiguracja pozostaje na szynie hosta. Zmiana rodziny wyłącznie
   przy kolejnym starcie; nie włączono przełączania kompozycji w czasie ruchu.
 - Classic korzysta z istniejącego asynchronicznego loadera ścieżki i sceny Neon.
   Pozostałe niepodłączone sceny zachowują jawny komunikat, bez demonstracyjnej
@@ -29,7 +31,19 @@ w działającym hoście QtVCP. Docelową kompozycję rozwijamy według zadań op
 
 Gałąź `codex/skin-qtvcp-host` zawiera także pomocniczą poprawkę kart z #161.
 Uruchomić w oddzielnym checkoutcie i istniejącym środowisku LinuxCNC, z zachowaniem
-obecnych procedur współdzielonych zasobów. Przykład dla profilu sim:
+obecnych procedur współdzielonych zasobów. Odbiór selektora: uruchomić normalnie poniższym poleceniem, wejść w Wygląd →
+Widok HMI, wybrać rodzinę i zapisać. Zamknąć oraz ponownie uruchomić HMI zgodnie
+z dotychczasową procedurą stanowiska. Zapis sam nie restartuje żadnego procesu.
+
+```sh
+./tools/linumert-start.sh --no-update
+```
+
+Ustawienie jest w `~/.config/linumert/operator-view.json` (osobno od palety), ścieżkę
+można izolować zmienną `LINUMERT_OPERATOR_PREFERENCES`. Niepoprawny/brakujący plik
+zachowuje dotychczasową powłokę. Opcja „Dotychczasowy widok” pozwala do niej wrócić.
+
+Przykład jawnego nadpisania wyboru dla pojedynczej próby sim:
 
 ```sh
 LINUMERT_OPERATOR_SKIN=classic-digital \
@@ -38,7 +52,7 @@ LINUMERT_OPERATOR_THEME=neon-punk \
 ```
 
 Alternatywy rodziny: industrial-pro, cyberdeck, organic-vector. Język jest pobierany
-z INI przez istniejący host. Bez zmiennych launcher zachowuje dotychczasowe działanie.
+z INI przez istniejący host. Bez zmiennej rodziny launcher używa wyboru zapisanego w GUI. Brak wyboru zachowuje powłokę.
 Nie używać `--skin`: ta historyczna opcja uruchamia osobny podgląd/monitor.
 
 ## Zakres odbioru
@@ -61,3 +75,18 @@ Wykonano przegląd kodu i parsowanie składni dwóch zmienionych modułów. Nowe
 nie uruchamiano i nie testowano lokalnie — odbiór powierzony Claude. Nie jest to
 ukończenie SKIN-02/04/05/06 ani sesji 028. Bez nowych zależności. NIEZWERYFIKOWANE
 NA SPRZĘCIE. Nie scalać na podstawie samych wcześniejszych testów pomocniczego układu.
+
+
+## Odbiór Claude i poprawka selektora — 2026-10-25
+
+Komentarz PR #163 z 17:53 UTC: bab3866 startuje na laptopie EndeavourOS w
+Classic Digital; make lint PASS, 1359 testów offline PASS / 110 pominiętych,
+check_requirements PASS. Brak selektora był zgłoszoną luką; pozostałe trzy rodziny
+nie były wtedy odebrane wizualnie. To nie jest pełny odbiór wszystkich funkcji.
+
+Kod 9167442 dodaje selektor w Wyglądzie oraz zapis przy następnym starcie.
+Nowy zakres: wybrać każdą rodzinę z GUI, zapisać, ponownie uruchomić, sprawdzić
+rzeczywistą rodzinę/DRO/program/konsolę i wrócić do dotychczasowego widoku.
+Sprawdzić błąd zapisu, uszkodzony plik, pierwszeństwo jawnej zmiennej i brak
+przełączenia/komend maszyny podczas zapisu. Parsowanie składni PASS; GUI i testy
+nowej wersji powierzono Claude, bez ponawiania lokalnych prób przez Codex.

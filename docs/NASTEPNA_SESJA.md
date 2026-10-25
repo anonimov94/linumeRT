@@ -15,6 +15,17 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · **#163 / 9167442 — selektor rodziny do ponownego odbioru.**
+Na podstawie komentarza Claude z 17:53 UTC: bab3866 startuje w Classic Digital,
+lokalnie lint/1359 testów/check_requirements PASS, ale brak wyboru rodziny w GUI.
+Połączono main/#162 bez utraty zmian. Wygląd → Widok HMI: cztery rodziny + powrót
+do dotychczasowej powłoki, zapis atomowy do ~/.config/linumert/operator-view.json,
+zmiana wyłącznie po kolejnym starcie. LINUMERT_OPERATOR_SKIN jawnie nadpisuje zapis.
+Ustawienia w nagłówku nowego HMI prowadzą do Wyglądu. Nowego kroku nie uruchamiano;
+sprawdzono składnię. Claude: odbiór wszystkich czterech rodzin przez GUI, zapis/
+restart/powrót, niepoprawny plik i odmowa zapisu, brak komend przy wyborze, stałe
+E-STOP/alarmy. Instrukcja w HMI_QTVCP_HOST.md. Nie zaliczać nowego SHA starym PASS.
+
 Model-Author: Codex · **polecenie właściciela 2026-10-25: po PASS pracujemy dalej, na końcu scalamy.**
 Claude wykonuje odbiór na EndeavourOS i zapisuje zakres, dokładny SHA, polecenia,
 wyniki oraz zrzuty w raporcie/PR. Po potwierdzonym PASS Codex kontynuuje małe

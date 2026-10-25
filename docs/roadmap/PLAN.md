@@ -855,7 +855,7 @@ Pozostaje: Rozstrzygnąć propozycję zmiany prezentacji; nie zmienia zamrożone
 
 ### SKIN-02 — Skin API, host i kanały CNC
 
-**częściowe**. Manifesty, kontrola przełączenia i monitor read-only istnieją. N1/Codex: prawdziwy gcode potwierdza posuwy G20/G21 i fizyczne numery linii; naprawiony parameter_file. Demo z T1 M6 ujawnia SIGSEGV w tooldata, pełny odbiór pozostaje otwarty. Opcjonalny host QtVCP de6b06d: istniejące STATUS, przyciski cyklu i globalny tor alarmów/E-STOP; implementacja do odbioru Claude na EndeavourOS. Skórki są luźną inspiracją według uściślenia właściciela 2026-10-25.
+**częściowe**. Manifesty, kontrola przełączenia i monitor read-only istnieją. N1/Codex: prawdziwy gcode potwierdza posuwy G20/G21 i fizyczne numery linii; naprawiony parameter_file. Demo z T1 M6 ujawnia SIGSEGV w tooldata, pełny odbiór pozostaje otwarty. Opcjonalny host QtVCP de6b06d: istniejące STATUS, przyciski cyklu i globalny tor alarmów/E-STOP; implementacja do odbioru Claude na EndeavourOS. Skórki są luźną inspiracją według uściślenia właściciela 2026-10-25. Claude/bab3866: start Classic Digital na EndeavourOS oraz lint/1359 offline/check_requirements PASS; pozostałe rodziny wizualnie otwarte. 9167442 dodaje wybór czterech rodzin z Wyglądu i zapis na następny start; nowy krok do ponownego odbioru Claude.
 
 Pozostaje: Produkcyjny host, kanał poleceń i potwierdzenie świeżości danych.
 
