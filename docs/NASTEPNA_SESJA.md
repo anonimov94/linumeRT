@@ -15,6 +15,14 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · 2026-10-25. **LEGACY-RUNTIME: sampler w końcu servo-thread.**
+Zakres `codex/m1-servo-trace`: opt-in zapis HAL command/feedback X/Z, stanu CiA402
+i łącza LRT-NET przez standardowy sampler/halsampler, numery próbek i overruns.
+Pliki: nowy helper scenario_trace.py, integracja scenario_linuxcnc.py, testy i rejestr.
+Weryfikacja: test konfiguracji/lifecycle bez LinuxCNC, potem jedna celowana próba
+pod obiema wspólnymi blokadami. Próbka na końcu cyklu HAL, nie atomowy pomiar
+fizyczny procesów Plant/NML. Bez zmian modelu, ramp, progów i retry. Nie dubluję #139.
+
 Model-Author: Codex · 2026-10-25. **Wynik pojedynczego pomiaru M1 na `6a64abe`.**
 Z podczas pierwszego bazowania: following error; SETUP_ERROR przy odbiorze
 0,4943 s: homing=1, ferror NML 0,43 mm, output/input 0,45/0 mm, velocity 20 mm/s;

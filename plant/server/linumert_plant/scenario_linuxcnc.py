@@ -334,9 +334,17 @@ def run_linuxcnc(scen: Scenario, port: int | None = None) -> ScenarioResult:
             "diagnostics": bool(os.environ.get("LINUMERT_SCENARIO_DIAGNOSTICS")),
             "error_alarms": {str(k): v for k, v in ERROR_ALARMS.items()},
             "program": str(scen.program) if scen.program else ""}
+    servo_trace = bool(os.environ.get("LINUMERT_SCENARIO_SERVO_TRACE"))
+    if servo_trace and not plan["diagnostics"]:
+        raise ScenarioError("servo trace wymaga LINUMERT_SCENARIO_DIAGNOSTICS (trwałe dowody)")
     with _workspace() as work:
         (work / "plan.json").write_text(json.dumps(plan, indent=2), encoding="utf-8")
         ini = _prepare(work, port)
+        trace = None
+        if servo_trace:
+            from .scenario_trace import Recorder
+
+            trace = Recorder(root, ini, work, rip)
         (work / "driver.py").write_text(DRIVER, encoding="utf-8")
         report = work / "plant_report.json"
         with rip.installed_modules(root, work, ("lrt_net", "lrt_cia402", "lrt_estop2")):
@@ -363,6 +371,8 @@ def run_linuxcnc(scen: Scenario, port: int | None = None) -> ScenarioResult:
                     output = ((work / "linuxcnc.log").read_text(encoding="utf-8")
                               if capture is not None else cnc.stdout.read())
                     raise ScenarioError("LinuxCNC nie wystartował: " + (output or ""))
+                if trace is not None:
+                    trace.start()
                 driver = subprocess.Popen(
                     ["bash", "-c", f"source '{root}/scripts/rip-environment' >/dev/null && "
                      f"exec python3 {work / 'driver.py'} '{json.dumps(plan)}'"],
@@ -394,8 +404,12 @@ def run_linuxcnc(scen: Scenario, port: int | None = None) -> ScenarioResult:
             finally:
                 if driver is not None and driver.poll() is None:
                     driver.kill()
-                rip.stop_linuxcnc(cnc, root, ini.parent)
-                plant.close()
+                try:
+                    if trace is not None:
+                        trace.stop()
+                finally:
+                    rip.stop_linuxcnc(cnc, root, ini.parent)
+                    plant.close()
                 if capture is not None:
                     capture.join(timeout=5)
                     (work / "driver.log").write_text("\n".join(lines) + "\n", encoding="utf-8")

@@ -25,3 +25,9 @@ raport Plant, stdout/stderr LinuxCNC, logi drivera/Plant i telemetrię.
 Log drivera zawiera próbki `PEAK` z nowym maksimum błędu, stanem jointa i licznikami LRT-NET.
 To próbki NML (~10 ms), nie ślad każdego cyklu servo; dodatkowy odczyt HAL może wpływać
 na pomiar czasu. Bez tej zmiennej katalog tymczasowy jest usuwany jak dotychczas.
+
+### Ślad serwo scenariusza Plant (M1)
+
+Po zajęciu wspólnej blokady LinuxCNC: ustaw `LINUMERT_SCENARIO_DIAGNOSTICS=build/evidence` oraz `LINUMERT_SCENARIO_SERVO_TRACE=1`, a następnie uruchom pojedynczy scenariusz z `--master linuxcnc`. Trace jest opcjonalny i wymaga trwałego katalogu diagnostyki.
+
+Standardowy sampler LinuxCNC zapisuje kanały X/Z i LRT-NET na końcu servo-thread. `servo_trace.txt` zaczyna każdą próbkę numerem cyklu próbkowania; `servo_trace.json` zawiera nazwy kolumn, integralność, overruns i pozostałą głębokość FIFO. `valid=false` wyklucza użycie śladu jako ciągłego. Nie jest to atomowy pomiar fizyczny Plant/NML: wartości zachowują kolejność aktualizacji producentów w HAL. Nie zmienia sterowania ani zabezpieczeń.
