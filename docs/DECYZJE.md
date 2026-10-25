@@ -331,3 +331,10 @@ implementuje integrację z QtVCP; Claude pomaga odbiorem na laptopie EndeavourOS
 Nie zastępuje to istniejących wymagań funkcjonalnych, kanału ACTION/STATUS ani HAL.
 Historyczne kryterium „cztery faktycznie odrębne aplikacje” z roadmapy skórek
 nie jest warunkiem bieżącego zlecenia. Nie zaliczamy nieodebranego zakresu.
+
+## Kontynuacja po odbiorze Claude — polecenie właściciela 2026-10-25
+Model-Author: Codex. Po pomyślnych testach Claude na laptopie EndeavourOS kontynuujemy
+rozwój HMI w M2; ukończone zmiany na końcu scalamy przez PR po wymaganych kontrolach.
+Nie trzeba ponownie pytać o zgodę na kontynuację lub scalenie. Wynik dotyczy konkretnego
+SHA i zakresu; zielone CI nie zastępuje odbioru Claude. Błędy poprawiamy i ponawiamy
+odbiór przed scaleniem. Skórki pozostają luźną inspiracją wizualną.

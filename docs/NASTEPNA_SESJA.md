@@ -15,6 +15,14 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · **polecenie właściciela 2026-10-25: po PASS pracujemy dalej, na końcu scalamy.**
+Claude wykonuje odbiór na EndeavourOS i zapisuje zakres, dokładny SHA, polecenia,
+wyniki oraz zrzuty w raporcie/PR. Po potwierdzonym PASS Codex kontynuuje małe
+użyteczne kroki M2; Claude pomaga kolejnymi odbiorami. Ukończone zmiany scalamy
+przez PR po wymaganych kontrolach, bez kolejnego pytania właściciela. #163 zależy
+od #161: uwzględnić kolejność/base PR; samo zielone CI nie zastępuje odbioru laptopa.
+Jeśli testy ujawnią błąd, najpierw poprawka i ponowny odbiór właściwego SHA.
+
 Model-Author: Codex · **host HMI do odbioru na EndeavourOS**. Gałąź
 `codex/skin-qtvcp-host`, kod de6b06d. Nowy opcjonalny widok wewnątrz QtVCP;
 STATUS i przyciski obecnego hosta, brak osobnego właściciela komend/HAL.
