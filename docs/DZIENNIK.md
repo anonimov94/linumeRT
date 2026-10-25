@@ -1244,3 +1244,8 @@ Z −0,011 / X +0,016 / Y +0,010 mm — kryterium ≤ 0,01 mm NIE spełnione dla
 ani progów). Poprawiono wyścig w sterowaniu MDI testów (czekanie na przyjęcie komendy i ustanie ruchu). Opis: `docs/user/SONDOWANIE.md`.
 Do sprawdzenia ręcznie: ekrany sondy QtDragon w nowym stylu, kalibracja sondy. Długi: scenariusze `probe_z_touchplate`/`probe_corner`.
 NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## 2026-10-25 — Claude: sesja 033, kalibracja sondy na wzorcu
+Model-Author: Claude. `core/linumert/programs/probe_calibration.py` (+ `tests/test_probe_calibration.py`, 18 testów) i test
+`tests/test_probe_calibration_linuxcnc.py`: kalibracja pięciu par oś/kierunek w jednym miejscu ściany, weryfikacja w innym — błąd po
+poprawce ≤ 0,01 mm. Model napędów bez zmian. Brak ekranu w HMI (D36 do domknięcia). NIEZWERYFIKOWANE NA SPRZĘCIE.
