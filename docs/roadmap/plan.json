@@ -1495,14 +1495,15 @@
         "070"
       ],
       "status": "partial",
-      "progress": "Manifesty, kontrola przełączenia i monitor read-only istnieją. N1/Codex: prawdziwy gcode potwierdza posuwy G20/G21 i fizyczne numery linii; naprawiony parameter_file. Demo z T1 M6 ujawnia SIGSEGV w tooldata, pełny odbiór pozostaje otwarty.",
+      "progress": "Manifesty, kontrola przełączenia i monitor read-only istnieją. N1/Codex: prawdziwy gcode potwierdza posuwy G20/G21 i fizyczne numery linii; naprawiony parameter_file. Demo z T1 M6 ujawnia SIGSEGV w tooldata, pełny odbiór pozostaje otwarty. Opcjonalny host QtVCP de6b06d: istniejące STATUS, przyciski cyklu i globalny tor alarmów/E-STOP; implementacja do odbioru Claude na EndeavourOS. Skórki są luźną inspiracją według uściślenia właściciela 2026-10-25. Claude/bab3866: start Classic Digital na EndeavourOS oraz lint/1359 offline/check_requirements PASS; pozostałe rodziny wizualnie otwarte. 9167442 dodaje wybór czterech rodzin z Wyglądu i zapis na następny start; nowy krok do ponownego odbioru Claude.",
       "remaining": [
         "Produkcyjny host, kanał poleceń i potwierdzenie świeżości danych."
       ],
       "evidence": [
         "docs/design/SKIN_SYSTEM_ROADMAP.md",
         "docs/design/SKIN_AUDIT.md",
-        "tests/test_toolpath.py"
+        "tests/test_toolpath.py",
+        "docs/design/HMI_QTVCP_HOST.md"
       ]
     },
     {
@@ -1925,8 +1926,8 @@
       "parents": [
         "028"
       ],
-      "status": "planned",
-      "progress": "Polecenie właściciela 2026-10-25 po odbiorze #163 (SHA 2ae9103): selektor widoku HMI działa; wybór rodziny nie zmienia jeszcze wyraźnie wyglądu.",
+      "status": "partial",
+      "progress": "Polecenie właściciela 2026-10-25 po odbiorze #163 (SHA 2ae9103): selektor widoku HMI działa; wybór rodziny nie zmienia jeszcze wyraźnie wyglądu. 7dc2649: odmienne malowanie geometrii i typografii wspólnej nawigacji każdej rodziny, dopasowanie ram stałych pasków; te same strony i sygnały Qt. Kod po kontroli składni, odbiór wizualny/fokusu/kontrastu powierzony Claude; pełna kompozycja i podglądy nieukończone. Przegląd 76fed49: usuwanie starej sceny przy zmianie pliku/utracie STATUS, ponowne wczytanie po odzyskaniu i poprawny opis pauzy. Regresja do wykonania przez Claude; bez zmiany statusu odbioru.",
       "remaining": [
         "Każda z rodzin classic-digital, industrial-pro, cyberdeck, organic-vector ma własny, wyraźnie odmienny wygląd zakładek i nawigacji.",
         "Główny ekran HMI w stylu sci-fi/cyberdeck: kształty i menu jako nakładka, pod spodem prostokątne podglądy: symulacja obróbki detalu z widocznym narzędziem oraz obok symulacja z widokiem na maszynę.",
@@ -1935,7 +1936,9 @@
       ],
       "evidence": [
         "https://github.com/anonimov94/linumeRT/pull/163#issuecomment-6401257406",
-        "docs/design/SKIN_SYSTEM_ROADMAP.md"
+        "docs/design/SKIN_SYSTEM_ROADMAP.md",
+        "screens/linumert/linumert_skin_navigation.py",
+        "docs/design/HMI_QTVCP_HOST.md"
       ]
     }
   ]

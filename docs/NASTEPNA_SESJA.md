@@ -15,6 +15,59 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · #163/a165f18: CI 5655900 zatrzymało się na I001
+(kolejność importów w nowej regresji). Poprawiono zgodnie z diagnostyką Ruff;
+bez zmiany zachowania. Lokalnie brak modułu Ruff, więc nie deklaruję lint PASS.
+Nowe CI i odbiór laptopa oczekiwane; bez ponownego uruchamiania testów Claude.
+
+Model-Author: Codex · **#163 / 76fed49 — przegląd stabilności do odbioru.**
+Zmiana pliku programu usuwa starą geometrię przed asynchronicznym wczytaniem;
+utrata STATUS usuwa scenę i tekst programu, odzyskanie statusu wczytuje plik ponownie.
+Przycisk pauzy pokazuje Wznów w stanie paused. Rozszerzono regresję w test_neon_view.py;
+nie uruchamiano testów laptopa. Claude: test tej regresji, zmiana programu A→B,
+utrata/odzyskanie statusu, pauza/wznowienie; następnie wcześniejszy odbiór czterech rodzin.
+82e653b ma wszystkie CI SUCCESS, co nie stanowi odbioru nowego 76fed49.
+Polecenie właściciela: dopracować kolejno wszystkie otwarte gałęzie; po tym przeglądzie
+HMI przechodzimy do #161, #160 i #159. Nie oznacza to zamknięcia pełnego M2.
+
+Model-Author: Codex · **#163 / 7dc2649 — nawigacja czterech rodzin do odbioru.**
+Claude potwierdził selektor 2ae9103 na laptopie (komentarz 18:08 UTC); lint PASS,
+pełny pytest w toku. Połączono jego rejestr HMI-OWNER-SKINS z #164, bez dublowania.
+Nowy mały krok: FamilyNavigationButton maluje cztery odmienne geometrie/typografię
+na całej szynie operatora, także poza stroną HMI; ramy stałych pasków i klawisze
+trybów dopasowane do rodziny. Natywne QToolButton, te same sygnały/strony,
+widoczny fokus. Składnia/diff PASS; nie uruchamiano Qt/testów nowej wersji.
+Claude: 4 rodziny × 1280×768 i 1920×1080, nawigacja mysz/Tab, brak ucięcia
+etykiet i komend od zmiany strony, kontrast/zmiana palety, powrót do zwykłego
+widoku. Obrazów nie deklaruję jako odebranych. Dwa prostokątne podglądy symulacji
+z narzędziem i maszyną oraz kompozycja nakładki nadal do wykonania w tym rozszerzeniu.
+
+Model-Author: Codex · **#163 / 9167442 — selektor rodziny do ponownego odbioru.**
+Na podstawie komentarza Claude z 17:53 UTC: bab3866 startuje w Classic Digital,
+lokalnie lint/1359 testów/check_requirements PASS, ale brak wyboru rodziny w GUI.
+Połączono main/#162 bez utraty zmian. Wygląd → Widok HMI: cztery rodziny + powrót
+do dotychczasowej powłoki, zapis atomowy do ~/.config/linumert/operator-view.json,
+zmiana wyłącznie po kolejnym starcie. LINUMERT_OPERATOR_SKIN jawnie nadpisuje zapis.
+Ustawienia w nagłówku nowego HMI prowadzą do Wyglądu. Nowego kroku nie uruchamiano;
+sprawdzono składnię. Claude: odbiór wszystkich czterech rodzin przez GUI, zapis/
+restart/powrót, niepoprawny plik i odmowa zapisu, brak komend przy wyborze, stałe
+E-STOP/alarmy. Instrukcja w HMI_QTVCP_HOST.md. Nie zaliczać nowego SHA starym PASS.
+
+Model-Author: Codex · **polecenie właściciela 2026-10-25: po PASS pracujemy dalej, na końcu scalamy.**
+Claude wykonuje odbiór na EndeavourOS i zapisuje zakres, dokładny SHA, polecenia,
+wyniki oraz zrzuty w raporcie/PR. Po potwierdzonym PASS Codex kontynuuje małe
+użyteczne kroki M2; Claude pomaga kolejnymi odbiorami. Ukończone zmiany scalamy
+przez PR po wymaganych kontrolach, bez kolejnego pytania właściciela. #163 zależy
+od #161: uwzględnić kolejność/base PR; samo zielone CI nie zastępuje odbioru laptopa.
+Jeśli testy ujawnią błąd, najpierw poprawka i ponowny odbiór właściwego SHA.
+
+Model-Author: Codex · **host HMI do odbioru na EndeavourOS**. Gałąź
+`codex/skin-qtvcp-host`, kod de6b06d. Nowy opcjonalny widok wewnątrz QtVCP;
+STATUS i przyciski obecnego hosta, brak osobnego właściciela komend/HAL.
+Instrukcja i pełny zakres: docs/design/HMI_QTVCP_HOST.md. Uruchomienie przez
+LINUMERT_OPERATOR_SKIN=classic-digital (bez --skin). Nie uruchamiałem testów nowego
+hosta; właściciel powierzył je Tobie. Wynik ma poprzedzać scalenie; 028 nadal partial.
+
 Model-Author: Codex · 2026-10-25. **Właściciel: poprawiona próba software GL też się zamyka.**
 Odpowiedź na polecenie bez --safe (faulthandler + Mesa software + xcb_glx):
 „Nadal się zamyka”. Nie powtarzać tego pytania ani nie uznawać GL za przyczynę.
@@ -33,7 +86,7 @@ test_hmi_page_stack.py używa dwóch kart po 700×200 przy szerokości 1200.
 Sprawdzona składnia/diff; testy Qt i odbiór Start/Narzędzia pozostają po Twojej stronie.
 
 Model-Author: Codex · bieżące polecenie właściciela 2026-10-25: celem jest docelowe HMI
-z czterech skórek. Codex implementuje integrację, Claude pomaga testami na laptopie
+inspirowane luźno skórkami (bez odwzorowania 1:1 i wymogu czterech aplikacji). Codex implementuje integrację, Claude pomaga testami na laptopie
 EndeavourOS. Stara powłoka nie jest docelową kompozycją. #161 to pomocnicza poprawka
 układu; nie zamyka integracji skórek. Nowy zakres: opcjonalny host skórek w QtVCP.
 

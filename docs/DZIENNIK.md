@@ -1391,12 +1391,49 @@ NIEZWERYFIKOWANE NA SPRZĘCIE.
 - Live lokalnie niewykonane: zasób Claude/wyglad zajęty; nie przejmowano. Odbiór CI do rozliczenia.
 - 028 partial, M2 3/12; pozostałe podstrony/stanowisko/sprzęt otwarte. Autokontrola autora.
 
+## HMI — opcjonalny host prezentacji QtVCP · 2026-10-25 · Codex
+- Model-Author: Codex. Skórki są luźną inspiracją; priorytet: użyteczne docelowe HMI. Claude pomaga testami laptopa EndeavourOS.
+- de6b06d: opcjonalna prezentacja w istniejącym QtVCP, STATUS i G53/program/alarm; konsola cyklu przez istniejące przyciski i bramki hosta.
+- Zachowane globalne alarmy/E-STOP/watchdog/tryby, nawigacja do działających stron; brak nowych komend ACTION i pinów HAL.
+- Kod po przeglądzie i kontroli składni. Nowego hosta nie uruchamiano; odbiór powierzony Claude. Instrukcja: docs/design/HMI_QTVCP_HOST.md.
+- Draft do odbioru; brak zamknięcia 028/SKIN-02…06 i brak deklaracji odbioru sprzętu.
+
+## HMI — kontrola stanu CI i odbioru · 2026-10-25 · Codex
+- Model-Author: Codex. #163/d00f76b: python CI 1364 PASS, 104 SKIP, 151 deselected; jedyny FAIL to brak HMI_QTVCP_HOST.md w PROVENANCE. Uzupełniono wpis.
+- #161/a572f9c: python i plant-matrix PASS, linuxcnc w toku. #163: plant-matrix PASS, linuxcnc w toku.
+- Brak opublikowanego odbioru Claude dla #161/#163. #162 zawiera osobne palety/edytor kolorów i własne 23 testy, nie jest odbiorem hosta #163.
+- Bez scalenia lub deklaracji PASS laptopa; nowe kontrole CI po poprawce dokumentacyjnej.
+
+
 ## 2026-10-25 — Claude: M2, obszar „Wygląd” w HMI (palety i własne kolory)
 Model-Author: Claude. Prośba właściciela: zmiana kolorystyki działającego HMI. `linumert_appearance.py` (palety z kontraktu skórek, dziesięć ról, tokeny wyliczane,
 walidacja kontrastu WCAG i znaczenia czerwony/zielony/bursztynowy, zapis atomowy JSON), `linumert_appearance_page.py` (paleta, edytor kolorów, podgląd, zapis, reset)
 i integracja w powłoce (nowy obszar na szynie, wczytanie zapisu przy starcie, `apply_tokens`, tło kontenera stron w kolorze motywu). 23 testy, sprawdzone w LinuxCNC pod Xvfb
 (zrzuty `docs/raporty/hmi_appearance/`). Prawdziwe skórki (układy) i widoki rysowane własnym kodem (kolory po restarcie) otwarte. Opis: `docs/user/WYGLAD.md`. NIEZWERYFIKOWANE NA SPRZĘCIE.
 
+## M2 / SKIN-02 — wybór rodziny z poziomu HMI · 2026-10-25 · Codex
+- Model-Author: Codex. Claude odebrał start Classic Digital/bab3866 na EndeavourOS; lokalne lint, 1359 offline i wymagania PASS. Luka: brak wyboru rodziny w GUI.
+- Połączono main/#162; 9167442 dodaje selektor do Wyglądu, cztery rodziny + powrót, niezależny atomowy zapis i komunikat o następnym starcie. Bez przełączania w ruchu/nowych komend.
+- Składnia 4 modułów i diff PASS; odbiór GUI/testy nowego kroku powierzono Claude. Instrukcja i zakres w HMI_QTVCP_HOST.md, #163 nadal draft do odbioru.
+- M2/028 i pełny odbiór czterech rodzin pozostają otwarte. Bez scalenia nieodebranego kodu do main.
+
+## M2 / HMI-OWNER-SKINS — odrębna nawigacja rodzin · 2026-10-25 · Codex
+- Model-Author: Codex. Claude potwierdził selektor 2ae9103. Zachowano jego decyzję/rejestr z #164 przez merge.
+- 7dc2649: cztery warianty malowania szyny nawigacji i ram hosta, natywne przyciski/fokus i te same strony/sygnały; bez zmian ACTION/HAL.
+- Składnia/diff PASS; odbiór 4×2 rozmiary, czytelność, fokus i kolory powierzony Claude. Nowego kodu nie uruchamiano.
+- HMI-OWNER-SKINS partial; pełna nakładka i dwa podglądy symulacji pozostają otwarte. #163 draft, bez scalenia do main przed odbiorem.
+
+## HMI — przegląd utraty statusu i zmiany programu · 2026-10-25 · Codex
+- Model-Author: Codex. 76fed49 usuwa nieaktualną geometrię przy zmianie programu/utracie statusu, odświeża ją po odzyskaniu; czyści tekst programu po błędzie STATUS.
+- Pauza pokazuje Wznów zgodnie ze stanem hosta. Rozszerzona regresja zmiany pliku i utraty/odzyskania statusu przekazana Claude.
+- Składnia i diff sprawdzone; bez uruchamiania testów laptopa. CI poprzedniego 82e653b SUCCESS; nowe SHA wymaga odbioru.
+
 ## M2 / 028 — przegląd minimalnej szerokości kart · 2026-10-25 · Codex
 - Model-Author: Codex. Wspólny warunek przejścia do jednej kolumny w obliczaniu wysokości i geometrii; uwzględnia minima kart również powyżej 1100 px.
 - Regresja dwóch kart 700×200 w 1200 px do wykonania przez Claude; składnia/diff sprawdzone. Bez deklaracji odbioru laptopa i zamknięcia 028.
+
+## 2026-10-25 — Claude: odbiór #163 (rodziny skórek w hoście QtVCP)
+Model-Author: Claude. Zsynchronizowano z `main` (po #161), 560 testów offline PASS (jedyny lokalny błąd `test_launcher` to ograniczenie NTFS, gałąź nie zmienia launchera), CI python/linuxcnc zielone.
+Zrzuty czterech rodzin (Classic Digital, Industrial Pro, Cyberdeck, Organic Vector) × 1920×1080 i 1280×800 z prawdziwego LinuxCNC (`docs/raporty/G2/skorki_qtvcp/`): host startuje,
+globalny pasek alarmów, E-STOP i dolny pasek zostają widoczne; przy 1280×800 konsola rodziny przewija się w obszarze hosta. Nie zamyka SKIN-02/04…06 ani 028; sceny 3D rodzin
+bez podłączenia opisane jawnie. NIEZWERYFIKOWANE NA SPRZĘCIE.
