@@ -322,3 +322,12 @@ uznawane za PASS ani usuwane z rejestru; istniejący PR diagnostyki #153 pozosta
 do rozliczenia, bez uruchamiania kolejnej pełnej serii. Claude/033 i ISO pozostają
 odrębnymi zakresami. Pierwszy krok 028: wymagana specyfikacja funkcjonalna i audyt
 już istniejącej powłoki, potem brakujące funkcje i rzeczywisty odbiór GUI.
+
+## Kierunek HMI i pomoc Claude — decyzja właściciela 2026-10-25
+Model-Author: Codex. Skórki i obrazy są luźną inspiracją wizualną, a nie kontraktem
+wiernego odwzorowania czterech kompozycji. Docelowe HMI rozwijamy według pracy
+operatora, wykorzystując ich charakter i istniejące moduły prezentacji. Codex
+implementuje integrację z QtVCP; Claude pomaga odbiorem na laptopie EndeavourOS.
+Nie zastępuje to istniejących wymagań funkcjonalnych, kanału ACTION/STATUS ani HAL.
+Historyczne kryterium „cztery faktycznie odrębne aplikacje” z roadmapy skórek
+nie jest warunkiem bieżącego zlecenia. Nie zaliczamy nieodebranego zakresu.
