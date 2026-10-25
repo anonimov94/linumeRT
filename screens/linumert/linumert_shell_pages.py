@@ -594,10 +594,8 @@ class StartPage(QtWidgets.QWidget):
         self.setObjectName("lrtPage")
         self.shell = shell
         self.items: list[model.CheckItem] = []
-        grid = QtWidgets.QGridLayout(self)
-        grid.setContentsMargins(16, 16, 16, 16)
-        grid.setSpacing(16)
         frame, lay, self.lbl_ready = card("Gotowość maszyny", "")
+        readiness = frame
         self.rows = QtWidgets.QGridLayout()
         self.rows.setHorizontalSpacing(16)
         self.rows.setVerticalSpacing(10)
@@ -608,7 +606,6 @@ class StartPage(QtWidgets.QWidget):
         self.btn_next.setProperty("role", "start")
         self.btn_next.clicked.connect(lambda: self.shell.select_area("production"))
         lay.addWidget(self.btn_next, 0, QtCore.Qt.AlignRight)
-        grid.addWidget(frame, 0, 0)
         frame, lay, _side = card("Ostatnie komunikaty", "pełna historia: Diagnostyka")
         self.recent = []
         for _ in range(8):
@@ -617,15 +614,17 @@ class StartPage(QtWidgets.QWidget):
             lay.addWidget(row)
             self.recent.append(row)
         lay.addStretch(1)
-        grid.addWidget(frame, 0, 1)
-        grid.setColumnStretch(0, 3)
-        grid.setColumnStretch(1, 2)
+        from linumert_layout import CardColumns
+
+        CardColumns(self, (readiness, frame))
 
     def _row(self, key: str, index: int) -> tuple:
         if key not in self.row_widgets:
             dot = _label("●", "lrtDot", level="info")
             title = _label("", "lrtTitleSmall")
             detail = _label("", "lrtMuted")
+            title.setWordWrap(True)
+            detail.setWordWrap(True)
             btn = QtWidgets.QPushButton("")
             btn.clicked.connect(lambda _c=False, k=key: self._act(k))
             self.rows.addWidget(dot, index, 0)

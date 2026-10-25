@@ -1384,6 +1384,13 @@ Model-Author: Claude. `tools/tune_accel.py` (moduł `accel_tuning`, 15 testów, 
 wynik Z niemonotoniczny). Raport `docs/raporty/prototypy/M1_ACCEL_TUNING_2026-10-25.md`. machine.yaml i progi bez zmian; seria 10 przebiegów PASS nadal otwarta.
 NIEZWERYFIKOWANE NA SPRZĘCIE.
 
+## M2 / 028 — responsywne karty Start i Narzędzia · 2026-10-25 · Codex
+- Model-Author: Codex. PR #161; adaptacyjne kolumny, zawijanie checklisty, zachowanie formularza/fokusu.
+- 15 testów rzeczywistego Qt PASS: 1280→1920→1280, 800→1600→800, wpis/Tab, samodzielny STL 1200×600.
+- Strażnik IP 10 PASS; bez nowych zależności, zmian ACTION/HAL. Zrzuty i granice: raport G2/M2_RESPONSIVE_2026-10-25.md.
+- Live lokalnie niewykonane: zasób Claude/wyglad zajęty; nie przejmowano. Odbiór CI do rozliczenia.
+- 028 partial, M2 3/12; pozostałe podstrony/stanowisko/sprzęt otwarte. Autokontrola autora.
+
 ## 2026-10-25 — Claude: M2, obszar „Wygląd” w HMI (palety i własne kolory)
 Model-Author: Claude. Prośba właściciela: zmiana kolorystyki działającego HMI. `linumert_appearance.py` (palety z kontraktu skórek, dziesięć ról, tokeny wyliczane,
 walidacja kontrastu WCAG i znaczenia czerwony/zielony/bursztynowy, zapis atomowy JSON), `linumert_appearance_page.py` (paleta, edytor kolorów, podgląd, zapis, reset)
@@ -1396,3 +1403,7 @@ i integracja w powłoce (nowy obszar na szynie, wczytanie zapisu przy starcie, `
 - Scenariusze `probe_z_touchplate` i `probe_corner` (`master: linuxcnc`, REQ-VM-09), oczekiwania z geometrii celu w machine.yaml. Atrapa mastera ich nie wykonuje (G38).
 - Weryfikacja: `make lint`, 9 testów jednostkowych kryteriów i spójności z geometrią, 56 testów scenariuszy; na LinuxCNC RIP w podmanie (Debian 12) oba scenariusze PASS (16 min 39 s).
 - Do zrobienia w 033: ekran kalibracji sondy w HMI, logika sondy QtDragon w nowym stylu, ręczny odbiór G54–G59.3 w HMI. Typ celu `plate` jest w modelu (router), ale scenariusz LinuxCNC istnieje tylko dla mill_servo_table. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## M2 / 028 — przegląd minimalnej szerokości kart · 2026-10-25 · Codex
+- Model-Author: Codex. Wspólny warunek przejścia do jednej kolumny w obliczaniu wysokości i geometrii; uwzględnia minima kart również powyżej 1100 px.
+- Regresja dwóch kart 700×200 w 1200 px do wykonania przez Claude; składnia/diff sprawdzone. Bez deklaracji odbioru laptopa i zamknięcia 028.

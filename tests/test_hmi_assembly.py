@@ -117,6 +117,33 @@ def smoke(snapshot):
                           "text": "kolizja", "line": 42, "pos": [1, 2, 3], "stop": False})
     assert shell.sim.events.item(0).text().startswith("1.00 s")
     assert not action.mock_calls, action.mock_calls
+    # Real styled pages must fit the operator viewport after shrinking again.
+    for width in (1280, 1920, 1280):
+        window.resize(width, 768)
+        for area in ("start", "tools"):
+            shell.select_area(area)
+            shell.refresh()
+            for _ in range(8):
+                app.processEvents()
+            scroll = shell.stack.parentWidget().parentWidget()
+            assert scroll.horizontalScrollBar().maximum() == 0, (area, width)
+            assert window.width() == width
+    from PyQt5 import QtCore, QtTest
+
+    window.activateWindow()
+    shell.tools.txt_desc.setFocus()
+    app.processEvents()
+    assert shell.tools.txt_desc.hasFocus()
+    QtTest.QTest.keyClicks(shell.tools.txt_desc, "draft")
+    assert shell.tools.txt_desc.text().endswith("draft")
+    QtTest.QTest.keyClick(shell.tools.txt_desc, QtCore.Qt.Key_Tab)
+    app.processEvents()
+    assert shell.tools.txt_holder.hasFocus()
+    assert window.grab().save(str(Path(snapshot).with_name("tools-responsive.png")))
+    shell.select_area("start")
+    for _ in range(8):
+        app.processEvents()
+    assert not action.mock_calls, action.mock_calls
     assert window.grab().save(snapshot)
     window.close()
 
