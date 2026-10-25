@@ -1423,3 +1423,10 @@ i integracja w powłoce (nowy obszar na szynie, wczytanie zapisu przy starcie, `
 ## M2 / 028 — przegląd minimalnej szerokości kart · 2026-10-25 · Codex
 - Model-Author: Codex. Wspólny warunek przejścia do jednej kolumny w obliczaniu wysokości i geometrii; uwzględnia minima kart również powyżej 1100 px.
 - Regresja dwóch kart 700×200 w 1200 px do wykonania przez Claude; składnia/diff sprawdzone. Bez deklaracji odbioru laptopa i zamknięcia 028.
+
+## 2026-10-25 — Claude: zakładka „Maszyny” w panelu Plant (biblioteka maszyn)
+Model-Author: Claude. Interfejs do API z #159: lista maszyn (aktywna, walidacja, osie, napędy), Aktywuj / Kopiuj /
+Zmień nazwę / Usuń (kosz z przywracaniem kliknięciem) oraz edytor YAML aktywnej maszyny z walidacją na żywo
+i zapisem do historii (`static/library.js`, zakładka w `index.html`). Sprawdzone klikaniem w panelu (kopia → kosz,
+zrzut `docs/raporty/plant_biblioteka/zakladka_maszyny_kosz.jpg`) oraz testem `test_panel_http_api_on_localhost`;
+17 testów PASS, ruff PASS. Edycja YAML dotyczy tylko aktywnej maszyny (inną najpierw aktywuj). NIEZWERYFIKOWANE NA SPRZĘCIE.
