@@ -26,6 +26,8 @@ import linumert_shell_pages as pages
 from linumert_operator_controls import OperatorControls
 
 try:
+    if os.environ.get("LINUMERT_NO_GL") == "1":      # tryb awaryjny: `linumert --safe`
+        raise ImportError("OpenGL wyłączony przez LINUMERT_NO_GL=1")
     import pyqtgraph.opengl as gl
 except Exception:  # noqa: BLE001 - brak pyqtgraph albo OpenGL: widok 2D
     gl = None

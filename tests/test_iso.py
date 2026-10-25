@@ -88,7 +88,8 @@ def test_desktop_shortcuts_and_restart_flags() -> None:
     desk = ISO / "config/includes.chroot/etc/skel/Desktop"
     names = {p.name for p in desk.glob("*.desktop")}
     assert names == {"linumert-sim.desktop", "linumert-plant.desktop", "linumert-neon.desktop",
-                     "linumert-stop.desktop", "linumert-panel-plant.desktop"}
+                     "linumert-stop.desktop", "linumert-panel-plant.desktop",
+                     "linumert-safe.desktop"}
     for p in desk.glob("*.desktop"):
         body = p.read_text()
         assert "Type=Application" in body and "Exec=" in body
@@ -96,6 +97,7 @@ def test_desktop_shortcuts_and_restart_flags() -> None:
     assert "--restart --plant" in (desk / "linumert-plant.desktop").read_text()
     launcher = SCRIPTS[2].read_text()
     assert "--restart" in launcher and "--stop" in launcher and "stop_all" in launcher
+    assert "--safe" in launcher and "LINUMERT_NO_GL=1" in launcher
     hook = SCRIPTS[1].read_text()
     assert "chmod 755 /etc/skel/Desktop/*.desktop" in hook
 

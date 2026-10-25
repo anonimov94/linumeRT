@@ -6,6 +6,8 @@
 #   linumert --neon     # monitor Classic × Neon: detal + maszyna, następny punkt z DTG (read-only)
 #   linumert --restart [--plant]  # zatrzymaj działający LinuxCNC/Plant i uruchom od nowa
 #   linumert --stop     # zatrzymaj działający LinuxCNC i Plant
+#   linumert --safe     # tryb awaryjny: bez OpenGL (widok 2D) i z renderowaniem programowym Mesa;
+#                       # gdy ekran kończy się „Naruszenie ochrony pamięci” (błąd sterownika GPU)
 # Ekran startuje przy logowaniu (autostart), więc kolejne `linumert` bez --restart zgłasza, że już działa.
 # Model-Author: Claude · 2026-10-19; --restart/--stop: 2026-10-25. NIEZWERYFIKOWANE NA SPRZĘCIE.
 set -euo pipefail
@@ -32,9 +34,10 @@ mode=""
 for a in "$@"; do
     case "$a" in
         --restart) restart=1 ;;
+        --safe) export LINUMERT_NO_GL=1 LIBGL_ALWAYS_SOFTWARE=1 QT_XCB_GL_INTEGRATION=none ;;
         --stop) stop_all; printf 'linumeRT zatrzymany.\n'; exit 0 ;;
         --plant|--monitor|--neon) mode=$a ;;
-        *) printf 'Użycie: linumert [--restart] [--plant|--monitor|--neon] | linumert --stop\n' >&2; exit 2 ;;
+        *) printf 'Użycie: linumert [--restart] [--safe] [--plant|--monitor|--neon] | linumert --stop\n' >&2; exit 2 ;;
     esac
 done
 cd "$R"
