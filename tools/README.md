@@ -17,3 +17,11 @@ Narzędzia deweloperskie, CI i koordynacji pracy. Polecenia środowiska krok po 
 | `agent_tests/` | wspólna paczka testowa z raportem JSON i launcherem Windows ([README](agent_tests/README.md)) |
 | `vm/` | pulpit VNC w WSL (`start-vnc.sh`); skrypty maszyn wirtualnych VM-A/VM-B w sesji 025 |
 | `check_requirements.py` | (od sesji 024) kontrola znaczników REQ w testach względem macierzy |
+
+Diagnostyka scenariusza z LinuxCNC (pod wspólną blokadą zasobu):
+`LINUMERT_SCENARIO_DIAGNOSTICS=build/scenario-evidence python tools/run_scenario.py first_motion --master linuxcnc`.
+Każde uruchomienie zachowuje osobny `lrt_scen_*`: konfigurację, plan, driver,
+raport Plant, stdout/stderr LinuxCNC, logi drivera/Plant i telemetrię.
+Log drivera zawiera próbki `PEAK` z nowym maksimum błędu, stanem jointa i licznikami LRT-NET.
+To próbki NML (~10 ms), nie ślad każdego cyklu servo; dodatkowy odczyt HAL może wpływać
+na pomiar czasu. Bez tej zmiennej katalog tymczasowy jest usuwany jak dotychczas.
