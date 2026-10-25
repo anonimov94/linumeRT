@@ -55,3 +55,20 @@ QT_OPENGL=software QT_XCB_GL_INTEGRATION=xcb_glx linumert
 
 To nie uruchamia drugiego serwera Plant. Wynik laptopa nadal oczekiwany; poprawny
 kontekst Qt pod Xvfb nie dowodzi usunięcia pierwotnego SIGSEGV przy normalnym starcie.
+
+## Wynik próby właściciela: nadal się zamyka
+
+Właściciel odpowiedział na poprawioną próbę bez --safe (software Mesa, xcb_glx,
+faulthandler): **„Nadal się zamyka”**. Korekta integracji GL nie rozwiązała
+zgłoszonego problemu. To nadal wymaga nowego raportu z faulthandler; nie wiadomo,
+czy zakończenie ma ten sam stos co pierwotny SIGSEGV.
+
+W lokalnym Downloads są wyłącznie pierwotne linuxcnc.report/info z 14:18 UTC;
+nie traktujemy ich jako nowego wyniku. Wymagany plik z ISO właściciela:
+~/linuxcnc_debug.txt lub nowy linuxcnc.report po tej próbie. Bez ponownego pytania
+czy software GL uruchamia ekran — ten wynik już otrzymano.
+
+#156 jest scalony jako 6dc700f, a #153/#155 są również w main. Dostępny obraz
+iso-20261025-6dc700f nie jest automatycznie obrazem testowanym wcześniej przez
+właściciela; brak SHA w przesłanym raporcie. Żadne scalenie ani zielone CI nie
+stanowi potwierdzenia startu na jego laptopie.

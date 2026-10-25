@@ -15,6 +15,15 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · 2026-10-25. **Właściciel: poprawiona próba software GL też się zamyka.**
+Odpowiedź na polecenie bez --safe (faulthandler + Mesa software + xcb_glx):
+„Nadal się zamyka”. Nie powtarzać tego pytania ani nie uznawać GL za przyczynę.
+W Downloads nadal tylko pierwotne raporty z 14:18 UTC, bez nowego tracebacku.
+Następny wymagany dowód: nowy linuxcnc.report lub ~/linuxcnc_debug.txt z tej próby.
+Zakres codex/m2-iso-crash-trace: zapisać negatywną próbę i rozróżnić wersje ISO;
+nie wprowadzać kolejnej spekulatywnej poprawki. Dotychczasowe #153/#155/#156 już
+scalone do main; to nie odbiór startu laptopa. Odbiór M2/ISO pozostaje partial.
+
 Model-Author: Codex · 2026-10-25. **#155: środowisko i stos stron odebrane, responsywność nadal otwarta.**
 ad17702: cnc_environment(), 45 kroków GUI PASS, tools/cycles=true, 64,90 s.
 e2dde87: PageStack izoluje minimum aktywnej strony od ukrytego QtDragon;
