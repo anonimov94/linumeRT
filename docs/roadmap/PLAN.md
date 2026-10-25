@@ -361,11 +361,11 @@ Pozostaje: D38-B: odzyskiwanie po Abort/E-STOP lub wymianie narzędzia i wykonan
 
 ### 033 — Zerowanie detalu i sonda
 
-**częściowe**. Zero detalu G54–G59 i model przygotówki dostępne.
+**częściowe**. Zero detalu G54–G59 i model przygotówki dostępne. Claude 2026-10-25: G54–G59.3 (G10 L2 P1–P9, wybór układu, obrót R, ruch do zera detalu ±0,01 mm, parametry w pliku zmiennych) oraz sondowanie G38.2/G38.3 Z i narożnika X/Y na LinuxCNC 2.9 + wygenerowany Plant (test linuxcnc); powtarzalność < 0,001 mm; błąd bezwzględny Z −0,011, X +0,016, Y +0,010 mm (luz 10 µm modelu napędów) — kryterium ≤ 0,01 mm niespełnione dla Z i X. docs/user/SONDOWANIE.md. Claude 2026-10-25: kalibracja sondy na wzorcu (stała poprawka na oś/kierunek, core/linumert/programs/probe_calibration.py): na Plant pięć par oś/kierunek skalibrowanych w jednym miejscu ściany i sprawdzonych w innym (przesunięcie 20 mm) daje błąd po poprawce ≤ 0,01 mm (0,000 mm w modelu deterministycznym); model napędów bez zmian. Brak jeszcze ekranu kalibracji w HMI.
 
-Pozostaje: Pełne G54–G59.3 oraz odbiór sondowania Z/narożnika i logiki sondy QtDragon.
+Pozostaje: Scenariusze Plant probe_z_touchplate i probe_corner (plant/scenarios) oraz sonda płytkowa (probe.type plate) — nie istnieją. Logika sondy QtDragon (Basic/Versa) w nowym stylu i klik przez GUI na pulpicie; ręczny odbiór G54–G59.3 w HMI. Ekran kalibracji sondy w HMI (D36) i wykorzystanie poprawki w cyklach sondowania; kalibracja na sprzęcie.
 
-Źródła: [docs/DZIENNIK.md](../DZIENNIK.md), [prompts/sesja-033.md](../../prompts/sesja-033.md).
+Źródła: [docs/DZIENNIK.md](../DZIENNIK.md), [tests/test_work_offsets_probe_linuxcnc.py](../../tests/test_work_offsets_probe_linuxcnc.py), [tests/plant_session.py](../../tests/plant_session.py), [docs/user/SONDOWANIE.md](../user/SONDOWANIE.md), [core/linumert/programs/probe_calibration.py](../../core/linumert/programs/probe_calibration.py), [tests/test_probe_calibration.py](../../tests/test_probe_calibration.py), [tests/test_probe_calibration_linuxcnc.py](../../tests/test_probe_calibration_linuxcnc.py), [prompts/sesja-033.md](../../prompts/sesja-033.md).
 
 ### 034 — Ręczna zmiana narzędzia
 

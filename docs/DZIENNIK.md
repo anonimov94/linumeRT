@@ -1235,6 +1235,20 @@ Model-Author: Claude. `tests/test_configgen_plant_linuxcnc.py` (marker `linuxcnc
 --target plant` dla `mill_servo_table` → LinuxCNC 2.9 RIP + serwer Plant (lockstep, lrt_net): włączenie, bazowanie
 wszystkich osi, ruch MDI X50; PASS (13,5 s). Sesja 062 pozostaje `partial` (EtherCAT 063, wrzeciono 064, sprzęt).
 NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## 2026-10-25 — Claude: sesja 033, G54–G59.3 i sondowanie na LinuxCNC + Plant
+Model-Author: Claude. `tests/test_work_offsets_probe_linuxcnc.py` (marker `linuxcnc`, wspólny `tests/plant_session.py`): dziewięć
+układów G54–G59.3 (G10 L2 P1–P9, obrót R90 w G55), ruch do zera detalu ±0,01 mm, parametry w pliku zmiennych; sondowanie
+Z i narożnika X/Y (G38.2 dwustopniowo, G38.3 w powietrzu). Wynik 2× zgodny: powtarzalność < 0,001 mm, błąd bezwzględny
+Z −0,011 / X +0,016 / Y +0,010 mm — kryterium ≤ 0,01 mm NIE spełnione dla Z i X (luz 10 µm w `servo_*.yaml`; nie zmieniałem modelu
+ani progów). Poprawiono wyścig w sterowaniu MDI testów (czekanie na przyjęcie komendy i ustanie ruchu). Opis: `docs/user/SONDOWANIE.md`.
+Do sprawdzenia ręcznie: ekrany sondy QtDragon w nowym stylu, kalibracja sondy. Długi: scenariusze `probe_z_touchplate`/`probe_corner`.
+NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## 2026-10-25 — Claude: sesja 033, kalibracja sondy na wzorcu
+Model-Author: Claude. `core/linumert/programs/probe_calibration.py` (+ `tests/test_probe_calibration.py`, 18 testów) i test
+`tests/test_probe_calibration_linuxcnc.py`: kalibracja pięciu par oś/kierunek w jednym miejscu ściany, weryfikacja w innym — błąd po
+poprawce ≤ 0,01 mm. Model napędów bez zmian. Brak ekranu w HMI (D36 do domknięcia). NIEZWERYFIKOWANE NA SPRZĘCIE.
 ## M1 — diagnostyka przed T0 · 2026-10-25 · Codex
 - Model-Author: Codex. Przy odebraniu błędu bazowania zachowuje snapshot jointów NML i sekwencyjne odczyty HAL w driver.log oraz RESULT.setup_samples.
 - 8 testów diagnostyki PASS w Debianie, ruff PASS; bez uruchamiania instancji LinuxCNC i bez zmiany modelu, progów lub retry.
