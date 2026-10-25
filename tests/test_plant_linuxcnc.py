@@ -212,6 +212,8 @@ def session(tmp_path_factory):
                 assert not collector.is_alive(), f"LinuxCNC log collector still active: {console}"
     line = next((x for x in run.stdout.splitlines() if x.startswith("RESULT ")), None)
     assert line, run.stdout + run.stderr
+    diagnostics = json.loads((tmp_path / "driver_diagnostics.json").read_text(encoding="utf-8"))
+    assert diagnostics["stage"] == "complete" and "snapshot_error" not in diagnostics, diagnostics
     res = json.loads(line[len("RESULT "):])
     res["hal"] = hal
     res["plant"] = json.loads(report.read_text(encoding="utf-8"))

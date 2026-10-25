@@ -30,9 +30,11 @@ def snapshot(reason):
     data["results"] = json.loads(json.dumps(out))
     return data
 
-def save_diagnostics():
+diagnostics_path = Path(sys.argv[0]).resolve().with_name("driver_diagnostics.json")
+
+def save_diagnostics(path=diagnostics_path):
     data = snapshot("driver_exit")
-    Path(__file__).with_name("driver_diagnostics.json").write_text(
+    path.write_text(
         json.dumps(data, indent=2) + "\n", encoding="utf-8")
     print("DRIVER_DIAGNOSTICS " + json.dumps(data), flush=True)
 

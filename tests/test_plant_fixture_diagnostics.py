@@ -19,6 +19,7 @@ def prepare(monkeypatch, tmp_path):
     monkeypatch.setitem(sys.modules, "linuxcnc", SimpleNamespace(
         command=lambda: None, stat=lambda: status,
         error_channel=lambda: SimpleNamespace(poll=lambda: next(messages, None))))
+    monkeypatch.setattr(sys, "argv", [str(tmp_path / "driver.py")])
     callbacks = []
     monkeypatch.setitem(sys.modules, "atexit", SimpleNamespace(register=callbacks.append))
     ns = {"__file__": str(tmp_path / "driver.py")}
@@ -36,6 +37,7 @@ def test_timeout_and_assertion_keep_state_errors_and_prior_results(monkeypatch, 
     ns["out"]["pockets"] = [{"done": True}]
     with pytest.raises(AssertionError):
         exec('assert wait(lambda: False, 0.1)', ns)
+    ns.pop("__file__")  # LinuxCNC can remove it before interpreter shutdown
     callbacks[0]()  # the hook Python runs during interpreter shutdown
     saved = json.loads((tmp_path / "driver_diagnostics.json").read_text())
     assert saved["stage"] == "before_softlimit"
