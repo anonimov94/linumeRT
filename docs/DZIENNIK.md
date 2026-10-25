@@ -1384,6 +1384,23 @@ Model-Author: Claude. `tools/tune_accel.py` (moduł `accel_tuning`, 15 testów, 
 wynik Z niemonotoniczny). Raport `docs/raporty/prototypy/M1_ACCEL_TUNING_2026-10-25.md`. machine.yaml i progi bez zmian; seria 10 przebiegów PASS nadal otwarta.
 NIEZWERYFIKOWANE NA SPRZĘCIE.
 
+## 2026-10-25 — Claude: przyspieszenia z doboru w machine.yaml i biblioteka maszyn (API)
+Model-Author: Claude. Na polecenie właściciela wpisano wyniki `tune_accel` do `config/machines/mill_servo_table.yaml`, `plant/scenarios/machines/mill_servo_table_y2.yaml`
+(X/Y 17100, Z 5400) i `config/machines/router_gantry_steppers.yaml` (X/Y 3820, Z 9440) oraz do ręcznych INI Plant (golden generatora). Scenariusze `heavy_table_live`
+i `edit_reload` dostały stały ruch porównawczy (`accel: 1000`), test niezależności od `substeps` — przyspieszenia referencyjne. Dodano `panel/machine_library.py` i endpointy
+(`/api/machines*`, `/api/machine/text*`): kopia, zmiana nazwy, kosz z przywracaniem, aktywacja, edycja YAML (każdy parametr, listy osi i napędów); 22 testy. Interfejs w panelu
+i seria 10 przebiegów M1 otwarte. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## 2026-10-25 — Claude: korekta Z routera po serii cykli
+Model-Author: Claude. `test_suite_cycles` (CI) wykazał utratę kroków Z routera przy 9 440 mm/s² w `stud_circle`; ustawiono Z = 4 000 mm/s² (61 testów PASS: cykle, substeps, drive_real,
+kieszenie). Raport `M1_ACCEL_TUNING_2026-10-25.md` uzupełniony o sekcję „Weryfikacja”. Wartość z narzędzia dla krokowców wymaga sprawdzenia na programach generatorów.
+NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## 2026-10-25 — Claude: korekta frezarki po odbiorze z LinuxCNC
+Model-Author: Claude. CI z prawdziwym LinuxCNC (`first_motion`, readiness, sampler) wykazało uchyb X 0,23–0,25 mm > 0,2 przy 17 100 mm/s² (atrapa mastera dawała 0,168).
+Ustawiono frezarkę X/Y 2 000, Z 2 500 mm/s² (lokalnie: 3 testy first_motion PASS, pozostałe testy LinuxCNC PASS); narzędzie dostało `--lag-factor`. Próg nie zmieniony.
+NIEZWERYFIKOWANE NA SPRZĘCIE.
+
 ## M2 / 028 — responsywne karty Start i Narzędzia · 2026-10-25 · Codex
 - Model-Author: Codex. PR #161; adaptacyjne kolumny, zawijanie checklisty, zachowanie formularza/fokusu.
 - 15 testów rzeczywistego Qt PASS: 1280→1920→1280, 800→1600→800, wpis/Tab, samodzielny STL 1200×600.
@@ -1417,6 +1434,12 @@ i integracja w powłoce (nowy obszar na szynie, wczytanie zapisu przy starcie, `
 - Scenariusze `probe_z_touchplate` i `probe_corner` (`master: linuxcnc`, REQ-VM-09), oczekiwania z geometrii celu w machine.yaml. Atrapa mastera ich nie wykonuje (G38).
 - Weryfikacja: `make lint`, 9 testów jednostkowych kryteriów i spójności z geometrią, 56 testów scenariuszy; na LinuxCNC RIP w podmanie (Debian 12) oba scenariusze PASS (16 min 39 s).
 - Do zrobienia w 033: ekran kalibracji sondy w HMI, logika sondy QtDragon w nowym stylu, ręczny odbiór G54–G59.3 w HMI. Typ celu `plate` jest w modelu (router), ale scenariusz LinuxCNC istnieje tylko dla mill_servo_table. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## #159 — uwagi Claude do biblioteki maszyn · 2026-10-25 · Codex
+- Model-Author: Codex. Usunięto stałą 17100 z testu edycji YAML; oczekiwanie pochodzi z aktualnej konfiguracji.
+- Atomowa publikacja plików konfiguracji w bibliotece/edytorze; kosz z unikalnym sufiksem i zgodnością starszych nazw.
+- Dodano regresje błędu publikacji i dwóch usunięć w tej samej sekundzie; wykonanie powierzono Claude. Składnia/diff PASS.
+- Bez zmian ramp/progów i bez deklaracji odbioru GUI/sprzętu. Przegląd autora nie zastępuje wymaganych kontroli.
 
 ## M2 / SKIN-02 — wybór rodziny z poziomu HMI · 2026-10-25 · Codex
 - Model-Author: Codex. Claude odebrał start Classic Digital/bab3866 na EndeavourOS; lokalne lint, 1359 offline i wymagania PASS. Luka: brak wyboru rodziny w GUI.

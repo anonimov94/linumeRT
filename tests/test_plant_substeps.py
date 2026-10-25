@@ -12,6 +12,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
+import yaml
 from linumert_plant.scenario import Scenario, Step, run_mock
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -40,7 +41,23 @@ def core():
         pytest.skip(f"rdzeń C niedostępny: {exc}")
 
 
+# poza krawędzią momentu (strojenie: M1_ACCEL_TUNING)
+REFERENCE_ACCEL = {"X": 1000, "Y": 1000, "Z": 500}
+
+
+def _reference_machine(machine: Path, tmp_path: Path) -> Path:
+    """Kopia maszyny z przyspieszeniami referencyjnymi: niezależność od substeps sprawdzamy w
+    obszarze pracy z zapasem, a nie na granicy utraty kroków dobranej do `substeps` = 4."""
+    data = yaml.safe_load(machine.read_text(encoding="utf-8"))
+    for axis in data["axes"]:
+        axis["max_acceleration"] = REFERENCE_ACCEL.get(axis["letter"], axis["max_acceleration"])
+    out = tmp_path / f"ref_{machine.name}"
+    out.write_text(yaml.safe_dump(data, allow_unicode=True), encoding="utf-8")
+    return out
+
+
 def _run(machine: Path, program: str, n: int, tmp_path: Path):
+    machine = _reference_machine(machine, tmp_path)
     path = tmp_path / f"p{n}.ngc"
     path.write_text(f"G90\nG0 Z-5\n{program}\nM2\n", encoding="utf-8")
     scen = Scenario("substeps", None, machine, duration=60, substeps=n, program=path,

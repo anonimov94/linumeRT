@@ -31,6 +31,7 @@ from ..faults import FaultError
 from ..server import PlantConfigError, PlantServer
 from . import presets as preset_store
 from .editor import EditorError, MachineEditor
+from .machine_library import MachineLibrary
 from .record import NAME_RE as RECORD_NAME_RE
 from .record import Recorder
 from .telemetry import FIELDS, UNITS
@@ -69,6 +70,16 @@ class Key(BaseModel):
 class MachineBody(BaseModel):
     data: dict[str, Any]
     comment: str | None = None
+
+
+class TextBody(BaseModel):
+    text: str
+    comment: str | None = None
+
+
+class LibraryBody(BaseModel):
+    file: str
+    name: str | None = None
 
 
 class CloneBody(BaseModel):
@@ -300,6 +311,47 @@ def create_app(server: PlantServer, state_dir: Path | str = Path("state")) -> Fa
     @app.get("/api/machine/scene")
     def machine_scene() -> dict:
         return ed(editor.scene)
+
+    # ---- biblioteka maszyn i edycja YAML (każdy parametr, nowe/stare/usuwanie) ----------------
+    library = MachineLibrary(editor)
+    app.state.library = library
+
+    @app.get("/api/machines")
+    def machines_list() -> dict:
+        return {"directory": str(ed(lambda: library.directory)), "machines": ed(library.catalog),
+                "trash": ed(library.trashed)}
+
+    @app.post("/api/machines/clone")
+    def machines_clone(body: LibraryBody) -> dict:
+        return ed(library.clone, body.file, body.name or "")
+
+    @app.post("/api/machines/rename")
+    def machines_rename(body: LibraryBody) -> dict:
+        return ed(library.rename, body.file, body.name or "")
+
+    @app.post("/api/machines/delete")
+    def machines_delete(body: LibraryBody) -> dict:
+        return ed(library.delete, body.file)
+
+    @app.post("/api/machines/restore")
+    def machines_restore(body: LibraryBody) -> dict:
+        return ed(library.restore, body.file)
+
+    @app.post("/api/machines/activate")
+    def machines_activate(body: LibraryBody) -> dict:
+        return ed(library.activate, body.file)
+
+    @app.get("/api/machine/text")
+    def machine_text() -> dict:
+        return ed(library.get_text)
+
+    @app.post("/api/machine/text/validate")
+    def machine_text_validate(body: TextBody) -> dict:
+        return {"errors": library.validate_text(body.text)}
+
+    @app.post("/api/machine/text/save")
+    def machine_text_save(body: TextBody) -> dict:
+        return ed(library.save_text, body.text, body.comment or "")
 
     @app.get("/api/drives/templates")
     def drive_templates() -> list[dict]:
