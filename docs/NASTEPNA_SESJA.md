@@ -15,6 +15,48 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · 2026-10-25. **#155: środowisko i stos stron odebrane, responsywność nadal otwarta.**
+ad17702: cnc_environment(), 45 kroków GUI PASS, tools/cycles=true, 64,90 s.
+e2dde87: PageStack izoluje minimum aktywnej strony od ukrytego QtDragon;
+test rzeczywistego Qt mała → szeroka → mała oraz złożenie HMI 2 PASS,
+środowisko/raportowanie 4 PASS. GUI ponownie 45 kroków PASS, 60,84 s, strony obecne.
+Nowe hashe/zrzuty w M2_028_2026-10-25_followup.json i raporcie G2.
+Procesy 46208/8453 zakończone, obie własne lease zwolnione, katalogi puste.
+Start nadal przewija poziomo — rozmiary samych kart/formularzy to następny krok.
+Nie zamykam 028 ani nie podwyższam 3/12. Bez zmian ACTION/HAL i bez instalacji bibliotek.
+
+Model-Author: Codex · 2026-10-25. **028: potwierdzony fallback usunięty w odbiorze, korekta układu.**
+Test GUI ad17702 po cnc_environment: 45 kroków PASS, tools/cycles=true, 64,90 s.
+Obie lease Codex/m2-028-gui-59903 zwolnione. Zrzuty Narzędzia/Diagnostyka nadal
+wykazują ucięcie prawej strony przy 1280×768. Zakres: stos stron ma uwzględniać
+minimum aktywnej strony, a nie niewidocznego szerokiego QtDragon; brak zmian
+ACTION/HAL. Weryfikacja rzeczywistym Qt: mała strona → szeroka → mała, potem GUI.
+
+Model-Author: Codex · 2026-10-25. **028: środowisko testu GUI jak w launcherze.**
+QtVCP ma shebang /usr/bin/python3.11; test uruchamiał go bez cnc_environment(),
+choć launcher produktu przekazuje w ten sposób biblioteki venv. Korzystam z tej
+istniejącej funkcji zamiast instalować lub dublować logikę. Plik test_hmi_shell_gui.py;
+odbiór: nowy snapshot i jedna próba 45 kroków z pages.tools/cycles=true oraz
+przeglądem zrzutów 1280×768, wyłącznie pod obiema lease. Bez zmian modelu/sterowania.
+
+Model-Author: Codex · 2026-10-25. **#155: 028 — test GUI PASS, pełny odbiór otwarty.**
+6ecda95, LinuxCNC sim / Xvfb 1280×768: 45 kroków, errors puste, 1 PASS w 61,84 s.
+Zrzut ujawnił brak yaml w procesie QtVCP i zastępczą tabelę Narzędzia: to nie odbiór
+pełnej własnej strony. Raport M2_028_2026-10-25.md/JSON i zrzut w docs/raporty/G2.
+Obie lease zwolnione, proces 55184 zakończony. Offline 111 PASS, 1 SKIP.
+Rozszerzam samotest o obecność stron tools/cycles, żeby fallback nie zaliczał
+pełnego GUI; 2 testy offline tego raportowania/synchronizacji PASS, ruff PASS.
+Następnie poprawne środowisko QtVCP i nowa celowana próba, bez nowej skórki.
+README #154 scalony 44e336f; licznik M2 pozostaje uczciwie 3/12.
+
+Model-Author: Codex · 2026-10-25. **Właściciel zmienił priorytet na M2 (3/12).**
+Zakres codex/m2-028-acceptance w osobnym checkoutcie linumeRT-m2-028:
+najpierw brakująca SPEC_EKRAN_GLOWNY.md z sesji 028, audyt istniejących testów
+powłoki/nawigacji i mapa pozostałych kryteriów. Potem odbiór GUI, nie nowa skórka.
+Pliki: docs/design/SPEC_EKRAN_GLOWNY.md, rejestr i raport 028; weryfikacja istniejącymi
+testami offline, IP guard, roadmap --check, a live wyłącznie pod obiema lease.
+Nie dubluję Twoich prac 033 ani ISO. #153 tylko do rozliczenia, bez nowej serii M1.
+
 Model-Author: Codex · 2026-10-25. **#153: odbiór diagnostyki w CI potwierdzony.**
 a78a2f1, run40199421896/job121187251141 SUCCESS: 151 live PASS. Fixture
 home_and_move PASS 14:06:35 UTC z wymaganym JSON/stage complete/brakiem snapshot_error.

@@ -523,3 +523,12 @@ Model-Author: Claude, GPL-2.0-or-later. Nowe wersje `docs/raporty/hmi_sym/skin_c
 przycięte do okna 1700×1080 bez retuszu) i `docs/raporty/hmi_sym/wynik-2026-10-25.json`. Zawierają grafiki QtDragon/LinuxCNC
 (GPL-2.0) i własne zasoby projektu. Zastępują wersje z 2026-10-23; użyte biblioteki (pyyaml, pydantic, pyqtgraph) tylko
 w środowisku wykonującym zrzuty, bez nowych zależności produktu.
+
+## Specyfikacja ekranu głównego — 2026-10-25
+- `docs/design/SPEC_EKRAN_GLOWNY.md` — autor: Codex; własny opis wymagań i kryteriów sesji 028, oparty na promptach oraz dokumentacji linumeRT (HMI_WORKFLOW, HMI_BASELINE, tokens.yaml); GPL-2.0-or-later. Bez nowych grafik, kodu lub materiałów osób trzecich.
+
+## Odbiór M2 / 028 — 2026-10-25
+- `docs/raporty/G2/M2_028_2026-10-25_start.png` — zrzut LinuxCNC sim + linumeRT/QtVCP pod Xvfb 1280×768, źródła 6ecda95; wykonanie Codex, bez retuszu. Własne zasoby linumeRT i QtDragon/LinuxCNC (GPL-2.0), całość GPL-2.0-or-later. Wynik i ograniczenia w raporcie M2_028_2026-10-25.
+
+## Kolejne zrzuty M2 / 028 — 2026-10-25
+- `docs/raporty/G2/M2_028_2026-10-25_v3_01_start.png`, `docs/raporty/G2/M2_028_2026-10-25_v3_16_obszar_narzedzia.png`, `docs/raporty/G2/M2_028_2026-10-25_v3_19_diagnostyka.png` — wykonanie Codex, LinuxCNC sim + QtVCP pod Xvfb 1280×768, źródła e2dde87, bez retuszu; linumeRT i QtDragon/LinuxCNC, GPL-2.0-or-later. Hashe w raporcie followup JSON.

@@ -6,13 +6,16 @@ Model-Author: Claude · HMI-PoC (2026-10-19).
 Włączany wyłącznie zmienną środowiska `LINUMERT_SHELL_SELFTEST=<katalog wyników>`; bez niej
 moduł nie jest importowany. Klika prawdziwe przyciski nakładki w procesie GUI (te same sloty co
 operator), po każdym kroku zapisuje zrzut okna `NN_nazwa.png` i stan do `wynik.json`; LinuxCNC
-zamyka wywołujący (okno potwierdzenia QtDragon przy zamykaniu nie blokuje testu). Uruchamia go `tests/test_hmi_shell_gui.py` (marker `linuxcnc`) i
+zamyka wywołujący (okno potwierdzenia QtDragon przy zamykaniu nie blokuje testu). Uruchamia go
+`tests/test_hmi_shell_gui.py` (marker `linuxcnc`) i
 `tools/dev/hmi-demo.sh`.
 
-Scenariusz (Start → lista gotowości): zwolnienie E-STOP → maszyna WŁ. → bazowanie → MDI G0 → program w AUTO → Wstrzymaj →
+Scenariusz (Start → lista gotowości): zwolnienie E-STOP → maszyna WŁ. → bazowanie → MDI G0 →
+program w AUTO → Wstrzymaj →
 Wznów → Stop → JOG X+ → obszary szyny (QtDragon) → powrót do „Maszyna” → Diagnostyka → Produkcja
 (korekcja posuwu 80 %, start od linii 6 do końca programu, korekcja 100 %) → grzyb HMI
-(wciśnięcie, nieskuteczny reset inną drogą, zwolnienie, brak sygnału życia → watchdog, potwierdzenie).
+(wciśnięcie, nieskuteczny reset inną drogą, zwolnienie, brak sygnału życia → watchdog,
+potwierdzenie).
 """
 
 from __future__ import annotations
@@ -304,7 +307,9 @@ class SelfTest(QtCore.QObject):
     def _finish(self) -> None:
         self.timer.stop()
         with open(os.path.join(self.out, "wynik.json"), "w", encoding="utf-8") as fh:
-            json.dump({"steps": self.steps, "errors": self.errors}, fh, indent=2,
+            json.dump({"steps": self.steps, "errors": self.errors,
+                       "pages": {"tools": self.shell.tools is not None,
+                                 "cycles": self.shell.cycles is not None}}, fh, indent=2,
                       ensure_ascii=False)
 
 
@@ -318,7 +323,8 @@ def maybe_start(shell) -> SelfTest | None:
 
 
 class ClassicSelfTest(QtCore.QObject):
-    """Samotest trybu klasycznego (LINUMERT_SHELL=0, przegląd Codexa P2): reset przyciskiem QtDragon,
+    """Samotest trybu klasycznego (LINUMERT_SHELL=0, przegląd Codexa P2): reset przyciskiem
+    QtDragon,
     brak sygnału życia → E-STOP, reset komendą z innego procesu nieskuteczny, wznowienie sygnału
     życia + przycisk QtDragon → zezwolenie, bez BYPASS i bez restartu ekranu."""
 

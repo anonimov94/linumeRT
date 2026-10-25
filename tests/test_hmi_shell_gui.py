@@ -20,6 +20,7 @@ import time
 from pathlib import Path
 
 import pytest
+from linumert.machine.launch import cnc_environment
 from rip_support import cleanup_linuxcnc, stop_linuxcnc
 
 pytestmark = pytest.mark.linuxcnc
@@ -50,7 +51,7 @@ def _run_selftest(tmp_path: Path, out: Path, extra_env: dict[str, str] | None = 
         "PROGRAM_PREFIX = ../nc_files", f"PROGRAM_PREFIX = {NC}").replace(
         "HALFILE = ../../hal/", f"HALFILE = {ROOT / 'config' / 'hal'}/"), encoding="utf-8")
     shutil.rmtree(out, ignore_errors=True)
-    env = {**os.environ, "LINUMERT_SHELL_SELFTEST": str(out), **(extra_env or {})}
+    env = {**cnc_environment(), "LINUMERT_SHELL_SELFTEST": str(out), **(extra_env or {})}
     proc = subprocess.Popen(["linuxcnc", str(ini)], cwd=work, env=env, stdout=subprocess.PIPE,
                             stderr=subprocess.STDOUT, text=True, start_new_session=True)
     result = out / "wynik.json"
@@ -85,6 +86,8 @@ def test_shell_selftest_in_gui(tmp_path) -> None:
     steps = {s["step"]: s for s in data["steps"]}
     assert data["errors"] == [], data["errors"]
     assert len(steps) == 45 and all(s["ok"] for s in steps.values())
+    # A fallback QtDragon page must not certify the custom operator screens.
+    assert data["pages"] == {"tools": True, "cycles": True}, data["pages"]
     assert steps["04d_wpis_liczb"]["typed_jog_speed"] == 12.3456
     assert steps["04d_wpis_liczb"]["typed_jog_step"] == "2.5"
     assert steps["04e_wpis_pozycji"]["typed_position_x"] == -12.3456

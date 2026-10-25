@@ -1,0 +1,54 @@
+[
+  {
+    "version": "v2",
+    "source_sha": "ad17702fa7f0f5597b802890c02887eb40480b2a",
+    "seconds": 64.9,
+    "steps": 45,
+    "pages": {
+      "tools": true,
+      "cycles": true
+    },
+    "errors": [],
+    "leases_released": true,
+    "raw_result_sha256": "009cd5ca548dfc30b0fd14040e8ab6a1092b0deebaecbdd738282cc975b21143",
+    "junit_sha256": "eddf8ea0dbc0d66e6dc04106079bebb5298dc905257a8700819260b34f15137d",
+    "screenshots": {}
+  },
+  {
+    "version": "v3",
+    "source_sha": "e2dde87dad405a3d12f4386a0b19334564f75f01",
+    "seconds": 60.84,
+    "steps": 45,
+    "pages": {
+      "tools": true,
+      "cycles": true
+    },
+    "errors": [],
+    "leases_released": true,
+    "raw_result_sha256": "ad79cdd8fb60ef6574c9b6c334814d946fbe1cdcd1954909dca23eb67f414c32",
+    "junit_sha256": "66cf0b308051be97c80a75e6efe24159c1283ca3ba8f864c25af957fa31d9de0",
+    "screenshots": {
+      "M2_028_2026-10-25_v3_01_start.png": {
+        "sha256": "cc3b2c5c0810f17c8e401a1d35a1b858d51ed749e0aa69838fd03f1c8037b0a3",
+        "size": [
+          1280,
+          768
+        ]
+      },
+      "M2_028_2026-10-25_v3_16_obszar_narzedzia.png": {
+        "sha256": "9861e19bb28121ff27d878c2c4a16cae255923dda74a4d9f7dd9276cac69513e",
+        "size": [
+          1280,
+          768
+        ]
+      },
+      "M2_028_2026-10-25_v3_19_diagnostyka.png": {
+        "sha256": "98b469e6b86df0091646c3017bfe318ab16a6704d109ad51b77624431ae89dc2",
+        "size": [
+          1280,
+          768
+        ]
+      }
+    }
+  }
+]

@@ -26,6 +26,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from qtvcp.core import Action, Info, Status
 
 from linumert_alarm_panel import AlarmPanel
+from linumert_layout import PageStack
 from linumert_operator_controls import OperatorControls
 from linumert_virtual_session import VirtualSession, virtual_config
 import linumert_shell_model as model
@@ -183,7 +184,7 @@ class LinumertShell(QtCore.QObject):
         body = QtWidgets.QHBoxLayout()
         body.setSpacing(0)
         body.addWidget(self._rail())
-        self.stack = QtWidgets.QStackedWidget()
+        self.stack = PageStack()
         self.stack.addWidget(self._machine_page())
         classic_page = QtWidgets.QWidget()
         classic_page.setObjectName("lrtClassic")

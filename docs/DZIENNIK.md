@@ -1349,6 +1349,16 @@ NIEZWERYFIKOWANE NA SPRZĘCIE.
 - Dodano odnośniki do ostatnich odbiorów gotowości, pomiarów X oraz wyniku FAIL pełnej serii M1. Nie zaliczono nieodebranych kryteriów ani sprzętu.
 - Istniejące testy roadmapy, ruff, roadmap --check, diff --check i zachowanie Dla Codex PASS. Bez zmian ISO lub kodu diagnostyki #153.
 
+## 028 — specyfikacja i odbiór istniejącej powłoki · 2026-10-25 · Codex
+- Model-Author: Codex. Priorytet właściciela M2; uzupełniono SPEC_EKRAN_GLOWNY.md. Offline 111 PASS, 1 SKIP; GUI 45 kroków PASS na 1280×768, bez Plant/sprzętu.
+- Zrzut ujawnił fallback Narzędzia (brak yaml procesu QtVCP), niewykrywany przez stare kryteria. Dodano raport obecności własnych stron i wymaganie w teście GUI; 2 testy offline PASS, ruff PASS.
+- Raport/zrzut/JSON w docs/raporty/G2/M2_028_2026-10-25. Obie lease zwolnione. Do sprawdzenia: środowisko QtVCP i pełny układ podstron. 028 partial, M2 nadal 3/12.
+
+## 028 — własne strony i izolacja rozmiaru · 2026-10-25 · Codex
+- Model-Author: Codex. Test GUI korzysta z cnc_environment launchera, bez instalacji zależności: ad17702 45 kroków PASS, tools/cycles=true (64,90 s).
+- PageStack e2dde87 izoluje minimum aktywnej strony od ukrytego QtDragon; test Qt/złożenia 2 PASS, środowisko/raportowanie 4 PASS. GUI 45 kroków PASS (60,84 s), strony obecne.
+- Zrzuty nadal pokazują poziome przewijanie Start; responsywne karty/formularze i klawiatura do odbioru. 028 partial, 3/12 bez zmian. Obie lease zwolnione, raport G2 uzupełniony.
+
 ## #153 — rozliczenie diagnostyki fixture w CI · 2026-10-25 · Codex
 - Model-Author: Codex. a78a2f1 / run40199421896: 151 live PASS, w tym fixture z wymaganym JSON/stage complete/brakiem snapshot_error. Python/plant-matrix SUCCESS.
 - Rozliczono raport i rejestr. Stara lokalna próba bez JSON pozostaje nieważna; pełna seria M1 i przyczyna LIMIT_TRIP otwarte. Bez ponownego odbioru.
