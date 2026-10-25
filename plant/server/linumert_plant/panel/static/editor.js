@@ -21,7 +21,7 @@ function showTab(tab) {
   E.tab = tab;
   for (const b of document.querySelectorAll(".tab")) b.classList.toggle("on", b.dataset.tab === tab);
   for (const v of document.querySelectorAll(".view")) v.hidden = v.id !== `view-${tab}`;
-  ({ maszyna: loadMachine, napedy: loadDrives, awarie: loadFaults })[tab]?.();
+  ({ maszyna: loadMachine, napedy: loadDrives, awarie: loadFaults, biblioteka: () => window.loadLibrary?.() })[tab]?.();
   actions();
 }
 function actions() {
@@ -34,6 +34,7 @@ function actions() {
     napedy: [["primary", "Kopiuj", "→ nowy szablon", () => cloneDrive(E.d.sel)],
              ["", "Zapisz jako szablon", "wybrana instancja", () => cloneDrive(E.d.selInst)],
              ["", "Porównaj", "z bazowym", () => $("d-diff").scrollIntoView()]],
+    biblioteka: window.libraryActions ? window.libraryActions() : [],
   }[E.tab] || [];
   bar.innerHTML = "";
   bar.hidden = !defs.length;

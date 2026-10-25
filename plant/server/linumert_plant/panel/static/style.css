@@ -136,4 +136,8 @@ input[type=text], input:not([type]) { flex: 1; min-height: 32px; background: var
 .fault select, .fault input { min-height: 34px; background: var(--bg2); color: var(--fg); border: 1px solid var(--line2);
   border-radius: 8px; padding: 0 8px; font: 12px var(--mono); }
 
+.yaml { width: 100%; min-height: 52vh; resize: vertical; background: var(--bg2); color: var(--fg);
+  border: 1px solid var(--line2); border-radius: 10px; padding: 10px; font-size: 12px; line-height: 1.5; tab-size: 2; }
+.item .badge-on { color: var(--teal2); } .item .bad { color: var(--err); }
+
 [hidden] { display: none !important; }

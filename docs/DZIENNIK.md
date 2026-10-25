@@ -1462,6 +1462,13 @@ i integracja w powłoce (nowy obszar na szynie, wczytanie zapisu przy starcie, `
 - Model-Author: Codex. Wspólny warunek przejścia do jednej kolumny w obliczaniu wysokości i geometrii; uwzględnia minima kart również powyżej 1100 px.
 - Regresja dwóch kart 700×200 w 1200 px do wykonania przez Claude; składnia/diff sprawdzone. Bez deklaracji odbioru laptopa i zamknięcia 028.
 
+## 2026-10-25 — Claude: zakładka „Maszyny” w panelu Plant (biblioteka maszyn)
+Model-Author: Claude. Interfejs do API z #159: lista maszyn (aktywna, walidacja, osie, napędy), Aktywuj / Kopiuj /
+Zmień nazwę / Usuń (kosz z przywracaniem kliknięciem) oraz edytor YAML aktywnej maszyny z walidacją na żywo
+i zapisem do historii (`static/library.js`, zakładka w `index.html`). Sprawdzone klikaniem w panelu (kopia → kosz,
+zrzut `docs/raporty/plant_biblioteka/zakladka_maszyny_kosz.jpg`) oraz testem `test_panel_http_api_on_localhost`;
+17 testów PASS, ruff PASS. Edycja YAML dotyczy tylko aktywnej maszyny (inną najpierw aktywuj). NIEZWERYFIKOWANE NA SPRZĘCIE.
+
 ## 2026-10-25 — Claude: odbiór #163 (rodziny skórek w hoście QtVCP)
 Model-Author: Claude. Zsynchronizowano z `main` (po #161), 560 testów offline PASS (jedyny lokalny błąd `test_launcher` to ograniczenie NTFS, gałąź nie zmienia launchera), CI python/linuxcnc zielone.
 Zrzuty czterech rodzin (Classic Digital, Industrial Pro, Cyberdeck, Organic Vector) × 1920×1080 i 1280×800 z prawdziwego LinuxCNC (`docs/raporty/G2/skorki_qtvcp/`): host startuje,
