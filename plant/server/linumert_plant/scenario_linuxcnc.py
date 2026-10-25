@@ -95,8 +95,20 @@ def machine_on():
     c.state(linuxcnc.STATE_ESTOP_RESET)
     wait(lambda: s.task_state == linuxcnc.STATE_ESTOP_RESET, 5)
     c.state(linuxcnc.STATE_ON)
-    return wait(lambda: s.task_state == linuxcnc.STATE_ON, 5)
+    if not wait(lambda: s.task_state == linuxcnc.STATE_ON, 5):
+        return False
+    # STATE_ON is a LinuxCNC command state, not CiA402 OPERATION ENABLED.
+    # Plant drives can still be in NOT_READY while their boot timer is running.
+    ready = wait(lambda: s.task_state == linuxcnc.STATE_ON and all(
+        hal.get_value("lrt-cia402.%d.enabled" % j) for j in range(4)), 5)
+    if plan.get("diagnostics"):
+        sample = {"elapsed": time.monotonic() - driver_started, "ready": ready}
+        out.setdefault("drive_ready", []).append(sample)
+        print("DRIVES_READY " + json.dumps(sample), flush=True)
+    return ready
 out["machine_on"] = machine_on()
+if not out["machine_on"]:
+    raise RuntimeError("napędy niegotowe do bazowania (CiA402 OPERATION ENABLED)")
 c.mode(linuxcnc.MODE_MANUAL); c.wait_complete()
 c.teleop_enable(0); c.wait_complete()
 for attempt in range(2):  # WSL bez RT: pojedynczy błąd nadążania przy bazowaniu — ponów raz
@@ -105,6 +117,8 @@ for attempt in range(2):  # WSL bez RT: pojedynczy błąd nadążania przy bazow
     if out["homed"]:
         break
     out["machine_on"] = machine_on()
+    if not out["machine_on"]:
+        raise RuntimeError("napędy niegotowe do ponownego bazowania (CiA402 OPERATION ENABLED)")
     c.mode(linuxcnc.MODE_MANUAL); c.wait_complete()
     c.teleop_enable(0); c.wait_complete()
 c.teleop_enable(1); c.wait_complete()
