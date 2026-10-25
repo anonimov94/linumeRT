@@ -1338,3 +1338,8 @@ NIEZWERYFIKOWANE NA SPRZĘCIE.
 - Plant LIMIT_TRIP bez czasu/osi, brak końcowego NML i śladu tego modułu; przyczyna nieustalona. Bez zmian modelu/ramp/progów i bez ponowienia serii.
 - Autokontrola JUnit, manifestów 628 plików i 12 śladów; raport M1_REPEAT_2026-10-25.md/JSON oraz surowy log/JUnit. Procesy zakończone, obie lease zwolnione.
 - Kolejny krok: diagnostyka timeoutów drivera pierwszego modułu, potem celowany odbiór. G1 i historyczny X nadal otwarte.
+
+## README — wykonane sesje i rozszerzenia · 2026-10-25 · Codex
+- Model-Author: Codex. Na polecenie właściciela README pokazuje osobno 39/84 sesji i 19/38 rozszerzeń, także w podziale M0–M6; liczniki generowane z plan.json.
+- Dodano odnośniki do ostatnich odbiorów gotowości, pomiarów X oraz wyniku FAIL pełnej serii M1. Nie zaliczono nieodebranych kryteriów ani sprzętu.
+- Istniejące testy roadmapy, ruff, roadmap --check, diff --check i zachowanie Dla Codex PASS. Bez zmian ISO lub kodu diagnostyki #153.

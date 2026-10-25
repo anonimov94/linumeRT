@@ -86,19 +86,27 @@ def readme_milestones(plan: dict, text: str) -> str:
     if README_START in old or README_END in before:
         raise ValueError('Niepoprawna kolejność znaczników MILESTONES')
     done = sum(r['status'] == 'done' for r in plan['sessions'])
+    extensions_done = sum(r['status'] == 'done' for r in plan['extensions'])
+    partial = sum(r['status'] == 'partial' for r in plan['sessions'])
+    planned = sum(r['status'] == 'planned' for r in plan['sessions'])
     lines = ['', '<!-- Generowane przez tools/roadmap.py z plan.json. -->', '',
              f"Stan rejestru: **{plan['updated']} · {done}/{plan['original_count']} "
              'ukończonych sesji**.', '',
-             '| Kamień | Zakres | Sesje ukończone | Rekordy z otwartymi kryteriami |',
-             '|---|---|---:|---:|']
+             f"Dodatkowo ukończono **{extensions_done}/{len(plan['extensions'])} rozszerzeń**. "
+             f'Wśród sesji: {partial} częściowych i {planned} planowanych. '
+             'Rozszerzenia liczymy osobno, bez zwiększania licznika 84 sesji.', '',
+             '| Kamień | Zakres | Sesje ukończone | Rozszerzenia ukończone | '
+             'Rekordy z otwartymi kryteriami |',
+             '|---|---|---:|---:|---:|']
     for milestone in plan['milestones']:
         group = [r for r in plan['sessions'] if r['milestone'] == milestone['id']]
         ids = {r['id'] for r in group}
         extensions = [r for r in plan['extensions'] if ids.intersection(r['parents'])]
         count = sum(r['status'] == 'done' for r in group)
         remaining = sum(bool(r['remaining']) for r in group + extensions)
+        extension_count = sum(r['status'] == 'done' for r in extensions)
         lines.append(f"| {milestone['id']} | {milestone['name']} | {count}/{len(group)} "
-                     f'| {remaining} |')
+                     f'| {extension_count}/{len(extensions)} | {remaining} |')
     lines += ['', 'Licznik sesji nie oznacza zaliczenia bramki, odbioru stanowiska ani sprzętu. '
               'Otwarte kryteria obejmują sesje i powiązane rozszerzenia; jedno rozszerzenie '
               'może dotyczyć kilku kamieni.', '',
