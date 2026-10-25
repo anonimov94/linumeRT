@@ -47,6 +47,28 @@ przy timeoutach/asercjach. Bez zmiany warunków ruchu, progów, timeoutów i mod
 Weryfikacja: wymuszony timeout/wyjątek na atrapach, lint, jawne not linuxcnc;
 odbiór live osobno, wyłącznie po uzyskaniu obu lease. Nie powtarzam pełnej serii.
 
+Model-Author: Codex · 2026-10-25. **#156: potwierdzony błąd kontekstu w --safe.**
+Niezależna próba QGLWidget pod Xvfb, bez LinuxCNC: LIBGL_ALWAYS_SOFTWARE=1,
+QT_XCB_GL_INTEGRATION=none → isValid False; xcb_glx → True. QtDragon nadal ma
+GCodeGraphics, więc tryb awaryjny nie może odbierać mu integracji GL.
+Zakres: --safe zachowuje programowe Mesa i podgląd linumeRT 2D, ale używa xcb_glx;
+regresja uruchamia atrapę launchera i rzeczywisty QGLWidget bez CNC: 12 testów ISO PASS. Nie zmieniam
+HAL/modelu ani nie deklaruję przyczyny pierwotnego SIGSEGV. Odbiór laptopa otwarty.
+
+Model-Author: Codex · 2026-10-25. **Nowy blocker właściciela: HMI z ISO SIGSEGV.**
+Właściciel dostarczył linuxcnc.report/info: LinuxCNC 2.9.10, Debian RT6.1,
+QtVCP dla profilu Plant kończy się SIGSEGV podczas startu. Podgląd skórek i serwer
+Plant działają osobno; nie są odbiorem normalnego HMI. Zakres codex/m2-iso-hmi-crash
+w osobnym checkoutcie: zachowanie dowodów i włączenie faulthandler w launcherze,
+bez deklaracji przyczyny GPU i bez zmian HAL/sterowania. Proszę nie dublować poprawki. Właściciel dostał nową próbę bez --safe: jawne
+LINUMERT_NO_GL=1 LIBGL_ALWAYS_SOFTWARE=1 QT_OPENGL=software
+QT_XCB_GL_INTEGRATION=xcb_glx PYTHONFAULTHANDLER=1 linumert; poprzednia prośba
+o stary --safe jest zastąpiona tym poleceniem.
+Poprosiłem właściciela o próbę PYTHONFAULTHANDLER=1 linumert --safe (sam sim).
+Tryb --safe wyłącza pyqtgraph 3D, ale bazowy GCodeGraphics nadal jest widgetem GL;
+sam SIGSEGV bez tracebacku nie ustala przyczyny. Weryfikacja: 11 istniejących testów ISO PASS,
+składnia/shellcheck, raport i zdalny SHA. Draft #156. Odbiór laptopa nadal otwarty.
+
 Model-Author: Codex · 2026-10-25. **Polecenie właściciela: aktualizacja README/postępu.**
 Zakres codex/readme-progress-summary, osobny checkout linumeRT-readme-status-20261025:
 README i jego generator pokazują sesje oraz ukończone rozszerzenia osobno, ostatnie

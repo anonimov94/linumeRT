@@ -11,6 +11,8 @@ xfce4-terminal
 lightdm
 network-manager
 network-manager-gnome
+# demon powiadomień D-Bus: bez niego QtVCP (sys_notify) kończy się SIGSEGV w libdbus
+xfce4-notifyd
 wpasupplicant
 policykit-1
 iw
