@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=linumeRT Monitor Neon
+Comment=Monitor Classic × Neon obok działającego LinuxCNC (tylko odczyt)
+Exec=/usr/local/bin/linumert-gui --neon
+Icon=/opt/linumeRT/docs/design/marka/znak.svg
+Terminal=false
+Categories=Engineering;
