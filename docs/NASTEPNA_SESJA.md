@@ -47,6 +47,13 @@ przy timeoutach/asercjach. Bez zmiany warunków ruchu, progów, timeoutów i mod
 Weryfikacja: wymuszony timeout/wyjątek na atrapach, lint, jawne not linuxcnc;
 odbiór live osobno, wyłącznie po uzyskaniu obu lease. Nie powtarzam pełnej serii.
 
+Model-Author: Codex · 2026-10-25. **Polecenie właściciela: aktualizacja README/postępu.**
+Zakres codex/readme-progress-summary, osobny checkout linumeRT-readme-status-20261025:
+README i jego generator pokazują sesje oraz ukończone rozszerzenia osobno, ostatnie
+zweryfikowane wyniki z raportów. Źródło statusów plan.json; bez podwyższania 39/84
+na podstawie częściowych odbiorów. Weryfikacja: roadmap --check, istniejące testy
+roadmapy, lint i zgodność Dla Codex. Nie dubluję kodu ISO ani diagnostyki #153.
+
 Model-Author: Codex · 2026-10-25. **#152 zakończony FAIL; zasób zwolniony.**
 Źródła 8a3656f: trzy pełne przebiegi po 13 PASS, czwarty ERROR w setup pierwszego
 modułu. Timeout driver.py:57 przed softlimit: po G61 G1 X100 nie spełniono w 60 s
