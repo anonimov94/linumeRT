@@ -1260,6 +1260,14 @@ NIEZWERYFIKOWANE NA SPRZĘCIE.
 - Incydent: pierwsze polecenie objęło też test live mimo blokady Claude 033, wynik nieważny (KeyboardInterrupt); zgłoszone w Dla Claude. Dalsze testy wyłącznie not linuxcnc.
 - Raport M1_DRIVE_READY_2026-10-25.md; wymagane CI i odbiór pierwszego bazowania ze śladem. M1/G1/sprzęt otwarte.
 
+
+## 077/078 — README, kamienie milowe i ISO na laptop (PR #144) · 2026-10-25 · Codex
+- Model-Author: Codex. Jawne polecenie właściciela: odświeżony README po polsku, funkcje, Live USB i aktualne dowody.
+- Tabela M0–M6 generowana z plan.json i kontrolowana przez --check; 39/84 sesji, bez deklarowania odbioru bramek.
+- Debian: 23 testy roadmap/ISO PASS, lint PASS, lokalne linki README PASS. Bez wspólnego LinuxCNC; Claude prowadzi 033.
+- ISO workflow 40181951376 uruchomiony z main c028159; oczekiwane wydanie testowe i weryfikacja SHA-256.
+- Budowa obrazu nie zamyka odbioru Live/instalacji/RT laptopa ani wcześniejszych bramek. Autokontrola.
+
 ## M1 — odbiór gotowości w CI · 2026-10-25 · Codex
 - Model-Author: Codex. d223909: LinuxCNC job 121128248228 SUCCESS, 147 live PASS, w tym pierwsze bazowanie bez retry i setup_errors oraz sampler.
 - #141/#142 scalone, zdalny main c028159 zweryfikowany. Nieważny lokalny incydent zachowany w raporcie; historyczny X, pełna seria i G1 nadal otwarte.

@@ -291,3 +291,13 @@ Powiązanie: M1/026, LEGACY-RUNTIME oraz istniejące modele 011/012 i ich scenar
 nie otwiera to nowej równoległej roadmapy ani nie zmienia kolejności odbiorów.
 Dowód porównawczy i ograniczenia: `raporty/prototypy/M1_FIRST_MOTION_2026-10-25.md`.
 NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+
+## README i ISO do testów na laptopie · 2026-10-25 · decyzja właściciela
+Model-Author: Codex. Właściciel zlecił nowy README strony repozytorium, aktualizację
+kamieni milowych i nowe ISO do własnego testu na laptopie. To jawny priorytet
+publikacji w ramach 077/078 i ISO-ACCEPTANCE; wcześniejsze odbiory M1–M6 pozostają
+otwarte. README korzysta z plan.json, bez drugiej ręcznej listy statusów.
+Obraz live amd64 powstaje z opublikowanego main przez istniejący workflow ISO;
+SHA źródeł i SHA-256 obrazu są częścią przekazania. Budowa/publikacja nie oznaczają
+odbioru startu, instalacji ani kwalifikacji RT laptopa. Claude kontynuuje 033.
