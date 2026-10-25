@@ -27,6 +27,7 @@ from qtvcp.core import Action, Info, Status
 
 from linumert_alarm_panel import AlarmPanel
 from linumert_layout import PageStack
+from linumert_operator_view import startup_family
 from linumert_operator_controls import OperatorControls
 from linumert_virtual_session import VirtualSession, virtual_config
 import linumert_appearance as appearance
@@ -76,7 +77,8 @@ AREAS = (
     ("settings", "Konfiguracja", "konfiguracja", "btn_settings"),
     ("classic", "Pełny QtDragon", "wtyczka", "btn_main"),
 )
-if os.environ.get("LINUMERT_OPERATOR_SKIN"):
+OPERATOR_FAMILY = startup_family()
+if OPERATOR_FAMILY != "shell":
     AREAS = (("skin", "HMI", "maszyna", "page:skin"), *AREAS)
 
 
@@ -138,6 +140,7 @@ class LinumertShell(QtCore.QObject):
         self.h = handler
         self.w = handler.w
         self.action, self.info, self.status = ACTION, INFO, STATUS
+        self.active_skin = OPERATOR_FAMILY
         # Piny grzyba HMI (D35): ok = 1 grzyb zwolniony, hb = sygnał życia, wd = uzbrojenie watchdoga
         self.hmi_pins = hmi_pins or {}
         self.tokens = model.load_tokens()
@@ -260,12 +263,12 @@ class LinumertShell(QtCore.QObject):
         self._timer.timeout.connect(self._tick)
         self._timer.start(500)
         self._start_mushroom()
-        if os.environ.get("LINUMERT_OPERATOR_SKIN"):
+        if self.active_skin != "shell":
             from linumert_skin_contract import PresentationPreferences
             from linumert_skin_qtvcp import OperatorSkin
 
             preferences = PresentationPreferences(
-                skin=os.environ["LINUMERT_OPERATOR_SKIN"],
+                skin=self.active_skin,
                 theme=os.environ.get("LINUMERT_OPERATOR_THEME", "classic-turquoise"),
                 language=self.language)
             self.skin_host = OperatorSkin(self, preferences)

@@ -35,7 +35,7 @@ class OperatorSkin(SkinMonitor):
         super()._replace_header(palette)
         routes = {text(key, self.preferences): target for key, target in (
             ("machine", "machine"), ("program", "program"),
-            ("tools", "tools"), ("diagnostics", "diag"), ("settings", "settings"))}
+            ("tools", "tools"), ("diagnostics", "diag"), ("settings", "appearance"))}
         for button in self.header.findChildren(SkinButton):
             target = routes.get(button.text())
             if target:
