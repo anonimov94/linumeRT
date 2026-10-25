@@ -1,6 +1,6 @@
 # M1 — gotowość napędów przed bazowaniem
 
-Model-Author: Codex · 2026-10-25. Autokontrola; odbiór runtime poprawki nadal otwarty.
+Model-Author: Codex · 2026-10-25. Autokontrola; odbiór poprawki na LinuxCNC w CI PASS.
 NIEZWERYFIKOWANE NA SPRZĘCIE. Zakres Claude 033 (G54–G59.3 i sonda Z/narożnika)
 pozostaje odrębny.
 
@@ -59,3 +59,26 @@ Dodany test `test_first_home_after_drive_readiness` ma marker linuxcnc i wymaga
 pierwszego bazowania bez retry oraz pustego setup_errors. Nie uruchamiano go
 lokalnie. Ostatni zestaw jednostkowy kodu `f85bcd7`: 24 PASS / 2 live deselected,
 lint/roadmap i pokrycie 22/22 REQ PASS. To nadal nie zastępuje wyniku testu live.
+
+## Końcowy odbiór w CI — d223909
+
+Po opisanym wyżej nieważnym przebiegu lokalnym wykonano niezależny przebieg
+w środowisku CI dla `d223909716b5aa51c7d152d1ae30f8a26754e77f`.
+[LinuxCNC job 121128248228](https://github.com/anonimov94/linumeRT/actions/runs/40179788254/job/121128248228)
+zakończył się SUCCESS; zestaw live: **147 PASS**, bez pominięcia nowych testów.
+`test_first_home_after_drive_readiness` PASS (09:31:08 UTC) oraz
+`test_servo_trace_with_real_sampler` PASS (09:31:21 UTC).
+
+Test pierwszego bazowania wymaga jednocześnie ukończenia programu, wszystkich
+kryteriów scenariusza, pustego setup_errors, gotowości wszystkich napędów oraz
+dokładnie jednego wywołania machine_on — pierwszego bazowania bez retry.
+To dowód usunięcia wykazanego braku oczekiwania na gotowość w tym runnerze;
+nie odbiór ogólnego interlocka HMI, historycznego uchybu X ani całej bramki G1.
+Model, czas rozruchu Z, rampy, progi i liczba dostępnych retry pozostały bez zmian.
+Incydent lokalny pozostaje nieważnym wynikiem i nie jest zastępowany deklaracją PASS.
+
+Kontrole python i plant-matrix dla tego samego HEAD również SUCCESS.
+Po scaleniu zależności #141 (`890c399`) PR #142 skierowano na main i scalono jako
+`c0281596a54a6911b344edf8709edabed8748090`; zdalny main zweryfikowany.
+Następne otwarte kryterium: historyczny uchyb X 0,3 mm, potem wymagana seria
+10 kolejnych PASS; GUI/heartbeat, VirtualBox, RT i sprzęt nadal otwarte.

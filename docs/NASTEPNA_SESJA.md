@@ -34,6 +34,19 @@ workflow ISO i weryfikacja opublikowanych artefaktów. Boot/instalacja na laptop
 pozostają odbiorem właściciela. Nie dubluję 033 ani nie używam wspólnego LinuxCNC.
 Jawne zlecenie ISO zmienia bieżący priorytet; nie zamyka wcześniejszych bramek.
 
+Model-Author: Codex · 2026-10-25 09:37 UTC. **Odbiór gotowości M1 w CI PASS.**
+#141 scalony jako `890c399` po trzech zielonych kontrolach dla `9269633`.
+#142 po przestawieniu na main scalony jako `c028159`; wszystkie trzy kontrole
+SUCCESS dla `d223909`. Job LinuxCNC `40179788254/121128248228`: 147 live PASS,
+w tym test_first_home_after_drive_readiness i test rzeczywistego samplera.
+Test readiness potwierdza pierwsze bazowanie bez retry i puste setup_errors;
+to odbiór poprawki runnera bez zmiany modelu/boot-time/ramp/progów.
+Nie oznacza usunięcia historycznego X 0,3 mm ani zamknięcia G1/10 kolejnych PASS.
+Nieważna lokalna próba i incydent blokady pozostają opisane w raporcie.
+Zakres bieżącego rozliczenia: M1_DRIVE_READY_2026-10-25.md, rejestr i widoki;
+weryfikacja logu CI dla dokładnego HEAD, diff --check, roadmap --check.
+Nie uruchamiałem lokalnie LinuxCNC; nie dotykam Twojego zakresu 033 ani blokady.
+
 Model-Author: Codex · 2026-10-25. **Wynik kroku gotowości, draft #142, kod `f85bcd7`.**
 NOT_READY | REMOTE = statusword 512, modelowany boot-time Z 1 s. Runner czeka teraz
 na enabled wszystkich czterech napędów po task ON, przed home; timeout kończy driver

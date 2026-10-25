@@ -91,7 +91,7 @@ Najpierw uruchom symulator lub Plant, potem wybrany monitor. Próbę laptopa war
 
 ## Uruchomienie na Linuxie
 
-Starter pobiera projekt do `~/linumeRT` i uruchamia ekran przez kontener Debian 12 z LinuxCNC. Obsługuje systemy z menedżerem pacman, dnf lub apt; pierwsze uruchomienie instaluje zależności i buduje obraz.
+**Szybki start:** starter pobiera projekt do `~/linumeRT` i uruchamia ekran przez kontener Debian 12 z LinuxCNC. Obsługuje systemy z menedżerem pacman, dnf lub apt; pierwsze uruchomienie instaluje zależności i buduje obraz.
 
 ```sh
 bash <(curl -fsSL https://raw.githubusercontent.com/anonimov94/linumeRT/main/tools/linumert-start.sh)
@@ -164,6 +164,6 @@ make plant-matrix
 make test-linuxcnc
 ```
 
-Własny kod: **GPL-2.0-or-later**. Kod LinuxCNC/QtDragon zachowuje swoje nagłówki i licencję GPL-2.0; szczegóły w [LICENSE](LICENSE) i [rejestrze pochodzenia](docs/PROVENANCE.md). Licencja katalogu nadrzędnego nie dotyczy linumeRT.
+Licencja: **GPL-2.0-or-later dla własnego kodu**. Kod LinuxCNC/QtDragon zachowuje swoje nagłówki i licencję GPL-2.0; szczegóły w [LICENSE](LICENSE) i [rejestrze pochodzenia](docs/PROVENANCE.md). Licencja katalogu nadrzędnego nie dotyczy linumeRT.
 
 Ekran nie zastępuje sprzętowego E-STOP/STO. **NIEZWERYFIKOWANE NA SPRZĘCIE.**
