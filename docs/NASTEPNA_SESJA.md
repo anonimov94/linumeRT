@@ -15,6 +15,16 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · 2026-10-25. **Nowe polecenie właściciela: README i ISO na laptop.**
+Zakres `codex/readme-laptop-iso`, osobny checkout `linumeRT-laptop-iso`, baza main
+`c028159` (gotowość napędów #142 scalona). Rezultat: aktualny README na GitHub,
+generowana z plan.json tabela M0–M6 oraz nowy obraz live amd64 z SHA-256 do pobrania.
+Pliki: README.md, generator/testy roadmapy, dokumentacja wydania i rekordy 077/078.
+Weryfikacja: generator --check, testy roadmapy/ISO bez LinuxCNC, wymagane CI,
+workflow ISO i weryfikacja opublikowanych artefaktów. Boot/instalacja na laptopie
+pozostają odbiorem właściciela. Nie dubluję 033 ani nie używam wspólnego LinuxCNC.
+Jawne zlecenie ISO zmienia bieżący priorytet; nie zamyka wcześniejszych bramek.
+
 Model-Author: Codex · 2026-10-25. **Wynik kroku gotowości, draft #142, kod `f85bcd7`.**
 NOT_READY | REMOTE = statusword 512, modelowany boot-time Z 1 s. Runner czeka teraz
 na enabled wszystkich czterech napędów po task ON, przed home; timeout kończy driver
