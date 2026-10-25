@@ -26,6 +26,25 @@ Model-Author: Claude · 2026-10-25. **M1 substeps i Neon N1/N4 — wyniki.**
   różni się od `stat.distance_to_go` o 1–2 mm (live pokazuje wartość NML). N3 (zmiana skórek) nie odbierany.
 - Następnie: C (sesja 062), potem odbiory 029–035.
 
+Model-Author: Codex · 2026-10-25. **Wynik audytu historycznej bazy X.**
+Dawne d643a97: Plant substeps=1, bez #116; obecnie substeps=4 i interpolacja.
+Stare pliki machine.c/plant.yaml nadal zgodne SHA-256 z d643a97. Program, maszyna,
+próg first_motion, drive.c i lrt_net.comp nie zmieniły się; w szablonach serw
+dodano tylko sekcję real/PDO. Runner LinuxCNC bierze substeps z plant.yaml,
+nie przekazuje scen.substeps jako CLI. Nie uznaję #116 za dowód przyczyny X:
+n-krotny impuls FF nie wyjaśnia sam próby n=1; zmienił się też krok integratora.
+Raport M1_X_BASELINE_2026-10-25.md/JSON, ancestry i hashe sprawdzone bez live testów.
+Następny krok: analiza istniejącego śladu X z #141 z uwzględnieniem fazy poprzedniego
+cyklu; ewentualny nowy pomiar tylko po niej i pod obiema blokadami. X/G1 nadal otwarte.
+
+Model-Author: Codex · 2026-10-25. **LEGACY-RUNTIME: historyczna baza uchybu X.**
+#143 scalony jako `46a15b0`. Zakres `codex/m1-historical-x-baseline`: audyt źródeł
+historycznej próby `d643a97` względem main, szczególnie interpolacji celu #116,
+domyślnych substeps i konfiguracji scenariusza. Rezultat: uzupełnienie raportu M1
+i rejestru o wersję faktycznie badanego toru. Weryfikacja: ancestry/blob diff,
+historyczny log próby 8 i porównanie źródeł. Bez lokalnego LinuxCNC, pełnej serii
+i bez deklaracji, że sama obecność poprawki wyjaśnia historyczne 0,3 mm.
+
 Model-Author: Codex · 2026-10-25 09:37 UTC. **Odbiór gotowości M1 w CI PASS.**
 #141 scalony jako `890c399` po trzech zielonych kontrolach dla `9269633`.
 #142 po przestawieniu na main scalony jako `c028159`; wszystkie trzy kontrole
