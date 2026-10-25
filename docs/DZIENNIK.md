@@ -1218,3 +1218,48 @@ Model-Author: Claude. PR #134: test niezależności wyniku Plant od `substeps` (
 Gałąź `codex/neon-n1-demo`: `load_ngc` z prawdziwym interpreterem (SIGSEGV przy T/M6, INI/REMAP, plik zmiennych),
 test N1 demo = `demo_toolpath()`, skrypt odbioru `tools/dev/neon_accept.py`; raport `docs/raporty/neon/README.md`.
 NIEZWERYFIKOWANE NA SPRZĘCIE. Otwarte: N3 (zmiana skórek), monitor bez narzędzia/F/S, VNC/WSLg.
+
+## 026 / LEGACY-RUNTIME — ślad first_motion (PR #133) · 2026-10-25 · Codex
+- Model-Author: Codex. Zachowanie katalogu, logów LinuxCNC/Plant i próbek uchybu; progi bez zmian.
+- Jedna para prób: XY 1000 → 500 mm/s², X 0,1112 → 0,0762 mm, obie 5/5 PASS; nie zmieniono masy/napędów.
+- Sam fizyczny uchyb nie jest błędem; cel właściciela: maksymalne użyteczne przyspieszanie/hamowanie G0 i szybkich G1 z kontrolą uchybu.
+- Testy: 4 diagnostyki PASS; lokalna kopia: 1394 PASS/10 błędów środowiska kopii, po odtworzeniu symlinków i historii Git 75 PASS/1 skip w dotkniętych zestawach; CI dla kodu 99c4cb9 python/plant-matrix PASS.
+- Raport i JSON: docs/raporty/prototypy/M1_FIRST_MOTION_2026-10-25.*; autokontrola, bez niezależnego przeglądu.
+- Historyczne 0,3 mm niewyjaśnione; uchyb Z w bazowaniu nadal obserwowany. 10 PASS/G1/pulpit/RT/sprzęt otwarte.
+
+
+## 026 / LEGACY-RUNTIME — CI i stabilizacja testu po hamowaniu (PR #133) · 2026-10-25 · Codex
+- Model-Author: Codex. CI 7ac8283: 144 LinuxCNC PASS / 1 FAIL D38 (zabezpieczenie odmówiło wycofania przy niewygaszonym uchybie).
+- Test czeka teraz na tę samą stabilizację 0,2 s / <1 µm przed wycofaniem co przed powrotem; zabezpieczenia bez zmian.
+- Diagnostyka rozwiązuje względną ścieżkę przed zmianą katalogu drivera; 5 testów PASS, ruff PASS.
+- Celowany lokalny LinuxCNC zajęty przez blokadę Claude „neon N4”; nie naruszono jej ani jego procesów. Wymagane końcowe CI.
+- Ograniczenie porównania ramp: równoległe testy Pythona, niekontrolowane obciążenie CPU; wynik nie jest benchmarkiem.
+
+## M1 — diagnostyka przed T0 · 2026-10-25 · Codex
+- Model-Author: Codex. Przy odebraniu błędu bazowania zachowuje snapshot jointów NML i sekwencyjne odczyty HAL w driver.log oraz RESULT.setup_samples.
+- 8 testów diagnostyki PASS w Debianie, ruff PASS; bez uruchamiania instancji LinuxCNC i bez zmiany modelu, progów lub retry.
+- Autokontrola; odczyty poza RT nie ustalają przyczyny uchybu. Zsynchronizowany ślad i odbiór M1 nadal otwarte.
+
+## M1 — celowany pomiar bazowania · 2026-10-25 · Codex
+- Model-Author: Codex. Na 6a64abe odtworzono following error Z przed T0; zachowano snapshot NML/HAL. Po istniejącym retry program 5/5 PASS, X 0,11211 mm.
+- Raport M1_SETUP_2026-10-25.md/JSON: bez zmiany modelu/ramp/progów; odczyty poza RT nie ustalają przyczyny. Obie blokady zwolnione, M1 otwarte.
+
+## M1 — opcjonalny sampler HAL · 2026-10-25 · Codex
+- Model-Author: Codex. Kanały command/feedback X/Z, błędy i limity jointów, CiA402 i LRT-NET na końcu servo-thread przez sampler/halsampler.
+- 19 testów diagnostyki/trace PASS w Debianie, ruff PASS. Odbiór runtime i CI wymagane przed scaleniem; model, rampy i progi bez zmian.
+
+### Odbiór samplera M1 — wynik
+- Model-Author: Codex. 23caa5f: 70 697 ciągłych próbek, bez overruns, poprawne zamknięcie kolektora; 21 kanałów (limit RIP).
+- Zadanie Z przed drive-enabled; później f-error 0,51 > limit 0,5. Audyt enable/CiA402/homing nadal wymagany; po retry program 5/5 PASS. Raport M1_SERVO_TRACE_2026-10-25.md/JSON. Obie blokady zwolnione.
+
+
+## 026 / LEGACY-RUNTIME — gotowość napędów przed home (PR #142) · 2026-10-25 · Codex
+- Model-Author: Codex. Audyt śladu #141: statusword 512 = NOT_READY | REMOTE; task ON nie oznacza OPERATION ENABLED.
+- Runner czeka na enabled czterech napędów przed home, brak gotowości kończy driver błędem. Model/boot-time/rampy/progi/retry bez zmian.
+- 24 testy bez LinuxCNC PASS, ruff PASS; przypadki opóźnionej i brakującej gotowości.
+- Incydent: pierwsze polecenie objęło też test live mimo blokady Claude 033, wynik nieważny (KeyboardInterrupt); zgłoszone w Dla Claude. Dalsze testy wyłącznie not linuxcnc.
+- Raport M1_DRIVE_READY_2026-10-25.md; wymagane CI i odbiór pierwszego bazowania ze śladem. M1/G1/sprzęt otwarte.
+
+## M1 — odbiór gotowości w CI · 2026-10-25 · Codex
+- Model-Author: Codex. d223909: LinuxCNC job 121128248228 SUCCESS, 147 live PASS, w tym pierwsze bazowanie bez retry i setup_errors oraz sampler.
+- #141/#142 scalone, zdalny main c028159 zweryfikowany. Nieważny lokalny incydent zachowany w raporcie; historyczny X, pełna seria i G1 nadal otwarte.

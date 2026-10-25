@@ -101,6 +101,22 @@ def run(ini, joint_count, output):
     def feedback_z():
         return float(hal.get_value(f"joint.{joint_count - 1}.motor-pos-fb"))
 
+    def wait_for_settled_drives():
+        # A single enabled button can precede the next servo oscillation after braking.
+        # Keep the production guard intact; wait with margin before either click.
+        stable_since = None
+
+        def settled():
+            nonlocal stable_since
+            if max(abs(j["ferror_current"]) for j in s.joint) >= 0.001:
+                stable_since = None
+                return False
+            if stable_since is None:
+                stable_since = time.monotonic()
+            return time.monotonic() - stable_since >= 0.2
+
+        wait(settled, control=control)
+
     for side, inch in ((40, False), (41, False), (42, False), (41, True), (42, True)):
         scale = 25.4 if inch else 1
         path = output / f"g{side}-{'inch' if inch else 'mm'}.ngc"
@@ -127,6 +143,7 @@ def run(ini, joint_count, output):
         wait(lambda: s.paused and abs(s.current_vel) < 1e-7, control=control)
         wait(lambda: control.last and control.last.ready and panel.withdraw.isEnabled(),
              control=control)
+        wait_for_settled_drives()
         before, z_before, frame = position(), feedback_z(), control.last.frame
         assert abs(before[1] - expected_y) < 0.01, (side, before)
         panel.withdraw.click()
@@ -142,20 +159,7 @@ def run(ini, joint_count, output):
         assert alarms and s.paused and control.model.active
         app.processEvents()
         panel.grab().save(str(output / f"retract-g{side}.png"))
-        # Crossing the 0.005 guard once can precede the next servo oscillation.
-        # Wait for actual drives to settle with margin before clicking return.
-        stable_since = None
-
-        def settled_for_return():
-            nonlocal stable_since
-            if max(abs(j["ferror_current"]) for j in s.joint) >= 0.001:
-                stable_since = None
-                return False
-            if stable_since is None:
-                stable_since = time.monotonic()
-            return time.monotonic() - stable_since >= 0.2
-
-        wait(settled_for_return, control=control)
+        wait_for_settled_drives()
         if side == 40:
             panel.return_button.click()
             wait(lambda: not control.model.active, control=control)
