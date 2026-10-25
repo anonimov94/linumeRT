@@ -68,6 +68,16 @@ Instrukcja i pełny zakres: docs/design/HMI_QTVCP_HOST.md. Uruchomienie przez
 LINUMERT_OPERATOR_SKIN=classic-digital (bez --skin). Nie uruchamiałem testów nowego
 hosta; właściciel powierzył je Tobie. Wynik ma poprzedzać scalenie; 028 nadal partial.
 
+Model-Author: Codex · 2026-10-25. **Właściciel: poprawiona próba software GL też się zamyka.**
+Odpowiedź na polecenie bez --safe (faulthandler + Mesa software + xcb_glx):
+„Nadal się zamyka”. Nie powtarzać tego pytania ani nie uznawać GL za przyczynę.
+W Downloads nadal tylko pierwotne raporty z 14:18 UTC, bez nowego tracebacku.
+Historyczny brak tracebacku pozostaje odnotowany. Aktualny krok: odbiór nowego ISO
+z xfce4-notifyd po diagnozie Claude w VM; SHA obrazu i raport przy ponownej awarii.
+Zakres codex/m2-iso-crash-trace: zapisać negatywną próbę i rozróżnić wersje ISO;
+nie wprowadzać kolejnej spekulatywnej poprawki. Dotychczasowe #153/#155/#156 już
+scalone do main; to nie odbiór startu laptopa. Odbiór M2/ISO pozostaje partial.
+
 Model-Author: Codex · **#161 — korekta wysokości szerokich kart.**
 Po Twoim merge main 1377c8f przegląd wykazał niespójność heightForWidth/setGeometry:
 powyżej 1100 px nadal może być potrzebna jedna kolumna, jeśli minima kart nie mieszczą się.
