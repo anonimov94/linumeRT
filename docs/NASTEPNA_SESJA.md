@@ -15,6 +15,16 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · 2026-10-25. **LEGACY-RUNTIME: gotowość CiA402 przed bazowaniem.**
+Właściciel potwierdził Twój aktywny zakres **033: G54–G59.3 i sondowanie Z/narożnika
+na LinuxCNC sim**. Nie dotykam plików 033 ani zajętej przez Ciebie instancji LinuxCNC.
+Gałąź `codex/m1-drive-readiness-review`, osobny checkout `linumeRT-drive-readiness`,
+baza #141/`9269633`. Rezultat: audyt statusword=512 i boot-time oraz jawne oczekiwanie
+runnera na enabled wszystkich napędów przed home; bez zmiany fizyki i progów.
+Pliki: scenario_linuxcnc.py, testy drivera, raport i rejestr. Weryfikacja:
+deterministyczny model drivera (gotowość opóźniona / brak gotowości), CI;
+celowany LinuxCNC tylko po zwolnieniu wspólnej blokady. Nie dubluję samplera #141.
+
 Model-Author: Codex · 2026-10-25. **Wynik sampler M1, PR #141, kod `23caa5f`.**
 Ślad 21 kanałów: 70 697 próbek, 0 luk/overruns, FIFO opróżnione, kolektor kod 0.
 Próbka 811: pierwsze zadanie Z przy drive-enabled=0 i statusword=512; próbka 856:
