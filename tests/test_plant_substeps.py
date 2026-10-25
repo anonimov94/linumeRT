@@ -2,7 +2,8 @@
 
 Model-Author: Claude · uruchomienie zadania A z przekazania Codex (M1).
 Regresja po PR #116: cel 607Ah z cyklu mastera trafiał do napędu w pierwszym podkroku (n-krotny
-impuls FF) — frezarka E-4201, router tysiące zgubionych kroków. Opis: docs/raporty/plant_substeps.md.
+impuls FF) — frezarka E-4201, router tysiące zgubionych kroków.
+Opis: docs/raporty/plant_substeps.md.
 Wymaga rdzenia C (kompilator, Linux/WSL).
 """
 
