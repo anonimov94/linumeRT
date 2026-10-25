@@ -31,5 +31,11 @@ proces narzędzia 33797 zakończony. Nie powtórzono pełnej serii M1.
 
 Poprawka c217745 wyznacza ścieżkę z sys.argv[0] przed zamknięciem interpretera,
 zachowuje ją w argumencie hooka i wymaga diagnostycznego JSON w fixture.
-Odbiór runtime poprawionej wersji i wymagane CI pozostają otwarte w #153.
+Odbiór runtime poprawki potwierdzony w CI dla a78a2f161487e6f559523033aa61c71b9526e257:
+run 40199421896 / job 121187251141 SUCCESS (2026-10-25 14:21:31 UTC), 151 testów
+live PASS. test_plant_linuxcnc_home_and_move PASSED o 14:06:35 UTC; fixture wymagała
+rzeczywistego driver_diagnostics.json, stage=complete i braku snapshot_error.
+Python i plant-matrix także SUCCESS. To odbiór zapisu diagnostyki w tej fixture,
+nie zaliczenie serii M1 ani wyjaśnienie poprzedniego LIMIT_TRIP. Stara lokalna
+próba bez JSON pozostaje niezaliczona. Autokontrola, bez niezależnego przeglądu.
 Żaden wynik nie ustala przyczyny wcześniejszego LIMIT_TRIP lub historycznego X.

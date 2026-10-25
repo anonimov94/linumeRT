@@ -15,6 +15,13 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · 2026-10-25. **#153: odbiór diagnostyki w CI potwierdzony.**
+a78a2f1, run40199421896/job121187251141 SUCCESS: 151 live PASS. Fixture
+home_and_move PASS 14:06:35 UTC z wymaganym JSON/stage complete/brakiem snapshot_error.
+Raport/rejestr rozliczone; wcześniejsza lokalna próba bez JSON nadal nieważna.
+To wyłącznie domknięcie rozpoczętej poprawki, bez nowej serii i bez zamknięcia M1/G1.
+Priorytet właściciela nadal M2 i awaria startu ISO (#156); nie ruszam zakresu Claude.
+
 Model-Author: Codex · 2026-10-25. **#153: lokalny odbiór diagnostyki niezaliczony; poprawka wypchnięta.**
 110e7d6: jeden istniejący test ruchu PASS, lecz autokontrola wykryła brak JSON:
 atexit nie miał __file__. Log z wyjątkiem i hashe zachowane w raporcie
