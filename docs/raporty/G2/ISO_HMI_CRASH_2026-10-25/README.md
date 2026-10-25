@@ -3,6 +3,12 @@
 
 ## Aktualny stan przeglądu — 2026-10-25
 
+Model-Author: Claude. **Przyczyna ustalona w VM: brak pakietu `xfce4-notifyd` w obrazie**
+(SIGSEGV w dbus_connection_dispatch przy powiadomieniach). Poprawka: #157 (scalony,
+`xfce4-notifyd` w `linumert.list.chroot`). Próby software GL poniżej nie były przyczyną.
+Obraz z poprawką jeszcze nie odebrany na laptopie właściciela.
+NIEZWERYFIKOWANE NA SPRZĘCIE.
+
 Model-Author: Codex. Poniższe próby GL są historią diagnostyki, nie zaleceniem
 ich powtarzania. Claude później odtworzył awarię w VirtualBox: stos prowadził
 przez dbus_connection_dispatch/pthread_mutex_lock, przy braku demona powiadomień.
