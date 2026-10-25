@@ -28,6 +28,7 @@ import tempfile
 import threading
 import time
 import urllib.request
+from contextlib import contextmanager
 from pathlib import Path
 
 from .scenario import (
@@ -103,13 +104,26 @@ estop_seen = False
 out["states"] = []
 state = None
 ferr = [0.0] * 4
+peaks = {}
 while now() < plan["duration"]:
     poll()
     if (s.task_state, s.interp_state) != state:
         state = (s.task_state, s.interp_state)
         out["states"].append([round(now(), 3), s.task_state, s.interp_state])
     for j in range(4):
-        ferr[j] = max(ferr[j], abs(s.joint[j]["ferror_current"]))
+        value = abs(s.joint[j]["ferror_current"])
+        if value > ferr[j]:
+            ferr[j] = value
+            if plan.get("diagnostics"):
+                peak = {"t": now(), "joint": j, "ferror": value,
+                        "line": s.motion_line, "joint_status": dict(s.joint[j])}
+                peak["link"] = {name: hal.get_value("lrt-net.0." + name) for name in
+                                ("sent", "received", "missed", "reply-age", "plant-lost",
+                                 "plant-late", "plant-jitter-us", "connected")}
+                peak["drive"] = {name: hal.get_value("lrt-net.0.axis.%d.%s" % (j, name))
+                                 for name in ("pos-cmd", "pos-fb", "ferror", "torque")}
+                peaks[str(j)] = peak
+                print("PEAK " + json.dumps(peak), flush=True)
     if s.motion_line != last_line and program["running"]:
         last_line = s.motion_line
         out["line_max"] = max(out["line_max"], last_line)
@@ -161,6 +175,7 @@ time.sleep(0.2); poll()
 out["program"] = program
 out["pos"] = [round(v, 4) for v in s.actual_position[:3]]
 out["ferr"] = ferr
+out["peaks"] = peaks
 out["task_state"] = s.task_state
 print("RESULT " + json.dumps(out), flush=True)
 '''
@@ -171,6 +186,26 @@ def _rip():
     import rip_support  # noqa: E402 - wspólne uruchamianie RIP z testami (sesja 008)
 
     return rip_support
+
+
+@contextmanager
+def _workspace():
+    """Opt-in forensic artifacts survive both failed criteria and runner exceptions."""
+    base = os.environ.get("LINUMERT_SCENARIO_DIAGNOSTICS")
+    if base:
+        directory = Path(base).resolve()
+        directory.mkdir(parents=True, exist_ok=True)
+        yield Path(tempfile.mkdtemp(prefix="lrt_scen_", dir=directory))
+    else:
+        with tempfile.TemporaryDirectory(prefix="lrt_scen_") as tmp:
+            yield Path(tmp)
+
+
+def _capture(stream, path: Path) -> None:
+    with path.open("w", encoding="utf-8") as output:
+        for line in stream:
+            output.write(line)
+            output.flush()
 
 
 def _prepare(work: Path, port: int) -> Path:
@@ -280,18 +315,25 @@ def run_linuxcnc(scen: Scenario, port: int | None = None) -> ScenarioResult:
     host_steps = sorted([s for s in scen.steps if s.action in HOST_ACTIONS],
                         key=lambda s: (s.at_line is not None, s.at or 0.0, s.at_line or 0))
     plan = {"duration": scen.duration, "steps": driver_steps,
+            "diagnostics": bool(os.environ.get("LINUMERT_SCENARIO_DIAGNOSTICS")),
             "error_alarms": {str(k): v for k, v in ERROR_ALARMS.items()},
             "program": str(scen.program) if scen.program else ""}
-    with tempfile.TemporaryDirectory(prefix="lrt_scen_") as tmp:
-        work = Path(tmp)
+    with _workspace() as work:
+        (work / "plan.json").write_text(json.dumps(plan, indent=2), encoding="utf-8")
         ini = _prepare(work, port)
         (work / "driver.py").write_text(DRIVER, encoding="utf-8")
         report = work / "plant_report.json"
         with rip.installed_modules(root, work, ("lrt_net", "lrt_cia402", "lrt_estop2")):
             plant = _Plant(scen, port, report)
             env = {**os.environ, "PATH": f"{ini.parent}:{os.environ.get('PATH', '')}"}
-            cnc = rip.start_linuxcnc(root, ini, env)
+            cnc = rip.start_linuxcnc(root, ini, env, console=plan["diagnostics"])
+            capture = None
+            if plan["diagnostics"]:
+                capture = threading.Thread(target=_capture,
+                                           args=(cnc.stdout, work / "linuxcnc.log"), daemon=True)
+                capture.start()
             driver = None
+            lines = []
             try:
                 for _ in range(120):
                     time.sleep(0.5)
@@ -300,7 +342,11 @@ def run_linuxcnc(scen: Scenario, port: int | None = None) -> ScenarioResult:
                     if probe.stdout.strip() == "TRUE" or cnc.poll() is not None:
                         break
                 if cnc.poll() is not None:
-                    raise ScenarioError("LinuxCNC nie wystartował: " + (cnc.stdout.read() or ""))
+                    if capture is not None:
+                        capture.join(timeout=5)
+                    output = ((work / "linuxcnc.log").read_text(encoding="utf-8")
+                              if capture is not None else cnc.stdout.read())
+                    raise ScenarioError("LinuxCNC nie wystartował: " + (output or ""))
                 driver = subprocess.Popen(
                     ["bash", "-c", f"source '{root}/scripts/rip-environment' >/dev/null && "
                      f"exec python3 {work / 'driver.py'} '{json.dumps(plan)}'"],
@@ -327,11 +373,17 @@ def run_linuxcnc(scen: Scenario, port: int | None = None) -> ScenarioResult:
                 driver.wait(timeout=60)
                 tele = plant.call("/api/telemetry")
                 live_states = plant.call("/api/faults")["drives"]  # przed zamknięciem LinuxCNC
+                if plan["diagnostics"]:
+                    (work / "telemetry.json").write_text(json.dumps(tele), encoding="utf-8")
             finally:
                 if driver is not None and driver.poll() is None:
                     driver.kill()
                 rip.stop_linuxcnc(cnc, root, ini.parent)
                 plant.close()
+                if capture is not None:
+                    capture.join(timeout=5)
+                    (work / "driver.log").write_text("\n".join(lines) + "\n", encoding="utf-8")
+                    (work / "plant.log").write_text("\n".join(plant.lines) + "\n", encoding="utf-8")
         if result_line is None:
             raise ScenarioError("skrypt LinuxCNC bez wyniku: " + " | ".join(lines[-8:]))
         out = json.loads(result_line)

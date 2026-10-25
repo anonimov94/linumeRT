@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated": "2026-10-24",
+  "updated": "2026-10-25",
   "model_author": "Codex",
   "original_count": 84,
   "origin_commit": "796c6a2",
@@ -1759,9 +1759,9 @@
         "082"
       ],
       "status": "partial",
-      "progress": "Testy runtime i launchery rozwijano później; stare listy nie są nowym harmonogramem. 2026-10-24: przyczyna zrywania LRT-NET przy zakładkach panelu Plant znaleziona i usunięta (parsowanie biblioteki napędów w procesie Plant blokowało pętlę UDP przez GIL; teraz CSafeLoader, cache wg mtime, krótszy interwał GIL). Odtworzenie lokalne: przed poprawką RTT maks. 242 ms i 130 zgubionych ramek, po poprawce 11,9 ms i 0. Właściciel potwierdził na pulpicie (2026-10-24): przełączanie kart panelu Plant nie zrywa już łącza. Odbiór WSL 2026-10-24: d643a97 7 przebiegów PASS, 8. FAIL (nadążanie X); aktualny 8b255cd 5 przebiegów PASS, 6. FAIL (KeyboardInterrupt podczas bazowania first_motion, rapid_vs_feed nieukończony). Dziesięć kolejnych przebiegów niezaliczone; raport M1_REPEAT_2026-10-24.md.",
+      "progress": "Testy runtime i launchery rozwijano później; stare listy nie są nowym harmonogramem. 2026-10-24: przyczyna zrywania LRT-NET przy zakładkach panelu Plant znaleziona i usunięta (parsowanie biblioteki napędów w procesie Plant blokowało pętlę UDP przez GIL; teraz CSafeLoader, cache wg mtime, krótszy interwał GIL). Odtworzenie lokalne: przed poprawką RTT maks. 242 ms i 130 zgubionych ramek, po poprawce 11,9 ms i 0. Właściciel potwierdził na pulpicie (2026-10-24): przełączanie kart panelu Plant nie zrywa już łącza. Odbiór WSL 2026-10-24: d643a97 7 przebiegów PASS, 8. FAIL (nadążanie X); aktualny 8b255cd 5 przebiegów PASS, 6. FAIL (KeyboardInterrupt podczas bazowania first_motion, rapid_vs_feed nieukończony). Dziesięć kolejnych przebiegów niezaliczone; raport M1_REPEAT_2026-10-24.md. 2026-10-25: zachowywanie katalogu diagnostycznego i logów LinuxCNC/Plant; celowane first_motion PASS. Jedna para prób, ta sama masa/napędy: limit przyspieszenia XY 1000 → 500 mm/s², próbka maksimum X 0,1112 → 0,0762 mm (5/5 kryteriów w obu). Nie zmieniono progów ani konfiguracji produkcyjnej. Historyczny skok 0,3 mm pozostaje niewyjaśniony; raport M1_FIRST_MOTION_2026-10-25.md. Doprecyzowanie właściciela: sam fizyczny uchyb przy rozpędzaniu i hamowaniu nie jest błędem systemowym; Plant służy do doboru maksymalnych użytecznych przyspieszeń i hamowania dla G0 oraz bardzo szybkich G1 przy kontrolowanym uchybie.",
       "remaining": [
-        "Ustalić przyczynę KeyboardInterrupt/bazowania first_motion i przerwania rapid_vs_feed; następnie ponowić wymaganą serię 10 kolejnych przebiegów PASS. Dotychczasowe serie WSL mają wynik FAIL.",
+        "Ustalić źródła historycznego uchybu X 0,3 mm oraz uchybu Z podczas bazowania (odnotowany także 2026-10-25), oddzielając dynamikę masy/napędu od opóźnienia LRT-NET. Sam uchyb fizyczny nie jest błędem systemowym; osobno oceniać tolerancję testu. Przyznana kolizja procesów dotyczy późniejszej serii z 2026-10-24, nie wcześniejszego uchybu. Następnie ponowić wymaganą serię 10 kolejnych przebiegów PASS; dotychczasowe serie WSL mają wynik FAIL.",
         "Zmierzyć najdłuższe zamrożenie GUI i heartbeat (50 000 linii G1), VirtualBox na docelowym stanowisku."
       ],
       "evidence": [
@@ -1771,7 +1771,9 @@
         "plant/server/linumert_plant/drive_library.py",
         "plant/server/linumert_plant/serve.py",
         "docs/raporty/prototypy/M1_REPEAT_2026-10-24.md",
-        "docs/raporty/prototypy/M1_REPEAT_2026-10-24.json"
+        "docs/raporty/prototypy/M1_REPEAT_2026-10-24.json",
+        "docs/raporty/prototypy/M1_FIRST_MOTION_2026-10-25.md",
+        "docs/raporty/prototypy/M1_FIRST_MOTION_2026-10-25.json"
       ]
     },
     {
