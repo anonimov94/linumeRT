@@ -58,6 +58,7 @@ _comp.ready()
 c, s, e = linuxcnc.command(), linuxcnc.stat(), linuxcnc.error_channel()
 out = {"errors": [], "setup_errors": [], "alarms": {}, "line_max": 0}
 T0 = None
+driver_started = time.monotonic()
 def now():
     return 0.0 if T0 is None else time.time() - T0
 def poll():
@@ -67,6 +68,21 @@ def poll():
         if not msg:
             break
         out["errors" if T0 is not None else "setup_errors"].append([round(now(), 3), msg[1]])
+        if T0 is None and plan.get("diagnostics"):
+            # Error-channel receipt time, not the servo cycle that caused the error.
+            # NML and subsequent HAL reads are sequential, never an atomic RT trace.
+            sample = {"elapsed": time.monotonic() - driver_started, "message": msg[1],
+                      "task_state": s.task_state,
+                      "joints": [dict(joint) for joint in s.joint]}
+            try:
+                sample["link"] = {name: hal.get_value("lrt-net.0." + name) for name in
+                                  ("sent", "received", "missed", "reply-age", "plant-lost",
+                                   "plant-late", "plant-jitter-us", "connected")}
+            except Exception as exc:
+                sample["hal_read_error"] = str(exc)
+            sample["read_finished"] = time.monotonic() - driver_started
+            out.setdefault("setup_samples", []).append(sample)
+            print("SETUP_ERROR " + json.dumps(sample), flush=True)
 def wait(cond, timeout):
     t = time.time()
     while time.time() - t < timeout:

@@ -15,6 +15,24 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · 2026-10-25. **Wynik: diagnostyka bazowania przed T0.**
+`SETUP_ERROR` zachowuje snapshot wszystkich jointów NML przy odebraniu błędu,
+sekwencyjne odczyty łącza HAL i monotoniczny czas odbioru/zakończenia odczytu.
+Próbka trafia od razu do driver.log i do RESULT.setup_samples; brak pinu HAL
+nie usuwa pierwotnego błędu. Odczyty poza RT nie dowodzą przyczyny ani czasu
+powstania uchybu. Retry, model i progi bez zmian. Debian: 8 testów diagnostyki
+PASS, ruff PASS; nie uruchamiałem instancji LinuxCNC. Autokontrola.
+Następnie celowany przebieg pod wspólną blokadą i właściwy zsynchronizowany ślad.
+
+Model-Author: Codex · 2026-10-25 08:06 UTC. **LEGACY-RUNTIME: dowód błędu przed T0.**
+#135 scalony po zielonych kontrolach jako `296f8b2`. Kolejny mały krok na
+`codex/m1-setup-error-evidence`: diagnostyka stanu jointów w chwili odebrania
+błędu podczas bazowania. Obecne PEAK startuje dopiero po bazowaniu; nie obejmuje
+uchybu Z przed T0. Pliki: scenario_linuxcnc.py, test_scenario_diagnostics.py,
+rejestr i to przekazanie. Weryfikacja: symulowany kanał błędów bez LinuxCNC,
+ruff i wymagane CI. To odczyty NML/HAL poza RT, nie zsynchronizowany ślad serwo
+ani ustalenie przyczyny błędu. Nie zmieniam progów, ramp, retry bazowania ani Twojego kodu N4.
+
 Model-Author: Codex · 2026-10-25 07:54 UTC. **M1 / LEGACY-RUNTIME: #133 scalony.**
 Autokontrola diffu zakończona; python, plant-matrix i linuxcnc SUCCESS dla
 `c9717bd3bfd99f903e5be4c23f02683afe93f1ce`. Merge commit
