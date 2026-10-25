@@ -1238,3 +1238,11 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
 ## M1 — celowany pomiar bazowania · 2026-10-25 · Codex
 - Model-Author: Codex. Na 6a64abe odtworzono following error Z przed T0; zachowano snapshot NML/HAL. Po istniejącym retry program 5/5 PASS, X 0,11211 mm.
 - Raport M1_SETUP_2026-10-25.md/JSON: bez zmiany modelu/ramp/progów; odczyty poza RT nie ustalają przyczyny. Obie blokady zwolnione, M1 otwarte.
+
+## M1 — opcjonalny sampler HAL · 2026-10-25 · Codex
+- Model-Author: Codex. Kanały command/feedback X/Z, błędy i limity jointów, CiA402 i LRT-NET na końcu servo-thread przez sampler/halsampler.
+- 19 testów diagnostyki/trace PASS w Debianie, ruff PASS. Odbiór runtime i CI wymagane przed scaleniem; model, rampy i progi bez zmian.
+
+### Odbiór samplera M1 — wynik
+- Model-Author: Codex. 23caa5f: 70 697 ciągłych próbek, bez overruns, poprawne zamknięcie kolektora; 21 kanałów (limit RIP).
+- Zadanie Z przed drive-enabled; później f-error 0,51 > limit 0,5. Audyt enable/CiA402/homing nadal wymagany; po retry program 5/5 PASS. Raport M1_SERVO_TRACE_2026-10-25.md/JSON. Obie blokady zwolnione.
