@@ -140,3 +140,35 @@ def test_load_ngc_real_interpreter_units_and_file_lines(tmp_path):
         assert move.end == pytest.approx((25.4, 0, 0), abs=0.001)
         assert move.feed == pytest.approx(254)
         assert move.line == 3  # physical file line, not the explicit N900 word
+
+
+@pytest.mark.linuxcnc
+def test_demo_ngc_real_interpreter_matches_demo_toolpath():
+    """N1: ścieżka z prawdziwego `gcode.parse` = `demo_toolpath()` (ruchy, linie, końce, posuwy)."""
+    pytest.importorskip("gcode")
+    from linumert.programs.toolpath import load_ngc
+
+    real = load_ngc(DEMO_NGC)
+    demo = demo_toolpath()
+    first = real.moves[0]            # interpreter zaczyna od ruchu zerowego do punktu startu
+    assert first.cum[-1] == pytest.approx(0, abs=1e-9)
+    assert first.points[-1] == pytest.approx(demo.moves[0].points[0], abs=0.001)
+    moves = real.moves[1:]
+    assert len(moves) == len(demo.moves)
+    for got, want in zip(moves, demo.moves, strict=True):
+        assert got.line == want.line
+        assert got.rapid == want.rapid
+        assert got.feed == pytest.approx(want.feed)
+        assert got.points[-1] == pytest.approx(want.points[-1], abs=0.001)
+        assert got.cum[-1] == pytest.approx(want.cum[-1], rel=0.005)
+    assert real.source == demo.source
+
+
+def test_strip_tool_words_keeps_lines_and_comments():
+    from linumert.programs.toolpath import strip_tool_words
+
+    text = "T1 M6 (T2 M6 zostaje)\nG1 X1 ; T3\nG43 H1\nM60 T#5 M06\nT[#1+1] M6\n"
+    out, changed = strip_tool_words(text)
+    assert changed
+    assert out.splitlines() == ["  (T2 M6 zostaje)", "G1 X1 ; T3", "G43 H1", "M60  ", " "]
+    assert strip_tool_words("G0 X1\nM61\n") == ("G0 X1\nM61\n", False)

@@ -17,6 +17,8 @@ NIEZWERYFIKOWANE NA SPRZĘCIE.
 from __future__ import annotations
 
 import math
+import os
+import re
 import tempfile
 from collections.abc import Iterable, Sequence
 from dataclasses import dataclass
@@ -315,24 +317,89 @@ class PreviewCanon:
         return Toolpath(self.moves, source, self.g5x + self.g92, self.notes)
 
 
+TOOL_MMAP = ".tool.mmap"
+_COMMENT = re.compile(r"\([^)]*\)|;.*$")
+_TOOL_WORDS = re.compile(
+    r"(?<![A-Za-z0-9.])(?:[Tt]\s*(?:\d+|#<[^>]*>|#\d+|\[[^\]]*\])|[Mm]\s*0*6(?!\d))")
+TOOL_SKIPPED_NOTE = "Zmiany narzędzi (T, M6) pominięte w podglądzie: LinuxCNC nie działa."
+
+
+def tool_data_available() -> bool:
+    """Czy interpreter może czytać dane narzędzi (LinuxCNC utworzył ~/.tool.mmap).
+
+    `gcode.parse` bez zmapowanej tablicy narzędzi kończy się SIGSEGV przy słowie T/M6
+    (tool_mmap_mutex_get; potwierdzone gdb na LinuxCNC 2.9).
+    Mapowanie robi `linuxcnc.stat().poll()`.
+    """
+    if not (Path(os.environ.get("HOME", "/tmp")) / TOOL_MMAP).exists():
+        return False
+    try:
+        import linuxcnc  # type: ignore[import-not-found]
+
+        linuxcnc.stat().poll()    # to poll() woła tool_mmap_user() (libtooldata jest współdzielona)
+    except Exception:  # noqa: BLE001 - brak NML/modułu = brak danych narzędzi
+        return False
+    return True
+
+
+def strip_tool_words(text: str) -> tuple[str, bool]:
+    """Wycina słowa T i M6 poza komentarzami; liczba i numeracja linii bez zmian."""
+    changed = False
+    out = []
+    for line in text.splitlines(keepends=True):
+        parts, last = [], 0
+        for m in _COMMENT.finditer(line):
+            parts.append(_TOOL_WORDS.sub("", line[last:m.start()]))
+            parts.append(m.group(0))
+            last = m.end()
+        parts.append(_TOOL_WORDS.sub("", line[last:]))
+        new = "".join(parts)
+        changed = changed or new != line
+        out.append(new)
+    return "".join(out), changed
+
+
 def load_ngc(path: Path | str, unitcode: str = "G21",
              initcode: str = "G17 G90 G94 G54") -> Toolpath:
-    """Ścieżka z interpretera LinuxCNC (moduł `gcode`); bez LinuxCNC: InterpreterUnavailable."""
+    """Ścieżka z interpretera LinuxCNC (moduł `gcode`); bez LinuxCNC: InterpreterUnavailable.
+
+    Bez działającego LinuxCNC (brak mapowania narzędzi) słowa T/M6 są wycinane z tymczasowej kopii
+    (te same numery linii) i podgląd dostaje notatkę.
+    """
     try:
         import gcode  # type: ignore[import-not-found]
     except ImportError as exc:
         raise InterpreterUnavailable("Brak modułu gcode z LinuxCNC 2.9.") from exc
     path = Path(path)
+    source_text = path.read_text(encoding="utf-8", errors="replace")
     canon = PreviewCanon()
+    skipped = False
     # gcode reads this attribute as a string, not a callback. Keep interpreter
     # parameter writes private to this analysis, away from the operator's state.
     with tempfile.TemporaryDirectory(prefix="linumert-preview-") as directory:
-        canon.parameter_file = str(Path(directory) / "preview.var")
-        result, seq = gcode.parse(str(path), canon, unitcode, initcode)
+        var = Path(directory) / "preview.var"
+        var.write_text("", encoding="utf-8")  # brak pliku: "link (updating variable file)"
+        canon.parameter_file = str(var)
+        parse_path = path
+        if not tool_data_available():
+            stripped, skipped = strip_tool_words(source_text)
+            if skipped:
+                parse_path = Path(directory) / path.name
+                parse_path.write_text(stripped, encoding="utf-8")
+        # Interpreter czyta INI z INI_FILE_NAME (REMAP, SUBROUTINE_PATH względem cwd): podgląd ma
+        # być niezależny od katalogu uruchomienia, więc analizuje program bez INI maszyny.
+        saved = os.environ.pop("INI_FILE_NAME", None)
+        try:
+            result, seq = gcode.parse(str(parse_path), canon, unitcode, initcode)
+        finally:
+            if saved is not None:
+                os.environ["INI_FILE_NAME"] = saved
     if result > gcode.MIN_ERROR:
         raise ValueError(f"linia {seq}: {gcode.strerror(result)}")
-    source = path.read_text(encoding="utf-8", errors="replace").splitlines()
-    return canon.toolpath(source)
+    toolpath = canon.toolpath(source_text.splitlines())
+    if skipped:
+        toolpath.notes = (*toolpath.notes, TOOL_SKIPPED_NOTE)
+    return toolpath
 
 
 # --------------------------------------------------------------------------- program demo
