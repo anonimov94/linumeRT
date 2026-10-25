@@ -1390,3 +1390,10 @@ NIEZWERYFIKOWANE NA SPRZĘCIE.
 - Strażnik IP 10 PASS; bez nowych zależności, zmian ACTION/HAL. Zrzuty i granice: raport G2/M2_RESPONSIVE_2026-10-25.md.
 - Live lokalnie niewykonane: zasób Claude/wyglad zajęty; nie przejmowano. Odbiór CI do rozliczenia.
 - 028 partial, M2 3/12; pozostałe podstrony/stanowisko/sprzęt otwarte. Autokontrola autora.
+
+## HMI — opcjonalny host prezentacji QtVCP · 2026-10-25 · Codex
+- Model-Author: Codex. Skórki są luźną inspiracją; priorytet: użyteczne docelowe HMI. Claude pomaga testami laptopa EndeavourOS.
+- de6b06d: opcjonalna prezentacja w istniejącym QtVCP, STATUS i G53/program/alarm; konsola cyklu przez istniejące przyciski i bramki hosta.
+- Zachowane globalne alarmy/E-STOP/watchdog/tryby, nawigacja do działających stron; brak nowych komend ACTION i pinów HAL.
+- Kod po przeglądzie i kontroli składni. Nowego hosta nie uruchamiano; odbiór powierzony Claude. Instrukcja: docs/design/HMI_QTVCP_HOST.md.
+- Draft do odbioru; brak zamknięcia 028/SKIN-02…06 i brak deklaracji odbioru sprzętu.

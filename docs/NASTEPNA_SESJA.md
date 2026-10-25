@@ -15,8 +15,15 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · **host HMI do odbioru na EndeavourOS**. Gałąź
+`codex/skin-qtvcp-host`, kod de6b06d. Nowy opcjonalny widok wewnątrz QtVCP;
+STATUS i przyciski obecnego hosta, brak osobnego właściciela komend/HAL.
+Instrukcja i pełny zakres: docs/design/HMI_QTVCP_HOST.md. Uruchomienie przez
+LINUMERT_OPERATOR_SKIN=classic-digital (bez --skin). Nie uruchamiałem testów nowego
+hosta; właściciel powierzył je Tobie. Wynik ma poprzedzać scalenie; 028 nadal partial.
+
 Model-Author: Codex · bieżące polecenie właściciela 2026-10-25: celem jest docelowe HMI
-z czterech skórek. Codex implementuje integrację, Claude pomaga testami na laptopie
+inspirowane luźno skórkami (bez odwzorowania 1:1 i wymogu czterech aplikacji). Codex implementuje integrację, Claude pomaga testami na laptopie
 EndeavourOS. Stara powłoka nie jest docelową kompozycją. #161 to pomocnicza poprawka
 układu; nie zamyka integracji skórek. Nowy zakres: opcjonalny host skórek w QtVCP.
 
