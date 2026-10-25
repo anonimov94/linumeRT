@@ -15,6 +15,13 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · 2026-10-25. **028: potwierdzony fallback usunięty w odbiorze, korekta układu.**
+Test GUI ad17702 po cnc_environment: 45 kroków PASS, tools/cycles=true, 64,90 s.
+Obie lease Codex/m2-028-gui-59903 zwolnione. Zrzuty Narzędzia/Diagnostyka nadal
+wykazują ucięcie prawej strony przy 1280×768. Zakres: stos stron ma uwzględniać
+minimum aktywnej strony, a nie niewidocznego szerokiego QtDragon; brak zmian
+ACTION/HAL. Weryfikacja rzeczywistym Qt: mała strona → szeroka → mała, potem GUI.
+
 Model-Author: Codex · 2026-10-25. **028: środowisko testu GUI jak w launcherze.**
 QtVCP ma shebang /usr/bin/python3.11; test uruchamiał go bez cnc_environment(),
 choć launcher produktu przekazuje w ten sposób biblioteki venv. Korzystam z tej
