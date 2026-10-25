@@ -29,8 +29,10 @@ from linumert_alarm_panel import AlarmPanel
 from linumert_layout import PageStack
 from linumert_operator_controls import OperatorControls
 from linumert_virtual_session import VirtualSession, virtual_config
+import linumert_appearance as appearance
 import linumert_shell_model as model
 import linumert_shell_pages as pages
+from linumert_appearance_page import AppearancePage
 from linumert_homing_page import HomingPage
 from linumert_program_page import ProgramPage
 from linumert_offsets_page import OffsetsPage
@@ -70,6 +72,7 @@ AREAS = (
     ("offsets", "Zero detalu", "zero", "page:offsets"),
     ("probe", "Sonda", "sonda", "btn_probe"),
     ("diag", "Diagnostyka", "diagnostyka", "page:diag"),
+    ("appearance", "Wygląd", "konfiguracja", "page:appearance"),
     ("settings", "Konfiguracja", "konfiguracja", "btn_settings"),
     ("classic", "Pełny QtDragon", "wtyczka", "btn_main"),
 )
@@ -138,6 +141,12 @@ class LinumertShell(QtCore.QObject):
         # Piny grzyba HMI (D35): ok = 1 grzyb zwolniony, hb = sygnał życia, wd = uzbrojenie watchdoga
         self.hmi_pins = hmi_pins or {}
         self.tokens = model.load_tokens()
+        # M2: zapisany wygląd (paleta lub własne kolory) przed budową widoków; błąd = domyślny wygląd.
+        saved = appearance.load()
+        try:
+            self.tokens = appearance.apply_to_tokens(self.tokens, saved["colors"])
+        except appearance.AppearanceError:
+            pass
         self.c = self.tokens["kolory"]
         self.s = model.ShellState(axes=tuple(a.upper() for a in INFO.AVAILABLE_AXES))
         ini = os.environ.get("INI_FILE_NAME") or getattr(INFO, "INIPATH", "")
@@ -177,6 +186,7 @@ class LinumertShell(QtCore.QObject):
         classic = self.w.takeCentralWidget()
         root = QtWidgets.QWidget()
         root.setObjectName("lrtRoot")
+        self.root = root
         root.setStyleSheet(model.shell_qss(self.tokens))
         grid = QtWidgets.QVBoxLayout(root)
         grid.setContentsMargins(0, 0, 0, 0)
@@ -204,16 +214,19 @@ class LinumertShell(QtCore.QObject):
         ini = os.environ.get("INI_FILE_NAME") or getattr(INFO, "INIPATH", "")
         self.tools = tools_page.ToolsPage(self, ini) if tools_page is not None else None
         self.offsets = OffsetsPage(self)
+        self.appearance = AppearancePage(self)
         self.pages = {"machine": 0, "classic": 1, "diag": self.stack.addWidget(self.diag),
                       "production": self.stack.addWidget(self.production),
                       "start": self.stack.addWidget(self.start),
                       "sim": self.stack.addWidget(self.sim),
                       "homing": self.stack.addWidget(self.homing),
                       "program": self.stack.addWidget(self.program),
-                      "offsets": self.stack.addWidget(self.offsets)}
+                      "offsets": self.stack.addWidget(self.offsets),
+                      "appearance": self.stack.addWidget(self.appearance)}
         self.page_widgets = {"diag": self.diag, "production": self.production,
                              "start": self.start, "sim": self.sim,
-                             "homing": self.homing, "program": self.program, "offsets": self.offsets}
+                             "homing": self.homing, "program": self.program, "offsets": self.offsets,
+                             "appearance": self.appearance}
         self.cycles = cycles_page.CyclesPage(self) if cycles_page is not None else None
         if self.cycles is not None:
             self.pages["cycles"] = self.stack.addWidget(self.cycles)
@@ -225,6 +238,8 @@ class LinumertShell(QtCore.QObject):
         content.setWidgetResizable(True)
         content.setFrameShape(QtWidgets.QFrame.NoFrame)
         content.setWidget(self.stack)
+        self.content = content
+        self._paint_content()
         body.addWidget(content, 1)
         grid.addLayout(body, 1)
         grid.addWidget(self._bottom_bar())
@@ -781,6 +796,28 @@ class LinumertShell(QtCore.QObject):
         btn = getattr(self.w, target, None)
         if btn is not None and btn.isEnabled():
             btn.click()  # przełącza tylko stronę QtDragon (main_tab_changed), bez ruchu
+
+    def _paint_content(self) -> None:
+        """Tło obszaru stron w kolorze motywu (bez tego poniżej krótkich stron widać szary Qt)."""
+        pal = self.content.viewport().palette()
+        pal.setColor(QtGui.QPalette.Window, QtGui.QColor(self.c["bg"]))
+        self.content.viewport().setPalette(pal)
+        self.content.viewport().setAutoFillBackground(True)
+        pal = self.stack.palette()
+        pal.setColor(QtGui.QPalette.Window, QtGui.QColor(self.c["bg"]))
+        self.stack.setPalette(pal)
+        self.stack.setAutoFillBackground(True)
+
+    def apply_tokens(self, tokens: dict) -> None:
+        """Zmiana kolorystyki na żywo: arkusz stylów i ikony szyny; bez poleceń do CNC."""
+        self.tokens = tokens
+        self.c.clear()
+        self.c.update(tokens["kolory"])       # widoki trzymają odwołanie do tego słownika
+        self.root.setStyleSheet(model.shell_qss(tokens))
+        self._paint_content()
+        for area, _text, icon, _btn in AREAS:
+            self.areas[area].setIcon(_icon(icon, self.c["fg2"]))
+        self._refresh_dro()
 
     def set_dro_view(self, view: str) -> None:
         self.dro_view = view

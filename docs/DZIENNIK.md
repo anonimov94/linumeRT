@@ -1403,3 +1403,9 @@ NIEZWERYFIKOWANE NA SPRZĘCIE.
 - #161/a572f9c: python i plant-matrix PASS, linuxcnc w toku. #163: plant-matrix PASS, linuxcnc w toku.
 - Brak opublikowanego odbioru Claude dla #161/#163. #162 zawiera osobne palety/edytor kolorów i własne 23 testy, nie jest odbiorem hosta #163.
 - Bez scalenia lub deklaracji PASS laptopa; nowe kontrole CI po poprawce dokumentacyjnej.
+
+## 2026-10-25 — Claude: M2, obszar „Wygląd” w HMI (palety i własne kolory)
+Model-Author: Claude. Prośba właściciela: zmiana kolorystyki działającego HMI. `linumert_appearance.py` (palety z kontraktu skórek, dziesięć ról, tokeny wyliczane,
+walidacja kontrastu WCAG i znaczenia czerwony/zielony/bursztynowy, zapis atomowy JSON), `linumert_appearance_page.py` (paleta, edytor kolorów, podgląd, zapis, reset)
+i integracja w powłoce (nowy obszar na szynie, wczytanie zapisu przy starcie, `apply_tokens`, tło kontenera stron w kolorze motywu). 23 testy, sprawdzone w LinuxCNC pod Xvfb
+(zrzuty `docs/raporty/hmi_appearance/`). Prawdziwe skórki (układy) i widoki rysowane własnym kodem (kolory po restarcie) otwarte. Opis: `docs/user/WYGLAD.md`. NIEZWERYFIKOWANE NA SPRZĘCIE.
