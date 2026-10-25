@@ -522,9 +522,9 @@
       "title": "Zerowanie detalu i sonda",
       "prompt": "prompts/sesja-033.md",
       "status": "partial",
-      "progress": "Zero detalu G54–G59 i model przygotówki dostępne. Claude 2026-10-25: G54–G59.3 (G10 L2 P1–P9, wybór układu, obrót R, ruch do zera detalu ±0,01 mm, parametry w pliku zmiennych) oraz sondowanie G38.2/G38.3 Z i narożnika X/Y na LinuxCNC 2.9 + wygenerowany Plant (test linuxcnc); powtarzalność < 0,001 mm; błąd bezwzględny Z −0,011, X +0,016, Y +0,010 mm (luz 10 µm modelu napędów) — kryterium ≤ 0,01 mm niespełnione dla Z i X. docs/user/SONDOWANIE.md. Claude 2026-10-25: kalibracja sondy na wzorcu (stała poprawka na oś/kierunek, core/linumert/programs/probe_calibration.py): na Plant pięć par oś/kierunek skalibrowanych w jednym miejscu ściany i sprawdzonych w innym (przesunięcie 20 mm) daje błąd po poprawce ≤ 0,01 mm (0,000 mm w modelu deterministycznym); model napędów bez zmian. Brak jeszcze ekranu kalibracji w HMI.",
+      "progress": "Zero detalu G54–G59 i model przygotówki dostępne. Claude 2026-10-25: G54–G59.3 (G10 L2 P1–P9, wybór układu, obrót R, ruch do zera detalu ±0,01 mm, parametry w pliku zmiennych) oraz sondowanie G38.2/G38.3 Z i narożnika X/Y na LinuxCNC 2.9 + wygenerowany Plant (test linuxcnc); powtarzalność < 0,001 mm; błąd bezwzględny Z −0,011, X +0,016, Y +0,010 mm (luz 10 µm modelu napędów) — kryterium ≤ 0,01 mm niespełnione dla Z i X. docs/user/SONDOWANIE.md. Claude 2026-10-25: kalibracja sondy na wzorcu (stała poprawka na oś/kierunek, core/linumert/programs/probe_calibration.py): na Plant pięć par oś/kierunek skalibrowanych w jednym miejscu ściany i sprawdzonych w innym (przesunięcie 20 mm) daje błąd po poprawce ≤ 0,01 mm (0,000 mm w modelu deterministycznym); model napędów bez zmian. Brak jeszcze ekranu kalibracji w HMI. Claude 2026-10-25: scenariusze Plant probe_z_touchplate i probe_corner (plant/scenarios, master linuxcnc, REQ-VM-09) z kryteriami probed/probe_repeat/probe_tripped; na LinuxCNC RIP oba PASS (błąd bezwzględny ±0,02 mm, powtarzalność ≤ 0,002 mm, po kalibracji ≤ 0,01 mm).",
       "remaining": [
-        "Scenariusze Plant probe_z_touchplate i probe_corner (plant/scenarios) oraz sonda płytkowa (probe.type plate) — nie istnieją.",
+        "Scenariusz dla sondy płytkowej (probe.type plate) na LinuxCNC: konfiguracja istnieje tylko dla mill_servo_table (box).",
         "Logika sondy QtDragon (Basic/Versa) w nowym stylu i klik przez GUI na pulpicie; ręczny odbiór G54–G59.3 w HMI.",
         "Ekran kalibracji sondy w HMI (D36) i wykorzystanie poprawki w cyklach sondowania; kalibracja na sprzęcie."
       ],
@@ -535,7 +535,10 @@
         "docs/user/SONDOWANIE.md",
         "core/linumert/programs/probe_calibration.py",
         "tests/test_probe_calibration.py",
-        "tests/test_probe_calibration_linuxcnc.py"
+        "tests/test_probe_calibration_linuxcnc.py",
+        "plant/scenarios/probe_z_touchplate.yaml",
+        "plant/scenarios/probe_corner.yaml",
+        "tests/test_probe_scenarios.py"
       ]
     },
     {

@@ -1,0 +1,50 @@
+# linumeRT · scenariusz Plant (sesja 033). Model-Author: Claude.
+# Sondowanie Z na górnej ścianie celu sondy (probe.target z machine.yaml): dwa dokładne pomiary
+# w jednym miejscu (powtarzalność), jeden po przesunięciu o (30, 20) mm z kalibracją na pierwszym,
+# oraz sonda w powietrzu (G38.3 bez kontaktu nie może ustawić sygnału zadziałania).
+# Oczekiwane wartości z geometrii celu: Z wrzeciona przy styku = target.max.z + tip_length
+# = -90 + 60 = -30 mm. Tylko LinuxCNC (G38.x nie istnieje w atrapie mastera).
+name: probe_z_touchplate
+description: "Sondowanie Z górnej ściany celu: błąd bezwzględny, powtarzalność i po kalibracji ≤ 0,01 mm."
+requirements: [REQ-VM-09]
+machine: ../../config/machines/mill_servo_table.yaml
+master: linuxcnc
+duration: 420
+steps:
+  - {at: 0.1, action: enable}
+  - {at: 0.3, action: mdi, command: "G21 G90 G49 G10 L2 P1 X0 Y0 Z0 R0", settle: true}
+  - {at: 0.4, action: mdi, command: "G54", settle: true}
+  - {at: 0.5, action: mdi, command: "G53 G0 Z-5", settle: true}
+  - {at: 0.6, action: mdi, command: "G53 G0 X300 Y400", settle: true}
+  # pomiar 1: szybko F100, odjazd 2 mm, dokładnie F10 dwa razy
+  - {at: 0.7, action: mdi, command: "G91 G38.2 Z-100 F100", settle: true, timeout: 120}
+  - {at: 0.8, action: mdi, command: "G91 G1 Z2 F300", settle: true}
+  - {at: 0.9, action: mdi, command: "G91 G38.2 Z-4 F10", settle: true}
+  - {at: 1.0, action: capture, name: z1}
+  - {at: 1.1, action: mdi, command: "G91 G1 Z2 F300", settle: true}
+  - {at: 1.2, action: mdi, command: "G91 G38.2 Z-4 F10", settle: true}
+  - {at: 1.3, action: capture, name: z2}
+  - {at: 1.4, action: mdi, command: "G91 G1 Z2 F300", settle: true}
+  # pomiar 3: inne miejsce tej samej ściany
+  - {at: 1.5, action: mdi, command: "G90", settle: true}
+  - {at: 1.6, action: mdi, command: "G53 G0 Z-5", settle: true}
+  - {at: 1.7, action: mdi, command: "G53 G0 X330 Y420", settle: true}
+  - {at: 1.8, action: mdi, command: "G91 G38.2 Z-100 F100", settle: true, timeout: 120}
+  - {at: 1.9, action: mdi, command: "G91 G1 Z2 F300", settle: true}
+  - {at: 2.0, action: mdi, command: "G91 G38.2 Z-4 F10", settle: true}
+  - {at: 2.1, action: capture, name: z3}
+  - {at: 2.2, action: mdi, command: "G91 G1 Z2 F300", settle: true}
+  # sonda w powietrzu
+  - {at: 2.3, action: mdi, command: "G90", settle: true}
+  - {at: 2.4, action: mdi, command: "G53 G0 Z-5", settle: true}
+  - {at: 2.5, action: mdi, command: "G53 G0 X100 Y100", settle: true}
+  - {at: 2.6, action: mdi, command: "G38.3 X150 F100", settle: true, timeout: 120}
+  - {at: 2.7, action: capture, name: air}
+expect:
+  - no_alarm: {}
+  - probe_tripped: {capture: z1, value: true}
+  - probe_tripped: {capture: z3, value: true}
+  - probe_tripped: {capture: air, value: false}
+  - probed: {capture: z1, axis: Z, value: -30.0, tol: 0.02}   # błąd bezwzględny (luz napędu 0,01)
+  - probe_repeat: {captures: [z1, z2], axis: Z, tol: 0.002}
+  - probed: {capture: z3, axis: Z, value: -30.0, tol: 0.01, calibrate: {capture: z1, value: -30.0}}

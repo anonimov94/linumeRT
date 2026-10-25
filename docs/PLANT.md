@@ -323,10 +323,14 @@ expect:
 Akcje: `enable`, `home` (`axes`), `move` (`X: 10, feed` [mm/min], `rapid`, `accel` [mm/s²] ponad
 limity osi), `mdi` (`command`), `program`, `wait` (`seconds` albo `until: {idle | alarm |
 drive_state}`, `timeout`), `fault`/`clear` (§7b), `set_param` (`drive, path, value`, REQ-VD-04),
-`fault_reset`, `spindle` (`rpm`). Kryteria: `max_following_error {axis, mm}`, `lost_steps {axis,
+`fault_reset`, `spindle` (`rpm`), `capture` (`name`; tylko master `linuxcnc`: zapis `probed_position` i
+`probe_tripped` po ostatnim G38.x). Krok `mdi` ma opcję `settle: true` (blokuje do końca ruchu, `timeout`).
+Kryteria: `max_following_error {axis, mm}`, `lost_steps {axis,
 min|max}`, `alarm {code, within_s}`, `no_alarm {allowed}`, `position {axis, value, tol, relative}`
 (`relative`: względem pozycji przy pierwszym ruchu), `drive_state`, `event {name, present}`,
-`oracle`, `completed`, `frames {lost_max}`. Błąd kroku (np. zdjęcie nieaktywnej awarii) = FAIL.
+`oracle`, `completed`, `frames {lost_max}`, sondowanie: `probe_tripped {capture, value}`,
+`probed {capture, axis, value, tol, calibrate: {capture, value}}` (pozycja sondowana; `calibrate` odejmuje stałą poprawkę
+wyznaczoną na wzorcu), `probe_repeat {captures, axis, tol}`. Błąd kroku (np. zdjęcie nieaktywnej awarii) = FAIL.
 
 - **Atrapa mastera** (`mock`, CI): LRT-NET bez gniazd, lockstep, deterministyczna (REQ-QA-04);
   ruch skoordynowany G0/G1 (G90/G91, F, M3/M4/M5, M2/M30), łuki i cykle → błąd scenariusza;

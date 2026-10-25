@@ -1428,6 +1428,13 @@ walidacja kontrastu WCAG i znaczenia czerwony/zielony/bursztynowy, zapis atomowy
 i integracja w powłoce (nowy obszar na szynie, wczytanie zapisu przy starcie, `apply_tokens`, tło kontenera stron w kolorze motywu). 23 testy, sprawdzone w LinuxCNC pod Xvfb
 (zrzuty `docs/raporty/hmi_appearance/`). Prawdziwe skórki (układy) i widoki rysowane własnym kodem (kolory po restarcie) otwarte. Opis: `docs/user/WYGLAD.md`. NIEZWERYFIKOWANE NA SPRZĘCIE.
 
+
+## 033 — Scenariusze sondowania Plant · 2026-10-25 · Claude
+- Model-Author: Claude. Silnik scenariuszy: akcja `capture`, `settle` w `mdi`, kryteria `probed`/`probe_repeat`/`probe_tripped` (z kalibracją na wzorcu).
+- Scenariusze `probe_z_touchplate` i `probe_corner` (`master: linuxcnc`, REQ-VM-09), oczekiwania z geometrii celu w machine.yaml. Atrapa mastera ich nie wykonuje (G38).
+- Weryfikacja: `make lint`, 9 testów jednostkowych kryteriów i spójności z geometrią, 56 testów scenariuszy; na LinuxCNC RIP w podmanie (Debian 12) oba scenariusze PASS (16 min 39 s).
+- Do zrobienia w 033: ekran kalibracji sondy w HMI, logika sondy QtDragon w nowym stylu, ręczny odbiór G54–G59.3 w HMI. Typ celu `plate` jest w modelu (router), ale scenariusz LinuxCNC istnieje tylko dla mill_servo_table. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
 ## #159 — uwagi Claude do biblioteki maszyn · 2026-10-25 · Codex
 - Model-Author: Codex. Usunięto stałą 17100 z testu edycji YAML; oczekiwanie pochodzi z aktualnej konfiguracji.
 - Atomowa publikacja plików konfiguracji w bibliotece/edytorze; kosz z unikalnym sufiksem i zgodnością starszych nazw.
