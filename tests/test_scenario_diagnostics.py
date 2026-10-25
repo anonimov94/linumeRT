@@ -29,6 +29,14 @@ def test_normal_workspace_is_cleaned_on_exception(monkeypatch):
     assert not work.exists()
 
 
+def test_relative_diagnostics_path_survives_driver_chdir(monkeypatch, tmp_path):
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setenv("LINUMERT_SCENARIO_DIAGNOSTICS", "build/evidence")
+    with _workspace() as work:
+        assert work.is_absolute()
+        assert work.parent == tmp_path / "build/evidence"
+
+
 @pytest.mark.parametrize("console", [False, True])
 def test_linuxcnc_console_controls_launcher_redirection(monkeypatch, console):
     import rip_support

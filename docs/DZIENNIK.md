@@ -1221,3 +1221,11 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
 - Testy: 4 diagnostyki PASS; lokalna kopia: 1394 PASS/10 błędów środowiska kopii, po odtworzeniu symlinków i historii Git 75 PASS/1 skip w dotkniętych zestawach; CI dla kodu 99c4cb9 python/plant-matrix PASS.
 - Raport i JSON: docs/raporty/prototypy/M1_FIRST_MOTION_2026-10-25.*; autokontrola, bez niezależnego przeglądu.
 - Historyczne 0,3 mm niewyjaśnione; uchyb Z w bazowaniu nadal obserwowany. 10 PASS/G1/pulpit/RT/sprzęt otwarte.
+
+
+## 026 / LEGACY-RUNTIME — CI i stabilizacja testu po hamowaniu (PR #133) · 2026-10-25 · Codex
+- Model-Author: Codex. CI 7ac8283: 144 LinuxCNC PASS / 1 FAIL D38 (zabezpieczenie odmówiło wycofania przy niewygaszonym uchybie).
+- Test czeka teraz na tę samą stabilizację 0,2 s / <1 µm przed wycofaniem co przed powrotem; zabezpieczenia bez zmian.
+- Diagnostyka rozwiązuje względną ścieżkę przed zmianą katalogu drivera; 5 testów PASS, ruff PASS.
+- Celowany lokalny LinuxCNC zajęty przez blokadę Claude „neon N4”; nie naruszono jej ani jego procesów. Wymagane końcowe CI.
+- Ograniczenie porównania ramp: równoległe testy Pythona, niekontrolowane obciążenie CPU; wynik nie jest benchmarkiem.

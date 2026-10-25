@@ -193,8 +193,9 @@ def _workspace():
     """Opt-in forensic artifacts survive both failed criteria and runner exceptions."""
     base = os.environ.get("LINUMERT_SCENARIO_DIAGNOSTICS")
     if base:
-        Path(base).mkdir(parents=True, exist_ok=True)
-        yield Path(tempfile.mkdtemp(prefix="lrt_scen_", dir=base))
+        directory = Path(base).resolve()
+        directory.mkdir(parents=True, exist_ok=True)
+        yield Path(tempfile.mkdtemp(prefix="lrt_scen_", dir=directory))
     else:
         with tempfile.TemporaryDirectory(prefix="lrt_scen_") as tmp:
             yield Path(tmp)

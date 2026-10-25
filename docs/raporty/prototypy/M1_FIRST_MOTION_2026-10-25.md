@@ -39,6 +39,8 @@ X: spadek o około 31%. W obu próbach maksimum X przy linii 6 (G0 powrotny),
 prędkość jointa w próbce odpowiednio około −98,5 i −70 mm/s. Łagodniejsza rampa
 zmniejszyła także szczytową prędkość na krótkim ruchu. To jedna para obserwacji,
 nie izolowany pomiar samej bezwładności ani uzasadnienie zmiany konfiguracji docelowej.
+Podczas porównania trwał także niezależny zestaw testów Pythona; obciążenie CPU
+nie było kontrolowane. Prób tych nie należy traktować jako benchmarku wydajności.
 Wstępny przebieg z wcześniejszą wersją diagnostyki (`9ee302e`) dał X 0,11256 mm, 5/5 PASS.
 
 W chwili próbek maksimum `reply-age=1`, `connected=true`, Plant `lost=late=0`;
@@ -79,7 +81,21 @@ W czasie prób zajęto obie zastane lokalizacje blokady:
 `/home/codex/linumert-test/locks` oraz `/home/codex/.cache/linumert-preview-locks`;
 zwolniono obie. Nie przerwano cudzych procesów ani nie zmieniono checkoutu Claude.
 
-## Następny krok
+## Regresja testu po hamowaniu — CI
+
+Workflow LinuxCNC `40171439226` dla `7ac8283`: **144 PASS / 1 FAIL**.
+Niepowodzenie: `test_retract_returns_to_compensated_path[plant]`, odmowa
+„Poczekaj na dotrzymanie pozycji przez napędy” po kliknięciu wycofania Z.
+Test uznawał pojedynczą próbkę włączonego przycisku za gotowość do kliknięcia;
+przed powrotem stosował już 0,2 s ciągłego uchybu <1 µm. Ta sama stabilizacja
+obejmuje teraz oba kliknięcia. Nie zmieniono progów ani kodu zabezpieczenia.
+To usunięcie wyścigu w teście względem gasnącego uchybu, nie usuwanie fizyki Plant.
+Ponowny test lokalny wstrzymała prawidłowo blokada Claude `neon N4`;
+nie przejęto jej i nie przerwano procesów. Pięć testów diagnostyki PASS,
+w tym względna ścieżka dowodów po zmianie katalogu drivera. Końcowe CI po poprawce
+pozostaje wymagane; pierwszy nieudany job nie jest deklarowany jako PASS.
+
+## Dalszy pomiar
 
 Odtworzyć błąd Z podczas bazowania z zachowanymi logami, a przy skoku X zebrać
 zsynchronizowany ślad zadanego ruchu, sprzężenia i wieku odpowiedzi. Następnie dobrać

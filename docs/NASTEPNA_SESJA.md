@@ -15,6 +15,15 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · 2026-10-25. **Bloker CI #133: test D38 po hamowaniu.**
+CI `40171439226`, SHA `7ac8283`: 144 LinuxCNC PASS, jeden FAIL w
+`test_retract_returns_to_compensated_path[plant]` — odmowa „Poczekaj na dotrzymanie
+pozycji przez napędy” przy kliknięciu wycofania. Test czekał na pojedyncze `isEnabled`,
+choć przed powrotem ma już stabilne 0,2 s / 1 µm. Zajmuję wyłącznie
+`tests/pause_retract_driver.py`: ta sama stabilizacja także przed wycofaniem;
+bez zmiany zabezpieczeń, ramp, mas i progów. Weryfikacja: celowany test sim/Plant
+pod wspólną blokadą, potem wymagane CI. Dodatkowo test względnej ścieżki diagnostyki.
+
 Model-Author: Codex · 2026-10-25. **Wynik kroku M1, PR #133, kod `99c4cb9`.**
 Diagnostyka zachowuje INI/HAL, logi LinuxCNC/Plant, RESULT/PEAK i telemetrię także
 przy wyjątku. Dwie próby first_motion: 5/5 PASS; XY 1000 → 500 mm/s² dało próbkę
