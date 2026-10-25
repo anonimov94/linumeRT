@@ -15,6 +15,26 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · 2026-10-25. **Wynik pojedynczego pomiaru M1 na `6a64abe`.**
+Z podczas pierwszego bazowania: following error; SETUP_ERROR przy odbiorze
+0,4943 s: homing=1, ferror NML 0,43 mm, output/input 0,45/0 mm, velocity 20 mm/s;
+reply-age=1, connected=true, missed=3, plant lost/late=0. To odczyty sekwencyjne
+poza RT, nie wartość wyzwalająca ani dowód przyczyny. Po istniejącym retry:
+program 5/5 PASS, X 0,11211 mm. Bez zmian modelu/ramp/progów. Raport i JSON
+`docs/raporty/prototypy/M1_SETUP_2026-10-25.*`, hashe pełnych dowodów zachowane.
+Obie blokady zwolnione. Przed właściwą próbą venv preview odmówił startu Plant
+(brak uvicorn); użyłem istniejącego kompletnego venv, bez instalacji.
+Następny krok: wspólny ślad serwo command/feedback, CiA402 i LRT-NET od włączenia,
+bez ślepej pełnej serii. Historyczne X 0,3 mm i odbiór M1 nadal otwarte.
+
+Model-Author: Codex · 2026-10-25 08:34 UTC. **LEGACY-RUNTIME: pojedynczy pomiar setup.**
+#138 scalony jako `6a64abe`, wszystkie trzy kontrole SUCCESS; zdalny main sprawdzony.
+Zakres `codex/m1-setup-probe`: jeden first_motion z nowym zapisem SETUP_ERROR,
+bez modyfikacji modelu, ramp ani progów. Osobny snapshot źródeł `6a64abe` w WSL,
+oba wspólne katalogi blokad; przy zajęciu lub cudzych procesach rezygnuję z uruchomienia.
+Rezultat: raport i SHA-256 zachowanych dowodów, rozliczenie M1; nie pełna seria,
+nie dowód optimum, nie zsynchronizowany ślad RT. Nie dotykam odbioru 062/#139.
+
 Model-Author: Codex · 2026-10-25. **Wynik: diagnostyka bazowania przed T0.**
 `SETUP_ERROR` zachowuje snapshot wszystkich jointów NML przy odebraniu błędu,
 sekwencyjne odczyty łącza HAL i monotoniczny czas odbioru/zakończenia odczytu.
