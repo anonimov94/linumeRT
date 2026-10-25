@@ -112,8 +112,8 @@ class ToolsPage(QtWidgets.QWidget):
         from linumert_layout import CardColumns
 
         CardColumns(self, (frame, self.editor_scroll))
-        self.table.setMinimumHeight(220)
-        self.editor_scroll.setMinimumHeight(400)
+        self.table.setMinimumHeight(160)
+        self.editor_scroll.setMinimumHeight(220)
         for widget in (self.spin_t, self.spin_p, self.spin_z, self.spin_life, self.spin_used,
                        *(spin for _label, spin in self.rows.values())):
             widget.valueChanged.connect(self._edited)

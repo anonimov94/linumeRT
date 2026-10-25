@@ -35,7 +35,21 @@ class CardColumns(QtWidgets.QGridLayout):
         width = max(max(card.minimumWidth(), card.minimumSizeHint().width())
                     for card in self.cards)
         size.setWidth(width + margins.left() + margins.right())
+        size.setHeight(max(max(card.minimumHeight(), card.minimumSizeHint().height())
+                           for card in self.cards) + margins.top() + margins.bottom())
         return size
+
+    def hasHeightForWidth(self):  # noqa: N802 - Qt virtual method
+        return True
+
+    def heightForWidth(self, width):  # noqa: N802 - Qt virtual method
+        margins = self.contentsMargins()
+        if width >= self.breakpoint:
+            return super().heightForWidth(width)
+        heights = [max(card.minimumHeight(), card.minimumSizeHint().height(),
+                       card.heightForWidth(width - margins.left() - margins.right()))
+                   for card in self.cards]
+        return sum(heights) + self.spacing() + margins.top() + margins.bottom()
 
     def setGeometry(self, rect):  # noqa: N802 - Qt virtual method
         margins = self.contentsMargins()

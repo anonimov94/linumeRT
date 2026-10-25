@@ -128,6 +128,17 @@ def smoke(snapshot):
             scroll = shell.stack.parentWidget().parentWidget()
             assert scroll.horizontalScrollBar().maximum() == 0, (area, width)
             assert window.width() == width
+    from PyQt5 import QtCore, QtTest
+
+    window.activateWindow()
+    shell.tools.txt_desc.setFocus()
+    app.processEvents()
+    assert shell.tools.txt_desc.hasFocus()
+    QtTest.QTest.keyClicks(shell.tools.txt_desc, "draft")
+    assert shell.tools.txt_desc.text().endswith("draft")
+    QtTest.QTest.keyClick(shell.tools.txt_desc, QtCore.Qt.Key_Tab)
+    app.processEvents()
+    assert shell.tools.txt_holder.hasFocus()
     assert window.grab().save(str(Path(snapshot).with_name("tools-responsive.png")))
     shell.select_area("start")
     for _ in range(8):
