@@ -17,7 +17,7 @@ ROOT = Path(__file__).resolve().parents[1]
 MILL = ROOT / "plant/scenarios/machines/mill_servo_table_y2.yaml"
 ROUTER = ROOT / "config/machines/router_gantry_steppers.yaml"
 
-# REQ-VM-01
+# REQ-QA-02
 CASES = [
     (MILL, "G0 Z-15", (1, 2, 4, 8, 16)),
     (MILL, "G0 X100 Y80", (1, 2, 4, 8)),
