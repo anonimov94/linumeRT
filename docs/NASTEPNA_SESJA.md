@@ -15,6 +15,13 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · 2026-10-25. **#153: zapis diagnostyki gotowy do odbioru.**
+Driver fixture zapisuje etap i stan NML/błędy przy timeoutach oraz przez atexit
+również przy asercji; stdout/stderr drivera i scalony log LinuxCNC trafiają do tmp.
+Trzy testy offline wymuszają timeout/asercję, błąd NML i odbiór logu: PASS;
+ruff i diff --check PASS, jawne not linuxcnc. Brak zmian progów/timeoutów/ruchu.
+Następnie jeden celowany odbiór istniejącej fixture pod obiema lease, bez pełnej serii.
+
 Model-Author: Codex · 2026-10-25. **LEGACY-RUNTIME: diagnostyka fixture po #152.**
 #152 scalony po zielonych python/plant-matrix jako 276f34c, main zweryfikowany.
 Zakres codex/m1-fixture-diagnostics: tests/test_plant_linuxcnc.py i pomocnik/test

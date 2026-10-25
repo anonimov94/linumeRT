@@ -18,6 +18,7 @@ import time
 from pathlib import Path
 
 import pytest
+from plant_fixture_diagnostics import DRIVER_DIAGNOSTICS, capture_console
 from rip_support import (
     installed_modules,
     plant_server,
@@ -62,6 +63,7 @@ import json, sys, time
 import linuxcnc
 c, s, e = linuxcnc.command(), linuxcnc.stat(), linuxcnc.error_channel()
 out = {"errors": []}
+''' + DRIVER_DIAGNOSTICS + r'''
 def wait(cond, timeout):
     t = time.time()
     while time.time() - t < timeout:
@@ -72,6 +74,7 @@ def wait(cond, timeout):
         if cond():
             return True
         time.sleep(0.05)
+    out.setdefault("timeouts", []).append(snapshot("wait_timeout"))
     return False
 c.state(linuxcnc.STATE_ESTOP_RESET)
 out["estop_reset"] = wait(lambda: s.task_state == linuxcnc.STATE_ESTOP_RESET, 5)
@@ -80,6 +83,7 @@ out["machine_on"] = wait(lambda: s.task_state == linuxcnc.STATE_ON, 5)
 c.mode(linuxcnc.MODE_MANUAL); c.wait_complete()
 c.teleop_enable(0); c.wait_complete()
 t0 = time.time()
+stage = "homing"
 c.home(-1)
 out["homed"] = wait(lambda: all(s.homed[:4]), 120)
 out["home_s"] = round(time.time() - t0, 1)
@@ -87,6 +91,7 @@ time.sleep(0.5); s.poll()
 out["after_home"] = [round(v, 3) for v in s.actual_position[:3]]
 c.teleop_enable(1); c.wait_complete()
 c.mode(linuxcnc.MODE_MDI); c.wait_complete()
+stage = "initial_move"
 c.mdi("G90 G1 X100 Y200 Z-20 F3000"); c.wait_complete(60)
 out["moved"] = wait(lambda: s.interp_state == linuxcnc.INTERP_IDLE, 60)
 time.sleep(0.5); s.poll()
@@ -97,6 +102,7 @@ out["errors_motion"] = list(out["errors"]); out["errors"] = []
 # Model-Author: Codex · plan 22.10: prawdziwy interpreter/planner i napędy Plant.
 out["pockets"] = []
 for path in sys.argv[1:]:
+    stage = "program:" + path
     c.mode(linuxcnc.MODE_AUTO); c.wait_complete()
     c.program_open(path); c.wait_complete()
     started_at = time.monotonic()
@@ -112,11 +118,13 @@ for path in sys.argv[1:]:
 c.mode(linuxcnc.MODE_MDI); c.wait_complete()
 # G61 before the oracle: pocket programs leave G64 active, allowing a stop short of X100.
 # Model-Author: Codex — establish and record a settled position before the rejected move.
+stage = "before_softlimit"
 c.mdi("G61 G90 G1 X100 Y200 Z-20 F3000"); c.wait_complete(60)
 assert wait(lambda: s.interp_state == linuxcnc.INTERP_IDLE and abs(s.current_vel) < 1e-7
             and abs(s.actual_position[0] - 100) < 0.005, 60)
 out["before_softlimit"] = list(s.position[:3])
 # softlimit_oracle: MDI poza soft limit X (599) — LinuxCNC powinien odrzucić
+stage = "softlimit"
 c.mdi("G90 G0 X700"); c.wait_complete(30)
 wait(lambda: s.interp_state == linuxcnc.INTERP_IDLE, 30)
 time.sleep(0.3); s.poll()
@@ -125,6 +133,7 @@ out["after_softlimit"] = [round(v, 3) for v in s.actual_position[:3]]
 out["after_softlimit_command"] = list(s.position[:3])
 c.state(linuxcnc.STATE_ON); c.mode(linuxcnc.MODE_MDI); c.wait_complete()
 # forbidden_zone_oracle: wjazd w strefę magazynu (LinuxCNC jej nie zna)
+stage = "forbidden_zone"
 c.mdi("G53 G0 Z-5"); c.wait_complete(30)
 c.mdi("G53 G0 X560 Y860"); c.wait_complete(60)
 wait(lambda: s.interp_state == linuxcnc.INTERP_IDLE, 60)
@@ -136,6 +145,7 @@ wait(lambda: s.interp_state == linuxcnc.INTERP_IDLE, 60)
 time.sleep(0.5); s.poll()
 out["zone_pos_back"] = [round(v, 3) for v in s.actual_position[:3]]
 out["zone_errors"] = list(out["errors"])
+stage = "complete"
 print("RESULT " + json.dumps(out))
 '''
 
@@ -173,6 +183,8 @@ def session(tmp_path_factory):
             plant_server(plant_yaml, PORT, "--seed", "5", "--report", str(report)):
         env = {**os.environ, "PATH": f"{ini.parent}:{os.environ.get('PATH', '')}"}
         cnc = start_linuxcnc(root, ini, env)
+        console = tmp_path / "linuxcnc-console.log"
+        collector = capture_console(cnc, console)
         try:
             ready = False
             for _ in range(60):  # LinuxCNC gotowy, gdy halcmd widzi połączenie lrt-net
@@ -183,16 +195,21 @@ def session(tmp_path_factory):
                 if probe.stdout.strip() == "TRUE":
                     ready = True
                     break
-            assert ready, (cnc.stdout.read() if cnc.poll() is not None else "brak połączenia")
+            assert ready, f"brak połączenia; LinuxCNC log: {console}"
             time.sleep(1.0)
             run = rip_run(root, f"python3 {tmp_path / 'driver.py'} {' '.join(programs)}",
                           ini.parent, timeout=420,
                           env=env)
+            (tmp_path / "driver.log").write_text(run.stdout + run.stderr, encoding="utf-8")
             hal = rip_run(root, "halcmd getp lrt-net.0.axis.0.ferror; "
                           "halcmd getp lrt-net.0.plant-lost; halcmd getp lrt-net.0.bad-frames",
                           ini.parent, env=env).stdout.split()
         finally:
-            stop_linuxcnc(cnc, root, ini.parent)
+            try:
+                stop_linuxcnc(cnc, root, ini.parent)
+            finally:
+                collector.join(timeout=5)
+                assert not collector.is_alive(), f"LinuxCNC log collector still active: {console}"
     line = next((x for x in run.stdout.splitlines() if x.startswith("RESULT ")), None)
     assert line, run.stdout + run.stderr
     res = json.loads(line[len("RESULT "):])
