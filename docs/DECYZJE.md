@@ -272,3 +272,22 @@ generator odmawia bez pinu E-STOP, heartbeat lub monitora watchdoga. Piny fizycz
 `machine.yaml` (`hardware.inputs/outputs/step_dir`), generator ich nie zgaduje. Generator jest
 w rdzeniu i leniwie importuje `linumert_plant` (biblioteka szablonów napędów).
 NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+
+## Plant — cel strojenia dynamiki · 2026-10-25 · decyzja właściciela
+
+Model-Author: Codex. Właściciel doprecyzował cel Plant podczas diagnostyki M1:
+model ma zachować bezwładność masy i odpowiedź napędu, również przy hamowaniu.
+Sam fizyczny uchyb, przeregulowanie lub droga zatrzymania nie stanowią błędu systemowego.
+Osobno oceniamy fizyczną odpowiedź, przekroczenie zadanej tolerancji odbioru oraz
+potwierdzony błąd implementacji/komunikacji; przekroczenie progu nie dowodzi błędu Plant.
+Celem jest dobór największych użytecznych przyspieszeń i hamowania przy ruchach G0
+oraz bardzo szybkich ruchach roboczych G1, bez uchybu poza dopuszczalną tolerancją
+lub z jego jawną kontrolą. Obniżenie przyspieszenia to punkt porównawczy, nie cel
+optymalizacji. Badamy rampy, nastawy napędu i mechanizmy LinuxCNC, zachowując LinuxCNC
+jako jedyny planer; nie wygładzamy sztucznie wyjścia modelu i nie osłabiamy kryteriów
+wyłącznie dla PASS. Należy rozdzielić dynamikę modelu od opóźnienia toru sprzężenia.
+Powiązanie: M1/026, LEGACY-RUNTIME oraz istniejące modele 011/012 i ich scenariusze;
+nie otwiera to nowej równoległej roadmapy ani nie zmienia kolejności odbiorów.
+Dowód porównawczy i ograniczenia: `raporty/prototypy/M1_FIRST_MOTION_2026-10-25.md`.
+NIEZWERYFIKOWANE NA SPRZĘCIE.
