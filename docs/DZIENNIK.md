@@ -1229,3 +1229,8 @@ Pełne CI ujawniło ostrzeżenie rs274 przy pierwszym zapisie nieistniejących p
 - Diagnostyka rozwiązuje względną ścieżkę przed zmianą katalogu drivera; 5 testów PASS, ruff PASS.
 - Celowany lokalny LinuxCNC zajęty przez blokadę Claude „neon N4”; nie naruszono jej ani jego procesów. Wymagane końcowe CI.
 - Ograniczenie porównania ramp: równoległe testy Pythona, niekontrolowane obciążenie CPU; wynik nie jest benchmarkiem.
+
+## M1 — diagnostyka przed T0 · 2026-10-25 · Codex
+- Model-Author: Codex. Przy odebraniu błędu bazowania zachowuje snapshot jointów NML i sekwencyjne odczyty HAL w driver.log oraz RESULT.setup_samples.
+- 8 testów diagnostyki PASS w Debianie, ruff PASS; bez uruchamiania instancji LinuxCNC i bez zmiany modelu, progów lub retry.
+- Autokontrola; odczyty poza RT nie ustalają przyczyny uchybu. Zsynchronizowany ślad i odbiór M1 nadal otwarte.
