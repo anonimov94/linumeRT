@@ -444,12 +444,13 @@
       "title": "Kompozycja ekranu głównego",
       "prompt": "prompts/sesja-028.md",
       "status": "partial",
-      "progress": "Powłoka HMI i nawigacja działają.",
+      "progress": "Powłoka HMI i nawigacja działają. Na polecenie właściciela 2026-10-25 priorytet przeniesiono na M2. Uzupełniono wymaganą specyfikację funkcjonalną SPEC_EKRAN_GLOWNY.md: dane operatora, hierarchia, brak ruchu od nawigacji i macierz dowodów odbioru. To specyfikacja, nie odbiór GUI ani zamknięcie skórek.",
       "remaining": [
         "Pełny odbiór kompozycji i nowych skórek; HMI-02, SKIN-04…06."
       ],
       "evidence": [
-        "docs/DZIENNIK.md"
+        "docs/DZIENNIK.md",
+        "docs/design/SPEC_EKRAN_GLOWNY.md"
       ]
     },
     {

@@ -301,3 +301,12 @@ otwarte. README korzysta z plan.json, bez drugiej ręcznej listy statusów.
 Obraz live amd64 powstaje z opublikowanego main przez istniejący workflow ISO;
 SHA źródeł i SHA-256 obrazu są częścią przekazania. Budowa/publikacja nie oznaczają
 odbioru startu, instalacji ani kwalifikacji RT laptopa. Claude kontynuuje 033.
+
+## Priorytet M2 — decyzja właściciela 2026-10-25
+Model-Author: Codex. Po aktualizacji README właściciel wskazał wiersz M2 (3/12)
+i polecił skupić rozwój na ekranie linumeRT na bazie QtDragon. To jawna zmiana
+kolejności: bieżące prace prowadzą do odbioru sesji 028–038. Otwarte M1/G1 nie są
+uznawane za PASS ani usuwane z rejestru; istniejący PR diagnostyki #153 pozostaje
+do rozliczenia, bez uruchamiania kolejnej pełnej serii. Claude/033 i ISO pozostają
+odrębnymi zakresami. Pierwszy krok 028: wymagana specyfikacja funkcjonalna i audyt
+już istniejącej powłoki, potem brakujące funkcje i rzeczywisty odbiór GUI.

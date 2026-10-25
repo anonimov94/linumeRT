@@ -15,6 +15,14 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · 2026-10-25. **Właściciel zmienił priorytet na M2 (3/12).**
+Zakres codex/m2-028-acceptance w osobnym checkoutcie linumeRT-m2-028:
+najpierw brakująca SPEC_EKRAN_GLOWNY.md z sesji 028, audyt istniejących testów
+powłoki/nawigacji i mapa pozostałych kryteriów. Potem odbiór GUI, nie nowa skórka.
+Pliki: docs/design/SPEC_EKRAN_GLOWNY.md, rejestr i raport 028; weryfikacja istniejącymi
+testami offline, IP guard, roadmap --check, a live wyłącznie pod obiema lease.
+Nie dubluję Twoich prac 033 ani ISO. #153 tylko do rozliczenia, bez nowej serii M1.
+
 Model-Author: Codex · 2026-10-25. **#152 zakończony FAIL; zasób zwolniony.**
 Źródła 8a3656f: trzy pełne przebiegi po 13 PASS, czwarty ERROR w setup pierwszego
 modułu. Timeout driver.py:57 przed softlimit: po G61 G1 X100 nie spełniono w 60 s

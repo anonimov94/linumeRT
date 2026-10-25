@@ -323,11 +323,11 @@ Pozostaje: Odbiór ręczny VM/Plant pozostaje otwarty; automatyczny P0 PASS nie 
 
 ### 028 — Kompozycja ekranu głównego
 
-**częściowe**. Powłoka HMI i nawigacja działają.
+**częściowe**. Powłoka HMI i nawigacja działają. Na polecenie właściciela 2026-10-25 priorytet przeniesiono na M2. Uzupełniono wymaganą specyfikację funkcjonalną SPEC_EKRAN_GLOWNY.md: dane operatora, hierarchia, brak ruchu od nawigacji i macierz dowodów odbioru. To specyfikacja, nie odbiór GUI ani zamknięcie skórek.
 
 Pozostaje: Pełny odbiór kompozycji i nowych skórek; HMI-02, SKIN-04…06.
 
-Źródła: [docs/DZIENNIK.md](../DZIENNIK.md), [prompts/sesja-028.md](../../prompts/sesja-028.md).
+Źródła: [docs/DZIENNIK.md](../DZIENNIK.md), [docs/design/SPEC_EKRAN_GLOWNY.md](../design/SPEC_EKRAN_GLOWNY.md), [prompts/sesja-028.md](../../prompts/sesja-028.md).
 
 ### 029 — Tryby, JOG i pulpit MPG
 
