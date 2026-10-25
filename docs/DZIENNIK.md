@@ -1339,10 +1339,19 @@ NIEZWERYFIKOWANE NA SPRZĘCIE.
 - Autokontrola JUnit, manifestów 628 plików i 12 śladów; raport M1_REPEAT_2026-10-25.md/JSON oraz surowy log/JUnit. Procesy zakończone, obie lease zwolnione.
 - Kolejny krok: diagnostyka timeoutów drivera pierwszego modułu, potem celowany odbiór. G1 i historyczny X nadal otwarte.
 
+## LEGACY-RUNTIME — diagnostyka fixture · 2026-10-25 · Codex
+- Model-Author: Codex. #152 scalony jako 276f34c. #153 dodaje NML/etap/błędy/timeouty i logi drivera/LinuxCNC, bez zmian ruchu/progów/modelu.
+- 3 testy offline PASS, ruff PASS. Jeden lokalny test ruchu 110e7d6 PASS, ale brak JSON przez __file__ w atexit: odbiór diagnostyki NIEZALICZONY. Dowody zachowane w M1_FIXTURE_DIAGNOSTICS_2026-10-25.
+- Poprawka c217745 zapamiętuje ścieżkę wcześniej i wymaga JSON w fixture; odbiór runtime otwarty. Obie lease zwolnione. Nie wznowiono pełnej serii; G1 nadal otwarte.
+
 ## README — wykonane sesje i rozszerzenia · 2026-10-25 · Codex
 - Model-Author: Codex. Na polecenie właściciela README pokazuje osobno 39/84 sesji i 19/38 rozszerzeń, także w podziale M0–M6; liczniki generowane z plan.json.
 - Dodano odnośniki do ostatnich odbiorów gotowości, pomiarów X oraz wyniku FAIL pełnej serii M1. Nie zaliczono nieodebranych kryteriów ani sprzętu.
 - Istniejące testy roadmapy, ruff, roadmap --check, diff --check i zachowanie Dla Codex PASS. Bez zmian ISO lub kodu diagnostyki #153.
+
+## #153 — rozliczenie diagnostyki fixture w CI · 2026-10-25 · Codex
+- Model-Author: Codex. a78a2f1 / run40199421896: 151 live PASS, w tym fixture z wymaganym JSON/stage complete/brakiem snapshot_error. Python/plant-matrix SUCCESS.
+- Rozliczono raport i rejestr. Stara lokalna próba bez JSON pozostaje nieważna; pełna seria M1 i przyczyna LIMIT_TRIP otwarte. Bez ponownego odbioru.
 
 ## M2 / ISO — QtVCP SIGSEGV na laptopie właściciela · 2026-10-25 · Codex
 - Model-Author: Codex. Raporty linuxcnc_info.txt/linuxcnc.report potwierdzają SIGSEGV DISPLAY QtVCP w profilu Plant, LinuxCNC 2.9.10. SHA ISO niepodany, przyczyna nieustalona.

@@ -1,0 +1,28 @@
+{
+  "source_sha": "110e7d6b888afc4274e2cacca86400462e6ec7bb",
+  "owner": "Codex/m1-fixture-diagnostics-58277",
+  "status": "PASS",
+  "child_pid": 58296,
+  "returncode": 0,
+  "leases_released": true,
+  "diagnostics_acceptance": "NOT_ACCEPTED: missing JSON due to __file__ at atexit; fixed subsequently",
+  "artifacts": {
+    "pytest.log": {
+      "bytes": 627,
+      "sha256": "22f24f1c0aba12ff89d346cc759a37835f14c303012186994ff864eb93fa255a"
+    },
+    "junit.xml": {
+      "bytes": 359,
+      "sha256": "5626022b3d8ca5d861e3247f2e00d13ce2d0bc2b1545d8f897576db6997d0564"
+    },
+    "tmp/plant_cnc0/driver.log": {
+      "bytes": 1564,
+      "sha256": "6a7625c27eba87a314b62f48350e936ee7d560c22243668fb9315b8669eecb07"
+    },
+    "tmp/plant_cnc0/linuxcnc-console.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "driver_log": "RESULT {\"errors\": [\"Linear move on line 21 would exceed joint 0's positive limit\", \"invalid params in linear command\"], \"estop_reset\": true, \"machine_on\": true, \"homed\": true, \"home_s\": 4.8, \"after_home\": [4.994, 5.004, -5.0], \"moved\": true, \"pos\": [100.0002, 199.9976, -20.0001], \"joint_ferror_max\": 0.11343443451801605, \"task_state\": 4, \"errors_motion\": [], \"pockets\": [{\"started\": true, \"done\": true, \"seconds\": 49.47901577800076, \"task_state\": 4, \"errors\": [], \"ferror\": 0.12085680747071592}, {\"started\": true, \"done\": true, \"seconds\": 37.497373108999454, \"task_state\": 4, \"errors\": [], \"ferror\": 0.12085680747071592}, {\"started\": true, \"done\": true, \"seconds\": 22.712449778999144, \"task_state\": 4, \"errors\": [], \"ferror\": 0.13761068297763757}], \"before_softlimit\": [100.0, 200.0, -20.0], \"softlimit_errors\": [\"Linear move on line 21 would exceed X's positive limit\"], \"after_softlimit\": [100.003, 200.005, -20.0], \"after_softlimit_command\": [100.0, 200.0, -20.0], \"zone_pos\": [560.0, 860.0, -5.0], \"zone_task\": [4, 3, 1], \"zone_pos_back\": [100.0, 200.0, -5.0], \"zone_errors\": [\"Linear move on line 21 would exceed joint 0's positive limit\", \"invalid params in linear command\"]}\nException ignored in atexit callback: <function save_diagnostics at 0x71a8d6e5cc20>\nTraceback (most recent call last):\n  File \"/home/codex/linumert-m1-fixture-diagnostics-20261025/build/acceptance/tmp/plant_cnc0/driver.py\", line 35, in save_diagnostics\n    Path(__file__).with_name(\"driver_diagnostics.json\").write_text(\n         ^^^^^^^^\nNameError: name '__file__' is not defined\n"
+}
