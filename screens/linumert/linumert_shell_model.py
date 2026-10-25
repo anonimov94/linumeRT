@@ -203,6 +203,8 @@ def shell_qss(tokens: dict) -> str:
     c, r = tokens["kolory"], tokens["rozmiary"]
     touch, card, btn = r["cel_dotykowy_px"], r["promien_kart_px"], r["promien_przyciskow_px"]
     small = r["min_tekst_px"]
+    down = icon_path("strzalka_dol").replace(os.sep, "/")
+    up = icon_path("strzalka_gora").replace(os.sep, "/")
     return f"""
 #lrtRoot, #lrtRoot QWidget#lrtPage {{ background: {c['bg']}; color: {c['fg']}; font-family: {FONT_UI}; }}
 #lrtTopBar, #lrtBottomBar {{ background: {c['bg2']}; border: 0; }}
@@ -253,6 +255,25 @@ QProgressBar[level="warn"]::chunk {{ background: {c['amber']}; }}
 #lrtRoot QPushButton:hover {{ border-color: {c['teal']}; }}
 #lrtRoot QPushButton:disabled {{ color: {c['fg3']}; border-color: {c['line']}; background: {c['bg2']}; }}
 #lrtRoot QPushButton:checked {{ background: {c['tealbg']}; color: {c['teal']}; border-color: {c['teal']}; }}
+#lrtRoot QLineEdit, #lrtRoot QAbstractSpinBox, #lrtRoot QComboBox {{ background: {c['bg']}; color: {c['fg']};
+    border: 1px solid {c['line2']}; border-radius: {btn}px; min-height: 36px; padding: 0 10px;
+    selection-background-color: {c['tealbg']}; selection-color: {c['fg']}; }}
+#lrtRoot QLineEdit:focus, #lrtRoot QAbstractSpinBox:focus, #lrtRoot QComboBox:focus {{ border-color: {c['teal']}; }}
+#lrtRoot QLineEdit:disabled, #lrtRoot QAbstractSpinBox:disabled, #lrtRoot QComboBox:disabled {{
+    color: {c['fg3']}; background: {c['bg2']}; border-color: {c['line']}; }}
+#lrtRoot QComboBox::drop-down {{ border: 0; width: 26px; }}
+#lrtRoot QComboBox::down-arrow {{ image: url({down}); width: 14px; height: 14px; margin-right: 8px; }}
+#lrtRoot QAbstractSpinBox::up-button, #lrtRoot QAbstractSpinBox::down-button {{
+    subcontrol-origin: border; width: 24px; border: 0; background: transparent; }}
+#lrtRoot QAbstractSpinBox::up-button {{ subcontrol-position: top right; }}
+#lrtRoot QAbstractSpinBox::down-button {{ subcontrol-position: bottom right; }}
+#lrtRoot QAbstractSpinBox::up-arrow {{ image: url({up}); width: 12px; height: 12px; }}
+#lrtRoot QAbstractSpinBox::down-arrow {{ image: url({down}); width: 12px; height: 12px; }}
+#lrtRoot QAbstractScrollArea {{ background: {c['bg']}; border: 0; }}
+#lrtRoot QAbstractScrollArea > QWidget {{ background: {c['bg']}; }}
+#lrtRoot QComboBox QAbstractItemView {{ background: {c['panel']}; color: {c['fg']}; border: 1px solid {c['line2']};
+    selection-background-color: {c['tealbg']}; selection-color: {c['fg']}; outline: 0; }}
+#lrtRoot QCheckBox {{ color: {c['fg']}; spacing: 8px; }}
 QToolButton#lrtRailBtn {{ background: transparent; border: 0; border-radius: {btn}px; min-height: 64px;
     color: {c['fg2']}; font-size: {small}px; padding: 6px 2px; }}
 QToolButton#lrtRailBtn:hover {{ background: {c['raise']}; }}

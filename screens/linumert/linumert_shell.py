@@ -382,7 +382,10 @@ class LinumertShell(QtCore.QObject):
         right.setSpacing(16)
         right.addWidget(self._tool_card())
         right.addWidget(self._feed_card())
-        right.addWidget(self._manual_card(), 1)
+        self._manual_frame = self._manual_card()
+        right.addWidget(self._manual_frame, 1)
+        self._machine_right = right
+        self._manual_on_top = False
         grid.addLayout(right, 0, 1, 2, 1)
         grid.setColumnStretch(0, 3)
         grid.setColumnStretch(1, 2)
@@ -911,8 +914,24 @@ class LinumertShell(QtCore.QObject):
             if homed.property("homed") != want:
                 _restyle(homed, homed=want)
 
+    def _arrange_machine_page(self) -> None:
+        """Panel ruchu ręcznego i MDI na górze prawej kolumny w JOG/MDI, na dole w AUTO.
+
+        W 1280×768 widoczne jest ok. 550 px strony; panel (≈366 px) pod kartami Narzędzie i
+        Posuw wychodził poza ekran, a przyciski osi (także Z) wymagały przewijania."""
+        if not hasattr(self, "_manual_frame"):
+            return                    # strona Maszyna jeszcze nie zbudowana
+        want_top = self.s.mode in ("manual", "mdi")
+        if want_top == self._manual_on_top:
+            return
+        right = self._machine_right
+        right.removeWidget(self._manual_frame)
+        right.insertWidget(0 if want_top else right.count(), self._manual_frame, 1)
+        self._manual_on_top = want_top
+
     def refresh(self) -> None:
         s, g = self.s, model.gates(self.s)
+        self._arrange_machine_page()
         self._alarm_causes()
         for panel in self.operator_panels:
             panel.refresh()

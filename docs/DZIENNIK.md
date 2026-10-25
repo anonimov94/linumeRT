@@ -1474,3 +1474,15 @@ Model-Author: Claude. Zsynchronizowano z `main` (po #161), 560 testów offline P
 Zrzuty czterech rodzin (Classic Digital, Industrial Pro, Cyberdeck, Organic Vector) × 1920×1080 i 1280×800 z prawdziwego LinuxCNC (`docs/raporty/G2/skorki_qtvcp/`): host startuje,
 globalny pasek alarmów, E-STOP i dolny pasek zostają widoczne; przy 1280×800 konsola rodziny przewija się w obszarze hosta. Nie zamyka SKIN-02/04…06 ani 028; sceny 3D rodzin
 bez podłączenia opisane jawnie. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+
+## M2 / 028 — panel jogu widoczny w 1280×768 · 2026-10-25 · Claude
+- Model-Author: Claude. Odbiór 1280×768 (zrzuty offscreen) wykazał, że na stronie Maszyna panel „Ruch ręczny i MDI” (przyciski X/Y/Z, MDI, M3/M4/M5, wymiana M6) leży pod kartami Narzędzie i Posuw i wychodzi poza ekran (widoczne 549 z 733 px).
+- `LinumertShell._arrange_machine_page`: w JOG/MDI panel jest na górze prawej kolumny, w AUTO na dole. Test `tests/test_machine_page_layout.py` (atrapa jak test_hmi_assembly): na `main` pada (6 przycisków poza widokiem), po zmianie przechodzi. Zrzut `machine_1280x768` sprawdzony wzrokiem.
+- Nadal otwarte w 028: obcięte dolne karty strony „HMI”, szyna 13 obszarów w 1280×768, białe pola formularzy, pasek alarmów bez kodu, znak marki. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+
+## M2 / 028 — ciemne pola formularzy w powłoce · 2026-10-25 · Claude
+- Model-Author: Claude. `shell_qss` stylizuje teraz QLineEdit, pola liczbowe, listy rozwijane (strzałki z własnych ikon `strzalka_dol/gora.svg`), pole wyboru i przewijane obszary z tokenów; wcześniej były białe (jog, MDI, wrzeciono, przygotówka, narzędzia).
+- Zrzuty 1280×768 i 1920×1080 sprawdzone wzrokiem; 161 testów powłoki HMI PASS w kontenerze z Qt; PROVENANCE: dwie nowe ikony (własne, SVG).
+- Dług: jasny pasek tła wokół prawego panelu strony Symulacja, formularz przygotówki szerszy niż panel (poziomy pasek przewijania), brak znaku marki, szyna 13 obszarów. NIEZWERYFIKOWANE NA SPRZĘCIE.
