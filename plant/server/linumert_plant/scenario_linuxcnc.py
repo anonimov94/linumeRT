@@ -120,6 +120,8 @@ while now() < plan["duration"]:
                 peak["link"] = {name: hal.get_value("lrt-net.0." + name) for name in
                                 ("sent", "received", "missed", "reply-age", "plant-lost",
                                  "plant-late", "plant-jitter-us", "connected")}
+                peak["drive"] = {name: hal.get_value("lrt-net.0.axis.%d.%s" % (j, name))
+                                 for name in ("pos-cmd", "pos-fb", "ferror", "torque")}
                 peaks[str(j)] = peak
                 print("PEAK " + json.dumps(peak), flush=True)
     if s.motion_line != last_line and program["running"]:
@@ -323,7 +325,7 @@ def run_linuxcnc(scen: Scenario, port: int | None = None) -> ScenarioResult:
         with rip.installed_modules(root, work, ("lrt_net", "lrt_cia402", "lrt_estop2")):
             plant = _Plant(scen, port, report)
             env = {**os.environ, "PATH": f"{ini.parent}:{os.environ.get('PATH', '')}"}
-            cnc = rip.start_linuxcnc(root, ini, env)
+            cnc = rip.start_linuxcnc(root, ini, env, console=plan["diagnostics"])
             capture = None
             if plan["diagnostics"]:
                 capture = threading.Thread(target=_capture,

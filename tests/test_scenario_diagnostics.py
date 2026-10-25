@@ -4,6 +4,7 @@ Model-Author: Codex. No LinuxCNC instance required.
 """
 
 import io
+from pathlib import Path
 
 import pytest
 from linumert_plant.scenario_linuxcnc import _capture, _workspace
@@ -26,3 +27,14 @@ def test_normal_workspace_is_cleaned_on_exception(monkeypatch):
         with _workspace() as work:
             raise RuntimeError
     assert not work.exists()
+
+
+@pytest.mark.parametrize("console", [False, True])
+def test_linuxcnc_console_controls_launcher_redirection(monkeypatch, console):
+    import rip_support
+
+    calls = []
+    monkeypatch.setattr(rip_support, "cleanup_linuxcnc", lambda *args: None)
+    monkeypatch.setattr(rip_support.subprocess, "Popen", lambda args, **kw: calls.append(args))
+    rip_support.start_linuxcnc(Path("/rip"), Path("/work/test.ini"), console=console)
+    assert ("linuxcnc -r " in calls[0][-1]) is console

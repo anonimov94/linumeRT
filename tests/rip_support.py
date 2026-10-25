@@ -83,10 +83,12 @@ def cleanup_linuxcnc(root: Path | None = None, cwd: Path | None = None) -> None:
     assert not left, f"po sprzątaniu LinuxCNC zostały procesy: {left}"
 
 
-def start_linuxcnc(root: Path, ini: Path, env: dict | None = None) -> subprocess.Popen:
+def start_linuxcnc(root: Path, ini: Path, env: dict | None = None, *,
+                   console: bool = False) -> subprocess.Popen:
     """`linuxcnc <ini>` z RIP we własnej grupie procesów (zatrzymanie: `stop_linuxcnc`)."""
     cleanup_linuxcnc(root, ini.parent)  # resztki poprzedniego testu blokują start
-    return subprocess.Popen(["bash", "-c", f"{_source(root)}exec linuxcnc '{ini}'"],
+    flags = "-r " if console else ""
+    return subprocess.Popen(["bash", "-c", f"{_source(root)}exec linuxcnc {flags}'{ini}'"],
                             cwd=ini.parent, env=env, stdout=subprocess.PIPE,
                             stderr=subprocess.STDOUT, text=True, start_new_session=True)
 
