@@ -1421,3 +1421,8 @@ i integracja w powłoce (nowy obszar na szynie, wczytanie zapisu przy starcie, `
 - 7dc2649: cztery warianty malowania szyny nawigacji i ram hosta, natywne przyciski/fokus i te same strony/sygnały; bez zmian ACTION/HAL.
 - Składnia/diff PASS; odbiór 4×2 rozmiary, czytelność, fokus i kolory powierzony Claude. Nowego kodu nie uruchamiano.
 - HMI-OWNER-SKINS partial; pełna nakładka i dwa podglądy symulacji pozostają otwarte. #163 draft, bez scalenia do main przed odbiorem.
+
+## HMI — przegląd utraty statusu i zmiany programu · 2026-10-25 · Codex
+- Model-Author: Codex. 76fed49 usuwa nieaktualną geometrię przy zmianie programu/utracie statusu, odświeża ją po odzyskaniu; czyści tekst programu po błędzie STATUS.
+- Pauza pokazuje Wznów zgodnie ze stanem hosta. Rozszerzona regresja zmiany pliku i utraty/odzyskania statusu przekazana Claude.
+- Składnia i diff sprawdzone; bez uruchamiania testów laptopa. CI poprzedniego 82e653b SUCCESS; nowe SHA wymaga odbioru.

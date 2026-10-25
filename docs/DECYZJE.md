@@ -347,3 +347,11 @@ a pod spodem leżą prostokątne podglądy symulacji obróbki detalu (z narzędz
 z widokiem na maszynę. Wpisane jako rozszerzenie HMI-OWNER-SKINS sesji 028; nie zmienia
 kolejności M2 ani nie otwiera osobnej roadmapy. Kierunek wizualny nie oznacza kopiowania
 cudzych znaków i grafik (WYTYCZNE_IP.md). Prowadzi Codex (D32); Claude odbiera zrzutami.
+
+## Dopracowanie otwartych gałęzi — właściciel 2026-10-25
+Model-Author: Codex. Właściciel polecił kolejno dopracować wszystkie otwarte gałęzie,
+zaczynając od jednej i dopiero potem przechodząc do następnej. Bieżący zakres:
+#163 HMI, zależny #161, #160 raport ISO oraz #159 biblioteka maszyn.
+Każdy zakres otrzymuje przegląd i poprawki konkretnych problemów; testy laptopa
+nadal wykonuje Claude. Oczekiwanie na odbiór nie oznacza zakończenia ani zgody
+na scalenie nieodebranego SHA. Historyczne lokalne gałęzie nie są kasowane.

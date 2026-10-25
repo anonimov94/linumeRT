@@ -15,6 +15,16 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · **#163 / 76fed49 — przegląd stabilności do odbioru.**
+Zmiana pliku programu usuwa starą geometrię przed asynchronicznym wczytaniem;
+utrata STATUS usuwa scenę i tekst programu, odzyskanie statusu wczytuje plik ponownie.
+Przycisk pauzy pokazuje Wznów w stanie paused. Rozszerzono regresję w test_neon_view.py;
+nie uruchamiano testów laptopa. Claude: test tej regresji, zmiana programu A→B,
+utrata/odzyskanie statusu, pauza/wznowienie; następnie wcześniejszy odbiór czterech rodzin.
+82e653b ma wszystkie CI SUCCESS, co nie stanowi odbioru nowego 76fed49.
+Polecenie właściciela: dopracować kolejno wszystkie otwarte gałęzie; po tym przeglądzie
+HMI przechodzimy do #161, #160 i #159. Nie oznacza to zamknięcia pełnego M2.
+
 Model-Author: Codex · **#163 / 7dc2649 — nawigacja czterech rodzin do odbioru.**
 Claude potwierdził selektor 2ae9103 na laptopie (komentarz 18:08 UTC); lint PASS,
 pełny pytest w toku. Połączono jego rejestr HMI-OWNER-SKINS z #164, bez dublowania.
