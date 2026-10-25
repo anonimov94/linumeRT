@@ -157,6 +157,11 @@ Wcześniejsze bramki pozostają priorytetem rozwoju. Automatyczne testy, odbiór
 
 - **Gotowość napędów przed bazowaniem:** runner czeka na potwierdzenie wszystkich czterech napędów; odbiór CI obejmował 147 testów LinuxCNC PASS, w tym pierwsze bazowanie bez ponowienia. [Raport gotowości](docs/raporty/prototypy/M1_DRIVE_READY_2026-10-25.md).
 - **Diagnostyka Plant:** dodano rejestrację próbek HAL i analizę fazy command/feedback. Trzy celowane próby pierwszego ruchu przeszły po 5/5 kryteriów. [Pomiary aktualnej bazy](docs/raporty/prototypy/M1_CURRENT_X_2026-10-25.md).
+- **Przyspieszenia Plant z jawnego budżetu uchybu:** `tools/tune_accel.py` dobiera przyspieszenia przy uchybie ≤ 0,2 mm. Po odbiorze z prawdziwym LinuxCNC (atrapa mastera zaniża uchyb ok. 1,5×) frezarka ma X/Y 2 000 i Z 2 500 mm/s², router X/Y 3 820 i Z 4 000 mm/s². Progów nie poluzowano. [Raport doboru](docs/raporty/prototypy/M1_ACCEL_TUNING_2026-10-25.md).
+- **Biblioteka maszyn w panelu Plant:** zakładka „Maszyny” — lista, aktywacja, kopia, zmiana nazwy, kosz z przywracaniem i edytor YAML aktywnej maszyny z walidacją (każdy parametr edytowalny). Sprawdzone klikaniem w panelu; aktywację na działającym Plant sprawdzają testy API.
+- **HMI:** obszar „Wygląd” (palety i własne kolory), adaptacyjne karty Start/Narzędzia oraz opcjonalny host czterech rodzin skórek w QtVCP ze zrzutami 4 rodzin w dwóch rozdzielczościach. Wyraźnie odmienny wygląd każdej rodziny i główny ekran holograficzny pozostają otwarte (HMI-OWNER-SKINS).
+- **Sondowanie:** scenariusze `probe_z_touchplate` i `probe_corner` w Plant (wymagają LinuxCNC). Ekran kalibracji sondy w HMI i odbiór na sprzęcie pozostają otwarte.
+- **ISO:** przyczyną zamykania się ekranu przy starcie był brak `xfce4-notifyd`; pakiet dodano do obrazu. Odbiór na laptopie właściciela czeka na nowy obraz.
 - **Pełna powtarzalność M1 pozostaje do odbioru:** trzy pełne przebiegi po 13 testów PASS, czwarty zakończony błędem setup przed testem soft limit. Wymaganych dziesięciu kolejnych PASS nie uzyskano; raport zachowuje wynik FAIL. [Raport serii](docs/raporty/prototypy/M1_REPEAT_2026-10-25.md).
 
 Są to wyniki konkretnych prac i prób. Ukończone sesje oraz rozszerzenia można przejrzeć w [wykazie wykonanych zakresów](prompts/DONE.md); stan wszystkich bramek i pozostałe kryteria znajdują się w [rejestrze projektu](docs/roadmap/PLAN.md).
