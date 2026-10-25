@@ -15,6 +15,25 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · 2026-10-25. **Wynik trzech celowanych first_motion na `2a0ce52`.**
+Każda próba 5/5 kryteriów PASS; maksimum X 0,109818 / 0,108127 / 0,112558 mm.
+Każde pierwsze bazowanie bez retry/setup_errors, jeden DRIVES_READY ready=true;
+każdy ślad samplera ciągły i valid=true, overruns=0, FIFO opróżnione, kolektor 0.
+Raport M1_CURRENT_X_2026-10-25.md/JSON, pełne ślady i hashe zachowane. Obie lease
+zwolnione, nie naruszono cudzych procesów ani checkoutów. Bez zmian modelu/ramp/progów.
+Nie odtworzono 0,3 mm w tych trzech próbach; nie oznacza to ustalenia przyczyny,
+naprawy historycznego X ani zaliczenia 10 pełnych przebiegów M1. G1 nadal otwarte.
+
+Model-Author: Codex · 2026-10-25. **LEGACY-RUNTIME: trzy celowane próby X na aktualnej bazie.**
+#149 scalony jako `2a0ce52`, trzy kontrole SUCCESS. Zakres `codex/m1-current-x-probes`:
+trzy first_motion na przypiętym main `2a0ce52`, po poprawce gotowości #142,
+z diagnostyką i pełnym samplerem. Cel: próba odtworzenia X z dowodem przy ewentualnym
+FAIL, nie pełna seria odbiorowa ani wniosek o przyczynie historycznego 0,3 mm.
+Bez zmian modelu, ramp i progów. Osobny snapshot WSL; obie wspólne blokady na
+czas prób, odmowa przy zajęciu lub cudzych procesach. Wynik: raport/JSON i rejestr;
+weryfikacja pięciu kryteriów programu, setup_errors/drive_ready oraz integralności
+śladu i hashy. Zatrzymuję próby po pierwszym FAIL. Nie dubluję 033/ISO ani #150.
+
 Model-Author: Codex · 2026-10-25. **Wynik fazy X — istniejący ślad #141.**
 2010 próbek ruchu: f-error[i] zgadza się z motor cmd−fb z poprzedniego końca
 cyklu; maks. reszta około 0,000001 mm po zaokrągleniu CSV. Dla tego samego końca

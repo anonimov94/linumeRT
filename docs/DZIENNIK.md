@@ -1310,6 +1310,10 @@ NIEZWERYFIKOWANE NA SPRZĘCIE.
 - Model-Author: Codex. Zachowany ślad #141: f-error odpowiada cmd-fb z poprzedniego końca cyklu, reszta około 0,000001 mm (zgodność liczb CSV, nie dokładność fizyczna). Kolejność sprawdzona w źródle LinuxCNC a33293f.
 - 18 testów analizy/trace PASS, 1 live jawnie deselected; ruff PASS. Bez nowego LinuxCNC i blokad. Analizator odmawia analizy luk, błędnych metadanych i braku ruchu. X historyczny i G1 otwarte.
 
+## M1 — trzy celowane próby aktualnej bazy · 2026-10-25 · Codex
+- Model-Author: Codex. 2a0ce52: 3 × first_motion, każde 5/5 PASS, pierwsze bazowanie bez retry/setup_errors, ślady valid=true. X 0,109818 / 0,108127 / 0,112558 mm.
+- Obie lease zwolnione, bez zmian modelu/ramp/progów i bez pełnej serii. Historyczny X i G1 otwarte. Raport M1_CURRENT_X_2026-10-25.md/JSON.
+
 ## 2026-10-25 — Claude: launchery ISO (skróty na pulpicie, restart, okno błędu)
 Model-Author: Claude. Obraz miał tylko wpisy w menu i autostart symulatora, a ponowne `linumert` przy działającym LinuxCNC kończyło się błędem.
 Dodano skróty `/etc/skel/Desktop` (symulator, Plant, monitor Neon, zatrzymaj), `linumert --restart/--stop`, wrapper `linumert-gui` z oknem terminala
