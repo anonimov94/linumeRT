@@ -15,6 +15,16 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · 2026-10-25. **#153: lokalny odbiór diagnostyki niezaliczony; poprawka wypchnięta.**
+110e7d6: jeden istniejący test ruchu PASS, lecz autokontrola wykryła brak JSON:
+atexit nie miał __file__. Log z wyjątkiem i hashe zachowane w raporcie
+M1_FIXTURE_DIAGNOSTICS_2026-10-25.md/JSON. Konsola LinuxCNC tej próby pusta.
+Obie lease Codex/m1-fixture-diagnostics-58277 zwolnione, proces zakończony.
+Poprawka c217745 zapamiętuje ścieżkę sys.argv[0] przed wyjściem i wymaga JSON
+w fixture; test offline usuwa __file__, 3 PASS i ruff PASS. Bez zmiany ruchu/progów.
+Draft #153 oczekuje rzeczywistego odbioru poprawki i zielonego CI właściwego HEAD;
+nie scalać na podstawie PASS starej wersji. Pełna seria M1 nadal FAIL, nie wznowiona.
+
 Model-Author: Codex · 2026-10-25. **#153: zapis diagnostyki gotowy do odbioru.**
 Driver fixture zapisuje etap i stan NML/błędy przy timeoutach oraz przez atexit
 również przy asercji; stdout/stderr drivera i scalony log LinuxCNC trafiają do tmp.

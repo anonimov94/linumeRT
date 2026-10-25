@@ -1338,3 +1338,8 @@ NIEZWERYFIKOWANE NA SPRZĘCIE.
 - Plant LIMIT_TRIP bez czasu/osi, brak końcowego NML i śladu tego modułu; przyczyna nieustalona. Bez zmian modelu/ramp/progów i bez ponowienia serii.
 - Autokontrola JUnit, manifestów 628 plików i 12 śladów; raport M1_REPEAT_2026-10-25.md/JSON oraz surowy log/JUnit. Procesy zakończone, obie lease zwolnione.
 - Kolejny krok: diagnostyka timeoutów drivera pierwszego modułu, potem celowany odbiór. G1 i historyczny X nadal otwarte.
+
+## LEGACY-RUNTIME — diagnostyka fixture · 2026-10-25 · Codex
+- Model-Author: Codex. #152 scalony jako 276f34c. #153 dodaje NML/etap/błędy/timeouty i logi drivera/LinuxCNC, bez zmian ruchu/progów/modelu.
+- 3 testy offline PASS, ruff PASS. Jeden lokalny test ruchu 110e7d6 PASS, ale brak JSON przez __file__ w atexit: odbiór diagnostyki NIEZALICZONY. Dowody zachowane w M1_FIXTURE_DIAGNOSTICS_2026-10-25.
+- Poprawka c217745 zapamiętuje ścieżkę wcześniej i wymaga JSON w fixture; odbiór runtime otwarty. Obie lease zwolnione. Nie wznowiono pełnej serii; G1 nadal otwarte.
