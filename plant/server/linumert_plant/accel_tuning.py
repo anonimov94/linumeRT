@@ -244,6 +244,9 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("machine", type=Path, help="machine.yaml (z czujnikami bazy do bazowania)")
     parser.add_argument("--axis", action="append", help="litera osi (domyślnie wszystkie liniowe)")
     parser.add_argument("--budget", type=float, default=0.2, help="budżet uchybu osi [mm]")
+    parser.add_argument("--lag-factor", type=float, default=1.0,
+                        help="o ile LinuxCNC zwiększa uchyb względem atrapy mastera (pomiar "
+                             "docelowy: ok. 1,5); budżet pomiaru = budżet / współczynnik")
     parser.add_argument("--margin", type=float, default=0.9)
     parser.add_argument("--max-factor", type=float, default=32.0)
     parser.add_argument("--distance", type=float, help="odległość testowa [mm] (domyślnie 150)")
@@ -251,12 +254,15 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--out", type=Path, help="raport Markdown")
     parser.add_argument("--json", type=Path, help="wynik JSON")
     args = parser.parse_args(argv)
+    if args.lag_factor < 1.0:
+        print("błąd: --lag-factor musi być ≥ 1", file=sys.stderr)
+        return 2
     try:
         data = yaml.safe_load(args.machine.read_text(encoding="utf-8"))
         letters = args.axis or [a["letter"] for a in data["axes"] if a["letter"] not in ROTARY]
 
         def runner(d: dict, letter: str, accel: float) -> Trial:
-            trial = run_plant(d, letter, accel, args.budget, args.distance)
+            trial = run_plant(d, letter, accel, args.budget / args.lag_factor, args.distance)
             print(f"  {letter} {accel:9.1f} mm/s²  {'PASS' if trial.passed else 'FAIL'}  "
                   f"uchyb {trial.ferr_mm:.4f} mm  {trial.reason}", flush=True)
             return trial

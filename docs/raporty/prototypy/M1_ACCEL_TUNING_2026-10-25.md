@@ -8,8 +8,8 @@ Atrapa mastera (lockstep, `substeps` = 4), test = bazowanie i szybki przejazd ta
 Wartości dotyczą **modelu Plant**, nie fizycznej maszyny. Do `machine.yaml` wpisano je na polecenie właściciela, z korektą opisaną w „Weryfikacji” poniżej.
 
 ## Wnioski
-- Frezarka serwo: obecne 1000/1000/500 mm/s² dają duży zapas; w budżecie 0,2 mm model dopuszcza
-  X i Y ok. 17 100, Z ok. 5 400 mm/s² (z zapasem 10%).
+- Frezarka serwo: na atrapie mastera budżet 0,2 mm dopuszczał X i Y ok. 17 100, Z ok. 5 400 mm/s²
+  (z zapasem 10%), ale odbiór z prawdziwym LinuxCNC (niżej) obniżył to do **2 000 / 2 000 / 2 500**.
 - Przekroczenie nie jest łagodne: X 20 000 → uchyb 0,26 mm, od 24 000 napęd wpada w E-4201 (uchyb
   28 mm, nasycenie momentu).
 - Router krokowy: uchyb nie istnieje (silniki bez sprzężenia), granicą jest utrata kroków:
@@ -37,7 +37,15 @@ wyczerpuje. Przyspieszenie Z routera ustawiono na **4 000 mm/s²** (przechodził
 cykli: 61 testów PASS). Wniosek na przyszłość: wartości z `tune_accel` dla krokowców trzeba sprawdzać
 na programach z generatorów, a nie tylko na pomiarze jednego przejazdu.
 
-## Pomiary
+## Odbiór z prawdziwym LinuxCNC (korekta frezarki)
+Scenariusz `first_motion` z LinuxCNC (próg uchybu X 0,2 mm) wykazał, że atrapa mastera **zaniża uchyb ok. 1,5×**
+(LinuxCNC dokłada opóźnienie jednego cyklu serwo): przy 17 100 mm/s² atrapa dawała 0,168 mm, LinuxCNC 0,23–0,25 mm.
+Zmierzone w LinuxCNC (X): 1 000 → ok. 0,11; 3 000 → 0,208; 5 000 → 0,217; 17 100 → 0,25 mm. Frezarka ma więc
+X/Y **2 000**, Z **2 500** mm/s² (pomiar X/Y 2 000: trzy testy `first_motion` PASS; pozostałe testy LinuxCNC —
+pause_retract, Plant, generator, układy G54–G59.3, sondowanie — PASS przy 3 000/2 500). Progu nie zmieniano.
+Narzędzie dostało `--lag-factor` (zalecane ok. 1,5), by budżet pomiaru uwzględniał to opóźnienie.
+
+## Pomiary (atrapa mastera, przed korektą)
 
 | Oś | Przyspieszenie | Wynik | Uchyb [mm] | Powód |
 |---|---:|---|---:|---|

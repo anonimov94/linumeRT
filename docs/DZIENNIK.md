@@ -1395,3 +1395,8 @@ i seria 10 przebiegów M1 otwarte. NIEZWERYFIKOWANE NA SPRZĘCIE.
 Model-Author: Claude. `test_suite_cycles` (CI) wykazał utratę kroków Z routera przy 9 440 mm/s² w `stud_circle`; ustawiono Z = 4 000 mm/s² (61 testów PASS: cykle, substeps, drive_real,
 kieszenie). Raport `M1_ACCEL_TUNING_2026-10-25.md` uzupełniony o sekcję „Weryfikacja”. Wartość z narzędzia dla krokowców wymaga sprawdzenia na programach generatorów.
 NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## 2026-10-25 — Claude: korekta frezarki po odbiorze z LinuxCNC
+Model-Author: Claude. CI z prawdziwym LinuxCNC (`first_motion`, readiness, sampler) wykazało uchyb X 0,23–0,25 mm > 0,2 przy 17 100 mm/s² (atrapa mastera dawała 0,168).
+Ustawiono frezarkę X/Y 2 000, Z 2 500 mm/s² (lokalnie: 3 testy first_motion PASS, pozostałe testy LinuxCNC PASS); narzędzie dostało `--lag-factor`. Próg nie zmieniony.
+NIEZWERYFIKOWANE NA SPRZĘCIE.
