@@ -1919,6 +1919,25 @@
         "tools/plant_substeps.py",
         "docs/raporty/plant_substeps.md"
       ]
+    },
+    {
+      "id": "HMI-OWNER-SKINS",
+      "title": "Odrębny wygląd każdej skórki i główny ekran holograficzny",
+      "parents": [
+        "028"
+      ],
+      "status": "planned",
+      "progress": "Polecenie właściciela 2026-10-25 po odbiorze #163 (SHA 2ae9103): selektor widoku HMI działa; wybór rodziny nie zmienia jeszcze wyraźnie wyglądu.",
+      "remaining": [
+        "Każda z rodzin classic-digital, industrial-pro, cyberdeck, organic-vector ma własny, wyraźnie odmienny wygląd zakładek i nawigacji.",
+        "Główny ekran HMI w stylu sci-fi/cyberdeck: kształty i menu jako nakładka, pod spodem prostokątne podglądy: symulacja obróbki detalu z widocznym narzędziem oraz obok symulacja z widokiem na maszynę.",
+        "Własne kształty, kolory i nazwy; bez kopiowania cudzych grafik i znaków (docs/prawne/WYTYCZNE_IP.md). Funkcje operatora od początku działają (D36); zwykły widok pozostaje dostępny.",
+        "Odbiór: zrzuty 4 skórek × 1280×768 i 1920×1080 porównane ze sobą i z makietami; wydajność 3D z pyqtgraph na pulpicie."
+      ],
+      "evidence": [
+        "https://github.com/anonimov94/linumeRT/pull/163#issuecomment-6401257406",
+        "docs/design/SKIN_SYSTEM_ROADMAP.md"
+      ]
     }
   ]
 }

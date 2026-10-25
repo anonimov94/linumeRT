@@ -150,6 +150,7 @@ Nie są kolejnym harmonogramem. Ich status dotyczy tylko wskazanego kroku.
 | ORIGIN-WIZARD | 033, 054 | Kreator zera detalu na przygotówce | częściowe |
 | M6-G43 | 034, 066 | Automatyczna korekta długości narzędzia po M6 | częściowe |
 | PLANT-SUBSTEPS | 049, 063 | Plant: wynik niezależny od podkroków całkowania | ukończone |
+| HMI-OWNER-SKINS | 028 | Odrębny wygląd każdej skórki i główny ekran holograficzny | planowane |
 
 ## Postęp, pozostały zakres i dowody
 
@@ -1006,4 +1007,12 @@ Pozostaje: Odbiór na pulpicie właściciela, w tym ręczna wymiana w oknie QtDr
 Pozostaje: Obciążenie CPU Plant realtime przy 4 podkrokach na VM-B (odbiór właściciela). Generator EtherCAT (063): 60C2h = okres wątku serwo.
 
 Źródła: [plant/core/machine.c](../../plant/core/machine.c), [plant/core/tests/test_machine.c](../../plant/core/tests/test_machine.c), [tools/plant_substeps.py](../../tools/plant_substeps.py), [docs/raporty/plant_substeps.md](../raporty/plant_substeps.md).
+
+### HMI-OWNER-SKINS — Odrębny wygląd każdej skórki i główny ekran holograficzny
+
+**planowane**. Polecenie właściciela 2026-10-25 po odbiorze #163 (SHA 2ae9103): selektor widoku HMI działa; wybór rodziny nie zmienia jeszcze wyraźnie wyglądu.
+
+Pozostaje: Każda z rodzin classic-digital, industrial-pro, cyberdeck, organic-vector ma własny, wyraźnie odmienny wygląd zakładek i nawigacji. Główny ekran HMI w stylu sci-fi/cyberdeck: kształty i menu jako nakładka, pod spodem prostokątne podglądy: symulacja obróbki detalu z widocznym narzędziem oraz obok symulacja z widokiem na maszynę. Własne kształty, kolory i nazwy; bez kopiowania cudzych grafik i znaków (docs/prawne/WYTYCZNE_IP.md). Funkcje operatora od początku działają (D36); zwykły widok pozostaje dostępny. Odbiór: zrzuty 4 skórek × 1280×768 i 1920×1080 porównane ze sobą i z makietami; wydajność 3D z pyqtgraph na pulpicie.
+
+Źródła: [PR](https://github.com/anonimov94/linumeRT/pull/163#issuecomment-6401257406), [docs/design/SKIN_SYSTEM_ROADMAP.md](../design/SKIN_SYSTEM_ROADMAP.md).
 

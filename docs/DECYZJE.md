@@ -338,3 +338,12 @@ rozwój HMI w M2; ukończone zmiany na końcu scalamy przez PR po wymaganych kon
 Nie trzeba ponownie pytać o zgodę na kontynuację lub scalenie. Wynik dotyczy konkretnego
 SHA i zakresu; zielone CI nie zastępuje odbioru Claude. Błędy poprawiamy i ponawiamy
 odbiór przed scaleniem. Skórki pozostają luźną inspiracją wizualną.
+
+## Skórki HMI: odrębny wygląd i główny ekran holograficzny — decyzja właściciela 2026-10-25
+Model-Author: Claude. Po odbiorze #163 (2ae9103) właściciel potwierdził działanie selektora
+widoku i zażądał: (1) wyraźnie odmiennego wyglądu zakładek każdej z czterech rodzin skórek,
+(2) jednego głównego ekranu w stylu sci-fi/cyberdeck, w którym kształty i menu są nakładką,
+a pod spodem leżą prostokątne podglądy symulacji obróbki detalu (z narzędziem) i symulacji
+z widokiem na maszynę. Wpisane jako rozszerzenie HMI-OWNER-SKINS sesji 028; nie zmienia
+kolejności M2 ani nie otwiera osobnej roadmapy. Kierunek wizualny nie oznacza kopiowania
+cudzych znaków i grafik (WYTYCZNE_IP.md). Prowadzi Codex (D32); Claude odbiera zrzutami.
