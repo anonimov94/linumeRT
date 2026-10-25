@@ -41,7 +41,8 @@ def core():
         pytest.skip(f"rdzeń C niedostępny: {exc}")
 
 
-REFERENCE_ACCEL = {"X": 1000, "Y": 1000, "Z": 500}   # poza krawędzią momentu (strojenie: M1_ACCEL_TUNING)
+# poza krawędzią momentu (strojenie: M1_ACCEL_TUNING)
+REFERENCE_ACCEL = {"X": 1000, "Y": 1000, "Z": 500}
 
 
 def _reference_machine(machine: Path, tmp_path: Path) -> Path:
