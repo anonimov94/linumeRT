@@ -29,7 +29,7 @@ class FamilyNavigationButton(QtWidgets.QToolButton):
             gradient = QtGui.QLinearGradient(box.topLeft(), box.bottomLeft())
             gradient.setColorAt(0, QtGui.QColor(c["raise"]))
             gradient.setColorAt(1, face)
-            painter.fillPath(path, gradient)
+            painter.fillPath(path, QtGui.QBrush(gradient))
         else:
             painter.fillPath(path, face)
         painter.setPen(QtGui.QPen(border, 2 if highlighted else 1))
