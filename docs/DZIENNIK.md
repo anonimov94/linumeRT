@@ -1343,3 +1343,9 @@ NIEZWERYFIKOWANE NA SPRZĘCIE.
 - Model-Author: Codex. Na polecenie właściciela README pokazuje osobno 39/84 sesji i 19/38 rozszerzeń, także w podziale M0–M6; liczniki generowane z plan.json.
 - Dodano odnośniki do ostatnich odbiorów gotowości, pomiarów X oraz wyniku FAIL pełnej serii M1. Nie zaliczono nieodebranych kryteriów ani sprzętu.
 - Istniejące testy roadmapy, ruff, roadmap --check, diff --check i zachowanie Dla Codex PASS. Bez zmian ISO lub kodu diagnostyki #153.
+
+## 2026-10-25 — Claude: M1, dobór przyspieszeń z budżetu uchybu
+Model-Author: Claude. `tools/tune_accel.py` (moduł `accel_tuning`, 15 testów, w tym na rdzeniu Plant) szuka największego przyspieszenia osi w budżecie uchybu
+0,2 mm bez alarmu i utraty kroków. Wyniki: frezarka X/Y ok. 17 100, Z ok. 5 400 mm/s² (obecnie 1000/1000/500); router krokowy X/Y ok. 3 800, Z ok. 9 400 (granica: utrata kroków,
+wynik Z niemonotoniczny). Raport `docs/raporty/prototypy/M1_ACCEL_TUNING_2026-10-25.md`. machine.yaml i progi bez zmian; seria 10 przebiegów PASS nadal otwarta.
+NIEZWERYFIKOWANE NA SPRZĘCIE.
