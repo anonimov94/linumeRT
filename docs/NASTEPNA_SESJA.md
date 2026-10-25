@@ -23,8 +23,8 @@ w osobnym checkoutcie: zachowanie dowodów i włączenie faulthandler w launcher
 bez deklaracji przyczyny GPU i bez zmian HAL/sterowania. Proszę nie dublować poprawki.
 Poprosiłem właściciela o próbę PYTHONFAULTHANDLER=1 linumert --safe (sam sim).
 Tryb --safe wyłącza pyqtgraph 3D, ale bazowy GCodeGraphics nadal jest widgetem GL;
-sam SIGSEGV bez tracebacku nie ustala przyczyny. Weryfikacja: istniejące testy ISO,
-składnia/shellcheck, raport i zdalny SHA. Odbiór laptopa nadal otwarty.
+sam SIGSEGV bez tracebacku nie ustala przyczyny. Weryfikacja: 11 istniejących testów ISO PASS,
+składnia/shellcheck, raport i zdalny SHA. Draft #156. Odbiór laptopa nadal otwarty.
 
 Model-Author: Codex · 2026-10-25. **Polecenie właściciela: aktualizacja README/postępu.**
 Zakres codex/readme-progress-summary, osobny checkout linumeRT-readme-status-20261025:

@@ -1710,16 +1710,18 @@
         "077",
         "078"
       ],
-      "status": "acceptance",
-      "progress": "Implementacja ISO istnieje. Na polecenie właściciela 2026-10-25 odświeżono README i generowaną z rejestru tabelę M0–M6; 23 testy roadmapy/konfiguracji ISO PASS w Debianie. Uruchomiono budowę obrazu do testów laptopa: workflow 40181951376, źródła main c0281596a54a6911b344edf8709edabed8748090. Budowa/publikacja i SHA-256 oczekują weryfikacji; boot/instalacja/RT laptopa pozostają osobnym odbiorem.",
+      "status": "partial",
+      "progress": "Implementacja ISO istnieje. Na polecenie właściciela 2026-10-25 odświeżono README i generowaną z rejestru tabelę M0–M6; 23 testy roadmapy/konfiguracji ISO PASS w Debianie. Uruchomiono budowę obrazu do testów laptopa: workflow 40181951376, źródła main c0281596a54a6911b344edf8709edabed8748090. Budowa/publikacja i SHA-256 oczekują weryfikacji; boot/instalacja/RT laptopa pozostają osobnym odbiorem. Właściciel 2026-10-25 uruchomił najnowsze ISO na laptopie: podgląd skórek i serwer Plant działają, ale normalne HMI QtVCP kończy się SIGSEGV podczas startu Plant (LinuxCNC 2.9.10, Debian RT). SHA konkretnego ISO nie jest w raportach. Odbiór startu HMI niezaliczony; surowe raporty i hashe zachowano. Launcher w #156 włącza faulthandler, 11 testów ISO PASS; oczekiwanie na próbę --safe i nowy debug, bez deklaracji przyczyny GPU.",
       "remaining": [
-        "Zweryfikować obraz main, SHA-256, live/instalację; publikacja ręczna zgodnie z D39."
+        "Zweryfikować obraz main, SHA-256, live/instalację; publikacja ręczna zgodnie z D39.",
+        "Ustalić przyczynę SIGSEGV QtVCP na ISO właściciela i odebrać rzeczywisty start normalnego HMI; działający podgląd/serwer nie zastępują tego kryterium."
       ],
       "evidence": [
         "tools/iso/build.sh",
         ".github/workflows/iso.yml",
         "README.md",
-        "https://github.com/anonimov94/linumeRT/actions/runs/40181951376"
+        "https://github.com/anonimov94/linumeRT/actions/runs/40181951376",
+        "docs/raporty/G2/ISO_HMI_CRASH_2026-10-25/README.md"
       ]
     },
     {

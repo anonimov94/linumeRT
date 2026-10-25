@@ -141,7 +141,7 @@ Nie są kolejnym harmonogramem. Ich status dotyczy tylko wskazanego kroku.
 | KONKURS-03 | 010, 061, 066 | Audyt luk i odrzucanie NaN/inf | ukończone |
 | KONKURS-04 (K04) | 028, 037 | Monitor skórek read-only | ukończone |
 | ISO-INTEGRATION (K05) | 077 | Bramka sim/Plant i monitor w obrazie ISO | ukończone |
-| ISO-ACCEPTANCE | 077, 078 | Odbiór i publikacja obrazu | do odbioru |
+| ISO-ACCEPTANCE | 077, 078 | Odbiór i publikacja obrazu | częściowe |
 | OD-01 | 024, 066, 072, 082 | Macierz Plant nie może przechodzić z nieoczekiwaną kolizją | ukończone |
 | EDITOR-VALIDATION | 044, 047 | Walidacja bieżącej treści i wyszukiwanie | ukończone |
 | LEGACY-RUNTIME | 017, 025, 026, 070, 077, 082 | Diagnostyka uruchomień z dawnych promptów startowych | częściowe |
@@ -943,11 +943,11 @@ Pozostaje: Pełny odbiór 4×4×2, rozdzielczości/dotyk, LinuxCNC/Plant, safety
 
 ### ISO-ACCEPTANCE — Odbiór i publikacja obrazu
 
-**do odbioru**. Implementacja ISO istnieje. Na polecenie właściciela 2026-10-25 odświeżono README i generowaną z rejestru tabelę M0–M6; 23 testy roadmapy/konfiguracji ISO PASS w Debianie. Uruchomiono budowę obrazu do testów laptopa: workflow 40181951376, źródła main c0281596a54a6911b344edf8709edabed8748090. Budowa/publikacja i SHA-256 oczekują weryfikacji; boot/instalacja/RT laptopa pozostają osobnym odbiorem.
+**częściowe**. Implementacja ISO istnieje. Na polecenie właściciela 2026-10-25 odświeżono README i generowaną z rejestru tabelę M0–M6; 23 testy roadmapy/konfiguracji ISO PASS w Debianie. Uruchomiono budowę obrazu do testów laptopa: workflow 40181951376, źródła main c0281596a54a6911b344edf8709edabed8748090. Budowa/publikacja i SHA-256 oczekują weryfikacji; boot/instalacja/RT laptopa pozostają osobnym odbiorem. Właściciel 2026-10-25 uruchomił najnowsze ISO na laptopie: podgląd skórek i serwer Plant działają, ale normalne HMI QtVCP kończy się SIGSEGV podczas startu Plant (LinuxCNC 2.9.10, Debian RT). SHA konkretnego ISO nie jest w raportach. Odbiór startu HMI niezaliczony; surowe raporty i hashe zachowano. Launcher w #156 włącza faulthandler, 11 testów ISO PASS; oczekiwanie na próbę --safe i nowy debug, bez deklaracji przyczyny GPU.
 
-Pozostaje: Zweryfikować obraz main, SHA-256, live/instalację; publikacja ręczna zgodnie z D39.
+Pozostaje: Zweryfikować obraz main, SHA-256, live/instalację; publikacja ręczna zgodnie z D39. Ustalić przyczynę SIGSEGV QtVCP na ISO właściciela i odebrać rzeczywisty start normalnego HMI; działający podgląd/serwer nie zastępują tego kryterium.
 
-Źródła: [tools/iso/build.sh](../../tools/iso/build.sh), [.github/workflows/iso.yml](../../.github/workflows/iso.yml), [README.md](../../README.md), [PR](https://github.com/anonimov94/linumeRT/actions/runs/40181951376).
+Źródła: [tools/iso/build.sh](../../tools/iso/build.sh), [.github/workflows/iso.yml](../../.github/workflows/iso.yml), [README.md](../../README.md), [PR](https://github.com/anonimov94/linumeRT/actions/runs/40181951376), [docs/raporty/G2/ISO_HMI_CRASH_2026-10-25/README.md](../raporty/G2/ISO_HMI_CRASH_2026-10-25/README.md).
 
 ### OD-01 — Macierz Plant nie może przechodzić z nieoczekiwaną kolizją
 

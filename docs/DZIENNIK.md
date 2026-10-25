@@ -1343,3 +1343,8 @@ NIEZWERYFIKOWANE NA SPRZĘCIE.
 - Model-Author: Codex. Na polecenie właściciela README pokazuje osobno 39/84 sesji i 19/38 rozszerzeń, także w podziale M0–M6; liczniki generowane z plan.json.
 - Dodano odnośniki do ostatnich odbiorów gotowości, pomiarów X oraz wyniku FAIL pełnej serii M1. Nie zaliczono nieodebranych kryteriów ani sprzętu.
 - Istniejące testy roadmapy, ruff, roadmap --check, diff --check i zachowanie Dla Codex PASS. Bez zmian ISO lub kodu diagnostyki #153.
+
+## M2 / ISO — QtVCP SIGSEGV na laptopie właściciela · 2026-10-25 · Codex
+- Model-Author: Codex. Raporty linuxcnc_info.txt/linuxcnc.report potwierdzają SIGSEGV DISPLAY QtVCP w profilu Plant, LinuxCNC 2.9.10. SHA ISO niepodany, przyczyna nieustalona.
+- Podgląd skórek i Plant działają według właściciela; normalne HMI nieodebrane. ISO-ACCEPTANCE wraca z acceptance do partial. Surowe dane/hashe zachowane.
+- #156: faulthandler w launcherze i dokładniejszy opis --safe, 11 istniejących testów ISO PASS. Bez zmian HAL/sterowania i bez deklaracji naprawy laptopa. Próba --safe z tracebackiem oczekuje wyniku właściciela.
