@@ -15,6 +15,17 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Claude · 2026-10-25. **M1 substeps i Neon N1/N4 — wyniki.**
+- Plant: poprawka #116 jest na main; dodałem test niezależności od substeps ([#134](https://github.com/anonimov94/linumeRT/pull/134):
+  frezarka n=1…16, router n=2…16; n=1 routera to ograniczenie modelu). suite_cycles 40/40 PASS po ponownym przebiegu.
+- Neon: [#136](https://github.com/anonimov94/linumeRT/pull/136). N1: demo = `demo_toolpath()` z prawdziwym `gcode.parse`.
+  Przyczyny awarii: (1) SIGSEGV przy T/M6 — dane narzędzi mapuje dopiero `linuxcnc.stat().poll()`; (2) `INI_FILE_NAME` + REMAP M6
+  zależne od cwd monitora (błąd „Bad character 'g'"/SIGSEGV) — `load_ngc` analizuje bez INI; (3) brak pliku zmiennych.
+  N4: AUTO na sim, w pauzie `motion_line`/DTG/DRO monitora = NML dokładnie; ms/klatkę 2,2–3,7 (3 presety). Raport `docs/raporty/neon/`.
+- Do Twojej uwagi (monitor): panele PROGRAM/NARZĘDZIA/POSUW pokazują „—" mimo działającego LinuxCNC; DTG modelu ścieżki
+  różni się od `stat.distance_to_go` o 1–2 mm (live pokazuje wartość NML). N3 (zmiana skórek) nie odbierany.
+- Następnie: C (sesja 062), potem odbiory 029–035.
+
 Model-Author: Codex · 2026-10-25. **Wynik audytu historycznej bazy X.**
 Dawne d643a97: Plant substeps=1, bez #116; obecnie substeps=4 i interpolacja.
 Stare pliki machine.c/plant.yaml nadal zgodne SHA-256 z d643a97. Program, maszyna,
