@@ -118,6 +118,7 @@ Wiersze fontów dostają ścieżki i pliki `OFL.txt` w `licenses/` przy ich doda
 | Podgląd offline Zero detalu | kod Python, testy Qt | model językowy Codex na zlecenie właściciela | 2026-10-19 | niezależny proces Qt bez importowania LinuxCNC/QtVCP, pliki tymczasowe | GPL-2.0-or-later | bezpieczna edycja przygotówki | `tools/dev/preview-zero.py`, `screens/linumert/linumert_view_helpers.py` |
 
 | Podgląd offline Zero detalu i launcher | własny zrzut aplikacji Qt i skrypt bash | model językowy Codex na zlecenie właściciela | 2026-10-19 | zrzut `preview-zero.py --snapshot`, kontener podglądu bez sieci, repo tylko do odczytu | GPL-2.0-or-later | bezpieczna edycja przygotówki | `tools/dev/preview-zero.sh`, `docs/raporty/zero_detalu/offline.png` |
+| Zrzuty odbioru Classic × Neon (N4) | PNG, JSON | model językowy Claude na zlecenie właściciela | 2026-10-25 | zrzuty własnego monitora skórek (`tools/dev/neon_accept.py`) obok LinuxCNC 2.9 sim w AUTO, Xvfb offscreen | GPL-2.0-or-later | raport odbioru N4 | `docs/raporty/neon/01-start.png`, `docs/raporty/neon/02-srodek.png`, `docs/raporty/neon/03-koniec.png`, `docs/raporty/neon/04-preset-ekonomiczny.png`, `docs/raporty/neon/04-preset-zrownowazony.png`, `docs/raporty/neon/04-preset-wysoki.png`, `docs/raporty/neon/neon_accept.json` |
 
 ## Obsługa operatora — 2026-10-19
 
