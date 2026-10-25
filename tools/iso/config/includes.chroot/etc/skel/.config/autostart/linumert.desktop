@@ -2,7 +2,7 @@
 Type=Application
 Name=linumeRT
 Comment=Ekran operatora linumeRT na LinuxCNC (symulacja)
-Exec=/usr/local/bin/linumert
+Exec=/usr/local/bin/linumert-gui
 Icon=/opt/linumeRT/docs/design/marka/znak.svg
 Terminal=false
 Categories=Engineering;

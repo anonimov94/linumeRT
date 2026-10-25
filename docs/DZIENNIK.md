@@ -1313,3 +1313,22 @@ NIEZWERYFIKOWANE NA SPRZĘCIE.
 ## M1 — trzy celowane próby aktualnej bazy · 2026-10-25 · Codex
 - Model-Author: Codex. 2a0ce52: 3 × first_motion, każde 5/5 PASS, pierwsze bazowanie bez retry/setup_errors, ślady valid=true. X 0,109818 / 0,108127 / 0,112558 mm.
 - Obie lease zwolnione, bez zmian modelu/ramp/progów i bez pełnej serii. Historyczny X i G1 otwarte. Raport M1_CURRENT_X_2026-10-25.md/JSON.
+
+## 2026-10-25 — Claude: launchery ISO (skróty na pulpicie, restart, okno błędu)
+Model-Author: Claude. Obraz miał tylko wpisy w menu i autostart symulatora, a ponowne `linumert` przy działającym LinuxCNC kończyło się błędem.
+Dodano skróty `/etc/skel/Desktop` (symulator, Plant, monitor Neon, zatrzymaj), `linumert --restart/--stop`, wrapper `linumert-gui` z oknem terminala
+przy błędzie i test w `tests/test_iso.py`. Nie ustalono jeszcze źródła błędów zgłoszonych przez właściciela przy `linumert` (brak treści błędu);
+obraz nie był uruchamiany poza CI. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## 2026-10-25 — Claude: Wi-Fi i przeglądarka w ISO
+Model-Author: Claude. Obraz budowany z `--apt-recommends false` miał tylko `network-manager-gnome` (bez demona NetworkManager, wpa_supplicant, polkit i firmware),
+więc Wi-Fi nie mogło działać. Dodano `network-manager`, `wpasupplicant`, `policykit-1`, `iw`, `rfkill`, `wireless-regdb`, firmware (iwlwifi, realtek, atheros,
+brcm80211, misc-nonfree) i `firefox-esr` (+pl) oraz skrót „Panel Plant (przeglądarka)”. Test `tests/test_iso.py` pilnuje listy. Rozmiar obrazu sprawdza workflow
+(limit 2 GiB). Obraz nie był uruchamiany; działanie Wi-Fi zależy od karty. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## 2026-10-25 — Claude: błąd uruchomienia ekranu w ISO (zdjęcie od właściciela) i tryb awaryjny
+Model-Author: Claude. Na laptopie `linumert --plant` kończy się: QtVCP `[Errno 2] ... '/usr/share/qtvcp/screens/linumert'`, ostrzeżenie `No USE_PROBE Entry in PROBE`
+i **`/usr/bin/linuxcnc: ... Naruszenie ochrony pamięci` (segfault procesu qtvcp)**; LinuxCNC/Plant startują poprawnie (RTAPI, task, io, halui), pada sam ekran.
+Podejrzenie robocze: sterownik GPU/OpenGL przy tworzeniu widoku 3D symulacji (pyqtgraph.opengl); w Xvfb/llvmpipe ekran działa. Niepotwierdzone — potrzebne `dmesg | grep -i segfault`.
+Dodano `linumert --safe` (LINUMERT_NO_GL=1: widok 2D; LIBGL_ALWAYS_SOFTWARE=1) i skrót „linumeRT (tryb awaryjny)”. Źródło `[Errno 2]` nieustalone.
+NIEZWERYFIKOWANE NA SPRZĘCIE.

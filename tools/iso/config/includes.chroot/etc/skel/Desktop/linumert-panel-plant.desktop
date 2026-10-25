@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Panel Plant (przeglądarka)
+Comment=Panel wirtualnej obrabiarki Plant, http://127.0.0.1:8080/ (po uruchomieniu linumeRT + Plant)
+Exec=xdg-open http://127.0.0.1:8080/
+Icon=/opt/linumeRT/docs/design/marka/znak.svg
+Terminal=false
+Categories=Engineering;

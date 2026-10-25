@@ -24,6 +24,9 @@ make -s -C "$R/plant/core" shared
 cp -n "$R/config/sim/linumert_xyz/linumert.var.default" "$R/config/sim/linumert_xyz/linumert.var"
 # Urządzenie do jednej pracy: konfiguracje i bazy narzędzi zapisywalne dla operatora
 chmod -R a+rwX "$R/config" "$R/screens"
+# Skróty na pulpicie (XFCE uruchamia tylko pliki z prawem wykonania) i skrypty startowe
+chmod 755 /usr/local/bin/linumert /usr/local/bin/linumert-gui
+chmod 755 /etc/skel/Desktop/*.desktop
 mkdir -p /etc/lightdm/lightdm.conf.d
 cat > /etc/lightdm/lightdm.conf.d/90-linumert-live.conf <<'EOF'
 [Seat:*]
