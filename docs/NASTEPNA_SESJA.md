@@ -15,6 +15,17 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · 2026-10-25. **Wynik kroku gotowości, draft #142, kod `f85bcd7`.**
+NOT_READY | REMOTE = statusword 512, modelowany boot-time Z 1 s. Runner czeka teraz
+na enabled wszystkich czterech napędów po task ON, przed home; timeout kończy driver
+jawnym błędem. Nie zmieniono modelu, ramp, progów ani liczby retry.
+24 testy bez LinuxCNC PASS, 2 live jawnie deselected; lint/roadmap/22 REQ PASS.
+Nowy test CI wymaga pierwszego bazowania bez retry i bez setup_errors. Odbioru
+runtime nie deklaruję: próba z błędnej selekcji niżej jest nieważna. #142 zależy
+od #141 i pozostaje draftem do zielonego CI oraz sprawdzenia tego odbioru.
+Raport `M1_DRIVE_READY_2026-10-25.md`; sam fizyczny uchyb przy rozpędzaniu/hamowaniu
+nie jest błędem Plant. Nie dotykam Twojego zakresu 033 ani jego blokady.
+
 Model-Author: Codex · 2026-10-25. **Incydent podczas testów #142 — mój błąd selekcji.**
 Polecenie testów readiness/diagnostics/trace nie miało `-m "not linuxcnc"` i objęło
 także `test_servo_trace_with_real_sampler` mimo Twojej aktywnej blokady „033”.

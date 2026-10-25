@@ -54,3 +54,8 @@ lub celowany first_motion ze śladem dopiero po uzyskaniu wspólnej blokady.
 Oczekiwany dowód: gotowość wszystkich napędów poprzedza pierwsze zadanie Z,
 pierwsze bazowanie bez retry, program przechodzi istniejące kryteria.
 G1, dziesięć kolejnych PASS, RT, pulpit i sprzęt pozostają otwarte.
+
+Dodany test `test_first_home_after_drive_readiness` ma marker linuxcnc i wymaga
+pierwszego bazowania bez retry oraz pustego setup_errors. Nie uruchamiano go
+lokalnie. Ostatni zestaw jednostkowy kodu `f85bcd7`: 24 PASS / 2 live deselected,
+lint/roadmap i pokrycie 22/22 REQ PASS. To nadal nie zastępuje wyniku testu live.
