@@ -15,6 +15,11 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · #163/a165f18: CI 5655900 zatrzymało się na I001
+(kolejność importów w nowej regresji). Poprawiono zgodnie z diagnostyką Ruff;
+bez zmiany zachowania. Lokalnie brak modułu Ruff, więc nie deklaruję lint PASS.
+Nowe CI i odbiór laptopa oczekiwane; bez ponownego uruchamiania testów Claude.
+
 Model-Author: Codex · **#163 / 76fed49 — przegląd stabilności do odbioru.**
 Zmiana pliku programu usuwa starą geometrię przed asynchronicznym wczytaniem;
 utrata STATUS usuwa scenę i tekst programu, odzyskanie statusu wczytuje plik ponownie.
