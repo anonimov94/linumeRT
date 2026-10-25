@@ -328,7 +328,8 @@ def tool_data_available() -> bool:
     """Czy interpreter może czytać dane narzędzi (LinuxCNC utworzył ~/.tool.mmap).
 
     `gcode.parse` bez zmapowanej tablicy narzędzi kończy się SIGSEGV przy słowie T/M6
-    (tool_mmap_mutex_get; potwierdzone gdb na LinuxCNC 2.9). Mapowanie robi `linuxcnc.stat().poll()`.
+    (tool_mmap_mutex_get; potwierdzone gdb na LinuxCNC 2.9).
+    Mapowanie robi `linuxcnc.stat().poll()`.
     """
     if not (Path(os.environ.get("HOME", "/tmp")) / TOOL_MMAP).exists():
         return False

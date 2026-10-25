@@ -1,7 +1,7 @@
 # Classic × Neon — odbiór N1 i N4 na prawdziwym LinuxCNC (sim, AUTO)
 
 Model-Author: Claude · 2026-10-25 · NIEZWERYFIKOWANE NA SPRZĘCIE (LinuxCNC 2.9 RIP, Debian 12 w WSL, Xvfb).
-Skrypt: `tools/dev/neon_accept.py` (uruchomienie: `.acc`-owy wrapper w opisie pliku, blokada `linuxcnc`).
+Skrypt: `tools/dev/neon_accept.py` (uruchomienie: `bash tools/dev/neon_accept.sh KATALOG`, zajmuje blokadę `linuxcnc`).
 Surowe dane: `neon_accept.json` (≈1070 próbek co ~0,1 s), zrzuty 1280×800 w tym katalogu.
 
 ## Co zrobiono
