@@ -1390,3 +1390,9 @@ NIEZWERYFIKOWANE NA SPRZĘCIE.
 - Strażnik IP 10 PASS; bez nowych zależności, zmian ACTION/HAL. Zrzuty i granice: raport G2/M2_RESPONSIVE_2026-10-25.md.
 - Live lokalnie niewykonane: zasób Claude/wyglad zajęty; nie przejmowano. Odbiór CI do rozliczenia.
 - 028 partial, M2 3/12; pozostałe podstrony/stanowisko/sprzęt otwarte. Autokontrola autora.
+
+## 2026-10-25 — Claude: M2, obszar „Wygląd” w HMI (palety i własne kolory)
+Model-Author: Claude. Prośba właściciela: zmiana kolorystyki działającego HMI. `linumert_appearance.py` (palety z kontraktu skórek, dziesięć ról, tokeny wyliczane,
+walidacja kontrastu WCAG i znaczenia czerwony/zielony/bursztynowy, zapis atomowy JSON), `linumert_appearance_page.py` (paleta, edytor kolorów, podgląd, zapis, reset)
+i integracja w powłoce (nowy obszar na szynie, wczytanie zapisu przy starcie, `apply_tokens`, tło kontenera stron w kolorze motywu). 23 testy, sprawdzone w LinuxCNC pod Xvfb
+(zrzuty `docs/raporty/hmi_appearance/`). Prawdziwe skórki (układy) i widoki rysowane własnym kodem (kolory po restarcie) otwarte. Opis: `docs/user/WYGLAD.md`. NIEZWERYFIKOWANE NA SPRZĘCIE.

@@ -444,7 +444,7 @@
       "title": "Kompozycja ekranu głównego",
       "prompt": "prompts/sesja-028.md",
       "status": "partial",
-      "progress": "Powłoka HMI i nawigacja działają. Na polecenie właściciela 2026-10-25 priorytet przeniesiono na M2. Uzupełniono wymaganą specyfikację funkcjonalną SPEC_EKRAN_GLOWNY.md: dane operatora, hierarchia, brak ruchu od nawigacji i macierz dowodów odbioru. To specyfikacja, nie odbiór GUI ani zamknięcie skórek. Odbiór 6ecda95: 111 testów offline PASS, 1 SKIP, istniejący test GUI 45 kroków PASS na 1280×768. Zrzut ujawnił brak yaml w procesie QtVCP i zastępczą tabelę Narzędzia: pełny odbiór nadal otwarty. Samotest rozszerzono o obecność własnych stron tools/cycles, aby nie zaliczał fallbacku. Kolejny odbiór ad17702 po cnc_environment(): tools/cycles=true i 45 kroków PASS. PageStack e2dde87 izoluje rozmiar aktywnej strony; regresja Qt i złożenie HMI 2 PASS, ponowny test GUI 45 kroków PASS. Start nadal przewija poziomo; nie potwierdzono pełnego dopasowania 1280×768. PR #161: adaptacyjne kolumny kart Start i Narzędzia; pełne złożenie Qt 1280→1920→1280 bez poziomego przewijania, wpis i Tab oraz zachowanie formularza po zmianie układu potwierdzone testami. Samodzielny edytor STL zachowuje wysokość 600 px.",
+      "progress": "Powłoka HMI i nawigacja działają. Na polecenie właściciela 2026-10-25 priorytet przeniesiono na M2. Uzupełniono wymaganą specyfikację funkcjonalną SPEC_EKRAN_GLOWNY.md: dane operatora, hierarchia, brak ruchu od nawigacji i macierz dowodów odbioru. To specyfikacja, nie odbiór GUI ani zamknięcie skórek. Odbiór 6ecda95: 111 testów offline PASS, 1 SKIP, istniejący test GUI 45 kroków PASS na 1280×768. Zrzut ujawnił brak yaml w procesie QtVCP i zastępczą tabelę Narzędzia: pełny odbiór nadal otwarty. Samotest rozszerzono o obecność własnych stron tools/cycles, aby nie zaliczał fallbacku. Kolejny odbiór ad17702 po cnc_environment(): tools/cycles=true i 45 kroków PASS. PageStack e2dde87 izoluje rozmiar aktywnej strony; regresja Qt i złożenie HMI 2 PASS, ponowny test GUI 45 kroków PASS. Start nadal przewija poziomo; nie potwierdzono pełnego dopasowania 1280×768. PR #161: adaptacyjne kolumny kart Start i Narzędzia; pełne złożenie Qt 1280→1920→1280 bez poziomego przewijania, wpis i Tab oraz zachowanie formularza po zmianie układu potwierdzone testami. Samodzielny edytor STL zachowuje wysokość 600 px. 2026-10-25 (Claude): obszar „Wygląd” w działającym HMI — pięć palet, edytor dziesięciu ról kolorów, podgląd na żywo, zapis i reset, kontrola czytelności (kontrast WCAG, znaczenie E-STOP/ostrzeżeń); 23 testy, zrzuty w LinuxCNC (docs/raporty/hmi_appearance). Prawdziwe skórki (układy) nadal otwarte.",
       "remaining": [
         "Pełny odbiór kompozycji i nowych skórek; HMI-02, SKIN-04…06.",
         "Odbiór wizualny i klawiaturowy pozostałych kluczowych podstron 1280×768 oraz live QtVCP po zmianie układu; Start/Narzędzia odebrane w rzeczywistym Qt z atrapą CNC."
@@ -453,7 +453,12 @@
         "docs/DZIENNIK.md",
         "docs/design/SPEC_EKRAN_GLOWNY.md",
         "docs/raporty/G2/M2_028_2026-10-25.md",
-        "docs/raporty/G2/M2_RESPONSIVE_2026-10-25.md"
+        "docs/raporty/G2/M2_RESPONSIVE_2026-10-25.md",
+        "screens/linumert/linumert_appearance.py",
+        "screens/linumert/linumert_appearance_page.py",
+        "tests/test_appearance.py",
+        "docs/user/WYGLAD.md",
+        "docs/raporty/hmi_appearance/wyglad_neon_punk.png"
       ]
     },
     {
@@ -1912,6 +1917,25 @@
         "plant/core/tests/test_machine.c",
         "tools/plant_substeps.py",
         "docs/raporty/plant_substeps.md"
+      ]
+    },
+    {
+      "id": "HMI-OWNER-SKINS",
+      "title": "Odrębny wygląd każdej skórki i główny ekran holograficzny",
+      "parents": [
+        "028"
+      ],
+      "status": "planned",
+      "progress": "Polecenie właściciela 2026-10-25 po odbiorze #163 (SHA 2ae9103): selektor widoku HMI działa; wybór rodziny nie zmienia jeszcze wyraźnie wyglądu.",
+      "remaining": [
+        "Każda z rodzin classic-digital, industrial-pro, cyberdeck, organic-vector ma własny, wyraźnie odmienny wygląd zakładek i nawigacji.",
+        "Główny ekran HMI w stylu sci-fi/cyberdeck: kształty i menu jako nakładka, pod spodem prostokątne podglądy: symulacja obróbki detalu z widocznym narzędziem oraz obok symulacja z widokiem na maszynę.",
+        "Własne kształty, kolory i nazwy; bez kopiowania cudzych grafik i znaków (docs/prawne/WYTYCZNE_IP.md). Funkcje operatora od początku działają (D36); zwykły widok pozostaje dostępny.",
+        "Odbiór: zrzuty 4 skórek × 1280×768 i 1920×1080 porównane ze sobą i z makietami; wydajność 3D z pyqtgraph na pulpicie."
+      ],
+      "evidence": [
+        "https://github.com/anonimov94/linumeRT/pull/163#issuecomment-6401257406",
+        "docs/design/SKIN_SYSTEM_ROADMAP.md"
       ]
     }
   ]
