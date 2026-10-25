@@ -1,6 +1,6 @@
 # suite_cycles — generatory na wirtualnych maszynach Plant
 
-Model-Author: Claude · 2026-10-24 · `tools/suite_cycles.py` (atrapa mastera, lockstep z napędami z `machine.yaml`; frezarka: wariant `mill_servo_table_y2` z czujnikiem bazy drugiej strony bramy).
+Model-Author: Claude · 2026-10-25 · `tools/suite_cycles.py` (atrapa mastera, lockstep z napędami z `machine.yaml`; frezarka: wariant `mill_servo_table_y2` z czujnikiem bazy drugiej strony bramy).
 
 Kryteria: ukończony, brak alarmu, 0 zgubionych kroków, błąd nadążania XYZ ≤ 0.2 mm. Detal w układzie maszyny X/Y 100–200, Z −20.
 
