@@ -526,3 +526,6 @@ w środowisku wykonującym zrzuty, bez nowych zależności produktu.
 
 ## Specyfikacja ekranu głównego — 2026-10-25
 - `docs/design/SPEC_EKRAN_GLOWNY.md` — autor: Codex; własny opis wymagań i kryteriów sesji 028, oparty na promptach oraz dokumentacji linumeRT (HMI_WORKFLOW, HMI_BASELINE, tokens.yaml); GPL-2.0-or-later. Bez nowych grafik, kodu lub materiałów osób trzecich.
+
+## Odbiór M2 / 028 — 2026-10-25
+- `docs/raporty/G2/M2_028_2026-10-25_start.png` — zrzut LinuxCNC sim + linumeRT/QtVCP pod Xvfb 1280×768, źródła 6ecda95; wykonanie Codex, bez retuszu. Własne zasoby linumeRT i QtDragon/LinuxCNC (GPL-2.0), całość GPL-2.0-or-later. Wynik i ograniczenia w raporcie M2_028_2026-10-25.

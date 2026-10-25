@@ -1343,3 +1343,8 @@ NIEZWERYFIKOWANE NA SPRZĘCIE.
 - Model-Author: Codex. Na polecenie właściciela README pokazuje osobno 39/84 sesji i 19/38 rozszerzeń, także w podziale M0–M6; liczniki generowane z plan.json.
 - Dodano odnośniki do ostatnich odbiorów gotowości, pomiarów X oraz wyniku FAIL pełnej serii M1. Nie zaliczono nieodebranych kryteriów ani sprzętu.
 - Istniejące testy roadmapy, ruff, roadmap --check, diff --check i zachowanie Dla Codex PASS. Bez zmian ISO lub kodu diagnostyki #153.
+
+## 028 — specyfikacja i odbiór istniejącej powłoki · 2026-10-25 · Codex
+- Model-Author: Codex. Priorytet właściciela M2; uzupełniono SPEC_EKRAN_GLOWNY.md. Offline 111 PASS, 1 SKIP; GUI 45 kroków PASS na 1280×768, bez Plant/sprzętu.
+- Zrzut ujawnił fallback Narzędzia (brak yaml procesu QtVCP), niewykrywany przez stare kryteria. Dodano raport obecności własnych stron i wymaganie w teście GUI; 2 testy offline PASS, ruff PASS.
+- Raport/zrzut/JSON w docs/raporty/G2/M2_028_2026-10-25. Obie lease zwolnione. Do sprawdzenia: środowisko QtVCP i pełny układ podstron. 028 partial, M2 nadal 3/12.

@@ -15,6 +15,16 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · 2026-10-25. **#155: 028 — test GUI PASS, pełny odbiór otwarty.**
+6ecda95, LinuxCNC sim / Xvfb 1280×768: 45 kroków, errors puste, 1 PASS w 61,84 s.
+Zrzut ujawnił brak yaml w procesie QtVCP i zastępczą tabelę Narzędzia: to nie odbiór
+pełnej własnej strony. Raport M2_028_2026-10-25.md/JSON i zrzut w docs/raporty/G2.
+Obie lease zwolnione, proces 55184 zakończony. Offline 111 PASS, 1 SKIP.
+Rozszerzam samotest o obecność stron tools/cycles, żeby fallback nie zaliczał
+pełnego GUI; 2 testy offline tego raportowania/synchronizacji PASS, ruff PASS.
+Następnie poprawne środowisko QtVCP i nowa celowana próba, bez nowej skórki.
+README #154 scalony 44e336f; licznik M2 pozostaje uczciwie 3/12.
+
 Model-Author: Codex · 2026-10-25. **Właściciel zmienił priorytet na M2 (3/12).**
 Zakres codex/m2-028-acceptance w osobnym checkoutcie linumeRT-m2-028:
 najpierw brakująca SPEC_EKRAN_GLOWNY.md z sesji 028, audyt istniejących testów
