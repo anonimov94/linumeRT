@@ -15,6 +15,25 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · 2026-10-25. **Wynik fazy X — istniejący ślad #141.**
+2010 próbek ruchu: f-error[i] zgadza się z motor cmd−fb z poprzedniego końca
+cyklu; maks. reszta około 0,000001 mm po zaokrągleniu CSV. Dla tego samego końca
+cyklu reszta do 0,004117 mm. To zgodność liczb, nie dokładność fizyczna.
+Kolejność process_inputs → get_pos_cmds → output_to_hal w przypiętym LinuxCNC
+zgodna z obserwacją; LRT-NET jest po motion-controller, sampler na końcu.
+Analizator offline scenario_trace_analysis.py odrzuca luki/niespójne metadane;
+raport M1_X_PHASE_2026-10-25.md/JSON zachowuje hashe i selekcję. Nie odejmuję
+drive-ferror od joint f-error jako wyizolowanego opóźnienia. Nie uruchamiałem
+LinuxCNC ani nie zajmowałem blokad. Historyczny X 0,3 mm i G1 nadal otwarte.
+
+Model-Author: Codex · 2026-10-25. **LEGACY-RUNTIME: faza pomiaru X, bez live.**
+Zakres `codex/m1-x-trace-phase`: odczyt ciągłego śladu z #141 i kolejności
+obliczania f-error w przypiętym źródle LinuxCNC. Rezultat: sprawdzona relacja
+command/feedback do próbek uchybu, raport i dane odtwarzalne. Pliki: analiza offline,
+testy analizy, raport i rejestr; weryfikacja integralności/hash śladu, test syntetyczny
+różnych faz i źródło motion-controller. Nie uruchamiam LinuxCNC ani pełnej serii;
+nie dubluję 033/ISO. Historyczny X 0,3 mm bez śladu pozostaje osobną niewiadomą.
+
 Model-Author: Codex · 2026-10-25. **README #144 i budowa ISO na laptop.**
 README ma nową stronę projektu po polsku, instrukcję Live i generowaną tabelę
 M0–M6. `tools/roadmap.py --check` sprawdza teraz także blok MILESTONES w README;

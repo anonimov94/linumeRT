@@ -31,3 +31,5 @@ na pomiar czasu. Bez tej zmiennej katalog tymczasowy jest usuwany jak dotychczas
 Po zajęciu wspólnej blokady LinuxCNC: ustaw `LINUMERT_SCENARIO_DIAGNOSTICS=build/evidence` oraz `LINUMERT_SCENARIO_SERVO_TRACE=1`, a następnie uruchom pojedynczy scenariusz z `--master linuxcnc`. Trace jest opcjonalny i wymaga trwałego katalogu diagnostyki.
 
 Standardowy sampler LinuxCNC zapisuje kanały X/Z i LRT-NET na końcu servo-thread. `servo_trace.txt` zaczyna każdą próbkę numerem cyklu próbkowania; `servo_trace.json` zawiera nazwy kolumn, integralność, overruns i pozostałą głębokość FIFO. `valid=false` wyklucza użycie śladu jako ciągłego. Nie jest to atomowy pomiar fizyczny Plant/NML: wartości zachowują kolejność aktualizacji producentów w HAL. Nie zmienia sterowania ani zabezpieczeń.
+
+Analiza bez uruchamiania LinuxCNC: `PYTHONPATH=plant/server python -m linumert_plant.scenario_trace_analysis KATALOG --out wynik.json`. Katalog musi zawierać kompletne servo_trace.json/txt. Porównuje fazy 0/1/2 na tej samej populacji próbek ruchu, zachowuje hashe i odmawia analizy nieciągłego lub niespójnego śladu. Wynik nie jest estymatorem przyczynowego opóźnienia ani dokładnością fizyczną.
