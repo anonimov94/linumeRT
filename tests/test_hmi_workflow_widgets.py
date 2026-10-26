@@ -683,6 +683,92 @@ def test_cycles_stl_capture_is_independent_of_source_file(page_env, monkeypatch)
     page.close()
 
 
+@pytest.mark.parametrize("kind", ["text", "shape", "facing"])
+def test_cam_views_layout_and_preview(page_env, monkeypatch, kind):
+    import linumert_fonts
+    import linumert_shell_model as model
+    from PyQt5 import QtCore, QtGui, QtWidgets
+
+    module, page, shell = _cycles(page_env, monkeypatch)
+    linumert_fonts.register()
+    page.setFont(QtGui.QFont("IBM Plex Sans", 10))
+    tokens = model.load_tokens()
+    shell.c = page.view2d.c = tokens["kolory"]
+    page.setObjectName("lrtRoot")
+    page.setStyleSheet(model.shell_qss(tokens))
+    if kind == "text":
+        title = module.engraving.EngraveText.title
+        values = {"text": "linumeRT\nCNC 2026", "font_style": "bold", "tracking": "0.3"}
+    elif kind == "shape":
+        title = module.shapes.ShapeEngrave.title
+        values = {"shape": "star", "strategy": "crosshatch", "angle": "15", "height": "40"}
+    else:
+        title = module.surfacing.FaceMillStrategies.title
+        values = {"x1": "100", "y1": "70", "tool_d": "16", "depth": "1", "mode": "concentric"}
+    page.cmb.setCurrentIndex(page.cmb.findText(title))
+    for name, value in values.items():
+        widget = page.inputs[name]
+        if isinstance(widget, QtWidgets.QComboBox):
+            widget.setCurrentIndex(widget.findData(value))
+        elif isinstance(widget, QtWidgets.QPlainTextEdit):
+            widget.setPlainText(value)
+        else:
+            widget.setText(value)
+    page.add_step()
+    assert page.program.steps and page.view2d.lines, page.lbl_issue.text()
+    page.result_tabs.setCurrentIndex(1)
+    page.resize(1280, 768)
+    page.show()
+    QtWidgets.QApplication.processEvents()
+    assert page.width() == 1280 and page.height() == 768
+    for button in page.findChildren(QtWidgets.QPushButton):
+        if button.isVisible():
+            assert page.rect().contains(QtCore.QRect(button.mapTo(page, QtCore.QPoint()),
+                                                    button.size()))
+    form_scroll = next(w for w in page.findChildren(QtWidgets.QScrollArea)
+                       if w.widget() is page.form_box)
+    assert form_scroll.horizontalScrollBar().maximum() == 0
+    if kind == "text":
+        assert page.inputs["text"].palette().color(QtGui.QPalette.Text).name() == shell.c["fg"]
+    elif kind == "facing":
+        assert not page.inputs["axis"].isEnabled() and page.inputs["direction"].isEnabled()
+    else:
+        assert not page.inputs["corner_r"].isEnabled() and page.inputs["inner"].isEnabled()
+    output = os.environ.get("LINUMERT_CAM_SHOT_DIR")
+    if output:
+        Path(output).mkdir(parents=True, exist_ok=True)
+        assert page.grab().save(str(Path(output) / f"cycles-{kind}.png"))
+    page.close()
+
+
+def test_cam_preview_camera_does_not_modify_program(page_env, monkeypatch):
+    from PyQt5 import QtCore, QtGui, QtWidgets
+
+    _module, page, _shell = _cycles(page_env, monkeypatch)
+    _face_step(page)
+    page.result_tabs.setCurrentIndex(1)
+    page.show()
+    QtWidgets.QApplication.processEvents()
+    view = page.view2d
+    program = page.text()
+    before = view.grab().toImage()
+    wheel = QtGui.QWheelEvent(QtCore.QPointF(100, 80), QtCore.QPointF(100, 80),
+                              QtCore.QPoint(), QtCore.QPoint(0, 120), QtCore.Qt.NoButton,
+                              QtCore.Qt.NoModifier, QtCore.Qt.ScrollUpdate, False)
+    QtWidgets.QApplication.sendEvent(view, wheel)
+    assert view.grab().toImage() != before
+    for event_type, point, button, buttons in (
+            (QtCore.QEvent.MouseButtonPress, (100, 80), QtCore.Qt.LeftButton, QtCore.Qt.LeftButton),
+            (QtCore.QEvent.MouseMove, (140, 100), QtCore.Qt.NoButton, QtCore.Qt.LeftButton),
+            (QtCore.QEvent.MouseButtonRelease, (140, 100), QtCore.Qt.LeftButton, QtCore.Qt.NoButton),
+            (QtCore.QEvent.MouseButtonDblClick, (100, 80), QtCore.Qt.LeftButton, QtCore.Qt.LeftButton)):
+        QtWidgets.QApplication.sendEvent(view, QtGui.QMouseEvent(
+            event_type, QtCore.QPointF(*point), button, buttons, QtCore.Qt.NoModifier))
+    assert view.grab().toImage() == before
+    assert page.text() == program and not page_env[3].mock_calls
+    page.close()
+
+
 def test_cycles_steps_checked_with_tool_db(page_env, monkeypatch):
     """Cykle (Model-Author: Claude, sesja 040): kroki porównane z bazą narzędzi w GUI."""
     from linumert.tools.db import Tool

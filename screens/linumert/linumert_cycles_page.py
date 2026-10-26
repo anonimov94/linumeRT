@@ -262,6 +262,7 @@ class CyclesPage(QtWidgets.QWidget):
                 w.setCurrentFont(QtGui.QFont(f.default))
             elif self._gen().name == "engrave_text" and f.name == "text":
                 w = QtWidgets.QPlainTextEdit(f.default)
+                w.setPalette(self.code.palette())
                 w.setMaximumHeight(96)
             elif f.kind == "choice":
                 w = QtWidgets.QComboBox()
@@ -278,6 +279,8 @@ class CyclesPage(QtWidgets.QWidget):
                 w.setChecked(bool(f.default))
             elif f.kind == "text":
                 w = QtWidgets.QLineEdit("" if f.default is None else str(f.default))
+                if f.name == "paths":
+                    w.setMaxLength(750000)
             else:
                 w = QtWidgets.QLineEdit("" if f.default is None else f"{f.default:g}")
                 w.setPlaceholderText("wymagane" if f.required else "")
@@ -286,6 +289,12 @@ class CyclesPage(QtWidgets.QWidget):
                 unit = {"mm": "cal", "mm/min": "cal/min"}.get(unit, unit)
             label = f.label + (f" [{unit}]" if unit else "") + (" *" if f.required else "")
             w.setAccessibleName(label)
+            if isinstance(w, QtWidgets.QComboBox):
+                w.setMinimumContentsLength(10)
+                w.setSizeAdjustPolicy(QtWidgets.QComboBox.AdjustToMinimumContentsLengthWithIcon)
+                w.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+                w.currentTextChanged.connect(w.setToolTip)
+                w.setToolTip(w.currentText())
             if f.name == "source":
                 w.setReadOnly(True)
             w.setMinimumHeight(44)
@@ -296,6 +305,7 @@ class CyclesPage(QtWidgets.QWidget):
             cell_layout.addWidget(w)
             error = pages._label("", "lrtMuted")
             error.setWordWrap(True)
+            error.setMaximumWidth(260)
             error.hide()
             cell_layout.addWidget(error)
             self.form.addRow(label, cell)
