@@ -1544,5 +1544,6 @@ Model-Author: Codex. Polecenie właściciela: Git, przegląd, testy, podgląd i 
 #171: rzeczywisty Qt checkbox PASS, HMI 45 kroków PASS w 63,06 s, CI HEAD zielone; autokontrola.
 #172–174 wstrzymane: po G92 pomijany łuk Y10 przy limicie5; obrócona helisa Y7,432 przy limicie7,2 pominięta.
 Istniejące 26 testów/4 subtesty i ruff PASS; konkretne reprodukcje w komentarzach oraz raporcie PR_REVIEW_2026-10-26.md.
-Pełna seria z gcode SIGSEGV w symulacji; oba znalezione błędy odtworzone na main53ad3ac, offline oddzielnie.
+Gcode SIGSEGV i test bez M2 odtworzone na main53ad3ac. Offline1368 PASS; 7 błędów montowania .git usuniętych w celowanej serii11 PASS/3 SKIP, REQ22/22 i C21/21 PASS.
+#171 scalony c1eabef; podgląd main aktywny w linumert-hmi do oceny właściciela, obie lease Codex zachowane.
 Bez zmian sterowania i katalogu operatora; LIMITS-PREFLIGHT nadal partial. NIEZWERYFIKOWANE NA SPRZĘCIE.
