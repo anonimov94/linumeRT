@@ -399,7 +399,7 @@ ostateczne rozstrzygnięcie przed publiczną premierą (sesja 080).
   `docs/LICENCJE.md` po wyniku; (d) opcjonalnie: koszt przejścia na `qtpy` we wszystkich plikach ekranu.
 - Do czasu wyniku: dystrybucja binarna/obrazu z PyQt5 wstrzymana, repozytorium źródłowe bez zmian.
 
-## Ekran operatora w HTML/WebGL obok QtDragon — 2026-10-26 · Claude · PROPOZYCJA
+## Ekran operatora w HTML/WebGL obok QtDragon — 2026-10-26 · Claude · PROPOZYCJA, kierunek POTWIERDZONY przez właściciela
 
 Model-Author: Claude. Powód: właściciel (2026-10-26) uznał, że Qt/QSS nie pozwala zrobić zaplanowanych skórek
 (cyberdeck i własny styl sci-fi), i zgodził się na HTML + WebGL. **To zmienia D02/D03 i kolejność z decyzji
@@ -431,3 +431,9 @@ właściciela w tym pliku.** Do tego czasu M2 i QtDragon bez zmian.
 **Pierwszy krok (po potwierdzeniu):** PoC `web-hmi-poc` — brama + jedna strona z DRO i prostą sceną WebGL w
 stylu cyberdeck, na atrapie `linuxcnc` i na LinuxCNC sim; kryterium: 30 FPS, stan osi i jog z przeglądarki, test
 bez LinuxCNC. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+**Decyzja właściciela (2026-10-26, „ok zatem zaniechać prace na GUI, by nie marnować mocy”):**
+- Kierunek HTML/WebGL potwierdzony; **zaniechać dalszych prac nad GUI Qt** (QtDragon/QtVCP, skórki `linumert_skin_*`, strony ekranu w `screens/linumert/`, testy GUI Qt). To zastępuje decyzję „Priorytet M2” z 2026-10-25 w części dotyczącej rozwoju ekranu Qt.
+- Dotyczy wszystkich modeli (Claude, Codex, ChatGPT). Otwarte PR-y GUI Qt (np. #180) nie są rozwijane dalej; scalić lub zamknąć decyduje właściciel. Naprawy błędów blokujących działanie ekranu awaryjnego i bezpieczeństwa wciąż dozwolone.
+- Rdzeń `linumert`, Plant, HAL, generatory, symulacja i alarmy działają dalej bez zmian.
+- Następny krok: PoC `web-hmi-poc` (brama + strona z DRO i sceną WebGL, atrapa `linuxcnc`).
