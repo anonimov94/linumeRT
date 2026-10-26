@@ -1,5 +1,7 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
 """Trzy ostatnie alarmy i pojedynczy/podwójny Reset. Model-Author: Codex."""
+import re
+
 from linumert_i18n import translate
 from PyQt5 import QtCore, QtWidgets
 
@@ -50,8 +52,15 @@ class AlarmPanel(QtWidgets.QFrame):
 
     def render(self):
         for row, entry in zip(self.rows, self.entries[:3] + [None] * 3):
-            row.setText(entry[1] if entry else "—")
-            row.setToolTip(entry[1] if entry else "")
+            message = entry[1] if entry else "—"
+            if entry:
+                source = entry[2]
+                code = source if re.fullmatch(r"(?:[WE]-\d{4}|K-3\d{2}|P-\d{4})", source) else (
+                    "E-1000" if source == "controller" else "")
+                if code and not message.startswith(code):
+                    message = f"{code} · {message}"
+            row.setText(message)
+            row.setToolTip(message if entry else "")
         level = self.entries[0][0] if self.entries else "info"
         self.setProperty("level", level)
         self.style().unpolish(self)

@@ -120,7 +120,7 @@ def smoke(snapshot):
     # Real styled pages must fit the operator viewport after shrinking again.
     for width in (1280, 1920, 1280):
         window.resize(width, 768)
-        for area in ("start", "tools"):
+        for area in ("start", "tools", "sim"):
             shell.select_area(area)
             shell.refresh()
             for _ in range(8):
@@ -128,8 +128,22 @@ def smoke(snapshot):
             scroll = shell.stack.parentWidget().parentWidget()
             assert scroll.horizontalScrollBar().maximum() == 0, (area, width)
             assert window.width() == width
+    rail = shell.areas["start"].parentWidget()
+    for button in shell.areas.values():
+        assert button.geometry().bottom() < rail.parentWidget().height(), button.text()
+    shell.show_alarm("err", "Próba kodu alarmu", "K-305")
+    assert shell.alarm.rows[0].text().startswith("K-305 ·")
+    shell.reset_alarms(False)
+    shell.select_area("sim")
+    for _ in range(8):
+        app.processEvents()
+    sim_scroll = shell.sim.findChild(QtWidgets.QScrollArea)
+    assert window.grab().save(str(Path(snapshot).with_name("sim-before.png")))
+    assert sim_scroll.horizontalScrollBar().maximum() == 0
+    assert window.grab().save(str(Path(snapshot).with_name("sim-responsive.png")))
     from PyQt5 import QtCore, QtTest
 
+    shell.select_area("tools")
     window.activateWindow()
     shell.tools.txt_desc.setFocus()
     app.processEvents()

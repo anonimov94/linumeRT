@@ -1486,3 +1486,9 @@ bez podłączenia opisane jawnie. NIEZWERYFIKOWANE NA SPRZĘCIE.
 - Model-Author: Claude. `shell_qss` stylizuje teraz QLineEdit, pola liczbowe, listy rozwijane (strzałki z własnych ikon `strzalka_dol/gora.svg`), pole wyboru i przewijane obszary z tokenów; wcześniej były białe (jog, MDI, wrzeciono, przygotówka, narzędzia).
 - Zrzuty 1280×768 i 1920×1080 sprawdzone wzrokiem; 161 testów powłoki HMI PASS w kontenerze z Qt; PROVENANCE: dwie nowe ikony (własne, SVG).
 - Dług: jasny pasek tła wokół prawego panelu strony Symulacja, formularz przygotówki szerszy niż panel (poziomy pasek przewijania), brak znaku marki, szyna 13 obszarów. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## M2 / 028 — mały ekran, pierwsza porcja · 2026-10-26 · Codex
+- Model-Author: Codex. Na polecenie właściciela kolejno domykamy przekazanie Claude; osobny checkout, bez zmiany plików operatora.
+- Dwukolumnowa szyna na niskim ekranie, istniejący znak marki, kody alarmów ze źródła; przygotówka w jednej kolumnie, akcje 2×2 i ciemne tło panelu.
+- 9 testów Qt PASS: rozmiary 1280→1920→1280, brak poziomego przewijania Symulacji, cała szyna, Tab/wpis, JOG. Sprawdzony zrzut Symulacji 1280×768.
+- Następnie osadzone karty HMI i dwa podglądy; pełne lint/test w toku. NIEZWERYFIKOWANE NA SPRZĘCIE.

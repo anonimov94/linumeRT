@@ -48,16 +48,20 @@ class FamilyNavigationButton(QtWidgets.QToolButton):
             painter.drawArc(box.adjusted(5, 5, -5, -5), 40*16, 70*16)
         mode = QtGui.QIcon.Normal if self.isEnabled() else QtGui.QIcon.Disabled
         state = QtGui.QIcon.On if active else QtGui.QIcon.Off
-        self.icon().paint(painter, QtCore.QRect((self.width()-24)//2, 10, 24, 24),
+        compact = self.height() < 64
+        size = 18 if compact else 24
+        self.icon().paint(painter, QtCore.QRect((self.width()-size)//2, 4 if compact else 10,
+                                              size, size),
                           QtCore.Qt.AlignCenter, mode, state)
         font = QtGui.QFont("DejaVu Sans Mono" if family in (
             "classic-digital", "cyberdeck") else "DejaVu Sans")
-        font.setPixelSize(11 if family == "cyberdeck" else 12)
+        font.setPixelSize(10 if compact else (11 if family == "cyberdeck" else 12))
         font.setBold(active or family == "industrial-pro")
         painter.setFont(font)
         painter.setPen(QtGui.QColor(c["fg"] if self.isEnabled() else c["fg3"]))
         caption = self.text().upper() if family == "cyberdeck" else self.text()
-        painter.drawText(QtCore.QRectF(6, 36, self.width()-12, self.height()-42),
+        painter.drawText(QtCore.QRectF(4, 23 if compact else 36, self.width()-8,
+                                       self.height()-(25 if compact else 42)),
                          QtCore.Qt.AlignCenter | QtCore.Qt.TextWordWrap, caption)
         if self.hasFocus():
             painter.setPen(QtGui.QPen(border, 1, QtCore.Qt.DotLine))
