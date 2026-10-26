@@ -6,8 +6,7 @@ Model-Author: Claude
 LinuxCNC odrzuca ruch dopiero, gdy planer do niego dojdzie, więc maszyna staje w połowie
 programu. Tu ścieżka z interpretera `rs274` (z prawdziwymi przesunięciami układów z pliku
 parametrów, bez ruchu maszyny) jest porównywana z `MIN_LIMIT`/`MAX_LIMIT` z INI. Kontrola
-jest diagnostyczna: nie zmienia programu ani zachowania sterownika. Sprawdza punkty końcowe
-ruchów; łuk może wyjść poza limit między punktami (NIE jest wykrywany). Położenie maszynowe =
+jest diagnostyczna: nie zmienia programu ani zachowania sterownika. Sprawdza końce ruchów i ekstrema łuków w płaszczyznach XY/YZ/XZ. Położenie maszynowe =
 program + przesunięcie G5x + G92 + korekta długości narzędzia; obrót XY (G10 L2 R) pominięty.
 """
 
@@ -15,6 +14,7 @@ from __future__ import annotations
 
 import configparser
 import dataclasses
+import math
 import re
 import subprocess
 import tempfile
@@ -98,41 +98,55 @@ def check_canon(text: str, limits: dict[str, tuple[float, float]]) -> list[Viola
     return analyze_canon(text, limits).violations
 
 
+def _arc_candidates(
+    start: tuple[float, float, float], vals: list[float], plane: tuple[int, int, int],
+) -> list[tuple[float, float, float]]:
+    """Ekstrema osi w zakresie łuku i jego koniec, w kolejności przejścia."""
+    first, second, spiral = plane
+    end = list(start)
+    end[first], end[second], end[spiral] = vals[0], vals[1], vals[5]
+    endpoint = tuple(end)
+    center_first, center_second, rotation = vals[2], vals[3], vals[4]
+    radius = math.hypot(start[first] - center_first, start[second] - center_second)
+    end_radius = math.hypot(endpoint[first] - center_first, endpoint[second] - center_second)
+    # Niepełny/niepoprawny zapis kanoniczny: zachowaj dotychczasową kontrolę końca.
+    if (rotation == 0 or radius < EPS
+            or not math.isclose(radius, end_radius, rel_tol=1e-4, abs_tol=EPS)):
+        return [endpoint]
+
+    start_angle = math.atan2(start[second] - center_second, start[first] - center_first)
+    end_angle = math.atan2(endpoint[second] - center_second, endpoint[first] - center_first)
+    direction = 1 if rotation > 0 else -1
+    sweep = ((end_angle - start_angle) * direction) % math.tau
+    if abs(rotation) > 1:
+        sweep += (abs(rotation) - 1) * math.tau
+    if sweep <= EPS:
+        return [endpoint]
+
+    interior: list[tuple[float, tuple[float, float, float]]] = []
+    for angle in (0.0, math.pi / 2, math.pi, 3 * math.pi / 2):
+        progress = ((angle - start_angle) * direction) % math.tau
+        if EPS < progress < sweep - EPS:
+            point = list(start)
+            point[first] = center_first + radius * math.cos(angle)
+            point[second] = center_second + radius * math.sin(angle)
+            point[spiral] = start[spiral] + (endpoint[spiral] - start[spiral]) * progress / sweep
+            interior.append((progress, tuple(point)))
+    return [point for _, point in sorted(interior)] + [endpoint]
+
+
 def analyze_canon(text: str, limits: dict[str, tuple[float, float]]) -> LimitReport:
-    """Pierwsze przekroczenie każdej osi i strony limitu; `count` liczy wszystkie ruchy."""
+    """Pierwsze przekroczenie każdej osi i strony limitu; `count` liczy sprawdzone punkty."""
     cuts_without_tlo = False
     found: list[Violation] = []
     seen: dict[tuple[str, str], int] = {}
     scale = 1.0
     g5x = g92 = tlo = (0.0, 0.0, 0.0)  # przesunięcia układu, G92 i korekta długości (XYZ)
     touched: set[str] = set()  # interpreter startuje w zerze maszyny: oś nieruszona = bez oceny
-    for raw in text.splitlines():
-        m = _CALL.match(raw)
-        if m is None:
-            continue
-        line = int(m.group(1)) if m.group(1).isdigit() else 0
-        name, args = m.group(2), m.group(3)
-        if name == "USE_LENGTH_UNITS":
-            scale = INCH if "INCHES" in args else 1.0
-            continue
-        if name == "SET_G5X_OFFSET":
-            g5x = tuple(_floats(args)[1:4])
-            continue
-        if name == "SET_G92_OFFSET":
-            g92 = tuple(_floats(args)[:3])
-            continue
-        if name == "USE_TOOL_LENGTH_OFFSET":
-            tlo = tuple(_floats(args)[:3])
-            continue
-        if name == "ARC_FEED":
-            vals = _floats(args)
-            pos = (vals[0], vals[1], vals[5])
-        elif name in ("STRAIGHT_TRAVERSE", "STRAIGHT_FEED"):
-            pos = tuple(_floats(args)[:3])
-        else:
-            continue
-        if name != "STRAIGHT_TRAVERSE" and not any(tlo):
-            cuts_without_tlo = True
+    position = (0.0, 0.0, 0.0)
+    plane = (0, 1, 2)  # XY, osie: pierwsza, druga, spiralna
+
+    def check_position(pos: tuple[float, float, float], line: int) -> None:
         for i, (axis, value) in enumerate(zip(AXES, pos, strict=False)):
             if axis not in limits:
                 continue
@@ -150,8 +164,46 @@ def analyze_canon(text: str, limits: dict[str, tuple[float, float]]) -> LimitRep
                 elif bad:
                     first = found[seen[key]]
                     found[seen[key]] = dataclasses.replace(first, count=first.count + 1)
-    return LimitReport(found, cuts_without_tlo)
 
+    for raw in text.splitlines():
+        m = _CALL.match(raw)
+        if m is None:
+            continue
+        line = int(m.group(1)) if m.group(1).isdigit() else 0
+        name, args = m.group(2), m.group(3)
+        if name == "USE_LENGTH_UNITS":
+            new_scale = INCH if "INCHES" in args else 1.0
+            position = tuple(value * scale / new_scale for value in position)
+            scale = new_scale
+            continue
+        if name == "SET_G5X_OFFSET":
+            g5x = tuple(_floats(args)[1:4])
+            continue
+        if name == "SET_G92_OFFSET":
+            g92 = tuple(_floats(args)[:3])
+            continue
+        if name == "USE_TOOL_LENGTH_OFFSET":
+            tlo = tuple(_floats(args)[:3])
+            continue
+        if name == "SELECT_PLANE":
+            plane_name = args.strip().rsplit("_", 1)[-1].upper()
+            plane = {"XY": (0, 1, 2), "YZ": (1, 2, 0), "XZ": (2, 0, 1)}.get(plane_name, plane)
+            continue
+        if name == "ARC_FEED":
+            vals = _floats(args)
+            candidates = _arc_candidates(position, vals, plane)
+            pos = candidates[-1]
+        elif name in ("STRAIGHT_TRAVERSE", "STRAIGHT_FEED"):
+            pos = tuple(_floats(args)[:3])
+            candidates = [pos]
+        else:
+            continue
+        if name != "STRAIGHT_TRAVERSE" and not any(tlo):
+            cuts_without_tlo = True
+        for candidate in candidates:
+            check_position(candidate, line)
+        position = pos
+    return LimitReport(found, cuts_without_tlo)
 
 _N_WORD = re.compile(r"^\s*[Nn]\d+\s*")
 
