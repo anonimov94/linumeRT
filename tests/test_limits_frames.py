@@ -42,3 +42,13 @@ def test_real_interpreter_arc_after_frame_change(tmp_path, change):
     assert run.returncode == 0 and 'PROGRAM_END()' in run.stdout, run.stderr
     got = check_canon(run.stdout, {'Y': (-5, 5)})
     assert [(v.axis, v.side, v.value) for v in got] == [('Y', 'max', 10)]
+
+
+def test_unit_switch_does_not_scale_rotary_position_or_offsets():
+    got = check_canon(canon(
+        'SET_G5X_OFFSET(1, 25.4, 0, 0, 90, 0, 0)',
+        'STRAIGHT_TRAVERSE(25.4, 0, 0, 10, 0, 0)',
+        'USE_LENGTH_UNITS(CANON_UNITS_INCHES)',
+        'STRAIGHT_FEED(1, 0, 0, 10, 0, 0)',
+    ), {'X': (0, 51), 'A': (95, 105)})
+    assert got == []

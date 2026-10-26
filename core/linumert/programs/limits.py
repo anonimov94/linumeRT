@@ -7,8 +7,9 @@ LinuxCNC odrzuca ruch dopiero, gdy planer do niego dojdzie, więc maszyna staje 
 programu. Tu ścieżka z interpretera `rs274` (z prawdziwymi przesunięciami układów z pliku
 parametrów, bez ruchu maszyny) jest porównywana z `MIN_LIMIT`/`MAX_LIMIT` z INI. Kontrola
 jest diagnostyczna: nie zmienia programu ani zachowania sterownika. Sprawdza końce
-ruchów i ekstrema łuków w płaszczyznach XY/YZ/XZ. Położenie maszynowe =
-program + przesunięcie G5x + G92 + korekta długości narzędzia; obrót XY (G10 L2 R) pominięty.
+ruchów i ekstrema łuków w płaszczyznach XY/YZ/XZ z uwzględnieniem obrotu XY (G10 L2 R).
+Sprawdza też osie obrotowe A/B/C (w stopniach, z pominięciem WRAPPED_ROTARY).
+Położenie maszynowe XYZ = (program + G92) obrócony w XY + G5x + korekta długości narzędzia.
 """
 
 from __future__ import annotations
@@ -26,6 +27,8 @@ from ._interpreter_process import InterpreterOutputLimit
 from .linuxcnc_check import run_interpreter
 
 AXES = ("X", "Y", "Z")
+ROTARY = ("A", "B", "C")
+ALL_AXES = AXES + ROTARY
 INCH = 25.4
 _CALL = re.compile(r"^\s*\d+ N([.\d]+)\s+([A-Z0-9_]+)\((.*)\)\s*$")
 EPS = 1e-6
@@ -35,16 +38,17 @@ EPS = 1e-6
 class Violation:
     line: int
     axis: str
-    value: float          # [mm] położenie maszynowe, którego program żąda
-    limit: float          # [mm] przekroczony limit
+    value: float          # [mm/°] położenie maszynowe, którego program żąda
+    limit: float          # [mm/°] przekroczony limit
     side: str             # "min" albo "max"
     count: int = 1        # ile ruchów przekracza tę samą stronę limitu tej osi
 
     def message(self) -> str:
         kind = "dolny" if self.side == "min" else "górny"
         more = f" (i {self.count - 1} kolejnych ruchów)" if self.count > 1 else ""
-        return (f"linia {self.line}: oś {self.axis} do {self.value:.3f} mm przekracza "
-                f"{kind} limit {self.limit:.3f} mm{more}")
+        unit = "°" if self.axis in ROTARY else "mm"
+        return (f"linia {self.line}: oś {self.axis} do {self.value:.3f} {unit} przekracza "
+                f"{kind} limit {self.limit:.3f} {unit}{more}")
 
 
 @dataclass(frozen=True)
@@ -58,7 +62,7 @@ class LimitReport:
 
 
 def limits_from_ini(path: Path | str) -> dict[str, tuple[float, float]]:
-    """Granice XYZ w mm, tak jak pozycje porównywane przez analyze_canon."""
+    """Granice XYZ w mm i A/B/C w stopniach (bez osi zawijanych)."""
     ini = configparser.ConfigParser(strict=False, interpolation=None)
     if not ini.read(path, encoding="utf-8"):
         raise ValueError("Brak pliku INI maszyny.")
@@ -73,6 +77,16 @@ def limits_from_ini(path: Path | str) -> dict[str, tuple[float, float]]:
         out[axis] = (lo * scale, hi * scale)
     if not out:
         raise ValueError("INI nie zawiera MIN_LIMIT/MAX_LIMIT osi XYZ.")
+    for axis in ROTARY:
+        section = f"AXIS_{axis}"
+        if ini.getboolean(section, "WRAPPED_ROTARY", fallback=False):
+            continue
+        try:
+            lo = float(ini.get(section, "MIN_LIMIT").split()[0])
+            hi = float(ini.get(section, "MAX_LIMIT").split()[0])
+        except (configparser.Error, ValueError, IndexError):
+            continue
+        out[axis] = (lo, hi)  # stopnie, niezależne od LINEAR_UNITS
     return out
 
 
@@ -95,17 +109,25 @@ def _floats(args: str) -> list[float]:
     return [float(x) for x in re.split(r"[,\s]+", args.strip()) if x]
 
 
+def _six(values: list[float]) -> tuple[float, ...]:
+    """Dopełnia pozycje i przesunięcia XYZABC zerami."""
+    return tuple((values + [0.0] * 6)[:6])
+
+
 def check_canon(text: str, limits: dict[str, tuple[float, float]]) -> list[Violation]:
     return analyze_canon(text, limits).violations
 
 
 def _arc_candidates(
-    start: tuple[float, float, float], vals: list[float], plane: tuple[int, int, int],
-) -> list[tuple[float, float, float]]:
+    start: tuple[float, ...], vals: list[float], plane: tuple[int, int, int],
+    xy_rot: float = 0.0,
+) -> list[tuple[float, ...]]:
     """Ekstrema osi w zakresie łuku i jego koniec, w kolejności przejścia."""
     first, second, spiral = plane
     end = list(start)
     end[first], end[second], end[spiral] = vals[0], vals[1], vals[5]
+    for index, value in enumerate(vals[6:9], start=3):
+        end[index] = value
     endpoint = tuple(end)
     center_first, center_second, rotation = vals[2], vals[3], vals[4]
     radius = math.hypot(start[first] - center_first, start[second] - center_second)
@@ -128,16 +150,44 @@ def _arc_candidates(
     if sweep <= EPS:
         return [endpoint]
 
-    interior: list[tuple[float, tuple[float, float, float]]] = []
-    for angle in (0.0, math.pi / 2, math.pi, 3 * math.pi / 2):
-        progress = ((angle - start_angle) * direction) % math.tau
-        if EPS < progress < sweep - EPS:
-            point = list(start)
-            point[first] = center_first + radius * math.cos(angle)
-            point[second] = center_second + radius * math.sin(angle)
-            point[spiral] = start[spiral] + (endpoint[spiral] - start[spiral]) * progress / sweep
-            interior.append((progress, tuple(point)))
-    return [point for _, point in sorted(interior)] + [endpoint]
+    # Each machine coordinate is A*cos(theta) + B*sin(theta) + C*progress
+    # plus a constant. Include the linear helix term before finding extrema.
+    angle = math.radians(xy_rot)
+    cosine, sine = math.cos(angle), math.sin(angle)
+    rows = ((cosine, -sine, 0), (sine, cosine, 0), (0, 0, 1))
+    progress_values: set[float] = set()
+    for row in rows:
+        a = -direction * radius * row[first]
+        b = direction * radius * row[second]
+        drift = row[spiral] * (endpoint[spiral] - start[spiral]) / sweep
+        amplitude = math.hypot(a, b)
+        if amplitude < EPS or abs(drift) > amplitude:
+            continue  # This coordinate is constant or monotonic.
+        phase = math.atan2(b, a)
+        root = math.asin(max(-1.0, min(1.0, -drift / amplitude)))
+        for theta in (root - phase, math.pi - root - phase):
+            progress = ((theta - start_angle) * direction) % math.tau
+            if progress <= EPS:
+                progress += math.tau
+            # Equal-phase extrema differ only by the linear drift per turn.
+            # First and last suffice even for arbitrarily many revolutions.
+            last = math.floor((sweep - progress) / math.tau)
+            for turn in (0, last):
+                value = progress + turn * math.tau
+                if turn >= 0 and EPS < value < sweep - EPS:
+                    progress_values.add(value)
+
+    interior = []
+    for progress in sorted(progress_values):
+        theta = start_angle + direction * progress
+        point = list(start)
+        point[first] = center_first + radius * math.cos(theta)
+        point[second] = center_second + radius * math.sin(theta)
+        point[spiral] = start[spiral] + (endpoint[spiral] - start[spiral]) * progress / sweep
+        for index in range(3, len(start)):
+            point[index] = start[index] + (endpoint[index] - start[index]) * progress / sweep
+        interior.append(tuple(point))
+    return interior + [endpoint]
 
 
 def analyze_canon(text: str, limits: dict[str, tuple[float, float]]) -> LimitReport:
@@ -146,16 +196,35 @@ def analyze_canon(text: str, limits: dict[str, tuple[float, float]]) -> LimitRep
     found: list[Violation] = []
     seen: dict[tuple[str, str], int] = {}
     scale = 1.0
-    g5x = g92 = tlo = (0.0, 0.0, 0.0)  # przesunięcia układu, G92 i korekta długości (XYZ)
+    g5x = g92 = tlo = (0.0,) * 6  # przesunięcia układu, G92 i korekta narzędzia (XYZABC)
     touched: set[str] = set()  # interpreter startuje w zerze maszyny: oś nieruszona = bez oceny
-    position = (0.0, 0.0, 0.0)
+    position = (0.0,) * 6
     plane = (0, 1, 2)  # XY, osie: pierwsza, druga, spiralna
+    xy_rot = 0.0  # stopnie, dodatnie = CCW
 
-    def check_position(pos: tuple[float, float, float], line: int) -> None:
-        for i, (axis, value) in enumerate(zip(AXES, pos, strict=False)):
+    def machine_position(pos: tuple[float, ...]) -> tuple[float, ...]:
+        x, y, z = (pos[i] + g92[i] for i in range(3))
+        angle = math.radians(xy_rot)
+        cosine, sine = math.cos(angle), math.sin(angle)
+        rotated = (x * cosine - y * sine, x * sine + y * cosine, z)
+        coordinates = rotated + tuple(pos[i] + g92[i] for i in range(3, len(pos)))
+        return tuple(value + g5x[i] + tlo[i] for i, value in enumerate(coordinates))
+
+    def program_position(machine: tuple[float, ...]) -> tuple[float, ...]:
+        x, y, z = (machine[i] - g5x[i] - tlo[i] for i in range(3))
+        angle = math.radians(xy_rot)
+        cosine, sine = math.cos(angle), math.sin(angle)
+        rotated = (x * cosine + y * sine, -x * sine + y * cosine, z)
+        coordinates = rotated + tuple(machine[i] - g5x[i] - tlo[i]
+                                      for i in range(3, len(machine)))
+        return tuple(value - g92[i] for i, value in enumerate(coordinates))
+
+    def check_position(pos: tuple[float, ...], line: int) -> None:
+        machine = tuple(value * scale if i < 3 else value
+                        for i, value in enumerate(machine_position(pos)))
+        for axis, value in zip(ALL_AXES, machine, strict=True):
             if axis not in limits:
                 continue
-            value = (value + g5x[i] + g92[i] + tlo[i]) * scale
             if axis not in touched:
                 if abs(value) < EPS:
                     continue
@@ -178,25 +247,27 @@ def analyze_canon(text: str, limits: dict[str, tuple[float, float]]) -> LimitRep
         name, args = m.group(2), m.group(3)
         if name == "USE_LENGTH_UNITS":
             new_scale = INCH if "INCHES" in args else 1.0
-            position = tuple(value * scale / new_scale for value in position)
+            position = tuple(value * scale / new_scale if i < 3 else value
+                             for i, value in enumerate(position))
             factor = scale / new_scale
-            g5x, g92, tlo = (tuple(value * factor for value in offset)
+            g5x, g92, tlo = (tuple(value * factor if i < 3 else value
+                                   for i, value in enumerate(offset))
                              for offset in (g5x, g92, tlo))
             scale = new_scale
             continue
-        if name in ("SET_G5X_OFFSET", "SET_G92_OFFSET", "USE_TOOL_LENGTH_OFFSET"):
+        if name in ("SET_G5X_OFFSET", "SET_G92_OFFSET", "USE_TOOL_LENGTH_OFFSET",
+                    "SET_XY_ROTATION"):
+            machine = machine_position(position)
             values = _floats(args)
             if name == "SET_G5X_OFFSET":
-                old, g5x = g5x, tuple(values[1:4])
-                new = g5x
+                g5x = _six(values[1:7])
             elif name == "SET_G92_OFFSET":
-                old, g92 = g92, tuple(values[:3])
-                new = g92
+                g92 = _six(values[:6])
+            elif name == "USE_TOOL_LENGTH_OFFSET":
+                tlo = _six(values[:6])
             else:
-                old, tlo = tlo, tuple(values[:3])
-                new = tlo
-            # A modal offset changes coordinates, never the machine position.
-            position = tuple(value + old[i] - new[i] for i, value in enumerate(position))
+                xy_rot = values[0] if values else 0.0
+            position = program_position(machine)
             continue
         if name == "SELECT_PLANE":
             plane_name = args.strip().rsplit("_", 1)[-1].upper()
@@ -204,10 +275,10 @@ def analyze_canon(text: str, limits: dict[str, tuple[float, float]]) -> LimitRep
             continue
         if name == "ARC_FEED":
             vals = _floats(args)
-            candidates = _arc_candidates(position, vals, plane)
+            candidates = _arc_candidates(position, vals, plane, xy_rot)
             pos = candidates[-1]
         elif name in ("STRAIGHT_TRAVERSE", "STRAIGHT_FEED"):
-            pos = tuple(_floats(args)[:3])
+            pos = _six(_floats(args)[:6])
             candidates = [pos]
         else:
             continue

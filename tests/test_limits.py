@@ -118,6 +118,90 @@ def test_xz_arc_extremum_uses_z_then_x_order():
     assert got[0].value == pytest.approx(20.0)
 
 
+def test_xy_rotation_changes_linear_machine_limits():
+    limits = {"X": (-20.0, 20.0), "Y": (-20.0, 5.0)}
+    straight = "STRAIGHT_FEED(10, 0, 0, 0, 0, 0)"
+    assert check_canon(_canon(straight), limits) == []
+    got = check_canon(_canon("SET_XY_ROTATION(90)", straight), limits)
+    assert [(v.line, v.axis, v.side) for v in got] == [(10, "Y", "max")]
+    assert got[0].value == pytest.approx(10.0)
+
+
+def test_xy_rotation_applies_g92_before_rotation():
+    limits = {"X": (-20.0, 20.0), "Y": (-1.0, 4.0), "Z": (-50.0, 50.0)}
+    canon = _canon("SET_G92_OFFSET(5, 0, 0, 0, 0, 0)",
+                   "SET_XY_ROTATION(90)",
+                   "STRAIGHT_FEED(0, 0, 1, 0, 0, 0)")
+    got = check_canon(canon, limits)
+    assert [(v.line, v.axis, v.side) for v in got] == [(11, "Y", "max")]
+    assert got[0].value == pytest.approx(5.0)
+
+
+def test_xy_rotated_arc_checks_machine_space_extremum():
+    limits = {"X": (-20.0, 20.0), "Y": (-20.0, 9.0)}
+    canon = _canon("SET_XY_ROTATION(45)",
+                   "STRAIGHT_TRAVERSE(10, 0, 0, 0, 0, 0)",
+                   "ARC_FEED(0, 10, 0, 0, 1, 0)")
+    got = check_canon(canon, limits)
+    assert [(v.line, v.axis, v.side) for v in got] == [(11, "Y", "max")]
+    assert got[0].value == pytest.approx(10.0)
+
+
+def test_rotary_limits_from_inch_ini_are_in_degrees(tmp_path):
+    ini = tmp_path / "rotary.ini"
+    ini.write_text("[TRAJ]\nLINEAR_UNITS = inch\n"
+                   "[AXIS_X]\nMIN_LIMIT = -2\nMAX_LIMIT = 2\n"
+                   "[AXIS_A]\nMIN_LIMIT = -10\nMAX_LIMIT = 100\n",
+                   encoding="utf-8")
+    limits = limits_from_ini(ini)
+    assert limits["X"] == pytest.approx((-50.8, 50.8))
+    assert limits["A"] == (-10.0, 100.0)
+
+
+@pytest.mark.parametrize("wrapped", ["1", "true", "yes"])
+def test_wrapped_rotary_is_excluded_from_limits(tmp_path, wrapped):
+    ini = tmp_path / "wrapped.ini"
+    ini.write_text("[AXIS_X]\nMIN_LIMIT = -50\nMAX_LIMIT = 50\n"
+                   f"[AXIS_C]\nWRAPPED_ROTARY = {wrapped}\n"
+                   "MIN_LIMIT = -360\nMAX_LIMIT = 360\n", encoding="utf-8")
+    assert "C" not in limits_from_ini(ini)
+
+
+def test_straight_rotary_limit_violation_uses_degrees():
+    limits = {"A": (-10.0, 100.0)}
+    got = check_canon(_canon("STRAIGHT_FEED(0, 0, 1, 120, 0, 0)"), limits)
+    assert [(v.line, v.axis, v.side, v.value) for v in got] == [(9, "A", "max", 120.0)]
+    assert "120.000 °" in got[0].message()
+    assert "100.000 °" in got[0].message()
+
+
+def test_rotary_g5x_offset_moves_axis_outside_limit():
+    limits = {"A": (-10.0, 100.0)}
+    canon = _canon("SET_G5X_OFFSET(1, 0, 0, 0, 30, 0, 0)",
+                   "STRAIGHT_FEED(0, 0, 1, 80, 0, 0)")
+    got = check_canon(canon, limits)
+    assert [(v.line, v.axis, v.side, v.value) for v in got] == [(10, "A", "max", 110.0)]
+
+
+def test_arc_feed_checks_rotary_axis_at_endpoint():
+    limits = {"A": (-10.0, 100.0)}
+    canon = _canon("STRAIGHT_TRAVERSE(10, 0, 1, 0, 0, 0)",
+                   "ARC_FEED(0, 10, 0, 0, 1, 1, 120, 0, 0, 0, 0, 0)")
+    got = check_canon(canon, limits)
+    assert [(v.line, v.axis, v.side) for v in got] == [(10, "A", "max")]
+    assert got[0].value == pytest.approx(120.0)
+
+
+def test_rotary_g92_and_tlo_are_not_scaled_by_inches():
+    limits = {"A": (-10.0, 100.0)}
+    canon = _canon("USE_LENGTH_UNITS(CANON_UNITS_INCHES)",
+                   "SET_G92_OFFSET(0, 0, 0, 5, 0, 0)",
+                   "USE_TOOL_LENGTH_OFFSET(0, 0, 0, 6, 0, 0)",
+                   "STRAIGHT_FEED(0, 0, 1, 95, 0, 0)")
+    got = check_canon(canon, limits)
+    assert [(v.line, v.axis, v.side, v.value) for v in got] == [(12, "A", "max", 106.0)]
+
+
 def test_number_lines_keeps_file_line_numbers():
     text = "%\nG21\n\nN50 G0 Z20 (x)\n(komentarz)\n"
     assert number_lines(text).splitlines() == ["%", "N2 G21", "", "N4 G0 Z20 (x)",

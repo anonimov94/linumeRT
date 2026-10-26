@@ -1558,3 +1558,32 @@ Model-Author: Codex. Nowe polecenie właściciela: scalić wszystkie PR i gałę
 Początek łuku zachowuje położenie maszynowe po G5x/G92/TLO; zmiana jednostek skaluje też offsety.
 21 testów i 4 subtesty PASS, w tym rzeczywisty rs274 dla G92 i G10 L2, ruff PASS.
 Helisy po obrocie XY pozostają do poprawienia w zależnym #173; nie zmieniano lokalnych plików operatora.
+
+## LIMITS-PREFLIGHT — obrót XY · 2026-10-26 · ChatGPT
+- Model-Author: ChatGPT (koordynacja: Claude). PR #173: SET_XY_ROTATION; punkt maszyny = (program + G92) obrócony w XY + G5x + TLO, kolejność sprawdzona w emccanon.cc LinuxCNC 2.9; ekstrema łuków XY liczone w układzie maszyny.
+- Przegląd Claude: 18 testów limitów PASS, ruff PASS po poprawce B007.
+- Pozostaje: osie obrotowe, odbiór na pulpicie właściciela. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## 2026-10-26 — Codex: poprawka #173 przed scaleniem
+Model-Author: Codex. Ekstrema po transformacji XY liczone z pochodnej składowej kołowej i liniowej helisy, także dla wielu obrotów CW/CCW w XY/YZ/XZ.
+Pierwsze i ostatnie ekstremum każdej fazy ogranicza koszt dla wielu obrotów. Zmiana obrotu/G5x/G92/TLO zachowuje położenie maszynowe.
+51 testów i 4 subtesty PASS, w tym rs274 dla obróconej helisy i zmian układu; odniesienie do gęstej siatki dla 24 kombinacji.
+
+## LIMITS-PREFLIGHT — osie obrotowe A/B/C · 2026-10-26 · ChatGPT
+- Model-Author: ChatGPT (koordynacja: Claude). PR #174: limity A/B/C z INI w stopniach (bez skali cali, osie WRAPPED_ROTARY pomijane), pozycje i przesunięcia G5x/G92/TLO dla XYZABC, jednostka ° w komunikacie.
+- Przegląd Claude: 26 testów limitów PASS, ruff PASS. Brak przykładowej konfiguracji 4/5 osi w repo (sesja 065) — test na rzeczywistym rs274 po jej powstaniu.
+- Pozostaje: decyzja G43 po M6 i odbiór na pulpicie właściciela. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## 2026-10-26 — Codex: integracja poprawek limitów z A/B/C (#174)
+Model-Author: Codex. Połączenie #172/#173 z sześcioma osiami: offsety A/B/C pozostają w stopniach przy zmianie mm/cale, interpolacja A/B/C na helisie zachowana.
+60 testów i 4 subtesty PASS, w tym trzy rzeczywiste próby rs274; ruff PASS. Przegląd bez zmian sterowania, RT ani katalogu operatora.
+
+## 069 — Diagnostyka napędów: dekoder CiA 402 · 2026-10-26 · ChatGPT
+- Model-Author: ChatGPT (koordynacja: Claude). Zrobione: dekoder 0x6041 (8 stanów + nieznany, flagi bitów 4/7/9/10/11, surowe bity 12–13) i grup błędów 0x603F, własne opisy PL; tylko diagnostyka.
+- Przegląd Claude: 63 testy PASS, test_ip_guard PASS, ruff PASS po poprawkach.
+- Do sprawdzenia ręcznie / długi: widok w HMI wg makiety 04, wykresy ≤ 20 Hz, ethercat slaves/master, fault z Plant. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## 2026-10-26 — Codex: odbiór dekodera CiA 402 (#175)
+Model-Author: Codex. Właściciel polecił scalić wszystkie PR/gałęzie, co obejmuje rozpoczętą część 069 przed dalszym M2; wcześniejsze bramki pozostają otwarte.
+Kod stanów/flag/kodów błędów przejrzany; 73 testy dekodera i IP PASS, ruff i roadmap --check PASS.
+To część diagnostyczna, nie funkcja bezpieczeństwa ani zamknięcie całej sesji 069; HMI i pełny zakres nadal w rejestrze.
