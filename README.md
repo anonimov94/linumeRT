@@ -132,7 +132,7 @@ W ekranie: **Start → potwierdzenie E-STOP → Włącz → Bazuj wszystkie**. D
 <!-- MILESTONES:START -->
 <!-- Generowane przez tools/roadmap.py z plan.json. -->
 
-Stan rejestru: **2026-10-25 · 39/84 ukończonych sesji**.
+Stan rejestru: **2026-10-26 · 39/84 ukończonych sesji**.
 
 Dodatkowo ukończono **19/39 rozszerzeń**. Wśród sesji: 30 częściowych i 15 planowanych. Rozszerzenia liczymy osobno, bez zwiększania licznika 84 sesji.
 
