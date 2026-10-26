@@ -58,5 +58,17 @@ Dowody: [start](HMI_CLOSEOUT_2026-10-26/01-start.png),
 [wyniki i hashe](HMI_CLOSEOUT_2026-10-26/results.json).
 Próba monitora zapisała ostrzeżenie QProcess przy wyjściu; skrypt odbioru teraz
 zamyka monitor przed LinuxCNC. Nie wpływało to na porównanie NML ani ukończenie programu.
-Pełny wynik wymaganych kontroli CI pozostaje warunkiem scalenia PR #169.
+Wymagane kontrole CI dla e9ed723 zakończone SUCCESS; PR #169 scalony jako 3c20817.
 Nie zamykamy całego 028/SKIN-02…06 ani odbioru pulpitu właściciela.
+
+
+## Końcowy wynik CI
+
+[LinuxCNC run40293747003](https://github.com/anonimov94/linumeRT/actions/runs/40293747003):
+1542 PASS, 184 subtesty PASS (11 SKIP, 154 deselected), następnie 154 testy live PASS.
+Osobne wczesne kroki: start prawdziwego QtVCP/Plant 2 PASS i samotest numeryczny 1 PASS.
+`test_cyberdeck_host_selftest_in_gui` i `test_plant_linuxcnc_home_and_move` PASS.
+Cała kontrola trwała 50 min 6 s, w tym live 38 min 14 s.
+[Python i macierz Plant run40293746655](https://github.com/anonimov94/linumeRT/actions/runs/40293746655):
+1407 PASS, 114 SKIP, REQ 22/22, testy C oraz plant-matrix SUCCESS.
+Autokontrola, bez niezależnego przeglądu; odbiór pulpitu i sprzętu pozostaje odrębny.

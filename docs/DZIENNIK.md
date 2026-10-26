@@ -1523,3 +1523,9 @@ bez podłączenia opisane jawnie. NIEZWERYFIKOWANE NA SPRZĘCIE.
 - Model-Author: Codex. Raport HMI_CLOSEOUT_2026-10-26 z trzema zrzutami live, JSON/hashe; 218 Qt/IP PASS, 101 subtestów, GL 160 kombinacji PASS.
 - Poprawiona fixture: 1 live PASS / 133,88 s, endpoint po 1,053 s, [100,199,9977,-20] mm, peak f-error 0,19263 mm, bez błędów ruchu; zainstalowany LinuxCNC z adapterem ścieżek helperów RIP.
 - Przekazanie trzech grup zaimplementowane i lokalnie odebrane; CI #169 musi być zielone przed scaleniem. Pełne 028/SKIN i odbiór pulpitu/sprzętu pozostają otwarte. Obie lease zwolnione.
+
+## HMI — scalenie trzech grup i pełne CI · 2026-10-26 · Codex
+- Model-Author: Codex. #169 scalony jako 3c20817 po wszystkich wymaganych kontrolach e9ed723. Autokontrola, bez niezależnego przeglądu.
+- LinuxCNC run40293747003: 1542 PASS + 184 subtesty, 154 live PASS; Cyberdeck host i home_and_move PASS. Python run40293746655: 1407 PASS, REQ 22/22, C PASS; macierz Plant SUCCESS.
+- Zlecone trzy grupy mają kod, lokalne i zdalne dowody odbioru. 028/SKIN pozostają partial; następnie odbiór pulpitu właściciela i dalsze M2 według rejestru.
+- Wszystko wypchnięte, obie lease zwolnione, kontenery testowe zakończone. Lokalna kopia operatora zachowuje własne narzędzia/programy.
