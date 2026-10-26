@@ -35,6 +35,7 @@ from linumert.generators.registry import GeneratorRegistry  # noqa: E402
 from linumert.generators.tooling import check_steps  # noqa: E402
 from linumert.programs.compiler import CompileError, compile_program  # noqa: E402
 from linumert.programs.lnx import LnxError, LnxProgram, Step, load_lnx, save_lnx  # noqa: E402
+from linumert.programs.step_editor import StepEditor  # noqa: E402
 
 ACTION = Action()
 GENERATORS = (basic.Header, basic.ToolChange, basic.FaceMill, drilling.DrillHoles,
@@ -63,10 +64,10 @@ class CyclesPage(QtWidgets.QWidget):
         super().__init__()
         self.setObjectName("lrtPage")
         self.shell = shell
-        self.program = LnxProgram(name="Program z cykli")
         self.registry = GeneratorRegistry()
         for group in (basic, drilling, pockets, contours):
             group.register(self.registry)
+        self.program = LnxProgram(name="Program z cykli")
         self.lnx_path = None
         self._dirty = False
         self._pool = ThreadPoolExecutor(max_workers=1)
@@ -112,6 +113,18 @@ class CyclesPage(QtWidgets.QWidget):
         self.step_list.setMaximumHeight(110)
         self.step_list.currentRowChanged.connect(self.select_step)
         lay.addWidget(self.step_list)
+        operations = QtWidgets.QGridLayout()
+        self.step_buttons = {}
+        for n, (operation, title) in enumerate((
+                ("up", "W górę"), ("down", "W dół"), ("duplicate", "Duplikuj"),
+                ("toggle", "Wyłącz / włącz"), ("delete", "Usuń wybrany"),
+                ("undo", "Cofnij"), ("redo", "Ponów"))):
+            button = QtWidgets.QPushButton(title)
+            button.setMinimumHeight(40)
+            button.clicked.connect(lambda _checked=False, op=operation: self.edit_steps(op))
+            operations.addWidget(button, n // 4, n % 4)
+            self.step_buttons[operation] = button
+        lay.addLayout(operations)
         self.code = QtWidgets.QPlainTextEdit()
         self.code.setReadOnly(True)
         self.code.setLineWrapMode(QtWidgets.QPlainTextEdit.NoWrap)
@@ -138,7 +151,7 @@ class CyclesPage(QtWidgets.QWidget):
             row.addWidget(btn)
         lay.addLayout(row)
         row = QtWidgets.QHBoxLayout()
-        for text, slot in (("Usuń ostatni", self.pop_step), ("Zapisz .ngc…", self.save),
+        for text, slot in (("Zapisz .ngc…", self.save),
                            ("Wczytaj do LinuxCNC", self.load)):
             btn = QtWidgets.QPushButton(text)
             btn.setMinimumHeight(40)
@@ -150,6 +163,45 @@ class CyclesPage(QtWidgets.QWidget):
         grid.setColumnStretch(1, 3)
         self.path: str | None = None
         self._build_form()
+        self._update_step_buttons()
+
+    @property
+    def program(self):
+        return self.editor.program
+
+    @program.setter
+    def program(self, program):
+        self.editor = StepEditor(program, self.registry)
+
+    def _update_step_buttons(self):
+        index = self.step_list.currentRow()
+        selected = 0 <= index < len(self.program.steps)
+        for operation, button in self.step_buttons.items():
+            enabled = selected
+            if operation == "up":
+                enabled = selected and index > 0
+            elif operation == "down":
+                enabled = selected and index < len(self.program.steps) - 1
+            elif operation == "undo":
+                enabled = self.editor.can_undo
+            elif operation == "redo":
+                enabled = self.editor.can_redo
+            button.setEnabled(enabled)
+
+    def edit_steps(self, operation, step=None, restore_form=True):
+        self.editor.selected = self.step_list.currentRow()
+        try:
+            changed = (self.editor.undo() if operation == "undo" else
+                       self.editor.redo() if operation == "redo" else
+                       self.editor.edit(operation, self.editor.selected, step))
+        except (ValueError, CompileError) as exc:
+            self.lbl_issue.setText(f"Nie zmieniono programu: {exc}")
+            return
+        if changed:
+            self._show()
+            self.step_list.setCurrentRow(self.editor.selected)
+            if restore_form and self.editor.selected >= 0:
+                self.select_step(self.editor.selected)
 
     # ---- formularz ------------------------------------------------------------------------
     def _gen(self):
@@ -235,10 +287,7 @@ class CyclesPage(QtWidgets.QWidget):
     def add_step(self) -> None:
         lines = self.preview()
         if lines is not None:
-            self.program.steps.append(self._last)
-            if self._last.generator == "header":
-                self.program.units = "inch" if self._last.params["units"] == "G20" else "mm"
-            self._show()
+            self.edit_steps("add", self._last)
 
     def update_step(self) -> None:
         index = self.step_list.currentRow()
@@ -248,14 +297,13 @@ class CyclesPage(QtWidgets.QWidget):
         if self.preview() is None:
             return
         original = self.program.steps[index]
-        self.program.steps[index] = original.model_copy(update={
+        replacement = original.model_copy(update={
             "generator": self._last.generator, "version": self._last.version,
             "params": self._last.params})
-        if self._last.generator == "header":
-            self.program.units = "inch" if self._last.params["units"] == "G20" else "mm"
-        self._show()
+        self.edit_steps("update", replacement)
 
     def select_step(self, index) -> None:
+        self._update_step_buttons()
         if not 0 <= index < len(self.program.steps):
             return
         step = self.program.steps[index]
@@ -281,8 +329,8 @@ class CyclesPage(QtWidgets.QWidget):
 
     def pop_step(self) -> None:
         if self.program.steps:
-            self.program.steps.pop()
-            self._show()
+            self.step_list.setCurrentRow(len(self.program.steps) - 1)
+            self.edit_steps("delete", restore_form=False)
 
     def text(self) -> str:
         return compile_program(self.program, self.registry)
@@ -303,6 +351,7 @@ class CyclesPage(QtWidgets.QWidget):
         self.lbl_prog.setText(f"{len(self.program.steps)} kroków")
         self.lbl_time.setText("")
         self.check_tools()
+        self._update_step_buttons()
 
     # ---- baza narzędzi, czas, podprogramy -------------------------------------------------
     def _tool_lookup(self):
