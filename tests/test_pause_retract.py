@@ -40,12 +40,28 @@ class PauseRetractTests(unittest.TestCase):
                 for _ in range(400):
                     self.assertFalse(c.tick(replace(s, offset=2, requested=2), 0.01))
                 self.assertEqual(c.phase, "returning")  # Request zero is not actual zero.
-                self.assertFalse(c.tick(replace(s, offset=0.0001), 0.01))
+                self.assertFalse(c.tick(replace(s, offset=0.00011), 0.01))
                 self.assertFalse(c.tick(replace(s, settled=False), 0.01))
                 self.assertTrue(c.active)
                 self.assertTrue(c.tick(s, 0.01))
                 self.assertFalse(c.active)
                 self.assertFalse(c.tick(s, 0.01))
+
+    def test_resume_accepts_settled_inch_roundoff_within_tolerance(self):
+        c, s = PauseRetract(), snapshot()
+        c.start(s, 2, 60)
+        for _ in range(400):
+            c.tick(replace(s, offset=c.target, requested=c.target), 0.01)
+        self.assertEqual(c.phase, "retracted")
+        c.return_to_path(replace(s, offset=2, requested=2), resume=True)
+        for _ in range(400):
+            self.assertFalse(c.tick(replace(s, offset=2, requested=2), 0.01))
+        residual = replace(
+            s, offset=1.0119131067838497e-06,
+            requested=6.642306770998641e-07, settled=True,
+        )
+        self.assertTrue(c.tick(residual, 0.01))
+        self.assertFalse(c.active)
 
     def test_changed_frame_pause_limits_or_readiness_latches_without_lowering(self):
         for change in ({"frame": ("other",)}, {"paused": False}, {"ready": False},

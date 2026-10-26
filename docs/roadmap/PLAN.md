@@ -626,11 +626,11 @@ Pozostaje: Remap M6, widok magazynu, scenariusze ATC i walidacja geometrii/stref
 
 ### 069 — Diagnostyka napędów
 
-**częściowe**. Diagnostyka HMI i historia komunikatów dostępne.
+**częściowe**. Diagnostyka HMI i historia komunikatów dostępne. Dekoder statusword CiA 402 i grup błędów 0x603F w rdzeniu (core/linumert/diag/cia402.py, 63 testy), PR #175; bez widoku HMI. Test Plant: fault watchdog i wstrzyknięty fault jednego napędu widoczne w dekoderze (3 testy), PR #177.
 
-Pozostaje: Dekoder CiA402, wykresy napędów, ethercat slaves/master i test fault.
+Pozostaje: Widok dekodera w HMI (tabela napędów), wykresy napędów, ethercat slaves/master; fault widoczny w GUI.
 
-Źródła: [docs/DZIENNIK.md](../DZIENNIK.md), [prompts/sesja-069.md](../../prompts/sesja-069.md).
+Źródła: [docs/DZIENNIK.md](../DZIENNIK.md), [core/linumert/diag/cia402.py](../../core/linumert/diag/cia402.py), [tests/test_cia402.py](../../tests/test_cia402.py), [tests/test_cia402_plant.py](../../tests/test_cia402_plant.py), [prompts/sesja-069.md](../../prompts/sesja-069.md).
 
 ### 070 — Łańcuch E-STOP i bezpieczeństwo
 
@@ -978,9 +978,9 @@ Pozostaje: Ustalić źródło historycznego uchybu X 0,3 mm, oddzielając dynami
 
 ### LIMITS-PREFLIGHT — Kontrola limitów osi przed startem programu
 
-**częściowe**. Przycisk 'Sprawdź limity osi' w edytorze G-code: rs274 z kopią parametrów (G54/G92, korekta długości, jednostki z INI) porównuje punkty końcowe ruchów z MIN/MAX_LIMIT; wynik w tle, lista linii z przeskokiem do edytora. Odtworzony błąd z G54 Z=-150 (linia 3, Z=-130) na rzeczywistym rs274; 7 testów + test GUI. Kontrola jest teraz automatyczna: po wczytaniu programu ekran sprawdza go w tle (limity osi, G5x/G92, korekta długości), pokazuje wynik na stronie Produkcja i pyta przed 'Cykl start', gdy program wyjdzie poza limity; informuje też o cięciu bez korekty długości (G49). Łuki ARC_FEED: sprawdzane ekstrema w płaszczyznach XY/YZ/XZ (pół okręgu, pełny okrąg, wiele obrotów), PR #172; 15 testów PASS. Obrót XY (G10 L2 R): G92, obrót, G5x, TLO jak w LinuxCNC 2.9, PR #173; 18 testów PASS.
+**częściowe**. Przycisk 'Sprawdź limity osi' w edytorze G-code: rs274 z kopią parametrów (G54/G92, korekta długości, jednostki z INI) porównuje punkty końcowe ruchów z MIN/MAX_LIMIT; wynik w tle, lista linii z przeskokiem do edytora. Odtworzony błąd z G54 Z=-150 (linia 3, Z=-130) na rzeczywistym rs274; 7 testów + test GUI. Kontrola jest teraz automatyczna: po wczytaniu programu ekran sprawdza go w tle (limity osi, G5x/G92, korekta długości), pokazuje wynik na stronie Produkcja i pyta przed 'Cykl start', gdy program wyjdzie poza limity; informuje też o cięciu bez korekty długości (G49). Łuki ARC_FEED: sprawdzane ekstrema w płaszczyznach XY/YZ/XZ (pół okręgu, pełny okrąg, wiele obrotów), PR #172; 15 testów PASS. Obrót XY (G10 L2 R): G92, obrót, G5x, TLO jak w LinuxCNC 2.9, PR #173; 18 testów PASS. Osie obrotowe A/B/C (stopnie, bez WRAPPED_ROTARY), PR #174; 26 testów PASS.
 
-Pozostaje: Limity osi obrotowych nie są sprawdzane. Automatyczne G43 po M6 (remap) i poprawne G43 w programie Facing z QtDragon (kod upstream) — osobna decyzja. Odbiór na pulpicie właściciela. Przegląd 2026-10-26: #172–174 wymagają poprawienia początku łuku po G92 i ekstremów helisy XZ/YZ po obrocie XY; odtworzone fałszywe wyniki bez przekroczeń.
+Pozostaje: Automatyczne G43 po M6 (remap) i poprawne G43 w programie Facing z QtDragon (kod upstream) — osobna decyzja. Odbiór na pulpicie właściciela. Przegląd 2026-10-26: #172–174 wymagają poprawienia początku łuku po G92 i ekstremów helisy XZ/YZ po obrocie XY; odtworzone fałszywe wyniki bez przekroczeń.
 
 Źródła: [core/linumert/programs/limits.py](../../core/linumert/programs/limits.py), [tests/test_limits.py](../../tests/test_limits.py), [tests/test_limits_units.py](../../tests/test_limits_units.py), [tests/test_hmi_workflow_widgets.py](../../tests/test_hmi_workflow_widgets.py), [screens/linumert/linumert_program_editor.py](../../screens/linumert/linumert_program_editor.py), [screens/linumert/linumert_preflight.py](../../screens/linumert/linumert_preflight.py), [screens/linumert/linumert_shell.py](../../screens/linumert/linumert_shell.py), [docs/raporty/PR_REVIEW_2026-10-26.md](../raporty/PR_REVIEW_2026-10-26.md).
 
