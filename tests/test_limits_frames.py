@@ -52,3 +52,12 @@ def test_unit_switch_does_not_scale_rotary_position_or_offsets():
         'STRAIGHT_FEED(1, 0, 0, 10, 0, 0)',
     ), {'X': (0, 51), 'A': (95, 105)})
     assert got == []
+
+
+def test_rotation_change_preserves_machine_arc_start():
+    got = check_canon(canon(
+        'STRAIGHT_TRAVERSE(10, 0, 0)', 'SET_XY_ROTATION(90)',
+        'ARC_FEED(0, 10, 0, 0, 1, 0)',
+    ), {'Y': (-5, 5)})
+    assert [(v.axis, v.side) for v in got] == [('Y', 'max')]
+    assert got[0].value == pytest.approx(10)
