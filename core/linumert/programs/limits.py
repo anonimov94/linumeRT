@@ -7,8 +7,8 @@ LinuxCNC odrzuca ruch dopiero, gdy planer do niego dojdzie, więc maszyna staje 
 programu. Tu ścieżka z interpretera `rs274` (z prawdziwymi przesunięciami układów z pliku
 parametrów, bez ruchu maszyny) jest porównywana z `MIN_LIMIT`/`MAX_LIMIT` z INI. Kontrola
 jest diagnostyczna: nie zmienia programu ani zachowania sterownika. Sprawdza końce
-ruchów i ekstrema łuków w płaszczyznach XY/YZ/XZ. Położenie maszynowe =
-program + przesunięcie G5x + G92 + korekta długości narzędzia; obrót XY (G10 L2 R) pominięty.
+ruchów i ekstrema łuków w płaszczyznach XY/YZ/XZ z uwzględnieniem obrotu XY (G10 L2 R).
+Położenie maszynowe = (program + G92) obrócony w XY + G5x + korekta długości narzędzia.
 """
 
 from __future__ import annotations
@@ -101,6 +101,7 @@ def check_canon(text: str, limits: dict[str, tuple[float, float]]) -> list[Viola
 
 def _arc_candidates(
     start: tuple[float, float, float], vals: list[float], plane: tuple[int, int, int],
+    xy_rot: float = 0.0,
 ) -> list[tuple[float, float, float]]:
     """Ekstrema osi w zakresie łuku i jego koniec, w kolejności przejścia."""
     first, second, spiral = plane
@@ -129,7 +130,10 @@ def _arc_candidates(
         return [endpoint]
 
     interior: list[tuple[float, tuple[float, float, float]]] = []
-    for angle in (0.0, math.pi / 2, math.pi, 3 * math.pi / 2):
+    extrema = (0.0, math.pi / 2, math.pi, 3 * math.pi / 2)
+    if plane == (0, 1, 2):
+        extrema = tuple(angle - math.radians(xy_rot) for angle in extrema)
+    for angle in extrema:
         progress = ((angle - start_angle) * direction) % math.tau
         if EPS < progress < sweep - EPS:
             point = list(start)
@@ -150,12 +154,19 @@ def analyze_canon(text: str, limits: dict[str, tuple[float, float]]) -> LimitRep
     touched: set[str] = set()  # interpreter startuje w zerze maszyny: oś nieruszona = bez oceny
     position = (0.0, 0.0, 0.0)
     plane = (0, 1, 2)  # XY, osie: pierwsza, druga, spiralna
+    xy_rot = 0.0  # stopnie, dodatnie = CCW
 
     def check_position(pos: tuple[float, float, float], line: int) -> None:
-        for i, (axis, value) in enumerate(zip(AXES, pos, strict=False)):
+        x, y, z = (pos[i] + g92[i] for i in range(3))
+        if xy_rot:
+            angle = math.radians(xy_rot)
+            cosine, sine = math.cos(angle), math.sin(angle)
+            x, y = x * cosine - y * sine, x * sine + y * cosine
+        machine = tuple((value + g5x[i] + tlo[i]) * scale
+                        for i, value in enumerate((x, y, z)))
+        for i, (axis, value) in enumerate(zip(AXES, machine, strict=False)):
             if axis not in limits:
                 continue
-            value = (value + g5x[i] + g92[i] + tlo[i]) * scale
             if axis not in touched:
                 if abs(value) < EPS:
                     continue
@@ -190,13 +201,17 @@ def analyze_canon(text: str, limits: dict[str, tuple[float, float]]) -> LimitRep
         if name == "USE_TOOL_LENGTH_OFFSET":
             tlo = tuple(_floats(args)[:3])
             continue
+        if name == "SET_XY_ROTATION":
+            values = _floats(args)
+            xy_rot = values[0] if values else 0.0
+            continue
         if name == "SELECT_PLANE":
             plane_name = args.strip().rsplit("_", 1)[-1].upper()
             plane = {"XY": (0, 1, 2), "YZ": (1, 2, 0), "XZ": (2, 0, 1)}.get(plane_name, plane)
             continue
         if name == "ARC_FEED":
             vals = _floats(args)
-            candidates = _arc_candidates(position, vals, plane)
+            candidates = _arc_candidates(position, vals, plane, xy_rot)
             pos = candidates[-1]
         elif name in ("STRAIGHT_TRAVERSE", "STRAIGHT_FEED"):
             pos = tuple(_floats(args)[:3])
