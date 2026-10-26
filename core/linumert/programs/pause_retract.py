@@ -8,6 +8,9 @@ import math
 from dataclasses import dataclass
 
 
+RETURN_TOLERANCE_MM = 1e-4  # decyzja właściciela 2026-10-26: dokładność powrotu Z
+
+
 class RetractRefused(ValueError):
     pass
 
@@ -36,7 +39,7 @@ class PauseRetract:
     never silently lower the tool after Abort, a mode change or an I/O failure.
     """
 
-    def __init__(self, tolerance=1e-6):
+    def __init__(self, tolerance=RETURN_TOLERANCE_MM):
         self.tolerance = tolerance
         self.phase = "idle"
         self.target = 0.0
