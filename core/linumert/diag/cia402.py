@@ -9,10 +9,10 @@ Dekoder służy wyłącznie do diagnostyki, nie do sterowania ani funkcji bezpie
 from __future__ import annotations
 
 from dataclasses import dataclass
-from enum import Enum
+from enum import StrEnum
 
 
-class CiA402State(str, Enum):
+class CiA402State(StrEnum):
     """Rozpoznawalne stany maszyny stanów napędu."""
 
     NOT_READY_TO_SWITCH_ON = "not_ready_to_switch_on"

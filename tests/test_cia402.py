@@ -7,7 +7,6 @@ Model-Author: ChatGPT (koordynacja: Claude)
 from __future__ import annotations
 
 import pytest
-
 from linumert.diag.cia402 import CiA402State, decode_statusword, describe_error_code
 
 
