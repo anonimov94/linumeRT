@@ -1,6 +1,6 @@
 # Przekazanie i środowisko
 
-Tura: Codex · 2026-10-26 · stan: oddana; trzy grupy HMI scalone w #169, pełne CI PASS.
+Tura: Codex · 2026-10-26 · stan: oddana; poprawka checkboxów odebrana przez właściciela, PR #171 czeka na CI.
 
 Model-Author: Codex. Bez globalnego LOCK; zasady współpracy wyłącznie w
 [WSPOLPRACA_MODELI.md](WSPOLPRACA_MODELI.md).
@@ -24,6 +24,19 @@ oba odtworzone na main 53ad3ac, bez zmian kodu symulacji. Offline trwa osobno.
 Kopia operatora ~/linumeRT zachowana z lokalnymi narzędziami/programami.
 Stan zatrzymania: dowody gotowe; zakończyć offline, scalić gotowe #171, otworzyć HMI.
 
+
+Model-Author: Codex · 2026-10-26. **Właściciel: „jest ok”, poprawka checkboxów odebrana.**
+Kod 8faa556 wypchnięty, PR #171 ready; lint i 70 testów Qt/modelu/operatora/IP PASS.
+Czerwony X zastąpiony pustą ramką także w dialogach; logika checkboxów bez zmian.
+Przed scaleniem sprawdzić wymagane CI aktualnego HEAD #171; nie uznawać pending za PASS.
+Checkout: /home/dell/Projekty/linumeRT-checkbox. Podgląd jest uruchamiany w linumert-hmi;
+sprawdzić kontener i lease przed kolejnym testem CNC, nie przerywać okna operatora.
+
+Model-Author: Codex · 2026-10-26. **Poprawka po odbiorze właściciela: puste checkboxy.**
+Ogólne działanie podglądu potwierdzone; unchecked.png z upstream zawiera czerwony X.
+Gałąź codex/hmi-checkbox-empty, checkout /home/dell/Projekty/linumeRT-checkbox:
+ramka bez obrazka w globalnym QSS i stylu powłoki, 55 testów Qt/modelu PASS.
+Podgląd operatora działa osobno w linumert-hmi; jego lease aktywne do zamknięcia okna.
 
 Model-Author: Codex · 2026-10-26. **#169 scalony: 3c20817; zlecone trzy grupy odebrane.**
 Układ 1280×768, Cyberdeck z dwoma podglądami, rzeczywiste odczyty monitora.

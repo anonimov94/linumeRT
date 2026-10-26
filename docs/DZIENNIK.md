@@ -1530,6 +1530,15 @@ bez podłączenia opisane jawnie. NIEZWERYFIKOWANE NA SPRZĘCIE.
 - Zlecone trzy grupy mają kod, lokalne i zdalne dowody odbioru. 028/SKIN pozostają partial; następnie odbiór pulpitu właściciela i dalsze M2 według rejestru.
 - Wszystko wypchnięte, obie lease zwolnione, kontenery testowe zakończone. Lokalna kopia operatora zachowuje własne narzędzia/programy.
 
+## 028 — puste pola wyboru bez czerwonego krzyżyka · 2026-10-26 · Codex
+- Model-Author: Codex. Właściciel potwierdził działanie podglądu i zgłosił krzyżyk w odznaczonych polach. Przyczyna: odziedziczony unchecked.png zawiera czerwony X, nie brak pliku.
+- Globalny QSS rysuje pustą ramkę także w dialogach; powłoka korzysta z kolorów motywu (również disabled). Zaznaczenie i logika przełączników zachowane.
+- 55 testów Qt/modelu PASS: rzeczywisty obraz unchecked/checked/unchecked, brak czerwonych pikseli, ramka i działanie Spacji, także poza powłoką. Bez nowych zasobów lub zależności.
+
+## 028 — odbiór checkboxów przez właściciela · 2026-10-26 · Codex
+- Model-Author: Codex. Właściciel po uruchomieniu poprawionego podglądu potwierdził „jest ok” i polecił wypchnąć zmiany.
+- Kod 8faa556: lint i 70 testów PASS, PR #171 ready. Wymagane CI pozostaje warunkiem scalenia; ten wpis nie deklaruje jego wyniku.
+
 ## 2026-10-26 — Codex: przegląd PR i odbiór przed scaleniem
 Model-Author: Codex. Polecenie właściciela: Git, przegląd, testy, podgląd i scalenie gotowych zmian.
 #171: rzeczywisty Qt checkbox PASS, HMI 45 kroków PASS w 63,06 s, CI HEAD zielone; autokontrola.
