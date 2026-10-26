@@ -138,6 +138,9 @@ class CyclesPage(QtWidgets.QWidget):
             self.step_buttons[operation] = button
         lay.addLayout(operations)
         self.code = QtWidgets.QPlainTextEdit()
+        code_palette = self.code.palette()
+        code_palette.setColor(QtGui.QPalette.Text, QtGui.QColor(colors["fg"]))
+        self.code.setPalette(code_palette)
         self.code.setReadOnly(True)
         self.code.setLineWrapMode(QtWidgets.QPlainTextEdit.NoWrap)
         self.result_tabs = QtWidgets.QTabWidget()

@@ -585,6 +585,8 @@ def test_cycles_layout_and_graphical_preview(page_env, monkeypatch):
     page.show()
     QtWidgets.QApplication.processEvents()
     assert page.width() == 1280 and page.height() == 768
+    assert page.code.palette().color(QtGui.QPalette.Text).name() == model.load_tokens()[
+        "kolory"]["fg"]
     for button in page.findChildren(QtWidgets.QPushButton):
         if button.isVisible():
             assert page.rect().contains(QtCore.QRect(button.mapTo(page, QtCore.QPoint()),
