@@ -630,7 +630,7 @@ Pozostaje: Remap M6, widok magazynu, scenariusze ATC i walidacja geometrii/stref
 
 Pozostaje: Widok dekodera w HMI (tabela napędów), wykresy napędów, ethercat slaves/master i test fault.
 
-Źródła: [docs/DZIENNIK.md](../DZIENNIK.md), [prompts/sesja-069.md](../../prompts/sesja-069.md).
+Źródła: [docs/DZIENNIK.md](../DZIENNIK.md), [core/linumert/diag/cia402.py](../../core/linumert/diag/cia402.py), [tests/test_cia402.py](../../tests/test_cia402.py), [prompts/sesja-069.md](../../prompts/sesja-069.md).
 
 ### 070 — Łańcuch E-STOP i bezpieczeństwo
 
