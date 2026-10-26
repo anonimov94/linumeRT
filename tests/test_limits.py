@@ -74,6 +74,43 @@ def test_arc_endpoint_is_checked():
     assert check_canon(_canon("ARC_FEED(700.0, 0.0, 650.0, 0.0, 1, -1.0)"), LIM)[0].axis == "X"
 
 
+
+def test_ccw_arc_detects_y_max_between_endpoints():
+    limits = {"X": (0.0, 50.0), "Y": (0.0, 15.0)}
+    canon = _canon("STRAIGHT_TRAVERSE(30, 10, 0, 0, 0, 0)",
+                   "ARC_FEED(10, 10, 20, 10, 1, 0)")
+    got = check_canon(canon, limits)
+    assert [(v.line, v.axis, v.side) for v in got] == [(10, "Y", "max")]
+    assert got[0].value == pytest.approx(20.0)
+
+
+def test_cw_arc_between_same_endpoints_stays_inside_limits():
+    limits = {"X": (0.0, 50.0), "Y": (0.0, 15.0)}
+    canon = _canon("STRAIGHT_TRAVERSE(30, 10, 0, 0, 0, 0)",
+                   "ARC_FEED(10, 10, 20, 10, -1, 0)")
+    assert check_canon(canon, limits) == []
+
+
+def test_full_circle_checks_extrema_on_both_axes():
+    limits = {"X": (5.0, 15.0), "Y": (5.0, 15.0)}
+    canon = _canon("STRAIGHT_TRAVERSE(15, 10, 0, 0, 0, 0)",
+                   "ARC_FEED(15, 10, 10, 10, 2, 0)")
+    got = check_canon(canon, limits)
+    assert {(v.axis, v.side) for v in got} == {("X", "min"), ("Y", "min"), ("Y", "max")}
+    assert {v.line for v in got} == {10}
+
+
+def test_xz_arc_extremum_uses_z_then_x_order():
+    limits = {"X": (0.0, 15.0), "Y": (-10.0, 10.0), "Z": (-40.0, 0.0)}
+    canon = _canon("SELECT_PLANE(CANON_PLANE_XZ)",
+                   "STRAIGHT_TRAVERSE(10, 0, -10, 0, 0, 0)",
+                   "ARC_FEED(-30, 10, -20, 10, 1, 0)")
+    got = check_canon(canon, limits)
+    assert [(v.line, v.axis, v.side) for v in got] == [(11, "X", "max")]
+    assert got[0].value == pytest.approx(20.0)
+
+
+
 def test_number_lines_keeps_file_line_numbers():
     text = "%\nG21\n\nN50 G0 Z20 (x)\n(komentarz)\n"
     assert number_lines(text).splitlines() == ["%", "N2 G21", "", "N4 G0 Z20 (x)",
