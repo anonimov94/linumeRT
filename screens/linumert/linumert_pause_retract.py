@@ -171,7 +171,9 @@ class RetractControl(QtCore.QObject):
                 if (self.last.powered and self.last.ready and self.last.paused and self.last.still
                         and self.last.frame == frame and self.last.settled
                         and not self.model.active
-                        and max(abs(self.last.offset), abs(self.last.requested)) < 1e-6):
+                        and max(
+                            abs(self.last.offset),
+                            abs(self.last.requested)) <= self.model.tolerance):
                     self.shell.action.PAUSE()
                 else:
                     self.model.message = "Powrót zakończony; stan zmienił się przed wznowieniem."
