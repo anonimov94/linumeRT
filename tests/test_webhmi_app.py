@@ -165,3 +165,45 @@ def test_client_limit(client):
     finally:
         for ws in sockets:
             ws.__exit__(None, None, None)
+
+
+def test_websocket_non_string_token_is_closed_cleanly(client):
+    with connect(client) as ws:
+        ws.send_json({"auth": 123})
+        with pytest.raises(WebSocketDisconnect) as info:
+            ws.receive_json()
+        assert info.value.code == 4401
+
+
+def test_two_websocket_sessions_cannot_share_a_jog(client):
+    with connect(client) as first, connect(client) as second:
+        hello(first)
+        hello(second)
+        first.send_json({"id": 1, "cmd": "jog", "axis": "X", "speed": 2.0})
+        while first.receive_json().get("type") != "ack":
+            pass
+        second.send_json({"id": 2, "cmd": "jog", "axis": "X", "speed": 2.0})
+        while True:
+            message = second.receive_json()
+            if message["type"] in ("ack", "error"):
+                break
+        assert message["type"] == "error" and "innej sesji" in message["message"]
+
+
+@pytest.mark.parametrize("origin", [
+    "http://evil.example", "null", "http://127.0.0.1:8765@evil.example",
+    "http://user@127.0.0.1:8765", "http://127.0.0.1:8765/path", "ftp://127.0.0.1",
+    "http://127.0.0.1:99999", "http://127.0.0.1.evil.example", "javascript:alert(1)",
+])
+def test_odd_origins_are_rejected(client, origin):
+    with pytest.raises(WebSocketDisconnect) as info:
+        with connect(client, origin=origin):
+            pass
+    assert info.value.code == 4403
+
+
+@pytest.mark.parametrize("origin", ["http://127.0.0.1:8765", "http://localhost:8765",
+                                    "http://[::1]:8765", "https://localhost"])
+def test_loopback_origins_are_accepted(client, origin):
+    with connect(client, origin=origin) as ws:
+        assert hello(ws)["type"] == "state"

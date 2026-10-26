@@ -4,10 +4,15 @@ SPDX-License-Identifier: GPL-2.0-or-later
 Model-Author: Claude
 
 Brama działa poza RT (zwykły wątek Pythona), jak panel Plant. Trzy zasady bezpieczeństwa:
-- **Deadman jogu:** ciągły jog trwa tylko ``jog_hold_s`` od ostatniego odświeżenia z przeglądarki;
-  po tym czasie, po utracie ostatniego klienta albo po ``estop`` brama sama wysyła stop jogu.
+- **Deadman jogu:** ciągły jog trwa tylko ``jog_hold_s`` od ostatniego odświeżenia z przeglądarki
+  i należy do jednej sesji (inna sesja go nie odświeży). Po wygaśnięciu, po rozłączeniu sesji
+  właściciela albo po ``estop`` brama wysyła stop jogu i ponawia go, dopóki się nie powiedzie.
+  To nie jest funkcja bezpieczeństwa: ciągły jog w LinuxCNC trwa dalej, gdy proces bramy padnie;
+  dlatego przed sprzętem wymagane jest wiązanie ``heartbeat`` z ``watchdog`` HAL (E-STOP).
 - **Brak zwolnienia E-STOP:** brama nie ma polecenia resetu (CLAUDE.md §6, D35/D37).
-- **Limit poleceń:** wiadra tokenów, żeby błąd lub atak z przeglądarki nie zalał LinuxCNC.
+- **Limit poleceń:** wiadra tokenów, żeby błąd lub atak z przeglądarki nie zalał LinuxCNC; polecenia
+  zatrzymujące (``estop``, ``stop``, ``pause``, ``jog_stop``, ``power_off``, ``jog`` z prędkością 0)
+  limitera nie podlegają.
 Stan dla klientów to ostatnia migawka z wątku; klienci nie odpytują maszyny sami.
 NIEZWERYFIKOWANE NA SPRZĘCIE.
 """
@@ -23,6 +28,8 @@ from linumert.cnc import Mode
 from .backend import CommandError, MachineBackend
 from .schema import Command, snapshot_to_dict
 
+STOP_COMMANDS = frozenset({"estop", "stop", "pause", "jog_stop", "power_off"})
+LOCAL_SESSION = "local"  # polecenia z REST (bez sesji WebSocket)
 POLL_HZ = 50.0
 JOG_HOLD_S = 0.4  # klient odświeża jog co ~100-150 ms
 HEARTBEAT_S = 1.0  # tyle życia przeglądarki uznajemy za "ekran żyje"
@@ -52,10 +59,10 @@ class Gateway:
         self._clock = clock
         self._hold = jog_hold_s
         self._lock = threading.RLock()
-        self._jog_until: dict[str, float] = {}
+        self._jog: dict[str, tuple[str, float]] = {}  # os -> (sesja, termin)
+        self._jog_retry: set[str] = set()  # osie, dla których stop jogu się nie udał
         self._limiter = RateLimiter(command_rate, command_rate, clock)
-        self._clients = 0
-        self._last_seen = float("-inf")
+        self._sessions: dict[str, float] = {}  # sesja -> ostatnia aktywność
         self._version = 0
         self._state: dict = {}
         self._stop = threading.Event()
@@ -82,60 +89,87 @@ class Gateway:
                 self.step()
             except Exception as error:  # noqa: BLE001 - wątek nie może zginąć po błędzie odczytu
                 with self._lock:
+                    self._stop_all_jog()  # bez wiarygodnego stanu nie ma ciągłego jogu
                     self._version += 1
                     self._state = {**self._state, "gateway_error": str(error)}
 
     def step(self) -> None:
         """Jeden obieg: czas atrapy, wygaśnięcie jogu, nowa migawka."""
         with self._lock:
-            self.backend.tick()
             now = self._clock()
-            for axis in [a for a, until in self._jog_until.items() if now >= until]:
-                self._jog_until.pop(axis)
-                self.backend.jog_stop(axis)
+            # najpierw wygaszanie jogu: błąd odczytu nie może go odsunąć
+            for axis in [a for a, (_, until) in self._jog.items() if now >= until]:
+                self._stop_axis(axis)
+            self._retry_stops()
+            self.backend.tick()
             state = snapshot_to_dict(self.backend.snapshot())
-            state["heartbeat"] = self._clients > 0 and now - self._last_seen <= HEARTBEAT_S
-            state["jog_active"] = sorted(self._jog_until)
+            state["heartbeat"] = any(now - seen <= HEARTBEAT_S
+                                     for seen in self._sessions.values())
+            state["jog_active"] = sorted(self._jog)
             state.pop("gateway_error", None)
             if state != self._state:
                 self._version += 1
                 self._state = state
 
     # ---- klienci ------------------------------------------------------------
-    def client_connected(self) -> None:
+    def client_connected(self, session: str = LOCAL_SESSION) -> None:
         with self._lock:
-            self._clients += 1
-            self._last_seen = self._clock()
+            self._sessions[session] = self._clock()
 
-    def client_disconnected(self) -> None:
+    def client_disconnected(self, session: str = LOCAL_SESSION) -> None:
+        """Rozłączenie zdejmuje jogi tej sesji; ostatnia sesja zdejmuje wszystkie."""
         with self._lock:
-            self._clients = max(self._clients - 1, 0)
-            if self._clients == 0:
+            self._sessions.pop(session, None)
+            for axis in [a for a, (owner, _) in self._jog.items() if owner == session]:
+                self._stop_axis(axis)
+            if not self._sessions:
                 self._stop_all_jog()
 
-    def touch(self) -> None:
+    def touch(self, session: str = LOCAL_SESSION) -> None:
         """Przeglądarka żyje (wiadomość z klienta); zasila ``heartbeat`` w stanie."""
         with self._lock:
-            self._last_seen = self._clock()
+            if session in self._sessions or session == LOCAL_SESSION:
+                self._sessions[session] = self._clock()
 
     def snapshot(self) -> tuple[int, dict]:
         with self._lock:
             return self._version, dict(self._state)
 
     # ---- polecenia ------------------------------------------------------------
-    def _stop_all_jog(self) -> None:
-        self._jog_until.clear()
-        self.backend.jog_stop(None)
+    def _stop_axis(self, axis: str) -> None:
+        """Zdejmuje jog osi; przy błędzie backendu zostaje do ponowienia w kolejnym obiegu."""
+        self._jog.pop(axis, None)
+        try:
+            self.backend.jog_stop(axis)
+            self._jog_retry.discard(axis)
+        except Exception:  # noqa: BLE001 - stop musi być ponawiany, nie gubiony
+            self._jog_retry.add(axis)
 
-    def execute(self, command: Command) -> None:
+    def _stop_all_jog(self) -> None:
+        self._jog.clear()
+        try:
+            self.backend.jog_stop(None)
+            self._jog_retry.clear()
+        except Exception:  # noqa: BLE001
+            self._jog_retry.add("*")
+
+    def _retry_stops(self) -> None:
+        for axis in sorted(self._jog_retry):
+            if axis == "*":
+                self._stop_all_jog()
+            else:
+                self._stop_axis(axis)
+
+    def execute(self, command: Command, session: str = LOCAL_SESSION) -> None:
         """Wykonuje polecenie; ``CommandError`` z komunikatem dla operatora przy odmowie."""
         with self._lock:
-            if not self._limiter.allow():
+            stop = command.cmd in STOP_COMMANDS or (command.cmd == "jog" and command.speed == 0.0)
+            if not stop and not self._limiter.allow():
                 raise CommandError("zbyt wiele poleceń na sekundę")
-            self.touch()
-            self._dispatch(command)
+            self.touch(session)
+            self._dispatch(command, session)
 
-    def _dispatch(self, c: Command) -> None:
+    def _dispatch(self, c: Command, session: str) -> None:
         b = self.backend
         name = c.cmd
         if name == "estop":
@@ -173,15 +207,16 @@ class Gateway:
         elif name == "jog":
             if c.axis is None or c.speed is None:
                 raise CommandError("jog: wymagane axis i speed")
+            owner = self._jog.get(c.axis, (session, 0.0))[0]
             if c.speed == 0.0:
-                self._jog_until.pop(c.axis, None)
-                b.jog_stop(c.axis)
+                self._stop_axis(c.axis)
+            elif owner != session:
+                raise CommandError(f"jog osi {c.axis} trwa w innej sesji")
             else:
                 b.jog(c.axis, c.speed)
-                self._jog_until[c.axis] = self._clock() + self._hold
+                self._jog[c.axis] = (session, self._clock() + self._hold)
         elif name == "jog_stop":
             if c.axis is None:
                 self._stop_all_jog()
             else:
-                self._jog_until.pop(c.axis, None)
-                b.jog_stop(c.axis)
+                self._stop_axis(c.axis)

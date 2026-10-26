@@ -20,7 +20,9 @@ from __future__ import annotations
 import asyncio
 import hmac
 import json
+import secrets
 from pathlib import Path
+from urllib.parse import urlsplit
 
 from fastapi import FastAPI, HTTPException, Request, WebSocket, WebSocketDisconnect
 from fastapi.responses import JSONResponse
@@ -36,6 +38,7 @@ KEEPALIVE_S = 1.0
 AUTH_TIMEOUT_S = 3.0
 MAX_MESSAGE_BYTES = 2048
 MAX_CLIENTS = 4
+MAX_PENDING = 8  # połączenia czekające na uwierzytelnienie
 STATIC = Path(__file__).resolve().parent / "static"
 LOOPBACK_HOSTS = ("127.0.0.1", "localhost", "[::1]")
 
@@ -50,19 +53,28 @@ def create_app(gateway: Gateway, token: str, extra_hosts: tuple[str, ...] = ()) 
     allowed_hosts = set(LOOPBACK_HOSTS) | set(extra_hosts)
     app = FastAPI(title="linumeRT web-hmi", docs_url=None, redoc_url=None, openapi_url=None)
     app.state.gateway = gateway
-    sockets = {"count": 0}
+    sockets = {"count": 0, "pending": 0}
 
-    def token_ok(candidate: str | None) -> bool:
-        return candidate is not None and hmac.compare_digest(candidate.encode(), token.encode())
+    def token_ok(candidate: object) -> bool:
+        return isinstance(candidate, str) and hmac.compare_digest(
+            candidate.encode(), token.encode())
 
     def host_ok(host_header: str | None) -> bool:
         return bool(host_header) and _host_only(host_header) in allowed_hosts
 
     def origin_ok(origin: str | None) -> bool:
-        if origin is None:  # klient spoza przeglądarki (testy, narzędzia)
+        if origin is None:  # klient spoza przeglądarki (testy, narzędzia): token i tak wymagany
             return True
-        scheme, _, rest = origin.partition("://")
-        return scheme in ("http", "https") and _host_only(rest) in allowed_hosts
+        try:
+            parts = urlsplit(origin)
+            host = f"[{parts.hostname}]" if parts.hostname and ":" in parts.hostname else (
+                parts.hostname or "")
+            parts.port  # noqa: B018 - wymusza walidację numeru portu
+        except ValueError:
+            return False
+        return (parts.scheme in ("http", "https") and not parts.username
+                and not parts.path.strip("/") and not parts.query and not parts.fragment
+                and host in allowed_hosts)
 
     @app.middleware("http")
     async def guard_host(request: Request, call_next):
@@ -101,27 +113,31 @@ def create_app(gateway: Gateway, token: str, extra_hosts: tuple[str, ...] = ()) 
             await socket.close(code=4403)
             return
         await socket.accept()
-        if sockets["count"] >= MAX_CLIENTS:
+        if sockets["count"] >= MAX_CLIENTS or sockets["pending"] >= MAX_PENDING:
             await socket.close(code=4429)
             return
+        sockets["pending"] += 1
         try:
             first = await asyncio.wait_for(socket.receive_text(), AUTH_TIMEOUT_S)
             auth = json.loads(first) if len(first) <= MAX_MESSAGE_BYTES else {}
         except (TimeoutError, ValueError, WebSocketDisconnect):
             await _close(socket, 4401)
             return
+        finally:
+            sockets["pending"] -= 1
         if not isinstance(auth, dict) or not token_ok(auth.get("auth")):
             await _close(socket, 4401)
             return
         sockets["count"] += 1
-        gateway.client_connected()
+        session = secrets.token_hex(8)
+        gateway.client_connected(session)
         try:
-            await _serve(socket, gateway)
+            await _serve(socket, gateway, session)
         except WebSocketDisconnect:
             pass
         finally:
             sockets["count"] -= 1
-            gateway.client_disconnected()
+            gateway.client_disconnected(session)
 
     if (STATIC / "index.html").exists():
         app.mount("/", StaticFiles(directory=STATIC, html=True), name="static")
@@ -135,7 +151,7 @@ async def _close(socket: WebSocket, code: int) -> None:
         pass
 
 
-async def _serve(socket: WebSocket, gateway: Gateway) -> None:
+async def _serve(socket: WebSocket, gateway: Gateway, session: str) -> None:
     async def pusher() -> None:
         sent, last = -1, 0.0
         loop = asyncio.get_running_loop()
@@ -159,12 +175,15 @@ async def _serve(socket: WebSocket, gateway: Gateway) -> None:
                 data = json.loads(text)
                 msg_id = data.get("id") if isinstance(data, dict) else None
                 command = Command.model_validate(data)
-                await asyncio.to_thread(gateway.execute, command)
+                await asyncio.to_thread(gateway.execute, command, session)
                 await socket.send_json({"type": "ack", "id": msg_id})
             except (ValueError, ValidationError) as error:
                 await socket.send_json({"type": "error", "id": msg_id,
                                         "message": f"niepoprawne polecenie: {error}"[:300]})
             except CommandError as error:
                 await socket.send_json({"type": "error", "id": msg_id, "message": str(error)})
+            except Exception:  # noqa: BLE001 - jedno złe polecenie nie zrywa sesji
+                await socket.send_json({"type": "error", "id": msg_id,
+                                        "message": "błąd wewnętrzny bramy"})
     finally:
         task.cancel()

@@ -169,3 +169,89 @@ def test_heartbeat_reflects_recent_client_activity():
     gateway.touch()
     run(gateway, clock, 0.1)
     assert gateway.snapshot()[1]["heartbeat"] is True
+
+
+def test_stop_commands_are_not_rate_limited():
+    gateway, _, _ = make(command_rate=2.0)
+    for _ in range(2):
+        gateway.execute(Command(cmd="override", feed=1.0))
+    with pytest.raises(CommandError, match="zbyt wiele"):
+        gateway.execute(Command(cmd="override", feed=1.0))
+    for stop in ("estop", "stop", "pause", "jog_stop", "power_off"):
+        try:
+            gateway.execute(Command(cmd=stop))
+        except CommandError as error:  # odmowa maszyny jest dozwolona, limiter nie
+            assert "zbyt wiele" not in str(error)
+
+
+def test_jog_belongs_to_one_session_and_dies_with_it():
+    gateway, _, clock = make()
+    gateway.client_connected("a")
+    gateway.client_connected("b")
+    jog = Command(cmd="jog", axis="X", speed=5.0)
+    gateway.execute(jog, "a")
+    with pytest.raises(CommandError, match="innej sesji"):
+        gateway.execute(jog, "b")  # drugi klient nie przejmuje ani nie odświeża cudzego jogu
+    run(gateway, clock, 0.1)
+    gateway.client_disconnected("a")  # b jeszcze żyje, ale jog należał do a
+    held = x(gateway)
+    run(gateway, clock, 0.3)
+    assert x(gateway) == pytest.approx(held)
+    assert gateway.snapshot()[1]["jog_active"] == []
+    gateway.execute(jog, "b")  # po zwolnieniu b może zacząć własny jog
+
+
+def test_failed_jog_stop_is_retried_until_it_succeeds():
+    gateway, machine, clock = make(jog_hold_s=0.2)
+    backend = gateway.backend
+    real_stop, failures = backend.jog_stop, {"left": 3}
+
+    def flaky(axis):
+        if failures["left"] > 0:
+            failures["left"] -= 1
+            raise RuntimeError("LinuxCNC nie odpowiada")
+        real_stop(axis)
+
+    backend.jog_stop = flaky
+    gateway.execute(Command(cmd="jog", axis="X", speed=5.0))
+    run(gateway, clock, 0.5)  # termin mija, stop zawodzi 3 razy, potem się udaje
+    assert not machine._jog
+    assert gateway.snapshot()[1]["jog_active"] == []
+
+
+def test_deadman_runs_even_when_snapshot_fails():
+    gateway, machine, clock = make(jog_hold_s=0.2)
+    gateway.execute(Command(cmd="jog", axis="X", speed=5.0))
+    gateway.backend.snapshot = lambda: (_ for _ in ()).throw(RuntimeError("odczyt"))
+    clock.t += 0.5
+    with pytest.raises(RuntimeError):
+        gateway.step()
+    assert not machine._jog  # wygaszenie jogu jest przed odczytem stanu
+
+
+def test_poll_loop_error_stops_active_jog():
+    gateway, machine, clock = make()
+    gateway.execute(Command(cmd="jog", axis="X", speed=5.0))
+    assert machine._jog
+
+    def broken():
+        raise RuntimeError("odczyt padł")
+
+    class OneTurn:
+        """Zdarzenie zatrzymania, które pozwala pętli wykonać dokładnie jeden obieg."""
+
+        def __init__(self):
+            self.turns = 0
+
+        def wait(self, _period):
+            self.turns += 1
+            return self.turns > 1
+
+        def set(self):
+            self.turns = 99
+
+    gateway.step = broken
+    gateway._stop = OneTurn()
+    gateway._loop()
+    assert not machine._jog  # bez wiarygodnego odczytu jog nie trwa
+    assert "odczyt padł" in gateway.snapshot()[1]["gateway_error"]

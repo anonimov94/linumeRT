@@ -37,12 +37,24 @@ ze znakiem, ≤ 50), `jog_stop`.
 Ekran nie jest funkcją bezpieczeństwa; E-STOP to obwód sprzętowy.
 - **Brak resetu E-STOP w bramie.** `estop` tylko odbiera zezwolenie; `power_on` działa dopiero po
   resecie wykonanym poza bramą (zatrzask HAL, D35/D37).
-- **Deadman jogu:** jog trwa 0,4 s od ostatniego odświeżenia; stop po wygaśnięciu, po utracie
-  ostatniego klienta, po `estop`, `stop`, `power_off` i zmianie trybu. Klient odświeża co 100–150 ms.
-- **Token** w nagłówku (REST) lub pierwszej wiadomości (WS), nigdy w URL; porównanie w stałym czasie.
-- **Host i Origin** tylko loopback (ochrona przed DNS rebinding i obcą stroną); brak CORS.
-- **Limity:** ramka WS ≤ 8 KiB, 60 poleceń/s, 4 klienci WS, walidacja pól (jog ≤ 50 mm/s).
-- `LinuxCNCBackend` nie czyta stanu podczas poleceń (odczyt opróżnia kanał błędów LinuxCNC).
+- **Deadman jogu (programowy, NIE funkcja bezpieczeństwa):** jog trwa 0,4 s od ostatniego odświeżenia
+  i należy do jednej sesji WebSocket (inna sesja go nie odświeży ani nie przejmie). Stop po
+  wygaśnięciu, po rozłączeniu sesji właściciela, po `estop`/`stop`/`power_off`/zmianie trybu i po
+  błędzie odczytu stanu; nieudany stop jest ponawiany w każdym obiegu (50 Hz). Wygaszanie idzie
+  przed odczytem stanu. **Gdy proces bramy padnie albo zawiesi się backend, ciągły jog w LinuxCNC trwa
+  dalej** — przed sprzętem wymagane jest wiązanie z `watchdog` HAL (E-STOP po utracie bramy).
+- **Token** w nagłówku (REST) lub pierwszej wiadomości (WS), nigdy w URL; porównanie w stałym czasie,
+  typ sprawdzany. Token wypisywany jest na stdout przy starcie (uwaga na logi usługi; `--token`/zmienna
+  środowiskowa pozwalają go podać z zewnątrz).
+- **Host i Origin** tylko loopback (parser URL; odrzucane: obcy host, `null`, userinfo, ścieżka, zły
+  port, inny schemat); brak Origin dozwolony (klient nieprzeglądarkowy, token i tak wymagany); brak CORS.
+- **Limity:** ramka WS ≤ 8 KiB (uvicorn i aplikacja), 60 poleceń/s (zatrzymania `estop`, `stop`, `pause`,
+  `jog_stop`, `power_off`, jog z prędkością 0 poza limitem), 4 klienci WS, 8 połączeń czekających na
+  uwierzytelnienie (3 s), walidacja pól (jog ≤ 50 mm/s).
+- `LinuxCNCBackend`: nie czyta stanu podczas poleceń (odczyt opróżnia kanał błędów LinuxCNC); jog
+  **przegubu** (`jjogmode=True`, `teleop_enable(0)`) przy założeniu kinematyki tożsamościowej jak w
+  czytniku; `wait_complete` -1 (timeout) i `RCS_ERROR` zgłaszane operatorowi. Maszyny z innym
+  układem przegubów (np. gantry z dwoma przegubami na oś) wymagają jawnego mapowania — jeszcze nie ma.
 Sygnał życia do `watchdog` HAL (D35, `linumert.hmi-wd-enable`) **nie jest jeszcze podpięty**:
 brama wystawia `heartbeat` w stanie, wiązanie z HAL to następny krok.
 

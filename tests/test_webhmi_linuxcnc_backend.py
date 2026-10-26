@@ -88,7 +88,7 @@ def test_jog_converts_mm_per_second_to_per_minute_on_axis_index():
     b, c = backend(task_mode=1)
     b.jog("z", 2.5)
     b.jog_stop("Z")
-    assert c.calls == [("jog", 21, False, 2, 150.0), ("jog", 20, False, 2)]
+    assert c.calls == [("teleop_enable", 0), ("jog", 21, True, 2, 150.0), ("jog", 20, True, 2)]
 
 
 def test_jog_refused_outside_manual_and_for_unknown_axis():
@@ -104,7 +104,7 @@ def test_jog_refused_outside_manual_and_for_unknown_axis():
 def test_jog_stop_all_stops_every_configured_axis():
     b, c = backend()
     b.jog_stop(None)
-    assert c.calls == [("jog", 20, False, 0), ("jog", 20, False, 1), ("jog", 20, False, 2)]
+    assert c.calls == [("jog", 20, True, 0), ("jog", 20, True, 1), ("jog", 20, True, 2)]
 
 
 def test_home_one_axis_and_all_and_unknown():
@@ -147,3 +147,10 @@ def test_wait_timeout_is_reported_to_operator():
     b, _ = backend(wait_result=-1)
     with pytest.raises(CommandError, match="nie potwierdził"):
         b.set_mode(Mode.AUTO)
+
+
+def test_rcs_error_from_wait_complete_is_reported():
+    b, c = backend(wait_result=3)
+    b._lc().RCS_ERROR = 3
+    with pytest.raises(CommandError, match="RCS_ERROR"):
+        b.set_mode(Mode.MDI)

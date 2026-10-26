@@ -22,7 +22,6 @@ from typing import Any, Protocol
 
 from linumert.cnc import FakeMachine, MachineSnapshot, Mode
 from linumert.cnc.linuxcnc_reader import LinuxCNCReader
-from linumert.cnc.model import AXIS_LETTERS
 
 
 class CommandError(Exception):
@@ -142,15 +141,18 @@ class LinuxCNCBackend:
     def _joint_axes(self) -> tuple[str, ...]:
         return self._recent().axis_names
 
-    def _axis_index(self, axis: str) -> int:
-        name = axis.upper()
-        if name not in AXIS_LETTERS or name not in self._joint_axes():
+    def _joint_index(self, axis: str) -> int:
+        names = self._joint_axes()
+        if axis.upper() not in names:
             raise CommandError(f"nieznana oś {axis!r}")
-        return AXIS_LETTERS.index(name)
+        return names.index(axis.upper())
 
     def _wait(self, cmd: Any) -> None:
-        if cmd.wait_complete(self.WAIT_TIMEOUT_S) == -1:
+        result = cmd.wait_complete(self.WAIT_TIMEOUT_S)
+        if result == -1:
             raise CommandError("LinuxCNC nie potwierdził polecenia w 2 s")
+        if result == getattr(self._lc(), "RCS_ERROR", object()):
+            raise CommandError("LinuxCNC odrzucił polecenie (RCS_ERROR)")
 
     def tick(self) -> None:  # stan LinuxCNC płynie sam
         return None
@@ -223,12 +225,15 @@ class LinuxCNCBackend:
         lc, cmd = self._lc(), self._cmd()
         if self._recent().mode is not Mode.MANUAL:
             raise CommandError("jog: wymagany tryb MANUAL")
-        # jjogmode=False: jog osi we współrzędnych (teleop); mm/s -> mm/min dla LinuxCNC
-        cmd.jog(lc.JOG_CONTINUOUS, False, self._axis_index(axis), speed * 60.0)
+        # Jog przegubu (jjogmode=True), nie osi: nie wymaga trybu teleop. Zakładamy kinematykę
+        # tożsamościową (i-ta oś = i-ty przegub), jak czytnik; mm/s -> mm/min dla LinuxCNC.
+        joint = self._joint_index(axis)
+        cmd.teleop_enable(0)
+        cmd.jog(lc.JOG_CONTINUOUS, True, joint, speed * 60.0)
 
     def jog_stop(self, axis: str | None) -> None:
         lc, cmd = self._lc(), self._cmd()
-        names = (axis.upper(),) if axis else self._joint_axes()
-        for name in names:
-            if name in AXIS_LETTERS:
-                cmd.jog(lc.JOG_STOP, False, AXIS_LETTERS.index(name))
+        names = self._joint_axes()
+        for name in (axis.upper(),) if axis else names:
+            if name in names:
+                cmd.jog(lc.JOG_STOP, True, names.index(name))
