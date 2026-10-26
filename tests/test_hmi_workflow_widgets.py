@@ -605,6 +605,31 @@ def test_cycles_layout_and_graphical_preview(page_env, monkeypatch):
     page.close()
 
 
+def test_cycles_text_font_size_and_saved_geometry(page_env, monkeypatch):
+    module, page, _shell = _cycles(page_env, monkeypatch)
+    page.cmb.setCurrentIndex(page.cmb.findText(module.engraving.EngraveText.title))
+    page.inputs["text"].setPlainText("ABC\n12")
+    assert page.preview() and page.view2d.lines, page.lbl_issue.text()
+    small = max(x for path in page.view2d.lines for x, _ in path)
+    page.inputs["text_height"].setText("20")
+    page.add_step()
+    assert len(page.program.steps) == 1
+    assert max(x for path in page.view2d.lines for x, _ in path) > small * 1.9
+    output = page.text()
+    def unavailable(_values):
+        raise ValueError("czcionka niedostępna")
+    monkeypatch.setattr("linumert_text_geometry.text_paths", unavailable)
+    page.select_step(0)
+    assert page.preview() and page.text() == output  # uses the persisted outline
+    page.inputs["x"].setText("10")
+    assert page.preview()  # placement does not need the font either
+    page.inputs["text_height"].setText("12")
+    assert page.preview() is None and "czcionka" in page.lbl_issue.text()
+    assert page.text() == output
+    assert not page_env[3].mock_calls
+    page.close()
+
+
 def test_cycles_steps_checked_with_tool_db(page_env, monkeypatch):
     """Cykle (Model-Author: Claude, sesja 040): kroki porównane z bazą narzędzi w GUI."""
     from linumert.tools.db import Tool

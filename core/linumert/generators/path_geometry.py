@@ -10,7 +10,8 @@ from .base import BaseMacroGenerator, Field, Issue, fmt
 MAX_POINTS = 12000
 MAX_BLOCKS = 20000
 CUT_FIELDS = (
-    Field("z_top", "float", "Powierzchnia Z", "mm", default=0.0),
+    Field("z_top", "float", "Powierzchnia Z", "mm", default=0.0,
+          minimum=-1000000, maximum=1000000),
     Field("depth", "float", "Głębokość", "mm", default=0.2, minimum=0.0001, maximum=100),
     Field("step_down", "float", "Krok Z", "mm", default=0.2, minimum=0.0001, maximum=100),
     Field("tool_d", "float", "Średnica robocza narzędzia", "mm", default=1.0,
@@ -18,7 +19,15 @@ CUT_FIELDS = (
     Field("feed", "float", "Posuw", "mm/min", default=300.0, minimum=0.001, maximum=100000),
     Field("plunge", "float", "Posuw zagłębiania", "mm/min", default=80.0,
           minimum=0.001, maximum=100000),
-    Field("safe_z", "float", "Bezpieczna Z", "mm", default=5.0),
+    Field("safe_z", "float", "Bezpieczna Z", "mm", default=5.0,
+          minimum=-1000000, maximum=1000000),
+)
+PLACEMENT = (
+    Field("x", "float", "Przesunięcie X", "mm", default=0.0, minimum=-100000, maximum=100000),
+    Field("y", "float", "Przesunięcie Y", "mm", default=0.0, minimum=-100000, maximum=100000),
+    Field("angle", "float", "Obrót", "°", default=0.0, minimum=-360, maximum=360),
+    Field("scale", "float", "Skala geometrii", default=1.0, minimum=0.001, maximum=1000),
+    Field("reverse", "bool", "Odwróć kierunek ścieżek", default=False),
 )
 
 
@@ -87,10 +96,16 @@ class PathTrace(BaseMacroGenerator):
     name = "path_trace"
     version = 1
     title = "Ścieżki XY — tor środka narzędzia"
-    fields = (Field("paths", "text", "Geometria XY", default=""),) + CUT_FIELDS
+    fields = (Field("paths", "text", "Geometria XY", default=""),) + PLACEMENT + CUT_FIELDS
 
     def paths(self, v):
-        return decode_paths(v["paths"])
+        paths = decode_paths(v["paths"])
+        c, s = math.cos(math.radians(v["angle"])), math.sin(math.radians(v["angle"]))
+        paths = [[(v["x"] + v["scale"] * (c * x - s * y),
+                   v["y"] + v["scale"] * (s * x + c * y)) for x, y in path] for path in paths]
+        if any(abs(n) > 1000000 for path in paths for point in path for n in point):
+            raise ValueError("przekształcona geometria w zakresie ±1000000")
+        return [path[::-1] for path in paths] if v["reverse"] else paths
 
     def check(self, v, step):
         try:
