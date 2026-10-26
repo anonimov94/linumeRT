@@ -228,3 +228,23 @@ def test_rotary_axis_and_axis_validation():
     assert pos(machine, "A") == pytest.approx(90.0)
     with pytest.raises(ValueError):
         FakeMachine(axes=("Q",))
+
+
+def test_jog_moves_until_stopped_and_respects_limits():
+    machine = make(Mode.MANUAL, limits={"X": (-5.0, 5.0)})
+    assert machine.jog("X", 2.0)
+    machine.advance(1.0)
+    assert pos(machine) == pytest.approx(2.0)
+    machine.advance(10.0)
+    assert pos(machine) == pytest.approx(5.0)  # twardo obciete limitem
+    machine.jog_stop("X")
+    machine.advance(1.0)
+    assert pos(machine) == pytest.approx(5.0)
+
+
+def test_jog_refused_outside_manual_and_when_off():
+    machine = make(Mode.MDI)
+    assert not machine.jog("X", 1.0)
+    assert not machine.jog("Q", 1.0)
+    machine.estop()
+    assert not machine.jog("X", 1.0)
