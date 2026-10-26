@@ -1497,3 +1497,8 @@ bez podłączenia opisane jawnie. NIEZWERYFIKOWANE NA SPRZĘCIE.
 - Model-Author: Codex. Osadzony widok ukrywa powtórzone paski studium; globalne akcje, alarmy i E-STOP pozostają w hoście.
 - 5 testów Qt PASS: cztery rodziny, 1280×768 → 1920×1080 → 1280×768, brak przewijania całej strony i wszystkie karty widoczne; zrzut Classic sprawdzony.
 - Samodzielny monitor zachowuje własny nagłówek/konsolę. Bez nowych zależności i kanału komend. Odbiór LinuxCNC trwa.
+
+## M2 / HMI-OWNER-SKINS — Cyberdeck z dwoma podglądami · 2026-10-26 · Codex
+- Model-Author: Codex. Prostokątne podglądy detalu z narzędziem i maszyny obok siebie, nad nimi własna nakładka narożników; dolny rząd DRO/program/posuw/narzędzie.
+- Wspólne loader/scena Neon; zmiana rodziny/motywu zachowuje scenę. Maszyna oznaczona jako model poglądowy XYZ, bez deklaracji modelu kolizji Plant.
+- 38 testów Qt/status PASS, 1 SKIP; zrzut z testową próbką sprawdzony. Bez nowych komend, pinów HAL lub zależności; odbiór live nowej kompozycji otwarty.

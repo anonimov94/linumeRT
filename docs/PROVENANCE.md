@@ -543,3 +543,5 @@ w środowisku wykonującym zrzuty, bez nowych zależności produktu.
 
 ## Integracja prezentacji z QtVCP — 2026-10-25
 - `docs/design/HMI_QTVCP_HOST.md` — autor: Codex, własna instrukcja implementacji, uruchomienia i odbioru opcjonalnego hosta HMI, oparta na kodzie oraz kontrakcie linumeRT; GPL-2.0-or-later. Bez materiałów osób trzecich i nowych zależności.
+
+- 2026-10-26 · Codex · własne narożniki nakładki Cyberdeck (`linumert_skin_cyberdeck.py`), rysowane Qt z palety projektu; GPL-2.0-or-later; bez zewnętrznych grafik.
