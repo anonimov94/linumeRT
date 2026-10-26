@@ -1512,3 +1512,9 @@ bez podłączenia opisane jawnie. NIEZWERYFIKOWANE NA SPRZĘCIE.
 - Model-Author: Codex. Run40285964696 osiągnął około 70% po 35 min i został anulowany; sam test kalibracji sondy trwał około 7 min.
 - Budżet całego zadania podniesiony do 60 min, aby otrzymać końcowy raport. Bez usuwania testów, zmiany timeoutów pojedynczych prób, progów lub modelu.
 - Wcześniejszy FAILED home_and_move pozostaje jawnie nierozliczony; większy budżet nie oznacza jego naprawy.
+
+## HMI — odbiór live, samotest i bloker CI · 2026-10-26 · Codex
+- Model-Author: Codex. Cyberdeck: AUTO zakończone, NML/monitor linia 59, DTG 3,230968241 mm zgodne; T1/D6/L0, źródło programu i zadane S12000 widoczne. Klatki 2,95–4,31 ms, 3 presety.
+- GL: 160 kombinacji PASS. Qt/IP: 218 testów PASS, 101 subtestów, 1 SKIP. Osadzony Cyberdeck: 45 kroków PASS / 61,22 s po poprawce scenariusza (nawigacja do widocznego Start).
+- CI 40285964696: artefakt driver.log potwierdza X=99,9947 przy celu 100 ±0,005 po stałym sleep(0,5), bez błędu ruchu. Fixture teraz wymaga istniejącej tolerancji przez 0,2 s, w dotychczasowym limicie 60 s; progi/model bez zmian.
+- 5 testów diagnostyki PASS (również nieustalona pozycja i reset dwell); odbiór live fixture nadal wymagany.

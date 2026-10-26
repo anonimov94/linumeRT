@@ -87,7 +87,7 @@ class SelfTest(QtCore.QObject):
         s, b = self.shell.s, self.shell.buttons
         click = self._click
         return [
-            ("01_start", None, None, 0),
+            ("01_start", lambda: click(self.shell.areas["start"]), None, 0),
             # Kroki 02–04 przyciskami listy gotowości widoku Start
             ("02_estop_zwolniony", lambda: self._start_action("estop"), lambda: not s.estop, 5),
             ("03_maszyna_wl", lambda: self._start_action("power"), lambda: s.machine_on, 5),

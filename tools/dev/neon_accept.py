@@ -74,6 +74,7 @@ def main(out: Path, skin="classic-digital", installed=False) -> int:
     program = work / DEMO.name
     cnc = start_linuxcnc(root, ini, env)
     result: dict = {"program": DEMO.name, "shots": {}, "samples": [], "frame_ms": {}}
+    window = None
     try:
         s = None
         for _ in range(120):
@@ -218,6 +219,9 @@ def main(out: Path, skin="classic-digital", installed=False) -> int:
             result["frame_ms"][name] = {v.mode: round(v.frame_ms, 2) for v in views}
             shot(f"04-preset-{name}")
     finally:
+        if window is not None:
+            window.close()
+            app.processEvents()
         stop_linuxcnc(cnc, root, work)
         (out / "linuxcnc.log").write_text(cnc.stdout.read() if cnc.stdout else "")
         (out / "neon_accept.json").write_text(json.dumps(result, indent=1))

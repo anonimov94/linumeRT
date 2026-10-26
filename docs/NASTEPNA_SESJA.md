@@ -26,7 +26,10 @@ CI python/plant-matrix PASS; pełna seria LinuxCNC anulowana po 35 min (wcześni
 FAIL home_and_move). Lokalna pełna seria z natywnym gcode: SIGSEGV parse_rs274,
 poza zmienionymi modułami; logi build/hmi-closeout. Obie lease zwolnione.
 Kolejna porcja: odczyty NML programu/posuwu/narzędzia (46 testów PASS, 1 SKIP),
-odbiór Cyberdeck w AUTO i pomiary presetów w toku.
+Cyberdeck AUTO PASS (NML/DTG/program/T1/D6), klatki 2,95–4,31 ms; GL 160 kombinacji PASS.
+Osadzony Cyberdeck: 45 kroków PASS po poprawce samotestu (jawne wejście w Start).
+Bloker CI home_and_move: próbka 99,9947 vs 100±0,005 po sleep(0,5). Dodano
+ciągłe ustalenie w tej samej tolerancji/limicie; 5 testów offline PASS, live otwarte.
 Kolejna porcja: Cyberdeck — dwa podglądy współdzielą scenę Neon, własna nakładka
 narożników, 38 testów Qt/status PASS, 1 SKIP. Zrzut Qt sprawdzony; odbiór live nowej kompozycji otwarty.
 

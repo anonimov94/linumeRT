@@ -56,7 +56,7 @@ class AlarmPanel(QtWidgets.QFrame):
             if entry:
                 source = entry[2]
                 code = source if re.fullmatch(r"(?:[WE]-\d{4}|K-3\d{2}|P-\d{4})", source) else (
-                    "E-1000" if source == "controller" else "")
+                    {"controller": "E-1000", "safety": "E-1100"}.get(source, ""))
                 if code and not message.startswith(code):
                     message = f"{code} · {message}"
             row.setText(message)

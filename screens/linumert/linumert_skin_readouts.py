@@ -77,7 +77,7 @@ class FeedReadout(QtWidgets.QWidget):
         p = QtGui.QPainter(self)
         p.setRenderHint(QtGui.QPainter.Antialiasing)
         c = self.palette
-        for index, (label, unit) in enumerate((("F", "mm/min"), ("S", "rpm"))):
+        for index, (label, unit) in enumerate((("F", "mm/min"), ("S", "rpm zad."))):
             rect = QtCore.QRectF(2, index*self.height()/2+2, self.width()-4, self.height()/2-4)
             p.fillPath(housing(rect, self.family), QtGui.QColor(c.background))
             p.setPen(QtGui.QColor(c.accent))
@@ -106,9 +106,13 @@ class ToolReadout(QtWidgets.QWidget):
     def set_readings(self, number=None, diameter=None, length=None):
         self.number, self.diameter, self.length = number, diameter, length
         self.setAccessibleName(f"T {number if number is not None else '—'}; "
-                               f"D {FeedReadout.format_value(diameter)} mm; "
-                               f"L {FeedReadout.format_value(length)} mm")
+                               f"D {self.dimension_value(diameter)} mm; "
+                               f"L {self.dimension_value(length)} mm")
         self.update()
+
+    @staticmethod
+    def dimension_value(value):
+        return "—" if value is None else f"{value:.3f}".rstrip("0").rstrip(".")
 
     def paintEvent(self, event):
         p = QtGui.QPainter(self)
@@ -133,8 +137,8 @@ class ToolReadout(QtWidgets.QWidget):
                    f"T {self.number if self.number is not None else '—'}")
         p.setPen(QtGui.QColor(c.muted))
         p.setFont(QtGui.QFont("DejaVu Sans Mono", 9))
-        p.drawText(QtCore.QRectF(x+20, top+32, self.width()-x-20, height), f"D {FeedReadout.format_value(self.diameter)} mm\n"
-                   f"L {FeedReadout.format_value(self.length)} mm")
+        p.drawText(QtCore.QRectF(x+20, top+32, self.width()-x-20, height), f"D {self.dimension_value(self.diameter)} mm\n"
+                   f"L {self.dimension_value(self.length)} mm")
 
 
 class ProgramView(QtWidgets.QWidget):

@@ -109,3 +109,16 @@ def test_legacy_simulation_commands_cannot_enable_safety_control():
         assert live.command({"cmd": cmd, "on": True})
     # Starszy ekran nie może odtworzyć usuniętego kanału sterowania.
     assert not vars(live)
+
+
+def test_alarm_panel_preserves_controller_and_estop_codes(app):
+    from linumert_alarm_panel import AlarmPanel
+
+    panel = AlarmPanel(SimpleNamespace(reset_alarms=Mock()))
+    panel.add("err", "Obwód E-STOP otwarty", "safety")
+    assert panel.rows[0].text().startswith("E-1100 ·")
+    panel.add("err", "Błąd interpretera", "controller")
+    assert panel.rows[0].text().startswith("E-1000 ·")
+    panel.add("err", "K-305 · kolizja", "K-305")
+    assert panel.rows[0].text() == "K-305 · kolizja"
+    panel.close()
