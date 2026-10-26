@@ -57,7 +57,8 @@ def main(argv: list[str] | None = None) -> int:
     app = create_app(gateway, token, extra_hosts=extra)
     print(f"web-hmi: http://{args.host}:{args.port}/  token: {token}")
     try:
-        uvicorn.run(app, host=args.host, port=args.port, log_level="warning")
+        uvicorn.run(app, host=args.host, port=args.port, log_level="warning",
+                    ws_max_size=8192)
     finally:
         gateway.stop()
     return 0
