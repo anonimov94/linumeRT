@@ -21,7 +21,10 @@ Pierwszy rezultat: układ 1280×768 (karty HMI, szyna, Symulacja/przygotówka, m
 następnie kompozycja dwóch podglądów i odczyty monitora. Bez globalnego LOCK.
 Stan zatrzymania: 9e2fec9 wypchnięty w #169; lint i 9 testów Qt PASS.
 Usunięto powtórzone paski wewnątrz hosta: 4 rodziny mieszczą wszystkie karty
-na 1280×768 (5 testów PASS); trwa pełna seria offline i odbiór QtVCP.
+na 1280×768 (5 testów PASS). QtVCP: 45 kroków PASS / 63,21 s.
+CI python/plant-matrix PASS; pełna seria LinuxCNC anulowana po 35 min (wcześniej
+FAIL home_and_move). Lokalna pełna seria z natywnym gcode: SIGSEGV parse_rs274,
+poza zmienionymi modułami; logi build/hmi-closeout. Obie lease zwolnione.
 
 Model-Author: Codex · **#159 — poprawki po Twoim raporcie 54fcfe3.**
 Test edycji YAML bierze przyspieszenie z aktualnego pliku źródłowego, zamiast 17100.
