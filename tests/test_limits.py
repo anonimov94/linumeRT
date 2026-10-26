@@ -118,6 +118,35 @@ def test_xz_arc_extremum_uses_z_then_x_order():
     assert got[0].value == pytest.approx(20.0)
 
 
+def test_xy_rotation_changes_linear_machine_limits():
+    limits = {"X": (-20.0, 20.0), "Y": (-20.0, 5.0)}
+    straight = "STRAIGHT_FEED(10, 0, 0, 0, 0, 0)"
+    assert check_canon(_canon(straight), limits) == []
+    got = check_canon(_canon("SET_XY_ROTATION(90)", straight), limits)
+    assert [(v.line, v.axis, v.side) for v in got] == [(10, "Y", "max")]
+    assert got[0].value == pytest.approx(10.0)
+
+
+def test_xy_rotation_applies_g92_before_rotation():
+    limits = {"X": (-20.0, 20.0), "Y": (-1.0, 4.0), "Z": (-50.0, 50.0)}
+    canon = _canon("SET_G92_OFFSET(5, 0, 0, 0, 0, 0)",
+                   "SET_XY_ROTATION(90)",
+                   "STRAIGHT_FEED(0, 0, 1, 0, 0, 0)")
+    got = check_canon(canon, limits)
+    assert [(v.line, v.axis, v.side) for v in got] == [(11, "Y", "max")]
+    assert got[0].value == pytest.approx(5.0)
+
+
+def test_xy_rotated_arc_checks_machine_space_extremum():
+    limits = {"X": (-20.0, 20.0), "Y": (-20.0, 9.0)}
+    canon = _canon("SET_XY_ROTATION(45)",
+                   "STRAIGHT_TRAVERSE(10, 0, 0, 0, 0, 0)",
+                   "ARC_FEED(0, 10, 0, 0, 1, 0)")
+    got = check_canon(canon, limits)
+    assert [(v.line, v.axis, v.side) for v in got] == [(11, "Y", "max")]
+    assert got[0].value == pytest.approx(10.0)
+
+
 def test_number_lines_keeps_file_line_numbers():
     text = "%\nG21\n\nN50 G0 Z20 (x)\n(komentarz)\n"
     assert number_lines(text).splitlines() == ["%", "N2 G21", "", "N4 G0 Z20 (x)",
