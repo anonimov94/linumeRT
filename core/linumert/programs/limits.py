@@ -6,7 +6,8 @@ Model-Author: Claude
 LinuxCNC odrzuca ruch dopiero, gdy planer do niego dojdzie, więc maszyna staje w połowie
 programu. Tu ścieżka z interpretera `rs274` (z prawdziwymi przesunięciami układów z pliku
 parametrów, bez ruchu maszyny) jest porównywana z `MIN_LIMIT`/`MAX_LIMIT` z INI. Kontrola
-jest diagnostyczna: nie zmienia programu ani zachowania sterownika. Sprawdza końce ruchów i ekstrema łuków w płaszczyznach XY/YZ/XZ. Położenie maszynowe =
+jest diagnostyczna: nie zmienia programu ani zachowania sterownika. Sprawdza końce
+ruchów i ekstrema łuków w płaszczyznach XY/YZ/XZ. Położenie maszynowe =
 program + przesunięcie G5x + G92 + korekta długości narzędzia; obrót XY (G10 L2 R) pominięty.
 """
 
@@ -117,9 +118,13 @@ def _arc_candidates(
     start_angle = math.atan2(start[second] - center_second, start[first] - center_first)
     end_angle = math.atan2(endpoint[second] - center_second, endpoint[first] - center_first)
     direction = 1 if rotation > 0 else -1
-    sweep = ((end_angle - start_angle) * direction) % math.tau
-    if abs(rotation) > 1:
-        sweep += (abs(rotation) - 1) * math.tau
+    if (math.hypot(endpoint[first] - start[first],
+                   endpoint[second] - start[second]) <= EPS):
+        sweep = abs(rotation) * math.tau
+    else:
+        sweep = ((end_angle - start_angle) * direction) % math.tau
+        if abs(rotation) > 1:
+            sweep += (abs(rotation) - 1) * math.tau
     if sweep <= EPS:
         return [endpoint]
 
@@ -204,6 +209,7 @@ def analyze_canon(text: str, limits: dict[str, tuple[float, float]]) -> LimitRep
             check_position(candidate, line)
         position = pos
     return LimitReport(found, cuts_without_tlo)
+
 
 _N_WORD = re.compile(r"^\s*[Nn]\d+\s*")
 
