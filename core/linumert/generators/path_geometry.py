@@ -68,6 +68,9 @@ def decode_paths(text):
 
 
 def cut_check(v, paths):
+    if not paths or any(not math.isfinite(n) or abs(n) > 1000000
+                        for path in paths for point in path for n in point):
+        return [problem("paths", "niepusta geometria w zakresie ±1000000")]
     if round(v["safe_z"], 4) <= round(v["z_top"], 4):
         return [problem("safe_z", "wartość większa od powierzchni Z")]
     layers = math.ceil(v["depth"] / v["step_down"])
