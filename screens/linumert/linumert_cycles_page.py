@@ -260,7 +260,10 @@ class CyclesPage(QtWidgets.QWidget):
             else:
                 w = QtWidgets.QLineEdit("" if f.default is None else f"{f.default:g}")
                 w.setPlaceholderText("wymagane" if f.required else "")
-            label = f.label + (f" [{f.unit}]" if f.unit else "") + (" *" if f.required else "")
+            unit = f.unit
+            if self.program.units == "inch":
+                unit = {"mm": "cal", "mm/min": "cal/min"}.get(unit, unit)
+            label = f.label + (f" [{unit}]" if unit else "") + (" *" if f.required else "")
             w.setAccessibleName(label)
             w.setMinimumHeight(40)
             cell = QtWidgets.QWidget()
@@ -283,6 +286,8 @@ class CyclesPage(QtWidgets.QWidget):
             signal.connect(self._form_changed)
         self.lbl_issue.setText("")
         self.view2d.set_lines([])
+        unit = "cal" if self.program.units == "inch" else "mm"
+        self.result_tabs.setTabText(1, f"Geometria kroku · XY [{unit}]")
 
     def _form_changed(self):
         self._draft_dirty = True

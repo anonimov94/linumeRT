@@ -77,3 +77,7 @@ def test_editing_disabled_header_does_not_change_program_units():
     assert model.program.units == "mm"
     model.edit("update", 0, step.model_copy(update={"comment": "zmiana opisu"}))
     assert model.program.units == "mm"
+    model.edit("toggle", 0)
+    assert model.program.units == "inch"
+    model.undo()
+    assert model.program.units == "mm"

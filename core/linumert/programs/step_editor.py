@@ -71,8 +71,9 @@ class StepEditor:
                 index = target
             else:
                 raise ValueError(f"Nieznana operacja: {operation}")
-        if step is not None and step.enabled and step.generator == "header":
-            candidate.units = "inch" if step.params.get("units") == "G20" else "mm"
+        unit_step = steps[index] if operation == "toggle" else step
+        if unit_step is not None and unit_step.enabled and unit_step.generator == "header":
+            candidate.units = "inch" if unit_step.params.get("units") == "G20" else "mm"
         return self._commit(candidate, index)
 
     def undo(self):

@@ -567,6 +567,10 @@ def test_cycles_inline_validation_and_uncommitted_load(page_env, monkeypatch):
     page.inputs["depth"].setText("1.5")
     page.update_step()  # re-entering the same value must not block saving
     assert page._committed_form()
+    page.program.units = "inch"
+    page.select_step(1)
+    assert "[cal]" in page.inputs["depth"].accessibleName()
+    assert "[cal]" in page.result_tabs.tabText(1)
     page.close()
 
 
