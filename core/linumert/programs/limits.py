@@ -164,7 +164,7 @@ def analyze_canon(text: str, limits: dict[str, tuple[float, float]]) -> LimitRep
             x, y = x * cosine - y * sine, x * sine + y * cosine
         machine = tuple((value + g5x[i] + tlo[i]) * scale
                         for i, value in enumerate((x, y, z)))
-        for i, (axis, value) in enumerate(zip(AXES, machine, strict=False)):
+        for axis, value in zip(AXES, machine, strict=False):
             if axis not in limits:
                 continue
             if axis not in touched:

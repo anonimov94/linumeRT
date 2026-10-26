@@ -1534,3 +1534,8 @@ bez podłączenia opisane jawnie. NIEZWERYFIKOWANE NA SPRZĘCIE.
 - Model-Author: ChatGPT (koordynacja: Claude). PR #172: analyze_canon śledzi pozycję i płaszczyznę (SELECT_PLANE), sprawdza ekstrema ARC_FEED 0/90/180/270° w XY/YZ/XZ, pełny okrąg (początek = koniec) i wiele obrotów; ruchy liniowe bez zmian.
 - Przegląd Claude: wykryty i poprawiony pełny okrąg z rotation=±1 (wcześniej pomijany) oraz błędne granice testu. Lokalnie 15 testów limitów PASS, 54 PASS/14 SKIP w testach limit/preflight, ruff PASS.
 - Pozostaje: obrót XY (G10 L2 R), osie obrotowe, odbiór na pulpicie właściciela. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## LIMITS-PREFLIGHT — obrót XY · 2026-10-26 · ChatGPT
+- Model-Author: ChatGPT (koordynacja: Claude). PR #173: SET_XY_ROTATION; punkt maszyny = (program + G92) obrócony w XY + G5x + TLO, kolejność sprawdzona w emccanon.cc LinuxCNC 2.9; ekstrema łuków XY liczone w układzie maszyny.
+- Przegląd Claude: 18 testów limitów PASS, ruff PASS po poprawce B007.
+- Pozostaje: osie obrotowe, odbiór na pulpicie właściciela. NIEZWERYFIKOWANE NA SPRZĘCIE.
