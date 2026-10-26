@@ -42,3 +42,12 @@ def test_real_interpreter_arc_after_frame_change(tmp_path, change):
     assert run.returncode == 0 and 'PROGRAM_END()' in run.stdout, run.stderr
     got = check_canon(run.stdout, {'Y': (-5, 5)})
     assert [(v.axis, v.side, v.value) for v in got] == [('Y', 'max', 10)]
+
+
+def test_rotation_change_preserves_machine_arc_start():
+    got = check_canon(canon(
+        'STRAIGHT_TRAVERSE(10, 0, 0)', 'SET_XY_ROTATION(90)',
+        'ARC_FEED(0, 10, 0, 0, 1, 0)',
+    ), {'Y': (-5, 5)})
+    assert [(v.axis, v.side) for v in got] == [('Y', 'max')]
+    assert got[0].value == pytest.approx(10)
