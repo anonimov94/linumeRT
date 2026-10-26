@@ -31,7 +31,7 @@ for _p in (os.path.join(ROOT, "core"),):
         sys.path.insert(0, _p)
 
 from linumert.generators import (  # noqa: E402
-    basic, contours, drilling, engraving, pockets, shapes, subroutines,
+    basic, contours, drilling, engraving, pockets, shapes, stl_trace, subroutines, surfacing,
 )
 from linumert.generators.registry import GeneratorRegistry  # noqa: E402
 from linumert.generators.tooling import check_steps  # noqa: E402
@@ -40,10 +40,11 @@ from linumert.programs.lnx import LnxError, LnxProgram, Step, load_lnx, save_lnx
 from linumert.programs.step_editor import StepEditor  # noqa: E402
 
 ACTION = Action()
-GENERATORS = (basic.Header, basic.ToolChange, basic.FaceMill, drilling.DrillHoles,
+GENERATORS = (basic.Header, basic.ToolChange, surfacing.FaceMillStrategies, drilling.DrillHoles,
               pockets.PocketRect, pockets.PocketCircle,
               contours.SlotLinear, contours.SlotArc, contours.StudRect, contours.StudCircle,
-              contours.Contour, shapes.ShapeEngrave, engraving.EngraveText, basic.ProgramEnd)
+              contours.Contour, shapes.ShapeEngrave, engraving.EngraveText,
+              stl_trace.StlSection, basic.ProgramEnd)
 
 
 
@@ -67,7 +68,7 @@ class CyclesPage(QtWidgets.QWidget):
         self.setObjectName("lrtPage")
         self.shell = shell
         self.registry = GeneratorRegistry()
-        for group in (basic, drilling, pockets, contours, shapes, engraving):
+        for group in (basic, drilling, pockets, contours, shapes, engraving, surfacing, stl_trace):
             group.register(self.registry)
         self.program = LnxProgram(name="Program z cykli")
         self.lnx_path = None
@@ -94,6 +95,10 @@ class CyclesPage(QtWidgets.QWidget):
             self.cmb.addItem(cls.title, cls)
         self.cmb.currentIndexChanged.connect(self._build_form)
         lay.addWidget(self.cmb)
+        self.stl_button = QtWidgets.QPushButton("Importuj STL / wybierz przekrój…")
+        self.stl_button.setMinimumHeight(44)
+        self.stl_button.clicked.connect(self.import_stl)
+        lay.addWidget(self.stl_button)
         self.form_box = QtWidgets.QWidget()
         self.form_box.setObjectName("lrtCycleFields")
         colors = {**pages.model.load_tokens()["kolory"], **shell.c}
@@ -241,6 +246,7 @@ class CyclesPage(QtWidgets.QWidget):
     def _build_form(self) -> None:
         self._validation_timer.stop()
         self._draft_dirty = False
+        self.stl_button.setVisible(self._gen().name == "stl_section")
         while self.form.rowCount():
             self.form.removeRow(0)
         self.inputs = {}
@@ -278,6 +284,8 @@ class CyclesPage(QtWidgets.QWidget):
                 unit = {"mm": "cal", "mm/min": "cal/min"}.get(unit, unit)
             label = f.label + (f" [{unit}]" if unit else "") + (" *" if f.required else "")
             w.setAccessibleName(label)
+            if f.name == "source":
+                w.setReadOnly(True)
             w.setMinimumHeight(44)
             cell = QtWidgets.QWidget()
             cell_layout = QtWidgets.QVBoxLayout(cell)
@@ -310,6 +318,26 @@ class CyclesPage(QtWidgets.QWidget):
         self.view2d.set_lines([])
         self.lbl_step.setText("Zmieniono parametry — użyj Podgląd, Dodaj lub Zmień wybrany.")
         self._validation_timer.start()
+
+    def import_stl(self):
+        if self.shell.s.running:
+            self.lbl_issue.setText("Zatrzymaj program przed importem STL.")
+            return
+        from linumert_stl_dialog import StlDialog
+
+        dialog = StlDialog(self, self.program.units, self.shell.c)
+        try:
+            if dialog.exec_() != QtWidgets.QDialog.Accepted:
+                return
+            for name, value in (("paths", dialog.paths_json), ("source", dialog.description())):
+                blocker = QtCore.QSignalBlocker(self.inputs[name])
+                self.inputs[name].setText(value)
+                del blocker
+            self._draft_dirty = True
+            self.preview()
+            self.result_tabs.setCurrentIndex(1)
+        finally:
+            dialog.deleteLater()
 
     def _committed_form(self):
         if not self._draft_dirty:
@@ -396,6 +424,9 @@ class CyclesPage(QtWidgets.QWidget):
         elif gen.name == "engrave_text":
             self.lbl_issue.setText("Grawerowanie konturów liter po środku narzędzia. "
                                    "Geometria czcionki zostaje zapisana w .lnx.")
+        elif gen.name == "stl_section":
+            self.lbl_issue.setText("Przekrój XY zapisany w kroku; tor środka narzędzia bez "
+                                   "korekcji promienia. Dodaj krok lub zmień wybrany.")
         return lines
 
     # ---- program --------------------------------------------------------------------------

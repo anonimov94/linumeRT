@@ -630,6 +630,58 @@ def test_cycles_text_font_size_and_saved_geometry(page_env, monkeypatch):
     page.close()
 
 
+def test_stl_dialog_background_section_and_stale_result(page_env, tmp_path):
+    from linumert_stl_dialog import StlDialog
+    from test_stl_section import write_cube
+
+    dialog = StlDialog(None, "mm", {"bg2": "#101010", "fg3": "#aaaaaa", "teal": "#2dd4bf"})
+    dialog.load_path(write_cube(tmp_path / "cube.stl"))
+    dialog._job[0].result(timeout=5)
+    dialog._poll()
+    dialog._job[0].result(timeout=5)
+    dialog._poll()
+    assert dialog.apply.isEnabled() and dialog.paths_json
+    dialog.scale.setValue(2)
+    assert not dialog.apply.isEnabled() and dialog.paths_json is None
+    dialog.calculate_section()
+    dialog.z.setValue(0.75)  # edit while the previous result is in flight
+    dialog._job[0].result(timeout=5)
+    dialog._poll()
+    assert not dialog.apply.isEnabled() and dialog.paths_json is None
+    dialog.calculate_section()
+    dialog._job[0].result(timeout=5)
+    dialog._poll()
+    assert dialog.apply.isEnabled() and "Rozmiar XYZ: 2" in dialog.message.text()
+    dialog.show()
+    dialog.view.setCurrentText("XZ")
+    from PyQt5 import QtWidgets
+    QtWidgets.QApplication.processEvents()
+    output = os.environ.get("LINUMERT_CAM_SHOT_DIR")
+    if output:
+        Path(output).mkdir(parents=True, exist_ok=True)
+        assert dialog.grab().save(str(Path(output) / "stl-import.png"))
+    dialog.accept()
+    assert dialog.result() == dialog.Accepted
+    dialog.deleteLater()
+
+
+def test_cycles_stl_capture_is_independent_of_source_file(page_env, monkeypatch):
+    from linumert.generators.path_geometry import decode_paths
+
+    module, page, _shell = _cycles(page_env, monkeypatch)
+    page.cmb.setCurrentIndex(page.cmb.findText(module.stl_trace.StlSection.title))
+    captured = "[[[0,0],[10,0],[10,10],[0,0]]]"
+    monkeypatch.setattr("linumert_stl_dialog.StlDialog", lambda *a: SimpleNamespace(
+        exec_=lambda: 1, paths_json=captured, description=lambda: "cube.stl | Z=0.5",
+        deleteLater=lambda: None))
+    page.stl_button.click()
+    assert page._draft_dirty and page.view2d.lines == decode_paths(captured)
+    page.add_step()
+    assert page.program.steps[0].generator == "stl_section"
+    assert "G1 X10 Y10" in page.text() and not page_env[3].mock_calls
+    page.close()
+
+
 def test_cycles_steps_checked_with_tool_db(page_env, monkeypatch):
     """Cykle (Model-Author: Claude, sesja 040): kroki porównane z bazą narzędzi w GUI."""
     from linumert.tools.db import Tool
