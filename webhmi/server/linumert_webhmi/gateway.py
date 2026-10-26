@@ -106,6 +106,7 @@ class Gateway:
             state["heartbeat"] = any(now - seen <= HEARTBEAT_S
                                      for seen in self._sessions.values())
             state["jog_active"] = sorted(self._jog)
+            state["jog_stop_pending"] = sorted(self._jog_retry)
             state.pop("gateway_error", None)
             if state != self._state:
                 self._version += 1
@@ -128,7 +129,7 @@ class Gateway:
     def touch(self, session: str = LOCAL_SESSION) -> None:
         """Przeglądarka żyje (wiadomość z klienta); zasila ``heartbeat`` w stanie."""
         with self._lock:
-            if session in self._sessions or session == LOCAL_SESSION:
+            if session in self._sessions:  # REST nie tworzy trwałej sesji
                 self._sessions[session] = self._clock()
 
     def snapshot(self) -> tuple[int, dict]:
@@ -168,6 +169,9 @@ class Gateway:
                 raise CommandError("zbyt wiele poleceń na sekundę")
             self.touch(session)
             self._dispatch(command, session)
+            if stop and self._jog_retry:
+                raise CommandError("zatrzymanie jogu niepotwierdzone przez LinuxCNC; "
+                                   "brama ponawia je automatycznie")
 
     def _dispatch(self, c: Command, session: str) -> None:
         b = self.backend
@@ -207,6 +211,10 @@ class Gateway:
         elif name == "jog":
             if c.axis is None or c.speed is None:
                 raise CommandError("jog: wymagane axis i speed")
+            if c.speed != 0.0 and self._jog_retry:
+                self._retry_stops()
+                if self._jog_retry:  # stary stop niepotwierdzony: nie startujemy nowego ruchu
+                    raise CommandError("jog zablokowany: poprzednie zatrzymanie niepotwierdzone")
             owner = self._jog.get(c.axis, (session, 0.0))[0]
             if c.speed == 0.0:
                 self._stop_axis(c.axis)

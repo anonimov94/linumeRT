@@ -255,3 +255,57 @@ def test_poll_loop_error_stops_active_jog():
     gateway._loop()
     assert not machine._jog  # bez wiarygodnego odczytu jog nie trwa
     assert "odczyt padł" in gateway.snapshot()[1]["gateway_error"]
+
+
+def _flaky_stop(gateway, failures):
+    backend = gateway.backend
+    real = backend.jog_stop
+    left = {"n": failures}
+
+    def stop(axis):
+        if left["n"] > 0:
+            left["n"] -= 1
+            raise RuntimeError("LinuxCNC nie odpowiada")
+        real(axis)
+
+    backend.jog_stop = stop
+    return left
+
+
+def test_new_jog_is_blocked_until_failed_stop_is_confirmed():
+    gateway, machine, clock = make()
+    gateway.execute(Command(cmd="jog", axis="X", speed=5.0))
+    left = _flaky_stop(gateway, failures=50)
+    with pytest.raises(CommandError, match="niepotwierdzone"):
+        gateway.execute(Command(cmd="jog_stop", axis="X"))  # nie udaje "ack"
+    gateway.step()  # ponowienie nadal zawodzi, oś zostaje oczekująca
+    assert gateway.snapshot()[1]["jog_stop_pending"] == ["X"]
+    with pytest.raises(CommandError, match="zablokowany"):
+        gateway.execute(Command(cmd="jog", axis="X", speed=5.0))
+    left["n"] = 0  # LinuxCNC wraca
+    run(gateway, clock, 0.05)
+    assert gateway.snapshot()[1]["jog_stop_pending"] == []
+    gateway.execute(Command(cmd="jog", axis="X", speed=5.0))  # teraz wolno
+    run(gateway, clock, 0.05)
+    assert gateway.snapshot()[1]["jog_active"] == ["X"]  # stary stop nie zabił nowego jogu
+
+
+def test_pending_stop_all_does_not_cancel_a_later_jog():
+    gateway, machine, clock = make()
+    gateway.execute(Command(cmd="jog", axis="X", speed=5.0))
+    left = _flaky_stop(gateway, failures=1)
+    with pytest.raises(CommandError, match="niepotwierdzone"):
+        gateway.execute(Command(cmd="estop"))
+    run(gateway, clock, 0.05)  # ponowienie udaje się
+    assert gateway.snapshot()[1]["jog_stop_pending"] == []
+    assert left["n"] == 0
+
+
+def test_rest_commands_do_not_create_a_permanent_session():
+    gateway, _, clock = make()
+    gateway.execute(Command(cmd="override", feed=1.0))  # sesja "local" (REST)
+    run(gateway, clock, 2.0)
+    assert gateway.snapshot()[1]["heartbeat"] is False  # REST nie udaje żywego ekranu
+    gateway.client_connected("ws1")
+    gateway.client_disconnected("ws1")
+    assert not gateway.backend.machine._jog
