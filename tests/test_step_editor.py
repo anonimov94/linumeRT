@@ -66,3 +66,14 @@ def test_update_units_and_undo_are_snapshots():
     assert model.program.units == "mm" and model.program.steps[0].params["title"] == "A"
     model.edit("toggle", 0)
     assert not model.can_redo
+
+
+def test_editing_disabled_header_does_not_change_program_units():
+    model = editor()
+    step = header("Nagłówek pomijany")
+    step.enabled = False
+    step.params["units"] = "G20"
+    model.edit("add", step=step)
+    assert model.program.units == "mm"
+    model.edit("update", 0, step.model_copy(update={"comment": "zmiana opisu"}))
+    assert model.program.units == "mm"

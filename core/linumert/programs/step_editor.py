@@ -71,7 +71,7 @@ class StepEditor:
                 index = target
             else:
                 raise ValueError(f"Nieznana operacja: {operation}")
-        if step is not None and step.generator == "header":
+        if step is not None and step.enabled and step.generator == "header":
             candidate.units = "inch" if step.params.get("units") == "G20" else "mm"
         return self._commit(candidate, index)
 
