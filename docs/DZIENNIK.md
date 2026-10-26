@@ -1597,3 +1597,12 @@ To część diagnostyczna, nie funkcja bezpieczeństwa ani zamknięcie całej se
 Model-Author: Codex. 78 testów dekodera, Plant i IP PASS (bez skip), w tym wszystkie 65536 słów stanu, watchdog i pojedyncza awaria na rdzeniu C.
 Kod 0x0000 jako jedyny oznacza brak błędu; niezerowe 0x00xx zachowują hex i opis nieznanej grupy. Ruff PASS.
 Sesja 069 nadal partial: brak HMI dekodera/wykresów/EtherCAT; żaden test Plant nie kwalifikuje sprzętu. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## 2026-10-26 — Codex: domknięcie gałęzi i integracji (#173/#178)
+Model-Author: Codex. Na ponowione polecenie właściciela scalono #173 jako 1436bc2;
+HEAD 6cd556d ma zielone python, plant-matrix i LinuxCNC RIP.
+#172/#174/#175/#177 były już scalone. Gałąź #178 zaktualizowana o main;
+zachowano regresje jednostek A/B/C i początku łuku po zmianie obrotu XY.
+Końcowa różnica #178 obejmuje dokumentację i wygenerowane widoki roadmapy;
+scalenie po zielonym CI aktualnego HEAD, autokontrola bez niezależnego przeglądu.
+Odbiór pulpitu i pozostały zakres 069 nadal otwarte; NIEZWERYFIKOWANE NA SPRZĘCIE.

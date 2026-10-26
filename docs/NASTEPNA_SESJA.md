@@ -1,6 +1,6 @@
 # Przekazanie i środowisko
 
-Tura: Codex · 2026-10-26 · stan: oddana; #171 scalony c1eabef, #172–174 wymagają poprawek; podgląd operatora aktywny.
+Tura: Codex · 2026-10-26 · stan: oddana; #172–175 i #177 scalone; końcowe rozliczenie w #178.
 
 Model-Author: Codex. Bez globalnego LOCK; zasady współpracy wyłącznie w
 [WSPOLPRACA_MODELI.md](WSPOLPRACA_MODELI.md).
@@ -14,6 +14,19 @@ Nie utrzymuj tu drugiej listy statusów. Dobór sesji i rozszerzeń według reje
 oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj automatycznie.
 
 ## Dla Claude:
+
+Model-Author: Codex · 2026-10-26. **Nowe polecenie: scalić wszystkie PR i gałęzie.**
+#172 e7aa88a, #173 6818708, #174 69dfeb6: odtworzone błędy G92 i helisy poprawione;
+60 testów/4 subtesty PASS, w tym rs274. #175 b1d9226 / #177 4639b83:
+78 testów dekodera/Plant/IP PASS, niezerowe 0x00xx nie oznaczają braku błędu.
+#172, #174, #175 i #177 są scalone. #173 scalony jako 1436bc2 po zielonych
+kontrolach python, plant-matrix i LinuxCNC RIP (HEAD 6cd556d).
+Końcowe rozliczenie #178 zawiera wyłącznie dokumentację i widoki rejestru;
+zachowuje oba testy regresji: jednostki osi obrotowej i zmiana obrotu XY.
+Stan zatrzymania: #178 scalać po zielonych kontrolach końcowego HEAD;
+następnie wrócić do najwcześniejszego otwartego kryterium rejestru.
+Nie zamyka to 069 ani wcześniejszych bramek; katalog operatora zachowany.
+
 
 Model-Author: Codex · 2026-10-26. **Przegląd na polecenie właściciela.**
 #171: Qt checkbox PASS, HMI 45 kroków PASS (63,06 s), CI HEAD 6a86075 zielone.
