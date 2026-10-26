@@ -15,6 +15,12 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · 2026-10-26. **Poprawka po odbiorze właściciela: puste checkboxy.**
+Ogólne działanie podglądu potwierdzone; unchecked.png z upstream zawiera czerwony X.
+Gałąź codex/hmi-checkbox-empty, checkout /home/dell/Projekty/linumeRT-checkbox:
+ramka bez obrazka w globalnym QSS i stylu powłoki, 55 testów Qt/modelu PASS.
+Podgląd operatora działa osobno w linumert-hmi; jego lease aktywne do zamknięcia okna.
+
 Model-Author: Codex · 2026-10-26. **#169 scalony: 3c20817; zlecone trzy grupy odebrane.**
 Układ 1280×768, Cyberdeck z dwoma podglądami, rzeczywiste odczyty monitora.
 Kod e9ed723: CI python/plant-matrix/linuxcnc SUCCESS; 1542 testy + 184 subtesty

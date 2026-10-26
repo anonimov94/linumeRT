@@ -1529,3 +1529,8 @@ bez podłączenia opisane jawnie. NIEZWERYFIKOWANE NA SPRZĘCIE.
 - LinuxCNC run40293747003: 1542 PASS + 184 subtesty, 154 live PASS; Cyberdeck host i home_and_move PASS. Python run40293746655: 1407 PASS, REQ 22/22, C PASS; macierz Plant SUCCESS.
 - Zlecone trzy grupy mają kod, lokalne i zdalne dowody odbioru. 028/SKIN pozostają partial; następnie odbiór pulpitu właściciela i dalsze M2 według rejestru.
 - Wszystko wypchnięte, obie lease zwolnione, kontenery testowe zakończone. Lokalna kopia operatora zachowuje własne narzędzia/programy.
+
+## 028 — puste pola wyboru bez czerwonego krzyżyka · 2026-10-26 · Codex
+- Model-Author: Codex. Właściciel potwierdził działanie podglądu i zgłosił krzyżyk w odznaczonych polach. Przyczyna: odziedziczony unchecked.png zawiera czerwony X, nie brak pliku.
+- Globalny QSS rysuje pustą ramkę także w dialogach; powłoka korzysta z kolorów motywu (również disabled). Zaznaczenie i logika przełączników zachowane.
+- 55 testów Qt/modelu PASS: rzeczywisty obraz unchecked/checked/unchecked, brak czerwonych pikseli, ramka i działanie Spacji, także poza powłoką. Bez nowych zasobów lub zależności.
