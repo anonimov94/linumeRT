@@ -16,9 +16,8 @@ sys.path.insert(0, str(ROOT / 'screens/linumert'))
 def test_empty_checkbox_overrides_legacy_cross_and_keeps_tick(tmp_path):
     os.environ.setdefault('QT_QPA_PLATFORM', 'offscreen')
     QtWidgets = pytest.importorskip('PyQt5.QtWidgets')
-    from PyQt5 import QtCore, QtTest
-
     import linumert_shell_model as model
+    from PyQt5 import QtCore, QtTest
 
     app = QtWidgets.QApplication.instance() or QtWidgets.QApplication([])
     # Actual application rules also apply to dialogs outside the shell root.
@@ -44,7 +43,8 @@ def test_empty_checkbox_overrides_legacy_cross_and_keeps_tick(tmp_path):
                 app.processEvents()
                 option = QtWidgets.QStyleOptionButton()
                 box.initStyleOption(option)
-                rect = box.style().subElementRect(QtWidgets.QStyle.SE_CheckBoxIndicator, option, box)
+                rect = box.style().subElementRect(
+                    QtWidgets.QStyle.SE_CheckBoxIndicator, option, box)
                 image = box.grab(rect).toImage()
                 red = green = 0
                 for x in range(image.width()):
