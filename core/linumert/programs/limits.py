@@ -179,16 +179,24 @@ def analyze_canon(text: str, limits: dict[str, tuple[float, float]]) -> LimitRep
         if name == "USE_LENGTH_UNITS":
             new_scale = INCH if "INCHES" in args else 1.0
             position = tuple(value * scale / new_scale for value in position)
+            factor = scale / new_scale
+            g5x, g92, tlo = (tuple(value * factor for value in offset)
+                             for offset in (g5x, g92, tlo))
             scale = new_scale
             continue
-        if name == "SET_G5X_OFFSET":
-            g5x = tuple(_floats(args)[1:4])
-            continue
-        if name == "SET_G92_OFFSET":
-            g92 = tuple(_floats(args)[:3])
-            continue
-        if name == "USE_TOOL_LENGTH_OFFSET":
-            tlo = tuple(_floats(args)[:3])
+        if name in ("SET_G5X_OFFSET", "SET_G92_OFFSET", "USE_TOOL_LENGTH_OFFSET"):
+            values = _floats(args)
+            if name == "SET_G5X_OFFSET":
+                old, g5x = g5x, tuple(values[1:4])
+                new = g5x
+            elif name == "SET_G92_OFFSET":
+                old, g92 = g92, tuple(values[:3])
+                new = g92
+            else:
+                old, tlo = tlo, tuple(values[:3])
+                new = tlo
+            # A modal offset changes coordinates, never the machine position.
+            position = tuple(value + old[i] - new[i] for i, value in enumerate(position))
             continue
         if name == "SELECT_PLANE":
             plane_name = args.strip().rsplit("_", 1)[-1].upper()
