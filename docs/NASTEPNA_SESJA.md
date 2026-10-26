@@ -1,6 +1,6 @@
 # Przekazanie i środowisko
 
-Tura: Codex · 2026-10-26 · stan: w toku; właściciel polecił scalić wszystkie PR i gałęzie.
+Tura: Codex · 2026-10-26 · stan: oddana; #172–175 i #177 scalone; końcowe rozliczenie w #178.
 
 Model-Author: Codex. Bez globalnego LOCK; zasady współpracy wyłącznie w
 [WSPOLPRACA_MODELI.md](WSPOLPRACA_MODELI.md).
@@ -19,9 +19,12 @@ Model-Author: Codex · 2026-10-26. **Nowe polecenie: scalić wszystkie PR i gał
 #172 e7aa88a, #173 6818708, #174 69dfeb6: odtworzone błędy G92 i helisy poprawione;
 60 testów/4 subtesty PASS, w tym rs274. #175 b1d9226 / #177 4639b83:
 78 testów dekodera/Plant/IP PASS, niezerowe 0x00xx nie oznaczają braku błędu.
-Każdy istniejący PR ma poprawki na swojej gałęzi; trwa CI nowych HEAD.
-Kopia integracyjna /tmp/linumert-merge-all łączy obie serie do pełnych testów.
-Stan zatrzymania: poprawki wypchnięte; następnie pełny odbiór i scalenia #172→173→174 oraz #175→177.
+#172, #174, #175 i #177 są scalone. #173 scalony jako 1436bc2 po zielonych
+kontrolach python, plant-matrix i LinuxCNC RIP (HEAD 6cd556d).
+Końcowe rozliczenie #178 zawiera wyłącznie dokumentację i widoki rejestru;
+zachowuje oba testy regresji: jednostki osi obrotowej i zmiana obrotu XY.
+Stan zatrzymania: #178 scalać po zielonych kontrolach końcowego HEAD;
+następnie wrócić do najwcześniejszego otwartego kryterium rejestru.
 Nie zamyka to 069 ani wcześniejszych bramek; katalog operatora zachowany.
 
 
