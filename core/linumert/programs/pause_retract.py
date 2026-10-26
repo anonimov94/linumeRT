@@ -7,7 +7,6 @@ Model-Author: Codex. All distances and rates use native machine units.
 import math
 from dataclasses import dataclass
 
-
 RETURN_TOLERANCE_MM = 1e-4  # decyzja właściciela 2026-10-26: dokładność powrotu Z
 
 
