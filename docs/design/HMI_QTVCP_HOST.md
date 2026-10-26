@@ -107,3 +107,12 @@ pełne etykiety i fokus Tab, kliknięcia wszystkich obszarów, zmiana palety i p
 do dotychczasowego widoku. Składnia/diff sprawdzone; nowej wersji nie uruchamiano.
 Rozszerzenie HMI-OWNER-SKINS obejmuje również pełną kompozycję nakładki i dwa
 prostokątne podglądy symulacji. Ten krok ich nie implementuje ani nie zalicza.
+
+## Dopasowanie do małego ekranu — 2026-10-26
+
+Osadzony widok korzysta ze stałego nagłówka, alarmów, trybów i paska akcji QtVCP.
+Powtórzony nagłówek i konsola studium skórek są ukryte w hoście, dzięki czemu dolne
+karty nie wychodzą poza ekran. Monitor samodzielny zachowuje własne paski.
+Regresja składa cztery rodziny z rzeczywistym Qt, zmienia 1280×768 → 1920×1080
+→ 1280×768 i wymaga braku przewijania całej strony oraz widoczności wszystkich kart.
+5 testów PASS, sprawdzony zrzut Classic Digital; odbiór live osobno.

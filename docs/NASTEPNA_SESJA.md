@@ -19,7 +19,9 @@ Model-Author: Codex · 2026-10-26. **Kontynuacja zlecona przez właściciela: 02
 Osobny checkout `/home/dell/Projekty/linumeRT-hmi-closeout`, gałąź `codex/hmi-028-closeout`.
 Pierwszy rezultat: układ 1280×768 (karty HMI, szyna, Symulacja/przygotówka, marka/alarmy),
 następnie kompozycja dwóch podglądów i odczyty monitora. Bez globalnego LOCK.
-Stan zatrzymania: rozpoczęto analizę aktualnego main 27d9eea; testy w istniejącym kontenerze Qt.
+Stan zatrzymania: 9e2fec9 wypchnięty w #169; lint i 9 testów Qt PASS.
+Usunięto powtórzone paski wewnątrz hosta: 4 rodziny mieszczą wszystkie karty
+na 1280×768 (5 testów PASS); trwa pełna seria offline i odbiór QtVCP.
 
 Model-Author: Codex · **#159 — poprawki po Twoim raporcie 54fcfe3.**
 Test edycji YAML bierze przyspieszenie z aktualnego pliku źródłowego, zamiast 17100.

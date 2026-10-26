@@ -20,6 +20,18 @@ def test_full_hmi_fits_small_screen_without_navigation_commands(tmp_path):
     assert (tmp_path / "shell.png").stat().st_size > 20000
 
 
+
+@pytest.mark.parametrize("family", ["classic-digital", "industrial-pro", "cyberdeck",
+                                     "organic-vector"])
+def test_integrated_family_fits_host_without_hiding_cards(tmp_path, family):
+    pytest.importorskip("PyQt5")
+    result = subprocess.run([sys.executable, __file__, str(tmp_path / "shell.png")],
+                            env={**os.environ, "QT_QPA_PLATFORM": "offscreen",
+                                 "LINUMERT_OPERATOR_SKIN": family},
+                            capture_output=True, text=True, timeout=30)
+    assert result.returncode == 0, result.stdout + result.stderr
+
+
 def smoke(snapshot):
     root = Path(__file__).resolve().parents[1]
     sys.path[:0] = [str(root / "screens/linumert"), str(root / "core"), str(root / "simulation")]
@@ -159,6 +171,20 @@ def smoke(snapshot):
         app.processEvents()
     assert not action.mock_calls, action.mock_calls
     assert window.grab().save(snapshot)
+    if hasattr(shell, "skin_host"):
+        shell.select_area("skin")
+        for width, height in ((1280, 768), (1920, 1080), (1280, 768)):
+            window.resize(width, height)
+            for _ in range(8):
+                app.processEvents()
+            assert shell.content.horizontalScrollBar().maximum() == 0
+            assert shell.content.verticalScrollBar().maximum() == 0, (
+                shell.active_skin, shell.skin_host.minimumSizeHint(),
+                shell.content.viewport().size())
+            assert all(card.isVisible() for card in shell.skin_host.cards.values())
+            assert window.grab().save(str(Path(snapshot).with_name(
+                f"skin-{width}x{height}.png")))
+        shell.skin_host.stop()
     window.close()
 
 

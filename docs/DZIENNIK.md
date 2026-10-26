@@ -1492,3 +1492,8 @@ bez podłączenia opisane jawnie. NIEZWERYFIKOWANE NA SPRZĘCIE.
 - Dwukolumnowa szyna na niskim ekranie, istniejący znak marki, kody alarmów ze źródła; przygotówka w jednej kolumnie, akcje 2×2 i ciemne tło panelu.
 - 9 testów Qt PASS: rozmiary 1280→1920→1280, brak poziomego przewijania Symulacji, cała szyna, Tab/wpis, JOG. Sprawdzony zrzut Symulacji 1280×768.
 - Następnie osadzone karty HMI i dwa podglądy; pełne lint/test w toku. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## M2 / 028 — wszystkie karty HMI w małym hoście · 2026-10-26 · Codex
+- Model-Author: Codex. Osadzony widok ukrywa powtórzone paski studium; globalne akcje, alarmy i E-STOP pozostają w hoście.
+- 5 testów Qt PASS: cztery rodziny, 1280×768 → 1920×1080 → 1280×768, brak przewijania całej strony i wszystkie karty widoczne; zrzut Classic sprawdzony.
+- Samodzielny monitor zachowuje własny nagłówek/konsolę. Bez nowych zależności i kanału komend. Odbiór LinuxCNC trwa.

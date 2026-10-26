@@ -45,10 +45,11 @@ class OperatorSkin(SkinMonitor):
 
     def refresh(self):
         super().refresh()
-        pl = self.preferences.language == "pl"
-        self.banner.setText(
-            "Integracja HMI w toku · G53 mm/° · JOG, tryby i E-STOP na stałym pasku hosta"
-            if pl else "HMI integration in progress · G53 mm/° · JOG, modes and E-STOP in host")
+        # The permanent QtVCP bars already expose these controls and state.
+        # Keep one visible command surface and give the workspace the full height.
+        for widget in (self.header, self.banner, self.status, self.console):
+            widget.hide()
+        self.root.setContentsMargins(4, 4, 4, 4)
         for key, button in self.controls.items():
             button.clicked.connect(lambda checked=False, action=key: self.dispatch(action))
         # Until the first validated STATUS sample, every new console is disabled.
