@@ -1615,3 +1615,13 @@ Odbiór pulpitu i pozostały zakres 069 nadal otwarte; NIEZWERYFIKOWANE NA SPRZ�
 - Szersza próba Windows: 182 PASS, 1 SKIP; 4 FAIL dotyczą lokalizacji liczb, skryptu rs274 i braku rdzenia C.
 - Kontrole Debian/LinuxCNC w PR #180. Autokontrola; odbiór pulpitu i pozostały zakres 045 nadal otwarte.
 - NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## CAM 2D — strategie, napisy i przekroje STL · 2026-10-26 · Codex
+- Model-Author: Codex. Polecenie właściciela: więcej strategii, kształty, napisy/czcionki i STL.
+- Planowanie v2: X/Y, zygzak, jeden kierunek, krzyżowo, współśrodkowo CW/CCW; v1 bez zmian.
+- Pięć kształtów, cztery strategie grawerowania; czcionki, rozmiar, odstępy i obrót napisów.
+- Import STL ASCII/binary w tle, model 3D, jednostki/skala i zamknięty przekrój XY do kroku.
+- Geometria zapisana w .lnx; zoom/pan i zakresy; limity rozmiaru, punktów i bloków.
+- Lokalnie 256 PASS/1 SKIP; lint, roadmap i REQ 22/22 PASS; 10 prób rs274 w CI.
+- Raport CAM_2D_2026-10-26.md, zrzuty build/cam/, kontrole PR #184; autokontrola.
+- Zakres STL: przekrój XY, bez frezowania powierzchni 3D. NIEZWERYFIKOWANE NA SPRZĘCIE.

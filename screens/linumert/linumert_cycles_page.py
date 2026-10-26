@@ -102,6 +102,7 @@ class CyclesPage(QtWidgets.QWidget):
         self.form_box = QtWidgets.QWidget()
         self.form_box.setObjectName("lrtCycleFields")
         colors = {**pages.model.load_tokens()["kolory"], **shell.c}
+        self._form_colors = colors
         self.form_box.setStyleSheet(
             f"QWidget#lrtCycleFields {{ background: {colors['bg2']}; }}")
         self.form = QtWidgets.QFormLayout(self.form_box)
@@ -152,6 +153,7 @@ class CyclesPage(QtWidgets.QWidget):
         self.code.setLineWrapMode(QtWidgets.QPlainTextEdit.NoWrap)
         self.result_tabs = QtWidgets.QTabWidget()
         self.result_tabs.setStyleSheet(
+            f"QTabWidget::pane {{ border: 1px solid {colors['line2']}; }} "
             f"QTabBar::tab {{ background: {colors['panel']}; color: {colors['fg2']}; "
             "padding: 8px; }"
             f"QTabBar::tab:selected {{ color: {colors['teal']}; "
@@ -277,6 +279,13 @@ class CyclesPage(QtWidgets.QWidget):
             elif f.kind == "bool":
                 w = QtWidgets.QCheckBox()
                 w.setChecked(bool(f.default))
+                if f.name == "reverse":
+                    colors = self._form_colors
+                    w.setStyleSheet(
+                        "QCheckBox::indicator { width: 18px; height: 18px; image: none; "
+                        f"border: 1px solid {colors['fg2']}; }} "
+                        f"QCheckBox::indicator:unchecked {{ background: {colors['bg']}; }} "
+                        f"QCheckBox::indicator:checked {{ background: {colors['teal']}; }}")
             elif f.kind == "text":
                 w = QtWidgets.QLineEdit("" if f.default is None else str(f.default))
                 if f.name == "paths":
@@ -331,6 +340,12 @@ class CyclesPage(QtWidgets.QWidget):
         if self._gen().name == "shape_engrave":
             shape = self.inputs["shape"].currentData()
             strategy = self.inputs["strategy"].currentData()
+            unit = "cal" if self.program.units == "inch" else "mm"
+            for name, axis, ordinary in (("width", "X", "Szerokość"), ("height", "Y", "Wysokość")):
+                title = f"Średnica obwiedni {axis}" if shape in ("polygon", "star") else ordinary
+                label = f"{title} [{unit}]"
+                self.form.labelForField(self.inputs[name].parentWidget()).setText(label)
+                self.inputs[name].setAccessibleName(label)
             for name, enabled in (("corner_r", shape == "rounded_rectangle"),
                                   ("sides", shape in ("polygon", "star")),
                                   ("inner", shape == "star"),

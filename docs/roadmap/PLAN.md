@@ -151,6 +151,7 @@ Nie są kolejnym harmonogramem. Ich status dotyczy tylko wskazanego kroku.
 | M6-G43 | 034, 066 | Automatyczna korekta długości narzędzia po M6 | częściowe |
 | PLANT-SUBSTEPS | 049, 063 | Plant: wynik niezależny od podkroków całkowania | ukończone |
 | HMI-OWNER-SKINS | 028 | Odrębny wygląd każdej skórki i główny ekran holograficzny | częściowe |
+| CAM-2D-TEXT-STL | 040, 043, 045, 046 | Strategie CAM 2D, napisy i przekroje STL | ukończone |
 
 ## Postęp, pozostały zakres i dowody
 
@@ -1015,4 +1016,10 @@ Pozostaje: Obciążenie CPU Plant realtime przy 4 podkrokach na VM-B (odbiór w�
 Pozostaje: Odbiór nowego układu na pulpicie właściciela: porównanie czterech rodzin przy 1280×768 i 1920×1080, dotyk i klawiatura. Pełna kwalifikacja scen/renderera ze SKIN-02/04…06; bieżący Cyberdeck używa QPainter Neon i poglądowego XYZ, nie modelu kolizji Plant.
 
 Źródła: [PR](https://github.com/anonimov94/linumeRT/pull/163#issuecomment-6401257406), [docs/design/SKIN_SYSTEM_ROADMAP.md](../design/SKIN_SYSTEM_ROADMAP.md), [screens/linumert/linumert_skin_navigation.py](../../screens/linumert/linumert_skin_navigation.py), [docs/design/HMI_QTVCP_HOST.md](../design/HMI_QTVCP_HOST.md), [screens/linumert/linumert_skin_cyberdeck.py](../../screens/linumert/linumert_skin_cyberdeck.py), [docs/raporty/G2/HMI_CLOSEOUT_2026-10-26.md](../raporty/G2/HMI_CLOSEOUT_2026-10-26.md).
+
+### CAM-2D-TEXT-STL — Strategie CAM 2D, napisy i przekroje STL
+
+**ukończone**. Polecenie właściciela 2026-10-26: więcej strategii, kształtów, napisy/czcionki i STL. Planowanie v2 X/Y: zygzak, jednokierunkowo, krzyżowo i współśrodkowo CW/CCW; v1 zachowana. Kształty parametryczne z konturem i kreskowaniem, tolerancja krzywych; napisy z czcionką, stylem, rozmiarem i układem. STL ASCII/binary w tle, model poglądowy 3D i zamknięty przekrój XY do kroku. Geometria utrwalona w .lnx, zoom/pan, GUI 1280×768; kontrola zakresów i budżetów. Zakres STL ograniczony do przekroju XY, bez frezowania powierzchni 3D. Autokontrola i dowody PR #184; nie zamyka odbioru pulpitu ani M3/M4.
+
+Źródła: [PR](https://github.com/anonimov94/linumeRT/pull/184), [docs/raporty/CAM_2D_2026-10-26.md](../raporty/CAM_2D_2026-10-26.md), [core/linumert/generators/shapes.py](../../core/linumert/generators/shapes.py), [core/linumert/generators/engraving.py](../../core/linumert/generators/engraving.py), [core/linumert/generators/surfacing.py](../../core/linumert/generators/surfacing.py), [core/linumert/programs/stl_section.py](../../core/linumert/programs/stl_section.py), [tests/test_cam_interpreter.py](../../tests/test_cam_interpreter.py).
 

@@ -15,6 +15,13 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · 2026-10-26. **Strategie, kształty, napisy i STL — PR #184.**
+Nowy zakres właściciela: planowanie v2, grawerowanie kształtów i konturów czcionek,
+STL ASCII/binary z podglądem i przekrojem XY. Geometria jest zachowana w .lnx.
+GUI 1280×768, zoom/pan, obliczenia STL w tle; raport CAM_2D_2026-10-26.md.
+Stan zatrzymania: kod i testy w codex/cam-strategies, kontrole konkretnego HEAD w #184.
+Nie zamyka to odbioru pulpitu, całych M3/M4 ani obróbki powierzchni STL 3D.
+
 Model-Author: Codex · 2026-10-26. **Bieżące zlecenie: backend i funkcje w GUI z edycją.**
 Porcja sesji 045 w PR #180, gałąź codex/cycles-editing: transakcyjny model kroków,
 przesuwanie/duplikacja/wyłączenie/usuwanie wybranego, Cofnij/Ponów, walidacja przy polach

@@ -1952,6 +1952,28 @@
         "screens/linumert/linumert_skin_cyberdeck.py",
         "docs/raporty/G2/HMI_CLOSEOUT_2026-10-26.md"
       ]
+    },
+    {
+      "id": "CAM-2D-TEXT-STL",
+      "title": "Strategie CAM 2D, napisy i przekroje STL",
+      "parents": [
+        "040",
+        "043",
+        "045",
+        "046"
+      ],
+      "status": "done",
+      "progress": "Polecenie właściciela 2026-10-26: więcej strategii, kształtów, napisy/czcionki i STL. Planowanie v2 X/Y: zygzak, jednokierunkowo, krzyżowo i współśrodkowo CW/CCW; v1 zachowana. Kształty parametryczne z konturem i kreskowaniem, tolerancja krzywych; napisy z czcionką, stylem, rozmiarem i układem. STL ASCII/binary w tle, model poglądowy 3D i zamknięty przekrój XY do kroku. Geometria utrwalona w .lnx, zoom/pan, GUI 1280×768; kontrola zakresów i budżetów. Zakres STL ograniczony do przekroju XY, bez frezowania powierzchni 3D. Autokontrola i dowody PR #184; nie zamyka odbioru pulpitu ani M3/M4.",
+      "remaining": [],
+      "evidence": [
+        "https://github.com/anonimov94/linumeRT/pull/184",
+        "docs/raporty/CAM_2D_2026-10-26.md",
+        "core/linumert/generators/shapes.py",
+        "core/linumert/generators/engraving.py",
+        "core/linumert/generators/surfacing.py",
+        "core/linumert/programs/stl_section.py",
+        "tests/test_cam_interpreter.py"
+      ]
     }
   ]
 }

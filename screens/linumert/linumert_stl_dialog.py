@@ -100,6 +100,12 @@ class StlDialog(QtWidgets.QDialog):
         self.center.toggled.connect(self._changed)
         layout.addLayout(controls)
         self.tabs = QtWidgets.QTabWidget()
+        self.tabs.setStyleSheet(
+            f"QTabWidget::pane {{ border: 1px solid {self.colors['line2']}; }} "
+            f"QTabBar::tab {{ background: {self.colors['panel']}; color: {self.colors['fg2']}; "
+            "padding: 8px; } "
+            f"QTabBar::tab:selected {{ background: {self.colors['tealbg']}; "
+            f"color: {self.colors['teal']}; }}")
         self.model_view = MeshPreview(self.colors)
         self.section_view = Preview2D(self.colors)
         self.section_view.unit = "cal" if program_units == "inch" else "mm"

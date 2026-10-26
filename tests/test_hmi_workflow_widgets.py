@@ -654,6 +654,8 @@ def test_stl_dialog_background_section_and_stale_result(page_env, tmp_path):
     assert dialog.apply.isEnabled() and "Rozmiar XYZ: 2" in dialog.message.text()
     dialog.show()
     dialog.view.setCurrentText("XZ")
+    assert dialog.model_view.mode == "XZ"
+    dialog.view.setCurrentText("iso")
     from PyQt5 import QtWidgets
     QtWidgets.QApplication.processEvents()
     assert dialog.width() <= 1280 and dialog.height() <= 768
@@ -760,8 +762,10 @@ def test_cam_preview_camera_does_not_modify_program(page_env, monkeypatch):
     for event_type, point, button, buttons in (
             (QtCore.QEvent.MouseButtonPress, (100, 80), QtCore.Qt.LeftButton, QtCore.Qt.LeftButton),
             (QtCore.QEvent.MouseMove, (140, 100), QtCore.Qt.NoButton, QtCore.Qt.LeftButton),
-            (QtCore.QEvent.MouseButtonRelease, (140, 100), QtCore.Qt.LeftButton, QtCore.Qt.NoButton),
-            (QtCore.QEvent.MouseButtonDblClick, (100, 80), QtCore.Qt.LeftButton, QtCore.Qt.LeftButton)):
+            (QtCore.QEvent.MouseButtonRelease, (140, 100),
+             QtCore.Qt.LeftButton, QtCore.Qt.NoButton),
+            (QtCore.QEvent.MouseButtonDblClick, (100, 80),
+             QtCore.Qt.LeftButton, QtCore.Qt.LeftButton)):
         QtWidgets.QApplication.sendEvent(view, QtGui.QMouseEvent(
             event_type, QtCore.QPointF(*point), button, buttons, QtCore.Qt.NoModifier))
     assert view.grab().toImage() == before

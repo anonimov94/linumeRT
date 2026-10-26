@@ -62,3 +62,5 @@ def test_v1_is_preserved_and_small_step_is_refused_before_allocation():
     assert registry.latest("face_mill").version == 2
     assert registry.latest("face_mill").validate(
         {"x1": 10000, "y1": 10000, "tool_d": 0.0001, "depth": 1})
+    assert registry.latest("face_mill").validate(
+        {"x1": 10, "y1": 10, "tool_d": 2, "depth": 1e-10})

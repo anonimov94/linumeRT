@@ -74,3 +74,8 @@ def test_large_circle_respects_chord_tolerance():
     for a, b in zip(path[:-1], path[1:], strict=True):
         midpoint_radius = math.hypot((a[0] + b[0]) / 2, (a[1] + b[1]) / 2)
         assert 5000 - midpoint_radius <= v["curve_tol"] + 1e-9
+
+
+def test_long_thin_hatch_is_bounded_by_cross_axis_not_stroke_length():
+    gen = shapes.ShapeEngrave()
+    assert not gen.validate({"width": 10000, "height": 1, "strategy": "hatch", "spacing": 0.1})

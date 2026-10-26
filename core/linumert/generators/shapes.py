@@ -80,7 +80,8 @@ class ShapeEngrave(PathTrace):
     def check(self, v, step):
         if v["shape"] == "rounded_rectangle" and v["corner_r"] > min(v["width"], v["height"]) / 2:
             return [problem("corner_r", "promień nie większy od połowy mniejszego wymiaru", step)]
-        if v["strategy"] != "outline" and max(v["width"], v["height"]) / v["spacing"] > 500:
+        span = max(v["width"], v["height"]) if v["strategy"] == "crosshatch" else v["height"]
+        if v["strategy"] != "outline" and span / v["spacing"] > 500:
             return [problem("spacing", "najwyżej 500 linii kreskowania na kierunek", step)]
         return cut_check(v, self.paths(v), step)
 

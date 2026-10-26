@@ -28,6 +28,7 @@ class Preview2D(QtWidgets.QWidget):
 
     def wheelEvent(self, event):  # noqa: N802
         if not self.lines or not event.angleDelta().y():
+            event.ignore()
             return
         steps = max(-20, min(20, event.angleDelta().y() / 120))
         zoom = max(0.1, min(100, self.zoom * 1.2 ** steps))

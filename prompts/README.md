@@ -153,3 +153,4 @@ Nie są kolejnym harmonogramem. Ich status dotyczy tylko wskazanego kroku.
 | M6-G43 | 034, 066 | Automatyczna korekta długości narzędzia po M6 | częściowe |
 | PLANT-SUBSTEPS | 049, 063 | Plant: wynik niezależny od podkroków całkowania | ukończone |
 | HMI-OWNER-SKINS | 028 | Odrębny wygląd każdej skórki i główny ekran holograficzny | częściowe |
+| CAM-2D-TEXT-STL | 040, 043, 045, 046 | Strategie CAM 2D, napisy i przekroje STL | ukończone |

@@ -21,7 +21,7 @@ class FaceMillStrategies(FaceMill):
         replace(f, choices=("zigzag", "one_way", "crosshatch", "concentric"))
         if f.name == "mode" else
         replace(f, minimum=0.0001, exclusive_minimum=False)
-        if f.name in ("tool_d", "step_down") else f for f in FaceMill.fields
+        if f.name in ("depth", "tool_d", "step_down") else f for f in FaceMill.fields
     ) + (
         Field("axis", "choice", "Kierunek przejść", default="X", choices=("X", "Y")),
         Field("direction", "choice", "Kierunek konturów", default="ccw", choices=("ccw", "cw")),
