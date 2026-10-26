@@ -398,3 +398,36 @@ ostateczne rozstrzygnięcie przed publiczną premierą (sesja 080).
   dopuszczalna dla projektu z kodem IgH/lcec (GPL-2.0, osobne procesy/moduły); (c) zaktualizować D14 i
   `docs/LICENCJE.md` po wyniku; (d) opcjonalnie: koszt przejścia na `qtpy` we wszystkich plikach ekranu.
 - Do czasu wyniku: dystrybucja binarna/obrazu z PyQt5 wstrzymana, repozytorium źródłowe bez zmian.
+
+## Ekran operatora w HTML/WebGL obok QtDragon — 2026-10-26 · Claude · PROPOZYCJA
+
+Model-Author: Claude. Powód: właściciel (2026-10-26) uznał, że Qt/QSS nie pozwala zrobić zaplanowanych skórek
+(cyberdeck i własny styl sci-fi), i zgodził się na HTML + WebGL. **To zmienia D02/D03 i kolejność z decyzji
+„Priorytet M2” (2026-10-25: rozwój ekranu na bazie QtDragon) — wchodzi w życie dopiero po potwierdzeniu
+właściciela w tym pliku.** Do tego czasu M2 i QtDragon bez zmian.
+
+**Propozycja**
+1. Warstwa wyświetlania (skórki, widok 3D symulacji, DRO, podgląd ścieżki) w przeglądarce: HTML/CSS + WebGL
+   (three.js lub czysty WebGL; wybór w PoC). Nowe zależności JS → wpis w `LICENCJE.md`/`PROVENANCE.md` (MIT).
+2. Brama LinuxCNC ↔ przeglądarka: mały proces Pythona poza RT (FastAPI + WebSocket, jak panel Plant), który
+   czyta `linuxcnc.stat()` i wysyła polecenia przez `linuxcnc.command()`. Żadnej logiki bezpieczeństwa w
+   przeglądarce: E-STOP to obwód sprzętowy, ekran tylko pokazuje stan (CLAUDE.md §6). Polecenia tylko po
+   lokalnym gnieździe/loopback, z tokenem sesji.
+3. Rdzeń `linumert` (generatory, narzędzia, alarmy, `.lnx`) i symulacja bez zmian — przeglądarka jest tylko
+   drugim klientem tych samych kontraktów (D05, HAL `linumert.*`).
+4. QtDragon pozostaje jako działający ekran awaryjny do czasu równoważności funkcji web (bramka odbioru, nie
+   data). Skórki Qt (`linumert_skin_*`) zamrożone, bez nowych funkcji.
+5. Skórki: cyberdeck oraz własny styl sci-fi z własną paletą, kształtami i nazwami. **Bez nazwy, logo i układu
+   „Star Trek”/LCARS (własność Paramount; WYTYCZNE_IP.md)** — nazwa skórki własna.
+6. Skutek uboczny: znika zależność ekranu od PyQt5 (GPL-3.0) z propozycji „Licencja PyQt5…” (wersja web nie
+   linkuje Qt); nie rozstrzyga to dystrybucji kopii QtDragon, dopóki jest wydawana.
+
+**Ryzyka**
+- Duży zakres: ~50 plików ekranu Qt do odtworzenia; ekran wymaga przeglądarki na maszynie (kiosk Chromium) i
+  weryfikacji opóźnień (wejścia MPG/jog nie mogą zależeć od przeglądarki — sprzęt/HAL, nie UI).
+- Kolizja z priorytetem M2 (sesje 028–038): trzeba ustalić, czy M2 zamykamy na QtDragon, czy web przejmuje
+  odbiór GUI.
+
+**Pierwszy krok (po potwierdzeniu):** PoC `web-hmi-poc` — brama + jedna strona z DRO i prostą sceną WebGL w
+stylu cyberdeck, na atrapie `linuxcnc` i na LinuxCNC sim; kryterium: 30 FPS, stan osi i jog z przeglądarki, test
+bez LinuxCNC. NIEZWERYFIKOWANE NA SPRZĘCIE.
