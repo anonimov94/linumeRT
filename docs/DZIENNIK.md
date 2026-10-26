@@ -1587,3 +1587,13 @@ Model-Author: Codex. Połączenie #172/#173 z sześcioma osiami: offsety A/B/C p
 Model-Author: Codex. Właściciel polecił scalić wszystkie PR/gałęzie, co obejmuje rozpoczętą część 069 przed dalszym M2; wcześniejsze bramki pozostają otwarte.
 Kod stanów/flag/kodów błędów przejrzany; 73 testy dekodera i IP PASS, ruff i roadmap --check PASS.
 To część diagnostyczna, nie funkcja bezpieczeństwa ani zamknięcie całej sesji 069; HMI i pełny zakres nadal w rejestrze.
+
+## 069 — Diagnostyka napędów: fault z Plant w dekoderze · 2026-10-26 · ChatGPT
+- Model-Author: ChatGPT (koordynacja: Claude). PR #177: spójność dekodera z masterem testowym dla 65 536 słów stanu; watchdog Plant -> FAULT i 0x8130 na wszystkich osiach, reset -> OPERATION_ENABLED; wstrzyknięty przeciążeniowy fault (0x2350) tylko na jednej osi.
+- Przegląd Claude: 3 testy PASS na rdzeniu C Plant, ruff PASS.
+- Pozostaje: widok w HMI, wykresy, ethercat slaves/master. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## 2026-10-26 — Codex: odbiór integracji CiA 402 z Plant (#177)
+Model-Author: Codex. 78 testów dekodera, Plant i IP PASS (bez skip), w tym wszystkie 65536 słów stanu, watchdog i pojedyncza awaria na rdzeniu C.
+Kod 0x0000 jako jedyny oznacza brak błędu; niezerowe 0x00xx zachowują hex i opis nieznanej grupy. Ruff PASS.
+Sesja 069 nadal partial: brak HMI dekodera/wykresów/EtherCAT; żaden test Plant nie kwalifikuje sprzętu. NIEZWERYFIKOWANE NA SPRZĘCIE.
