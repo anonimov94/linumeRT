@@ -1853,9 +1853,8 @@
         "051"
       ],
       "status": "partial",
-      "progress": "Przycisk 'Sprawdź limity osi' w edytorze G-code: rs274 z kopią parametrów (G54/G92, korekta długości, jednostki z INI) porównuje punkty końcowe ruchów z MIN/MAX_LIMIT; wynik w tle, lista linii z przeskokiem do edytora. Odtworzony błąd z G54 Z=-150 (linia 3, Z=-130) na rzeczywistym rs274; 7 testów + test GUI. Kontrola jest teraz automatyczna: po wczytaniu programu ekran sprawdza go w tle (limity osi, G5x/G92, korekta długości), pokazuje wynik na stronie Produkcja i pyta przed 'Cykl start', gdy program wyjdzie poza limity; informuje też o cięciu bez korekty długości (G49).",
+      "progress": "Przycisk 'Sprawdź limity osi' w edytorze G-code: rs274 z kopią parametrów (G54/G92, korekta długości, jednostki z INI) porównuje punkty końcowe ruchów z MIN/MAX_LIMIT; wynik w tle, lista linii z przeskokiem do edytora. Odtworzony błąd z G54 Z=-150 (linia 3, Z=-130) na rzeczywistym rs274; 7 testów + test GUI. Kontrola jest teraz automatyczna: po wczytaniu programu ekran sprawdza go w tle (limity osi, G5x/G92, korekta długości), pokazuje wynik na stronie Produkcja i pyta przed 'Cykl start', gdy program wyjdzie poza limity; informuje też o cięciu bez korekty długości (G49). Łuki ARC_FEED: sprawdzane ekstrema w płaszczyznach XY/YZ/XZ (pół okręgu, pełny okrąg, wiele obrotów), PR #172; 15 testów PASS. Obrót XY (G10 L2 R): G92, obrót, G5x, TLO jak w LinuxCNC 2.9, PR #173; 18 testów PASS. Osie obrotowe A/B/C (stopnie, bez WRAPPED_ROTARY), PR #174; 26 testów PASS.",
       "remaining": [
-        "Łuki między punktami końcowymi, obrót XY i limity osi obrotowych nie są sprawdzane.",
         "Automatyczne G43 po M6 (remap) i poprawne G43 w programie Facing z QtDragon (kod upstream) — osobna decyzja.",
         "Odbiór na pulpicie właściciela.",
         "Przegląd 2026-10-26: #172–174 wymagają poprawienia początku łuku po G92 i ekstremów helisy XZ/YZ po obrocie XY; odtworzone fałszywe wyniki bez przekroczeń."
