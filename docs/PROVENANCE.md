@@ -545,3 +545,14 @@ w środowisku wykonującym zrzuty, bez nowych zależności produktu.
 - `docs/design/HMI_QTVCP_HOST.md` — autor: Codex, własna instrukcja implementacji, uruchomienia i odbioru opcjonalnego hosta HMI, oparta na kodzie oraz kontrakcie linumeRT; GPL-2.0-or-later. Bez materiałów osób trzecich i nowych zależności.
 
 - 2026-10-26 · Codex · własne narożniki nakładki Cyberdeck (`linumert_skin_cyberdeck.py`), rysowane Qt z palety projektu; GPL-2.0-or-later; bez zewnętrznych grafik.
+
+### Odbiór Cyberdeck z LinuxCNC — 2026-10-26
+
+Autor: Codex; źródło: własne zrzuty Qt z wykonania programu `linumert_neon_demo.ngc`
+w odizolowanym LinuxCNC 2.9.10 / Debian 12 / Xvfb. Licencja: GPL-2.0-or-later
+(własna kompozycja i renderer linumeRT; bez zasobów producentów sterowań).
+Zakres: dokumentacja techniczna odbioru, bez kwalifikacji sprzętu.
+
+- `docs/raporty/G2/HMI_CLOSEOUT_2026-10-26/01-start.png`
+- `docs/raporty/G2/HMI_CLOSEOUT_2026-10-26/02-srodek.png`
+- `docs/raporty/G2/HMI_CLOSEOUT_2026-10-26/03-koniec.png`
