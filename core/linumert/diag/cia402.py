@@ -68,7 +68,6 @@ _STATE_DESCRIPTIONS: dict[CiA402State, str] = {
 }
 
 _ERROR_GROUPS: dict[int, str] = {
-    0x00: "Brak zgłoszonego błędu",
     0x10: "Błąd ogólny napędu",
     0x21: "Problem z prądem napędu",
     0x22: "Problem z prądem napędu",
@@ -121,5 +120,6 @@ def decode_statusword(word: int) -> StatuswordInfo:
 def describe_error_code(code: int) -> str:
     """Opisuje grupę kodu błędu 0x603F; nie zgaduje znaczenia dolnego bajtu."""
     _check_uint16(code, "Kod błędu")
-    description = _ERROR_GROUPS.get(code >> 8, "Nierozpoznana grupa błędów napędu")
+    description = ("Brak zgłoszonego błędu" if code == 0 else
+                   _ERROR_GROUPS.get(code >> 8, "Nierozpoznana grupa błędów napędu"))
     return f"{description} (0x{code:04X})"

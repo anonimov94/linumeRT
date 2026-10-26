@@ -114,3 +114,10 @@ def test_error_code_range_and_type_validation(code):
 def test_largest_valid_values_are_accepted():
     assert decode_statusword(0xFFFF).state is CiA402State.UNKNOWN
     assert "0xFFFF" in describe_error_code(0xFFFF)
+
+
+@pytest.mark.parametrize("code", [0x0001, 0x00FF])
+def test_nonzero_reserved_error_never_reports_no_error(code):
+    result = describe_error_code(code)
+    assert "Brak zgłoszonego błędu" not in result
+    assert f"0x{code:04X}" in result
