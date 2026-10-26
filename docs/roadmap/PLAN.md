@@ -626,11 +626,11 @@ Pozostaje: Remap M6, widok magazynu, scenariusze ATC i walidacja geometrii/stref
 
 ### 069 — Diagnostyka napędów
 
-**częściowe**. Diagnostyka HMI i historia komunikatów dostępne. Dekoder statusword CiA 402 i grup błędów 0x603F w rdzeniu (core/linumert/diag/cia402.py, 63 testy), PR #175; bez widoku HMI.
+**częściowe**. Diagnostyka HMI i historia komunikatów dostępne. Dekoder statusword CiA 402 i grup błędów 0x603F w rdzeniu (core/linumert/diag/cia402.py, 63 testy), PR #175; bez widoku HMI. Test Plant: fault watchdog i wstrzyknięty fault jednego napędu widoczne w dekoderze (3 testy), PR #177.
 
-Pozostaje: Widok dekodera w HMI (tabela napędów), wykresy napędów, ethercat slaves/master i test fault.
+Pozostaje: Widok dekodera w HMI (tabela napędów), wykresy napędów, ethercat slaves/master; fault widoczny w GUI.
 
-Źródła: [docs/DZIENNIK.md](../DZIENNIK.md), [core/linumert/diag/cia402.py](../../core/linumert/diag/cia402.py), [tests/test_cia402.py](../../tests/test_cia402.py), [prompts/sesja-069.md](../../prompts/sesja-069.md).
+Źródła: [docs/DZIENNIK.md](../DZIENNIK.md), [core/linumert/diag/cia402.py](../../core/linumert/diag/cia402.py), [tests/test_cia402.py](../../tests/test_cia402.py), [tests/test_cia402_plant.py](../../tests/test_cia402_plant.py), [prompts/sesja-069.md](../../prompts/sesja-069.md).
 
 ### 070 — Łańcuch E-STOP i bezpieczeństwo
 

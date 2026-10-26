@@ -1534,3 +1534,8 @@ bez podłączenia opisane jawnie. NIEZWERYFIKOWANE NA SPRZĘCIE.
 - Model-Author: ChatGPT (koordynacja: Claude). Zrobione: dekoder 0x6041 (8 stanów + nieznany, flagi bitów 4/7/9/10/11, surowe bity 12–13) i grup błędów 0x603F, własne opisy PL; tylko diagnostyka.
 - Przegląd Claude: 63 testy PASS, test_ip_guard PASS, ruff PASS po poprawkach.
 - Do sprawdzenia ręcznie / długi: widok w HMI wg makiety 04, wykresy ≤ 20 Hz, ethercat slaves/master, fault z Plant. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## 069 — Diagnostyka napędów: fault z Plant w dekoderze · 2026-10-26 · ChatGPT
+- Model-Author: ChatGPT (koordynacja: Claude). PR #177: spójność dekodera z masterem testowym dla 65 536 słów stanu; watchdog Plant -> FAULT i 0x8130 na wszystkich osiach, reset -> OPERATION_ENABLED; wstrzyknięty przeciążeniowy fault (0x2350) tylko na jednej osi.
+- Przegląd Claude: 3 testy PASS na rdzeniu C Plant, ruff PASS.
+- Pozostaje: widok w HMI, wykresy, ethercat slaves/master. NIEZWERYFIKOWANE NA SPRZĘCIE.
