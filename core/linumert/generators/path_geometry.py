@@ -31,8 +31,8 @@ PLACEMENT = (
 )
 
 
-def problem(field, detail):
-    return Issue("P-5015", {"step": 0, "field": field, "expected": detail}, field)
+def problem(field, detail, step=0):
+    return Issue("P-5015", {"step": step, "field": field, "expected": detail}, field)
 
 
 def decode_paths(text):
@@ -56,7 +56,7 @@ def decode_paths(text):
         for point in path:
             if not isinstance(point, list) or len(point) != 2 or any(
                     isinstance(x, bool) or not isinstance(x, (int, float))
-                    or not math.isfinite(x) or abs(x) > 1000000 for x in point):
+                    or abs(x) > 1000000 or not math.isfinite(x) for x in point):
                 raise ValueError("skończone współrzędne XY w zakresie ±1000000")
             p = tuple(round(float(x), 4) for x in point)
             if not points or p != points[-1]:
@@ -67,17 +67,17 @@ def decode_paths(text):
     return result
 
 
-def cut_check(v, paths):
+def cut_check(v, paths, step=0):
     if not paths or any(not math.isfinite(n) or abs(n) > 1000000
                         for path in paths for point in path for n in point):
-        return [problem("paths", "niepusta geometria w zakresie ±1000000")]
+        return [problem("paths", "niepusta geometria w zakresie ±1000000", step)]
     if round(v["safe_z"], 4) <= round(v["z_top"], 4):
-        return [problem("safe_z", "wartość większa od powierzchni Z")]
+        return [problem("safe_z", "wartość większa od powierzchni Z", step)]
     layers = math.ceil(v["depth"] / v["step_down"])
     blocks = layers * sum(len(path) + 3 for path in paths) + 1
     if blocks > MAX_BLOCKS:
         return [problem("step_down", f"najwyżej {MAX_BLOCKS} bloków; zwiększ krok Z "
-                         "lub uprość geometrię")]
+                         "lub uprość geometrię", step)]
     return []
 
 
@@ -108,13 +108,23 @@ class PathTrace(BaseMacroGenerator):
                    v["y"] + v["scale"] * (s * x + c * y)) for x, y in path] for path in paths]
         if any(abs(n) > 1000000 for path in paths for point in path for n in point):
             raise ValueError("przekształcona geometria w zakresie ±1000000")
-        return [path[::-1] for path in paths] if v["reverse"] else paths
+        result = []
+        for path in paths:
+            rounded = []
+            for point in path:
+                point = tuple(round(n, 4) for n in point)
+                if not rounded or point != rounded[-1]:
+                    rounded.append(point)
+            if len(rounded) < 2:
+                raise ValueError("skala zachowująca odcinki dłuższe od 0,0001")
+            result.append(rounded[::-1] if v["reverse"] else rounded)
+        return result
 
     def check(self, v, step):
         try:
-            return cut_check(v, self.paths(v))
+            return cut_check(v, self.paths(v), step)
         except ValueError as exc:
-            return [problem("paths", str(exc))]
+            return [problem("paths", str(exc), step)]
 
     def generate(self, v):
         return emit_paths(v, self.paths(v))

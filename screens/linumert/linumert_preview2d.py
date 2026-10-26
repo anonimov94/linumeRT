@@ -13,6 +13,7 @@ class Preview2D(QtWidgets.QWidget):
         super().__init__()
         self.c = colors
         self.lines: list = []
+        self.unit = "mm"
         self.setMinimumHeight(180)
 
     def set_lines(self, lines) -> None:
@@ -29,11 +30,16 @@ class Preview2D(QtWidgets.QWidget):
             return
         xs, ys = [x for x, _ in pts], [y for _, y in pts]
         w, h = max(max(xs) - min(xs), 1e-6), max(max(ys) - min(ys), 1e-6)
-        k = min((self.width() - 20) / w, (self.height() - 20) / h)
+        k = min((self.width() - 20) / w, (self.height() - 44) / h)
         ox = (self.width() - w * k) / 2 - min(xs) * k
-        oy = (self.height() + h * k) / 2 + min(ys) * k
+        oy = (self.height() - 24 + h * k) / 2 + min(ys) * k
         p.setPen(QtGui.QPen(QtGui.QColor(self.c["teal"]), 1.5))
         for ln in self.lines:
             poly = QtGui.QPolygonF([QtCore.QPointF(ox + x * k, oy - y * k) for x, y in ln])
             p.drawPolyline(poly)
+        p.setPen(QtGui.QColor(self.c.get("fg2", self.c["fg3"])))
+        caption = (f"X: {min(xs):.4f} … {max(xs):.4f}   Y: {min(ys):.4f} … {max(ys):.4f}"
+                   f"   [{self.unit}]")
+        p.drawText(self.rect().adjusted(8, self.height() - 24, -8, -4),
+                   QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter, caption)
         p.end()

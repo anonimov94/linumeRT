@@ -26,15 +26,26 @@ class EngraveText(PathTrace):
     name = "engrave_text"
     version = 1
     title = "Napis — kontury czcionki"
+    choice_labels = {
+        "font_style": {"regular": "Zwykła", "bold": "Pogrubiona", "italic": "Kursywa",
+                       "bold_italic": "Pogrubiona kursywa"},
+        "align": {"left": "Do lewej", "center": "Wyśrodkowany", "right": "Do prawej"},
+    }
     fields = TEXT_FIELDS + PathTrace.fields
 
     def normalize(self, params, step=0):
         # Literal text is metadata, never a G-code comment. Parentheses/newlines are valid glyphs.
         text = params.get("text", "linumeRT")
-        values, issues = super().normalize({**params, "text": ""}, step)
+        family = params.get("font_family", "IBM Plex Sans")
+        values, issues = super().normalize({**params, "text": "", "font_family": ""}, step)
+        if (not isinstance(family, str) or not family.strip() or len(family) > 128
+                or any(ord(c) < 32 for c in family)):
+            issues.append(problem("font_family", "nazwa czcionki, do 128 znaków", step))
+        else:
+            values["font_family"] = family
         if not isinstance(text, str) or not text.strip() or len(text) > 128 or any(
                 ord(c) < 32 and c != "\n" for c in text):
-            issues.append(problem("text", "od 1 do 128 znaków, bez znaków sterujących"))
+            issues.append(problem("text", "od 1 do 128 znaków, bez znaków sterujących", step))
         else:
             values["text"] = text
         return values, issues

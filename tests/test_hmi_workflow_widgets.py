@@ -656,6 +656,7 @@ def test_stl_dialog_background_section_and_stale_result(page_env, tmp_path):
     dialog.view.setCurrentText("XZ")
     from PyQt5 import QtWidgets
     QtWidgets.QApplication.processEvents()
+    assert dialog.width() <= 1280 and dialog.height() <= 768
     output = os.environ.get("LINUMERT_CAM_SHOT_DIR")
     if output:
         Path(output).mkdir(parents=True, exist_ok=True)

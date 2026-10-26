@@ -12,6 +12,11 @@ from .path_geometry import MAX_BLOCKS, cut_check, emit_paths, problem
 
 class FaceMillStrategies(FaceMill):
     version = 2
+    choice_labels = {
+        "mode": {"zigzag": "Zygzak", "one_way": "Jednokierunkowo",
+                 "crosshatch": "Przejścia krzyżowe", "concentric": "Kontury współśrodkowe"},
+        "direction": {"ccw": "Przeciwnie do wskazówek zegara", "cw": "Zgodnie z zegarem"},
+    }
     fields = tuple(
         replace(f, choices=("zigzag", "one_way", "crosshatch", "concentric"))
         if f.name == "mode" else
@@ -28,7 +33,7 @@ class FaceMillStrategies(FaceMill):
             return issues
         for key in ("x0", "x1", "y0", "y1", "z_top", "safe_z", "overrun", "tool_d"):
             if abs(v[key]) > 1000000:
-                return [problem(key, "wartość w zakresie ±1000000")]
+                return [problem(key, "wartość w zakresie ±1000000", step)]
         stride = v["tool_d"] * v["stepover"] / 100
         width, height = v["x1"] - v["x0"], v["y1"] - v["y0"]
         nx, ny = math.ceil(width / stride) + 1, math.ceil(height / stride) + 1
@@ -43,8 +48,8 @@ class FaceMillStrategies(FaceMill):
             count = 5 * n if v["mode"] == "one_way" else 2 * n + 3
         if count * math.ceil(v["depth"] / v["step_down"]) + 1 > MAX_BLOCKS:
             return [problem("stepover", "najwyżej 20000 bloków; zwiększ krok lub średnicę "
-                             "narzędzia, zmniejsz wybieg lub głębokość")]
-        return cut_check(v, self.paths(v))
+                             "narzędzia, zmniejsz wybieg lub głębokość", step)]
+        return cut_check(v, self.paths(v), step)
 
     def paths(self, v):
         stride = v["tool_d"] * v["stepover"] / 100
@@ -61,7 +66,8 @@ class FaceMillStrategies(FaceMill):
                 path = [(cx - a, cy - b), (cx + a, cy - b), (cx + a, cy + b),
                         (cx - a, cy + b), (cx - a, cy - b)]
                 paths.append(path[::-1] if v["direction"] == "cw" else path)
-            a, b = max(0, hx - (n - 1) * stride), max(0, hy - (n - 1) * stride)
+            # Finish the centre strip even when the last mathematical ring collapses to a point.
+            a, b = (abs(paths[-1][0][0] - cx), abs(paths[-1][0][1] - cy)) if paths else (hx, hy)
             paths.append([(cx - a, cy), (cx + a, cy)] if hx >= hy else
                          [(cx, cy - b), (cx, cy + b)])
             return [p for p in paths if p[0] != p[1]]

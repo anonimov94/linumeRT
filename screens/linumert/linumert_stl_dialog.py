@@ -12,6 +12,7 @@ from linumert.generators.path_geometry import decode_paths
 from linumert.programs.stl_section import read_stl, section_xy
 
 from linumert_preview2d import Preview2D
+from linumert_fonts import register
 from linumert_shell_model import load_tokens, shell_qss
 
 
@@ -48,6 +49,8 @@ class StlDialog(QtWidgets.QDialog):
     def __init__(self, parent, program_units, colors):
         super().__init__(parent)
         self.setObjectName("lrtRoot")
+        register()
+        self.setFont(QtGui.QFont("IBM Plex Sans", 10))
         self.setWindowTitle("STL — model i przekrój XY")
         self.resize(1200, 720)
         tokens = load_tokens()
@@ -63,36 +66,43 @@ class StlDialog(QtWidgets.QDialog):
         self._timer.timeout.connect(self._poll)
         layout = QtWidgets.QVBoxLayout(self)
         note = QtWidgets.QLabel("Model STL → przekrój XY → kontur do grawerowania. "
-                                "STL nie zawiera jednostek; wybierz je przed przeliczeniem.")
+                                "STL nie zawiera jednostek; wybierz je przed przeliczeniem. "
+                                "Wysokość skrawania ustawiasz osobno w Cyklach.")
         note.setWordWrap(True)
         layout.addWidget(note)
-        controls = QtWidgets.QHBoxLayout()
+        controls = QtWidgets.QGridLayout()
         self.choose = QtWidgets.QPushButton("Otwórz STL…")
         self.choose.clicked.connect(self.choose_file)
-        controls.addWidget(self.choose)
+        controls.addWidget(self.choose, 0, 0, 2, 1)
         self.units = QtWidgets.QComboBox()
         self.units.addItems(["mm", "cal"])
         self.scale = QtWidgets.QDoubleSpinBox()
         self.scale.setRange(0.001, 1000)
         self.scale.setDecimals(4)
         self.scale.setValue(1)
+        self.scale.setKeyboardTracking(False)
         self.z = QtWidgets.QDoubleSpinBox()
         self.z.setRange(-1000000, 1000000)
         self.z.setDecimals(4)
-        self.center = QtWidgets.QCheckBox("Wycentruj XY")
+        self.z.setKeyboardTracking(False)
+        self.center = QtWidgets.QPushButton("Wycentruj XY")
+        self.center.setCheckable(True)
         self.center.setChecked(True)
-        for label, widget in (("Jednostki STL", self.units), ("Skala", self.scale),
-                              (f"Przekrój Z [{'cal' if program_units == 'inch' else 'mm'}]", self.z)):
-            controls.addWidget(QtWidgets.QLabel(label))
-            controls.addWidget(widget)
+        for col, (label, widget) in enumerate((
+                ("Jednostki STL", self.units), ("Skala", self.scale),
+                (f"Przekrój Z [{'cal' if program_units == 'inch' else 'mm'}]", self.z)), 1):
+            controls.addWidget(QtWidgets.QLabel(label), 0, col)
+            controls.addWidget(widget, 1, col)
+            widget.setMinimumHeight(44)
             signal = widget.currentIndexChanged if widget is self.units else widget.valueChanged
             signal.connect(self._changed)
-        controls.addWidget(self.center)
+        controls.addWidget(self.center, 1, 4)
         self.center.toggled.connect(self._changed)
         layout.addLayout(controls)
         self.tabs = QtWidgets.QTabWidget()
         self.model_view = MeshPreview(self.colors)
         self.section_view = Preview2D(self.colors)
+        self.section_view.unit = "cal" if program_units == "inch" else "mm"
         self.tabs.addTab(self.model_view, "Model · siatka poglądowa do 2000 trójkątów")
         self.tabs.addTab(self.section_view, "Przekrój XY · pełna siatka")
         layout.addWidget(self.tabs, 1)
@@ -113,6 +123,7 @@ class StlDialog(QtWidgets.QDialog):
                                                   | QtWidgets.QDialogButtonBox.Cancel)
         self.apply = self.buttons.button(QtWidgets.QDialogButtonBox.Ok)
         self.apply.setText("Użyj przekroju")
+        self.buttons.button(QtWidgets.QDialogButtonBox.Cancel).setText("Anuluj")
         self.apply.setEnabled(False)
         self.buttons.accepted.connect(self.accept)
         self.buttons.rejected.connect(self.reject)
@@ -203,8 +214,9 @@ class StlDialog(QtWidgets.QDialog):
             self.message.setText("Parametry zmienione podczas obliczeń — przelicz ponownie.")
 
     def description(self):
-        return (f"{Path(self.source).name} | Z={self.z.value():g} | "
-                f"{self.units.currentText()} | skala={self.scale.value():g}").replace(
+        unit = "cal" if self.program_units == "inch" else "mm"
+        return (f"{Path(self.source).name} | przekrój Z={self.z.value():g} {unit} | "
+                f"STL={self.units.currentText()} | skala={self.scale.value():g}").replace(
                     "(", "[").replace(")", "]").replace("\n", " ")
 
     def accept(self):

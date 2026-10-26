@@ -265,9 +265,11 @@ class CyclesPage(QtWidgets.QWidget):
                 w.setMaximumHeight(96)
             elif f.kind == "choice":
                 w = QtWidgets.QComboBox()
-                w.addItems(list(f.choices))
+                labels = getattr(self._gen(), "choice_labels", {}).get(f.name, {})
+                for value in f.choices:
+                    w.addItem(labels.get(value, value), value)
                 if f.default is not None:
-                    w.setCurrentText(str(f.default))
+                    w.setCurrentIndex(w.findData(f.default))
                 if f.name == "direction" and self._gen().name.startswith("pocket_"):
                     w.setToolTip("Kieszeń, wrzeciono M3: ccw — współbieżnie; cw — przeciwbieżnie. "
                                  "Po zmianie kierunku wrzeciona zależność jest odwrotna.")
@@ -312,8 +314,26 @@ class CyclesPage(QtWidgets.QWidget):
         self.view2d.set_lines([])
         unit = "cal" if self.program.units == "inch" else "mm"
         self.result_tabs.setTabText(1, f"Geometria kroku · XY [{unit}]")
+        self.view2d.unit = unit
+        self._adapt_form()
+
+    def _adapt_form(self):
+        if self._gen().name == "shape_engrave":
+            shape = self.inputs["shape"].currentData()
+            strategy = self.inputs["strategy"].currentData()
+            for name, enabled in (("corner_r", shape == "rounded_rectangle"),
+                                  ("sides", shape in ("polygon", "star")),
+                                  ("inner", shape == "star"),
+                                  ("spacing", strategy != "outline"),
+                                  ("curve_tol", shape in ("ellipse", "rounded_rectangle"))):
+                self.inputs[name].setEnabled(enabled)
+        elif self._gen().name == "face_mill" and "axis" in self.inputs:
+            concentric = self.inputs["mode"].currentData() == "concentric"
+            self.inputs["axis"].setEnabled(not concentric)
+            self.inputs["direction"].setEnabled(concentric)
 
     def _form_changed(self):
+        self._adapt_form()
         self._draft_dirty = True
         self.view2d.set_lines([])
         self.lbl_step.setText("Zmieniono parametry — użyj Podgląd, Dodaj lub Zmień wybrany.")
@@ -352,8 +372,10 @@ class CyclesPage(QtWidgets.QWidget):
             w = self.inputs[f.name]
             if isinstance(w, QtWidgets.QPlainTextEdit):
                 out[f.name] = w.toPlainText()
-            elif isinstance(w, QtWidgets.QComboBox):
+            elif isinstance(w, QtWidgets.QFontComboBox):
                 out[f.name] = w.currentText()
+            elif isinstance(w, QtWidgets.QComboBox):
+                out[f.name] = w.currentData() if w.currentData() is not None else w.currentText()
             elif isinstance(w, QtWidgets.QCheckBox):
                 out[f.name] = w.isChecked()
             else:
@@ -470,7 +492,11 @@ class CyclesPage(QtWidgets.QWidget):
             elif isinstance(w, QtWidgets.QPlainTextEdit):
                 w.setPlainText(str(value))
             elif isinstance(w, QtWidgets.QComboBox):
-                w.setCurrentText(str(value))
+                index = w.findData(value)
+                if index >= 0:
+                    w.setCurrentIndex(index)
+                else:
+                    w.setCurrentText(str(value))
             elif isinstance(w, QtWidgets.QCheckBox):
                 w.setChecked(bool(value))
             elif isinstance(w, QtWidgets.QLineEdit):
