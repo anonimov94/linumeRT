@@ -1854,7 +1854,8 @@
       "remaining": [
         "Łuki między punktami końcowymi, obrót XY i limity osi obrotowych nie są sprawdzane.",
         "Automatyczne G43 po M6 (remap) i poprawne G43 w programie Facing z QtDragon (kod upstream) — osobna decyzja.",
-        "Odbiór na pulpicie właściciela."
+        "Odbiór na pulpicie właściciela.",
+        "Przegląd 2026-10-26: #172–174 wymagają poprawienia początku łuku po G92 i ekstremów helisy XZ/YZ po obrocie XY; odtworzone fałszywe wyniki bez przekroczeń."
       ],
       "evidence": [
         "core/linumert/programs/limits.py",
@@ -1863,7 +1864,8 @@
         "tests/test_hmi_workflow_widgets.py",
         "screens/linumert/linumert_program_editor.py",
         "screens/linumert/linumert_preflight.py",
-        "screens/linumert/linumert_shell.py"
+        "screens/linumert/linumert_shell.py",
+        "docs/raporty/PR_REVIEW_2026-10-26.md"
       ]
     },
     {

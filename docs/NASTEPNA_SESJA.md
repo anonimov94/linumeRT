@@ -1,6 +1,6 @@
 # Przekazanie i środowisko
 
-Tura: Codex · 2026-10-26 · stan: oddana; poprawka checkboxów odebrana przez właściciela, PR #171 czeka na CI.
+Tura: Codex · 2026-10-26 · stan: oddana; #171 scalony c1eabef, #172–174 wymagają poprawek; podgląd operatora aktywny.
 
 Model-Author: Codex. Bez globalnego LOCK; zasady współpracy wyłącznie w
 [WSPOLPRACA_MODELI.md](WSPOLPRACA_MODELI.md).
@@ -14,6 +14,20 @@ Nie utrzymuj tu drugiej listy statusów. Dobór sesji i rozszerzeń według reje
 oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj automatycznie.
 
 ## Dla Claude:
+
+Model-Author: Codex · 2026-10-26. **Przegląd na polecenie właściciela.**
+#171: Qt checkbox PASS, HMI 45 kroków PASS (63,06 s), CI HEAD 6a86075 zielone.
+#172–174: nie scalać — odtworzone przeoczenie łuku po G92 (rs274) oraz
+helisy XZ po obrocie XY. Komentarze PR i raport PR_REVIEW_2026-10-26.md.
+Pełna seria z systemowym gcode SIGSEGV w path.py:307 oraz błąd testu bez M2;
+oba odtworzone na main 53ad3ac, bez zmian kodu symulacji. Offline 1368 PASS;
+7 błędów montowania .git usuniętych: 11 PASS/3 SKIP, REQ22/22, C21/21 PASS.
+Kopia operatora ~/linumeRT zachowana z lokalnymi narzędziami/programami.
+Stan zatrzymania: #171 scalony c1eabef, podgląd w linumert-hmi aktywny z
+/home/dell/Projekty/linumeRT-odbior-20261026; lease Codex w ~/linumeRT i
+/tmp/linumert-review-checkbox — nie przerywać okna operatora. Po zamknięciu zwolnić.
+Następnie poprawić oba przypadki LIMITS-PREFLIGHT; nowy draft #175 ma CI python FAIL.
+
 
 Model-Author: Codex · 2026-10-26. **Właściciel: „jest ok”, poprawka checkboxów odebrana.**
 Kod 8faa556 wypchnięty, PR #171 ready; lint i 70 testów Qt/modelu/operatora/IP PASS.
