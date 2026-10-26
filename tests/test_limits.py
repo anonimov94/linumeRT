@@ -92,7 +92,7 @@ def test_cw_arc_between_same_endpoints_stays_inside_limits():
 
 
 def test_full_circle_checks_extrema_on_both_axes():
-    limits = {"X": (5.0, 15.0), "Y": (5.0, 15.0)}
+    limits = {"X": (6.0, 15.0), "Y": (6.0, 14.0)}
     canon = _canon("STRAIGHT_TRAVERSE(15, 10, 0, 0, 0, 0)",
                    "ARC_FEED(15, 10, 10, 10, 2, 0)")
     got = check_canon(canon, limits)
