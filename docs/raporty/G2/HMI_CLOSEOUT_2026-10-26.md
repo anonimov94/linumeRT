@@ -47,7 +47,7 @@ Wyniki z LinuxCNC (kod monitora ee722b6, host/samotest 6b82b95):
 - Qt/IP: 218 PASS, 101 subtestów PASS, 1 SKIP, 6 testów live poza tym wywołaniem.
   GL Mesa: 160 kombinacji rozmiarów/rodzin/motywów/języków PASS.
 - Fixture Plant: 1 live PASS w 133,88 s; endpoint ustalony po 1,053 s,
-  [100, 199,9977, −20] mm, peak f-error 0,19263 mm, errors_motion puste.
+  [100.0000, 199.9977, -20.0000] mm, peak f-error 0,19263 mm, errors_motion puste.
   Zainstalowany LinuxCNC, istniejące helpery RIP uruchomione przez adapter ścieżek
   wskazujący rzeczywiste binaria/moduły systemowe; nie nazywamy tego budową RIP.
   Ciągła tolerancja 5 µm przez 0,2 s; bez zmiany modelu, ramp, tolerancji lub limitu 60 s.

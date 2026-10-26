@@ -112,13 +112,15 @@ class NavigationRail(QtWidgets.QScrollArea):
         self.setFixedWidth(204 if columns == 2 else 116)
         self.panel.setStyleSheet("QToolButton#lrtRailBtn { min-height: 48px; font-size: 11px; }"
                                 if columns == 2 else "")
+        for row in range(self.grid.rowCount()):
+            self.grid.setRowStretch(row, 0)
         for button in self.buttons:
             self.grid.removeWidget(button)
         for index, button in enumerate(self.buttons):
             button.setMinimumHeight(48 if columns == 2 else 72)
             button.setIconSize(QtCore.QSize(18, 18) if columns == 2 else QtCore.QSize(24, 24))
             self.grid.addWidget(button, index // columns, index % columns)
-        self.grid.setRowStretch(len(self.buttons), 1)
+        self.grid.setRowStretch((len(self.buttons) + columns - 1) // columns, 1)
 
     def resizeEvent(self, event):  # noqa: N802 - Qt virtual method
         self.arrange(2 if event.size().height() < 1000 else 1)

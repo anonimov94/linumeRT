@@ -30,7 +30,7 @@ Cyberdeck AUTO PASS (NML/DTG/program/T1/D6), klatki 2,95–4,31 ms; GL 160 kombi
 Osadzony Cyberdeck: 45 kroków PASS po poprawce samotestu (jawne wejście w Start).
 Bloker CI home_and_move: próbka 99,9947 vs 100±0,005 po sleep(0,5). Dodano
 ciągłe ustalenie w tej samej tolerancji/limicie; 5 testów offline PASS, live PASS
-133,88 s, endpoint po 1,053 s, [100,199,9977,-20] mm. Obie lease zwolnione.
+133,88 s, endpoint po 1,053 s, [100.0000, 199.9977, -20.0000] mm. Obie lease zwolnione.
 Zlecone trzy grupy mają kod i lokalny odbiór; wymagane CI #169 nadal oczekiwane.
 Kolejna porcja: Cyberdeck — dwa podglądy współdzielą scenę Neon, własna nakładka
 narożników, 38 testów Qt/status PASS, 1 SKIP. Zrzut Qt sprawdzony; odbiór live nowej kompozycji otwarty.
