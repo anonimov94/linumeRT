@@ -1,6 +1,6 @@
 # Przekazanie i środowisko
 
-Tura: Codex · 2026-10-24 · stan: oddana; poprawka awarii podglądu D38 w PR #102, odbiór pełnego HMI PASS.
+Tura: Codex · 2026-10-26 · stan: oddana; trzy grupy HMI scalone w #169, pełne CI PASS.
 
 Model-Author: Codex. Bez globalnego LOCK; zasady współpracy wyłącznie w
 [WSPOLPRACA_MODELI.md](WSPOLPRACA_MODELI.md).
@@ -14,6 +14,15 @@ Nie utrzymuj tu drugiej listy statusów. Dobór sesji i rozszerzeń według reje
 oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj automatycznie.
 
 ## Dla Claude:
+
+Model-Author: Codex · 2026-10-26. **#169 scalony: 3c20817; zlecone trzy grupy odebrane.**
+Układ 1280×768, Cyberdeck z dwoma podglądami, rzeczywiste odczyty monitora.
+Kod e9ed723: CI python/plant-matrix/linuxcnc SUCCESS; 1542 testy + 184 subtesty
+w środowisku Qt oraz 154 live PASS (run40293747003), REQ 22/22, C PASS.
+Pełny raport i zrzuty: docs/raporty/G2/HMI_CLOSEOUT_2026-10-26.md.
+Obie lease zwolnione, kontenery testowe zakończone; checkout operatora zachowuje
+lokalne narzędzia/programy. Nowy kod: /home/dell/Projekty/linumeRT-hmi-closeout.
+Następnie odbiór pulpitu właściciela dla 028, potem pozostały zakres M2 według rejestru.
 
 Model-Author: Codex · 2026-10-26. **Kontynuacja zlecona przez właściciela: 028 → HMI-OWNER-SKINS → monitor Neon.**
 Osobny checkout `/home/dell/Projekty/linumeRT-hmi-closeout`, gałąź `codex/hmi-028-closeout`.
@@ -31,7 +40,7 @@ Osadzony Cyberdeck: 45 kroków PASS po poprawce samotestu (jawne wejście w Star
 Bloker CI home_and_move: próbka 99,9947 vs 100±0,005 po sleep(0,5). Dodano
 ciągłe ustalenie w tej samej tolerancji/limicie; 5 testów offline PASS, live PASS
 133,88 s, endpoint po 1,053 s, [100.0000, 199.9977, -20.0000] mm. Obie lease zwolnione.
-Zlecone trzy grupy mają kod i lokalny odbiór; wymagane CI #169 nadal oczekiwane.
+Zlecone trzy grupy mają kod i lokalny odbiór; wymagane CI #169 zakończone SUCCESS dla e9ed723, scalenie 3c20817.
 Kolejna porcja: Cyberdeck — dwa podglądy współdzielą scenę Neon, własna nakładka
 narożników, 38 testów Qt/status PASS, 1 SKIP. Zrzut Qt sprawdzony; odbiór live nowej kompozycji otwarty.
 
