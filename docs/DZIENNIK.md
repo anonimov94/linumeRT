@@ -1507,3 +1507,8 @@ bez podłączenia opisane jawnie. NIEZWERYFIKOWANE NA SPRZĘCIE.
 - Model-Author: Codex. NML: posuw toru mm/min, zadane obroty rpm, numer narzędzia, średnica i offset Z tabeli; brak danych pozostaje jawny.
 - Program pokazuje źródło wczytane z rzeczywistego pliku oraz zaznaczenie motion_line. Utrata statusu czyści odczyty i program; zmiana rodziny korzysta z tej samej próbki.
 - 46 testów Qt/status PASS, 1 SKIP; walidacja NaN/ujemnych danych, przeliczenie cali i czyszczenie danych. Odbiór ruchu/DTG i trzech presetów trwa w odizolowanym LinuxCNC.
+
+## CI LinuxCNC — budżet pełnej serii · 2026-10-26 · Codex
+- Model-Author: Codex. Run40285964696 osiągnął około 70% po 35 min i został anulowany; sam test kalibracji sondy trwał około 7 min.
+- Budżet całego zadania podniesiony do 60 min, aby otrzymać końcowy raport. Bez usuwania testów, zmiany timeoutów pojedynczych prób, progów lub modelu.
+- Wcześniejszy FAILED home_and_move pozostaje jawnie nierozliczony; większy budżet nie oznacza jego naprawy.

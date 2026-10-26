@@ -32,7 +32,9 @@ jobs:
     defaults:
       run:
         shell: bash
-    timeout-minutes: 35
+    # The full serial suite now exceeds 35 minutes (probe calibration alone ~7 min).
+    # Keep all checks and per-test limits; allow the complete run to report failures.
+    timeout-minutes: 60
     steps:
       # Git przed checkoutem: bez niego actions/checkout pobiera archiwum bez .git i krok
       # `git diff --check` w runnerze kończy się błędem (run 39121565345).
