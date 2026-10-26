@@ -364,3 +364,37 @@ Przed scaleniem naprawiamy odtworzone błędy, testujemy i rozliczamy CI; zachow
 historię przez merge commit i lokalne dane operatora. Polecenie obejmuje domknięcie
 rozpoczętych porcji, nie zamyka wcześniejszych bramek ani całej sesji 069. Po scaleniu
 wracamy do najwcześniejszego otwartego kryterium rejestru.
+
+## Licencja PyQt5 a dystrybucja na GPL-2.0 — 2026-10-26 · Claude · PROPOZYCJA
+
+Model-Author: Claude. Powód: kontrola licencji (Grok, 2026-10-26) wskazała PyQt5 (GPL-3.0-only) jako
+konflikt z D14 („całość rozpowszechniana na GPL-2.0”). `docs/LICENCJE.md` miał ten punkt jako „do
+potwierdzenia” (sesje 005/080). Poniżej stan faktyczny i rekomendacja; **to nie jest porada prawna** —
+ostateczne rozstrzygnięcie przed publiczną premierą (sesja 080).
+
+**Stan faktyczny (repozytorium `main`, 2026-10-26)**
+- ~50 plików ekranu `screens/linumert/` importuje `PyQt5` bezpośrednio (nie przez `qtpy`; `qtpy` jest tylko
+  w 2 plikach), plus `core/linumert/diag/doctor.py` i ~45 plików testów. Nasze pliki mają nagłówek
+  `SPDX-License-Identifier: GPL-2.0-or-later`.
+- Kopia bazowa QtDragon (`linumert_upstream_handler.py`) importuje `PyQt5` i `qtvcp.*`; QtVCP w LinuxCNC 2.9
+  jest zbudowany na PyQt5 — każda instalacja ekranu QtVCP ma tę zależność niezależnie od nas.
+- `UPSTREAM.md` zapisuje licencję kopii jako „GPL-2.0 (LinuxCNC, COPYING)”; nie sprawdzono, czy poszczególne
+  pliki QtVCP mają klauzulę „or later”.
+
+**Ocena (do potwierdzenia)**
+1. Nasz kod jest GPL-2.0-or-later, więc połączone dzieło może zostać rozpowszechnione na GPL-3.0, jeśli
+   wszystkie składniki ze strony LinuxCNC/QtDragon też dopuszczają „or later”. Wtedy PyQt5 (GPL-3.0) nie
+   blokuje dystrybucji — blokuje ją tylko wyłączna GPL-2.0-only w którymś linkowanym składniku.
+   Stwierdzenie „realny konflikt” (Grok) jest więc możliwe, ale **niezweryfikowane**.
+2. Sformułowanie D14 „na GPL-2.0” jest zbyt wąskie; zamiast tego: „GPL-2.0-or-later, dystrybucja całości
+   zgodnie z najsilniejszą z licencji składników (GPL-3.0 przy PyQt5)”.
+3. Migracja na PySide6 (LGPL) oznacza odejście od QtVCP z LinuxCNC 2.9 (PyQt5) lub utrzymanie własnej
+   gałęzi: koszt wysoki (~50 plików ekranu + testy), korzyść licencyjna niepewna.
+
+**Rekomendacja**
+- Nie migrować do PySide teraz. Zostać przy PyQt5/QtVCP (zgodnie z D02).
+- Zadania weryfikacyjne przed sesją 080: (a) sprawdzić nagłówki licencyjne plików QtVCP/QtDragon użytych w
+  kopii (czy „GPL-2.0-or-later”); (b) ustalić z opinią prawną, czy dystrybucja na GPL-3.0 jest
+  dopuszczalna dla projektu z kodem IgH/lcec (GPL-2.0, osobne procesy/moduły); (c) zaktualizować D14 i
+  `docs/LICENCJE.md` po wyniku; (d) opcjonalnie: koszt przejścia na `qtpy` we wszystkich plikach ekranu.
+- Do czasu wyniku: dystrybucja binarna/obrazu z PyQt5 wstrzymana, repozytorium źródłowe bez zmian.
