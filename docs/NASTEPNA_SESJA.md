@@ -15,6 +15,16 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · 2026-10-26. **Przegląd na polecenie właściciela.**
+#171: Qt checkbox PASS, HMI 45 kroków PASS (63,06 s), CI HEAD 6a86075 zielone.
+#172–174: nie scalać — odtworzone przeoczenie łuku po G92 (rs274) oraz
+helisy XZ po obrocie XY. Komentarze PR i raport PR_REVIEW_2026-10-26.md.
+Pełna seria z systemowym gcode SIGSEGV w path.py:307 oraz błąd testu bez M2;
+oba odtworzone na main 53ad3ac, bez zmian kodu symulacji. Offline trwa osobno.
+Kopia operatora ~/linumeRT zachowana z lokalnymi narzędziami/programami.
+Stan zatrzymania: dowody gotowe; zakończyć offline, scalić gotowe #171, otworzyć HMI.
+
+
 Model-Author: Codex · 2026-10-26. **#169 scalony: 3c20817; zlecone trzy grupy odebrane.**
 Układ 1280×768, Cyberdeck z dwoma podglądami, rzeczywiste odczyty monitora.
 Kod e9ed723: CI python/plant-matrix/linuxcnc SUCCESS; 1542 testy + 184 subtesty
