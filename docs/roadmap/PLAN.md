@@ -626,9 +626,9 @@ Pozostaje: Remap M6, widok magazynu, scenariusze ATC i walidacja geometrii/stref
 
 ### 069 — Diagnostyka napędów
 
-**częściowe**. Diagnostyka HMI i historia komunikatów dostępne.
+**częściowe**. Diagnostyka HMI i historia komunikatów dostępne. Dekoder statusword CiA 402 i grup błędów 0x603F w rdzeniu (core/linumert/diag/cia402.py, 63 testy), PR #175; bez widoku HMI.
 
-Pozostaje: Dekoder CiA402, wykresy napędów, ethercat slaves/master i test fault.
+Pozostaje: Widok dekodera w HMI (tabela napędów), wykresy napędów, ethercat slaves/master i test fault.
 
 Źródła: [docs/DZIENNIK.md](../DZIENNIK.md), [prompts/sesja-069.md](../../prompts/sesja-069.md).
 

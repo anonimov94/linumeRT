@@ -1039,12 +1039,14 @@
       "title": "Diagnostyka napędów",
       "prompt": "prompts/sesja-069.md",
       "status": "partial",
-      "progress": "Diagnostyka HMI i historia komunikatów dostępne.",
+      "progress": "Diagnostyka HMI i historia komunikatów dostępne. Dekoder statusword CiA 402 i grup błędów 0x603F w rdzeniu (core/linumert/diag/cia402.py, 63 testy), PR #175; bez widoku HMI.",
       "remaining": [
-        "Dekoder CiA402, wykresy napędów, ethercat slaves/master i test fault."
+        "Widok dekodera w HMI (tabela napędów), wykresy napędów, ethercat slaves/master i test fault."
       ],
       "evidence": [
-        "docs/DZIENNIK.md"
+        "docs/DZIENNIK.md",
+        "core/linumert/diag/cia402.py",
+        "tests/test_cia402.py"
       ]
     },
     {

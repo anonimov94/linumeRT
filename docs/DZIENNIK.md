@@ -1529,3 +1529,8 @@ bez podłączenia opisane jawnie. NIEZWERYFIKOWANE NA SPRZĘCIE.
 - LinuxCNC run40293747003: 1542 PASS + 184 subtesty, 154 live PASS; Cyberdeck host i home_and_move PASS. Python run40293746655: 1407 PASS, REQ 22/22, C PASS; macierz Plant SUCCESS.
 - Zlecone trzy grupy mają kod, lokalne i zdalne dowody odbioru. 028/SKIN pozostają partial; następnie odbiór pulpitu właściciela i dalsze M2 według rejestru.
 - Wszystko wypchnięte, obie lease zwolnione, kontenery testowe zakończone. Lokalna kopia operatora zachowuje własne narzędzia/programy.
+
+## 069 — Diagnostyka napędów: dekoder CiA 402 · 2026-10-26 · ChatGPT
+- Model-Author: ChatGPT (koordynacja: Claude). Zrobione: dekoder 0x6041 (8 stanów + nieznany, flagi bitów 4/7/9/10/11, surowe bity 12–13) i grup błędów 0x603F, własne opisy PL; tylko diagnostyka.
+- Przegląd Claude: 63 testy PASS, test_ip_guard PASS, ruff PASS po poprawkach.
+- Do sprawdzenia ręcznie / długi: widok w HMI wg makiety 04, wykresy ≤ 20 Hz, ethercat slaves/master, fault z Plant. NIEZWERYFIKOWANE NA SPRZĘCIE.
