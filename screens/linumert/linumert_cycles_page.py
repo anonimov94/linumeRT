@@ -30,7 +30,7 @@ for _p in (os.path.join(ROOT, "core"),):
     if _p not in sys.path:
         sys.path.insert(0, _p)
 
-from linumert.generators import basic, contours, drilling, pockets, subroutines  # noqa: E402
+from linumert.generators import basic, contours, drilling, pockets, shapes, subroutines  # noqa: E402
 from linumert.generators.registry import GeneratorRegistry  # noqa: E402
 from linumert.generators.tooling import check_steps  # noqa: E402
 from linumert.programs.compiler import CompileError, compile_program  # noqa: E402
@@ -41,7 +41,7 @@ ACTION = Action()
 GENERATORS = (basic.Header, basic.ToolChange, basic.FaceMill, drilling.DrillHoles,
               pockets.PocketRect, pockets.PocketCircle,
               contours.SlotLinear, contours.SlotArc, contours.StudRect, contours.StudCircle,
-              contours.Contour, basic.ProgramEnd)
+              contours.Contour, shapes.ShapeEngrave, basic.ProgramEnd)
 
 
 
@@ -65,7 +65,7 @@ class CyclesPage(QtWidgets.QWidget):
         self.setObjectName("lrtPage")
         self.shell = shell
         self.registry = GeneratorRegistry()
-        for group in (basic, drilling, pockets, contours):
+        for group in (basic, drilling, pockets, contours, shapes):
             group.register(self.registry)
         self.program = LnxProgram(name="Program z cykli")
         self.lnx_path = None
@@ -357,6 +357,9 @@ class CyclesPage(QtWidgets.QWidget):
             self.lbl_issue.setText(entry[values.get("entry", "plunge")] + finish +
                                    " Sprawdź w symulacji.")
         self._last = Step(generator=gen.name, version=gen.version, params=values)
+        if gen.name == "shape_engrave":
+            self.lbl_issue.setText("Grawerowanie po środku narzędzia, bez korekcji promienia. "
+                                   "Odstęp kreskowania nie określa szerokości rowka.")
         return lines
 
     # ---- program --------------------------------------------------------------------------
