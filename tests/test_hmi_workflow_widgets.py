@@ -571,13 +571,20 @@ def test_cycles_inline_validation_and_uncommitted_load(page_env, monkeypatch):
 
 
 def test_cycles_layout_and_graphical_preview(page_env, monkeypatch):
-    from PyQt5 import QtCore, QtWidgets
+    import linumert_fonts
+    import linumert_shell_model as model
+    from PyQt5 import QtCore, QtGui, QtWidgets
 
     module, page, _shell = _cycles(page_env, monkeypatch)
+    linumert_fonts.register()
+    page.setFont(QtGui.QFont("IBM Plex Sans", 10))
+    page.setObjectName("lrtRoot")
+    page.setStyleSheet(model.shell_qss(model.load_tokens()))
     _face_step(page)
     page.resize(1280, 768)
     page.show()
     QtWidgets.QApplication.processEvents()
+    assert page.width() == 1280 and page.height() == 768
     for button in page.findChildren(QtWidgets.QPushButton):
         if button.isVisible():
             assert page.rect().contains(QtCore.QRect(button.mapTo(page, QtCore.QPoint()),

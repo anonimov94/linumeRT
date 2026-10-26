@@ -13,7 +13,7 @@ class StepEditor:
     """Validate before replacing a program; retain at most 100 undo states."""
 
     def __init__(self, program: LnxProgram, registry):
-        self.program = program
+        self.program = program.model_copy(deep=True)
         self.registry = registry
         self.selected = -1
         self._undo: list[tuple[LnxProgram, int]] = []

@@ -1606,3 +1606,12 @@ zachowano regresje jednostek A/B/C i początku łuku po zmianie obrotu XY.
 Końcowa różnica #178 obejmuje dokumentację i wygenerowane widoki roadmapy;
 scalenie po zielonym CI aktualnego HEAD, autokontrola bez niezależnego przeglądu.
 Odbiór pulpitu i pozostały zakres 069 nadal otwarte; NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## 045 — Edycja kroków programu dialogowego · 2026-10-26 · Codex
+- Model-Author: Codex. Backend StepEditor zatwierdza poprawny program atomowo; do 100 zmian Cofnij/Ponów.
+- GUI Cykle: przesuwanie, niezależna kopia, wyłączenie/włączenie i usunięcie zaznaczonego kroku.
+- Błędy przy polach po 300 ms; zmiana parametrów unieważnia geometrię i wymaga zatwierdzenia przed eksportem.
+- 19 testów modelu/Qt PASS; layout 1280×768 i zrzut build/cycles-editing.png; ruff i REQ 22/22 PASS.
+- Szersza próba Windows: 182 PASS, 1 SKIP; 4 FAIL dotyczą lokalizacji liczb, skryptu rs274 i braku rdzenia C.
+- Kontrole Debian/LinuxCNC w PR #180. Autokontrola; odbiór pulpitu i pozostały zakres 045 nadal otwarte.
+- NIEZWERYFIKOWANE NA SPRZĘCIE.

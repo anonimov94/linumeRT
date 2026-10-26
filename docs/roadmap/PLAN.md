@@ -446,11 +446,11 @@ Pozostaje: Odbiór wszystkich wzorów, cykli, walidacji i podglądu przez GUI.
 
 ### 045 — Panel programu dialogowego
 
-**częściowe**. Panel Cykle: formularze, lista, edycja i pliki .lnx (#59).
+**częściowe**. Panel Cykle: formularze, lista, edycja i pliki .lnx (#59). 2026-10-26: StepEditor bez Qt, atomowe zmiany i 100 poziomów Cofnij/Ponów; GUI przesuwa, duplikuje, wyłącza i usuwa wybrany krok. Walidacja przy polach po 300 ms, nieaktualna geometria czyszczona; eksport wymaga zatwierdzenia formularza. 19 testów modelu/Qt PASS, układ 1280×768 i podgląd XY; PR #180.
 
-Pozostaje: Komplet operacji kroków, walidacja przy polach i kryteria oryginalnego promptu.
+Pozostaje: Wybór narzędzia z ToolDB filtrowany typem, kategorie generatorów i pełny odbiór oryginalnego promptu na docelowym pulpicie.
 
-Źródła: [docs/DZIENNIK.md](../DZIENNIK.md), [prompts/sesja-045.md](../../prompts/sesja-045.md).
+Źródła: [docs/DZIENNIK.md](../DZIENNIK.md), [core/linumert/programs/step_editor.py](../../core/linumert/programs/step_editor.py), [tests/test_step_editor.py](../../tests/test_step_editor.py), [prompts/sesja-045.md](../../prompts/sesja-045.md).
 
 ### 046 — Podglądy 2D w formularzach
 

@@ -15,6 +15,14 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · 2026-10-26. **Bieżące zlecenie: backend i funkcje w GUI z edycją.**
+Porcja sesji 045 w PR #180, gałąź codex/cycles-editing: transakcyjny model kroków,
+przesuwanie/duplikacja/wyłączenie/usuwanie wybranego, Cofnij/Ponów, walidacja przy polach
+oraz zatwierdzanie parametrów przed zapisem/wczytaniem. Odbiór Qt bez maszyny:
+19 testów modelu/cykli PASS; zrzut build/cycles-editing.png, layout 1280×768.
+Stan zatrzymania: kontrole Debiana/LinuxCNC w #180; wcześniejsze bramki nadal otwarte.
+Pozostały zakres 045 i kolejność dalszej pracy wyłącznie w rejestrze roadmapy.
+
 Model-Author: Codex · 2026-10-26. **Nowe polecenie: scalić wszystkie PR i gałęzie.**
 #172 e7aa88a, #173 6818708, #174 69dfeb6: odtworzone błędy G92 i helisy poprawione;
 60 testów/4 subtesty PASS, w tym rs274. #175 b1d9226 / #177 4639b83:

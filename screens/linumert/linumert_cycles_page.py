@@ -23,7 +23,7 @@ from concurrent.futures import ThreadPoolExecutor
 import linumert_shell_pages as pages
 from linumert_preview2d import Preview2D
 from linumert_sim_page import ROOT
-from PyQt5 import QtCore, QtWidgets
+from PyQt5 import QtCore, QtGui, QtWidgets
 from qtvcp.core import Action
 
 for _p in (os.path.join(ROOT, "core"),):
@@ -85,12 +85,18 @@ class CyclesPage(QtWidgets.QWidget):
         grid.setContentsMargins(16, 16, 16, 16)
         grid.setSpacing(16)
         frame, lay, self.lbl_step = pages.card("Cykl", "")
+        self.lbl_step.setWordWrap(True)
+        self.lbl_step.setMaximumWidth(240)
         self.cmb = QtWidgets.QComboBox()
         for cls in GENERATORS:
             self.cmb.addItem(cls.title, cls)
         self.cmb.currentIndexChanged.connect(self._build_form)
         lay.addWidget(self.cmb)
         self.form_box = QtWidgets.QWidget()
+        self.form_box.setObjectName("lrtCycleFields")
+        colors = {**pages.model.load_tokens()["kolory"], **shell.c}
+        self.form_box.setStyleSheet(
+            f"QWidget#lrtCycleFields {{ background: {colors['bg2']}; }}")
         self.form = QtWidgets.QFormLayout(self.form_box)
         scroll = QtWidgets.QScrollArea()
         scroll.setWidgetResizable(True)
@@ -111,6 +117,11 @@ class CyclesPage(QtWidgets.QWidget):
         self.view2d = Preview2D(shell.c)
         frame, lay, self.lbl_prog = pages.card("Program z kroków", "0 kroków")
         self.step_list = QtWidgets.QListWidget()
+        palette = self.step_list.palette()
+        palette.setColor(QtGui.QPalette.Text, QtGui.QColor(colors["fg"]))
+        palette.setColor(QtGui.QPalette.Highlight, QtGui.QColor(colors["tealbg"]))
+        palette.setColor(QtGui.QPalette.HighlightedText, QtGui.QColor(colors["teal"]))
+        self.step_list.setPalette(palette)
         self.step_list.setMaximumHeight(110)
         self.step_list.currentRowChanged.connect(self.select_step)
         lay.addWidget(self.step_list)
@@ -130,6 +141,11 @@ class CyclesPage(QtWidgets.QWidget):
         self.code.setReadOnly(True)
         self.code.setLineWrapMode(QtWidgets.QPlainTextEdit.NoWrap)
         self.result_tabs = QtWidgets.QTabWidget()
+        self.result_tabs.setStyleSheet(
+            f"QTabBar::tab {{ background: {colors['panel']}; color: {colors['fg2']}; "
+            "padding: 8px; }"
+            f"QTabBar::tab:selected {{ color: {colors['teal']}; "
+            f"background: {colors['tealbg']}; }}")
         self.result_tabs.addTab(self.code, "G-code programu")
         self.result_tabs.addTab(self.view2d, "Geometria kroku · XY")
         lay.addWidget(self.result_tabs, 1)
@@ -254,6 +270,9 @@ class CyclesPage(QtWidgets.QWidget):
             error.hide()
             cell_layout.addWidget(error)
             self.form.addRow(label, cell)
+            self.form.labelForField(cell).setWordWrap(True)
+            self.form.labelForField(cell).setMaximumWidth(150)
+            self.form.labelForField(cell).setMinimumWidth(150)
             self.inputs[f.name] = w
             self.field_errors[f.name] = error
             signal = (w.currentIndexChanged if isinstance(w, QtWidgets.QComboBox) else
