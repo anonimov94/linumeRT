@@ -152,6 +152,7 @@ Nie są kolejnym harmonogramem. Ich status dotyczy tylko wskazanego kroku.
 | PLANT-SUBSTEPS | 049, 063 | Plant: wynik niezależny od podkroków całkowania | ukończone |
 | HMI-OWNER-SKINS | 028 | Odrębny wygląd każdej skórki i główny ekran holograficzny | częściowe |
 | CAM-2D-TEXT-STL | 040, 043, 045, 046 | Strategie CAM 2D, napisy i przekroje STL | ukończone |
+| WEB-HMI-POC | 028, 055 | Web HMI: brama, DRO i scena WebGL | planowane |
 
 ## Postęp, pozostały zakres i dowody
 
@@ -1022,4 +1023,12 @@ Pozostaje: Odbiór nowego układu na pulpicie właściciela: porównanie czterec
 **ukończone**. Polecenie właściciela 2026-10-26: więcej strategii, kształtów, napisy/czcionki i STL. Planowanie v2 X/Y: zygzak, jednokierunkowo, krzyżowo i współśrodkowo CW/CCW; v1 zachowana. Kształty parametryczne z konturem i kreskowaniem, tolerancja krzywych; napisy z czcionką, stylem, rozmiarem i układem. STL ASCII/binary w tle, model poglądowy 3D i zamknięty przekrój XY do kroku. Geometria utrwalona w .lnx, zoom/pan, GUI 1280×768; kontrola zakresów i budżetów. Zakres STL ograniczony do przekroju XY, bez frezowania powierzchni 3D. Autokontrola i dowody PR #184; nie zamyka odbioru pulpitu ani M3/M4.
 
 Źródła: [PR](https://github.com/anonimov94/linumeRT/pull/184), [docs/raporty/CAM_2D_2026-10-26.md](../raporty/CAM_2D_2026-10-26.md), [core/linumert/generators/shapes.py](../../core/linumert/generators/shapes.py), [core/linumert/generators/engraving.py](../../core/linumert/generators/engraving.py), [core/linumert/generators/surfacing.py](../../core/linumert/generators/surfacing.py), [core/linumert/programs/stl_section.py](../../core/linumert/programs/stl_section.py), [tests/test_cam_interpreter.py](../../tests/test_cam_interpreter.py).
+
+### WEB-HMI-POC — Web HMI: brama, DRO i scena WebGL
+
+**planowane**. Kierunek HTML/WebGL potwierdzony przez właściciela w decyzji Claude #183. Synteza z #184 zachowuje wspólny backend CAM i działający Qt jako ekran awaryjny; dalszy rozwój GUI Qt zamrożony po domknięciu tej porcji.
+
+Pozostaje: Kontrakt bramy poza RT korzystającej ze stanów i komend LinuxCNC oraz dotychczasowych wymagań D35/HAL. DRO i scena WebGL na atrapie, z tymi samymi modelami i generatorami rdzenia; rejestr nowych zasobów i zależności. Testy bez LinuxCNC i odbiór PoC na LinuxCNC sim/Plant według decyzji #183.
+
+Źródła: [docs/DECYZJE.md](../DECYZJE.md), [docs/SYNTEZA_MODELI_2026-10-26.md](../SYNTEZA_MODELI_2026-10-26.md), [PR](https://github.com/anonimov94/linumeRT/pull/183).
 

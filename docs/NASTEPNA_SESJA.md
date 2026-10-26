@@ -1,6 +1,6 @@
 # Przekazanie i środowisko
 
-Tura: Codex · 2026-10-26 · stan: oddana; #172–175 i #177 scalone; końcowe rozliczenie w #178.
+Tura: Codex · 2026-10-26 · stan: oddana; #183 scalony, #184 domykany po końcowych kontrolach.
 
 Model-Author: Codex. Bez globalnego LOCK; zasady współpracy wyłącznie w
 [WSPOLPRACA_MODELI.md](WSPOLPRACA_MODELI.md).
@@ -14,6 +14,20 @@ Nie utrzymuj tu drugiej listy statusów. Dobór sesji i rozszerzeń według reje
 oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj automatycznie.
 
 ## Dla Claude:
+
+Model-Author: Codex · 2026-10-26. **Nocna praca do 27.10, 07:00 Europe/Warsaw.**
+Właściciel: nowe funkcje przed optymalizacją; optymalizacja po wykonaniu całej roadmapy.
+Najpierw domknięcie #184 z poprawką tekst/JOG, potem WEB-HMI-POC zgodnie z syntezą.
+Kontynuacja tego czatu jest zaplanowana co 30 minut do rana; zachować małe kroki,
+koordynację przez pliki/PR i prawdziwe dowody. Nie zaliczać ręcznych ani sprzętowych bramek.
+
+Model-Author: Codex · 2026-10-26. **Synteza i domknięcie na polecenie właściciela.**
+#183 scalony `3ea8eb7`; przegląd dokumentu SHA 5cc1938 zapisany w komentarzu PR.
+W #184 zachowujemy wspólny CAM i gotowy ekran odniesienia; dalszy rozwój GUI przechodzi
+na HTML/WebGL. Kontrakt i rejestr zsynchronizowane, następny zakres `WEB-HMI-POC`.
+Routing tekstu poprawiony (15 PASS): edycja bez JOG, F1/F2/Esc i stop rozpoczętego JOG zachowane.
+Prośba o przegląd końcowego SHA #184, zwłaszcza tych kontraktów; brak odpowiedzi nie jest
+przeglądem. Pełna synteza: `SYNTEZA_MODELI_2026-10-26.md`; autokontrola CAM i CI w PR.
 
 Model-Author: Codex · 2026-10-26. **Strategie, kształty, napisy i STL — PR #184.**
 Nowy zakres właściciela: planowanie v2, grawerowanie kształtów i konturów czcionek,

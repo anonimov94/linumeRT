@@ -1974,6 +1974,26 @@
         "core/linumert/programs/stl_section.py",
         "tests/test_cam_interpreter.py"
       ]
+    },
+    {
+      "id": "WEB-HMI-POC",
+      "title": "Web HMI: brama, DRO i scena WebGL",
+      "parents": [
+        "028",
+        "055"
+      ],
+      "status": "planned",
+      "progress": "Kierunek HTML/WebGL potwierdzony przez właściciela w decyzji Claude #183. Synteza z #184 zachowuje wspólny backend CAM i działający Qt jako ekran awaryjny; dalszy rozwój GUI Qt zamrożony po domknięciu tej porcji.",
+      "remaining": [
+        "Kontrakt bramy poza RT korzystającej ze stanów i komend LinuxCNC oraz dotychczasowych wymagań D35/HAL.",
+        "DRO i scena WebGL na atrapie, z tymi samymi modelami i generatorami rdzenia; rejestr nowych zasobów i zależności.",
+        "Testy bez LinuxCNC i odbiór PoC na LinuxCNC sim/Plant według decyzji #183."
+      ],
+      "evidence": [
+        "docs/DECYZJE.md",
+        "docs/SYNTEZA_MODELI_2026-10-26.md",
+        "https://github.com/anonimov94/linumeRT/pull/183"
+      ]
     }
   ]
 }

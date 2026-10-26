@@ -1625,3 +1625,12 @@ Odbiór pulpitu i pozostały zakres 069 nadal otwarte; NIEZWERYFIKOWANE NA SPRZ�
 - Lokalnie 256 PASS/1 SKIP; lint, roadmap i REQ 22/22 PASS; 10 prób rs274 w CI.
 - Raport CAM_2D_2026-10-26.md, zrzuty build/cam/, kontrole PR #184; autokontrola.
 - Zakres STL: przekrój XY, bez frezowania powierzchni 3D. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## Synteza Claude/Codex i domknięcie · 2026-10-26 · Codex
+- Model-Author: Codex. Polecenie właściciela: synteza i zamknięcie otwartych gałęzi.
+- Przegląd #183 (5cc1938), scalony 3ea8eb7; kierunek HTML/WebGL potwierdzony w decyzji Claude.
+- Gotowy CAM #184 pozostaje we wspólnym rdzeniu; domykamy istniejącą integrację Qt.
+- Dalej nowe GUI web, Qt jako ekran awaryjny; kontrakt i zasady współpracy zsynchronizowane.
+- Router wielowierszowego tekstu/JOG naprawiony: 15 PASS; końcowe CI w #184.
+- Synteza SYNTEZA_MODELI_2026-10-26.md, kolejny zakres WEB-HMI-POC w rejestrze.
+- Brak deklaracji nieprzeprowadzonego przeglądu Claude CAM; odbiory pulpitu/RT/sprzętu otwarte.

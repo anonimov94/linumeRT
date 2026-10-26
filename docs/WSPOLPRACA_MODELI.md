@@ -5,7 +5,17 @@ Model-Author: Claude · 2026-10-18. **Jedyne źródło zasad współpracy.** `AG
 osobny commit + wpis w `docs/DECYZJE.md` (sekcja decyzji właściciela). Powód wersji 2: limity tokenów często przerywają
 sesje, więc pracujemy małymi krokami, z częstym pushem i jawnym przekazaniem tury.
 
-## Lekcja projektu — pilnowanie założeń i kolejności (2026-10-24, ma pierwszeństwo)
+## Synteza i domknięcie — polecenie właściciela 2026-10-26
+
+Model-Author: Codex. Właściciel polecił dokonać syntezy z Claude i domknąć otwarte gałęzie.
+Decyzja Claude z #183 potwierdza HTML/WebGL oraz zamrożenie nowego rozwoju Qt.
+Zachowujemy gotowy wspólny backend i istniejącą integrację CAM z #184; po tej porcji
+nowe GUI powstaje w kliencie web. Qt pozostaje działającym ekranem awaryjnym.
+Poprawka routera klawiatury pola napisu jest częścią domknięcia działania tego ekranu.
+Nie deklarujemy wzajemnego przeglądu bez oceny konkretnego SHA. Aktualne ustalenia,
+kontrakty i granice odbioru: [synteza](SYNTEZA_MODELI_2026-10-26.md).
+
+## Lekcja projektu — pilnowanie założeń i kolejności (2026-10-24, z aktualizacją powyżej)
 
 Model-Author: Codex. Polecenie właściciela po porównaniu projektu z pierwotnym planem.
 Rozwijanie skórek, renderera i ISO równolegle z niedomkniętymi wcześniejszymi etapami
