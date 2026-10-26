@@ -152,9 +152,13 @@ QCheckBox::indicator:checked {
     width: 14px;
 }
 
+/* linumeRT: an empty checkbox is a frame, not the upstream red cross.
+ * Model-Author: Codex · 2026-10-26. */
 QCheckBox::indicator:unchecked {
-    image: url(:/buttons/images/unchecked.png);
-    background-color: white;
+    image: none;
+    border: 1px solid #9aa7b4;
+    border-radius: 3px;
+    background-color: transparent;
     height: 14px;
     width: 14px;
 }
