@@ -1539,3 +1539,8 @@ bez podłączenia opisane jawnie. NIEZWERYFIKOWANE NA SPRZĘCIE.
 - Model-Author: ChatGPT (koordynacja: Claude). PR #173: SET_XY_ROTATION; punkt maszyny = (program + G92) obrócony w XY + G5x + TLO, kolejność sprawdzona w emccanon.cc LinuxCNC 2.9; ekstrema łuków XY liczone w układzie maszyny.
 - Przegląd Claude: 18 testów limitów PASS, ruff PASS po poprawce B007.
 - Pozostaje: osie obrotowe, odbiór na pulpicie właściciela. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## LIMITS-PREFLIGHT — osie obrotowe A/B/C · 2026-10-26 · ChatGPT
+- Model-Author: ChatGPT (koordynacja: Claude). PR #174: limity A/B/C z INI w stopniach (bez skali cali, osie WRAPPED_ROTARY pomijane), pozycje i przesunięcia G5x/G92/TLO dla XYZABC, jednostka ° w komunikacie.
+- Przegląd Claude: 26 testów limitów PASS, ruff PASS. Brak przykładowej konfiguracji 4/5 osi w repo (sesja 065) — test na rzeczywistym rs274 po jej powstaniu.
+- Pozostaje: decyzja G43 po M6 i odbiór na pulpicie właściciela. NIEZWERYFIKOWANE NA SPRZĘCIE.
