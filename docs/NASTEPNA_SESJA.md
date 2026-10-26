@@ -15,6 +15,12 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · 2026-10-26. **Kontynuacja zlecona przez właściciela: 028 → HMI-OWNER-SKINS → monitor Neon.**
+Osobny checkout `/home/dell/Projekty/linumeRT-hmi-closeout`, gałąź `codex/hmi-028-closeout`.
+Pierwszy rezultat: układ 1280×768 (karty HMI, szyna, Symulacja/przygotówka, marka/alarmy),
+następnie kompozycja dwóch podglądów i odczyty monitora. Bez globalnego LOCK.
+Stan zatrzymania: rozpoczęto analizę aktualnego main 27d9eea; testy w istniejącym kontenerze Qt.
+
 Model-Author: Codex · **#159 — poprawki po Twoim raporcie 54fcfe3.**
 Test edycji YAML bierze przyspieszenie z aktualnego pliku źródłowego, zamiast 17100.
 Zapis biblioteki i edytora korzysta z pliku tymczasowego, fsync i os.replace;
