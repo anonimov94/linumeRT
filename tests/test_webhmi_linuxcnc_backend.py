@@ -27,14 +27,14 @@ class Recorder:
         return call
 
 
-def backend(task_state=70, task_mode=1, wait_result=0):
+def backend(task_state=70, task_mode=1, wait_result=0, linear_units=1.0):
     # Stałe celowo inne niż w prawdziwym LinuxCNC: mapowanie idzie po nazwie stałej.
     stat = SimpleNamespace(
         poll=lambda: None, task_state=task_state, task_mode=task_mode, interp_state=1,
         axis_mask=0b111, actual_position=(0,) * 9, position=(0,) * 9, homed=(1, 1, 1),
         limit=(0, 0, 0), axis=({}, {}, {}), current_line=0, file="", feedrate=1.0,
         rapidrate=1.0, spindle=({},), tool_in_spindle=0, tool_offset=(), g5x_index=1,
-        g5x_offset=(), gcodes=(), mcodes=())
+        g5x_offset=(), gcodes=(), mcodes=(), linear_units=linear_units)
     command = Recorder(wait_result)
     module = SimpleNamespace(
         STATE_ESTOP=1, STATE_ESTOP_RESET=2, STATE_OFF=3, STATE_ON=70,
@@ -84,11 +84,22 @@ def test_mdi_run_pause_resume_stop():
         ("auto", 11), ("auto", 12), ("abort",)]
 
 
-def test_jog_converts_mm_per_second_to_per_minute_on_axis_index():
-    b, c = backend(task_mode=1)
-    b.jog("z", 2.5)
+@pytest.mark.parametrize("speed", [2.5, -2.5, 0.05])
+@pytest.mark.parametrize("units", [1.0, 1 / 25.4])
+def test_jog_uses_native_units_per_second(speed, units):
+    b, c = backend(task_mode=1, linear_units=units)
+    b.jog("z", speed)
     b.jog_stop("Z")
-    assert c.calls == [("teleop_enable", 0), ("jog", 21, True, 2, 150.0), ("jog", 20, True, 2)]
+    assert c.calls == [("teleop_enable", 0), ("jog", 21, True, 2, speed * units),
+                       ("jog", 20, True, 2)]
+
+
+@pytest.mark.parametrize("units", [None, 0, -1, float("nan"), float("inf")])
+def test_jog_without_valid_machine_units_sends_no_motion(units):
+    b, c = backend(linear_units=units)
+    with pytest.raises(CommandError, match="skali jednostek"):
+        b.jog("X", 1)
+    assert c.calls == []
 
 
 def test_jog_refused_outside_manual_and_for_unknown_axis():

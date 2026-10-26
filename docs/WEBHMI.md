@@ -53,7 +53,10 @@ Ekran nie jest funkcją bezpieczeństwa; E-STOP to obwód sprzętowy.
   uwierzytelnienie (3 s), walidacja pól (jog ≤ 50 mm/s).
 - `LinuxCNCBackend`: nie czyta stanu podczas poleceń (odczyt opróżnia kanał błędów LinuxCNC); jog
   **przegubu** (`jjogmode=True`, `teleop_enable(0)`) przy założeniu kinematyki tożsamościowej jak w
-  czytniku; `wait_complete` -1 (timeout) i `RCS_ERROR` zgłaszane operatorowi. Maszyny z innym
+  czytniku; prędkość liniowa API w mm/s jest przeliczana przez `stat.linear_units` na
+  jednostki maszyny/s (`command.jog` nie przyjmuje jednostek/min). Osie ABC używają stopni/s.
+  Brak poprawnej skali blokuje jog liniowy. `wait_complete` -1 (timeout) i `RCS_ERROR`
+  zgłaszane operatorowi. Maszyny z innym
   układem przegubów (np. gantry z dwoma przegubami na oś) wymagają jawnego mapowania — jeszcze nie ma.
 Sygnał życia do `watchdog` HAL (D35, `linumert.hmi-wd-enable`) **nie jest jeszcze podpięty**:
 brama wystawia `heartbeat` w stanie, wiązanie z HAL to następny krok.
