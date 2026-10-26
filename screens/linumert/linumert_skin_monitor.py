@@ -7,7 +7,7 @@ from pathlib import Path
 
 from linumert_skin_controls import EmergencyReadout
 from linumert_skin_preview import SkinPreview
-from linumert_skin_readouts import AxisReadout, ProgramView
+from linumert_skin_readouts import AxisReadout, FeedReadout, ProgramView, ToolReadout
 from linumert_skin_status import AXES, MAX_AGE, decode_sample
 from PyQt5 import QtCore, QtWidgets
 
@@ -223,6 +223,20 @@ class SkinMonitor(SkinPreview):
         for view in self.workspace.findChildren(AxisReadout):
             view.set_positions(values)
         self.follow_program(sample)
+        for view in self.workspace.findChildren(FeedReadout):
+            view.set_readings(sample.feed_mm_min if sample else None,
+                              sample.spindle_rpm if sample else None)
+        for view in self.workspace.findChildren(ToolReadout):
+            view.set_readings(sample.tool_number if sample else None,
+                              sample.tool_diameter if sample else None,
+                              sample.tool_length if sample else None)
+        scene = self.shared.get("path_scene")
+        source = scene.toolpath.source if sample and scene else None
+        for view in self.workspace.findChildren(ProgramView):
+            view.set_source(source, sample.file if sample else "",
+                            sample.motion_line if sample else 0,
+                            self.shared.get("program_note", "") if sample else (
+                                "Status niedostępny" if pl else "Status unavailable"))
 
     def follow_program(self, sample):
         """Classic × Neon: aktywny plik → wczytanie ścieżki; linia i pozycja → następny punkt."""

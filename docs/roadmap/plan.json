@@ -444,7 +444,7 @@
       "title": "Kompozycja ekranu głównego",
       "prompt": "prompts/sesja-028.md",
       "status": "partial",
-      "progress": "Powłoka HMI i nawigacja działają. Na polecenie właściciela 2026-10-25 priorytet przeniesiono na M2. Uzupełniono wymaganą specyfikację funkcjonalną SPEC_EKRAN_GLOWNY.md: dane operatora, hierarchia, brak ruchu od nawigacji i macierz dowodów odbioru. To specyfikacja, nie odbiór GUI ani zamknięcie skórek. Odbiór 6ecda95: 111 testów offline PASS, 1 SKIP, istniejący test GUI 45 kroków PASS na 1280×768. Zrzut ujawnił brak yaml w procesie QtVCP i zastępczą tabelę Narzędzia: pełny odbiór nadal otwarty. Samotest rozszerzono o obecność własnych stron tools/cycles, aby nie zaliczał fallbacku. Kolejny odbiór ad17702 po cnc_environment(): tools/cycles=true i 45 kroków PASS. PageStack e2dde87 izoluje rozmiar aktywnej strony; regresja Qt i złożenie HMI 2 PASS, ponowny test GUI 45 kroków PASS. Start nadal przewija poziomo; nie potwierdzono pełnego dopasowania 1280×768. PR #161: adaptacyjne kolumny kart Start i Narzędzia; pełne złożenie Qt 1280→1920→1280 bez poziomego przewijania, wpis i Tab oraz zachowanie formularza po zmianie układu potwierdzone testami. Samodzielny edytor STL zachowuje wysokość 600 px. 2026-10-25 (Claude): obszar „Wygląd” w działającym HMI — pięć palet, edytor dziesięciu ról kolorów, podgląd na żywo, zapis i reset, kontrola czytelności (kontrast WCAG, znaczenie E-STOP/ostrzeżeń); 23 testy, zrzuty w LinuxCNC (docs/raporty/hmi_appearance). Prawdziwe skórki (układy) nadal otwarte. 2026-10-25 (Claude): panel ruchu ręcznego i MDI widoczny w 1280×768 bez przewijania (w JOG/MDI na górze prawej kolumny strony Maszyna); test regresji tests/test_machine_page_layout.py. 2026-10-25 (Claude): pola formularzy, listy i pola liczbowe powłoki w ciemnym stylu z tokenów (strzałki z własnych ikon).",
+      "progress": "Powłoka HMI i nawigacja działają. Na polecenie właściciela 2026-10-25 priorytet przeniesiono na M2. Uzupełniono wymaganą specyfikację funkcjonalną SPEC_EKRAN_GLOWNY.md: dane operatora, hierarchia, brak ruchu od nawigacji i macierz dowodów odbioru. To specyfikacja, nie odbiór GUI ani zamknięcie skórek. Odbiór 6ecda95: 111 testów offline PASS, 1 SKIP, istniejący test GUI 45 kroków PASS na 1280×768. Zrzut ujawnił brak yaml w procesie QtVCP i zastępczą tabelę Narzędzia: pełny odbiór nadal otwarty. Samotest rozszerzono o obecność własnych stron tools/cycles, aby nie zaliczał fallbacku. Kolejny odbiór ad17702 po cnc_environment(): tools/cycles=true i 45 kroków PASS. PageStack e2dde87 izoluje rozmiar aktywnej strony; regresja Qt i złożenie HMI 2 PASS, ponowny test GUI 45 kroków PASS. Start nadal przewija poziomo; nie potwierdzono pełnego dopasowania 1280×768. PR #161: adaptacyjne kolumny kart Start i Narzędzia; pełne złożenie Qt 1280→1920→1280 bez poziomego przewijania, wpis i Tab oraz zachowanie formularza po zmianie układu potwierdzone testami. Samodzielny edytor STL zachowuje wysokość 600 px. 2026-10-25 (Claude): obszar „Wygląd” w działającym HMI — pięć palet, edytor dziesięciu ról kolorów, podgląd na żywo, zapis i reset, kontrola czytelności (kontrast WCAG, znaczenie E-STOP/ostrzeżeń); 23 testy, zrzuty w LinuxCNC (docs/raporty/hmi_appearance). Prawdziwe skórki (układy) nadal otwarte. 2026-10-25 (Claude): panel ruchu ręcznego i MDI widoczny w 1280×768 bez przewijania (w JOG/MDI na górze prawej kolumny strony Maszyna); test regresji tests/test_machine_page_layout.py. 2026-10-25 (Claude): pola formularzy, listy i pola liczbowe powłoki w ciemnym stylu z tokenów (strzałki z własnych ikon). 2026-10-26: dwukolumnowa szyna na niskim ekranie, znak marki, kody alarmów ze źródła i formularz Symulacji bez poziomego przewijania; 9 testów Qt PASS. Pełny odbiór HMI nadal otwarty. Kolejny odbiór: wszystkie karty czterech rodzin w 1280×768, 218 testów Qt/IP i 101 subtestów PASS; host Cyberdeck 45 kroków live PASS / 61,22 s. Raport HMI_CLOSEOUT_2026-10-26. Pełna sesja pozostaje partial.",
       "remaining": [
         "Pełny odbiór kompozycji i nowych skórek; HMI-02, SKIN-04…06.",
         "Odbiór wizualny i klawiaturowy pozostałych kluczowych podstron 1280×768 oraz live QtVCP po zmianie układu; Start/Narzędzia odebrane w rzeczywistym Qt z atrapą CNC."
@@ -459,7 +459,8 @@
         "tests/test_appearance.py",
         "docs/user/WYGLAD.md",
         "docs/raporty/hmi_appearance/wyglad_neon_punk.png",
-        "tests/test_machine_page_layout.py"
+        "tests/test_machine_page_layout.py",
+        "docs/raporty/G2/HMI_CLOSEOUT_2026-10-26.md"
       ]
     },
     {
@@ -1933,18 +1934,18 @@
         "028"
       ],
       "status": "partial",
-      "progress": "Polecenie właściciela 2026-10-25 po odbiorze #163 (SHA 2ae9103): selektor widoku HMI działa; wybór rodziny nie zmienia jeszcze wyraźnie wyglądu. 7dc2649: odmienne malowanie geometrii i typografii wspólnej nawigacji każdej rodziny, dopasowanie ram stałych pasków; te same strony i sygnały Qt. Kod po kontroli składni, odbiór wizualny/fokusu/kontrastu powierzony Claude; pełna kompozycja i podglądy nieukończone. Przegląd 76fed49: usuwanie starej sceny przy zmianie pliku/utracie STATUS, ponowne wczytanie po odzyskaniu i poprawny opis pauzy. Regresja do wykonania przez Claude; bez zmiany statusu odbioru.",
+      "progress": "Polecenie właściciela 2026-10-25 po odbiorze #163 (SHA 2ae9103): selektor widoku HMI działa; wybór rodziny nie zmienia jeszcze wyraźnie wyglądu. 7dc2649: odmienne malowanie geometrii i typografii wspólnej nawigacji każdej rodziny, dopasowanie ram stałych pasków; te same strony i sygnały Qt. Kod po kontroli składni, odbiór wizualny/fokusu/kontrastu powierzony Claude; pełna kompozycja i podglądy nieukończone. Przegląd 76fed49: usuwanie starej sceny przy zmianie pliku/utracie STATUS, ponowne wczytanie po odzyskaniu i poprawny opis pauzy. Regresja do wykonania przez Claude; bez zmiany statusu odbioru. 2026-10-26: Cyberdeck ma obok siebie dwa prostokątne podglądy Neon pod własną nakładką narożników; wspólna scena, narzędzie i model poglądowy XYZ. Regresja zachowuje scenę po zmianie rodziny/motywu; zrzut Qt sprawdzony. Odbiór live nowej kompozycji pozostaje otwarty. Cyberdeck odebrany w AUTO: linia/DTG/DRO zgodne z NML, program/T1/D6/S12000 widoczne, 3 presety 2,95–4,31 ms; osadzony host 45 kroków PASS. Macierz GL 160 kombinacji PASS. Pozostaje odrębny odbiór pulpitu i pełnej roadmapy skórek.",
       "remaining": [
-        "Każda z rodzin classic-digital, industrial-pro, cyberdeck, organic-vector ma własny, wyraźnie odmienny wygląd zakładek i nawigacji.",
-        "Główny ekran HMI w stylu sci-fi/cyberdeck: kształty i menu jako nakładka, pod spodem prostokątne podglądy: symulacja obróbki detalu z widocznym narzędziem oraz obok symulacja z widokiem na maszynę.",
-        "Własne kształty, kolory i nazwy; bez kopiowania cudzych grafik i znaków (docs/prawne/WYTYCZNE_IP.md). Funkcje operatora od początku działają (D36); zwykły widok pozostaje dostępny.",
-        "Odbiór: zrzuty 4 skórek × 1280×768 i 1920×1080 porównane ze sobą i z makietami; wydajność 3D z pyqtgraph na pulpicie."
+        "Odbiór nowego układu na pulpicie właściciela: porównanie czterech rodzin przy 1280×768 i 1920×1080, dotyk i klawiatura.",
+        "Pełna kwalifikacja scen/renderera ze SKIN-02/04…06; bieżący Cyberdeck używa QPainter Neon i poglądowego XYZ, nie modelu kolizji Plant."
       ],
       "evidence": [
         "https://github.com/anonimov94/linumeRT/pull/163#issuecomment-6401257406",
         "docs/design/SKIN_SYSTEM_ROADMAP.md",
         "screens/linumert/linumert_skin_navigation.py",
-        "docs/design/HMI_QTVCP_HOST.md"
+        "docs/design/HMI_QTVCP_HOST.md",
+        "screens/linumert/linumert_skin_cyberdeck.py",
+        "docs/raporty/G2/HMI_CLOSEOUT_2026-10-26.md"
       ]
     }
   ]

@@ -140,3 +140,9 @@ def test_shell_selftest_in_gui(tmp_path) -> None:
     assert steps["33_reset_komenda"]["estop"] and not steps["33_reset_komenda"]["hmi_chain"]
     assert not steps["34_potwierdzenie_grzybem"]["estop"]
     assert all((out / f"{name}.png").stat().st_size > 20000 for name in steps)
+
+
+def test_cyberdeck_host_selftest_in_gui(tmp_path, monkeypatch) -> None:
+    """Same operator acceptance after starting in the integrated Cyberdeck view."""
+    monkeypatch.setenv("LINUMERT_OPERATOR_SKIN", "cyberdeck")
+    test_shell_selftest_in_gui(tmp_path)

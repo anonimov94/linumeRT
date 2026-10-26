@@ -248,3 +248,44 @@ def test_preview_keeps_demo_scene_across_skin_and_theme(app):
     assert window.shared["path_scene"] is scene and scene.index > 0
     assert window.viewports["machine"].scene is scene
     window.close()
+
+
+def test_cyberdeck_shares_live_scene_with_classic_and_keeps_both_views(app, tmp_path):
+    import time
+
+    from linumert_skin_contract import PresentationPreferences
+    from linumert_skin_cyberdeck import SceneOverlay
+    from linumert_skin_monitor import SkinMonitor
+    from linumert_skin_status import MachineSample
+
+    window = SkinMonitor(PresentationPreferences("classic-digital", "neon-punk", "pl"))
+    window.reader.stop()
+    window.loader.start = lambda path: None
+    window.sample = MachineSample(time.monotonic(), (20.0, 10.0, 0.0) + (0.0,) * 6,
+                                  "MODE_AUTO", "STATE_ON", "INTERP_READING", False, True,
+                                  file="test.ngc", motion_line=10)
+    window.program_file = "test.ngc"
+    try:
+        window.program_loaded(demo_toolpath(), "program testowy")
+        scene = window.shared["path_scene"]
+        scene.timer.stop()
+        scene.follow(10, (20, 10, 0))
+        index = scene.index
+        window.select("skin", "cyberdeck")
+        window.resize(1280, 768)
+        window.show()
+        app.processEvents()
+        assert window.shared["path_scene"] is scene and scene.index == index
+        assert {"toolpath", "machine"} <= window.viewports.keys()
+        assert len(window.workspace.findChildren(SceneOverlay)) == 2
+        for view in window.viewports.values():
+            assert view.isVisible()
+        assert window.cards["toolpath"].geometry().right() < (
+            window.cards["machine"].geometry().left())
+        assert window.grab().save(str(tmp_path / "cyberdeck-live.png"))
+        window.select("theme", "classic-turquoise")
+        assert window.shared["path_scene"] is scene
+        assert len(window.workspace.findChildren(SceneOverlay)) == 2
+    finally:
+        window.close()
+        app.processEvents()

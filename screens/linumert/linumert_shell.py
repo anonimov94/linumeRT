@@ -26,7 +26,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from qtvcp.core import Action, Info, Status
 
 from linumert_alarm_panel import AlarmPanel
-from linumert_layout import PageStack
+from linumert_layout import NavigationRail, PageStack
 from linumert_operator_view import startup_family
 from linumert_operator_controls import OperatorControls
 from linumert_virtual_session import VirtualSession, virtual_config
@@ -296,6 +296,13 @@ class LinumertShell(QtCore.QObject):
         logo.setObjectName("lrtLogo")
         logo.setTextFormat(QtCore.Qt.RichText)
         logo.setText(f"linume<span style='color:{self.c['teal']}'>RT</span>")
+        from PyQt5.QtSvg import QSvgWidget
+
+        mark = QSvgWidget(os.path.join(os.path.dirname(__file__), "..", "..",
+                                      "docs", "design", "marka", "znak_bez_tla.svg"))
+        mark.setFixedSize(32, 32)
+        mark.setAccessibleName("Znak linumeRT")
+        lay.addWidget(mark)
         lay.addWidget(logo)
         modes = QtWidgets.QButtonGroup(bar)
         for mode in model.MODES:
@@ -334,12 +341,7 @@ class LinumertShell(QtCore.QObject):
         return self.alarm
 
     def _rail(self) -> QtWidgets.QWidget:
-        rail = QtWidgets.QFrame()
-        rail.setObjectName("lrtRail")
-        rail.setFixedWidth(96)
-        lay = QtWidgets.QVBoxLayout(rail)
-        lay.setContentsMargins(8, 12, 8, 12)
-        lay.setSpacing(6)
+        rail = NavigationRail()
         group = QtWidgets.QButtonGroup(rail)
         for area, text, icon, _btn in AREAS:
             if self.active_skin == "shell":
@@ -358,16 +360,9 @@ class LinumertShell(QtCore.QObject):
             btn.setToolTip(f"Obszar: {text} (bez ruchu i bez zmiany trybu)")
             btn.clicked.connect(lambda _c=False, a=area: self.select_area(a))
             group.addButton(btn)
-            lay.addWidget(btn)
+            rail.add_button(btn)
             self.areas[area] = btn
-        lay.addStretch(1)
-        scroll = QtWidgets.QScrollArea()
-        scroll.setFrameShape(QtWidgets.QFrame.NoFrame)
-        scroll.setWidgetResizable(True)
-        scroll.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
-        scroll.setFixedWidth(116)
-        scroll.setWidget(rail)
-        return scroll
+        return rail
 
     def _machine_page(self) -> QtWidgets.QWidget:
         page = QtWidgets.QWidget()

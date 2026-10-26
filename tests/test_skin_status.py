@@ -162,3 +162,62 @@ def test_program_line_offsets_and_work_position():
     status.linear_units = 1 / 25.4                                # maszyna w calach → mm
     inch = decode_sample(json.dumps(read_status(status, api)).encode(), time.monotonic())
     assert inch.g5x_offset[0] == pytest.approx(2540) and inch.distance_to_go == pytest.approx(101.6)
+
+
+def test_live_feed_spindle_and_tool_units_and_invalid_payloads():
+    status, api = fake_status()
+    status.linear_units = 1 / 25.4
+    status.current_vel = 2.0
+    status.spindle = ({'speed': -12000.0},)
+    status.tool_in_spindle = 7
+    status.tool_table = (SimpleNamespace(id=7, diameter=0.25, zoffset=-1.5),)
+    payload = read_status(status, api)
+    sample = decode_sample(json.dumps(payload).encode(), time.monotonic())
+    assert sample.feed_mm_min == pytest.approx(3048.0)
+    assert sample.spindle_rpm == 12000
+    assert sample.tool_number == 7
+    assert sample.tool_diameter == pytest.approx(6.35)
+    assert sample.tool_length == pytest.approx(-38.1)
+    for field, bad in [('feed_mm_min', -1), ('spindle_rpm', float('nan')),
+                       ('tool_number', True), ('tool_number', -1),
+                       ('tool_diameter', -1), ('tool_length', float('inf'))]:
+        with pytest.raises(ValueError):
+            decode_sample(json.dumps({**payload, field: bad}).encode(), time.monotonic())
+
+
+def test_monitor_program_and_instruments_clear_on_status_loss():
+    pytest.importorskip('PyQt5')
+    from linumert.programs.toolpath import Toolpath, demo_toolpath
+    from linumert_skin_contract import PresentationPreferences
+    from linumert_skin_monitor import SkinMonitor
+    from linumert_skin_readouts import FeedReadout, ProgramView, ToolReadout
+    from PyQt5 import QtWidgets
+
+    app = QtWidgets.QApplication.instance() or QtWidgets.QApplication([])
+    window = SkinMonitor(PresentationPreferences('cyberdeck', 'neon-punk', 'pl'))
+    window.reader.stop()
+    window.loader.start = lambda path: None
+    status, api = fake_status()
+    status.current_vel, status.spindle = 2.0, ({'speed': 8000.0},)
+    status.tool_in_spindle = 7
+    status.motion_line = 2
+    sample = decode_sample(json.dumps(read_status(status, api)).encode(), time.monotonic())
+    try:
+        window.present(sample, 'sampled')
+        window.program_loaded(Toolpath(demo_toolpath().moves, ('G21 G90', 'G1 X10 F120')), 'a.ngc')
+        feed = window.workspace.findChild(FeedReadout)
+        tool = window.workspace.findChild(ToolReadout)
+        program = window.workspace.findChild(ProgramView)
+        assert feed.feed == 120 and feed.spindle == 8000
+        assert tool.number == 7 and tool.diameter is None
+        assert '0002  G1 X10 F120' in program.findChild(QtWidgets.QPlainTextEdit).toPlainText()
+        assert len(program.findChild(QtWidgets.QPlainTextEdit).extraSelections()) == 1
+        window.present(None, 'disconnected')
+        feed = window.workspace.findChild(FeedReadout)
+        tool = window.workspace.findChild(ToolReadout)
+        program = window.workspace.findChild(ProgramView)
+        assert feed.feed is feed.spindle is tool.number is None
+        assert not program.findChild(QtWidgets.QPlainTextEdit).toPlainText()
+    finally:
+        window.close()
+        app.processEvents()

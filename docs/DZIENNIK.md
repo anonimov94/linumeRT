@@ -1486,3 +1486,40 @@ bez podłączenia opisane jawnie. NIEZWERYFIKOWANE NA SPRZĘCIE.
 - Model-Author: Claude. `shell_qss` stylizuje teraz QLineEdit, pola liczbowe, listy rozwijane (strzałki z własnych ikon `strzalka_dol/gora.svg`), pole wyboru i przewijane obszary z tokenów; wcześniej były białe (jog, MDI, wrzeciono, przygotówka, narzędzia).
 - Zrzuty 1280×768 i 1920×1080 sprawdzone wzrokiem; 161 testów powłoki HMI PASS w kontenerze z Qt; PROVENANCE: dwie nowe ikony (własne, SVG).
 - Dług: jasny pasek tła wokół prawego panelu strony Symulacja, formularz przygotówki szerszy niż panel (poziomy pasek przewijania), brak znaku marki, szyna 13 obszarów. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## M2 / 028 — mały ekran, pierwsza porcja · 2026-10-26 · Codex
+- Model-Author: Codex. Na polecenie właściciela kolejno domykamy przekazanie Claude; osobny checkout, bez zmiany plików operatora.
+- Dwukolumnowa szyna na niskim ekranie, istniejący znak marki, kody alarmów ze źródła; przygotówka w jednej kolumnie, akcje 2×2 i ciemne tło panelu.
+- 9 testów Qt PASS: rozmiary 1280→1920→1280, brak poziomego przewijania Symulacji, cała szyna, Tab/wpis, JOG. Sprawdzony zrzut Symulacji 1280×768.
+- Następnie osadzone karty HMI i dwa podglądy; pełne lint/test w toku. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## M2 / 028 — wszystkie karty HMI w małym hoście · 2026-10-26 · Codex
+- Model-Author: Codex. Osadzony widok ukrywa powtórzone paski studium; globalne akcje, alarmy i E-STOP pozostają w hoście.
+- 5 testów Qt PASS: cztery rodziny, 1280×768 → 1920×1080 → 1280×768, brak przewijania całej strony i wszystkie karty widoczne; zrzut Classic sprawdzony.
+- Samodzielny monitor zachowuje własny nagłówek/konsolę. Bez nowych zależności i kanału komend. Odbiór LinuxCNC trwa.
+
+## M2 / HMI-OWNER-SKINS — Cyberdeck z dwoma podglądami · 2026-10-26 · Codex
+- Model-Author: Codex. Prostokątne podglądy detalu z narzędziem i maszyny obok siebie, nad nimi własna nakładka narożników; dolny rząd DRO/program/posuw/narzędzie.
+- Wspólne loader/scena Neon; zmiana rodziny/motywu zachowuje scenę. Maszyna oznaczona jako model poglądowy XYZ, bez deklaracji modelu kolizji Plant.
+- 38 testów Qt/status PASS, 1 SKIP; zrzut z testową próbką sprawdzony. Bez nowych komend, pinów HAL lub zależności; odbiór live nowej kompozycji otwarty.
+
+## M2 / Neon — rzeczywiste odczyty programu, posuwu i narzędzia · 2026-10-26 · Codex
+- Model-Author: Codex. NML: posuw toru mm/min, zadane obroty rpm, numer narzędzia, średnica i offset Z tabeli; brak danych pozostaje jawny.
+- Program pokazuje źródło wczytane z rzeczywistego pliku oraz zaznaczenie motion_line. Utrata statusu czyści odczyty i program; zmiana rodziny korzysta z tej samej próbki.
+- 46 testów Qt/status PASS, 1 SKIP; walidacja NaN/ujemnych danych, przeliczenie cali i czyszczenie danych. Odbiór ruchu/DTG i trzech presetów trwa w odizolowanym LinuxCNC.
+
+## CI LinuxCNC — budżet pełnej serii · 2026-10-26 · Codex
+- Model-Author: Codex. Run40285964696 osiągnął około 70% po 35 min i został anulowany; sam test kalibracji sondy trwał około 7 min.
+- Budżet całego zadania podniesiony do 60 min, aby otrzymać końcowy raport. Bez usuwania testów, zmiany timeoutów pojedynczych prób, progów lub modelu.
+- Wcześniejszy FAILED home_and_move pozostaje jawnie nierozliczony; większy budżet nie oznacza jego naprawy.
+
+## HMI — odbiór live, samotest i bloker CI · 2026-10-26 · Codex
+- Model-Author: Codex. Cyberdeck: AUTO zakończone, NML/monitor linia 59, DTG 3,230968241 mm zgodne; T1/D6/L0, źródło programu i zadane S12000 widoczne. Klatki 2,95–4,31 ms, 3 presety.
+- GL: 160 kombinacji PASS. Qt/IP: 218 testów PASS, 101 subtestów, 1 SKIP. Osadzony Cyberdeck: 45 kroków PASS / 61,22 s po poprawce scenariusza (nawigacja do widocznego Start).
+- CI 40285964696: artefakt driver.log potwierdza X=99,9947 przy celu 100 ±0,005 po stałym sleep(0,5), bez błędu ruchu. Fixture teraz wymaga istniejącej tolerancji przez 0,2 s, w dotychczasowym limicie 60 s; progi/model bez zmian.
+- 5 testów diagnostyki PASS (również nieustalona pozycja i reset dwell); odbiór live fixture nadal wymagany.
+
+## HMI — dowody końcowe i odbiór fixture · 2026-10-26 · Codex
+- Model-Author: Codex. Raport HMI_CLOSEOUT_2026-10-26 z trzema zrzutami live, JSON/hashe; 218 Qt/IP PASS, 101 subtestów, GL 160 kombinacji PASS.
+- Poprawiona fixture: 1 live PASS / 133,88 s, endpoint po 1,053 s, [100,199,9977,-20] mm, peak f-error 0,19263 mm, bez błędów ruchu; zainstalowany LinuxCNC z adapterem ścieżek helperów RIP.
+- Przekazanie trzech grup zaimplementowane i lokalnie odebrane; CI #169 musi być zielone przed scaleniem. Pełne 028/SKIN i odbiór pulpitu/sprzętu pozostają otwarte. Obie lease zwolnione.

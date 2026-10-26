@@ -80,3 +80,48 @@ class PageStack(QtWidgets.QStackedWidget):
     def _page_changed(self, _index):
         self.updateGeometry()
         self.adjustSize()
+
+
+class NavigationRail(QtWidgets.QScrollArea):
+    """Two columns on short displays; preserve buttons, focus and connections."""
+
+    def __init__(self):
+        super().__init__()
+        self.setFrameShape(QtWidgets.QFrame.NoFrame)
+        self.setWidgetResizable(True)
+        self.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
+        self.panel = QtWidgets.QFrame()
+        self.panel.setObjectName("lrtRail")
+        self.grid = QtWidgets.QGridLayout(self.panel)
+        self.grid.setContentsMargins(6, 6, 6, 6)
+        self.grid.setSpacing(4)
+        self.buttons = []
+        self.columns = 0
+        self.setWidget(self.panel)
+        self.arrange(2)
+
+    def add_button(self, button):
+        self.buttons.append(button)
+        self.columns = 0
+        self.arrange(2 if self.height() < 1000 else 1)
+
+    def arrange(self, columns):
+        if self.columns == columns:
+            return
+        self.columns = columns
+        self.setFixedWidth(204 if columns == 2 else 116)
+        self.panel.setStyleSheet("QToolButton#lrtRailBtn { min-height: 48px; font-size: 11px; }"
+                                if columns == 2 else "")
+        for row in range(self.grid.rowCount()):
+            self.grid.setRowStretch(row, 0)
+        for button in self.buttons:
+            self.grid.removeWidget(button)
+        for index, button in enumerate(self.buttons):
+            button.setMinimumHeight(48 if columns == 2 else 72)
+            button.setIconSize(QtCore.QSize(18, 18) if columns == 2 else QtCore.QSize(24, 24))
+            self.grid.addWidget(button, index // columns, index % columns)
+        self.grid.setRowStretch((len(self.buttons) + columns - 1) // columns, 1)
+
+    def resizeEvent(self, event):  # noqa: N802 - Qt virtual method
+        self.arrange(2 if event.size().height() < 1000 else 1)
+        super().resizeEvent(event)

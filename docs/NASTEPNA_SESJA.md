@@ -15,6 +15,26 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · 2026-10-26. **Kontynuacja zlecona przez właściciela: 028 → HMI-OWNER-SKINS → monitor Neon.**
+Osobny checkout `/home/dell/Projekty/linumeRT-hmi-closeout`, gałąź `codex/hmi-028-closeout`.
+Pierwszy rezultat: układ 1280×768 (karty HMI, szyna, Symulacja/przygotówka, marka/alarmy),
+następnie kompozycja dwóch podglądów i odczyty monitora. Bez globalnego LOCK.
+Stan zatrzymania: 9e2fec9 wypchnięty w #169; lint i 9 testów Qt PASS.
+Usunięto powtórzone paski wewnątrz hosta: 4 rodziny mieszczą wszystkie karty
+na 1280×768 (5 testów PASS). QtVCP: 45 kroków PASS / 63,21 s.
+CI python/plant-matrix PASS; pełna seria LinuxCNC anulowana po 35 min (wcześniej
+FAIL home_and_move). Lokalna pełna seria z natywnym gcode: SIGSEGV parse_rs274,
+poza zmienionymi modułami; logi build/hmi-closeout. Obie lease zwolnione.
+Kolejna porcja: odczyty NML programu/posuwu/narzędzia (46 testów PASS, 1 SKIP),
+Cyberdeck AUTO PASS (NML/DTG/program/T1/D6), klatki 2,95–4,31 ms; GL 160 kombinacji PASS.
+Osadzony Cyberdeck: 45 kroków PASS po poprawce samotestu (jawne wejście w Start).
+Bloker CI home_and_move: próbka 99,9947 vs 100±0,005 po sleep(0,5). Dodano
+ciągłe ustalenie w tej samej tolerancji/limicie; 5 testów offline PASS, live PASS
+133,88 s, endpoint po 1,053 s, [100.0000, 199.9977, -20.0000] mm. Obie lease zwolnione.
+Zlecone trzy grupy mają kod i lokalny odbiór; wymagane CI #169 nadal oczekiwane.
+Kolejna porcja: Cyberdeck — dwa podglądy współdzielą scenę Neon, własna nakładka
+narożników, 38 testów Qt/status PASS, 1 SKIP. Zrzut Qt sprawdzony; odbiór live nowej kompozycji otwarty.
+
 Model-Author: Codex · **#159 — poprawki po Twoim raporcie 54fcfe3.**
 Test edycji YAML bierze przyspieszenie z aktualnego pliku źródłowego, zamiast 17100.
 Zapis biblioteki i edytora korzysta z pliku tymczasowego, fsync i os.replace;

@@ -17,7 +17,7 @@ def prepare(monkeypatch, tmp_path):
         homed=[1]*4, limit=[1, 0, 0, 0], paused=False, motion_line=42,
         read_line=44, exec_state=7, joint=[{"ferror": 0.01, "fault": 1}]*4)
     monkeypatch.setitem(sys.modules, "linuxcnc", SimpleNamespace(
-        command=lambda: None, stat=lambda: status,
+        INTERP_IDLE=1, command=lambda: None, stat=lambda: status,
         error_channel=lambda: SimpleNamespace(poll=lambda: next(messages, None))))
     monkeypatch.setattr(sys, "argv", [str(tmp_path / "driver.py")])
     callbacks = []
@@ -66,3 +66,25 @@ def test_console_drain_preserves_output(tmp_path):
     thread.join(timeout=2)
     assert not thread.is_alive()
     assert target.read_text() == "startup\nlimit error\n"
+
+
+def test_initial_move_waits_for_feedback_instead_of_one_fixed_sleep(monkeypatch, tmp_path):
+    ns, _, status = prepare(monkeypatch, tmp_path)
+    status.interp_state, status.current_vel, status.inpos = 1, 0.0, True
+    def poll():
+        stamp = ns["time"].monotonic()
+        # Inside once, then outside: the dwell must restart at the last recovery.
+        settled = 0.1 <= stamp < 0.2 or stamp >= 0.4
+        status.actual_position = [100 if settled else 99.9947, 200, -20]
+    status.poll = poll
+    assert ns["wait"](ns["settled_position"]((100, 200, -20)), 1.0)
+    assert ns["time"].monotonic() >= 0.6
+    assert status.actual_position == [100, 200, -20]
+
+
+def test_endpoint_outside_existing_tolerance_still_times_out(monkeypatch, tmp_path):
+    ns, _, status = prepare(monkeypatch, tmp_path)
+    status.interp_state, status.current_vel, status.inpos = 1, 0.0, True
+    status.actual_position = [99.9947, 200, -20]
+    assert not ns["wait"](ns["settled_position"]((100, 200, -20)), 0.5)
+    assert ns["out"]["timeouts"]

@@ -76,6 +76,22 @@ def wait(cond, timeout):
         time.sleep(0.05)
     out.setdefault("timeouts", []).append(snapshot("wait_timeout"))
     return False
+def settled_position(target, tolerance=0.005, dwell=0.2):
+    """Require the existing endpoint tolerance continuously, not a fixed sleep."""
+    since = None
+    def ready():
+        nonlocal since
+        stopped = (s.interp_state == linuxcnc.INTERP_IDLE and s.inpos
+                   and abs(s.current_vel) < 1e-7)
+        within = all(abs(value - end) <= tolerance
+                     for value, end in zip(s.actual_position[:3], target, strict=True))
+        if not stopped or not within:
+            since = None
+            return False
+        if since is None:
+            since = time.monotonic()
+        return time.monotonic() - since >= dwell
+    return ready
 c.state(linuxcnc.STATE_ESTOP_RESET)
 out["estop_reset"] = wait(lambda: s.task_state == linuxcnc.STATE_ESTOP_RESET, 5)
 c.state(linuxcnc.STATE_ON)
@@ -93,8 +109,9 @@ c.teleop_enable(1); c.wait_complete()
 c.mode(linuxcnc.MODE_MDI); c.wait_complete()
 stage = "initial_move"
 c.mdi("G90 G1 X100 Y200 Z-20 F3000"); c.wait_complete(60)
-out["moved"] = wait(lambda: s.interp_state == linuxcnc.INTERP_IDLE, 60)
-time.sleep(0.5); s.poll()
+settle_started = time.monotonic()
+out["moved"] = wait(settled_position((100.0, 200.0, -20.0)), 60)
+out["endpoint_settle_s"] = time.monotonic() - settle_started
 out["pos"] = [round(v, 4) for v in s.actual_position[:3]]
 out["joint_ferror_max"] = max(abs(s.joint[i]["ferror_highmark"]) for i in range(4))
 out["task_state"] = s.task_state

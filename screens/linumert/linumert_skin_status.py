@@ -62,6 +62,12 @@ class MachineSample:
     distance_to_go: float = 0.0
     dtg: tuple[float, float, float] = (0.0, 0.0, 0.0)
 
+    feed_mm_min: float | None = None
+    spindle_rpm: float | None = None  # NML setpoint, not tachometer feedback.
+    tool_number: int | None = None
+    tool_diameter: float | None = None
+    tool_length: float | None = None  # Table Z offset, signed.
+
     def work_position(self) -> tuple[float, float, float] | None:
         if any(v is None for v in self.positions[:3]):
             return None
@@ -115,7 +121,24 @@ def read_status(status: StatusPort, api: object) -> dict:
     line = status.motion_line
     if type(line) is not int or line < 0:
         raise ValueError("invalid motion_line")
+    velocity = getattr(status, "current_vel", None)
+    spindle = getattr(status, "spindle", ())
+    rpm = spindle[0].get("speed") if spindle else None
+    tool = getattr(status, "tool_in_spindle", None)
+    if tool is not None and (type(tool) is not int or tool < 0):
+        raise ValueError("invalid tool number")
+    diameter = length = None
+    for entry in getattr(status, "tool_table", ()):
+        if entry.id == tool:
+            diameter = number(entry.diameter) / linear
+            length = number(entry.zoffset) / linear
+            break
+    if diameter is not None and diameter < 0:
+        raise ValueError("invalid tool diameter")
     return dict(
+        feed_mm_min=None if velocity is None else abs(number(velocity)) * 60 / linear,
+        spindle_rpm=None if rpm is None else abs(number(rpm)), tool_number=tool,
+        tool_diameter=diameter, tool_length=length,
         file=path, motion_line=line, g5x_offset=xyz("g5x_offset"),
         g92_offset=xyz("g92_offset"), tool_offset=xyz("tool_offset"),
         rotation_xy=number(status.rotation_xy),
@@ -159,6 +182,14 @@ def decode_sample(payload: bytes, now: float) -> MachineSample:
         data[field] = tuple(number(v) for v in values)
     data["rotation_xy"] = number(data["rotation_xy"])
     data["distance_to_go"] = number(data["distance_to_go"])
+    for field in ("feed_mm_min", "spindle_rpm", "tool_diameter", "tool_length"):
+        if data[field] is not None:
+            data[field] = number(data[field])
+            if field != "tool_length" and data[field] < 0:
+                raise ValueError("invalid " + field)
+    tool = data["tool_number"]
+    if tool is not None and (type(tool) is not int or tool < 0):
+        raise ValueError("invalid tool number")
     result = MachineSample(**data)
     if not result.fresh(now):
         raise ValueError("expired status")
