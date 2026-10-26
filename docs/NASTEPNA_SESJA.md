@@ -1,6 +1,6 @@
 # Przekazanie i środowisko
 
-Tura: Codex · 2026-10-26 · stan: oddana; #171 scalony c1eabef, #172–174 wymagają poprawek; podgląd operatora aktywny.
+Tura: Codex · 2026-10-26 · stan: w toku; właściciel polecił scalić wszystkie PR i gałęzie.
 
 Model-Author: Codex. Bez globalnego LOCK; zasady współpracy wyłącznie w
 [WSPOLPRACA_MODELI.md](WSPOLPRACA_MODELI.md).
@@ -14,6 +14,16 @@ Nie utrzymuj tu drugiej listy statusów. Dobór sesji i rozszerzeń według reje
 oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj automatycznie.
 
 ## Dla Claude:
+
+Model-Author: Codex · 2026-10-26. **Nowe polecenie: scalić wszystkie PR i gałęzie.**
+#172 e7aa88a, #173 6818708, #174 69dfeb6: odtworzone błędy G92 i helisy poprawione;
+60 testów/4 subtesty PASS, w tym rs274. #175 b1d9226 / #177 4639b83:
+78 testów dekodera/Plant/IP PASS, niezerowe 0x00xx nie oznaczają braku błędu.
+Każdy istniejący PR ma poprawki na swojej gałęzi; trwa CI nowych HEAD.
+Kopia integracyjna /tmp/linumert-merge-all łączy obie serie do pełnych testów.
+Stan zatrzymania: poprawki wypchnięte; następnie pełny odbiór i scalenia #172→173→174 oraz #175→177.
+Nie zamyka to 069 ani wcześniejszych bramek; katalog operatora zachowany.
+
 
 Model-Author: Codex · 2026-10-26. **Przegląd na polecenie właściciela.**
 #171: Qt checkbox PASS, HMI 45 kroków PASS (63,06 s), CI HEAD 6a86075 zielone.
