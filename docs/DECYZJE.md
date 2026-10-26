@@ -355,3 +355,12 @@ zaczynając od jednej i dopiero potem przechodząc do następnej. Bieżący zakr
 Każdy zakres otrzymuje przegląd i poprawki konkretnych problemów; testy laptopa
 nadal wykonuje Claude. Oczekiwanie na odbiór nie oznacza zakończenia ani zgody
 na scalenie nieodebranego SHA. Historyczne lokalne gałęzie nie są kasowane.
+
+## Polecenie właściciela — scalenie rozpoczętych PR i gałęzi (2026-10-26)
+
+Model-Author: Codex. Właściciel: „scalaj wszystkie pr i branches”. Obejmuje #172–174
+(LIMITS-PREFLIGHT, rodzice 031/051) oraz #175/#177 (rozpoczęta diagnostyka 069).
+Przed scaleniem naprawiamy odtworzone błędy, testujemy i rozliczamy CI; zachowujemy
+historię przez merge commit i lokalne dane operatora. Polecenie obejmuje domknięcie
+rozpoczętych porcji, nie zamyka wcześniejszych bramek ani całej sesji 069. Po scaleniu
+wracamy do najwcześniejszego otwartego kryterium rejestru.

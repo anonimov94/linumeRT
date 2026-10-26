@@ -274,6 +274,11 @@ QProgressBar[level="warn"]::chunk {{ background: {c['amber']}; }}
 #lrtRoot QComboBox QAbstractItemView {{ background: {c['panel']}; color: {c['fg']}; border: 1px solid {c['line2']};
     selection-background-color: {c['tealbg']}; selection-color: {c['fg']}; outline: 0; }}
 #lrtRoot QCheckBox {{ color: {c['fg']}; spacing: 8px; }}
+#lrtRoot QCheckBox::indicator {{ width: 18px; height: 18px; border: 1px solid transparent; }}
+#lrtRoot QCheckBox::indicator:unchecked {{ image: none; background: {c['bg']};
+    border: 1px solid {c['fg2']}; border-radius: 3px; }}
+#lrtRoot QCheckBox::indicator:unchecked:disabled {{ background: {c['bg2']};
+    border-color: {c['fg3']}; }}
 QToolButton#lrtRailBtn {{ background: transparent; border: 0; border-radius: {btn}px; min-height: 64px;
     color: {c['fg2']}; font-size: {small}px; padding: 6px 2px; }}
 QToolButton#lrtRailBtn:hover {{ background: {c['raise']}; }}
