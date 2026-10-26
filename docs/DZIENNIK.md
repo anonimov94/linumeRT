@@ -1547,3 +1547,14 @@ Istniejące 26 testów/4 subtesty i ruff PASS; konkretne reprodukcje w komentarz
 Gcode SIGSEGV i test bez M2 odtworzone na main53ad3ac. Offline1368 PASS; 7 błędów montowania .git usuniętych w celowanej serii11 PASS/3 SKIP, REQ22/22 i C21/21 PASS.
 #171 scalony c1eabef; podgląd main aktywny w linumert-hmi do oceny właściciela, obie lease Codex zachowane.
 Bez zmian sterowania i katalogu operatora; LIMITS-PREFLIGHT nadal partial. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## LIMITS-PREFLIGHT — ekstrema łuków przed startem programu · 2026-10-26 · ChatGPT
+- Model-Author: ChatGPT (koordynacja: Claude). PR #172: analyze_canon śledzi pozycję i płaszczyznę (SELECT_PLANE), sprawdza ekstrema ARC_FEED 0/90/180/270° w XY/YZ/XZ, pełny okrąg (początek = koniec) i wiele obrotów; ruchy liniowe bez zmian.
+- Przegląd Claude: wykryty i poprawiony pełny okrąg z rotation=±1 (wcześniej pomijany) oraz błędne granice testu. Lokalnie 15 testów limitów PASS, 54 PASS/14 SKIP w testach limit/preflight, ruff PASS.
+- Pozostaje: obrót XY (G10 L2 R), osie obrotowe, odbiór na pulpicie właściciela. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## 2026-10-26 — Codex: scalenie wszystkich rozpoczętych PR, poprawka #172
+Model-Author: Codex. Nowe polecenie właściciela: scalić wszystkie PR i gałęzie; odbiór rozpoczętego zakresu 028/031/051/069, bez deklaracji zamknięcia bramek.
+Początek łuku zachowuje położenie maszynowe po G5x/G92/TLO; zmiana jednostek skaluje też offsety.
+21 testów i 4 subtesty PASS, w tym rzeczywisty rs274 dla G92 i G10 L2, ruff PASS.
+Helisy po obrocie XY pozostają do poprawienia w zależnym #173; nie zmieniano lokalnych plików operatora.
