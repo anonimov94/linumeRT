@@ -514,6 +514,84 @@ def _face_step(page, tool_d="10"):
     page.add_step()
 
 
+def test_cycles_edit_buttons_roundtrip_and_selection(page_env, monkeypatch, tmp_path):
+    from linumert.programs.lnx import load_lnx
+
+    module, page, _shell = _cycles(page_env, monkeypatch)
+    action = page_env[3]
+    _face_step(page)
+    page.step_buttons["duplicate"].click()
+    assert page.step_list.currentRow() == 2 and len(page.program.steps) == 3
+    page.inputs["depth"].setText("2")
+    page.update_step()
+    assert page.program.steps[1].params["depth"] == 1
+    assert page.program.steps[2].params["depth"] == 2
+    page.step_buttons["up"].click()
+    assert page.step_list.currentRow() == 1 and page.program.steps[1].params["depth"] == 2
+    page.step_buttons["toggle"].click()
+    assert not page.program.steps[1].enabled and "wyłączony" in page.step_list.item(1).text()
+    assert "G1 Z-2" not in page.text()
+    page.step_buttons["delete"].click()
+    page.step_buttons["undo"].click()
+    assert not page.program.steps[1].enabled and len(page.program.steps) == 3
+    page.step_buttons["redo"].click()
+    assert len(page.program.steps) == 2
+    target = tmp_path / "edycja.lnx"
+    monkeypatch.setattr(module.QtWidgets.QFileDialog, "getSaveFileName",
+                        lambda *a, **k: (str(target), ""))
+    assert page.save_lnx() and load_lnx(target) == page.program
+    assert not action.mock_calls
+    page.close()
+
+
+def test_cycles_inline_validation_and_uncommitted_load(page_env, monkeypatch):
+    from PyQt5 import QtTest
+
+    _module, page, _shell = _cycles(page_env, monkeypatch)
+    _face_step(page)
+    original = page.text()
+    page.inputs["depth"].setText("-1")
+    QtTest.QTest.qWait(350)
+    assert "Błąd" in page.field_errors["depth"].text()
+    assert not page.field_errors["depth"].isHidden() and not page.view2d.lines
+    page.update_step()
+    assert page.text() == original
+    page.path = "existing.ngc"
+    page.load()
+    assert "Niezatwierdzone" in page.lbl_issue.text() and not page_env[3].mock_calls
+    page.inputs["depth"].setText("1,5")
+    QtTest.QTest.qWait(350)
+    assert page.field_errors["depth"].isHidden()
+    page.update_step()
+    assert page.program.steps[1].params["depth"] == 1.5
+    page.inputs["depth"].setText("1.5")
+    page.update_step()  # re-entering the same value must not block saving
+    assert page._committed_form()
+    page.close()
+
+
+def test_cycles_layout_and_graphical_preview(page_env, monkeypatch):
+    from PyQt5 import QtCore, QtWidgets
+
+    module, page, _shell = _cycles(page_env, monkeypatch)
+    _face_step(page)
+    page.resize(1280, 768)
+    page.show()
+    QtWidgets.QApplication.processEvents()
+    for button in page.findChildren(QtWidgets.QPushButton):
+        if button.isVisible():
+            assert page.rect().contains(QtCore.QRect(button.mapTo(page, QtCore.QPoint()),
+                                                    button.size())), button.text()
+    page.result_tabs.setCurrentIndex(1)
+    assert page.view2d.lines
+    # Optional artifact for the author's visual inspection; no repository mutation in CI.
+    output = os.environ.get("LINUMERT_CYCLES_SCREENSHOT")
+    if output:
+        Path(output).parent.mkdir(parents=True, exist_ok=True)
+        assert page.grab().save(output)
+    page.close()
+
+
 def test_cycles_steps_checked_with_tool_db(page_env, monkeypatch):
     """Cykle (Model-Author: Claude, sesja 040): kroki porównane z bazą narzędzi w GUI."""
     from linumert.tools.db import Tool

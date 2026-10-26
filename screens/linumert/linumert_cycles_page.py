@@ -73,6 +73,10 @@ class CyclesPage(QtWidgets.QWidget):
         self._pool = ThreadPoolExecutor(max_workers=1)
         self._job = None
         self._revision = 0
+        self._validation_timer = QtCore.QTimer(self)
+        self._validation_timer.setSingleShot(True)
+        self._validation_timer.setInterval(300)
+        self._validation_timer.timeout.connect(self._values)
         self._timer = QtCore.QTimer(self)
         self._timer.setInterval(200)
         self._timer.timeout.connect(self._poll_estimate)
@@ -104,10 +108,7 @@ class CyclesPage(QtWidgets.QWidget):
             row.addWidget(btn)
         lay.addLayout(row)
         grid.addWidget(frame, 0, 0, 2, 1)
-        frame, lay, _s = pages.card("Podgląd 2D", "XY [mm]")
         self.view2d = Preview2D(shell.c)
-        lay.addWidget(self.view2d)
-        grid.addWidget(frame, 0, 1)
         frame, lay, self.lbl_prog = pages.card("Program z kroków", "0 kroków")
         self.step_list = QtWidgets.QListWidget()
         self.step_list.setMaximumHeight(110)
@@ -128,7 +129,14 @@ class CyclesPage(QtWidgets.QWidget):
         self.code = QtWidgets.QPlainTextEdit()
         self.code.setReadOnly(True)
         self.code.setLineWrapMode(QtWidgets.QPlainTextEdit.NoWrap)
-        lay.addWidget(self.code, 1)
+        self.result_tabs = QtWidgets.QTabWidget()
+        self.result_tabs.addTab(self.code, "G-code programu")
+        self.result_tabs.addTab(self.view2d, "Geometria kroku · XY")
+        lay.addWidget(self.result_tabs, 1)
+        note = pages._label("Kolejność kroków wpływa na obróbkę. Po zmianach sprawdź "
+                            "narzędzia, układ detalu i symulację.", "lrtMuted")
+        note.setWordWrap(True)
+        lay.addWidget(note)
         self.lbl_tools = pages._label("", "lrtMuted")
         self.lbl_tools.setWordWrap(True)
         lay.addWidget(self.lbl_tools)
@@ -158,7 +166,7 @@ class CyclesPage(QtWidgets.QWidget):
             btn.clicked.connect(slot)
             row.addWidget(btn)
         lay.addLayout(row)
-        grid.addWidget(frame, 1, 1)
+        grid.addWidget(frame, 0, 1, 2, 1)
         grid.setColumnStretch(0, 2)
         grid.setColumnStretch(1, 3)
         self.path: str | None = None
@@ -202,15 +210,20 @@ class CyclesPage(QtWidgets.QWidget):
             self.step_list.setCurrentRow(self.editor.selected)
             if restore_form and self.editor.selected >= 0:
                 self.select_step(self.editor.selected)
+        elif operation == "update":
+            self._draft_dirty = False
 
     # ---- formularz ------------------------------------------------------------------------
     def _gen(self):
         return self.cmb.currentData()()
 
     def _build_form(self) -> None:
+        self._validation_timer.stop()
+        self._draft_dirty = False
         while self.form.rowCount():
             self.form.removeRow(0)
         self.inputs = {}
+        self.field_errors = {}
         for f in self.cmb.currentData().fields:
             if f.kind == "choice":
                 w = QtWidgets.QComboBox()
@@ -229,10 +242,38 @@ class CyclesPage(QtWidgets.QWidget):
                 w = QtWidgets.QLineEdit("" if f.default is None else f"{f.default:g}")
                 w.setPlaceholderText("wymagane" if f.required else "")
             label = f.label + (f" [{f.unit}]" if f.unit else "") + (" *" if f.required else "")
-            self.form.addRow(label, w)
+            w.setAccessibleName(label)
+            w.setMinimumHeight(40)
+            cell = QtWidgets.QWidget()
+            cell_layout = QtWidgets.QVBoxLayout(cell)
+            cell_layout.setContentsMargins(0, 0, 0, 0)
+            cell_layout.setSpacing(2)
+            cell_layout.addWidget(w)
+            error = pages._label("", "lrtMuted")
+            error.setWordWrap(True)
+            error.hide()
+            cell_layout.addWidget(error)
+            self.form.addRow(label, cell)
             self.inputs[f.name] = w
+            self.field_errors[f.name] = error
+            signal = (w.currentIndexChanged if isinstance(w, QtWidgets.QComboBox) else
+                      w.toggled if isinstance(w, QtWidgets.QCheckBox) else w.textChanged)
+            signal.connect(self._form_changed)
         self.lbl_issue.setText("")
         self.view2d.set_lines([])
+
+    def _form_changed(self):
+        self._draft_dirty = True
+        self.view2d.set_lines([])
+        self.lbl_step.setText("Zmieniono parametry — użyj Podgląd, Dodaj lub Zmień wybrany.")
+        self._validation_timer.start()
+
+    def _committed_form(self):
+        if not self._draft_dirty:
+            return True
+        self.lbl_issue.setText("Niezatwierdzone parametry formularza. Użyj „Zmień wybrany” "
+                               "lub „Dodaj krok” przed zapisem albo wczytaniem do LinuxCNC.")
+        return False
 
     def params(self) -> dict:
         out = {}
@@ -255,11 +296,19 @@ class CyclesPage(QtWidgets.QWidget):
         return out
 
     def _values(self):
+        self._validation_timer.stop()
         gen = self._gen()
         values, issues = gen.normalize(self.params())
         if not issues:
             issues = gen.check(values, 0)
+        for name, label in self.field_errors.items():
+            messages = [i.message() for i in issues if i.field == name]
+            label.setText("Błąd: " + "\n".join(messages) if messages else "")
+            label.setVisible(bool(messages))
+            self.inputs[name].setAccessibleDescription("\n".join(messages))
         if issues:
+            self.view2d.set_lines([])
+            self.lbl_step.setText("Popraw parametry kroku.")
             self.lbl_issue.setText("; ".join(i.message() for i in issues))
             return gen, None
         self.lbl_issue.setText("")
@@ -326,6 +375,7 @@ class CyclesPage(QtWidgets.QWidget):
             elif isinstance(w, QtWidgets.QLineEdit):
                 w.setText(str(value))
         self.preview()
+        self._draft_dirty = False
 
     def pop_step(self) -> None:
         if self.program.steps:
@@ -475,7 +525,7 @@ class CyclesPage(QtWidgets.QWidget):
         except (LnxError, CompileError) as exc:
             self.lbl_issue.setText(f"Nie otwarto: {exc}")
             return False
-        if self._dirty and QtWidgets.QMessageBox.question(
+        if (self._dirty or self._draft_dirty) and QtWidgets.QMessageBox.question(
                 self, "Niezapisany program", "Odrzucić niezapisane zmiany w krokach?",
                 QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
                 QtWidgets.QMessageBox.No) != QtWidgets.QMessageBox.Yes:
@@ -491,6 +541,8 @@ class CyclesPage(QtWidgets.QWidget):
         return True
 
     def save_lnx(self) -> str | None:
+        if not self._committed_form():
+            return None
         start = self.lnx_path or os.path.join(os.path.expanduser("~"), "linumert_cykle.lnx")
         path, _filter = QtWidgets.QFileDialog.getSaveFileName(
             self, "Zapisz program dialogowy", start, "Program dialogowy (*.lnx)")
@@ -509,6 +561,8 @@ class CyclesPage(QtWidgets.QWidget):
         return path
 
     def save(self) -> str | None:
+        if not self._committed_form():
+            return None
         if not self.program.steps:
             self.lbl_issue.setText("Brak kroków programu.")
             return None
@@ -530,6 +584,8 @@ class CyclesPage(QtWidgets.QWidget):
         return path
 
     def load(self) -> None:
+        if not self._committed_form():
+            return
         if not self.program.steps:
             self.lbl_issue.setText("Brak kroków programu.")
             return
@@ -553,6 +609,7 @@ class CyclesPage(QtWidgets.QWidget):
         pass
 
     def closeEvent(self, event) -> None:  # noqa: N802 - API Qt
+        self._validation_timer.stop()
         self._timer.stop()
         if self._job is not None:
             future, path, _revision = self._job
