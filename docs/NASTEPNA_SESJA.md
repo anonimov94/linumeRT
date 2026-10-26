@@ -25,6 +25,8 @@ na 1280×768 (5 testów PASS). QtVCP: 45 kroków PASS / 63,21 s.
 CI python/plant-matrix PASS; pełna seria LinuxCNC anulowana po 35 min (wcześniej
 FAIL home_and_move). Lokalna pełna seria z natywnym gcode: SIGSEGV parse_rs274,
 poza zmienionymi modułami; logi build/hmi-closeout. Obie lease zwolnione.
+Kolejna porcja: odczyty NML programu/posuwu/narzędzia (46 testów PASS, 1 SKIP),
+odbiór Cyberdeck w AUTO i pomiary presetów w toku.
 Kolejna porcja: Cyberdeck — dwa podglądy współdzielą scenę Neon, własna nakładka
 narożników, 38 testów Qt/status PASS, 1 SKIP. Zrzut Qt sprawdzony; odbiór live nowej kompozycji otwarty.
 

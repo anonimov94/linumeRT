@@ -1502,3 +1502,8 @@ bez podłączenia opisane jawnie. NIEZWERYFIKOWANE NA SPRZĘCIE.
 - Model-Author: Codex. Prostokątne podglądy detalu z narzędziem i maszyny obok siebie, nad nimi własna nakładka narożników; dolny rząd DRO/program/posuw/narzędzie.
 - Wspólne loader/scena Neon; zmiana rodziny/motywu zachowuje scenę. Maszyna oznaczona jako model poglądowy XYZ, bez deklaracji modelu kolizji Plant.
 - 38 testów Qt/status PASS, 1 SKIP; zrzut z testową próbką sprawdzony. Bez nowych komend, pinów HAL lub zależności; odbiór live nowej kompozycji otwarty.
+
+## M2 / Neon — rzeczywiste odczyty programu, posuwu i narzędzia · 2026-10-26 · Codex
+- Model-Author: Codex. NML: posuw toru mm/min, zadane obroty rpm, numer narzędzia, średnica i offset Z tabeli; brak danych pozostaje jawny.
+- Program pokazuje źródło wczytane z rzeczywistego pliku oraz zaznaczenie motion_line. Utrata statusu czyści odczyty i program; zmiana rodziny korzysta z tej samej próbki.
+- 46 testów Qt/status PASS, 1 SKIP; walidacja NaN/ujemnych danych, przeliczenie cali i czyszczenie danych. Odbiór ruchu/DTG i trzech presetów trwa w odizolowanym LinuxCNC.

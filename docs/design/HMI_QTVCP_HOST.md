@@ -116,3 +116,12 @@ karty nie wychodzą poza ekran. Monitor samodzielny zachowuje własne paski.
 Regresja składa cztery rodziny z rzeczywistym Qt, zmienia 1280×768 → 1920×1080
 → 1280×768 i wymaga braku przewijania całej strony oraz widoczności wszystkich kart.
 5 testów PASS, sprawdzony zrzut Classic Digital; odbiór live osobno.
+
+## Odczyty monitora — 2026-10-26
+
+F pokazuje rzeczywistą prędkość toru (`current_vel`, mm/min), S zadane obroty
+(`spindle[0].speed`, rpm; nie jest to sprzężenie tachometru). T pochodzi z
+`tool_in_spindle`, D i L z tabeli narzędzi; L oznacza podpisany offset Z z tabeli.
+Po utracie statusu wartości są czyszczone. Program pochodzi z pliku wczytanego
+przez loader ścieżki; aktywna linia jest zaznaczona według `motion_line`.
+Cyberdeck korzysta z tej samej sceny Neon co Classic; widok XYZ jest poglądowy.
