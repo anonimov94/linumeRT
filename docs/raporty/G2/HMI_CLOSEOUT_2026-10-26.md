@@ -24,3 +24,39 @@ Surowe logi lokalne: build/hmi-closeout/{step1-checks,live-check}.log.
 
 Odbiór pulpitu właściciela i sprzętu pozostaje odrębny.
 NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+
+## Domknięcie zleconych trzech grup
+
+1. Układ 1280×768: szyna, przygotówka, dolne karty HMI, znak i kody alarmów.
+   Cztery rodziny mieszczą karty bez przewijania całej strony; treści formularzy
+   nadal przewijają się we własnym panelu.
+2. Cyberdeck: dwa prostokątne podglądy pod nakładką. Detal z narzędziem i
+   poglądowy model XYZ korzystają ze wspólnej sceny Neon. To renderer QPainter,
+   nie deklaracja modelu kolizji Plant ani nowego renderera pyqtgraph.
+3. Monitor: źródło rzeczywistego programu i aktywna linia, rzeczywisty posuw toru,
+   zadane obroty, T/D/offset Z tabeli; brak danych i utrata statusu jawne.
+
+Wyniki z LinuxCNC (kod monitora ee722b6, host/samotest 6b82b95):
+- AUTO zakończone; pauza: linia 59 = 59, DTG 3,230968241 mm = 3,230968241 mm,
+  DRO zgodne z NML. T1, D6 mm, L0 mm, zadane S12000; źródło programu widoczne.
+- Trzy presety: detal 2,95 / 3,66 / 4,31 ms; maszyna 2,96 / 3,06 / 3,55 ms.
+- Osadzony Cyberdeck 1280×768: 45 kroków PASS w 61,22 s. Pierwsza próba ujawniła
+  założenie samotestu o aktywnym Start; po jawnym kliknięciu Start scenariusz PASS.
+  Nie zmieniano interlocków.
+- Qt/IP: 218 PASS, 101 subtestów PASS, 1 SKIP, 6 testów live poza tym wywołaniem.
+  GL Mesa: 160 kombinacji rozmiarów/rodzin/motywów/języków PASS.
+- Fixture Plant: 1 live PASS w 133,88 s; endpoint ustalony po 1,053 s,
+  [100, 199,9977, −20] mm, peak f-error 0,19263 mm, errors_motion puste.
+  Zainstalowany LinuxCNC, istniejące helpery RIP uruchomione przez adapter ścieżek
+  wskazujący rzeczywiste binaria/moduły systemowe; nie nazywamy tego budową RIP.
+  Ciągła tolerancja 5 µm przez 0,2 s; bez zmiany modelu, ramp, tolerancji lub limitu 60 s.
+
+Dowody: [start](HMI_CLOSEOUT_2026-10-26/01-start.png),
+[środek](HMI_CLOSEOUT_2026-10-26/02-srodek.png),
+[koniec](HMI_CLOSEOUT_2026-10-26/03-koniec.png),
+[wyniki i hashe](HMI_CLOSEOUT_2026-10-26/results.json).
+Próba monitora zapisała ostrzeżenie QProcess przy wyjściu; skrypt odbioru teraz
+zamyka monitor przed LinuxCNC. Nie wpływało to na porównanie NML ani ukończenie programu.
+Pełny wynik wymaganych kontroli CI pozostaje warunkiem scalenia PR #169.
+Nie zamykamy całego 028/SKIN-02…06 ani odbioru pulpitu właściciela.

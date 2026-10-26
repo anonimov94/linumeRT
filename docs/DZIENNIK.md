@@ -1518,3 +1518,8 @@ bez podłączenia opisane jawnie. NIEZWERYFIKOWANE NA SPRZĘCIE.
 - GL: 160 kombinacji PASS. Qt/IP: 218 testów PASS, 101 subtestów, 1 SKIP. Osadzony Cyberdeck: 45 kroków PASS / 61,22 s po poprawce scenariusza (nawigacja do widocznego Start).
 - CI 40285964696: artefakt driver.log potwierdza X=99,9947 przy celu 100 ±0,005 po stałym sleep(0,5), bez błędu ruchu. Fixture teraz wymaga istniejącej tolerancji przez 0,2 s, w dotychczasowym limicie 60 s; progi/model bez zmian.
 - 5 testów diagnostyki PASS (również nieustalona pozycja i reset dwell); odbiór live fixture nadal wymagany.
+
+## HMI — dowody końcowe i odbiór fixture · 2026-10-26 · Codex
+- Model-Author: Codex. Raport HMI_CLOSEOUT_2026-10-26 z trzema zrzutami live, JSON/hashe; 218 Qt/IP PASS, 101 subtestów, GL 160 kombinacji PASS.
+- Poprawiona fixture: 1 live PASS / 133,88 s, endpoint po 1,053 s, [100,199,9977,-20] mm, peak f-error 0,19263 mm, bez błędów ruchu; zainstalowany LinuxCNC z adapterem ścieżek helperów RIP.
+- Przekazanie trzech grup zaimplementowane i lokalnie odebrane; CI #169 musi być zielone przed scaleniem. Pełne 028/SKIN i odbiór pulpitu/sprzętu pozostają otwarte. Obie lease zwolnione.
