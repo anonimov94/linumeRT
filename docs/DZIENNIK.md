@@ -1634,3 +1634,11 @@ Odbiór pulpitu i pozostały zakres 069 nadal otwarte; NIEZWERYFIKOWANE NA SPRZ�
 - Router wielowierszowego tekstu/JOG naprawiony: 15 PASS; końcowe CI w #184.
 - Synteza SYNTEZA_MODELI_2026-10-26.md, kolejny zakres WEB-HMI-POC w rejestrze.
 - Brak deklaracji nieprzeprowadzonego przeglądu Claude CAM; odbiory pulpitu/RT/sprzętu otwarte.
+
+Model-Author: Codex · 2026-10-27. #184: LinuxCNC run 40407002589 —
+1738 offline PASS; 166 RIP PASS, 1 FAIL w D38 Plant (powrót eoffset).
+Sterownik produkcyjny i istniejąca regresja dopuszczają 0.0001 jednostki natywnej,
+lecz test integracyjny nadal wymagał 0.000001. Ujednolicono obie asercje testu
+z istniejącym kontraktem; bez zmiany sterownika ani tolerancji produkcyjnej.
+Dodano wartości pinów do diagnostyki porażki. Lokalnie ruff i 7 testów/10 subtestów PASS.
+Pełny RIP musi ponownie potwierdzić wynik; nie scalać na czerwonym CI.
