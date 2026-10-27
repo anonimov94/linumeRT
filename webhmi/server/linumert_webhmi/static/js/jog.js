@@ -17,6 +17,7 @@ export function createJog({ send, ready, mayJog, onAlarm, onChange }) {
   let phase = "idle"; // idle / moving / stopping / fault
   let reason = "";
   let stopPending = false;
+  let stopAcked = false;
 
   function indicate(text, next) {
     phase = next;
@@ -39,13 +40,17 @@ export function createJog({ send, ready, mayJog, onAlarm, onChange }) {
     active = null;
     clearTimer();
     reason = why;
+    stopAcked = false;
     indicate("JOG: ZATRZYMYWANIE…", "stopping");
     const id = send({ cmd: "jog_stop", axis }, (reply) => {
       if (reply.type === "error") {
         fault("Niepotwierdzony JOG STOP: " + String(reply.message || "błąd bramy"));
-      } else if (!stopPending) {
-        reason = "";
-        indicate("JOG: BEZ RUCHU", "idle");
+      } else {
+        stopAcked = true;
+        if (!stopPending) {
+          reason = "";
+          indicate("JOG: BEZ RUCHU", "idle");
+        }
       }
     });
     if (id === null) fault("JOG STOP nie został wysłany — brak łączności.");
@@ -60,10 +65,14 @@ export function createJog({ send, ready, mayJog, onAlarm, onChange }) {
   function retryStop() {
     if (phase !== "fault" || !ready()) return;
     reason = "Ponawianie zatrzymania jogu";
+    stopAcked = false;
     indicate("JOG: ZATRZYMYWANIE…", "stopping");
     const id = send({ cmd: "jog_stop" }, (reply) => {
       if (reply.type === "error") fault("JOG STOP nadal niepotwierdzony: " + String(reply.message));
-      else if (!stopPending) { reason = ""; indicate("JOG: BEZ RUCHU", "idle"); }
+      else {
+        stopAcked = true;
+        if (!stopPending) { reason = ""; indicate("JOG: BEZ RUCHU", "idle"); }
+      }
     });
     if (id === null) fault("Nie można ponowić JOG STOP.");
   }
@@ -117,6 +126,10 @@ export function createJog({ send, ready, mayJog, onAlarm, onChange }) {
     if (stopPending) {
       if (phase === "idle") fault("Brama zgłasza niepotwierdzony stop jogu.");
       else if (phase === "stopping") status.textContent = "JOG: ZATRZYMYWANIE…";
+    }
+    if (phase === "stopping" && stopAcked && !stopPending) {
+      reason = "";
+      indicate("JOG: BEZ RUCHU", "idle");
     }
     if (active && (!mayJog(active.axis) || !ready())) stop("Zmiana stanu maszyny");
   }
