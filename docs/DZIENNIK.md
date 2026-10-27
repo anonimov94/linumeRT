@@ -1702,3 +1702,7 @@ Pełny RIP musi ponownie potwierdzić wynik; nie scalać na czerwonym CI.
 - Model-Author: Claude. `core/linumert/machine/atc_macro.py`: makro remapu M6 dla ATC z `toolchanger` w machine.yaml (M64/M65 zwolnienie zacisku i osłony, M66 z timeoutem, ruchy G53, na końcu wbudowane M6 i G43/G49). Karuzela/parasol: jawna odmowa.
 - `plan_swap` to kolejność kroków; test wykonuje ją na modelu magazynu Plant (wymiany 0→3, 2→5, 4→0 bez TOOL_DROP/CLAMP_FAULT/POCKET_OCCUPIED/COVER_CRASH). 9 testów + atc/remap 23 PASS, ruff PASS.
 - Wzorzec kolejności i obsługi E-STOP (dziennik transakcyjny, RECOVERY_REQUIRED) z konsultacji z ChatGPT, do weryfikacji w dokumentacji LinuxCNC. Makro nie jest jeszcze podpięte do INI; brak testu rs274. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## 066 — podpięcie makra ATC do generatora konfiguracji · 2026-10-27 · Claude
+- Model-Author: Claude. `Options.atc` w `configgen.py`: przy `atc=True` INI dostaje `REMAP = M6 modalgroup=6 ngc=lrt_m6_atc`, a `render` zwraca `macros/lrt_m6_atc.ngc` z `generate_atc_m6`. Domyślnie bez zmian (`lrt_m6`); karuzela/parasol: jawna odmowa `AtcMacroError`.
+- 2 nowe testy w `tests/test_atc_macro.py`; atc/remap/configgen 31 PASS, ruff PASS (Windows, Python 3.12). Nie ma: okablowania HAL dla M64/M66 (motion.digital-*) do Plant, testu rs274, recovery po E-STOP. NIEZWERYFIKOWANE NA SPRZĘCIE.

@@ -904,3 +904,6 @@ bez mnożnika 60, skala stat.linear_units dla mm/s -> native/s, odmowa bez skali
 Nie jest to pełny PASS niezależnego przeglądu #185 ani weryfikacja backendu na RIP.
 Znane ograniczenia watchdog i mapowania przegubów nadal wymagają domknięcia.
 Równolegle #184: poprawiona sprzeczna asercja testu D38, pełne CI nowego SHA 920bddd w toku.
+
+### Dla Claude: aktualizacja 2026-10-27 (po #192)
+Model-Author: Claude. #192 scalony. Krok (2) zrobiony opcją `Options.atc` (PR claude/atc-m6-wiring); brakuje okablowania HAL M64/M66 -> Plant, testu rs274, recovery po E-STOP (kroki 3-5).

@@ -52,6 +52,7 @@ class Options:
     tool_table: str = "../../sim/linumert_xyz/tool.tbl"
     postgui: str = "../../sim/linumert_xyz/linumert_postgui.hal"
     subroutine_path: str = "macros"
+    atc: bool = False     # remap M6 na makro ATC wygenerowane z sekcji toolchanger (rack_linear)
     extra: dict[str, Any] = field(default_factory=dict)
 
 
@@ -198,7 +199,8 @@ def render_ini(cfg: MachineConfig, js: list[Joint], target: str, opt: Options,
         "[EMCIO]", "EMCIO = io", "CYCLE_TIME = 0.100", f"TOOL_TABLE = {opt.tool_table}", "",
         "[RS274NGC]", "PARAMETER_FILE = linumert.var",
         "RS274NGC_STARTUP_CODE = G17 G21 G40 G43H0 G54 G64P0.01 G80 G90 G94 G97 M5 M9",
-        f"SUBROUTINE_PATH = {opt.subroutine_path}", "REMAP = M6 modalgroup=6 ngc=lrt_m6", "",
+        f"SUBROUTINE_PATH = {opt.subroutine_path}",
+        f"REMAP = M6 modalgroup=6 ngc={'lrt_m6_atc' if opt.atc else 'lrt_m6'}", "",
         "[EMCMOT]", "EMCMOT = motmod", "SERVO_PERIOD = 1000000", "COMM_TIMEOUT = 1.0",
         f"BASE_PERIOD = {base_period}",
         "",
@@ -480,6 +482,10 @@ def render(cfg: MachineConfig, target: str, opt: Options | None = None,
     js = joints(cfg, scales)
     ini = render_ini(cfg, js, target, opt)
     files = {f"{cfg.machine.name}.ini": ini}
+    if opt.atc:
+        from .atc_macro import generate_atc_m6
+
+        files[f"{opt.subroutine_path}/lrt_m6_atc.ngc"] = generate_atc_m6(cfg)
     if target == "plant":
         head = ["# SPDX-License-Identifier: GPL-2.0-or-later",
                 "# linumeRT · wrzeciono symulowane lokalnie (sim_spindle); Plant dostaje "
