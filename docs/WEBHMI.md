@@ -212,3 +212,15 @@ Przyrost może zostać przerwany przez STOP. Wcześniejsze ograniczenia watchdog
 
 Odbiór Pythona, Node, przeglądarki i LinuxCNC raportowany osobno w PR sprintu i #181;
 atrapa ani testy mapowania nie zastępują dowodu rzeczywistego LinuxCNC.
+
+### JOG klawiaturą na wybranym przycisku
+
+Model-Author: Codex · 2026-10-27. Przejdź Tabem na przycisk JOG wybranej osi
+i kierunku. Przytrzymaj Spację albo Enter; zwolnienie klawisza lub przejście
+fokusu na inny element zatrzymuje ruch. Przyrost jest wykonywany raz na gest;
+powtarzanie klawisza przez system nie zleca następnego kroku. Zasady blokad,
+podtrzymania i potwierdzenia STOP są wspólne z obsługą wskaźnika.
+
+To skróty wyłącznie przycisków JOG. Pisanie w polach tokenu i MDI nie uruchamia
+JOG; nie dodano globalnych klawiszy ruchu. Kombinacje z Ctrl/Alt/Meta/Shift nie
+rozpoczynają JOG. [Odbiór przeglądarki z atrapą i ograniczenia](raporty/G2/WEBHMI_KEYBOARD_2026-10-27.md).
