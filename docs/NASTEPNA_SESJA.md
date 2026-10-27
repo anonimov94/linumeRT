@@ -1,6 +1,6 @@
 # Przekazanie i środowisko
 
-Tura: Codex · 2026-10-27 · stan: oddana; backend STL w #190, lokalny odbiór PASS; #188 scalony.
+Tura: Codex · 2026-10-27 · stan: oddana; odbiór i scalanie gotowych PR #190/#184, wyniki końcowe w kontrolach PR.
 
 Model-Author: Codex. Bez globalnego LOCK; zasady współpracy wyłącznie w
 [WSPOLPRACA_MODELI.md](WSPOLPRACA_MODELI.md).
@@ -14,6 +14,17 @@ Nie utrzymuj tu drugiej listy statusów. Dobór sesji i rozszerzeń według reje
 oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj automatycznie.
 
 ## Dla Claude:
+
+Model-Author: Codex · 2026-10-27. **Polecenie właściciela: testować i scalać gotowe gałęzie.**
+#190 ma zielone python/plant-matrix/LinuxCNC (158 live PASS); #184 połączony z main
+i backendem #190, konflikty wyłącznie dokumentacji rozwiązane. Jeden aktualny
+WEBHMI-POC zachowuje postęp; CAM-2D-TEXT-STL i CAM-RELIEF-STL pozostają osobno.
+Dodatkowe rs274: 10 CAM + 1 relief PASS; lokalna macierz/scenariusze Plant PASS.
+Pełne testy offline i CI końcowego SHA trwają; scalać dopiero po zielonych kontrolach.
+Systemowy gcode 2.9 w obrazie lokalnym ujawnia istniejący błąd test_sim_path
+(brak M2) i późniejszy SIGSEGV; błąd odtworzony na czystym main 38a248d.
+Powtórka offline w czystym venv bez LinuxCNC; odbiór RIP osobno przez CI.
+Kopia operatora i jej lokalne pliki pozostają zachowane.
 
 Model-Author: Codex · 2026-10-27. **Nowy podział właściciela: backend CNC po stronie Codex.**
 Zakres: obsługa napędów, cykle frezowania/toczenia/szlifowania, generowanie ścieżki
@@ -40,6 +51,27 @@ Stan zatrzymania: PR #188 wypchnięty; make lint test: 1595 PASS, 124 SKIP,
 157 deselected (LinuxCNC), REQ 22/22. CI Debian/LinuxCNC PASS; #188 scalony jako d6a9853. Nie zajmuję backend.py/gateway.py/app.py.
 Następny zakres: rzeczywista przeglądarka i LinuxCNC RIP; watchdog HAL nadal otwarty.
 Rekord WEBHMI-POC wiąże zakres z 028/029 i decyzją właściciela; bez zamknięcia M2.
+
+Model-Author: Codex · 2026-10-26. **Nocna praca do 27.10, 07:00 Europe/Warsaw.**
+Właściciel: nowe funkcje przed optymalizacją; optymalizacja po wykonaniu całej roadmapy.
+Najpierw domknięcie #184 z poprawką tekst/JOG, potem WEB-HMI-POC zgodnie z syntezą.
+Kontynuacja tego czatu jest zaplanowana co 30 minut do rana; zachować małe kroki,
+koordynację przez pliki/PR i prawdziwe dowody. Nie zaliczać ręcznych ani sprzętowych bramek.
+
+Model-Author: Codex · 2026-10-26. **Synteza i domknięcie na polecenie właściciela.**
+#183 scalony `3ea8eb7`; przegląd dokumentu SHA 5cc1938 zapisany w komentarzu PR.
+W #184 zachowujemy wspólny CAM i gotowy ekran odniesienia; dalszy rozwój GUI przechodzi
+na HTML/WebGL. Kontrakt i rejestr zsynchronizowane, następny zakres `WEB-HMI-POC`.
+Routing tekstu poprawiony (15 PASS): edycja bez JOG, F1/F2/Esc i stop rozpoczętego JOG zachowane.
+Prośba o przegląd końcowego SHA #184, zwłaszcza tych kontraktów; brak odpowiedzi nie jest
+przeglądem. Pełna synteza: `SYNTEZA_MODELI_2026-10-26.md`; autokontrola CAM i CI w PR.
+
+Model-Author: Codex · 2026-10-26. **Strategie, kształty, napisy i STL — PR #184.**
+Nowy zakres właściciela: planowanie v2, grawerowanie kształtów i konturów czcionek,
+STL ASCII/binary z podglądem i przekrojem XY. Geometria jest zachowana w .lnx.
+GUI 1280×768, zoom/pan, obliczenia STL w tle; raport CAM_2D_2026-10-26.md.
+Stan zatrzymania: kod i testy w codex/cam-strategies, kontrole konkretnego HEAD w #184.
+Nie zamyka to odbioru pulpitu, całych M3/M4 ani obróbki powierzchni STL 3D.
 
 Model-Author: Codex · 2026-10-26. **Bieżące zlecenie: backend i funkcje w GUI z edycją.**
 Porcja sesji 045 w PR #180, gałąź codex/cycles-editing: transakcyjny model kroków,

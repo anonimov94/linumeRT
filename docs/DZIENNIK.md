@@ -1632,6 +1632,33 @@ Odbiór pulpitu i pozostały zakres 069 nadal otwarte; NIEZWERYFIKOWANE NA SPRZ�
 - Rejestr WEBHMI-POC partial; odbiór przeglądarki, LinuxCNC RIP i watchdog HAL pozostają otwarte. Bez zmian Qt/HAL.
 - Autokontrola, bez niezależnego przeglądu. NIEZWERYFIKOWANE NA SPRZĘCIE.
 
+## CAM 2D — strategie, napisy i przekroje STL · 2026-10-26 · Codex
+- Model-Author: Codex. Polecenie właściciela: więcej strategii, kształty, napisy/czcionki i STL.
+- Planowanie v2: X/Y, zygzak, jeden kierunek, krzyżowo, współśrodkowo CW/CCW; v1 bez zmian.
+- Pięć kształtów, cztery strategie grawerowania; czcionki, rozmiar, odstępy i obrót napisów.
+- Import STL ASCII/binary w tle, model 3D, jednostki/skala i zamknięty przekrój XY do kroku.
+- Geometria zapisana w .lnx; zoom/pan i zakresy; limity rozmiaru, punktów i bloków.
+- Lokalnie 256 PASS/1 SKIP; lint, roadmap i REQ 22/22 PASS; 10 prób rs274 w CI.
+- Raport CAM_2D_2026-10-26.md, zrzuty build/cam/, kontrole PR #184; autokontrola.
+- Zakres STL: przekrój XY, bez frezowania powierzchni 3D. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## Synteza Claude/Codex i domknięcie · 2026-10-26 · Codex
+- Model-Author: Codex. Polecenie właściciela: synteza i zamknięcie otwartych gałęzi.
+- Przegląd #183 (5cc1938), scalony 3ea8eb7; kierunek HTML/WebGL potwierdzony w decyzji Claude.
+- Gotowy CAM #184 pozostaje we wspólnym rdzeniu; domykamy istniejącą integrację Qt.
+- Dalej nowe GUI web, Qt jako ekran awaryjny; kontrakt i zasady współpracy zsynchronizowane.
+- Router wielowierszowego tekstu/JOG naprawiony: 15 PASS; końcowe CI w #184.
+- Synteza SYNTEZA_MODELI_2026-10-26.md, kolejny zakres WEB-HMI-POC w rejestrze.
+- Brak deklaracji nieprzeprowadzonego przeglądu Claude CAM; odbiory pulpitu/RT/sprzętu otwarte.
+
+Model-Author: Codex · 2026-10-27. #184: LinuxCNC run 40407002589 —
+1738 offline PASS; 166 RIP PASS, 1 FAIL w D38 Plant (powrót eoffset).
+Sterownik produkcyjny i istniejąca regresja dopuszczają 0.0001 jednostki natywnej,
+lecz test integracyjny nadal wymagał 0.000001. Ujednolicono obie asercje testu
+z istniejącym kontraktem; bez zmiany sterownika ani tolerancji produkcyjnej.
+Dodano wartości pinów do diagnostyki porażki. Lokalnie ruff i 7 testów/10 subtestów PASS.
+Pełny RIP musi ponownie potwierdzić wynik; nie scalać na czerwonym CI.
+
 ## 041/043/051 — backend CNC: wspólny czytnik STL · 2026-10-27 · Codex
 - Model-Author: Codex. Nowe polecenie właściciela: napędy, frezowanie/toczenie/szlifowanie i STL → ścieżka G-code.
 - Przeniesiono wyłącznie czytnik/przekroje STL i testy z #184; ASCII/binary, limity i walidacja siatki bez Qt.
@@ -1657,3 +1684,10 @@ Odbiór pulpitu i pozostały zakres 069 nadal otwarte; NIEZWERYFIKOWANE NA SPRZ�
 - #188 scalony jako d6a9853 po zielonym CI; main włączony do #190 z zachowaniem obu rozszerzeń rejestru.
 - #190: pierwsza porcja STL gotowa, CI w toku; scalenie po zielonych kontrolach właściwego HEAD. Autokontrola bez niezależnego przeglądu.
 - Dalszy zakres: zgrubna STL, cykle toczenia/szlifowania i backend napędów; bez deklaracji ich ukończenia. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## Odbiór gotowych gałęzi #190/#184 · 2026-10-27 · Codex
+- Model-Author: Codex. Polecenie właściciela: testować i scalać gotowe gałęzie; bez nowego zakresu i zamykania wcześniejszych bramek.
+- Osobne checkouty; main włączony do #184, następnie backend #190. Konflikty tylko dokumentacji; zachowano CAM i bieżący WEBHMI-POC bez zduplikowanej roadmapy.
+- rs274: 10 ścieżek CAM + 1 relief PASS; macierz/scenariusze Plant i C 109/109 PASS.
+- Lokalna pełna próba z systemowym gcode: błąd brakującego M2 i SIGSEGV w symulacji. Błąd test_sim_path odtworzony także na czystym main 38a248d; testy offline powtórzone w czystym venv.
+- Końcowe wyniki i SHA w kontrolach #184/#190; scalenie wyłącznie po zielonych kontrolach. Autokontrola, bez niezależnego przeglądu. NIEZWERYFIKOWANE NA SPRZĘCIE.

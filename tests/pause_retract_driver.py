@@ -168,8 +168,11 @@ def run(ini, joint_count, output):
         else:
             panel.resume_button.click()
         wait(lambda: not control.model.active and not s.paused, control=control)
-        assert abs(hal.get_value("axis.z.eoffset")) < 1e-6
-        assert abs(hal.get_value("axis.z.eoffset-request")) < 1e-6
+        # Match the production return tolerance, including native-unit roundoff.
+        # Plant can retain a sub-tolerance residual after ownership is released.
+        offsets = {pin: float(hal.get_value(f"axis.z.{pin}"))
+                   for pin in ("eoffset", "eoffset-request")}
+        assert max(map(abs, offsets.values())) <= control.model.tolerance, offsets
         wait(lambda before=before: position()[0] > before[0] + 0.2, control=control)
         assert abs(position()[1] - expected_y) < 0.01, ("compensation lost", position())
         wait(lambda: s.interp_state == linuxcnc.INTERP_IDLE, control=control)

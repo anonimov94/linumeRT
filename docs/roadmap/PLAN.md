@@ -152,7 +152,8 @@ Nie są kolejnym harmonogramem. Ich status dotyczy tylko wskazanego kroku.
 | PLANT-SUBSTEPS | 049, 063 | Plant: wynik niezależny od podkroków całkowania | ukończone |
 | HMI-OWNER-SKINS | 028 | Odrębny wygląd każdej skórki i główny ekran holograficzny | częściowe |
 | CNC-BACKEND | 039, 041, 043, 051, 061, 063, 069 | Backend napędów, cykli technologicznych i płaskorzeźby STL | częściowe |
-| WEBHMI-POC | 028, 029 | HTML/WebGL: integracja strony z bramą LinuxCNC | częściowe |
+| WEBHMI-POC | 028, 029, 055 | HTML/WebGL: integracja strony z bramą LinuxCNC | częściowe |
+| CAM-2D-TEXT-STL | 040, 043, 045, 046 | Strategie CAM 2D, napisy i przekroje STL | ukończone |
 
 ## Postęp, pozostały zakres i dowody
 
@@ -1032,5 +1033,11 @@ Pozostaje: Rozszerzony odbiór złożonych płaskorzeźb w symulacji i integracj
 
 Pozostaje: Odbiór rzeczywistej przeglądarki: DRO, scena WebGL ≤30 FPS, jog i utrata połączenia. Integracja i odbiór na LinuxCNC RIP; niezależny watchdog HAL przed użyciem sprzętu. Równoważność funkcji web z ekranem awaryjnym Qt; wcześniejsze bramki pozostają otwarte.
 
-Źródła: [docs/DECYZJE.md](../DECYZJE.md), [docs/WEBHMI.md](../WEBHMI.md), [tools/ci/check_webhmi_wheel.py](../../tools/ci/check_webhmi_wheel.py), [PR](https://github.com/anonimov94/linumeRT/pull/185), [PR](https://github.com/anonimov94/linumeRT/pull/187), [PR](https://github.com/anonimov94/linumeRT/pull/188).
+Źródła: [docs/DECYZJE.md](../DECYZJE.md), [docs/WEBHMI.md](../WEBHMI.md), [tools/ci/check_webhmi_wheel.py](../../tools/ci/check_webhmi_wheel.py), [PR](https://github.com/anonimov94/linumeRT/pull/185), [PR](https://github.com/anonimov94/linumeRT/pull/187), [PR](https://github.com/anonimov94/linumeRT/pull/188), [docs/SYNTEZA_MODELI_2026-10-26.md](../SYNTEZA_MODELI_2026-10-26.md).
+
+### CAM-2D-TEXT-STL — Strategie CAM 2D, napisy i przekroje STL
+
+**ukończone**. Polecenie właściciela 2026-10-26: więcej strategii, kształtów, napisy/czcionki i STL. Planowanie v2 X/Y: zygzak, jednokierunkowo, krzyżowo i współśrodkowo CW/CCW; v1 zachowana. Kształty parametryczne z konturem i kreskowaniem, tolerancja krzywych; napisy z czcionką, stylem, rozmiarem i układem. STL ASCII/binary w tle, model poglądowy 3D i zamknięty przekrój XY do kroku. Geometria utrwalona w .lnx, zoom/pan, GUI 1280×768; kontrola zakresów i budżetów. Zakres STL ograniczony do przekroju XY, bez frezowania powierzchni 3D. Autokontrola i dowody PR #184; nie zamyka odbioru pulpitu ani M3/M4.
+
+Źródła: [PR](https://github.com/anonimov94/linumeRT/pull/184), [docs/raporty/CAM_2D_2026-10-26.md](../raporty/CAM_2D_2026-10-26.md), [core/linumert/generators/shapes.py](../../core/linumert/generators/shapes.py), [core/linumert/generators/engraving.py](../../core/linumert/generators/engraving.py), [core/linumert/generators/surfacing.py](../../core/linumert/generators/surfacing.py), [core/linumert/programs/stl_section.py](../../core/linumert/programs/stl_section.py), [tests/test_cam_interpreter.py](../../tests/test_cam_interpreter.py).
 

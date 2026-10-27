@@ -438,6 +438,26 @@ bez LinuxCNC. NIEZWERYFIKOWANE NA SPRZĘCIE.
 - Rdzeń `linumert`, Plant, HAL, generatory, symulacja i alarmy działają dalej bez zmian.
 - Następny krok: PoC `web-hmi-poc` (brama + strona z DRO i sceną WebGL, atrapa `linuxcnc`).
 
+## Synteza i domknięcie otwartych gałęzi — polecenie właściciela 2026-10-26
+
+Model-Author: Codex. Właściciel polecił dokonać syntezy z Claude i domknąć otwarte gałęzie.
+Łączymy potwierdzony kierunek HTML/WebGL z gotowym backendem CAM i istniejącą integracją
+Qt w #184. Zachowujemy wykonaną pracę i kompatybilność `.lnx`; po domknięciu tej porcji
+nowe GUI rozwijamy w kliencie web, a Qt utrzymujemy jako ekran awaryjny.
+Poprawka routera tekstu/JOG jest naprawą działania istniejącego ekranu, nie nowym kierunkiem Qt.
+Kontrakt i zasady współpracy zsynchronizowano; szczegóły w `SYNTEZA_MODELI_2026-10-26.md`.
+`WEB-HMI-POC` jest następnym zakresem rejestru. Bramka licencyjna, odbiory pulpitu,
+RT/sprzętu i całych kamieni pozostają otwarte; decyzja nie uruchamia publikacji binarnej.
+
+## Praca nocna nad funkcjami — polecenie właściciela 2026-10-26
+
+Model-Author: Codex. Właściciel polecił pracować nad kodem do rana, z pierwszeństwem nowych
+funkcji; optymalizacja dopiero po rzeczywistym wykonaniu wszystkich pozycji roadmapy.
+Koniec nocnej kontynuacji przyjęto na 2026-10-27 07:00 Europe/Warsaw.
+Najpierw domknięcie rozpoczętych PR-ów, potem funkcje z rejestru zgodnie z syntezą i kierunkiem
+web HMI. Ręcznych odbiorów i prób sprzętowych nie oznaczamy jako wykonanych bez dowodów.
+Praca trwa małymi porcjami z testami i pushem; CI oczekujące/czerwone nie jest zgodą na merge.
+
 ## Backend CNC i cykle — polecenie właściciela 2026-10-27
 
 Model-Author: Codex. Właściciel przydzielił Codexowi backend obsługi napędów oraz cykli

@@ -557,6 +557,15 @@ Zakres: dokumentacja techniczna odbioru, bez kwalifikacji sprzętu.
 - `docs/raporty/G2/HMI_CLOSEOUT_2026-10-26/02-srodek.png`
 - `docs/raporty/G2/HMI_CLOSEOUT_2026-10-26/03-koniec.png`
 
+### Strategie 2D, napisy i przekroje STL — 2026-10-26
+
+Model-Author: Codex. Oryginalny kod generatorów `shapes.py`, `surfacing.py`, `engraving.py`,
+`path_geometry.py`, `stl_trace.py`, czytnika `stl_section.py` i widoków tekstu/STL:
+GPL-2.0-or-later, bez kodu i zasobów producentów sterowań. Napisy używają czcionek dostępnych
+w systemie; dołączone IBM Plex Sans i JetBrains Mono pozostają na OFL-1.1 (wpisy powyżej).
+Nie dodano plików fontów ani bibliotek. Siatka sześcianu w testach jest własną geometrią.
+Zrzuty `build/cam/` pochodzą z własnego Qt z atrapą CNC i nie są zasobami produktu.
+
 ### Backend płaskorzeźby STL — 2026-10-27
 
 Model-Author: Codex. Własny algorytm kontaktu frezu kulistego i rastra, CLI oraz

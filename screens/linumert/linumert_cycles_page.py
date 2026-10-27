@@ -30,7 +30,9 @@ for _p in (os.path.join(ROOT, "core"),):
     if _p not in sys.path:
         sys.path.insert(0, _p)
 
-from linumert.generators import basic, contours, drilling, pockets, subroutines  # noqa: E402
+from linumert.generators import (  # noqa: E402
+    basic, contours, drilling, engraving, pockets, shapes, stl_trace, subroutines, surfacing,
+)
 from linumert.generators.registry import GeneratorRegistry  # noqa: E402
 from linumert.generators.tooling import check_steps  # noqa: E402
 from linumert.programs.compiler import CompileError, compile_program  # noqa: E402
@@ -38,10 +40,11 @@ from linumert.programs.lnx import LnxError, LnxProgram, Step, load_lnx, save_lnx
 from linumert.programs.step_editor import StepEditor  # noqa: E402
 
 ACTION = Action()
-GENERATORS = (basic.Header, basic.ToolChange, basic.FaceMill, drilling.DrillHoles,
+GENERATORS = (basic.Header, basic.ToolChange, surfacing.FaceMillStrategies, drilling.DrillHoles,
               pockets.PocketRect, pockets.PocketCircle,
               contours.SlotLinear, contours.SlotArc, contours.StudRect, contours.StudCircle,
-              contours.Contour, basic.ProgramEnd)
+              contours.Contour, shapes.ShapeEngrave, engraving.EngraveText,
+              stl_trace.StlSection, basic.ProgramEnd)
 
 
 
@@ -65,7 +68,7 @@ class CyclesPage(QtWidgets.QWidget):
         self.setObjectName("lrtPage")
         self.shell = shell
         self.registry = GeneratorRegistry()
-        for group in (basic, drilling, pockets, contours):
+        for group in (basic, drilling, pockets, contours, shapes, engraving, surfacing, stl_trace):
             group.register(self.registry)
         self.program = LnxProgram(name="Program z cykli")
         self.lnx_path = None
@@ -92,9 +95,14 @@ class CyclesPage(QtWidgets.QWidget):
             self.cmb.addItem(cls.title, cls)
         self.cmb.currentIndexChanged.connect(self._build_form)
         lay.addWidget(self.cmb)
+        self.stl_button = QtWidgets.QPushButton("Importuj STL / wybierz przekrój…")
+        self.stl_button.setMinimumHeight(44)
+        self.stl_button.clicked.connect(self.import_stl)
+        lay.addWidget(self.stl_button)
         self.form_box = QtWidgets.QWidget()
         self.form_box.setObjectName("lrtCycleFields")
         colors = {**pages.model.load_tokens()["kolory"], **shell.c}
+        self._form_colors = colors
         self.form_box.setStyleSheet(
             f"QWidget#lrtCycleFields {{ background: {colors['bg2']}; }}")
         self.form = QtWidgets.QFormLayout(self.form_box)
@@ -145,6 +153,7 @@ class CyclesPage(QtWidgets.QWidget):
         self.code.setLineWrapMode(QtWidgets.QPlainTextEdit.NoWrap)
         self.result_tabs = QtWidgets.QTabWidget()
         self.result_tabs.setStyleSheet(
+            f"QTabWidget::pane {{ border: 1px solid {colors['line2']}; }} "
             f"QTabBar::tab {{ background: {colors['panel']}; color: {colors['fg2']}; "
             "padding: 8px; }"
             f"QTabBar::tab:selected {{ color: {colors['teal']}; "
@@ -239,24 +248,48 @@ class CyclesPage(QtWidgets.QWidget):
     def _build_form(self) -> None:
         self._validation_timer.stop()
         self._draft_dirty = False
+        self.stl_button.setVisible(self._gen().name == "stl_section")
         while self.form.rowCount():
             self.form.removeRow(0)
         self.inputs = {}
         self.field_errors = {}
+        self._text_geometry_key = None
         for f in self.cmb.currentData().fields:
-            if f.kind == "choice":
+            if self._gen().name == "engrave_text" and f.name == "font_family":
+                from linumert_fonts import register
+
+                register()
+                w = QtWidgets.QFontComboBox()
+                w.setEditable(True)
+                w.setCurrentFont(QtGui.QFont(f.default))
+            elif self._gen().name == "engrave_text" and f.name == "text":
+                w = QtWidgets.QPlainTextEdit(f.default)
+                w.setPalette(self.code.palette())
+                w.setMaximumHeight(96)
+            elif f.kind == "choice":
                 w = QtWidgets.QComboBox()
-                w.addItems(list(f.choices))
+                labels = getattr(self._gen(), "choice_labels", {}).get(f.name, {})
+                for value in f.choices:
+                    w.addItem(labels.get(value, value), value)
                 if f.default is not None:
-                    w.setCurrentText(str(f.default))
+                    w.setCurrentIndex(w.findData(f.default))
                 if f.name == "direction" and self._gen().name.startswith("pocket_"):
                     w.setToolTip("Kieszeń, wrzeciono M3: ccw — współbieżnie; cw — przeciwbieżnie. "
                                  "Po zmianie kierunku wrzeciona zależność jest odwrotna.")
             elif f.kind == "bool":
                 w = QtWidgets.QCheckBox()
                 w.setChecked(bool(f.default))
+                if f.name == "reverse":
+                    colors = self._form_colors
+                    w.setStyleSheet(
+                        "QCheckBox::indicator { width: 18px; height: 18px; image: none; "
+                        f"border: 1px solid {colors['fg2']}; }} "
+                        f"QCheckBox::indicator:unchecked {{ background: {colors['bg']}; }} "
+                        f"QCheckBox::indicator:checked {{ background: {colors['teal']}; }}")
             elif f.kind == "text":
                 w = QtWidgets.QLineEdit("" if f.default is None else str(f.default))
+                if f.name == "paths":
+                    w.setMaxLength(750000)
             else:
                 w = QtWidgets.QLineEdit("" if f.default is None else f"{f.default:g}")
                 w.setPlaceholderText("wymagane" if f.required else "")
@@ -265,7 +298,15 @@ class CyclesPage(QtWidgets.QWidget):
                 unit = {"mm": "cal", "mm/min": "cal/min"}.get(unit, unit)
             label = f.label + (f" [{unit}]" if unit else "") + (" *" if f.required else "")
             w.setAccessibleName(label)
-            w.setMinimumHeight(40)
+            if isinstance(w, QtWidgets.QComboBox):
+                w.setMinimumContentsLength(10)
+                w.setSizeAdjustPolicy(QtWidgets.QComboBox.AdjustToMinimumContentsLengthWithIcon)
+                w.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+                w.currentTextChanged.connect(w.setToolTip)
+                w.setToolTip(w.currentText())
+            if f.name == "source":
+                w.setReadOnly(True)
+            w.setMinimumHeight(44)
             cell = QtWidgets.QWidget()
             cell_layout = QtWidgets.QVBoxLayout(cell)
             cell_layout.setContentsMargins(0, 0, 0, 0)
@@ -273,12 +314,16 @@ class CyclesPage(QtWidgets.QWidget):
             cell_layout.addWidget(w)
             error = pages._label("", "lrtMuted")
             error.setWordWrap(True)
+            error.setMaximumWidth(260)
             error.hide()
             cell_layout.addWidget(error)
             self.form.addRow(label, cell)
             self.form.labelForField(cell).setWordWrap(True)
             self.form.labelForField(cell).setMaximumWidth(150)
             self.form.labelForField(cell).setMinimumWidth(150)
+            if f.name == "paths":
+                cell.hide()
+                self.form.labelForField(cell).hide()
             self.inputs[f.name] = w
             self.field_errors[f.name] = error
             signal = (w.currentIndexChanged if isinstance(w, QtWidgets.QComboBox) else
@@ -288,12 +333,56 @@ class CyclesPage(QtWidgets.QWidget):
         self.view2d.set_lines([])
         unit = "cal" if self.program.units == "inch" else "mm"
         self.result_tabs.setTabText(1, f"Geometria kroku · XY [{unit}]")
+        self.view2d.unit = unit
+        self._adapt_form()
+
+    def _adapt_form(self):
+        if self._gen().name == "shape_engrave":
+            shape = self.inputs["shape"].currentData()
+            strategy = self.inputs["strategy"].currentData()
+            unit = "cal" if self.program.units == "inch" else "mm"
+            for name, axis, ordinary in (("width", "X", "Szerokość"), ("height", "Y", "Wysokość")):
+                title = f"Średnica obwiedni {axis}" if shape in ("polygon", "star") else ordinary
+                label = f"{title} [{unit}]"
+                self.form.labelForField(self.inputs[name].parentWidget()).setText(label)
+                self.inputs[name].setAccessibleName(label)
+            for name, enabled in (("corner_r", shape == "rounded_rectangle"),
+                                  ("sides", shape in ("polygon", "star")),
+                                  ("inner", shape == "star"),
+                                  ("spacing", strategy != "outline"),
+                                  ("curve_tol", shape in ("ellipse", "rounded_rectangle"))):
+                self.inputs[name].setEnabled(enabled)
+        elif self._gen().name == "face_mill" and "axis" in self.inputs:
+            concentric = self.inputs["mode"].currentData() == "concentric"
+            self.inputs["axis"].setEnabled(not concentric)
+            self.inputs["direction"].setEnabled(concentric)
 
     def _form_changed(self):
+        self._adapt_form()
         self._draft_dirty = True
         self.view2d.set_lines([])
         self.lbl_step.setText("Zmieniono parametry — użyj Podgląd, Dodaj lub Zmień wybrany.")
         self._validation_timer.start()
+
+    def import_stl(self):
+        if self.shell.s.running:
+            self.lbl_issue.setText("Zatrzymaj program przed importem STL.")
+            return
+        from linumert_stl_dialog import StlDialog
+
+        dialog = StlDialog(self, self.program.units, self.shell.c)
+        try:
+            if dialog.exec_() != QtWidgets.QDialog.Accepted:
+                return
+            for name, value in (("paths", dialog.paths_json), ("source", dialog.description())):
+                blocker = QtCore.QSignalBlocker(self.inputs[name])
+                self.inputs[name].setText(value)
+                del blocker
+            self._draft_dirty = True
+            self.preview()
+            self.result_tabs.setCurrentIndex(1)
+        finally:
+            dialog.deleteLater()
 
     def _committed_form(self):
         if not self._draft_dirty:
@@ -306,8 +395,12 @@ class CyclesPage(QtWidgets.QWidget):
         out = {}
         for f in self.cmb.currentData().fields:
             w = self.inputs[f.name]
-            if isinstance(w, QtWidgets.QComboBox):
+            if isinstance(w, QtWidgets.QPlainTextEdit):
+                out[f.name] = w.toPlainText()
+            elif isinstance(w, QtWidgets.QFontComboBox):
                 out[f.name] = w.currentText()
+            elif isinstance(w, QtWidgets.QComboBox):
+                out[f.name] = w.currentData() if w.currentData() is not None else w.currentText()
             elif isinstance(w, QtWidgets.QCheckBox):
                 out[f.name] = w.isChecked()
             else:
@@ -326,6 +419,21 @@ class CyclesPage(QtWidgets.QWidget):
         self._validation_timer.stop()
         gen = self._gen()
         values, issues = gen.normalize(self.params())
+        if not issues and gen.name == "engrave_text":
+            key = tuple(values[k] for k in engraving.LAYOUT_KEYS)
+            if not values["paths"] or key != self._text_geometry_key:
+                from linumert_text_geometry import text_paths
+
+                try:
+                    values["paths"] = text_paths(values)
+                    blocker = QtCore.QSignalBlocker(self.inputs["paths"])
+                    self.inputs["paths"].setText(values["paths"])
+                    del blocker
+                    self._text_geometry_key = key
+                except (ValueError, OverflowError) as exc:
+                    from linumert.generators.path_geometry import problem
+
+                    issues = [problem("text", str(exc))]
         if not issues:
             issues = gen.check(values, 0)
         for name, label in self.field_errors.items():
@@ -357,6 +465,15 @@ class CyclesPage(QtWidgets.QWidget):
             self.lbl_issue.setText(entry[values.get("entry", "plunge")] + finish +
                                    " Sprawdź w symulacji.")
         self._last = Step(generator=gen.name, version=gen.version, params=values)
+        if gen.name == "shape_engrave":
+            self.lbl_issue.setText("Grawerowanie po środku narzędzia, bez korekcji promienia. "
+                                   "Odstęp kreskowania nie określa szerokości rowka.")
+        elif gen.name == "engrave_text":
+            self.lbl_issue.setText("Grawerowanie konturów liter po środku narzędzia. "
+                                   "Geometria czcionki zostaje zapisana w .lnx.")
+        elif gen.name == "stl_section":
+            self.lbl_issue.setText("Przekrój XY zapisany w kroku; tor środka narzędzia bez "
+                                   "korekcji promienia. Dodaj krok lub zmień wybrany.")
         return lines
 
     # ---- program --------------------------------------------------------------------------
@@ -395,12 +512,24 @@ class CyclesPage(QtWidgets.QWidget):
         self._build_form()
         for name, value in step.params.items():
             w = self.inputs.get(name)
-            if isinstance(w, QtWidgets.QComboBox):
-                w.setCurrentText(str(value))
+            if isinstance(w, QtWidgets.QFontComboBox):
+                w.setEditText(str(value))
+            elif isinstance(w, QtWidgets.QPlainTextEdit):
+                w.setPlainText(str(value))
+            elif isinstance(w, QtWidgets.QComboBox):
+                index = w.findData(value)
+                if index >= 0:
+                    w.setCurrentIndex(index)
+                else:
+                    w.setCurrentText(str(value))
             elif isinstance(w, QtWidgets.QCheckBox):
                 w.setChecked(bool(value))
             elif isinstance(w, QtWidgets.QLineEdit):
                 w.setText(str(value))
+        if step.generator == "engrave_text":
+            values, issues = gen.normalize(self.params())
+            if not issues and values.get("paths"):
+                self._text_geometry_key = tuple(values[k] for k in engraving.LAYOUT_KEYS)
         self.preview()
         self._draft_dirty = False
 

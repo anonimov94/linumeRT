@@ -1987,7 +1987,8 @@
       "title": "HTML/WebGL: integracja strony z bramą LinuxCNC",
       "parents": [
         "028",
-        "029"
+        "029",
+        "055"
       ],
       "status": "partial",
       "progress": "Kierunek HTML/WebGL potwierdzony przez właściciela 2026-10-26; GUI Qt zamrożone według DECYZJE.md. Brama Claude (#185), strona Cyberdeck (#187) i jednostki jogu (#186) są w main. 2026-10-27 Codex: odtworzono brak strony w wheel (HTTP 404); dodano zasoby statyczne do danych pakietu i kontrolę artefaktu w CI poza checkoutem. Poprawiona paczka: HTTP zasobów, uwierzytelnienie WebSocket, jog atrapy i zatrzymanie po rozłączeniu PASS; 71 testów WebHMI PASS na Pythonie 3.14.8. Nie jest to odbiór przeglądarki ani LinuxCNC. Pełne lokalne make lint test: 1595 PASS, 124 SKIP, 157 testów LinuxCNC poza zakresem; REQ 22/22. PR #188, CI Debian/LinuxCNC w toku.",
@@ -2002,7 +2003,30 @@
         "tools/ci/check_webhmi_wheel.py",
         "https://github.com/anonimov94/linumeRT/pull/185",
         "https://github.com/anonimov94/linumeRT/pull/187",
-        "https://github.com/anonimov94/linumeRT/pull/188"
+        "https://github.com/anonimov94/linumeRT/pull/188",
+        "docs/SYNTEZA_MODELI_2026-10-26.md"
+      ]
+    },
+    {
+      "id": "CAM-2D-TEXT-STL",
+      "title": "Strategie CAM 2D, napisy i przekroje STL",
+      "parents": [
+        "040",
+        "043",
+        "045",
+        "046"
+      ],
+      "status": "done",
+      "progress": "Polecenie właściciela 2026-10-26: więcej strategii, kształtów, napisy/czcionki i STL. Planowanie v2 X/Y: zygzak, jednokierunkowo, krzyżowo i współśrodkowo CW/CCW; v1 zachowana. Kształty parametryczne z konturem i kreskowaniem, tolerancja krzywych; napisy z czcionką, stylem, rozmiarem i układem. STL ASCII/binary w tle, model poglądowy 3D i zamknięty przekrój XY do kroku. Geometria utrwalona w .lnx, zoom/pan, GUI 1280×768; kontrola zakresów i budżetów. Zakres STL ograniczony do przekroju XY, bez frezowania powierzchni 3D. Autokontrola i dowody PR #184; nie zamyka odbioru pulpitu ani M3/M4.",
+      "remaining": [],
+      "evidence": [
+        "https://github.com/anonimov94/linumeRT/pull/184",
+        "docs/raporty/CAM_2D_2026-10-26.md",
+        "core/linumert/generators/shapes.py",
+        "core/linumert/generators/engraving.py",
+        "core/linumert/generators/surfacing.py",
+        "core/linumert/programs/stl_section.py",
+        "tests/test_cam_interpreter.py"
       ]
     }
   ]

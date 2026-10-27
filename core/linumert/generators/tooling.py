@@ -101,6 +101,16 @@ CHECKS = {"face_mill": _face_mill, "drill_holes": _drill_holes,
           "pocket_rect": _face_mill, "pocket_circle": _face_mill}
 
 
+def _engraving(step, v, tool, k):
+    if tool.type == "chamfer":
+        return _length_issue(step, tool, "step_down", v["step_down"] * k)
+    return _face_mill(step, v, tool, k)
+
+
+CHECKS.update(dict.fromkeys(("shape_engrave", "engrave_text", "path_trace", "stl_section"),
+                           _engraving))
+
+
 def check_steps(steps: list[tuple[int, str, dict[str, Any]]], lookup: ToolLookup,
                 units: str = "mm") -> list[Issue]:
     """Kroki (numer, nazwa generatora, znormalizowane parametry) → błędy względem bazy."""
