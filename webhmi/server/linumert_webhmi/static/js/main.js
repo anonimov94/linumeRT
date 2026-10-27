@@ -68,8 +68,9 @@ function updateControls() {
   const mdiHint = $("mdiSend").querySelector(".interlock-reason");
   mdiHint.textContent = mdi.ok ? "" : mdi.reason;
   const jogRule = rules.jog;
-  const jogOK = jogRule.ok && (jog.canStart() || jog.isActive());
-  const jogReason = jogRule.ok ? (jog.canStart() || jog.isActive() ? "" : "Oczekiwanie na potwierdzenie JOG STOP") : jogRule.reason;
+  const needsHoming = $("jogIncrement").value !== "continuous" && state?.all_homed !== true;
+  const jogOK = jogRule.ok && !needsHoming && (jog.canStart() || jog.isActive());
+  const jogReason = jogRule.ok && needsHoming ? "Przyrost JOG wymaga bazowania wszystkich osi" : jogRule.ok ? (jog.canStart() || jog.isActive() ? "" : "Oczekiwanie na potwierdzenie JOG STOP") : jogRule.reason;
   dro.jogButtons(jogOK, jogReason);
   $("jogLockReason").textContent = jogReason;
   $("connect").disabled = connection.isOpening();
@@ -144,7 +145,7 @@ const connection = createConnection({
       result(message, "error");
       banner(message);
       if (jog.isActive()) jog.stop("Odmowa bramy");
-    } else if (command && command !== "jog") {
+    } else if (command && command !== "jog" && command !== "jog_keepalive") {
       result("POTWIERDZONO [" + command + "] ID " + reply.id, "ok");
     }
     updateControls();
@@ -168,7 +169,8 @@ jog = createJog({
   ready: () => connection.ready(),
   mayJog: (axis) => {
     const rule = access("jog");
-    return rule.ok && Array.isArray(state?.axes) &&
+    return rule.ok && ($("jogIncrement").value === "continuous" || state?.all_homed === true) &&
+      Array.isArray(state?.axes) &&
       state.axes.some((a) => a.name === axis && !a.limit_hit);
   },
   onAlarm(message) {

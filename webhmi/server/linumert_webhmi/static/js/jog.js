@@ -168,6 +168,7 @@ export function createJog({ send, ready, mayJog, onAlarm, onChange, onEvent = ()
   });
   increment.addEventListener("change", () => {
     if (active) stop("Zmiana przyrostu podczas JOG");
+    onChange();
   });
   window.addEventListener("blur", () => stop("Utrata fokusu okna"));
   document.addEventListener("visibilitychange", () => {
