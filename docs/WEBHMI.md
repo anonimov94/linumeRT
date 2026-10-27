@@ -180,6 +180,9 @@ Testy: `node --test tests/webhmi_js/test_events.mjs`, istniejące testy
 (HTTP 200 wszystkich modułów, brak CDN, nagłówki SPDX, sprawdzenie selektorów,
 statyczny kontrakt FERR, `node --check` gdy dostępny Node.js).
 
+Pakiet wheel dołącza `static/js/*.js` i `static/js/*.json` w `pyproject.toml`,
+aby strona z importami ES działała również poza repozytorium.
+
 Nie modyfikowano bramy Python, HAL ani interfejsu poleceń. Etap 2 nie
 dodaje funkcji bezpieczeństwa; do maszyny realnej nadal niezbędny jest
 niezależny watchdog HAL oraz sprzętowy E-STOP.
