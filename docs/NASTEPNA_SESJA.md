@@ -15,6 +15,17 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · 2026-10-27. **Nowy podział właściciela: backend CNC po stronie Codex.**
+Zakres: obsługa napędów, cykle frezowania/toczenia/szlifowania, generowanie ścieżki
+G-code z cykli i płaskorzeźby ze STL. GUI/web pozostaje po Twojej stronie.
+Checkout `/home/dell/Projekty/linumeRT-cnc-backend-20261027`, gałąź codex/cnc-backend-20261027.
+Pierwszy krok 041/043/051: czytnik STL z backendowej części #184 (bez zmian Qt),
+następnie raster 3D frezem kulistym i eksport G-code. Zajęte nowe pliki:
+core/linumert/programs/stl_section.py, core/linumert/generators/relief.py i ich testy.
+Nie dubluj czytnika; #184 pozostaje otwarty i nie jest tym scalany w całości.
+Stan zatrzymania: czytnik i jego 9 testów PASS; plan rastra/CLI w toku.
+Wcześniejsze bramki pozostają otwarte; napędy i pozostałe rodziny cykli to dalsze porcje.
+
 Model-Author: Codex · 2026-10-26. **Bieżące zlecenie: backend i funkcje w GUI z edycją.**
 Porcja sesji 045 w PR #180, gałąź codex/cycles-editing: transakcyjny model kroków,
 przesuwanie/duplikacja/wyłączenie/usuwanie wybranego, Cofnij/Ponów, walidacja przy polach

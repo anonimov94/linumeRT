@@ -1623,3 +1623,9 @@ Odbiór pulpitu i pozostały zakres 069 nadal otwarte; NIEZWERYFIKOWANE NA SPRZ�
 - `core/linumert/cnc/fake.py`: jog ciągły w atrapie. Pakiet i skrypt `linumert-webhmi` w `pyproject.toml`.
 - Testy: 35 nowych (brama, aplikacja, mapowanie poleceń) + 2 jog; ruff PASS. Opis: `docs/WEBHMI.md`.
 - Otwarte: strona WebGL, wiązanie `watchdog` HAL, weryfikacja na LinuxCNC RIP i sprzęcie. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## 041/043/051 — backend CNC: wspólny czytnik STL · 2026-10-27 · Codex
+- Model-Author: Codex. Nowe polecenie właściciela: napędy, frezowanie/toczenie/szlifowanie i STL → ścieżka G-code.
+- Przeniesiono wyłącznie czytnik/przekroje STL i testy z #184; ASCII/binary, limity i walidacja siatki bez Qt.
+- Odbiór: 9 testów czytnika PASS, ruff PASS. Brak nowych zależności; numpy już w rdzeniu.
+- Raster kulisty i eksport w następnej porcji; pozostałe cykle i napędy w rejestrze. Bez zamknięcia bramek.

@@ -437,3 +437,15 @@ bez LinuxCNC. NIEZWERYFIKOWANE NA SPRZĘCIE.
 - Dotyczy wszystkich modeli (Claude, Codex, ChatGPT). Otwarte PR-y GUI Qt (np. #180) nie są rozwijane dalej; scalić lub zamknąć decyduje właściciel. Naprawy błędów blokujących działanie ekranu awaryjnego i bezpieczeństwa wciąż dozwolone.
 - Rdzeń `linumert`, Plant, HAL, generatory, symulacja i alarmy działają dalej bez zmian.
 - Następny krok: PoC `web-hmi-poc` (brama + strona z DRO i sceną WebGL, atrapa `linuxcnc`).
+
+## Backend CNC i cykle — polecenie właściciela 2026-10-27
+
+Model-Author: Codex. Właściciel przydzielił Codexowi backend obsługi napędów oraz cykli
+frezowania, toczenia, szlifowania, generowania ścieżek G-code i płaskorzeźb ze STL.
+To jawne rozszerzenie zakresu poza dotychczasowy podział HMI; Claude kontynuuje web/GUI.
+Priorytet pierwszej porcji: użyteczny backend STL → raster 3D → G-code, powiązany
+z 041/043/051. Reużywamy backendowy czytnik z #184, bez rozwijania zamrożonych stron Qt.
+Pozostałe rodziny cykli i napędy są kolejnymi porcjami wspólnego backendu, nie osobnymi
+implementacjami dla skórek. Odbiory M1/M2 i dalsze bramki pozostają otwarte; brak zmian RT/HAL.
+Pierwszy raster obejmuje frez kulisty, górną obwiednię i wykańczanie przygotówki po zgrubnej;
+nie jest jeszcze strategią zgrubną, obsługą podcięć ani kwalifikacją sprzętu.

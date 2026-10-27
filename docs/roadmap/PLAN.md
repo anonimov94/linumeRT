@@ -1,7 +1,7 @@
 <!-- Generowane przez python3 tools/roadmap.py; edytuj docs/roadmap/plan.json. -->
 # Wspólny plan linumeRT
 
-Pierwotny plan: **84 sesje M0–M6**, commit `796c6a2`. Stan na 2026-10-26: planowane: 15; w toku: 0; częściowe: 30; do odbioru: 0; ukończone: 39; zablokowane: 0.
+Pierwotny plan: **84 sesje M0–M6**, commit `796c6a2`. Stan na 2026-10-27: planowane: 15; w toku: 0; częściowe: 30; do odbioru: 0; ukończone: 39; zablokowane: 0.
 
 Zakończenie części implementacji nie oznacza odbioru całej funkcji ani sprzętu.
 
@@ -151,6 +151,7 @@ Nie są kolejnym harmonogramem. Ich status dotyczy tylko wskazanego kroku.
 | M6-G43 | 034, 066 | Automatyczna korekta długości narzędzia po M6 | częściowe |
 | PLANT-SUBSTEPS | 049, 063 | Plant: wynik niezależny od podkroków całkowania | ukończone |
 | HMI-OWNER-SKINS | 028 | Odrębny wygląd każdej skórki i główny ekran holograficzny | częściowe |
+| CNC-BACKEND | 039, 041, 043, 051, 061, 063, 069 | Backend napędów, cykli technologicznych i płaskorzeźby STL | częściowe |
 
 ## Postęp, pozostały zakres i dowody
 
@@ -1015,4 +1016,12 @@ Pozostaje: Obciążenie CPU Plant realtime przy 4 podkrokach na VM-B (odbiór w�
 Pozostaje: Odbiór nowego układu na pulpicie właściciela: porównanie czterech rodzin przy 1280×768 i 1920×1080, dotyk i klawiatura. Pełna kwalifikacja scen/renderera ze SKIN-02/04…06; bieżący Cyberdeck używa QPainter Neon i poglądowego XYZ, nie modelu kolizji Plant.
 
 Źródła: [PR](https://github.com/anonimov94/linumeRT/pull/163#issuecomment-6401257406), [docs/design/SKIN_SYSTEM_ROADMAP.md](../design/SKIN_SYSTEM_ROADMAP.md), [screens/linumert/linumert_skin_navigation.py](../../screens/linumert/linumert_skin_navigation.py), [docs/design/HMI_QTVCP_HOST.md](../design/HMI_QTVCP_HOST.md), [screens/linumert/linumert_skin_cyberdeck.py](../../screens/linumert/linumert_skin_cyberdeck.py), [docs/raporty/G2/HMI_CLOSEOUT_2026-10-26.md](../raporty/G2/HMI_CLOSEOUT_2026-10-26.md).
+
+### CNC-BACKEND — Backend napędów, cykli technologicznych i płaskorzeźby STL
+
+**częściowe**. Polecenie właściciela 2026-10-27: Codex prowadzi backend napędów i cykli frezowania/toczenia/szlifowania oraz generowanie ścieżki G-code, w tym płaskorzeźby STL. Pierwsza porcja reużywa czytnik STL/przekroje z #184, bez GUI Qt; 9 testów PASS. Raster kulisty i eksport w toku.
+
+Pozostaje: STL → zachowawczy raster 3D frezem kulistym → G-code; testy i CLI, potem odbiór LinuxCNC/symulacji. Rozwój strategii frezowania oraz osobne kontrakty i generatory toczenia/szlifowania. Backend diagnostyki/obsługi napędów zgodny z CiA 402, mapowaniem maszyny i nadrzędnym obwodem bezpieczeństwa.
+
+Źródła: [docs/DECYZJE.md](../DECYZJE.md), [core/linumert/programs/stl_section.py](../../core/linumert/programs/stl_section.py), [PR](https://github.com/anonimov94/linumeRT/pull/184).
 

@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated": "2026-10-26",
+  "updated": "2026-10-27",
   "model_author": "Codex",
   "original_count": 84,
   "origin_commit": "796c6a2",
@@ -1951,6 +1951,31 @@
         "docs/design/HMI_QTVCP_HOST.md",
         "screens/linumert/linumert_skin_cyberdeck.py",
         "docs/raporty/G2/HMI_CLOSEOUT_2026-10-26.md"
+      ]
+    },
+    {
+      "id": "CNC-BACKEND",
+      "title": "Backend napędów, cykli technologicznych i płaskorzeźby STL",
+      "parents": [
+        "039",
+        "041",
+        "043",
+        "051",
+        "061",
+        "063",
+        "069"
+      ],
+      "status": "partial",
+      "progress": "Polecenie właściciela 2026-10-27: Codex prowadzi backend napędów i cykli frezowania/toczenia/szlifowania oraz generowanie ścieżki G-code, w tym płaskorzeźby STL. Pierwsza porcja reużywa czytnik STL/przekroje z #184, bez GUI Qt; 9 testów PASS. Raster kulisty i eksport w toku.",
+      "remaining": [
+        "STL → zachowawczy raster 3D frezem kulistym → G-code; testy i CLI, potem odbiór LinuxCNC/symulacji.",
+        "Rozwój strategii frezowania oraz osobne kontrakty i generatory toczenia/szlifowania.",
+        "Backend diagnostyki/obsługi napędów zgodny z CiA 402, mapowaniem maszyny i nadrzędnym obwodem bezpieczeństwa."
+      ],
+      "evidence": [
+        "docs/DECYZJE.md",
+        "core/linumert/programs/stl_section.py",
+        "https://github.com/anonimov94/linumeRT/pull/184"
       ]
     }
   ]
