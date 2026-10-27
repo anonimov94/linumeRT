@@ -27,7 +27,7 @@ export function createConnection(handlers) {
     const payload = { id, ...command };
     try {
       ws.send(JSON.stringify(payload));
-      pending.set(id, { cmd: command.cmd, onReply });
+      pending.set(id, { cmd: command.cmd, onReply, sentAt: performance.now() });
       return id;
     } catch (_) {
       handlers.onError("Nie można wysłać " + command.cmd + " przez WebSocket");
@@ -87,7 +87,8 @@ export function createConnection(handlers) {
         const entry = pending.get(data.id);
         if (entry) pending.delete(data.id);
         if (entry?.onReply) entry.onReply(data);
-        handlers.onReply(data, entry?.cmd ?? null);
+        handlers.onReply(data, entry?.cmd ?? null,
+          entry ? Math.max(0, performance.now() - entry.sentAt) : null);
       }
     });
     next.addEventListener("close", (event) => {

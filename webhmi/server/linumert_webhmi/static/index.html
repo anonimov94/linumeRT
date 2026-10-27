@@ -47,10 +47,10 @@ Model-Author: ChatGPT
             <thead>
               <tr>
                 <th>Oś</th><th>Pozycja robocza</th><th>Pozycja maszyny</th>
-                <th>Referencja</th><th>Limit</th><th colspan="2">JOG ±</th>
+                <th>Referencja</th><th>Limit</th><th title="Błąd nadążania">FERR</th><th colspan="2">JOG ±</th>
               </tr>
             </thead>
-            <tbody id="axisRows"><tr><td colspan="7" class="empty">Oczekiwanie na dane osi…</td></tr></tbody>
+            <tbody id="axisRows"><tr><td colspan="8" class="empty">Oczekiwanie na dane osi…</td></tr></tbody>
           </table>
         </div>
         <div class="jog-controls">
@@ -130,7 +130,26 @@ Model-Author: ChatGPT
           <div><div class="eyebrow">05 / DIAGNOSTYKA</div><h2 id="errorsTitle">Komunikaty i błędy</h2></div>
         </div>
         <div id="commandResult" class="command-result" role="status" aria-live="polite">Brak wysłanych poleceń.</div>
-        <ul id="errors" class="error-list"><li>Brak danych diagnostycznych.</li></ul>
+        <div class="diagnostic-metrics" aria-label="Metryki komunikacji">
+          <div>Pakiety: <strong id="stateRate">0.0 stanów/s</strong></div>
+          <div>Wiek stanu: <strong id="stateAge">BRAK</strong></div>
+          <div>Ostatnie ACK: <strong id="ackLatency">—</strong></div>
+        </div>
+        <div id="lamps" class="diagnostic-lamps" aria-label="Lampki diagnostyczne" role="group"></div>
+        <div class="diagnostic-toolbar">
+          <label for="logFilter">Dziennik zdarzeń:</label>
+          <select id="logFilter" aria-label="Filtr poziomu dziennika">
+            <option value="all">Wszystkie</option>
+            <option value="warn">Ostrzeżenia i alarmy</option>
+            <option value="alarm">Tylko alarmy</option>
+          </select>
+          <button type="button" id="logClear">Wyczyść</button>
+          <button type="button" id="logExport">Eksport TXT</button>
+        </div>
+        <ol id="eventLog" class="event-log" aria-label="Dziennik zdarzeń z godziną"></ol>
+        <div class="diagnostic-errors"><strong>Aktualne błędy bramy i CNC</strong>
+          <ul id="errors" class="error-list"><li>Brak danych diagnostycznych.</li></ul>
+        </div>
       </section>
     </main>
 

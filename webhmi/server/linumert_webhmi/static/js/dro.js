@@ -6,6 +6,8 @@ Model-Author: ChatGPT
 
 const $ = (id) => document.getElementById(id);
 const LETTERS = ["X", "Y", "Z", "A", "B", "C", "U", "V", "W"];
+export const FERR_WARN_MM = 0.05;
+const ANGULAR = new Set(["A", "B", "C"]);
 const fmt = (value, digits = 3) => value == null || !Number.isFinite(Number(value))
   ? "—" : Number(value).toFixed(digits);
 const plain = (value) => value == null || value === "" ? "—" : String(value);
@@ -27,7 +29,7 @@ export function createDRO(jog, onAxesChange) {
     $("axisRows").replaceChildren();
     for (const axis of names) {
       const tr = document.createElement("tr");
-      const cells = Array.from({ length: 5 }, () => document.createElement("td"));
+      const cells = Array.from({ length: 6 }, () => document.createElement("td"));
       cells[0].textContent = axis;
       cells[0].className = "axis-badge";
       cells[1].className = cells[2].className = "numeric";
@@ -63,6 +65,13 @@ export function createDRO(jog, onAxesChange) {
       cells[3].textContent = axis.homed ? "OK" : "NIE";
       cells[4].textContent = axis.limit_hit ? "LIMIT !" : "OK";
       cells[4].className = axis.limit_hit ? "limit-hit" : "";
+      const ferr = Number(axis.following_error);
+      const ferrValid = axis.following_error != null && Number.isFinite(ferr);
+      const exceeding = ferrValid && !ANGULAR.has(axis.name) && Math.abs(ferr) > FERR_WARN_MM;
+      cells[5].textContent = ferrValid ? (exceeding ? "! " : "") + ferr.toFixed(4) : "—";
+      cells[5].title = ANGULAR.has(axis.name) ? "FERR [stopnie]" : "FERR [mm]";
+      cells[5].className = exceeding ? "ferr-warning" : "";
+      if (exceeding) cells[5].title += " — UWAGA: przekroczony próg 0,05 mm";
     }
     $("homingStatus").textContent = state.all_homed ? "OSIE ZBAZOWANE" : "BAZOWANIE WYMAGANE";
     $("workOffset").textContent = plain(state.work_offset);

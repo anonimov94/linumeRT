@@ -8,7 +8,7 @@ const INTERVAL_MS = 150;
 const ROTARY = new Set(["A", "B", "C"]);
 const AXES = new Set(["X", "Y", "Z", "A", "B", "C", "U", "V", "W"]);
 
-export function createJog({ send, ready, mayJog, onAlarm, onChange }) {
+export function createJog({ send, ready, mayJog, onAlarm, onChange, onEvent = () => {} }) {
   const status = document.getElementById("jogStatus");
   const slider = document.getElementById("jogSpeed");
   const label = document.getElementById("jogSpeedValue");
@@ -40,6 +40,7 @@ export function createJog({ send, ready, mayJog, onAlarm, onChange }) {
     active = null;
     clearTimer();
     reason = why;
+    onEvent("warn", "JOG", "Żądanie STOP dla osi " + axis + " — " + why);
     stopAcked = false;
     indicate("JOG: ZATRZYMYWANIE…", "stopping");
     const id = send({ cmd: "jog_stop", axis }, (reply) => {
@@ -65,6 +66,7 @@ export function createJog({ send, ready, mayJog, onAlarm, onChange }) {
   function retryStop() {
     if (phase !== "fault" || !ready()) return;
     reason = "Ponawianie zatrzymania jogu";
+    onEvent("warn", "JOG", "Ponowne żądanie JOG STOP");
     stopAcked = false;
     indicate("JOG: ZATRZYMYWANIE…", "stopping");
     const id = send({ cmd: "jog_stop" }, (reply) => {
@@ -102,7 +104,11 @@ export function createJog({ send, ready, mayJog, onAlarm, onChange }) {
       if (id === null) stop("Błąd wysyłania JOG");
     }
     pulse();
-    if (active && timer === null) timer = setInterval(pulse, INTERVAL_MS);
+    if (active && timer === null) {
+      onEvent("info", "JOG", "START " + axis + " " +
+        (direction > 0 ? "+" : "−") + " " + magnitude + " " + unit(axis));
+      timer = setInterval(pulse, INTERVAL_MS);
+    }
   }
   function button(axis, direction) {
     const node = document.createElement("button");
