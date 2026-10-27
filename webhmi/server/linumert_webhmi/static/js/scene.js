@@ -4,6 +4,8 @@ Model-Author: ChatGPT
 */
 "use strict";
 
+const $ = (id) => document.getElementById(id);
+
 // Renderer bez zmiany geometrii i wyglądu v1, poza cyklem życia strony.
 export function initScene(getState) {
   // Minimalny renderer WebGL 1: kolorowe linie XYZ w widoku izometrycznym.
