@@ -52,7 +52,7 @@ function updateControls() {
   $("mdiText").title = mdi.ok ? "" : mdi.reason;
   $("mdiSend").title = mdi.ok ? "" : mdi.reason;
   const jogRule = rules.jog;
-  const jogOK = jogRule.ok && jog.canStart();
+  const jogOK = jogRule.ok && (jog.canStart() || jog.isActive());
   dro.jogButtons(jogOK, jogRule.ok ? "Oczekiwanie na potwierdzenie JOG STOP" : jogRule.reason);
   $("connect").disabled = connection.isOpening();
   $("disconnect").disabled = !connection.isOpening();
@@ -112,6 +112,7 @@ const connection = createConnection({
     updateControls();
   },
   onDisconnect(message) {
+    receivedAt = 0;
     jog.onLost();
     result(message + " — sprawdź fizyczny stan maszyny.", "error");
     banner("BRAK POŁĄCZENIA. DRO NIEAKTUALNE. Nie potwierdzono stanu ruchu.");
