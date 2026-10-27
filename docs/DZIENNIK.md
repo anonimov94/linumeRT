@@ -1383,3 +1383,8 @@ Model-Author: Claude. `tools/tune_accel.py` (moduł `accel_tuning`, 15 testów, 
 0,2 mm bez alarmu i utraty kroków. Wyniki: frezarka X/Y ok. 17 100, Z ok. 5 400 mm/s² (obecnie 1000/1000/500); router krokowy X/Y ok. 3 800, Z ok. 9 400 (granica: utrata kroków,
 wynik Z niemonotoniczny). Raport `docs/raporty/prototypy/M1_ACCEL_TUNING_2026-10-25.md`. machine.yaml i progi bez zmian; seria 10 przebiegów PASS nadal otwarta.
 NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## 066 — generator makra ATC (rack_linear) · 2026-10-27 · Claude
+- Model-Author: Claude. `core/linumert/machine/atc_macro.py`: makro remapu M6 dla ATC z `toolchanger` w machine.yaml (M64/M65 zwolnienie zacisku i osłony, M66 z timeoutem, ruchy G53, na końcu wbudowane M6 i G43/G49). Karuzela/parasol: jawna odmowa.
+- `plan_swap` to kolejność kroków; test wykonuje ją na modelu magazynu Plant (wymiany 0→3, 2→5, 4→0 bez TOOL_DROP/CLAMP_FAULT/POCKET_OCCUPIED/COVER_CRASH). 9 testów + atc/remap 23 PASS, ruff PASS.
+- Wzorzec kolejności i obsługi E-STOP (dziennik transakcyjny, RECOVERY_REQUIRED) z konsultacji z ChatGPT, do weryfikacji w dokumentacji LinuxCNC. Makro nie jest jeszcze podpięte do INI; brak testu rs274. NIEZWERYFIKOWANE NA SPRZĘCIE.
