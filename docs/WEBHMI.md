@@ -26,7 +26,7 @@ Adres domyślny `127.0.0.1:8765`. Token wypisywany przy starcie (albo `--token` 
 | `GET /api/health` | bez tokenu: `ok`, `schema`, `task_state` |
 | `GET /api/state` | nagłówek `X-Linumert-Token`; `{version, state}` |
 | `POST /api/command` | nagłówek tokenu; ciało `Command` (poniżej); 409 przy odmowie maszyny, 422 przy złym ciele |
-| `WS /ws` | pierwsza wiadomość `{"auth": "<token>"}`; potem serwer wysyła `{"type":"state","version","state"}` (≤ 30 Hz, keepalive 1 s); klient wysyła `{"id","cmd",...}` → `ack` / `error` |
+| `WS /ws` | pierwsza wiadomość `{"auth": "<token>"}`; potem serwer wysyła `{"type":"state","version","state"}` (≤ 30 Hz, keepalive 0,2 s); klient wysyła `{"id","cmd",...}` → `ack` / `error` |
 
 Polecenia (`cmd`): `estop`, `power_on`, `power_off`, `mode` (`mode`: manual/mdi/auto), `home`
 (`axis` opcjonalnie), `mdi` (`text` ≤ 200 znaków, jedna linia), `run` (`from_line`), `pause`,
@@ -117,10 +117,11 @@ WebSocket nawet gdy stan jest nieaktualny.
 **Świeżość:** po 500 ms bez pakietu `state` DRO ma etykietę
 „NIEAKTUALNE”, zwykłe komendy są blokowane, aktywny JOG jest zatrzymywany.
 Po ponad 2 s bez stanu panel zrywa WS i wymaga ręcznego ponownego połączenia.
-**Ograniczenie kontraktu:** backend wypycha zmiany do 30 Hz, lecz dla
-niezmienionego stanu ma keepalive dopiero po 1 s — dlatego statyczny ekran
-może okresowo wyświetlać „NIEAKTUALNE” między kolejnymi pakietami.
-Poprawienie tego wymaga osobnej zmiany bramy, której ten PR nie dotyka.
+**Keepalive:** brama wypycha zmiany do 30 Hz, a przy niezmienionym stanie
+wysyła pakiet co 0,2 s (`KEEPALIVE_S = 0.2`). Próg świeżości klienta to
+500 ms (`FRESH_MS = 500`), a utraty łączności 2000 ms (`LOST_MS = 2000`).
+Przy dużym opóźnieniu lub zawieszeniu bramy dane nadal mogą stać się
+nieaktualne — wtedy sterowanie ruchem jest blokowane.
 
 **JOG:** odświeżany co 150 ms; `jog_stop` po pointerup/cancel,
 utracie capture/fokusu, ukryciu karty, utracie łączności lub przeterminowanym
