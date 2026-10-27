@@ -7,6 +7,7 @@ Model-Author: ChatGPT
 import re
 import shutil
 import subprocess
+import tomllib
 from pathlib import Path
 
 import pytest
@@ -97,6 +98,13 @@ def test_node_events():
         ["node", "--test", str(ROOT / "tests/webhmi_js/test_events.mjs")],
         cwd=ROOT, check=True, timeout=40,
     )
+
+
+def test_webhmi_wheel_includes_es_modules():
+    package = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
+    patterns = package["tool"]["setuptools"]["package-data"]["linumert_webhmi"]
+    assert "static/js/*.js" in patterns
+    assert "static/js/*.json" in patterns
 
 
 def test_ferr_schema_and_threshold():
