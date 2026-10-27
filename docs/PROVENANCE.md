@@ -580,3 +580,13 @@ zależność rdzenia; nie dodano biblioteki CAM ani zasobów GUI.
 Model-Author: Codex. Oryginalne rozszerzenie backendu i klienta WebHMI oraz testy
 Python/Node/LinuxCNC w sprincie #181; GPL-2.0-or-later. Bez nowych bibliotek produktu,
 fontów, ikon lub innych zasobów zewnętrznych. Zrzuty odbioru to własny ekran z atrapą CNC.
+
+### WebHMI: odbiór JOG klawiaturą — 2026-10-27
+
+Model-Author: Codex. Autor: Codex; źródło: własne zrzuty klienta linumeRT WebHMI
+w przeglądarce aplikacji Codex na Windows, z lokalną bramą i FakeBackend.
+Licencja: GPL-2.0-or-later. Zakres: dokumentacja techniczna odbioru 028/029,
+bez kwalifikacji LinuxCNC ani sprzętu; bez zasobów zewnętrznych.
+
+- `docs/raporty/G2/WEBHMI_KEYBOARD_2026-10-27/01-keyboard-jog.png`
+- `docs/raporty/G2/WEBHMI_KEYBOARD_2026-10-27/02-disconnected.png`
