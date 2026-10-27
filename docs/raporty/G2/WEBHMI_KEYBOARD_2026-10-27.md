@@ -29,7 +29,9 @@ Dowody: [DRO i podpowiedź klawiatury 1280×768](WEBHMI_KEYBOARD_2026-10-27/01-k
 - Node `tests/webhmi_js/test_jog.mjs`: 18 PASS, w tym 8 nowych przypadków klawiatury.
 - Windows/Python 3.12: static, gateway, app i linuxcnc_backend — 97 PASS. Test linuxcnc_backend używa wstrzykniętego modułu; nie jest odbiorem prawdziwego LinuxCNC.
 - Ruff PASS; pokrycie REQ 22/22 PASS.
-- Pełna regresja Debiana i kontrola CI: wynik zostanie zapisany po zakończeniu, bez zaliczania oczekującego uruchomienia.
+- Pełna próba Debiana 12/Python 3.11 na rewizji kodu `099691a`: 1703 PASS, 138 SKIP, 169 deselected, 1 FAIL — brak wpisu własnego zrzutu w PROVENANCE. Nie był to błąd funkcji. Dodano wpisy obu zrzutów w `2e8f298`; kontrola IP po poprawce: 10 PASS. Pełnej serii po tej zmianie dokumentacji nie powtarzano.
+- Na `2e8f298`: `make lint test-c` PASS i REQ 22/22 PASS. Testy wykonano w natywnej kopii Linuksa; początkową próbę z checkoutu Windows przerwano po potwierdzeniu, że nie odtwarza dowiązań Qt wymaganych przez testy.
+- Końcowa kontrola CI Pythona, macierzy Plant i LinuxCNC: [PR #196](https://github.com/anonimov94/linumeRT/pull/196). Oczekujący wynik nie jest PASS ani zgodą na scalenie.
 
 ## Pozostałe kryteria
 
