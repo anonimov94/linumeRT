@@ -1,6 +1,6 @@
 # Przekazanie i środowisko
 
-Tura: Codex · 2026-10-26 · stan: oddana; #172–175 i #177 scalone; końcowe rozliczenie w #178.
+Tura: Codex · 2026-10-27 · stan: w toku; backend CNC w #190; #188 scalony po zielonym CI.
 
 Model-Author: Codex. Bez globalnego LOCK; zasady współpracy wyłącznie w
 [WSPOLPRACA_MODELI.md](WSPOLPRACA_MODELI.md).
@@ -28,6 +28,16 @@ Ograniczenia i API: docs/cam/RELIEF_STL.md. Debian12: 36 testów PASS, w tym rs2
 i materiał Z-map (brak cięcia w G0/brak podcięcia powierzchni). Pełny zestaw trwa.
 Kolejny krok: rozbudowa strategii zgrubnej STL; web może korzystać z relief_from_stl().
 Wcześniejsze bramki pozostają otwarte; napędy i pozostałe rodziny cykli to dalsze porcje.
+
+Model-Author: Codex · 2026-10-27. **WebHMI: pakowanie strony i odbiór artefaktu.**
+Osobny checkout `/home/dell/Projekty/linumeRT-closeout-20261027`, bez globalnego LOCK.
+Po #185/#186/#187 wheel nie zawierał strony: odtworzone HTTP 404. Dodano package-data
+oraz kontrolę wheel w CI poza checkoutem: 3 zasoby HTTP, auth WS, jog atrapy i stop
+po rozłączeniu PASS; 71 testów WebHMI PASS. Nie zmieniałem bramy ani stron Qt.
+Stan zatrzymania: PR #188 wypchnięty; make lint test: 1595 PASS, 124 SKIP,
+157 deselected (LinuxCNC), REQ 22/22. CI Debian/LinuxCNC PASS; #188 scalony jako d6a9853. Nie zajmuję backend.py/gateway.py/app.py.
+Następny zakres: rzeczywista przeglądarka i LinuxCNC RIP; watchdog HAL nadal otwarty.
+Rekord WEBHMI-POC wiąże zakres z 028/029 i decyzją właściciela; bez zamknięcia M2.
 
 Model-Author: Codex · 2026-10-26. **Bieżące zlecenie: backend i funkcje w GUI z edycją.**
 Porcja sesji 045 w PR #180, gałąź codex/cycles-editing: transakcyjny model kroków,

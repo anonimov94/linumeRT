@@ -65,6 +65,7 @@ packages = [
 [tool.setuptools.package-data]
 "linumert.alarms" = ["catalog.yaml"]
 "linumert.programs" = ["lnx_schema.json"]
+"linumert_webhmi" = ["static/*.html", "static/*.js", "static/*.css"]
 "linumert_plant.panel" = ["static/*.html", "static/*.js", "static/*.css", "static/*.svg",
                           "static/vendor/*", "static/ikony/*"]
 
