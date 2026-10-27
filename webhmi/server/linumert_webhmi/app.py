@@ -7,7 +7,7 @@ Model-Author: Claude
   (nagłówek ``X-Linumert-Token``).
 - WebSocket ``/ws``: pierwsza wiadomość ``{"auth": "<token>"}`` w ciągu ``AUTH_TIMEOUT_S``;
   potem serwer wysyła ``{"type":"state","version":n,"state":{...}}`` przy zmianie stanu
-  (≤ ``PUSH_HZ``, keepalive co 1 s), a klient polecenia ``{"id":..,"cmd":..}`` z odpowiedzią
+  (≤ ``PUSH_HZ``, keepalive co 0,2 s), a klient polecenia ``{"id":..,"cmd":..}`` z odpowiedzią
   ``ack``/``error``. Token nigdy w URL.
 - Host (ochrona przed DNS rebinding) i Origin (strona z innego źródła nie otworzy sesji)
   muszą należeć do dozwolonych; domyślnie tylko loopback.
@@ -34,7 +34,7 @@ from .gateway import Gateway
 from .schema import SCHEMA_VERSION, Command
 
 PUSH_HZ = 30.0
-KEEPALIVE_S = 1.0
+KEEPALIVE_S = 0.2
 AUTH_TIMEOUT_S = 3.0
 MAX_MESSAGE_BYTES = 2048
 MAX_CLIENTS = 4

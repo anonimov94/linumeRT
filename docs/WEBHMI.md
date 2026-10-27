@@ -26,7 +26,7 @@ Adres domyślny `127.0.0.1:8765`. Token wypisywany przy starcie (albo `--token` 
 | `GET /api/health` | bez tokenu: `ok`, `schema`, `task_state` |
 | `GET /api/state` | nagłówek `X-Linumert-Token`; `{version, state}` |
 | `POST /api/command` | nagłówek tokenu; ciało `Command` (poniżej); 409 przy odmowie maszyny, 422 przy złym ciele |
-| `WS /ws` | pierwsza wiadomość `{"auth": "<token>"}`; potem serwer wysyła `{"type":"state","version","state"}` (≤ 30 Hz, keepalive 1 s); klient wysyła `{"id","cmd",...}` → `ack` / `error` |
+| `WS /ws` | pierwsza wiadomość `{"auth": "<token>"}`; potem serwer wysyła `{"type":"state","version","state"}` (≤ 30 Hz, keepalive 0,2 s); klient wysyła `{"id","cmd",...}` → `ack` / `error` |
 
 Polecenia (`cmd`): `estop`, `power_on`, `power_off`, `mode` (`mode`: manual/mdi/auto), `home`
 (`axis` opcjonalnie), `mdi` (`text` ≤ 200 znaków, jedna linia), `run` (`from_line`), `pause`,
@@ -93,3 +93,48 @@ nie symulacja kolizji, kinematyki ani weryfikator ścieżki. Testy:
 a jog deadman klienta nie jest funkcją bezpieczeństwa. Przed podłączeniem
 rzeczywistej maszyny wymagany jest sprzętowy E-STOP oraz niezależny watchdog HAL
 powiązany z bramą. Funkcji resetu E-STOP w tym interfejsie nie ma.
+
+
+## Sterowanie — hardening etap 1 (Model-Author: ChatGPT)
+
+Zmiany bez przebudowy skórki. `static/app.js` to punkt wejścia ES Modules,
+a logika jest w `static/js/{main,connection,interlocks,jog,dro,scene}.js`.
+Żadnych CDN ani pakietów npm. `js/interlocks.js` eksportuje czystą
+`allowed(state, link)`, używaną do blokad przycisków i JOG; odmowy pokazują
+opis tekstowy oraz `title`. Nie jest to zabezpieczenie sprzętowe: brama
+weryfikuje polecenia niezależnie. Wartości enumów pochodzą z
+`core/linumert/cnc/model.py`:
+`task_state=estop/estop_reset/off/on`, `mode=manual/mdi/auto`,
+`interp_state=idle/reading/paused/waiting`.
+
+**Reguły:** `power_on` przy `off`/`estop_reset`; `home` i `jog`
+w `on+manual+idle`; `mdi` w `on+mdi+idle`; `run`
+w `on+auto+idle` ze zbazowanymi osiami i wybranym programem;
+`pause` przy `reading/waiting`; `resume` przy `paused`.
+`stop` i `estop` pozostają dostępne przy uwierzytelnionym
+WebSocket nawet gdy stan jest nieaktualny.
+
+**Świeżość:** po 500 ms bez pakietu `state` DRO ma etykietę
+„NIEAKTUALNE”, zwykłe komendy są blokowane, aktywny JOG jest zatrzymywany.
+Po ponad 2 s bez stanu panel zrywa WS i wymaga ręcznego ponownego połączenia.
+**Keepalive:** brama wypycha zmiany do 30 Hz, a przy niezmienionym stanie
+wysyła pakiet co 0,2 s (`KEEPALIVE_S = 0.2`). Próg świeżości klienta to
+500 ms (`FRESH_MS = 500`), a utraty łączności 2000 ms (`LOST_MS = 2000`).
+Przy dużym opóźnieniu lub zawieszeniu bramy dane nadal mogą stać się
+nieaktualne — wtedy sterowanie ruchem jest blokowane.
+
+**JOG:** odświeżany co 150 ms; `jog_stop` po pointerup/cancel,
+utracie capture/fokusu, ukryciu karty, utracie łączności lub przeterminowanym
+stanie. Status „BEZ RUCHU” dopiero po `ack` zatrzymania (oraz bez
+`jog_stop_pending` w bieżącym stanie). Błąd stopu oznacza wyraźny alarm;
+przycisk STOP pozwala ponowić `jog_stop`, bez automatycznego startu ruchu.
+Suwak ma `mm/s` dla X/Y/Z/U/V/W i `deg/s` dla A/B/C; prędkości
+wynikają z kontraktu bramy, która nadal ogranicza je do 50.
+**Brak autowznowienia poleceń** po ponownym połączeniu. Token pozostaje
+w pamięci tej karty, nie w URL i nie w sessionStorage/localStorage.
+
+Testy lokalne: `node --test tests/webhmi_js/test_interlocks.mjs` oraz
+`python -m pytest tests/test_webhmi_static.py` (uruchamia node:test,
+jeśli Node.js jest dostępny). Przed obsługą maszyny realnej nadal wymagane
+sprzętowy E-STOP, watchdog HAL i niezależne testy ruchu/failure-injection.
+Etap 2 (dziennik i eksport diagnostyki) jest odłożony do osobnego PR.
