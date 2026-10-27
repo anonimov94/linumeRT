@@ -49,7 +49,8 @@ def test_static_client_is_local_and_has_license_headers():
 def test_e2e_selectors_still_exist():
     html = (STATIC / "index.html").read_text(encoding="utf-8")
     for selector in ('id="token"', 'id="connect"', 'id="axisRows"', 'id="jogSpeed"',
-                     'id="commandResult"', 'class="status-tag offline"',
+                     'id="commandResult"', 'id="jogIncrement"', 'id="jogIncrementUnit"',
+                     'class="status-tag offline"',
                      'data-cmd="estop"', 'data-cmd="stop"', 'data-mode="manual"'):
         assert selector in html, selector
     js = (STATIC / "js/jog.js").read_text(encoding="utf-8")
@@ -115,3 +116,11 @@ def test_ferr_schema_and_threshold():
     source = (STATIC / "js/dro.js").read_text(encoding="utf-8")
     assert "FERR_WARN_MM = 0.05" in source
     assert "axis.following_error" in source
+
+
+@pytest.mark.skipif(shutil.which("node") is None, reason="Node.js nie jest zainstalowany")
+def test_node_jog():
+    subprocess.run(
+        ["node", "--test", str(ROOT / "tests/webhmi_js/test_jog.mjs")],
+        cwd=ROOT, check=True, timeout=40,
+    )

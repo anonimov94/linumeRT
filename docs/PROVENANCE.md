@@ -574,3 +574,9 @@ analityczne/losowe geometrie testowe w `core/linumert/generators/relief.py` i
 Czytnik `programs/stl_section.py` i jego testy reużyte z własnej backendowej części
 PR #184 (`codex/cam-strategies`), ta sama licencja i autor. NumPy to istniejąca
 zależność rdzenia; nie dodano biblioteki CAM ani zasobów GUI.
+
+### Przyrostowy JOG WebHMI — 2026-10-27
+
+Model-Author: Codex. Oryginalne rozszerzenie backendu i klienta WebHMI oraz testy
+Python/Node/LinuxCNC w sprincie #181; GPL-2.0-or-later. Bez nowych bibliotek produktu,
+fontów, ikon lub innych zasobów zewnętrznych. Zrzuty odbioru to własny ekran z atrapą CNC.

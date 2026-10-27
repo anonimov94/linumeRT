@@ -66,6 +66,16 @@ tests/ docs/ docs/prawne/ prompts/ community/
   `@pytest.mark.linuxcnc`.
 - Wszystko dotyczące prawdziwego sprzętu oznaczaj `NIEZWERYFIKOWANE NA SPRZĘCIE`.
 
+### Kontrakt precyzji — polecenie właściciela 2026-10-27
+
+- Pozycje liniowe: rozdzielczość zapisu/prezentacji **0,0001 mm**.
+- Obliczenia współrzędnych: **0,000001 mm**; nie wymagamy większej precyzji wyników.
+- Odbiór pozycjonowania: błąd bezwzględny **poniżej 0,001 mm** jest akceptowalny.
+- Wartości np. 0,999999994 mm przy zadanym 1 mm spełniają kryterium.
+
+To kontrakt wartości i odbioru; typ zmiennoprzecinkowy może zachować dodatkowe bity.
+Nie zastępuje potwierdzenia dokładności sprzętu ani wymagań granic/kolizji/bezpieczeństwa.
+
 ## 5. Czas rzeczywisty
 - UI, rdzeń, SQLite, symulacja i panel Plant działają poza RT. W RT tylko komponenty HAL (`hal/*.comp`):
   bez alokacji, bez blokującego I/O (UDP tylko nieblokująco, jak hm2_eth), bez logowania na dysk.

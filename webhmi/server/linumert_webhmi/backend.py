@@ -11,7 +11,7 @@ wstrzykiwany, więc mapowanie poleceń testuje się bez LinuxCNC).
 Bezpieczeństwo (CLAUDE.md §6): brama nigdy nie zwalnia E-STOP. Wystawia ``estop`` (odbiera
 zezwolenie) i ``power_on`` dopiero po resecie wykonanym poza bramą (zatrzask HAL, D35/D37).
 Każdy błąd polecenia to ``CommandError`` z komunikatem po polsku.
-NIEZWERYFIKOWANE NA SPRZĘCIE; ``LinuxCNCBackend`` niezweryfikowany na LinuxCNC 2.9 RIP.
+NIEZWERYFIKOWANE NA SPRZĘCIE. Celowany odbiór LinuxCNC sim: test_webhmi_live_linuxcnc.py.
 """
 
 from __future__ import annotations
@@ -29,6 +29,23 @@ class CommandError(Exception):
     """Polecenie odrzucone przez maszynę lub bramę; ``str(error)`` trafia do operatora."""
 
 
+def _increment_target(snap: MachineSnapshot, axis: str, speed: float,
+                      distance: float, scale: float = 1.0) -> float:
+    if (snap.task_state.value != "on" or snap.mode is not Mode.MANUAL
+            or snap.interp_state.value != "idle" or not snap.all_homed):
+        raise CommandError("jog przyrostowy: wymagane ON, MANUAL, bez ruchu i bazowanie")
+    if (not math.isfinite(speed) or not 0 < abs(speed) <= 50
+            or not math.isfinite(distance) or not 0 < distance <= 1):
+        raise CommandError("jog przyrostowy: niepoprawna prędkość lub droga")
+    row = next((a for a in snap.axes if a.name == axis.upper()), None)
+    if row is None:
+        raise CommandError("jog przyrostowy: nieznana oś")
+    target = row.position + math.copysign(distance * scale, speed)
+    if row.limit_hit or not row.soft_min <= target <= row.soft_max:
+        raise CommandError("jog przyrostowy: limit osi")
+    return target
+
+
 class MachineBackend(Protocol):
     def snapshot(self) -> MachineSnapshot: ...
     def estop(self) -> None: ...
@@ -44,6 +61,7 @@ class MachineBackend(Protocol):
     def set_override(self, feed: float | None, rapid: float | None,
                      spindle: float | None) -> None: ...
     def jog(self, axis: str, speed: float) -> None: ...
+    def jog_increment(self, axis: str, speed: float, distance: float) -> None: ...
     def jog_stop(self, axis: str | None) -> None: ...
     def tick(self) -> None: ...
 
@@ -56,10 +74,20 @@ class FakeBackend:
         self.machine = machine or FakeMachine(rapid_speed=200.0)
         self._clock = clock
         self._last = clock()
+        self._increments: dict[str, tuple[float, float]] = {}
 
     def tick(self) -> None:
         now = self._clock()
-        self.machine.advance(max(now - self._last, 0.0))
+        dt = max(now - self._last, 0.0)
+        positions = {a.name: a.position for a in self.machine.snapshot().axes}
+        for axis, (target, speed) in list(self._increments.items()):
+            remaining = (target - positions[axis]) * math.copysign(1, speed)
+            if remaining <= 1e-10:
+                self.jog_stop(axis)
+            elif dt > 0:
+                self._need(self.machine.jog(axis, math.copysign(
+                    min(abs(speed), remaining / dt), speed)))
+        self.machine.advance(dt)
         self._last = now
 
     def _need(self, ok: bool) -> None:
@@ -108,7 +136,18 @@ class FakeBackend:
     def jog(self, axis: str, speed: float) -> None:
         self._need(self.machine.jog(axis, speed))
 
+    def jog_increment(self, axis: str, speed: float, distance: float) -> None:
+        snap = self.machine.snapshot()
+        name = axis.upper()
+        target = _increment_target(snap, name, speed, distance)
+        self.jog(name, speed)
+        self._increments[name] = (target, speed)
+
     def jog_stop(self, axis: str | None) -> None:
+        if axis is None:
+            self._increments.clear()
+        else:
+            self._increments.pop(axis.upper(), None)
         self.machine.jog_stop(axis)
 
 
@@ -249,3 +288,18 @@ class LinuxCNCBackend:
         for name in (axis.upper(),) if axis else names:
             if name in names:
                 cmd.jog(lc.JOG_STOP, True, names.index(name))
+
+    def jog_increment(self, axis: str, speed: float, distance: float) -> None:
+        lc, cmd = self._lc(), self._cmd()
+        if self._recent().mode is not Mode.MANUAL:
+            raise CommandError("jog: wymagany tryb MANUAL")
+        joint = self._joint_index(axis)
+        scale = 1.0
+        if axis.upper() not in "ABC":
+            units = self._linear_units
+            if units is None or not math.isfinite(units) or units <= 0:
+                raise CommandError("jog: brak poprawnej skali jednostek maszyny")
+            scale = units
+        _increment_target(self._recent(), axis, speed, distance, scale)
+        cmd.teleop_enable(0)
+        cmd.jog(lc.JOG_INCREMENT, True, joint, speed * scale, distance * scale)

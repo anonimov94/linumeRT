@@ -65,7 +65,8 @@ class Command(BaseModel):
     """Polecenie z przeglądarki; pole ``cmd`` wybiera akcję, reszta to jej argumenty."""
 
     cmd: Literal["estop", "power_on", "power_off", "mode", "home", "mdi", "run", "pause",
-                 "resume", "stop", "override", "jog", "jog_stop"]
+                 "resume", "stop", "override", "jog", "jog_stop", "jog_increment",
+                 "jog_keepalive"]
     mode: Literal["manual", "mdi", "auto"] | None = None
     axis: AXIS | None = None
     text: str | None = Field(default=None, max_length=MAX_MDI_CHARS)
@@ -74,6 +75,7 @@ class Command(BaseModel):
     rapid: float | None = Field(default=None, ge=0.0, le=1.0)
     spindle: float | None = Field(default=None, ge=0.0, le=2.0)
     speed: float | None = None  # mm/s ze znakiem (jog)
+    distance: float | None = Field(default=None, gt=0, le=1, allow_inf_nan=False)
 
     @field_validator("text")
     @classmethod
