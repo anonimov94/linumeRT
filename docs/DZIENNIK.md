@@ -1616,6 +1616,22 @@ Odbiór pulpitu i pozostały zakres 069 nadal otwarte; NIEZWERYFIKOWANE NA SPRZ�
 - Kontrole Debian/LinuxCNC w PR #180. Autokontrola; odbiór pulpitu i pozostały zakres 045 nadal otwarte.
 - NIEZWERYFIKOWANE NA SPRZĘCIE.
 
+## Brama web-hmi — backend · 2026-10-26 · Claude
+- Model-Author: Claude. Realizuje decyzję „Ekran operatora w HTML/WebGL obok QtDragon” (backend PoC).
+- `webhmi/server/linumert_webhmi/`: brama FastAPI REST + WebSocket, wątek odpytujący, deadman jogu 0,4 s, limit
+  poleceń, token + Host/Origin; `FakeBackend` (atrapa) i `LinuxCNCBackend` (wstrzykiwany moduł). Brak resetu E-STOP.
+- `core/linumert/cnc/fake.py`: jog ciągły w atrapie. Pakiet i skrypt `linumert-webhmi` w `pyproject.toml`.
+- Testy: 35 nowych (brama, aplikacja, mapowanie poleceń) + 2 jog; ruff PASS. Opis: `docs/WEBHMI.md`.
+- Otwarte: strona WebGL, wiązanie `watchdog` HAL, weryfikacja na LinuxCNC RIP i sprzęcie. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## 028/029 — WebHMI w paczce instalacyjnej · 2026-10-27 · Codex
+- Model-Author: Codex. Kontynuacja kierunku HTML/WebGL właściciela i bramy Claude; osobny checkout, kopia operatora zachowana.
+- Odtworzono brak static w wheel: HTTP / = 404. Package-data dołącza HTML/JS/CSS; CI sprawdza wheel poza źródłami.
+- Stary artefakt FAIL 404; poprawiony PASS: 3 zasoby HTTP, auth WS, jog atrapy i stop po rozłączeniu. 71 testów WebHMI PASS (Python 3.14.8).
+- Pełne make lint test: 1595 PASS, 124 SKIP, 157 deselected (LinuxCNC), REQ 22/22. PR #188; CI Debian/LinuxCNC w toku, bez deklaracji scalenia.
+- Rejestr WEBHMI-POC partial; odbiór przeglądarki, LinuxCNC RIP i watchdog HAL pozostają otwarte. Bez zmian Qt/HAL.
+- Autokontrola, bez niezależnego przeglądu. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
 ## CAM 2D — strategie, napisy i przekroje STL · 2026-10-26 · Codex
 - Model-Author: Codex. Polecenie właściciela: więcej strategii, kształty, napisy/czcionki i STL.
 - Planowanie v2: X/Y, zygzak, jeden kierunek, krzyżowo, współśrodkowo CW/CCW; v1 bez zmian.

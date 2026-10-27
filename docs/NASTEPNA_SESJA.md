@@ -1,6 +1,6 @@
 # Przekazanie i środowisko
 
-Tura: Codex · 2026-10-26 · stan: oddana; #183 scalony, #184 domykany po końcowych kontrolach.
+Tura: Codex · 2026-10-27 · stan: oddana; WebHMI wheel w PR #188, odbiór lokalny PASS, CI w toku.
 
 Model-Author: Codex. Bez globalnego LOCK; zasady współpracy wyłącznie w
 [WSPOLPRACA_MODELI.md](WSPOLPRACA_MODELI.md).
@@ -14,6 +14,17 @@ Nie utrzymuj tu drugiej listy statusów. Dobór sesji i rozszerzeń według reje
 oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj automatycznie.
 
 ## Dla Claude:
+
+Model-Author: Codex · 2026-10-27. **WebHMI: pakowanie strony i odbiór artefaktu.**
+Osobny checkout `/home/dell/Projekty/linumeRT-closeout-20261027`, bez globalnego LOCK.
+Po #185/#186/#187 wheel nie zawierał strony: odtworzone HTTP 404. Dodano package-data
+oraz kontrolę wheel w CI poza checkoutem: 3 zasoby HTTP, auth WS, jog atrapy i stop
+po rozłączeniu PASS; 71 testów WebHMI PASS. Nie zmieniałem bramy ani stron Qt.
+Stan zatrzymania: PR #188 wypchnięty; make lint test: 1595 PASS, 124 SKIP,
+157 deselected (LinuxCNC), REQ 22/22. CI Debian/LinuxCNC w toku; scalić merge commitem
+po zielonych kontrolach aktualnego HEAD. Nie zajmuję backend.py/gateway.py/app.py.
+Następny zakres: rzeczywista przeglądarka i LinuxCNC RIP; watchdog HAL nadal otwarty.
+Rekord WEBHMI-POC wiąże zakres z 028/029 i decyzją właściciela; bez zamknięcia M2.
 
 Model-Author: Codex · 2026-10-26. **Nocna praca do 27.10, 07:00 Europe/Warsaw.**
 Właściciel: nowe funkcje przed optymalizacją; optymalizacja po wykonaniu całej roadmapy.
@@ -822,3 +833,16 @@ Stan zatrzymania: poprawka i regresja gotowe; następny krok — integracja z #1
 Model-Author: Codex. PR #103 jest scalony (3d4ecec), a jego gałąź usunięta.
 Przekierowałem PR #106 na main; pozostaje draftem do pełnego odbioru.
 Nie kieruj już integracji do wip/od-01-kolizje. Brak nowego zadania w „Dla Codex:” na main.
+
+## Dla Claude — korekta prędkości JOG bramy, 2026-10-27
+
+Model-Author: Codex. Przegląd #185 SHA 0161746 wykazał mnożnik 60 w
+LinuxCNCBackend.jog, mimo że linuxcnc.command.jog przyjmuje jednostki/s.
+Dowód pierwotny: AXIS 2.9 get_jog_speed (linia 1706: returns units/sec), jog_on:
+https://github.com/LinuxCNC/linuxcnc/blob/2.9/src/emc/usr_intf/axis/scripts/axis.py#L1706
+Poprawka w codex/webhmi-jog-units, PR kierowany do claude/webhmi-backend:
+bez mnożnika 60, skala stat.linear_units dla mm/s -> native/s, odmowa bez skali.
+69 testów bramy/mapowania/aplikacji PASS, ruff PASS na Windows/Python 3.12.
+Nie jest to pełny PASS niezależnego przeglądu #185 ani weryfikacja backendu na RIP.
+Znane ograniczenia watchdog i mapowania przegubów nadal wymagają domknięcia.
+Równolegle #184: poprawiona sprzeczna asercja testu D38, pełne CI nowego SHA 920bddd w toku.
