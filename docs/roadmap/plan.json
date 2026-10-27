@@ -469,12 +469,13 @@
       "title": "Tryby, JOG i pulpit MPG",
       "prompt": "prompts/sesja-029.md",
       "status": "partial",
-      "progress": "JOG, tryby i edytowalny krok dostępne w HMI.",
+      "progress": "JOG, tryby i edytowalny krok dostępne w HMI. 2026-10-27: sprint właściciela z issue #181, cztery role Codex; implementacja przyrostowego JOG w web i odbiór przeglądarki/LinuxCNC. Końcowe dowody i SHA w PR sprintu; bez deklaracji pełnego odbioru MPG/pulpitu/watchdog HAL.",
       "remaining": [
         "Rozliczyć MPG i pełny scenariusz odbioru 029."
       ],
       "evidence": [
-        "docs/DZIENNIK.md"
+        "docs/DZIENNIK.md",
+        "https://github.com/anonimov94/linumeRT/issues/181"
       ]
     },
     {
@@ -1991,7 +1992,7 @@
         "055"
       ],
       "status": "partial",
-      "progress": "Kierunek HTML/WebGL potwierdzony przez właściciela 2026-10-26; GUI Qt zamrożone według DECYZJE.md. Brama Claude (#185), strona Cyberdeck (#187) i jednostki jogu (#186) są w main. 2026-10-27 Codex: odtworzono brak strony w wheel (HTTP 404); dodano zasoby statyczne do danych pakietu i kontrolę artefaktu w CI poza checkoutem. Poprawiona paczka: HTTP zasobów, uwierzytelnienie WebSocket, jog atrapy i zatrzymanie po rozłączeniu PASS; 71 testów WebHMI PASS na Pythonie 3.14.8. Nie jest to odbiór przeglądarki ani LinuxCNC. Pełne lokalne make lint test: 1595 PASS, 124 SKIP, 157 testów LinuxCNC poza zakresem; REQ 22/22. PR #188, CI Debian/LinuxCNC w toku.",
+      "progress": "Kierunek HTML/WebGL potwierdzony przez właściciela 2026-10-26; GUI Qt zamrożone według DECYZJE.md. Brama Claude (#185), strona Cyberdeck (#187) i jednostki jogu (#186) są w main. 2026-10-27 Codex: odtworzono brak strony w wheel (HTTP 404); dodano zasoby statyczne do danych pakietu i kontrolę artefaktu w CI poza checkoutem. Poprawiona paczka: HTTP zasobów, uwierzytelnienie WebSocket, jog atrapy i zatrzymanie po rozłączeniu PASS; 71 testów WebHMI PASS na Pythonie 3.14.8. Nie jest to odbiór przeglądarki ani LinuxCNC. Pełne lokalne make lint test: 1595 PASS, 124 SKIP, 157 testów LinuxCNC poza zakresem; REQ 22/22. PR #188, CI Debian/LinuxCNC w toku. 2026-10-27: sprint właściciela z issue #181, cztery role Codex; implementacja przyrostowego JOG w web i odbiór przeglądarki/LinuxCNC. Końcowe dowody i SHA w PR sprintu; bez deklaracji pełnego odbioru MPG/pulpitu/watchdog HAL.",
       "remaining": [
         "Odbiór rzeczywistej przeglądarki: DRO, scena WebGL ≤30 FPS, jog i utrata połączenia.",
         "Integracja i odbiór na LinuxCNC RIP; niezależny watchdog HAL przed użyciem sprzętu.",
@@ -2004,7 +2005,8 @@
         "https://github.com/anonimov94/linumeRT/pull/185",
         "https://github.com/anonimov94/linumeRT/pull/187",
         "https://github.com/anonimov94/linumeRT/pull/188",
-        "docs/SYNTEZA_MODELI_2026-10-26.md"
+        "docs/SYNTEZA_MODELI_2026-10-26.md",
+        "https://github.com/anonimov94/linumeRT/issues/181"
       ]
     },
     {

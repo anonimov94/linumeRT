@@ -1,6 +1,7 @@
 /*
 SPDX-License-Identifier: GPL-2.0-or-later
 Model-Author: ChatGPT
+Incremental jog: Model-Author: Codex
 */
 "use strict";
 
@@ -12,6 +13,9 @@ export function createJog({ send, ready, mayJog, onAlarm, onChange, onEvent = ()
   const status = document.getElementById("jogStatus");
   const slider = document.getElementById("jogSpeed");
   const label = document.getElementById("jogSpeedValue");
+  const increment = document.getElementById("jogIncrement");
+  const incrementUnit = document.getElementById("jogIncrementUnit");
+  const choices = new Set(["continuous", "0.001", "0.01", "0.1", "1"]);
   let active = null;
   let timer = null;
   let phase = "idle"; // idle / moving / stopping / fault
@@ -29,6 +33,7 @@ export function createJog({ send, ready, mayJog, onAlarm, onChange, onEvent = ()
   function units(axis = "X") {
     label.textContent = Number(slider.value).toFixed(1) + " " + unit(axis);
     slider.title = "Prędkość dla osi " + axis + " w " + unit(axis);
+    incrementUnit.textContent = ROTARY.has(axis) ? "deg" : "mm";
   }
   function clearTimer() {
     if (timer !== null) clearInterval(timer);
@@ -83,8 +88,11 @@ export function createJog({ send, ready, mayJog, onAlarm, onChange, onEvent = ()
     if (phase !== "idle" || !ready() || !mayJog(axis)) return;
     const magnitude = Number(slider.value);
     if (!Number.isFinite(magnitude) || magnitude <= 0 || magnitude > 50) return;
+    const selected = increment.value;
+    if (!choices.has(selected)) return;
+    const distance = selected === "continuous" ? null : Number(selected);
     event.preventDefault();
-    active = { axis, pointerId: event.pointerId, speed: direction * magnitude };
+    active = { axis, pointerId: event.pointerId, speed: direction * magnitude, distance, sent: false };
     reason = "";
     indicate("JOG: " + axis + " " + (direction > 0 ? "+" : "−"), "moving");
     units(axis);
@@ -95,7 +103,12 @@ export function createJog({ send, ready, mayJog, onAlarm, onChange, onEvent = ()
       if (!ready() || !mayJog(axis) || document.hidden || !document.hasFocus()) {
         stop("Utrata warunków bezpiecznego JOG"); return;
       }
-      const id = send({ cmd: "jog", axis, speed: active.speed }, (reply) => {
+      const command = active.distance === null
+        ? { cmd: "jog", axis, speed: active.speed }
+        : active.sent ? { cmd: "jog_keepalive", axis }
+          : { cmd: "jog_increment", axis, speed: active.speed, distance: active.distance };
+      active.sent = true;
+      const id = send(command, (reply) => {
         if (reply.type === "error" && phase === "moving") {
           onAlarm("Odrzucono JOG: " + String(reply.message || "błąd"));
           stop("Brama odrzuciła JOG");
@@ -106,7 +119,8 @@ export function createJog({ send, ready, mayJog, onAlarm, onChange, onEvent = ()
     pulse();
     if (active && timer === null) {
       onEvent("info", "JOG", "START " + axis + " " +
-        (direction > 0 ? "+" : "−") + " " + magnitude + " " + unit(axis));
+        (direction > 0 ? "+" : "−") + " " + magnitude + " " + unit(axis) +
+        (distance === null ? " · ciągły" : " · krok " + distance + " " + incrementUnit.textContent));
       timer = setInterval(pulse, INTERVAL_MS);
     }
   }
@@ -151,6 +165,9 @@ export function createJog({ send, ready, mayJog, onAlarm, onChange, onEvent = ()
   slider.addEventListener("input", () => {
     units(active?.axis || "X");
     if (active) stop("Zmiana prędkości podczas JOG");
+  });
+  increment.addEventListener("change", () => {
+    if (active) stop("Zmiana przyrostu podczas JOG");
   });
   window.addEventListener("blur", () => stop("Utrata fokusu okna"));
   document.addEventListener("visibilitychange", () => {

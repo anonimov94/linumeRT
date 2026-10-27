@@ -60,6 +60,7 @@ class Gateway:
         self._hold = jog_hold_s
         self._lock = threading.RLock()
         self._jog: dict[str, tuple[str, float]] = {}  # os -> (sesja, termin)
+        self._increment_axes: set[str] = set()
         self._jog_retry: set[str] = set()  # osie, dla których stop jogu się nie udał
         self._limiter = RateLimiter(command_rate, command_rate, clock)
         self._sessions: dict[str, float] = {}  # sesja -> ostatnia aktywność
@@ -140,6 +141,7 @@ class Gateway:
     def _stop_axis(self, axis: str) -> None:
         """Zdejmuje jog osi; przy błędzie backendu zostaje do ponowienia w kolejnym obiegu."""
         self._jog.pop(axis, None)
+        self._increment_axes.discard(axis)
         try:
             self.backend.jog_stop(axis)
             self._jog_retry.discard(axis)
@@ -148,6 +150,7 @@ class Gateway:
 
     def _stop_all_jog(self) -> None:
         self._jog.clear()
+        self._increment_axes.clear()
         try:
             self.backend.jog_stop(None)
             self._jog_retry.clear()
@@ -218,11 +221,33 @@ class Gateway:
             owner = self._jog.get(c.axis, (session, 0.0))[0]
             if c.speed == 0.0:
                 self._stop_axis(c.axis)
+            elif c.axis in self._increment_axes:
+                raise CommandError("jog: najpierw zatrzymaj poprzedni ruch przyrostowy")
             elif owner != session:
                 raise CommandError(f"jog osi {c.axis} trwa w innej sesji")
             else:
                 b.jog(c.axis, c.speed)
                 self._jog[c.axis] = (session, self._clock() + self._hold)
+        elif name == "jog_increment":
+            if c.axis is None or c.speed is None or c.speed == 0 or c.distance is None:
+                raise CommandError("jog przyrostowy: wymagane axis, niezerowa speed i distance")
+            if self._jog_retry:
+                self._retry_stops()
+                if self._jog_retry:
+                    raise CommandError("jog zablokowany: poprzednie zatrzymanie niepotwierdzone")
+            if c.axis in self._jog:
+                raise CommandError("jog: najpierw zatrzymaj poprzedni ruch osi")
+            if self._state.get("gateway_error"):
+                raise CommandError("jog: brak wiarygodnego stanu maszyny")
+            b.jog_increment(c.axis, c.speed, c.distance)
+            self._increment_axes.add(c.axis)
+            self._jog[c.axis] = (session, self._clock() + self._hold)
+        elif name == "jog_keepalive":
+            if c.axis not in self._increment_axes:
+                raise CommandError("jog: brak aktywnego ruchu przyrostowego")
+            if self._jog[c.axis][0] != session:
+                raise CommandError("jog osi trwa w innej sesji")
+            self._jog[c.axis] = (session, self._clock() + self._hold)
         elif name == "jog_stop":
             if c.axis is None:
                 self._stop_all_jog()

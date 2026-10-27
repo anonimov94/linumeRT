@@ -309,3 +309,93 @@ def test_rest_commands_do_not_create_a_permanent_session():
     gateway.client_connected("ws1")
     gateway.client_disconnected("ws1")
     assert not gateway.backend.machine._jog
+
+
+def test_increment_held_does_not_repeat_and_requires_release_before_restart():
+    gateway, _, clock = make()
+    gateway.execute(Command(cmd="jog_increment", axis="X", speed=1, distance=1), "a")
+    for _ in range(20):
+        gateway.execute(Command(cmd="jog_keepalive", axis="X"), "a")
+        run(gateway, clock, 0.1)
+    assert x(gateway) == pytest.approx(1)
+    with pytest.raises(CommandError, match="poprzedni"):
+        gateway.execute(Command(cmd="jog_increment", axis="X", speed=1, distance=1), "a")
+    with pytest.raises(CommandError, match="poprzedni"):
+        gateway.execute(Command(cmd="jog", axis="X", speed=1), "a")
+    gateway.execute(Command(cmd="jog_stop", axis="X"), "a")
+    gateway.execute(Command(cmd="jog_increment", axis="X", speed=-5, distance=0.1), "a")
+    run(gateway, clock, 0.1)
+    assert x(gateway) == pytest.approx(0.9)
+
+
+def test_increment_keepalive_is_owner_only_and_deadman_stops_slow_move():
+    gateway, _, clock = make(jog_hold_s=0.2)
+    gateway.client_connected("a")
+    gateway.client_connected("b")
+    gateway.execute(Command(cmd="jog_increment", axis="X", speed=0.1, distance=1), "a")
+    with pytest.raises(CommandError, match="innej sesji"):
+        gateway.execute(Command(cmd="jog_keepalive", axis="X"), "b")
+    run(gateway, clock, 0.5)
+    held = x(gateway)
+    assert 0 < held < 0.03
+    run(gateway, clock, 1)
+    assert x(gateway) == held
+    with pytest.raises(CommandError, match="brak aktywnego"):
+        gateway.execute(Command(cmd="jog_keepalive", axis="X"), "a")
+
+
+def test_increment_disconnect_and_global_stop_cancel_remaining_distance():
+    for stopping in ("disconnect", "stop", "estop", "power_off"):
+        gateway, _, clock = make()
+        gateway.client_connected("a")
+        gateway.execute(Command(cmd="jog_increment", axis="X", speed=0.1, distance=1), "a")
+        run(gateway, clock, 0.1)
+        if stopping == "disconnect":
+            gateway.client_disconnected("a")
+        else:
+            gateway.execute(Command(cmd=stopping), "a")
+        held = x(gateway)
+        run(gateway, clock, 1)
+        assert x(gateway) == held
+        assert gateway.snapshot()[1]["jog_active"] == []
+
+
+@pytest.mark.parametrize("distance", [0, -1, 1.01, float("nan"), float("inf")])
+def test_increment_distance_rejects_unbounded_or_invalid_values(distance):
+    with pytest.raises(ValidationError):
+        Command(cmd="jog_increment", axis="X", speed=1, distance=distance)
+
+
+def test_increment_preflight_refuses_unhomed_limit_and_wrong_mode():
+    gateway, machine, _ = make(mode=Mode.MDI)
+    with pytest.raises(CommandError, match="MANUAL"):
+        gateway.execute(Command(cmd="jog_increment", axis="X", speed=1, distance=1))
+    machine.set_mode(Mode.MANUAL)
+    machine._pos["X"] = 49.5
+    with pytest.raises(CommandError, match="limit"):
+        gateway.execute(Command(cmd="jog_increment", axis="X", speed=1, distance=1))
+    assert not machine._jog
+
+
+def test_increment_failed_stop_is_retried_and_blocks_restart():
+    gateway, _, clock = make()
+    real_stop = gateway.backend.jog_stop
+    failures = [3]
+
+    def flaky(axis):
+        if failures[0]:
+            failures[0] -= 1
+            raise RuntimeError("test stop failure")
+        real_stop(axis)
+
+    gateway.execute(Command(cmd="jog_increment", axis="X", speed=0.1, distance=1))
+    gateway.backend.jog_stop = flaky
+    with pytest.raises(CommandError, match="niepotwierdzone"):
+        gateway.execute(Command(cmd="jog_stop", axis="X"))
+    with pytest.raises(CommandError, match="niepotwierdzone"):
+        gateway.execute(Command(cmd="jog_increment", axis="X", speed=1, distance=1))
+    run(gateway, clock, 0.2)
+    held = x(gateway)
+    run(gateway, clock, 1)
+    assert x(gateway) == held
+    assert gateway.snapshot()[1]["jog_stop_pending"] == []

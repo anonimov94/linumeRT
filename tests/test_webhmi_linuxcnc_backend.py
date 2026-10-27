@@ -165,3 +165,46 @@ def test_rcs_error_from_wait_complete_is_reported():
     b._lc().RCS_ERROR = 3
     with pytest.raises(CommandError, match="RCS_ERROR"):
         b.set_mode(Mode.MDI)
+
+
+@pytest.mark.parametrize("units", [1.0, 1 / 25.4])
+@pytest.mark.parametrize("speed", [2.5, -2.5])
+def test_increment_converts_both_velocity_and_distance_without_reissuing_mode(units, speed):
+    b, c = backend(linear_units=units)
+    b.snapshot()
+    b.jog_increment("X", speed, 0.1)
+    assert c.calls == [("teleop_enable", 0), ("jog", 22, True, 0, speed * units, 0.1 * units)]
+
+
+def test_increment_rotary_is_in_degrees_even_with_inch_linear_machine():
+    b, c = backend(linear_units=1 / 25.4)
+    b._reader._stat.axis_mask = 0b1111
+    b._reader._stat.homed = (1,) * 4
+    b.snapshot()
+    b.jog_increment("A", -2, 1)
+    assert c.calls == [("teleop_enable", 0), ("jog", 22, True, 3, -2, 1)]
+
+
+def test_increment_rejects_state_units_and_limits_before_any_motion():
+    for b, c in (backend(task_state=1), backend(task_mode=80), backend(linear_units=None)):
+        with pytest.raises(CommandError):
+            b.jog_increment("X", 1, 1)
+        assert c.calls == []
+    b, c = backend()
+    b._reader._stat.homed = (0, 1, 1)
+    with pytest.raises(CommandError, match="bazowanie"):
+        b.jog_increment("X", 1, 1)
+    assert c.calls == []
+
+
+def test_increment_checks_soft_limits_in_native_inch_units():
+    b, c = backend(linear_units=1 / 25.4)
+    b._reader._stat.actual_position = (0.99,) + (0,) * 8
+    b._reader._stat.axis = ({"max_position_limit": 1}, {}, {})
+    b.snapshot()
+    with pytest.raises(CommandError, match="limit"):
+        b.jog_increment("X", 1, 1)
+    assert c.calls == []
+    b.jog_increment("X", 1, 0.1)
+    assert c.calls[-1][:4] == ("jog", 22, True, 0)
+    assert c.calls[-1][4:] == pytest.approx((1 / 25.4, 0.1 / 25.4))
