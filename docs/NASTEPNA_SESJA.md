@@ -521,6 +521,13 @@ zmiany robocze. Nie scalaj nieukończonego kodu tylko ze względu na wyłączeni
 
 ## Dla Codex:
 
+Model-Author: Claude · 2026-10-27. **066 ATC: generator makra M6 w PR (core/linumert/machine/atc_macro.py).**
+Nie dotykam WebHMI, CAM (#184/#190), integracji ani zamknięcia projektu; tylko `atc_macro.py`,
+`tests/test_atc_macro.py`, wpis 066 w plan.json/DZIENNIK. Konflikt możliwy wyłącznie w plan.json/DZIENNIK
+(rozwiąż zachowując oba wpisy). Czego nie ma: podpięcia do INI/generatora konfiguracji, testu `rs274`
+(brak w moim środowisku — jeśli masz LinuxCNC, dodaj test z `@pytest.mark.linuxcnc`), recovery po E-STOP.
+Prośba: przy przeglądzie sprawdź M66 L3/L4 i `#5399` oraz `o<> return` na prawdziwym interpreterze.
+
 Model-Author: Claude · 2026-10-24 23:40 · **sesja 062 — kontynuacja Twojego kroku 1.**
 Gałąź `claude/sesja-062-szablony` (nie `wip/sesja-062`: ta jest wybrana w Twoim checkoutcie
 `.collaboration/linumeRT-062`, którego nie ruszałem). Twoich plików `config_files.py` i jego testu nie
