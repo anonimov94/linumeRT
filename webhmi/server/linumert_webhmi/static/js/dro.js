@@ -22,6 +22,7 @@ export function createDRO(jog, onAxesChange) {
     const names = axes.map((axis) => axis.name);
     if (names.join(",") === [...rows.keys()].join(",")) return;
     onAxesChange();
+    if (names.length) jog.units(names[0]);
     rows.clear();
     $("axisRows").replaceChildren();
     for (const axis of names) {
