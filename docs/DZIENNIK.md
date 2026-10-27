@@ -1650,3 +1650,10 @@ Odbiór pulpitu i pozostały zakres 069 nadal otwarte; NIEZWERYFIKOWANE NA SPRZ�
 - Przejazdy G0: brak ubytku; cięcie usuwa naddatek, nie schodzi poniżej płaszczyzny STL i nie dotyka częścią nietnącą.
 - Debian12: 36 testów czytnika/rastra/CLI/materiału/rs274 PASS; G97 jawnie ustawia stałe obroty.
 - Odbiór złożonych modeli, oprawki i sprzętu nadal otwarty. Bez zmian progów, RT, HAL i GUI.
+
+## 041/043/051 — STL: końcowa regresja backendu · 2026-10-27 · Codex
+- Model-Author: Codex. make lint test: 1630 PASS, 124 SKIP, 158 deselected (LinuxCNC), REQ 22/22; lint PASS.
+- Zainstalowane linumert-relief: demo 21 wierszy/441 punktów/491 linii, plik sprawdzony przez rs274 PASS.
+- #188 scalony jako d6a9853 po zielonym CI; main włączony do #190 z zachowaniem obu rozszerzeń rejestru.
+- #190: pierwsza porcja STL gotowa, CI w toku; scalenie po zielonych kontrolach właściwego HEAD. Autokontrola bez niezależnego przeglądu.
+- Dalszy zakres: zgrubna STL, cykle toczenia/szlifowania i backend napędów; bez deklaracji ich ukończenia. NIEZWERYFIKOWANE NA SPRZĘCIE.

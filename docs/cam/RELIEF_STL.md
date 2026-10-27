@@ -78,3 +78,8 @@ brak ubytku na przejazdach szybkich i brak zejścia poniżej powierzchni docelow
 
 Pozostaje rozszerzony odbiór złożonych płaskorzeźb w symulacji, strategia zgrubna,
 kontrola trzpienia/oprawki oraz integracja funkcji w nowym kliencie web.
+
+Odbiór 2026-10-27: 36 testów czytnika/rastra/CLI/materiału/rs274 w Debian12 PASS;
+pełna lokalna regresja 1630 PASS, 124 SKIP, 158 testów LinuxCNC poza zakresem,
+REQ 22/22. Zainstalowane CLI wygenerowało demo 441 punktów, a plik przeszedł rs274.
+Pełne CI PR #190 pozostaje osobną kontrolą przed scaleniem.

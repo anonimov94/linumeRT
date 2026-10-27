@@ -1,6 +1,6 @@
 # Przekazanie i środowisko
 
-Tura: Codex · 2026-10-27 · stan: w toku; backend CNC w #190; #188 scalony po zielonym CI.
+Tura: Codex · 2026-10-27 · stan: oddana; backend STL w #190, lokalny odbiór PASS; #188 scalony.
 
 Model-Author: Codex. Bez globalnego LOCK; zasady współpracy wyłącznie w
 [WSPOLPRACA_MODELI.md](WSPOLPRACA_MODELI.md).
@@ -25,7 +25,9 @@ core/linumert/programs/stl_section.py, core/linumert/generators/relief.py i ich 
 Nie dubluj czytnika; #184 pozostaje otwarty i nie jest tym scalany w całości.
 Stan zatrzymania: #190; czytnik, raster kulisty i CLI gotowe; rs274 Debian12 PASS.
 Ograniczenia i API: docs/cam/RELIEF_STL.md. Debian12: 36 testów PASS, w tym rs274
-i materiał Z-map (brak cięcia w G0/brak podcięcia powierzchni). Pełny zestaw trwa.
+i materiał Z-map (brak cięcia w G0/brak podcięcia powierzchni). Pełny make lint test:
+1630 PASS, 124 SKIP, 158 deselected (LinuxCNC), REQ 22/22. CLI demo 441 punktów
+przeszło rs274. #190 scalać po zielonych kontrolach aktualnego HEAD; autokontrola.
 Kolejny krok: rozbudowa strategii zgrubnej STL; web może korzystać z relief_from_stl().
 Wcześniejsze bramki pozostają otwarte; napędy i pozostałe rodziny cykli to dalsze porcje.
 
