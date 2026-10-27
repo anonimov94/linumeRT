@@ -1954,6 +1954,35 @@
       ]
     },
     {
+      "id": "CNC-BACKEND",
+      "title": "Backend napędów, cykli technologicznych i płaskorzeźby STL",
+      "parents": [
+        "039",
+        "041",
+        "043",
+        "051",
+        "061",
+        "063",
+        "069"
+      ],
+      "status": "partial",
+      "progress": "Polecenie właściciela 2026-10-27: Codex prowadzi backend napędów i cykli frezowania/toczenia/szlifowania oraz generowanie ścieżki G-code, w tym płaskorzeźby STL. Pierwsza porcja reużywa czytnik STL/przekroje z #184, bez GUI Qt; 9 testów PASS. Raster kulisty i eksport w toku. Raster 3D i CLI linumert-relief gotowe: analityczny kontakt kuli z trójkątami, zachowawcza osłona odcinków między próbkami, safe-Z między wierszami, G61 i atomowy eksport. Test kompletnego G-code w rs274/Debian12 PASS. To wykańczanie przygotówki po zgrubnej, bez gwarancji tolerancji powierzchni/oprawki. Eksportowany G-code przeszedł test usuwania naddatku z pochyłej przygotówki w istniejącej Z-map: brak ubytku w G0, brak zejścia poniżej docelowej płaszczyzny i brak kontaktu części nietnących. Debian12: 36 testów czytnika/rastra/CLI/rs274/materiału PASS. Pełna regresja lokalna: 1630 PASS, 124 SKIP, 158 deselected (LinuxCNC), REQ 22/22; lint PASS. Zainstalowane CLI wygenerowało demo 21 wierszy/441 punktów; wynik przeszedł rs274. PR #190 oczekuje CI i scalenia.",
+      "remaining": [
+        "Rozszerzony odbiór złożonych płaskorzeźb w symulacji i integracja web; następnie obróbka zgrubna i kontrola oprawki.",
+        "Rozwój strategii frezowania oraz osobne kontrakty i generatory toczenia/szlifowania.",
+        "Backend diagnostyki/obsługi napędów zgodny z CiA 402, mapowaniem maszyny i nadrzędnym obwodem bezpieczeństwa."
+      ],
+      "evidence": [
+        "docs/DECYZJE.md",
+        "core/linumert/programs/stl_section.py",
+        "https://github.com/anonimov94/linumeRT/pull/184",
+        "docs/cam/RELIEF_STL.md",
+        "core/linumert/generators/relief.py",
+        "tests/test_gen_relief.py",
+        "https://github.com/anonimov94/linumeRT/pull/190"
+      ]
+    },
+    {
       "id": "WEBHMI-POC",
       "title": "HTML/WebGL: integracja strony z bramą LinuxCNC",
       "parents": [

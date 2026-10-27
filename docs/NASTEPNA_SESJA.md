@@ -1,6 +1,6 @@
 # Przekazanie i środowisko
 
-Tura: Codex · 2026-10-27 · stan: oddana; WebHMI wheel w PR #188, odbiór lokalny PASS, CI w toku.
+Tura: Codex · 2026-10-27 · stan: oddana; backend STL w #190, lokalny odbiór PASS; #188 scalony.
 
 Model-Author: Codex. Bez globalnego LOCK; zasady współpracy wyłącznie w
 [WSPOLPRACA_MODELI.md](WSPOLPRACA_MODELI.md).
@@ -15,14 +15,29 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · 2026-10-27. **Nowy podział właściciela: backend CNC po stronie Codex.**
+Zakres: obsługa napędów, cykle frezowania/toczenia/szlifowania, generowanie ścieżki
+G-code z cykli i płaskorzeźby ze STL. GUI/web pozostaje po Twojej stronie.
+Checkout `/home/dell/Projekty/linumeRT-cnc-backend-20261027`, gałąź codex/cnc-backend-20261027.
+Pierwszy krok 041/043/051: czytnik STL z backendowej części #184 (bez zmian Qt),
+następnie raster 3D frezem kulistym i eksport G-code. Zajęte nowe pliki:
+core/linumert/programs/stl_section.py, core/linumert/generators/relief.py i ich testy.
+Nie dubluj czytnika; #184 pozostaje otwarty i nie jest tym scalany w całości.
+Stan zatrzymania: #190; czytnik, raster kulisty i CLI gotowe; rs274 Debian12 PASS.
+Ograniczenia i API: docs/cam/RELIEF_STL.md. Debian12: 36 testów PASS, w tym rs274
+i materiał Z-map (brak cięcia w G0/brak podcięcia powierzchni). Pełny make lint test:
+1630 PASS, 124 SKIP, 158 deselected (LinuxCNC), REQ 22/22. CLI demo 441 punktów
+przeszło rs274. #190 scalać po zielonych kontrolach aktualnego HEAD; autokontrola.
+Kolejny krok: rozbudowa strategii zgrubnej STL; web może korzystać z relief_from_stl().
+Wcześniejsze bramki pozostają otwarte; napędy i pozostałe rodziny cykli to dalsze porcje.
+
 Model-Author: Codex · 2026-10-27. **WebHMI: pakowanie strony i odbiór artefaktu.**
 Osobny checkout `/home/dell/Projekty/linumeRT-closeout-20261027`, bez globalnego LOCK.
 Po #185/#186/#187 wheel nie zawierał strony: odtworzone HTTP 404. Dodano package-data
 oraz kontrolę wheel w CI poza checkoutem: 3 zasoby HTTP, auth WS, jog atrapy i stop
 po rozłączeniu PASS; 71 testów WebHMI PASS. Nie zmieniałem bramy ani stron Qt.
 Stan zatrzymania: PR #188 wypchnięty; make lint test: 1595 PASS, 124 SKIP,
-157 deselected (LinuxCNC), REQ 22/22. CI Debian/LinuxCNC w toku; scalić merge commitem
-po zielonych kontrolach aktualnego HEAD. Nie zajmuję backend.py/gateway.py/app.py.
+157 deselected (LinuxCNC), REQ 22/22. CI Debian/LinuxCNC PASS; #188 scalony jako d6a9853. Nie zajmuję backend.py/gateway.py/app.py.
 Następny zakres: rzeczywista przeglądarka i LinuxCNC RIP; watchdog HAL nadal otwarty.
 Rekord WEBHMI-POC wiąże zakres z 028/029 i decyzją właściciela; bez zamknięcia M2.
 

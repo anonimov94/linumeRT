@@ -1631,3 +1631,29 @@ Odbiór pulpitu i pozostały zakres 069 nadal otwarte; NIEZWERYFIKOWANE NA SPRZ�
 - Pełne make lint test: 1595 PASS, 124 SKIP, 157 deselected (LinuxCNC), REQ 22/22. PR #188; CI Debian/LinuxCNC w toku, bez deklaracji scalenia.
 - Rejestr WEBHMI-POC partial; odbiór przeglądarki, LinuxCNC RIP i watchdog HAL pozostają otwarte. Bez zmian Qt/HAL.
 - Autokontrola, bez niezależnego przeglądu. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## 041/043/051 — backend CNC: wspólny czytnik STL · 2026-10-27 · Codex
+- Model-Author: Codex. Nowe polecenie właściciela: napędy, frezowanie/toczenie/szlifowanie i STL → ścieżka G-code.
+- Przeniesiono wyłącznie czytnik/przekroje STL i testy z #184; ASCII/binary, limity i walidacja siatki bez Qt.
+- Odbiór: 9 testów czytnika PASS, ruff PASS. Brak nowych zależności; numpy już w rdzeniu.
+- Raster kulisty i eksport w następnej porcji; pozostałe cykle i napędy w rejestrze. Bez zamknięcia bramek.
+
+## 041/043/051 — STL: raster kulisty i eksport G-code · 2026-10-27 · Codex
+- Model-Author: Codex. Kontakt kuli z trójkątem/krawędzią/wierzchołkiem, raster XYZ, zachowawcza osłona między próbkami, jawne limity pracy.
+- CLI linumert-relief: skala, frez, kroki, posuwy, T/H/S; atomowy zapis, safe-Z między wierszami, G61.
+- Testy geometrii/CLI i istniejących .lnx; pełny program w rs274 na Debian12 PASS w osobnym kontenerze bez instancji CNC/HAL.
+- Dokumentacja docs/cam/RELIEF_STL.md i pochodzenie uzupełnione; nie dodano zależności ani GUI.
+- Pozostaje symulacja materiału, zgrubna, oprawka i klient web; toczenie/szlifowanie/napędy to dalsze porcje. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## 041/043/051 — STL: odbiór materiału i przejazdów · 2026-10-27 · Codex
+- Model-Author: Codex. Eksportowany G-code przetworzono przez istniejącą Z-map z frezem kulistym i przygotówką po zgrubnej.
+- Przejazdy G0: brak ubytku; cięcie usuwa naddatek, nie schodzi poniżej płaszczyzny STL i nie dotyka częścią nietnącą.
+- Debian12: 36 testów czytnika/rastra/CLI/materiału/rs274 PASS; G97 jawnie ustawia stałe obroty.
+- Odbiór złożonych modeli, oprawki i sprzętu nadal otwarty. Bez zmian progów, RT, HAL i GUI.
+
+## 041/043/051 — STL: końcowa regresja backendu · 2026-10-27 · Codex
+- Model-Author: Codex. make lint test: 1630 PASS, 124 SKIP, 158 deselected (LinuxCNC), REQ 22/22; lint PASS.
+- Zainstalowane linumert-relief: demo 21 wierszy/441 punktów/491 linii, plik sprawdzony przez rs274 PASS.
+- #188 scalony jako d6a9853 po zielonym CI; main włączony do #190 z zachowaniem obu rozszerzeń rejestru.
+- #190: pierwsza porcja STL gotowa, CI w toku; scalenie po zielonych kontrolach właściwego HEAD. Autokontrola bez niezależnego przeglądu.
+- Dalszy zakres: zgrubna STL, cykle toczenia/szlifowania i backend napędów; bez deklaracji ich ukończenia. NIEZWERYFIKOWANE NA SPRZĘCIE.
