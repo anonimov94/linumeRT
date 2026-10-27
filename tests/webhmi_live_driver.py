@@ -78,15 +78,15 @@ def run(output):
                 start = x()
                 command(ws, {"cmd": "jog_increment", "axis": "X", "speed": 5,
                              "distance": 1})
-                wait(lambda: abs(x() - start - 1) < 0.002 and status.inpos)
+                wait(lambda: abs(x() - start - 1) < 0.001 and status.inpos)
                 report["increment_mm"] = x() - start
                 time.sleep(0.15)
-                assert abs(x() - start - 1) < 0.002, "increment repeated without another click"
+                assert abs(x() - start - 1) < 0.001, "increment repeated without another click"
                 command(ws, {"cmd": "jog_stop"})
                 command(ws, {"cmd": "mode", "mode": "mdi"})
                 command(ws, {"cmd": "jog_increment", "axis": "X", "speed": 5,
                              "distance": 1}, expected="error")
-                assert abs(x() - start - 1) < 0.002, "wrong-mode jog moved the axis"
+                assert abs(x() - start - 1) < 0.001, "wrong-mode jog moved the axis"
                 report["wrong_mode_rejected"] = True
                 command(ws, {"cmd": "mode", "mode": "manual"})
                 start = x()

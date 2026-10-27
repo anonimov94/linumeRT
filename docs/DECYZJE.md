@@ -490,3 +490,12 @@ cztery instancje Codex w sprincie były inną organizacją niż wskazana przez w
 dalsze delegowanie w ten sposób zakończono. Kod już wykonany podlega zwykłym testom
 i integracji, bez przypisywania go innym modelom. Dokładna, nadrzędna reguła:
 WSPOLPRACA_MODELI.md, „Bezwzględna reguła zespołów i raportów”.
+
+## Precyzja wartości i odbiór pozycjonowania — polecenie właściciela 2026-10-27
+
+Model-Author: Codex. Właściciel określił rozdzielczość pozycji 0,0001 mm, obliczeń
+0,000001 mm oraz akceptację bezwzględnego błędu pozycjonowania poniżej 0,001 mm.
+Wartość 0,999999994 mm dla zadania 1 mm jest poprawna; nie wymagamy zgodności
+bitowej ani dokładniejszych wyników. Kontrakt zapisano w CLAUDE.md. Test kroku
+WebHMI wymaga błędu <0,001 mm zamiast wcześniejszego progu 0,002 mm. Test stabilności
+po STOP pozostaje osobny; nie zmieniono limitów, fizyki, safety ani typów liczbowych.
