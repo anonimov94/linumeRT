@@ -53,6 +53,7 @@ export function createLog() {
     }
     list.replaceChildren(nodes);
     if (follow) list.scrollTop = list.scrollHeight;
+    else list.scrollTop = previousScroll;
   }
   function add(level, source, text) {
     const follow = nearBottom();
