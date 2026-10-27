@@ -1629,3 +1629,10 @@ Odbiór pulpitu i pozostały zakres 069 nadal otwarte; NIEZWERYFIKOWANE NA SPRZ�
 - Przeniesiono wyłącznie czytnik/przekroje STL i testy z #184; ASCII/binary, limity i walidacja siatki bez Qt.
 - Odbiór: 9 testów czytnika PASS, ruff PASS. Brak nowych zależności; numpy już w rdzeniu.
 - Raster kulisty i eksport w następnej porcji; pozostałe cykle i napędy w rejestrze. Bez zamknięcia bramek.
+
+## 041/043/051 — STL: raster kulisty i eksport G-code · 2026-10-27 · Codex
+- Model-Author: Codex. Kontakt kuli z trójkątem/krawędzią/wierzchołkiem, raster XYZ, zachowawcza osłona między próbkami, jawne limity pracy.
+- CLI linumert-relief: skala, frez, kroki, posuwy, T/H/S; atomowy zapis, safe-Z między wierszami, G61.
+- Testy geometrii/CLI i istniejących .lnx; pełny program w rs274 na Debian12 PASS w osobnym kontenerze bez instancji CNC/HAL.
+- Dokumentacja docs/cam/RELIEF_STL.md i pochodzenie uzupełnione; nie dodano zależności ani GUI.
+- Pozostaje symulacja materiału, zgrubna, oprawka i klient web; toczenie/szlifowanie/napędy to dalsze porcje. NIEZWERYFIKOWANE NA SPRZĘCIE.

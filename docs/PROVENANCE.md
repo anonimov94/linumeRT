@@ -556,3 +556,12 @@ Zakres: dokumentacja techniczna odbioru, bez kwalifikacji sprzętu.
 - `docs/raporty/G2/HMI_CLOSEOUT_2026-10-26/01-start.png`
 - `docs/raporty/G2/HMI_CLOSEOUT_2026-10-26/02-srodek.png`
 - `docs/raporty/G2/HMI_CLOSEOUT_2026-10-26/03-koniec.png`
+
+### Backend płaskorzeźby STL — 2026-10-27
+
+Model-Author: Codex. Własny algorytm kontaktu frezu kulistego i rastra, CLI oraz
+analityczne/losowe geometrie testowe w `core/linumert/generators/relief.py` i
+`tests/test_gen_relief.py`; GPL-2.0-or-later, bez kodu lub zasobów zewnętrznych.
+Czytnik `programs/stl_section.py` i jego testy reużyte z własnej backendowej części
+PR #184 (`codex/cam-strategies`), ta sama licencja i autor. NumPy to istniejąca
+zależność rdzenia; nie dodano biblioteki CAM ani zasobów GUI.

@@ -23,7 +23,8 @@ Pierwszy krok 041/043/051: czytnik STL z backendowej części #184 (bez zmian Qt
 następnie raster 3D frezem kulistym i eksport G-code. Zajęte nowe pliki:
 core/linumert/programs/stl_section.py, core/linumert/generators/relief.py i ich testy.
 Nie dubluj czytnika; #184 pozostaje otwarty i nie jest tym scalany w całości.
-Stan zatrzymania: czytnik i jego 9 testów PASS; plan rastra/CLI w toku.
+Stan zatrzymania: #190; czytnik, raster kulisty i CLI gotowe; rs274 Debian12 PASS.
+Ograniczenia i API: docs/cam/RELIEF_STL.md. Kolejny odbiór: materiał/przejazdy symulacji.
 Wcześniejsze bramki pozostają otwarte; napędy i pozostałe rodziny cykli to dalsze porcje.
 
 Model-Author: Codex · 2026-10-26. **Bieżące zlecenie: backend i funkcje w GUI z edycją.**
