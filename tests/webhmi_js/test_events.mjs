@@ -47,7 +47,7 @@ test("all homed and per-axis homed are independent", () => {
   ] });
   const output = diffState(snapshot(), changed);
   assert.equal(has(output, "BAZOWANIE", "Nie wszystkie", "warn"), true);
-  assert.equal(has(output, "OŚ X", "niezbasowana", "warn"), true);
+  assert.equal(has(output, "OŚ X", "niezbazowana", "warn"), true);
   assert.equal(output.some(e => e.source === "OŚ Y"), false);
 });
 test("limit hit per axis both directions", () => {
