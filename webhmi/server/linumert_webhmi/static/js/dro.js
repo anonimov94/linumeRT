@@ -67,10 +67,11 @@ export function createDRO(jog, onAxesChange) {
       cells[4].className = axis.limit_hit ? "limit-hit" : "";
       const ferr = Number(axis.following_error);
       const ferrValid = axis.following_error != null && Number.isFinite(ferr);
-      cells[5].textContent = ferrValid ? ferr.toFixed(4) : "—";
+      const exceeding = ferrValid && !ANGULAR.has(axis.name) && Math.abs(ferr) > FERR_WARN_MM;
+      cells[5].textContent = ferrValid ? (exceeding ? "! " : "") + ferr.toFixed(4) : "—";
       cells[5].title = ANGULAR.has(axis.name) ? "FERR [stopnie]" : "FERR [mm]";
-      cells[5].className = ferrValid && !ANGULAR.has(axis.name) &&
-        Math.abs(ferr) > FERR_WARN_MM ? "ferr-warning" : "";
+      cells[5].className = exceeding ? "ferr-warning" : "";
+      if (exceeding) cells[5].title += " — UWAGA: przekroczony próg 0,05 mm";
     }
     $("homingStatus").textContent = state.all_homed ? "OSIE ZBAZOWANE" : "BAZOWANIE WYMAGANE";
     $("workOffset").textContent = plain(state.work_offset);
