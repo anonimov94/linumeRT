@@ -329,7 +329,7 @@ Model-Author: ChatGPT
      0,-.08,0,1
   ]);
   function frame() {
-    if (canvas.width === 0 || canvas.height === 0) return;
+    if (canvas.clientWidth === 0 || canvas.clientHeight === 0) return;
     const width = Math.min(canvas.clientWidth * Math.min(devicePixelRatio || 1, 2), 1600);
     const height = Math.min(canvas.clientHeight * Math.min(devicePixelRatio || 1, 2), 1000);
     if (canvas.width !== Math.floor(width) || canvas.height !== Math.floor(height)) {
