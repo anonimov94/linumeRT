@@ -5,6 +5,19 @@ Model-Author: Claude · 2026-10-18. **Jedyne źródło zasad współpracy.** `AG
 osobny commit + wpis w `docs/DECYZJE.md` (sekcja decyzji właściciela). Powód wersji 2: limity tokenów często przerywają
 sesje, więc pracujemy małymi krokami, z częstym pushem i jawnym przekazaniem tury.
 
+## Bezwzględna reguła zespołów i raportów — polecenie właściciela 2026-10-27
+
+Model-Author: Codex. **Przy organizowaniu zespołu modeli i raportów (np. issue #181)
+korzystamy wyłącznie z darmowych czatów już zalogowanych w przeglądarce właściciela.**
+Nie uruchamiamy dodatkowych sesji Claude, sesji agentów programistycznych ani płatnych
+API do odtwarzania takiego zespołu. Nie zastępujemy Claude, ChatGPT, Gemini lub Groka
+subagentami Codex. Prowadzący agent może samodzielnie integrować i testować kod;
+konsultacje i przydziały zespołowe odbywają się przez wskazane istniejące czaty.
+Raport podaje rzeczywistego rozmówcę, pytanie, odpowiedź i stan wdrożenia. Brak dostępu
+do zalogowanej przeglądarki lub limit czatu raportujemy jawnie, bez fikcyjnego udziału
+i bez uruchamiania zastępczej sesji. Ta reguła ma pierwszeństwo przed starszymi
+przydziałami i propozycjami sposobu pracy zespołu.
+
 ## Synteza i domknięcie — polecenie właściciela 2026-10-26
 
 Model-Author: Codex. Właściciel polecił dokonać syntezy z Claude i domknąć otwarte gałęzie.

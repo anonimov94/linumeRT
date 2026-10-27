@@ -480,3 +480,13 @@ Nie deklarujemy udziału Claude/Gemini/Groka. Wybrano istniejący WEBHMI-POC i s
 Zależności otwarte: pełne MPG/pulpit, niezależny watchdog HAL i sprzęt; sprint nie zamyka
 całych sesji ani bramek. Pozostały plan zachowuje kolejność; lokalnej pracy ATC nie przejmujemy.
 Raporty co około 10 minut w #181, kod w osobnym checkoutcie, scalenie po zielonych kontrolach.
+
+## Darmowe czaty jako jedyny zespół — bezwzględne polecenie właściciela 2026-10-27
+
+Model-Author: Codex. Organizując ekipę i raporty według #181, używać wyłącznie
+darmowych czatów już zalogowanych w przeglądarce właściciela. Nie uruchamiać kolejnych
+sesji Claude, płatnych API ani zastępować tej ekipy subagentami Codex. Dotychczasowe
+cztery instancje Codex w sprincie były inną organizacją niż wskazana przez właściciela;
+dalsze delegowanie w ten sposób zakończono. Kod już wykonany podlega zwykłym testom
+i integracji, bez przypisywania go innym modelom. Dokładna, nadrzędna reguła:
+WSPOLPRACA_MODELI.md, „Bezwzględna reguła zespołów i raportów”.
