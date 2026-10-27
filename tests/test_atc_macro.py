@@ -105,3 +105,23 @@ def test_plan_swaps_tools_on_the_plant_model_without_faults(old, new):
         assert model.slots[old - 1] == old   # stare narzędzie wróciło do swojego gniazda
     if new:
         assert model.slots[new - 1] is None  # nowe opuściło gniazdo
+
+
+def test_configgen_atc_option_switches_remap_and_emits_macro():
+    from linumert.machine.configgen import Options, render
+
+    cfg = _cfg()
+    plain = render(cfg, "sim")
+    assert "ngc=lrt_m6\n" in next(v for k, v in plain.items() if k.endswith(".ini"))
+    assert not any(k.endswith("lrt_m6_atc.ngc") for k in plain)
+    files = render(cfg, "sim", Options(atc=True))
+    ini = next(v for k, v in files.items() if k.endswith(".ini"))
+    assert "REMAP = M6 modalgroup=6 ngc=lrt_m6_atc\n" in ini
+    assert files["macros/lrt_m6_atc.ngc"] == generate_atc_m6(cfg)
+
+
+def test_configgen_atc_option_refuses_carousel():
+    from linumert.machine.configgen import Options, render
+
+    with pytest.raises(AtcMacroError):
+        render(_cfg(type="carousel"), "sim", Options(atc=True))
