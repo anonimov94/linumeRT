@@ -93,3 +93,47 @@ nie symulacja kolizji, kinematyki ani weryfikator ścieżki. Testy:
 a jog deadman klienta nie jest funkcją bezpieczeństwa. Przed podłączeniem
 rzeczywistej maszyny wymagany jest sprzętowy E-STOP oraz niezależny watchdog HAL
 powiązany z bramą. Funkcji resetu E-STOP w tym interfejsie nie ma.
+
+
+## Sterowanie — hardening etap 1 (Model-Author: ChatGPT)
+
+Zmiany bez przebudowy skórki. `static/app.js` to punkt wejścia ES Modules,
+a logika jest w `static/js/{main,connection,interlocks,jog,dro,scene}.js`.
+Żadnych CDN ani pakietów npm. `js/interlocks.js` eksportuje czystą
+`allowed(state, link)`, używaną do blokad przycisków i JOG; odmowy pokazują
+opis tekstowy oraz `title`. Nie jest to zabezpieczenie sprzętowe: brama
+weryfikuje polecenia niezależnie. Wartości enumów pochodzą z
+`core/linumert/cnc/model.py`:
+`task_state=estop/estop_reset/off/on`, `mode=manual/mdi/auto`,
+`interp_state=idle/reading/paused/waiting`.
+
+**Reguły:** `power_on` przy `off`/`estop_reset`; `home` i `jog`
+w `on+manual+idle`; `mdi` w `on+mdi+idle`; `run`
+w `on+auto+idle` ze zbazowanymi osiami i wybranym programem;
+`pause` przy `reading/waiting`; `resume` przy `paused`.
+`stop` i `estop` pozostają dostępne przy uwierzytelnionym
+WebSocket nawet gdy stan jest nieaktualny.
+
+**Świeżość:** po 500 ms bez pakietu `state` DRO ma etykietę
+„NIEAKTUALNE”, zwykłe komendy są blokowane, aktywny JOG jest zatrzymywany.
+Po ponad 2 s bez stanu panel zrywa WS i wymaga ręcznego ponownego połączenia.
+**Ograniczenie kontraktu:** backend wypycha zmiany do 30 Hz, lecz dla
+niezmienionego stanu ma keepalive dopiero po 1 s — dlatego statyczny ekran
+może okresowo wyświetlać „NIEAKTUALNE” między kolejnymi pakietami.
+Poprawienie tego wymaga osobnej zmiany bramy, której ten PR nie dotyka.
+
+**JOG:** odświeżany co 150 ms; `jog_stop` po pointerup/cancel,
+utracie capture/fokusu, ukryciu karty, utracie łączności lub przeterminowanym
+stanie. Status „BEZ RUCHU” dopiero po `ack` zatrzymania (oraz bez
+`jog_stop_pending` w bieżącym stanie). Błąd stopu oznacza wyraźny alarm;
+przycisk STOP pozwala ponowić `jog_stop`, bez automatycznego startu ruchu.
+Suwak ma `mm/s` dla X/Y/Z/U/V/W i `deg/s` dla A/B/C; prędkości
+wynikają z kontraktu bramy, która nadal ogranicza je do 50.
+**Brak autowznowienia poleceń** po ponownym połączeniu. Token pozostaje
+w pamięci tej karty, nie w URL i nie w sessionStorage/localStorage.
+
+Testy lokalne: `node --test tests/webhmi_js/test_interlocks.mjs` oraz
+`python -m pytest tests/test_webhmi_static.py` (uruchamia node:test,
+jeśli Node.js jest dostępny). Przed obsługą maszyny realnej nadal wymagane
+sprzętowy E-STOP, watchdog HAL i niezależne testy ruchu/failure-injection.
+Etap 2 (dziennik i eksport diagnostyki) jest odłożony do osobnego PR.
