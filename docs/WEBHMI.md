@@ -89,6 +89,17 @@ siatkę XY i marker XYZ, z limitem 30 FPS. To wizualizacja demonstracyjna,
 nie symulacja kolizji, kinematyki ani weryfikator ścieżki. Testy:
 `python -m pytest tests/test_webhmi_static.py`.
 
+Model-Author: Codex · 2026-10-27. Pliki strony są dołączane również do paczki wheel.
+CI buduje paczkę i sprawdza ją poza checkoutem: odpowiedzi HTTP dla trzech zasobów,
+uwierzytelnienie WebSocket, jog atrapy i zatrzymanie po rozłączeniu. Uruchomienie:
+
+```bash
+python -m pip wheel --no-deps . --wheel-dir dist
+python tools/ci/check_webhmi_wheel.py dist/linumert-*.whl
+```
+
+Kontrola używa zależności testowych z `.[dev]`; nie uruchamia LinuxCNC ani przeglądarki.
+
 **Bezpieczeństwo:** E-STOP z przeglądarki jest wyłącznie poleceniem programowym,
 a jog deadman klienta nie jest funkcją bezpieczeństwa. Przed podłączeniem
 rzeczywistej maszyny wymagany jest sprzętowy E-STOP oraz niezależny watchdog HAL

@@ -15,6 +15,10 @@ jobs:
           python-version: "3.11"
       - run: make install lint test
       - run: make test-c
+      - name: Check WebHMI from the distributable wheel
+        run: |
+          python -m pip wheel --no-deps . --wheel-dir dist
+          python tools/ci/check_webhmi_wheel.py dist/linumert-*.whl
 
   # Scenariusze Plant z atrapą mastera na wszystkich config/machines/*.yaml (REQ-QA-02, sesja 024).
   plant-matrix:
