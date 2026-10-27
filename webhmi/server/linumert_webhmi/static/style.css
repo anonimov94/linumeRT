@@ -34,3 +34,25 @@ footer{margin:20px 0;justify-content:space-between;flex-wrap:wrap;font-size:10px
 .interlock-reason:empty{display:none}
 .stale-label{color:#f1b47c!important;border-color:#a16d4b!important}
 .readout.stale .numeric{opacity:.55;text-decoration:underline dotted #f1b47c;text-underline-offset:4px}
+
+/* Diagnostyka etap 2: bez przebudowy istniejących paneli. */
+.diagnostic-metrics{display:flex;flex-wrap:wrap;gap:18px;padding:12px 18px;border-bottom:1px solid var(--edge);color:var(--muted);font-size:12px}
+.diagnostic-metrics strong{font:600 13px ui-monospace,Consolas,monospace;color:var(--cyan)}
+.diagnostic-lamps{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:8px;padding:14px 18px;border-bottom:1px solid var(--edge)}
+.lamp{display:flex;align-items:center;gap:7px;padding:8px 10px;border:1px solid var(--edge);background:#081923;border-radius:4px;min-width:0}
+.lamp strong{font-size:11px;min-width:65px}.lamp>span:last-child{font-size:10px;overflow-wrap:anywhere;color:var(--muted)}
+.lamp-dot{width:10px;height:10px;border-radius:50%;background:#69dca9;flex:none}
+.lamp.level-warn .lamp-dot{background:#e8b665}.lamp.level-alarm .lamp-dot{background:#ff777b}
+.lamp.level-warn>span:last-child{color:#f4c27a}.lamp.level-alarm>span:last-child{color:#ff9c95}
+.diagnostic-toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:10px 18px}
+.diagnostic-toolbar label{font-size:12px;color:var(--muted)}
+.diagnostic-toolbar select{background:#071620;color:#eefaf6;border:1px solid #316073;border-radius:4px;padding:9px}
+.event-log{margin:0 18px 12px;padding:0;list-style:none;height:180px;overflow:auto;border:1px solid var(--edge);background:#081620;overscroll-behavior:contain}
+.event-row{display:flex;align-items:baseline;gap:10px;font-size:11px;font-family:ui-monospace,Consolas,monospace;border-bottom:1px solid #18313f;padding:7px 9px;min-width:0}
+.event-row time{color:var(--muted);flex:none;font-variant-numeric:tabular-nums}
+.event-row strong{color:#80e5c5;flex:none;min-width:50px}.event-row.level-warn strong{color:#e8b665}.event-row.level-alarm strong{color:#ff8787}
+.event-row span{overflow-wrap:anywhere;white-space:pre-wrap;min-width:0}
+.diagnostic-errors{border-top:1px solid var(--edge);padding-top:10px}
+.diagnostic-errors>strong{font-size:11px;color:var(--muted);padding-left:18px}
+.ferr-warning{color:#f2bd7e!important;background:#45301966;font-weight:700}
+@media(max-width:730px){.event-row{flex-wrap:wrap}.diagnostic-metrics{gap:10px}}
