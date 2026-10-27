@@ -31,6 +31,21 @@ class SelftestSynchronizationTest(unittest.TestCase):
         self.assertFalse(settled(obj))
 
 
+    def test_scenario_opens_start_instead_of_clicking_hidden_readiness(self):
+        path = Path(__file__).resolve().parents[1] / "screens/linumert/linumert_shell_selftest.py"
+        cls = next(n for n in ast.parse(path.read_text()).body
+                   if isinstance(n, ast.ClassDef) and n.name == "SelfTest")
+        method = next(n for n in cls.body if isinstance(n, ast.FunctionDef) and n.name == "_plan")
+        namespace = {"_external_reset": Mock()}
+        exec(compile(ast.Module(body=[method], type_ignores=[]), str(path), "exec"), namespace)
+        obj = Mock()
+        obj.shell = SimpleNamespace(s=Mock(), buttons={}, areas={"start": Mock()},
+                                    _hb_timer=Mock())
+        first = namespace["_plan"](obj)[0]
+        self.assertEqual(first[0], "01_start")
+        first[1]()
+        obj._click.assert_called_once_with(obj.shell.areas["start"])
+
     def test_finish_exposes_missing_custom_page_instead_of_hiding_fallback(self):
         path = Path(__file__).resolve().parents[1] / "screens/linumert/linumert_shell_selftest.py"
         cls = next(n for n in ast.parse(path.read_text()).body

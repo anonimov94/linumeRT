@@ -142,3 +142,31 @@ def test_spinbox_keeps_emergency_keys_and_releases_existing_jog(keyboard):
     handler.processed_key_event__(field.lineEdit(), up, False, "", up.key(), False, False)
     assert handler.calls[-1] == (outside, QtCore.Qt.Key_Right, False)
     field.close()
+
+
+@pytest.mark.parametrize("kind", ["plain", "rich"])
+def test_multiline_text_edits_do_not_jog_and_keep_stop_and_jog_release(keyboard, kind):
+    from PyQt5 import QtCore, QtGui, QtTest, QtWidgets
+
+    _app, handler = keyboard
+    field = QtWidgets.QPlainTextEdit() if kind == "plain" else QtWidgets.QTextEdit()
+    field.show()
+    QtTest.QTest.keyClicks(field, "CNC X Y Z")
+    QtTest.QTest.keyClick(field, QtCore.Qt.Key_Left)
+    QtTest.QTest.keyClick(field, QtCore.Qt.Key_Return)
+    QtTest.QTest.keyClicks(field, "A")
+    assert field.toPlainText() == "CNC X Y \nAZ"
+    assert not handler.calls
+    event = QtGui.QKeyEvent(QtCore.QEvent.KeyPress, QtCore.Qt.Key_B, QtCore.Qt.NoModifier, "B")
+    handler.processed_key_event__(field.viewport(), event, True, "B", event.key(), False, False)
+    assert "ABZ" in field.toPlainText() and not handler.calls
+    for key in (QtCore.Qt.Key_F1, QtCore.Qt.Key_F2, QtCore.Qt.Key_Escape):
+        QtTest.QTest.keyClick(field, key)
+        assert handler.calls[-2:] == [(field, key, True), (field, key, False)]
+    outside = QtWidgets.QWidget()
+    down = QtGui.QKeyEvent(QtCore.QEvent.KeyPress, QtCore.Qt.Key_Right, QtCore.Qt.NoModifier)
+    up = QtGui.QKeyEvent(QtCore.QEvent.KeyRelease, QtCore.Qt.Key_Right, QtCore.Qt.NoModifier)
+    handler.processed_key_event__(outside, down, True, "", down.key(), False, False)
+    handler.processed_key_event__(field, up, False, "", up.key(), False, False)
+    assert handler.calls[-1] == (outside, QtCore.Qt.Key_Right, False)
+    field.close()

@@ -60,12 +60,24 @@ class FeedReadout(QtWidgets.QWidget):
         super().__init__()
         self.family, self.palette = family, palette
         self.setMinimumSize(90, 64)
+        self.feed = self.spindle = None
+        self.setToolTip("F: rzeczywista prędkość toru · S: zadane obroty z LinuxCNC")
+
+    def set_readings(self, feed=None, spindle=None):
+        self.feed, self.spindle = feed, spindle
+        self.setAccessibleName(f"F {self.format_value(feed)} mm/min; "
+                               f"S zadane {self.format_value(spindle)} rpm")
+        self.update()
+
+    @staticmethod
+    def format_value(value):
+        return "—" if value is None else f"{value:.1f}"
 
     def paintEvent(self, event):
         p = QtGui.QPainter(self)
         p.setRenderHint(QtGui.QPainter.Antialiasing)
         c = self.palette
-        for index, (label, unit) in enumerate((("F", "mm/min"), ("S", "rpm"))):
+        for index, (label, unit) in enumerate((("F", "mm/min"), ("S", "rpm zad."))):
             rect = QtCore.QRectF(2, index*self.height()/2+2, self.width()-4, self.height()/2-4)
             p.fillPath(housing(rect, self.family), QtGui.QColor(c.background))
             p.setPen(QtGui.QColor(c.accent))
@@ -76,7 +88,8 @@ class FeedReadout(QtWidgets.QWidget):
             p.drawText(rect.adjusted(9, 0, 0, 0),
                        QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter, label)
             p.drawText(rect.adjusted(28, 0, -55, 0),
-                       QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter, "—")
+                       QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter,
+                       self.format_value(self.feed if index == 0 else self.spindle))
             p.setPen(QtGui.QColor(c.muted))
             p.setFont(QtGui.QFont("DejaVu Sans", 7))
             p.drawText(rect.adjusted(rect.width()-50, 0, -4, 0), QtCore.Qt.AlignCenter, unit)
@@ -87,6 +100,19 @@ class ToolReadout(QtWidgets.QWidget):
         super().__init__()
         self.palette = palette
         self.setMinimumSize(80, 65)
+        self.number = self.diameter = self.length = None
+        self.setToolTip("Narzędzie we wrzecionie · D: średnica · L: offset Z z tabeli narzędzi")
+
+    def set_readings(self, number=None, diameter=None, length=None):
+        self.number, self.diameter, self.length = number, diameter, length
+        self.setAccessibleName(f"T {number if number is not None else '—'}; "
+                               f"D {self.dimension_value(diameter)} mm; "
+                               f"L {self.dimension_value(length)} mm")
+        self.update()
+
+    @staticmethod
+    def dimension_value(value):
+        return "—" if value is None else f"{value:.3f}".rstrip("0").rstrip(".")
 
     def paintEvent(self, event):
         p = QtGui.QPainter(self)
@@ -107,15 +133,18 @@ class ToolReadout(QtWidgets.QWidget):
         font = QtGui.QFont("DejaVu Sans Mono", 15)
         font.setBold(True)
         p.setFont(font)
-        p.drawText(QtCore.QRectF(x+20, top, self.width()-x-20, 30), QtCore.Qt.AlignLeft, "T —")
+        p.drawText(QtCore.QRectF(x+20, top, self.width()-x-20, 30), QtCore.Qt.AlignLeft,
+                   f"T {self.number if self.number is not None else '—'}")
         p.setPen(QtGui.QColor(c.muted))
         p.setFont(QtGui.QFont("DejaVu Sans Mono", 9))
-        p.drawText(QtCore.QRectF(x+20, top+32, self.width()-x-20, height), "D — mm\nL — mm")
+        p.drawText(QtCore.QRectF(x+20, top+32, self.width()-x-20, height), f"D {self.dimension_value(self.diameter)} mm\n"
+                   f"L {self.dimension_value(self.length)} mm")
 
 
 class ProgramView(QtWidgets.QWidget):
     def __init__(self, palette, caption):
         super().__init__()
+        self.palette = palette
         layout = QtWidgets.QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
         label = QtWidgets.QLabel(caption)
@@ -140,3 +169,26 @@ class ProgramView(QtWidgets.QWidget):
         selection.format.setProperty(QtGui.QTextFormat.FullWidthSelection, True)
         editor.setExtraSelections([selection])
         layout.addWidget(editor, 1)
+
+    def set_source(self, source, filename, line, note=""):
+        editor = self.findChild(QtWidgets.QPlainTextEdit)
+        caption = self.findChild(QtWidgets.QLabel)
+        caption.setTextFormat(QtCore.Qt.PlainText)
+        caption.setText(filename.rsplit("/", 1)[-1] if source is not None else note)
+        caption.setToolTip(filename)
+        content = "\n".join(f"{i:04}  {text}" for i, text in enumerate(source or (), 1))
+        if editor.toPlainText() != content:
+            editor.setPlainText(content)
+        selection = QtWidgets.QTextEdit.ExtraSelection()
+        cursor = editor.textCursor()
+        block = editor.document().findBlockByNumber(line - 1)
+        if source and block.isValid():
+            cursor.setPosition(block.position())
+            selection.cursor = cursor
+            selection.format.setBackground(QtGui.QColor(self.palette.raised))
+            selection.format.setProperty(QtGui.QTextFormat.FullWidthSelection, True)
+            editor.setExtraSelections([selection])
+            editor.setTextCursor(cursor)
+            editor.ensureCursorVisible()
+        else:
+            editor.setExtraSelections([])

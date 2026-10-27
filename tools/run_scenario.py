@@ -99,6 +99,13 @@ def main(argv: list[str] | None = None) -> int:
             paths = [resolve(s) for s in args.scenarios] or sorted(SCENARIOS.glob("*.yaml"))
             paths = [x for x in paths if args.scenarios or x.stem != "matrix_smoke"]
             scenarios = [load_scenario(x, machine=args.machine) for x in paths]
+            if not args.scenarios and args.master != "linuxcnc":
+                # „Wszystkie” bez RIP: scenariusze `master: linuxcnc` (np. sondowanie G38) pomijamy
+                only = [s.name for s in scenarios if s.master == "linuxcnc"]
+                if only:
+                    print(f"Pominięto scenariusze tylko-LinuxCNC (--master linuxcnc): "
+                          f"{', '.join(only)}")
+                    scenarios = [s for s in scenarios if s.master != "linuxcnc"]
     except (ScenarioError, FileNotFoundError) as exc:
         print(f"Błąd: {exc}", file=sys.stderr)
         return 2

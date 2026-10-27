@@ -32,9 +32,10 @@ from .server import DEFAULT_SUBSTEPS
 
 ROOT = Path(__file__).resolve().parents[3]
 ACTIONS = ("enable", "home", "move", "mdi", "program", "wait", "fault", "clear", "set_param",
-           "fault_reset", "spindle", "edit_machine", "reload")
+           "fault_reset", "spindle", "edit_machine", "reload", "capture")
 CRITERIA = ("max_following_error", "lost_steps", "alarm", "no_alarm", "position",
-            "drive_state", "event", "oracle", "completed", "frames", "machine", "reloaded")
+            "drive_state", "event", "oracle", "completed", "frames", "machine", "reloaded",
+            "probed", "probe_repeat", "probe_tripped")
 # 603Fh → alarm katalogu (drive.h: LRT_DRIVE_FAULT_LIST)
 ERROR_ALARMS = {0xFF00: "E-4200", 0x8611: "E-4201", 0x2350: "E-4202", 0x2310: "E-4203",
                 0x4310: "E-4204", 0x3200: "E-4205", 0x7305: "E-4206", 0xFF01: "E-4207",
@@ -230,6 +231,8 @@ class ScenarioResult:
     versions: dict[str, str] = field(default_factory=dict)
     machine_data: dict[str, Any] = field(default_factory=dict)  # machine.yaml na końcu przebiegu
     reloads: int = 0
+    # Zrzuty sondowania (akcja `capture`, tylko master linuxcnc): nazwa → {tripped, pos: X Y Z}
+    probes: dict[str, dict[str, Any]] = field(default_factory=dict)
 
     @property
     def passed(self) -> bool:
@@ -325,6 +328,52 @@ def evaluate(result: ScenarioResult) -> None:
             ok = lost <= int(arg.get("lost_max", 0))
             res.criteria.append(Criterion(f"utracone ramki ≤ {arg.get('lost_max', 0)}", ok,
                                           str(lost)))
+        elif kind in ("probed", "probe_repeat", "probe_tripped"):
+            _evaluate_probe(res, kind, arg, axis)
+
+
+def _probe_axis_value(res: ScenarioResult, name: str, axis: str) -> float | None:
+    """Pozycja osi w chwili zadziałania sondy w zrzucie `name`; None gdy brak zrzutu albo
+    sonda nie zadziałała (pozycja sprzed próby nie jest wynikiem pomiaru)."""
+    shot = res.probes.get(name)
+    if not shot or not shot.get("tripped") or axis not in "XYZ" or len(axis) != 1:
+        return None
+    return float(shot["pos"]["XYZ".index(axis)])
+
+
+def _evaluate_probe(res: ScenarioResult, kind: str, arg: dict[str, Any], axis: str) -> None:
+    """Kryteria sondowania (sesja 033): wartości z `probed_position` LinuxCNC po G38.x."""
+    if kind == "probe_tripped":
+        name, want = str(arg["capture"]), bool(arg.get("value", True))
+        shot = res.probes.get(name)
+        got = None if shot is None else bool(shot.get("tripped"))
+        res.criteria.append(Criterion(f"sonda {name} {'zadziałała' if want else 'nie zadziałała'}",
+                                      got == want, "brak zrzutu" if got is None else str(got)))
+    elif kind == "probe_repeat":
+        names = [str(n) for n in arg["captures"]]
+        tol = float(arg.get("tol", 0.002))
+        values = [_probe_axis_value(res, n, axis) for n in names]
+        ok = None not in values and max(values) - min(values) <= tol  # type: ignore[type-var]
+        detail = "brak pomiaru" if None in values else \
+            f"rozrzut {max(values) - min(values):.4f} mm"  # type: ignore[type-var]
+        res.criteria.append(Criterion(f"powtarzalność {axis} ({', '.join(names)}) ≤ {tol} mm",
+                                      ok, detail))
+    else:
+        name, tol = str(arg["capture"]), float(arg.get("tol", 0.01))
+        got = _probe_axis_value(res, name, axis)
+        label = f"sonda {axis} {name} = {arg['value']} ± {tol}"
+        cal = arg.get("calibrate")
+        if cal is not None and got is not None:
+            ref = _probe_axis_value(res, str(cal["capture"]), axis)
+            if ref is None:
+                got = None
+            else:  # stała poprawka z wzorca (jak core/linumert/programs/probe_calibration.py)
+                got -= ref - float(cal["value"])
+                label += f" po kalibracji na {cal['capture']}"
+        ok = got is not None and abs(got - float(arg["value"])) <= tol
+        res.criteria.append(Criterion(label, ok,
+                                      "brak pomiaru" if got is None else
+                                      f"{got:.4f} (błąd {got - float(arg['value']):+.4f} mm)"))
 
 
 # ---- atrapa mastera -----------------------------------------------------------------------

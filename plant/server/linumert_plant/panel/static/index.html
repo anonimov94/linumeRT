@@ -19,6 +19,7 @@
     <button class="tab on" data-tab="praca">Praca</button>
     <button class="tab" data-tab="napedy">Napędy</button>
     <button class="tab" data-tab="maszyna">Maszyna</button>
+    <button class="tab" data-tab="biblioteka">Maszyny</button>
     <button class="tab" data-tab="awarie">Awarie</button>
   </nav>
   <span id="machine" class="sub">—</span>
@@ -102,6 +103,21 @@
   <section class="card"><h2>Instancje w maszynie</h2><div id="d-inst" class="list"></div></section>
 </main>
 
+<main class="grid2 view" id="view-biblioteka" hidden>
+  <section class="card"><h2>Biblioteka maszyn <span class="grow"></span><span id="l-dir" class="note mono"></span></h2>
+    <div id="l-list" class="list"></div>
+    <div class="row"><input id="l-name" placeholder="nazwa nowej maszyny / po zmianie" maxlength="64">
+      <span class="note">litera, potem litery, cyfry, _ lub -</span></div>
+    <div class="err" id="l-err" role="alert"></div>
+    <h3>Kosz</h3><div id="l-trash" class="list"></div></section>
+  <section class="card"><h2 id="l-title">Aktywna maszyna — YAML</h2>
+    <p class="note">Edytujesz plik aktywnej maszyny; każdy parametr jest dostępny. Inną maszynę najpierw aktywuj.
+      Zapis przechodzi pełną walidację i trafia do historii wersji.</p>
+    <textarea id="l-text" class="yaml mono" spellcheck="false" aria-label="machine.yaml"></textarea>
+    <div id="l-valid" class="valid"></div>
+    <div class="row"><input id="l-comment" placeholder="komentarz do wersji" maxlength="80"></div></section>
+</main>
+
 <main class="grid2 view" id="view-awarie" hidden>
   <section class="card"><h2>Wstrzyknij awarię</h2><div id="f-catalog" class="faults"></div></section>
   <section class="card"><h2>Aktywne awarie i stan napędów</h2><div id="f-active" class="list"></div>
@@ -112,5 +128,6 @@
 <script src="/static/vendor/uPlot.iife.min.js"></script>
 <script src="/static/app.js"></script>
 <script src="/static/editor.js"></script>
+<script src="/static/library.js"></script>
 </body>
 </html>

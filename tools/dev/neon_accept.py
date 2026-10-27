@@ -12,6 +12,7 @@ NIEZWERYFIKOWANE NA SPRZĘCIE.
 
 from __future__ import annotations
 
+import argparse
 import json
 import os
 import re
@@ -56,7 +57,7 @@ def prepare(work: Path) -> Path:
     return ini
 
 
-def main(out: Path) -> int:
+def main(out: Path, skin="classic-digital", installed=False) -> int:
     from linumert_neon_render import PRESETS
     from linumert_neon_view import NeonPathView
     from linumert_skin_contract import PresentationPreferences
@@ -64,7 +65,7 @@ def main(out: Path) -> int:
     from PyQt5 import QtWidgets
 
     out.mkdir(parents=True, exist_ok=True)
-    root = rip_root()
+    root = None if installed else rip_root()
     work = Path(tempfile.mkdtemp(prefix="neon-accept-")) / "cfg"
     ini = prepare(work)
     env = {**os.environ, "INI_FILE_NAME": str(ini), "CONFIG_DIR": str(work),
@@ -73,6 +74,7 @@ def main(out: Path) -> int:
     program = work / DEMO.name
     cnc = start_linuxcnc(root, ini, env)
     result: dict = {"program": DEMO.name, "shots": {}, "samples": [], "frame_ms": {}}
+    window = None
     try:
         s = None
         for _ in range(120):
@@ -106,7 +108,7 @@ def main(out: Path) -> int:
                 result["probe"]["gdb"] = r.stdout[-1800:]
             return 0
         app = QtWidgets.QApplication([])
-        window = SkinMonitor(PresentationPreferences("classic-digital", "neon-punk", "pl"))
+        window = SkinMonitor(PresentationPreferences(skin, "neon-punk", "pl"))
         window.resize(1280, 800)
         window.show()
 
@@ -187,6 +189,16 @@ def main(out: Path) -> int:
                     "dtg_scene": scene.toolpath.dtg(scene.index, scene.s),
                     "dro_nml": [round(v, 4) for v in s.actual_position[:3]],
                     "dro_monitor": [round(v, 4) for v in sample.positions[:3]]}
+                from linumert_skin_readouts import FeedReadout, ProgramView, ToolReadout
+                feed = window.workspace.findChild(FeedReadout)
+                tool = window.workspace.findChild(ToolReadout)
+                program_view = window.workspace.findChild(ProgramView)
+                result["instruments"] = {
+                    "feed_mm_min": feed.feed, "spindle_setpoint_rpm": feed.spindle,
+                    "tool": tool.number, "diameter_mm": tool.diameter,
+                    "table_z_mm": tool.length,
+                    "source_visible": bool(program_view.findChild(
+                        QtWidgets.QPlainTextEdit).toPlainText())}
                 shot("02-srodek")
                 shot_mid = True
                 c.auto(linuxcnc.AUTO_RESUME)
@@ -207,19 +219,36 @@ def main(out: Path) -> int:
             result["frame_ms"][name] = {v.mode: round(v.frame_ms, 2) for v in views}
             shot(f"04-preset-{name}")
     finally:
+        if window is not None:
+            window.close()
+            app.processEvents()
         stop_linuxcnc(cnc, root, work)
         (out / "linuxcnc.log").write_text(cnc.stdout.read() if cnc.stdout else "")
         (out / "neon_accept.json").write_text(json.dumps(result, indent=1))
+    assert result.get("scene_loaded") and result.get("completed"), result
+    compare = result["paused_compare"]
+    assert compare["line"][0] == compare["line"][1], compare
+    assert abs(compare["dtg_nml_vs_monitor"][0] - compare["dtg_nml_vs_monitor"][1]) < 0.01
+    assert result["instruments"]["tool"] == 1 and result["instruments"]["source_visible"]
+    assert result["instruments"]["spindle_setpoint_rpm"] is not None
     return 0
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("output", type=Path, nargs="?", default=Path("neon-out"))
+    parser.add_argument("--skin", choices=("classic-digital", "cyberdeck"),
+                        default="classic-digital")
+    parser.add_argument("--installed", action="store_true",
+                        help="Use installed LinuxCNC instead of RIP")
+    parser.add_argument("--model", choices=("Claude", "Codex"), default="Claude")
+    args = parser.parse_args()
     lock = subprocess.run([sys.executable, str(ROOT / "tools/lock.py"), "acquire", "linuxcnc",
-                           "--model", "Claude", "--note", "neon N4"], check=False)
+                           "--model", args.model, "--note", "neon live acceptance"], check=False)
     if lock.returncode:
         raise SystemExit(75)
     try:
-        raise SystemExit(main(Path(sys.argv[1] if len(sys.argv) > 1 else "neon-out")))
+        raise SystemExit(main(args.output, args.skin, args.installed))
     finally:
         subprocess.run([sys.executable, str(ROOT / "tools/lock.py"), "release", "linuxcnc",
-                        "--model", "Claude"], check=False)
+                        "--model", args.model], check=False)

@@ -48,6 +48,8 @@ graficznego/fontu w repozytorium. Nowy zasób = nowy wiersz w tym samym commicie
 | wtyczka.svg | ikona (SVG, 24 px) | projekt linumeRT (agent AI na zlecenie właściciela) | 2026-10-17 | rysowane od zera | GPL-2.0-or-later | ekran operatora i panel Plant | `docs/design/ikony/wtyczka.svg` |
 | wykres.svg | ikona (SVG, 24 px) | projekt linumeRT (agent AI na zlecenie właściciela) | 2026-10-17 | rysowane od zera | GPL-2.0-or-later | ekran operatora i panel Plant | `docs/design/ikony/wykres.svg` |
 | zero.svg | ikona (SVG, 24 px) | projekt linumeRT (agent AI na zlecenie właściciela) | 2026-10-17 | rysowane od zera | GPL-2.0-or-later | ekran operatora i panel Plant | `docs/design/ikony/zero.svg` |
+| strzalka_dol.svg | ikona (SVG, 24 px) | projekt linumeRT (Claude, sesja 028) | 2026-10-25 | rysowane od zera | GPL-2.0-or-later | ekran operatora i panel Plant | `docs/design/ikony/strzalka_dol.svg` |
+| strzalka_gora.svg | ikona (SVG, 24 px) | projekt linumeRT (Claude, sesja 028) | 2026-10-25 | rysowane od zera | GPL-2.0-or-later | ekran operatora i panel Plant | `docs/design/ikony/strzalka_gora.svg` |
 | 01_maszyna.png | makieta (PNG 1280×800) | projekt linumeRT (agent AI na zlecenie właściciela) | 2026-10-17 | rysowane od zera | GPL-2.0-or-later | makieta wzorcowa; nie jest zasobem produktu | `docs/design/makiety/01_maszyna.png` |
 | 02_program_dialogowy.png | makieta (PNG 1280×800) | projekt linumeRT (agent AI na zlecenie właściciela) | 2026-10-17 | rysowane od zera | GPL-2.0-or-later | makieta wzorcowa; nie jest zasobem produktu | `docs/design/makiety/02_program_dialogowy.png` |
 | 03_symulacja.png | makieta (PNG 1280×800) | projekt linumeRT (agent AI na zlecenie właściciela) | 2026-10-17 | rysowane od zera | GPL-2.0-or-later | makieta wzorcowa; nie jest zasobem produktu | `docs/design/makiety/03_symulacja.png` |
@@ -118,6 +120,9 @@ Wiersze fontów dostają ścieżki i pliki `OFL.txt` w `licenses/` przy ich doda
 | Podgląd offline Zero detalu | kod Python, testy Qt | model językowy Codex na zlecenie właściciela | 2026-10-19 | niezależny proces Qt bez importowania LinuxCNC/QtVCP, pliki tymczasowe | GPL-2.0-or-later | bezpieczna edycja przygotówki | `tools/dev/preview-zero.py`, `screens/linumert/linumert_view_helpers.py` |
 
 | Podgląd offline Zero detalu i launcher | własny zrzut aplikacji Qt i skrypt bash | model językowy Codex na zlecenie właściciela | 2026-10-19 | zrzut `preview-zero.py --snapshot`, kontener podglądu bez sieci, repo tylko do odczytu | GPL-2.0-or-later | bezpieczna edycja przygotówki | `tools/dev/preview-zero.sh`, `docs/raporty/zero_detalu/offline.png` |
+| Zrzuty odbioru rodzin skórek w hoście QtVCP (#163) | PNG | model językowy Claude na zlecenie właściciela | 2026-10-25 | prawdziwe HMI w LinuxCNC 2.9 pod Xvfb, rodzina wybrana zmienną `LINUMERT_OPERATOR_SKIN`, okna 1920×1080 i 1280×800, bez retuszu | GPL-2.0-or-later (zawiera grafikę QtDragon) | odbiór SKIN-04…06 / 028 | `docs/raporty/G2/skorki_qtvcp/classic-digital_1280x800.png`, `docs/raporty/G2/skorki_qtvcp/classic-digital_1920x1080.png`, `docs/raporty/G2/skorki_qtvcp/cyberdeck_1280x800.png`, `docs/raporty/G2/skorki_qtvcp/cyberdeck_1920x1080.png`, `docs/raporty/G2/skorki_qtvcp/industrial-pro_1280x800.png`, `docs/raporty/G2/skorki_qtvcp/industrial-pro_1920x1080.png`, `docs/raporty/G2/skorki_qtvcp/organic-vector_1280x800.png`, `docs/raporty/G2/skorki_qtvcp/organic-vector_1920x1080.png` |
+| Obszar „Wygląd” HMI (palety, edytor kolorów) | kod (Python/Qt), testy, zrzuty | model językowy Claude na zlecenie właściciela | 2026-10-25 | własna implementacja; wartości palet z `linumert_skin_contract.PALETTES` i `docs/design/tokens.yaml`; zrzuty z LinuxCNC 2.9 pod Xvfb | GPL-2.0-or-later | zmiana kolorystyki HMI | `screens/linumert/linumert_appearance.py`, `screens/linumert/linumert_appearance_page.py`, `tests/test_appearance.py`, `docs/raporty/hmi_appearance/wyglad_neon_punk.png`, `docs/raporty/hmi_appearance/wyglad_classic_turquoise.png` |
+| Zakładka „Maszyny” panelu Plant (biblioteka maszyn, edytor YAML) | kod (JS/HTML/CSS), test, zrzut | model językowy Claude na zlecenie właściciela | 2026-10-25 | własna implementacja; zrzut z panelu Plant uruchomionego lokalnie | GPL-2.0-or-later | panel testowy Plant | `plant/server/linumert_plant/panel/static/library.js`, `docs/raporty/plant_biblioteka/zakladka_maszyny_kosz.jpg` |
 | Inwentaryzacja HMI-01 | narzędzie Python, test, dokumentacja | model językowy Codex na zlecenie właściciela | 2026-10-18 | własna analiza XML/AST ekranu linumeRT z QtDragon, bez uruchamiania kodu; mapa zawiera nazwy i właściwości z licencjonowanej kopii upstream | narzędzie GPL-2.0-or-later; mapa GPL-2.0 (dane QtDragon) | kontrakt migracji HMI | `tools/hmi_inventory.py`, `tests/test_hmi_inventory.py`, `docs/design/HMI_BASELINE.md`, `docs/design/HMI_WIDGET_MAP.md` |
 | Zrzuty odbioru Classic × Neon (N4) | PNG, JSON | model językowy Claude na zlecenie właściciela | 2026-10-25 | zrzuty własnego monitora skórek (`tools/dev/neon_accept.py`) obok LinuxCNC 2.9 sim w AUTO, Xvfb offscreen | GPL-2.0-or-later | raport odbioru N4 | `docs/raporty/neon/01-start.png`, `docs/raporty/neon/02-srodek.png`, `docs/raporty/neon/03-koniec.png`, `docs/raporty/neon/04-preset-ekonomiczny.png`, `docs/raporty/neon/04-preset-zrownowazony.png`, `docs/raporty/neon/04-preset-wysoki.png`, `docs/raporty/neon/neon_accept.json` |
 
@@ -532,3 +537,40 @@ w środowisku wykonującym zrzuty, bez nowych zależności produktu.
 
 ## Kolejne zrzuty M2 / 028 — 2026-10-25
 - `docs/raporty/G2/M2_028_2026-10-25_v3_01_start.png`, `docs/raporty/G2/M2_028_2026-10-25_v3_16_obszar_narzedzia.png`, `docs/raporty/G2/M2_028_2026-10-25_v3_19_diagnostyka.png` — wykonanie Codex, LinuxCNC sim + QtVCP pod Xvfb 1280×768, źródła e2dde87, bez retuszu; linumeRT i QtDragon/LinuxCNC, GPL-2.0-or-later. Hashe w raporcie followup JSON.
+
+## Dopasowanie kart M2 — 2026-10-25
+- `docs/raporty/G2/M2_RESPONSIVE_start.png`, `docs/raporty/G2/M2_RESPONSIVE_tools.png` — Codex, surowe zrzuty rzeczywistego Qt/offscreen, pełna powłoka linumeRT z atrapą CNC, 1280×768, źródła f76554f; własne zasoby projektu i QtDragon/LinuxCNC (GPL-2.0), całość GPL-2.0-or-later. Nie są dowodem wykonania CNC.
+
+## Integracja prezentacji z QtVCP — 2026-10-25
+- `docs/design/HMI_QTVCP_HOST.md` — autor: Codex, własna instrukcja implementacji, uruchomienia i odbioru opcjonalnego hosta HMI, oparta na kodzie oraz kontrakcie linumeRT; GPL-2.0-or-later. Bez materiałów osób trzecich i nowych zależności.
+
+- 2026-10-26 · Codex · własne narożniki nakładki Cyberdeck (`linumert_skin_cyberdeck.py`), rysowane Qt z palety projektu; GPL-2.0-or-later; bez zewnętrznych grafik.
+
+### Odbiór Cyberdeck z LinuxCNC — 2026-10-26
+
+Autor: Codex; źródło: własne zrzuty Qt z wykonania programu `linumert_neon_demo.ngc`
+w odizolowanym LinuxCNC 2.9.10 / Debian 12 / Xvfb. Licencja: GPL-2.0-or-later
+(własna kompozycja i renderer linumeRT; bez zasobów producentów sterowań).
+Zakres: dokumentacja techniczna odbioru, bez kwalifikacji sprzętu.
+
+- `docs/raporty/G2/HMI_CLOSEOUT_2026-10-26/01-start.png`
+- `docs/raporty/G2/HMI_CLOSEOUT_2026-10-26/02-srodek.png`
+- `docs/raporty/G2/HMI_CLOSEOUT_2026-10-26/03-koniec.png`
+
+### Strategie 2D, napisy i przekroje STL — 2026-10-26
+
+Model-Author: Codex. Oryginalny kod generatorów `shapes.py`, `surfacing.py`, `engraving.py`,
+`path_geometry.py`, `stl_trace.py`, czytnika `stl_section.py` i widoków tekstu/STL:
+GPL-2.0-or-later, bez kodu i zasobów producentów sterowań. Napisy używają czcionek dostępnych
+w systemie; dołączone IBM Plex Sans i JetBrains Mono pozostają na OFL-1.1 (wpisy powyżej).
+Nie dodano plików fontów ani bibliotek. Siatka sześcianu w testach jest własną geometrią.
+Zrzuty `build/cam/` pochodzą z własnego Qt z atrapą CNC i nie są zasobami produktu.
+
+### Backend płaskorzeźby STL — 2026-10-27
+
+Model-Author: Codex. Własny algorytm kontaktu frezu kulistego i rastra, CLI oraz
+analityczne/losowe geometrie testowe w `core/linumert/generators/relief.py` i
+`tests/test_gen_relief.py`; GPL-2.0-or-later, bez kodu lub zasobów zewnętrznych.
+Czytnik `programs/stl_section.py` i jego testy reużyte z własnej backendowej części
+PR #184 (`codex/cam-strategies`), ta sama licencja i autor. NumPy to istniejąca
+zależność rdzenia; nie dodano biblioteki CAM ani zasobów GUI.

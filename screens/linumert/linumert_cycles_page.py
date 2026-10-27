@@ -23,24 +23,28 @@ from concurrent.futures import ThreadPoolExecutor
 import linumert_shell_pages as pages
 from linumert_preview2d import Preview2D
 from linumert_sim_page import ROOT
-from PyQt5 import QtCore, QtWidgets
+from PyQt5 import QtCore, QtGui, QtWidgets
 from qtvcp.core import Action
 
 for _p in (os.path.join(ROOT, "core"),):
     if _p not in sys.path:
         sys.path.insert(0, _p)
 
-from linumert.generators import basic, contours, drilling, pockets, subroutines  # noqa: E402
+from linumert.generators import (  # noqa: E402
+    basic, contours, drilling, engraving, pockets, shapes, stl_trace, subroutines, surfacing,
+)
 from linumert.generators.registry import GeneratorRegistry  # noqa: E402
 from linumert.generators.tooling import check_steps  # noqa: E402
 from linumert.programs.compiler import CompileError, compile_program  # noqa: E402
 from linumert.programs.lnx import LnxError, LnxProgram, Step, load_lnx, save_lnx  # noqa: E402
+from linumert.programs.step_editor import StepEditor  # noqa: E402
 
 ACTION = Action()
-GENERATORS = (basic.Header, basic.ToolChange, basic.FaceMill, drilling.DrillHoles,
+GENERATORS = (basic.Header, basic.ToolChange, surfacing.FaceMillStrategies, drilling.DrillHoles,
               pockets.PocketRect, pockets.PocketCircle,
               contours.SlotLinear, contours.SlotArc, contours.StudRect, contours.StudCircle,
-              contours.Contour, basic.ProgramEnd)
+              contours.Contour, shapes.ShapeEngrave, engraving.EngraveText,
+              stl_trace.StlSection, basic.ProgramEnd)
 
 
 
@@ -63,15 +67,19 @@ class CyclesPage(QtWidgets.QWidget):
         super().__init__()
         self.setObjectName("lrtPage")
         self.shell = shell
-        self.program = LnxProgram(name="Program z cykli")
         self.registry = GeneratorRegistry()
-        for group in (basic, drilling, pockets, contours):
+        for group in (basic, drilling, pockets, contours, shapes, engraving, surfacing, stl_trace):
             group.register(self.registry)
+        self.program = LnxProgram(name="Program z cykli")
         self.lnx_path = None
         self._dirty = False
         self._pool = ThreadPoolExecutor(max_workers=1)
         self._job = None
         self._revision = 0
+        self._validation_timer = QtCore.QTimer(self)
+        self._validation_timer.setSingleShot(True)
+        self._validation_timer.setInterval(300)
+        self._validation_timer.timeout.connect(self._values)
         self._timer = QtCore.QTimer(self)
         self._timer.setInterval(200)
         self._timer.timeout.connect(self._poll_estimate)
@@ -80,12 +88,23 @@ class CyclesPage(QtWidgets.QWidget):
         grid.setContentsMargins(16, 16, 16, 16)
         grid.setSpacing(16)
         frame, lay, self.lbl_step = pages.card("Cykl", "")
+        self.lbl_step.setWordWrap(True)
+        self.lbl_step.setMaximumWidth(240)
         self.cmb = QtWidgets.QComboBox()
         for cls in GENERATORS:
             self.cmb.addItem(cls.title, cls)
         self.cmb.currentIndexChanged.connect(self._build_form)
         lay.addWidget(self.cmb)
+        self.stl_button = QtWidgets.QPushButton("Importuj STL / wybierz przekrój…")
+        self.stl_button.setMinimumHeight(44)
+        self.stl_button.clicked.connect(self.import_stl)
+        lay.addWidget(self.stl_button)
         self.form_box = QtWidgets.QWidget()
+        self.form_box.setObjectName("lrtCycleFields")
+        colors = {**pages.model.load_tokens()["kolory"], **shell.c}
+        self._form_colors = colors
+        self.form_box.setStyleSheet(
+            f"QWidget#lrtCycleFields {{ background: {colors['bg2']}; }}")
         self.form = QtWidgets.QFormLayout(self.form_box)
         scroll = QtWidgets.QScrollArea()
         scroll.setWidgetResizable(True)
@@ -103,19 +122,49 @@ class CyclesPage(QtWidgets.QWidget):
             row.addWidget(btn)
         lay.addLayout(row)
         grid.addWidget(frame, 0, 0, 2, 1)
-        frame, lay, _s = pages.card("Podgląd 2D", "XY [mm]")
         self.view2d = Preview2D(shell.c)
-        lay.addWidget(self.view2d)
-        grid.addWidget(frame, 0, 1)
         frame, lay, self.lbl_prog = pages.card("Program z kroków", "0 kroków")
         self.step_list = QtWidgets.QListWidget()
+        palette = self.step_list.palette()
+        palette.setColor(QtGui.QPalette.Text, QtGui.QColor(colors["fg"]))
+        palette.setColor(QtGui.QPalette.Highlight, QtGui.QColor(colors["tealbg"]))
+        palette.setColor(QtGui.QPalette.HighlightedText, QtGui.QColor(colors["teal"]))
+        self.step_list.setPalette(palette)
         self.step_list.setMaximumHeight(110)
         self.step_list.currentRowChanged.connect(self.select_step)
         lay.addWidget(self.step_list)
+        operations = QtWidgets.QGridLayout()
+        self.step_buttons = {}
+        for n, (operation, title) in enumerate((
+                ("up", "W górę"), ("down", "W dół"), ("duplicate", "Duplikuj"),
+                ("toggle", "Wyłącz / włącz"), ("delete", "Usuń wybrany"),
+                ("undo", "Cofnij"), ("redo", "Ponów"))):
+            button = QtWidgets.QPushButton(title)
+            button.setMinimumHeight(40)
+            button.clicked.connect(lambda _checked=False, op=operation: self.edit_steps(op))
+            operations.addWidget(button, n // 4, n % 4)
+            self.step_buttons[operation] = button
+        lay.addLayout(operations)
         self.code = QtWidgets.QPlainTextEdit()
+        code_palette = self.code.palette()
+        code_palette.setColor(QtGui.QPalette.Text, QtGui.QColor(colors["fg"]))
+        self.code.setPalette(code_palette)
         self.code.setReadOnly(True)
         self.code.setLineWrapMode(QtWidgets.QPlainTextEdit.NoWrap)
-        lay.addWidget(self.code, 1)
+        self.result_tabs = QtWidgets.QTabWidget()
+        self.result_tabs.setStyleSheet(
+            f"QTabWidget::pane {{ border: 1px solid {colors['line2']}; }} "
+            f"QTabBar::tab {{ background: {colors['panel']}; color: {colors['fg2']}; "
+            "padding: 8px; }"
+            f"QTabBar::tab:selected {{ color: {colors['teal']}; "
+            f"background: {colors['tealbg']}; }}")
+        self.result_tabs.addTab(self.code, "G-code programu")
+        self.result_tabs.addTab(self.view2d, "Geometria kroku · XY")
+        lay.addWidget(self.result_tabs, 1)
+        note = pages._label("Kolejność kroków wpływa na obróbkę. Po zmianach sprawdź "
+                            "narzędzia, układ detalu i symulację.", "lrtMuted")
+        note.setWordWrap(True)
+        lay.addWidget(note)
         self.lbl_tools = pages._label("", "lrtMuted")
         self.lbl_tools.setWordWrap(True)
         lay.addWidget(self.lbl_tools)
@@ -138,56 +187,220 @@ class CyclesPage(QtWidgets.QWidget):
             row.addWidget(btn)
         lay.addLayout(row)
         row = QtWidgets.QHBoxLayout()
-        for text, slot in (("Usuń ostatni", self.pop_step), ("Zapisz .ngc…", self.save),
+        for text, slot in (("Zapisz .ngc…", self.save),
                            ("Wczytaj do LinuxCNC", self.load)):
             btn = QtWidgets.QPushButton(text)
             btn.setMinimumHeight(40)
             btn.clicked.connect(slot)
             row.addWidget(btn)
         lay.addLayout(row)
-        grid.addWidget(frame, 1, 1)
+        grid.addWidget(frame, 0, 1, 2, 1)
         grid.setColumnStretch(0, 2)
         grid.setColumnStretch(1, 3)
         self.path: str | None = None
         self._build_form()
+        self._update_step_buttons()
+
+    @property
+    def program(self):
+        return self.editor.program
+
+    @program.setter
+    def program(self, program):
+        self.editor = StepEditor(program, self.registry)
+
+    def _update_step_buttons(self):
+        index = self.step_list.currentRow()
+        selected = 0 <= index < len(self.program.steps)
+        for operation, button in self.step_buttons.items():
+            enabled = selected
+            if operation == "up":
+                enabled = selected and index > 0
+            elif operation == "down":
+                enabled = selected and index < len(self.program.steps) - 1
+            elif operation == "undo":
+                enabled = self.editor.can_undo
+            elif operation == "redo":
+                enabled = self.editor.can_redo
+            button.setEnabled(enabled)
+
+    def edit_steps(self, operation, step=None, restore_form=True):
+        self.editor.selected = self.step_list.currentRow()
+        try:
+            changed = (self.editor.undo() if operation == "undo" else
+                       self.editor.redo() if operation == "redo" else
+                       self.editor.edit(operation, self.editor.selected, step))
+        except (ValueError, CompileError) as exc:
+            self.lbl_issue.setText(f"Nie zmieniono programu: {exc}")
+            return
+        if changed:
+            self._show()
+            self.step_list.setCurrentRow(self.editor.selected)
+            if restore_form and self.editor.selected >= 0:
+                self.select_step(self.editor.selected)
+        elif operation == "update":
+            self._draft_dirty = False
 
     # ---- formularz ------------------------------------------------------------------------
     def _gen(self):
         return self.cmb.currentData()()
 
     def _build_form(self) -> None:
+        self._validation_timer.stop()
+        self._draft_dirty = False
+        self.stl_button.setVisible(self._gen().name == "stl_section")
         while self.form.rowCount():
             self.form.removeRow(0)
         self.inputs = {}
+        self.field_errors = {}
+        self._text_geometry_key = None
         for f in self.cmb.currentData().fields:
-            if f.kind == "choice":
+            if self._gen().name == "engrave_text" and f.name == "font_family":
+                from linumert_fonts import register
+
+                register()
+                w = QtWidgets.QFontComboBox()
+                w.setEditable(True)
+                w.setCurrentFont(QtGui.QFont(f.default))
+            elif self._gen().name == "engrave_text" and f.name == "text":
+                w = QtWidgets.QPlainTextEdit(f.default)
+                w.setPalette(self.code.palette())
+                w.setMaximumHeight(96)
+            elif f.kind == "choice":
                 w = QtWidgets.QComboBox()
-                w.addItems(list(f.choices))
+                labels = getattr(self._gen(), "choice_labels", {}).get(f.name, {})
+                for value in f.choices:
+                    w.addItem(labels.get(value, value), value)
                 if f.default is not None:
-                    w.setCurrentText(str(f.default))
+                    w.setCurrentIndex(w.findData(f.default))
                 if f.name == "direction" and self._gen().name.startswith("pocket_"):
                     w.setToolTip("Kieszeń, wrzeciono M3: ccw — współbieżnie; cw — przeciwbieżnie. "
                                  "Po zmianie kierunku wrzeciona zależność jest odwrotna.")
             elif f.kind == "bool":
                 w = QtWidgets.QCheckBox()
                 w.setChecked(bool(f.default))
+                if f.name == "reverse":
+                    colors = self._form_colors
+                    w.setStyleSheet(
+                        "QCheckBox::indicator { width: 18px; height: 18px; image: none; "
+                        f"border: 1px solid {colors['fg2']}; }} "
+                        f"QCheckBox::indicator:unchecked {{ background: {colors['bg']}; }} "
+                        f"QCheckBox::indicator:checked {{ background: {colors['teal']}; }}")
             elif f.kind == "text":
                 w = QtWidgets.QLineEdit("" if f.default is None else str(f.default))
+                if f.name == "paths":
+                    w.setMaxLength(750000)
             else:
                 w = QtWidgets.QLineEdit("" if f.default is None else f"{f.default:g}")
                 w.setPlaceholderText("wymagane" if f.required else "")
-            label = f.label + (f" [{f.unit}]" if f.unit else "") + (" *" if f.required else "")
-            self.form.addRow(label, w)
+            unit = f.unit
+            if self.program.units == "inch":
+                unit = {"mm": "cal", "mm/min": "cal/min"}.get(unit, unit)
+            label = f.label + (f" [{unit}]" if unit else "") + (" *" if f.required else "")
+            w.setAccessibleName(label)
+            if isinstance(w, QtWidgets.QComboBox):
+                w.setMinimumContentsLength(10)
+                w.setSizeAdjustPolicy(QtWidgets.QComboBox.AdjustToMinimumContentsLengthWithIcon)
+                w.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+                w.currentTextChanged.connect(w.setToolTip)
+                w.setToolTip(w.currentText())
+            if f.name == "source":
+                w.setReadOnly(True)
+            w.setMinimumHeight(44)
+            cell = QtWidgets.QWidget()
+            cell_layout = QtWidgets.QVBoxLayout(cell)
+            cell_layout.setContentsMargins(0, 0, 0, 0)
+            cell_layout.setSpacing(2)
+            cell_layout.addWidget(w)
+            error = pages._label("", "lrtMuted")
+            error.setWordWrap(True)
+            error.setMaximumWidth(260)
+            error.hide()
+            cell_layout.addWidget(error)
+            self.form.addRow(label, cell)
+            self.form.labelForField(cell).setWordWrap(True)
+            self.form.labelForField(cell).setMaximumWidth(150)
+            self.form.labelForField(cell).setMinimumWidth(150)
+            if f.name == "paths":
+                cell.hide()
+                self.form.labelForField(cell).hide()
             self.inputs[f.name] = w
+            self.field_errors[f.name] = error
+            signal = (w.currentIndexChanged if isinstance(w, QtWidgets.QComboBox) else
+                      w.toggled if isinstance(w, QtWidgets.QCheckBox) else w.textChanged)
+            signal.connect(self._form_changed)
         self.lbl_issue.setText("")
         self.view2d.set_lines([])
+        unit = "cal" if self.program.units == "inch" else "mm"
+        self.result_tabs.setTabText(1, f"Geometria kroku · XY [{unit}]")
+        self.view2d.unit = unit
+        self._adapt_form()
+
+    def _adapt_form(self):
+        if self._gen().name == "shape_engrave":
+            shape = self.inputs["shape"].currentData()
+            strategy = self.inputs["strategy"].currentData()
+            unit = "cal" if self.program.units == "inch" else "mm"
+            for name, axis, ordinary in (("width", "X", "Szerokość"), ("height", "Y", "Wysokość")):
+                title = f"Średnica obwiedni {axis}" if shape in ("polygon", "star") else ordinary
+                label = f"{title} [{unit}]"
+                self.form.labelForField(self.inputs[name].parentWidget()).setText(label)
+                self.inputs[name].setAccessibleName(label)
+            for name, enabled in (("corner_r", shape == "rounded_rectangle"),
+                                  ("sides", shape in ("polygon", "star")),
+                                  ("inner", shape == "star"),
+                                  ("spacing", strategy != "outline"),
+                                  ("curve_tol", shape in ("ellipse", "rounded_rectangle"))):
+                self.inputs[name].setEnabled(enabled)
+        elif self._gen().name == "face_mill" and "axis" in self.inputs:
+            concentric = self.inputs["mode"].currentData() == "concentric"
+            self.inputs["axis"].setEnabled(not concentric)
+            self.inputs["direction"].setEnabled(concentric)
+
+    def _form_changed(self):
+        self._adapt_form()
+        self._draft_dirty = True
+        self.view2d.set_lines([])
+        self.lbl_step.setText("Zmieniono parametry — użyj Podgląd, Dodaj lub Zmień wybrany.")
+        self._validation_timer.start()
+
+    def import_stl(self):
+        if self.shell.s.running:
+            self.lbl_issue.setText("Zatrzymaj program przed importem STL.")
+            return
+        from linumert_stl_dialog import StlDialog
+
+        dialog = StlDialog(self, self.program.units, self.shell.c)
+        try:
+            if dialog.exec_() != QtWidgets.QDialog.Accepted:
+                return
+            for name, value in (("paths", dialog.paths_json), ("source", dialog.description())):
+                blocker = QtCore.QSignalBlocker(self.inputs[name])
+                self.inputs[name].setText(value)
+                del blocker
+            self._draft_dirty = True
+            self.preview()
+            self.result_tabs.setCurrentIndex(1)
+        finally:
+            dialog.deleteLater()
+
+    def _committed_form(self):
+        if not self._draft_dirty:
+            return True
+        self.lbl_issue.setText("Niezatwierdzone parametry formularza. Użyj „Zmień wybrany” "
+                               "lub „Dodaj krok” przed zapisem albo wczytaniem do LinuxCNC.")
+        return False
 
     def params(self) -> dict:
         out = {}
         for f in self.cmb.currentData().fields:
             w = self.inputs[f.name]
-            if isinstance(w, QtWidgets.QComboBox):
+            if isinstance(w, QtWidgets.QPlainTextEdit):
+                out[f.name] = w.toPlainText()
+            elif isinstance(w, QtWidgets.QFontComboBox):
                 out[f.name] = w.currentText()
+            elif isinstance(w, QtWidgets.QComboBox):
+                out[f.name] = w.currentData() if w.currentData() is not None else w.currentText()
             elif isinstance(w, QtWidgets.QCheckBox):
                 out[f.name] = w.isChecked()
             else:
@@ -203,11 +416,34 @@ class CyclesPage(QtWidgets.QWidget):
         return out
 
     def _values(self):
+        self._validation_timer.stop()
         gen = self._gen()
         values, issues = gen.normalize(self.params())
+        if not issues and gen.name == "engrave_text":
+            key = tuple(values[k] for k in engraving.LAYOUT_KEYS)
+            if not values["paths"] or key != self._text_geometry_key:
+                from linumert_text_geometry import text_paths
+
+                try:
+                    values["paths"] = text_paths(values)
+                    blocker = QtCore.QSignalBlocker(self.inputs["paths"])
+                    self.inputs["paths"].setText(values["paths"])
+                    del blocker
+                    self._text_geometry_key = key
+                except (ValueError, OverflowError) as exc:
+                    from linumert.generators.path_geometry import problem
+
+                    issues = [problem("text", str(exc))]
         if not issues:
             issues = gen.check(values, 0)
+        for name, label in self.field_errors.items():
+            messages = [i.message() for i in issues if i.field == name]
+            label.setText("Błąd: " + "\n".join(messages) if messages else "")
+            label.setVisible(bool(messages))
+            self.inputs[name].setAccessibleDescription("\n".join(messages))
         if issues:
+            self.view2d.set_lines([])
+            self.lbl_step.setText("Popraw parametry kroku.")
             self.lbl_issue.setText("; ".join(i.message() for i in issues))
             return gen, None
         self.lbl_issue.setText("")
@@ -229,16 +465,22 @@ class CyclesPage(QtWidgets.QWidget):
             self.lbl_issue.setText(entry[values.get("entry", "plunge")] + finish +
                                    " Sprawdź w symulacji.")
         self._last = Step(generator=gen.name, version=gen.version, params=values)
+        if gen.name == "shape_engrave":
+            self.lbl_issue.setText("Grawerowanie po środku narzędzia, bez korekcji promienia. "
+                                   "Odstęp kreskowania nie określa szerokości rowka.")
+        elif gen.name == "engrave_text":
+            self.lbl_issue.setText("Grawerowanie konturów liter po środku narzędzia. "
+                                   "Geometria czcionki zostaje zapisana w .lnx.")
+        elif gen.name == "stl_section":
+            self.lbl_issue.setText("Przekrój XY zapisany w kroku; tor środka narzędzia bez "
+                                   "korekcji promienia. Dodaj krok lub zmień wybrany.")
         return lines
 
     # ---- program --------------------------------------------------------------------------
     def add_step(self) -> None:
         lines = self.preview()
         if lines is not None:
-            self.program.steps.append(self._last)
-            if self._last.generator == "header":
-                self.program.units = "inch" if self._last.params["units"] == "G20" else "mm"
-            self._show()
+            self.edit_steps("add", self._last)
 
     def update_step(self) -> None:
         index = self.step_list.currentRow()
@@ -248,14 +490,13 @@ class CyclesPage(QtWidgets.QWidget):
         if self.preview() is None:
             return
         original = self.program.steps[index]
-        self.program.steps[index] = original.model_copy(update={
+        replacement = original.model_copy(update={
             "generator": self._last.generator, "version": self._last.version,
             "params": self._last.params})
-        if self._last.generator == "header":
-            self.program.units = "inch" if self._last.params["units"] == "G20" else "mm"
-        self._show()
+        self.edit_steps("update", replacement)
 
     def select_step(self, index) -> None:
+        self._update_step_buttons()
         if not 0 <= index < len(self.program.steps):
             return
         step = self.program.steps[index]
@@ -271,18 +512,31 @@ class CyclesPage(QtWidgets.QWidget):
         self._build_form()
         for name, value in step.params.items():
             w = self.inputs.get(name)
-            if isinstance(w, QtWidgets.QComboBox):
-                w.setCurrentText(str(value))
+            if isinstance(w, QtWidgets.QFontComboBox):
+                w.setEditText(str(value))
+            elif isinstance(w, QtWidgets.QPlainTextEdit):
+                w.setPlainText(str(value))
+            elif isinstance(w, QtWidgets.QComboBox):
+                index = w.findData(value)
+                if index >= 0:
+                    w.setCurrentIndex(index)
+                else:
+                    w.setCurrentText(str(value))
             elif isinstance(w, QtWidgets.QCheckBox):
                 w.setChecked(bool(value))
             elif isinstance(w, QtWidgets.QLineEdit):
                 w.setText(str(value))
+        if step.generator == "engrave_text":
+            values, issues = gen.normalize(self.params())
+            if not issues and values.get("paths"):
+                self._text_geometry_key = tuple(values[k] for k in engraving.LAYOUT_KEYS)
         self.preview()
+        self._draft_dirty = False
 
     def pop_step(self) -> None:
         if self.program.steps:
-            self.program.steps.pop()
-            self._show()
+            self.step_list.setCurrentRow(len(self.program.steps) - 1)
+            self.edit_steps("delete", restore_form=False)
 
     def text(self) -> str:
         return compile_program(self.program, self.registry)
@@ -303,6 +557,7 @@ class CyclesPage(QtWidgets.QWidget):
         self.lbl_prog.setText(f"{len(self.program.steps)} kroków")
         self.lbl_time.setText("")
         self.check_tools()
+        self._update_step_buttons()
 
     # ---- baza narzędzi, czas, podprogramy -------------------------------------------------
     def _tool_lookup(self):
@@ -426,7 +681,7 @@ class CyclesPage(QtWidgets.QWidget):
         except (LnxError, CompileError) as exc:
             self.lbl_issue.setText(f"Nie otwarto: {exc}")
             return False
-        if self._dirty and QtWidgets.QMessageBox.question(
+        if (self._dirty or self._draft_dirty) and QtWidgets.QMessageBox.question(
                 self, "Niezapisany program", "Odrzucić niezapisane zmiany w krokach?",
                 QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
                 QtWidgets.QMessageBox.No) != QtWidgets.QMessageBox.Yes:
@@ -442,6 +697,8 @@ class CyclesPage(QtWidgets.QWidget):
         return True
 
     def save_lnx(self) -> str | None:
+        if not self._committed_form():
+            return None
         start = self.lnx_path or os.path.join(os.path.expanduser("~"), "linumert_cykle.lnx")
         path, _filter = QtWidgets.QFileDialog.getSaveFileName(
             self, "Zapisz program dialogowy", start, "Program dialogowy (*.lnx)")
@@ -460,6 +717,8 @@ class CyclesPage(QtWidgets.QWidget):
         return path
 
     def save(self) -> str | None:
+        if not self._committed_form():
+            return None
         if not self.program.steps:
             self.lbl_issue.setText("Brak kroków programu.")
             return None
@@ -481,6 +740,8 @@ class CyclesPage(QtWidgets.QWidget):
         return path
 
     def load(self) -> None:
+        if not self._committed_form():
+            return
         if not self.program.steps:
             self.lbl_issue.setText("Brak kroków programu.")
             return
@@ -504,6 +765,7 @@ class CyclesPage(QtWidgets.QWidget):
         pass
 
     def closeEvent(self, event) -> None:  # noqa: N802 - API Qt
+        self._validation_timer.stop()
         self._timer.stop()
         if self._job is not None:
             future, path, _revision = self._job

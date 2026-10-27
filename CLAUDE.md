@@ -35,6 +35,14 @@ dialogowe, symulację, diagnostykę. Ma **własny** wygląd i własne nazewnictw
 tego projektu** i nie wolno jej tu stosować — jest niezgodna z GPL.
 
 ## 3. Struktura repozytorium
+
+**Aktualizacja właściciela 2026-10-26 (ma pierwszeństwo dla warstwy ekranu):**
+nowy rozwój GUI przechodzi na HTML/CSS/WebGL; QtDragon/QtVCP pozostaje działającym ekranem
+awaryjnym i punktem odniesienia. Rozwój funkcji/skórek Qt jest zamrożony po domknięciu
+istniejącej porcji CAM #184; dozwolone są poprawki błędów blokujących i obsługi sterowania.
+Rdzeń, Plant, HAL i generatory pozostają wspólne. Reguła D36 dotyczy teraz nowego klienta web.
+Decyzja i synteza: `docs/DECYZJE.md`, `docs/SYNTEZA_MODELI_2026-10-26.md`.
+
 ```
 core/linumert/         # rdzeń: alarms/ tools/ programs/ generators/ machine/ plugins/ cnc/ diag/
 simulation/            # ścieżka, czas, materiał, kolizje (proces osobny)

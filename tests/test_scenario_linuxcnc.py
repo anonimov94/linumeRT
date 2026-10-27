@@ -32,6 +32,21 @@ def test_scenario_with_linuxcnc(index: int, path: Path) -> None:  # REQ-QA-03
     assert res.passed, (failed, res.alarms, res.log[-15:])
 
 
+ONLY = sorted(p for p in SCENARIOS.glob("*.yaml") if load_scenario(p).master == "linuxcnc")
+
+
+@pytest.mark.parametrize("index, path", list(enumerate(ONLY)), ids=[p.stem for p in ONLY])
+def test_linuxcnc_only_scenario(index: int, path: Path) -> None:  # REQ-VM-09 (sonda, sesja 033)
+    """Scenariusze z G38.x (probe_z_touchplate, probe_corner): tylko prawdziwy LinuxCNC."""
+    from linumert_plant.scenario_linuxcnc import run_linuxcnc
+    from rip_support import rip_root
+
+    rip_root()
+    res = run_linuxcnc(load_scenario(path), port=47820 + len(BOTH) + index)
+    failed = [f"{c.name}: {c.detail}" for c in res.criteria if not c.passed]
+    assert res.passed, (failed, res.alarms, res.probes, res.log[-15:])
+
+
 def test_linuxcnc_master_rejects_other_machine() -> None:
     from linumert_plant.scenario import ScenarioError
     from linumert_plant.scenario_linuxcnc import run_linuxcnc
