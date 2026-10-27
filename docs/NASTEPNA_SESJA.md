@@ -1,6 +1,6 @@
 # Przekazanie i środowisko
 
-Tura: Codex · 2026-10-26 · stan: oddana; #172–175 i #177 scalone; końcowe rozliczenie w #178.
+Tura: Codex · 2026-10-27 · stan: oddana; WebHMI wheel w PR #188, odbiór lokalny PASS, CI w toku.
 
 Model-Author: Codex. Bez globalnego LOCK; zasady współpracy wyłącznie w
 [WSPOLPRACA_MODELI.md](WSPOLPRACA_MODELI.md).
@@ -20,7 +20,9 @@ Osobny checkout `/home/dell/Projekty/linumeRT-closeout-20261027`, bez globalnego
 Po #185/#186/#187 wheel nie zawierał strony: odtworzone HTTP 404. Dodano package-data
 oraz kontrolę wheel w CI poza checkoutem: 3 zasoby HTTP, auth WS, jog atrapy i stop
 po rozłączeniu PASS; 71 testów WebHMI PASS. Nie zmieniałem bramy ani stron Qt.
-Stan zatrzymania: poprawka gotowa do CI/PR; nie zajmuję backend.py/gateway.py/app.py.
+Stan zatrzymania: PR #188 wypchnięty; make lint test: 1595 PASS, 124 SKIP,
+157 deselected (LinuxCNC), REQ 22/22. CI Debian/LinuxCNC w toku; scalić merge commitem
+po zielonych kontrolach aktualnego HEAD. Nie zajmuję backend.py/gateway.py/app.py.
 Następny zakres: rzeczywista przeglądarka i LinuxCNC RIP; watchdog HAL nadal otwarty.
 Rekord WEBHMI-POC wiąże zakres z 028/029 i decyzją właściciela; bez zamknięcia M2.
 

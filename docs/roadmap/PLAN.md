@@ -1019,9 +1019,9 @@ Pozostaje: Odbiór nowego układu na pulpicie właściciela: porównanie czterec
 
 ### WEBHMI-POC — HTML/WebGL: integracja strony z bramą LinuxCNC
 
-**częściowe**. Kierunek HTML/WebGL potwierdzony przez właściciela 2026-10-26; GUI Qt zamrożone według DECYZJE.md. Brama Claude (#185), strona Cyberdeck (#187) i jednostki jogu (#186) są w main. 2026-10-27 Codex: odtworzono brak strony w wheel (HTTP 404); dodano zasoby statyczne do danych pakietu i kontrolę artefaktu w CI poza checkoutem. Poprawiona paczka: HTTP zasobów, uwierzytelnienie WebSocket, jog atrapy i zatrzymanie po rozłączeniu PASS; 71 testów WebHMI PASS na Pythonie 3.14.8. Nie jest to odbiór przeglądarki ani LinuxCNC.
+**częściowe**. Kierunek HTML/WebGL potwierdzony przez właściciela 2026-10-26; GUI Qt zamrożone według DECYZJE.md. Brama Claude (#185), strona Cyberdeck (#187) i jednostki jogu (#186) są w main. 2026-10-27 Codex: odtworzono brak strony w wheel (HTTP 404); dodano zasoby statyczne do danych pakietu i kontrolę artefaktu w CI poza checkoutem. Poprawiona paczka: HTTP zasobów, uwierzytelnienie WebSocket, jog atrapy i zatrzymanie po rozłączeniu PASS; 71 testów WebHMI PASS na Pythonie 3.14.8. Nie jest to odbiór przeglądarki ani LinuxCNC. Pełne lokalne make lint test: 1595 PASS, 124 SKIP, 157 testów LinuxCNC poza zakresem; REQ 22/22. PR #188, CI Debian/LinuxCNC w toku.
 
 Pozostaje: Odbiór rzeczywistej przeglądarki: DRO, scena WebGL ≤30 FPS, jog i utrata połączenia. Integracja i odbiór na LinuxCNC RIP; niezależny watchdog HAL przed użyciem sprzętu. Równoważność funkcji web z ekranem awaryjnym Qt; wcześniejsze bramki pozostają otwarte.
 
-Źródła: [docs/DECYZJE.md](../DECYZJE.md), [docs/WEBHMI.md](../WEBHMI.md), [tools/ci/check_webhmi_wheel.py](../../tools/ci/check_webhmi_wheel.py), [PR](https://github.com/anonimov94/linumeRT/pull/185), [PR](https://github.com/anonimov94/linumeRT/pull/187).
+Źródła: [docs/DECYZJE.md](../DECYZJE.md), [docs/WEBHMI.md](../WEBHMI.md), [tools/ci/check_webhmi_wheel.py](../../tools/ci/check_webhmi_wheel.py), [PR](https://github.com/anonimov94/linumeRT/pull/185), [PR](https://github.com/anonimov94/linumeRT/pull/187), [PR](https://github.com/anonimov94/linumeRT/pull/188).
 

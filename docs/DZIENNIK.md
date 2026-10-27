@@ -1628,5 +1628,6 @@ Odbiór pulpitu i pozostały zakres 069 nadal otwarte; NIEZWERYFIKOWANE NA SPRZ�
 - Model-Author: Codex. Kontynuacja kierunku HTML/WebGL właściciela i bramy Claude; osobny checkout, kopia operatora zachowana.
 - Odtworzono brak static w wheel: HTTP / = 404. Package-data dołącza HTML/JS/CSS; CI sprawdza wheel poza źródłami.
 - Stary artefakt FAIL 404; poprawiony PASS: 3 zasoby HTTP, auth WS, jog atrapy i stop po rozłączeniu. 71 testów WebHMI PASS (Python 3.14.8).
+- Pełne make lint test: 1595 PASS, 124 SKIP, 157 deselected (LinuxCNC), REQ 22/22. PR #188; CI Debian/LinuxCNC w toku, bez deklaracji scalenia.
 - Rejestr WEBHMI-POC partial; odbiór przeglądarki, LinuxCNC RIP i watchdog HAL pozostają otwarte. Bez zmian Qt/HAL.
 - Autokontrola, bez niezależnego przeglądu. NIEZWERYFIKOWANE NA SPRZĘCIE.
