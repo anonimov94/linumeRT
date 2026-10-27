@@ -51,6 +51,8 @@ function updateControls() {
   $("mdiText").disabled = $("mdiSend").disabled = !mdi.ok;
   $("mdiText").title = mdi.ok ? "" : mdi.reason;
   $("mdiSend").title = mdi.ok ? "" : mdi.reason;
+  const mdiHint = $("mdiSend").querySelector(".interlock-reason");
+  mdiHint.textContent = mdi.ok ? "" : mdi.reason;
   const jogRule = rules.jog;
   const jogOK = jogRule.ok && (jog.canStart() || jog.isActive());
   const jogReason = jogRule.ok ? (jog.canStart() || jog.isActive() ? "" : "Oczekiwanie na potwierdzenie JOG STOP") : jogRule.reason;
@@ -135,6 +137,10 @@ jog = createJog({
 });
 dro = createDRO(jog, () => jog.stop("Zmiana konfiguracji osi"));
 
+const mdiHint = document.createElement("span");
+mdiHint.className = "interlock-reason";
+mdiHint.setAttribute("aria-hidden", "true");
+$("mdiSend").appendChild(mdiHint);
 for (const button of controls) {
   const hint = document.createElement("span");
   hint.className = "interlock-reason";
