@@ -131,7 +131,7 @@ export function createLog() {
           axes.filter(a => a.limit_hit).map(a => a.name).join(", ") : "BRAK AKTYWNYCH"),
       stale ? unknown("JOG") : lamp("JOG",
         pending.length || String(jogStatus).includes("NIEPOTWIERDZONY") ? "alarm" :
-          moving.length ? "warn" : "info",
+          moving.length || String(jogStatus).includes("ZATRZYMYWANIE") ? "warn" : "info",
         pending.length ? "STOP OCZEKUJE: " + pending.join(", ") :
           moving.length ? "RUCH: " + moving.join(", ") : String(jogStatus).includes("ZATRZYMYWANIE") ?
             "ZATRZYMYWANIE" : "BEZ RUCHU"),
