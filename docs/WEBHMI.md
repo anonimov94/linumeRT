@@ -158,7 +158,10 @@ Panel diagnostyki w istniejącym wyglądzie WebHMI zawiera:
 - DRO: kolumna `FERR` (`following_error`) z czterema miejscami po przecinku,
   progiem ostrzeżenia `|FERR| > 0.05 mm` na osiach liniowych X/Y/Z/U/V/W
   (znacznik `!` i podświetlenie). Osie A/B/C pokazują stopnie — próg w mm
-  nie jest stosowany do wartości kątowych.
+  nie jest stosowany do wartości kątowych. Aktualny schemat przekazuje FERR
+  w jednostkach natywnych maszyny: próg 0,05 mm jest prawidłowy dla maszyn
+  liniowych skonfigurowanych w milimetrach; dla konfiguracji calowej konieczne
+  będzie udostępnienie skali w schemacie i przeliczenie po stronie klienta.
 - Liczniki pakietów `state` odebranych w ostatniej sekundzie, wieku
   ostatniej migawki oraz czasu RTT ostatniego `ack` (w milisekundach).
   Pomiar RTT obejmuje WebSocket i obsługę polecenia przez bramę, a nie
