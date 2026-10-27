@@ -44,7 +44,7 @@ export function diffState(prev, next) {
     const previous = previousAxes.get(name);
     if (previous?.homed !== axis.homed && typeof axis.homed === "boolean") {
       add(axis.homed ? "info" : "warn", "OŚ " + name,
-        axis.homed ? "Bazowanie potwierdzone" : "Oś niezbasowana");
+        axis.homed ? "Bazowanie potwierdzone" : "Oś niezbazowana");
     }
     if (previous?.limit_hit !== axis.limit_hit && typeof axis.limit_hit === "boolean") {
       add(axis.limit_hit ? "alarm" : "info", "OŚ " + name,
