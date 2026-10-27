@@ -36,6 +36,7 @@ export function createLog() {
   };
   const nearBottom = () => list.scrollHeight - list.scrollTop - list.clientHeight <= 30;
   function redraw(follow = false) {
+    const previousScroll = list.scrollTop;
     const items = selected();
     const nodes = document.createDocumentFragment();
     for (const entry of items) {
