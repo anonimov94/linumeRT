@@ -565,3 +565,12 @@ GPL-2.0-or-later, bez kodu i zasobów producentów sterowań. Napisy używają c
 w systemie; dołączone IBM Plex Sans i JetBrains Mono pozostają na OFL-1.1 (wpisy powyżej).
 Nie dodano plików fontów ani bibliotek. Siatka sześcianu w testach jest własną geometrią.
 Zrzuty `build/cam/` pochodzą z własnego Qt z atrapą CNC i nie są zasobami produktu.
+
+### Backend płaskorzeźby STL — 2026-10-27
+
+Model-Author: Codex. Własny algorytm kontaktu frezu kulistego i rastra, CLI oraz
+analityczne/losowe geometrie testowe w `core/linumert/generators/relief.py` i
+`tests/test_gen_relief.py`; GPL-2.0-or-later, bez kodu lub zasobów zewnętrznych.
+Czytnik `programs/stl_section.py` i jego testy reużyte z własnej backendowej części
+PR #184 (`codex/cam-strategies`), ta sama licencja i autor. NumPy to istniejąca
+zależność rdzenia; nie dodano biblioteki CAM ani zasobów GUI.

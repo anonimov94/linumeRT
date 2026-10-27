@@ -457,3 +457,15 @@ Koniec nocnej kontynuacji przyjęto na 2026-10-27 07:00 Europe/Warsaw.
 Najpierw domknięcie rozpoczętych PR-ów, potem funkcje z rejestru zgodnie z syntezą i kierunkiem
 web HMI. Ręcznych odbiorów i prób sprzętowych nie oznaczamy jako wykonanych bez dowodów.
 Praca trwa małymi porcjami z testami i pushem; CI oczekujące/czerwone nie jest zgodą na merge.
+
+## Backend CNC i cykle — polecenie właściciela 2026-10-27
+
+Model-Author: Codex. Właściciel przydzielił Codexowi backend obsługi napędów oraz cykli
+frezowania, toczenia, szlifowania, generowania ścieżek G-code i płaskorzeźb ze STL.
+To jawne rozszerzenie zakresu poza dotychczasowy podział HMI; Claude kontynuuje web/GUI.
+Priorytet pierwszej porcji: użyteczny backend STL → raster 3D → G-code, powiązany
+z 041/043/051. Reużywamy backendowy czytnik z #184, bez rozwijania zamrożonych stron Qt.
+Pozostałe rodziny cykli i napędy są kolejnymi porcjami wspólnego backendu, nie osobnymi
+implementacjami dla skórek. Odbiory M1/M2 i dalsze bramki pozostają otwarte; brak zmian RT/HAL.
+Pierwszy raster obejmuje frez kulisty, górną obwiednię i wykańczanie przygotówki po zgrubnej;
+nie jest jeszcze strategią zgrubną, obsługą podcięć ani kwalifikacją sprzętu.

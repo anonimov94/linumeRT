@@ -151,6 +151,7 @@ Nie są kolejnym harmonogramem. Ich status dotyczy tylko wskazanego kroku.
 | M6-G43 | 034, 066 | Automatyczna korekta długości narzędzia po M6 | częściowe |
 | PLANT-SUBSTEPS | 049, 063 | Plant: wynik niezależny od podkroków całkowania | ukończone |
 | HMI-OWNER-SKINS | 028 | Odrębny wygląd każdej skórki i główny ekran holograficzny | częściowe |
+| CNC-BACKEND | 039, 041, 043, 051, 061, 063, 069 | Backend napędów, cykli technologicznych i płaskorzeźby STL | częściowe |
 | WEBHMI-POC | 028, 029, 055 | HTML/WebGL: integracja strony z bramą LinuxCNC | częściowe |
 | CAM-2D-TEXT-STL | 040, 043, 045, 046 | Strategie CAM 2D, napisy i przekroje STL | ukończone |
 
@@ -1017,6 +1018,14 @@ Pozostaje: Obciążenie CPU Plant realtime przy 4 podkrokach na VM-B (odbiór w�
 Pozostaje: Odbiór nowego układu na pulpicie właściciela: porównanie czterech rodzin przy 1280×768 i 1920×1080, dotyk i klawiatura. Pełna kwalifikacja scen/renderera ze SKIN-02/04…06; bieżący Cyberdeck używa QPainter Neon i poglądowego XYZ, nie modelu kolizji Plant.
 
 Źródła: [PR](https://github.com/anonimov94/linumeRT/pull/163#issuecomment-6401257406), [docs/design/SKIN_SYSTEM_ROADMAP.md](../design/SKIN_SYSTEM_ROADMAP.md), [screens/linumert/linumert_skin_navigation.py](../../screens/linumert/linumert_skin_navigation.py), [docs/design/HMI_QTVCP_HOST.md](../design/HMI_QTVCP_HOST.md), [screens/linumert/linumert_skin_cyberdeck.py](../../screens/linumert/linumert_skin_cyberdeck.py), [docs/raporty/G2/HMI_CLOSEOUT_2026-10-26.md](../raporty/G2/HMI_CLOSEOUT_2026-10-26.md).
+
+### CNC-BACKEND — Backend napędów, cykli technologicznych i płaskorzeźby STL
+
+**częściowe**. Polecenie właściciela 2026-10-27: Codex prowadzi backend napędów i cykli frezowania/toczenia/szlifowania oraz generowanie ścieżki G-code, w tym płaskorzeźby STL. Pierwsza porcja reużywa czytnik STL/przekroje z #184, bez GUI Qt; 9 testów PASS. Raster kulisty i eksport w toku. Raster 3D i CLI linumert-relief gotowe: analityczny kontakt kuli z trójkątami, zachowawcza osłona odcinków między próbkami, safe-Z między wierszami, G61 i atomowy eksport. Test kompletnego G-code w rs274/Debian12 PASS. To wykańczanie przygotówki po zgrubnej, bez gwarancji tolerancji powierzchni/oprawki. Eksportowany G-code przeszedł test usuwania naddatku z pochyłej przygotówki w istniejącej Z-map: brak ubytku w G0, brak zejścia poniżej docelowej płaszczyzny i brak kontaktu części nietnących. Debian12: 36 testów czytnika/rastra/CLI/rs274/materiału PASS. Pełna regresja lokalna: 1630 PASS, 124 SKIP, 158 deselected (LinuxCNC), REQ 22/22; lint PASS. Zainstalowane CLI wygenerowało demo 21 wierszy/441 punktów; wynik przeszedł rs274. PR #190 oczekuje CI i scalenia.
+
+Pozostaje: Rozszerzony odbiór złożonych płaskorzeźb w symulacji i integracja web; następnie obróbka zgrubna i kontrola oprawki. Rozwój strategii frezowania oraz osobne kontrakty i generatory toczenia/szlifowania. Backend diagnostyki/obsługi napędów zgodny z CiA 402, mapowaniem maszyny i nadrzędnym obwodem bezpieczeństwa.
+
+Źródła: [docs/DECYZJE.md](../DECYZJE.md), [core/linumert/programs/stl_section.py](../../core/linumert/programs/stl_section.py), [PR](https://github.com/anonimov94/linumeRT/pull/184), [docs/cam/RELIEF_STL.md](../cam/RELIEF_STL.md), [core/linumert/generators/relief.py](../../core/linumert/generators/relief.py), [tests/test_gen_relief.py](../../tests/test_gen_relief.py), [PR](https://github.com/anonimov94/linumeRT/pull/190).
 
 ### WEBHMI-POC — HTML/WebGL: integracja strony z bramą LinuxCNC
 

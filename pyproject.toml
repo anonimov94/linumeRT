@@ -24,6 +24,7 @@ dependencies = [
 linumert-config = "linumert.machine.config_build:main"
 # Brama web-hmi LinuxCNC <-> przegladarka (webhmi/, DECYZJE 2026-10-26)
 linumert-webhmi = "linumert_webhmi.__main__:main"
+linumert-relief = "linumert.generators.relief:main"
 
 [project.optional-dependencies]
 # Panel web Plant (sesja 022); bez tej grupy Plant działa, a panel zgłasza brak zależności.
