@@ -1615,3 +1615,11 @@ Odbiór pulpitu i pozostały zakres 069 nadal otwarte; NIEZWERYFIKOWANE NA SPRZ�
 - Szersza próba Windows: 182 PASS, 1 SKIP; 4 FAIL dotyczą lokalizacji liczb, skryptu rs274 i braku rdzenia C.
 - Kontrole Debian/LinuxCNC w PR #180. Autokontrola; odbiór pulpitu i pozostały zakres 045 nadal otwarte.
 - NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## Brama web-hmi — backend · 2026-10-26 · Claude
+- Model-Author: Claude. Realizuje decyzję „Ekran operatora w HTML/WebGL obok QtDragon” (backend PoC).
+- `webhmi/server/linumert_webhmi/`: brama FastAPI REST + WebSocket, wątek odpytujący, deadman jogu 0,4 s, limit
+  poleceń, token + Host/Origin; `FakeBackend` (atrapa) i `LinuxCNCBackend` (wstrzykiwany moduł). Brak resetu E-STOP.
+- `core/linumert/cnc/fake.py`: jog ciągły w atrapie. Pakiet i skrypt `linumert-webhmi` w `pyproject.toml`.
+- Testy: 35 nowych (brama, aplikacja, mapowanie poleceń) + 2 jog; ruff PASS. Opis: `docs/WEBHMI.md`.
+- Otwarte: strona WebGL, wiązanie `watchdog` HAL, weryfikacja na LinuxCNC RIP i sprzęcie. NIEZWERYFIKOWANE NA SPRZĘCIE.

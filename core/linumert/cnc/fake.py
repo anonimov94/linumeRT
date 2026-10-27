@@ -86,6 +86,7 @@ class FakeMachine:
         self._ending = False
         self._line = 0
         self._errors: list[str] = []
+        self._jog: dict[str, float] = {}  # os -> predkosc [mm/s] ze znakiem
 
     # ---- zegar i migawka -------------------------------------------------
     def clock(self) -> float:
@@ -243,6 +244,24 @@ class FakeMachine:
         if spindle is not None:
             self.spindle_override = min(max(spindle, 0.0), 2.0)
 
+    def jog(self, axis: str, speed: float) -> bool:
+        """Ciagly jog osi (MANUAL, bez ruchu programu); ``speed`` w mm/s ze znakiem."""
+        if not self._require_on("jog"):
+            return False
+        name = axis.upper()
+        if name not in self._pos:
+            return self._fail(f"jog: nieznana os {axis!r}")
+        if self.mode is not Mode.MANUAL or self._busy():
+            return self._fail("jog: wymagany tryb MANUAL bez ruchu")
+        self._jog[name] = speed
+        return True
+
+    def jog_stop(self, axis: str | None = None) -> None:
+        if axis is None:
+            self._jog.clear()
+        else:
+            self._jog.pop(axis.upper(), None)
+
     def set_work_offset(self, name: str, **axes: float) -> None:
         index = WORK_OFFSET_NAMES.index(name)
         for axis, value in axes.items():
@@ -252,6 +271,9 @@ class FakeMachine:
     def advance(self, dt: float) -> None:
         remaining = max(dt, 0.0)
         self.time += remaining
+        for name, speed in self._jog.items():
+            low, high = self._limits[name]
+            self._pos[name] = min(max(self._pos[name] + speed * remaining, low), high)
         self._pump()
         while remaining > _EPS and self._queue and not self._paused:
             remaining -= self._step(self._queue[0], remaining)
@@ -283,6 +305,7 @@ class FakeMachine:
         return bool(self._queue) or self._running
 
     def _stop_motion(self) -> None:
+        self._jog.clear()
         self._queue.clear()
         self._running = False
         self._paused = False
