@@ -9,6 +9,8 @@ import { createConnection } from "./connection.js";
 import { createJog } from "./jog.js";
 import { createDRO } from "./dro.js";
 import { initScene } from "./scene.js";
+import { diffState } from "./events.js";
+import { createLog } from "./log.js";
 
 const $ = (id) => document.getElementById(id);
 const FRESH_MS = 500;
@@ -20,6 +22,18 @@ let version = -1;
 let haveConnected = false;
 let jog;
 let dro;
+const journal = createLog();
+let stateReceipts = [];
+let lastAckMs = null;
+let telemetryWasFresh = false;
+let previousLinkStatus = "";
+
+function refreshDiagnostics() {
+  const now = Date.now();
+  stateReceipts = stateReceipts.filter((time) => now - time < 1000);
+  journal.metrics(stateReceipts.length, age(), lastAckMs);
+  journal.lamps(state, connection.ready(), fresh(), $("jogStatus").textContent);
+}
 
 function result(message, kind = "") {
   $("commandResult").textContent = message;
@@ -62,6 +76,7 @@ function updateControls() {
   $("disconnect").disabled = !connection.isOpening();
   $("connect").textContent = haveConnected && connection.hasToken() ? "Połącz ponownie" : "Połącz";
   dro.freshness(age(), connected);
+  refreshDiagnostics();
 }
 function send(command, onReply = null) {
   const id = connection.send(command, onReply);
@@ -71,7 +86,11 @@ function send(command, onReply = null) {
 function execute(command) {
   const key = command.cmd === "mode" ? "mode:" + command.mode : command.cmd;
   const rule = access(key);
-  if (!rule.ok) { result("Zablokowano " + key + ": " + rule.reason, "error"); return; }
+  if (!rule.ok) {
+    result("Zablokowano " + key + ": " + rule.reason, "error");
+    journal.add("warn", "BLOKADA", key + ": " + rule.reason);
+    return;
+  }
   // STOP i E-STOP wysyłamy bez opóźniania przez inne polecenia.
   if (command.cmd === "stop" || command.cmd === "estop") {
     send(command);
@@ -86,11 +105,20 @@ const connection = createConnection({
   onStatus(text, online) {
     $("connectionStatus").textContent = text;
     $("connectionStatus").className = "status-tag " + (online ? "online" : "offline");
+    if (text !== previousLinkStatus) {
+      if (online) journal.add("info", "ŁĄCZE", "Połączono i uwierzytelniono WebSocket");
+      else if (text === "ŁĄCZENIE") journal.add("info", "ŁĄCZE", "Łączenie z bramą");
+      previousLinkStatus = text;
+    }
     updateControls();
   },
   onState(next, nextVersion) {
+    journal.appendAll(diffState(state, next));
     state = next;
     receivedAt = Date.now();
+    stateReceipts.push(receivedAt);
+    if (!telemetryWasFresh) journal.add("info", "TELEMETRIA", "Dane aktualne");
+    telemetryWasFresh = true;
     version = nextVersion;
     dro.render(state, version);
     jog.onState(state);
@@ -103,7 +131,13 @@ const connection = createConnection({
       banner("Brama online. Panel WebHMI nie zastępuje sprzętowego E-STOP i watchdog HAL.");
     }
   },
-  onReply(reply, command) {
+  onReply(reply, command, latencyMs) {
+    const cmd = command ?? "id=" + String(reply.id ?? "?");
+    journal.add(reply.type === "error" ? "alarm" : "info", "POLECENIE",
+      (reply.type === "error" ? "ERROR " : "ACK ") + cmd + " (#" + String(reply.id ?? "?") +
+      ")" + (Number.isFinite(latencyMs) ? " " + Math.round(latencyMs) + " ms" : "") +
+      (reply.type === "error" ? ": " + String(reply.message ?? "błąd") : ""));
+    if (reply.type === "ack" && Number.isFinite(latencyMs)) lastAckMs = latencyMs;
     if (reply.type === "error") {
       const message = "ODRZUCONO [" + (command ?? reply.id ?? "?") + "]: " +
         String(reply.message ?? "Nieznany błąd");
@@ -116,13 +150,18 @@ const connection = createConnection({
     updateControls();
   },
   onDisconnect(message) {
+    journal.add("warn", "ŁĄCZE", "Rozłączono: " + message);
+    telemetryWasFresh = false;
     receivedAt = 0;
     jog.onLost();
     result(message + " — sprawdź fizyczny stan maszyny.", "error");
     banner("BRAK POŁĄCZENIA. DRO NIEAKTUALNE. Nie potwierdzono stanu ruchu.");
     updateControls();
   },
-  onError(message) { result(message, "error"); banner(message); },
+  onError(message) {
+    journal.add("alarm", "KLIENT", message);
+    result(message, "error"); banner(message);
+  },
 });
 jog = createJog({
   send,
@@ -132,7 +171,11 @@ jog = createJog({
     return rule.ok && Array.isArray(state?.axes) &&
       state.axes.some((a) => a.name === axis && !a.limit_hit);
   },
-  onAlarm(message) { result("ALARM: " + message, "error"); banner("ALARM: " + message); },
+  onAlarm(message) {
+    journal.add("alarm", "JOG", message);
+    result("ALARM: " + message, "error"); banner("ALARM: " + message);
+  },
+  onEvent(level, source, text) { journal.add(level, source, text); },
   onChange() { updateControls(); },
 });
 dro = createDRO(jog, () => jog.stop("Zmiana konfiguracji osi"));
@@ -169,10 +212,16 @@ $("token").addEventListener("keydown", (event) => {
 });
 $("mdiForm").addEventListener("submit", (event) => {
   event.preventDefault();
-  if (!access("mdi").ok) { result("MDI: " + access("mdi").reason, "error"); return; }
+  if (!access("mdi").ok) {
+    result("MDI: " + access("mdi").reason, "error");
+    journal.add("warn", "BLOKADA", "MDI: " + access("mdi").reason);
+    return;
+  }
   const text = $("mdiText").value.trim();
   if (!text || text.length > 200 || /[\r\n\x00-\x1f]/.test(text)) {
-    result("MDI: jedna niepusta linia, maks. 200 znaków.", "error"); return;
+    result("MDI: jedna niepusta linia, maks. 200 znaków.", "error");
+    journal.add("warn", "BLOKADA", "MDI: niepoprawne polecenie");
+    return;
   }
   jog.stop("Wysyłanie MDI");
   send({ cmd: "mdi", text });
@@ -181,6 +230,10 @@ $("mdiForm").addEventListener("submit", (event) => {
 const watch = setInterval(() => {
   const currentAge = age();
   if (connection.ready()) {
+    if (currentAge > FRESH_MS && telemetryWasFresh) {
+      telemetryWasFresh = false;
+      journal.add("warn", "TELEMETRIA", "NIEAKTUALNE: " + Math.round(currentAge) + " ms");
+    }
     if (currentAge > FRESH_MS) {
       jog.stop("Telemetria starsza niż 500 ms");
       banner("NIEAKTUALNA TELEMETRIA (" + Math.round(currentAge) + " ms). JOG ZABLOKOWANY.");
