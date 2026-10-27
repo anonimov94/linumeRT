@@ -1,7 +1,7 @@
 <!-- Generowane przez python3 tools/roadmap.py; edytuj docs/roadmap/plan.json. -->
 # Wspólny plan linumeRT
 
-Pierwotny plan: **84 sesje M0–M6**, commit `796c6a2`. Stan na 2026-10-26: planowane: 15; w toku: 0; częściowe: 30; do odbioru: 0; ukończone: 39; zablokowane: 0.
+Pierwotny plan: **84 sesje M0–M6**, commit `796c6a2`. Stan na 2026-10-27: planowane: 15; w toku: 0; częściowe: 30; do odbioru: 0; ukończone: 39; zablokowane: 0.
 
 Zakończenie części implementacji nie oznacza odbioru całej funkcji ani sprzętu.
 
@@ -151,6 +151,7 @@ Nie są kolejnym harmonogramem. Ich status dotyczy tylko wskazanego kroku.
 | M6-G43 | 034, 066 | Automatyczna korekta długości narzędzia po M6 | częściowe |
 | PLANT-SUBSTEPS | 049, 063 | Plant: wynik niezależny od podkroków całkowania | ukończone |
 | HMI-OWNER-SKINS | 028 | Odrębny wygląd każdej skórki i główny ekran holograficzny | częściowe |
+| WEBHMI-POC | 028, 029 | HTML/WebGL: integracja strony z bramą LinuxCNC | częściowe |
 
 ## Postęp, pozostały zakres i dowody
 
@@ -1015,4 +1016,12 @@ Pozostaje: Obciążenie CPU Plant realtime przy 4 podkrokach na VM-B (odbiór w�
 Pozostaje: Odbiór nowego układu na pulpicie właściciela: porównanie czterech rodzin przy 1280×768 i 1920×1080, dotyk i klawiatura. Pełna kwalifikacja scen/renderera ze SKIN-02/04…06; bieżący Cyberdeck używa QPainter Neon i poglądowego XYZ, nie modelu kolizji Plant.
 
 Źródła: [PR](https://github.com/anonimov94/linumeRT/pull/163#issuecomment-6401257406), [docs/design/SKIN_SYSTEM_ROADMAP.md](../design/SKIN_SYSTEM_ROADMAP.md), [screens/linumert/linumert_skin_navigation.py](../../screens/linumert/linumert_skin_navigation.py), [docs/design/HMI_QTVCP_HOST.md](../design/HMI_QTVCP_HOST.md), [screens/linumert/linumert_skin_cyberdeck.py](../../screens/linumert/linumert_skin_cyberdeck.py), [docs/raporty/G2/HMI_CLOSEOUT_2026-10-26.md](../raporty/G2/HMI_CLOSEOUT_2026-10-26.md).
+
+### WEBHMI-POC — HTML/WebGL: integracja strony z bramą LinuxCNC
+
+**częściowe**. Kierunek HTML/WebGL potwierdzony przez właściciela 2026-10-26; GUI Qt zamrożone według DECYZJE.md. Brama Claude (#185), strona Cyberdeck (#187) i jednostki jogu (#186) są w main. 2026-10-27 Codex: odtworzono brak strony w wheel (HTTP 404); dodano zasoby statyczne do danych pakietu i kontrolę artefaktu w CI poza checkoutem. Poprawiona paczka: HTTP zasobów, uwierzytelnienie WebSocket, jog atrapy i zatrzymanie po rozłączeniu PASS; 71 testów WebHMI PASS na Pythonie 3.14.8. Nie jest to odbiór przeglądarki ani LinuxCNC.
+
+Pozostaje: Odbiór rzeczywistej przeglądarki: DRO, scena WebGL ≤30 FPS, jog i utrata połączenia. Integracja i odbiór na LinuxCNC RIP; niezależny watchdog HAL przed użyciem sprzętu. Równoważność funkcji web z ekranem awaryjnym Qt; wcześniejsze bramki pozostają otwarte.
+
+Źródła: [docs/DECYZJE.md](../DECYZJE.md), [docs/WEBHMI.md](../WEBHMI.md), [tools/ci/check_webhmi_wheel.py](../../tools/ci/check_webhmi_wheel.py), [PR](https://github.com/anonimov94/linumeRT/pull/185), [PR](https://github.com/anonimov94/linumeRT/pull/187).
 

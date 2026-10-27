@@ -15,6 +15,15 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · 2026-10-27. **WebHMI: pakowanie strony i odbiór artefaktu.**
+Osobny checkout `/home/dell/Projekty/linumeRT-closeout-20261027`, bez globalnego LOCK.
+Po #185/#186/#187 wheel nie zawierał strony: odtworzone HTTP 404. Dodano package-data
+oraz kontrolę wheel w CI poza checkoutem: 3 zasoby HTTP, auth WS, jog atrapy i stop
+po rozłączeniu PASS; 71 testów WebHMI PASS. Nie zmieniałem bramy ani stron Qt.
+Stan zatrzymania: poprawka gotowa do CI/PR; nie zajmuję backend.py/gateway.py/app.py.
+Następny zakres: rzeczywista przeglądarka i LinuxCNC RIP; watchdog HAL nadal otwarty.
+Rekord WEBHMI-POC wiąże zakres z 028/029 i decyzją właściciela; bez zamknięcia M2.
+
 Model-Author: Codex · 2026-10-26. **Bieżące zlecenie: backend i funkcje w GUI z edycją.**
 Porcja sesji 045 w PR #180, gałąź codex/cycles-editing: transakcyjny model kroków,
 przesuwanie/duplikacja/wyłączenie/usuwanie wybranego, Cofnij/Ponów, walidacja przy polach
