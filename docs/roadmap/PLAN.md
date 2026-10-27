@@ -609,11 +609,11 @@ Pozostaje: Pełna fizyka osi obrotowych, generator kinematyk, DRO/TCP i five_axi
 
 ### 066 — Automatyczna zmiana narzędzia
 
-**częściowe**. Model magazynu i zacisku Plant istnieje.
+**częściowe**. Model magazynu i zacisku Plant istnieje. Generator makra remapu M6 dla ATC z machine.yaml (rack_linear): core/linumert/machine/atc_macro.py, plan wymiany sprawdzony na modelu magazynu Plant (tests/test_atc_macro.py, 9 testów).
 
-Pozostaje: Remap M6, widok magazynu, scenariusze ATC i walidacja geometrii/stref wymiany.
+Pozostaje: Podpięcie makra do INI sim/Plant i generatora konfiguracji, widok magazynu, scenariusze ATC, walidacja stref wymiany, karuzela i parasol, dziennik transakcyjny i RECOVERY_REQUIRED po E-STOP.
 
-Źródła: [docs/DZIENNIK.md](../DZIENNIK.md), [prompts/sesja-066.md](../../prompts/sesja-066.md).
+Źródła: [docs/DZIENNIK.md](../DZIENNIK.md), [core/linumert/machine/atc_macro.py](../../core/linumert/machine/atc_macro.py), [tests/test_atc_macro.py](../../tests/test_atc_macro.py), [prompts/sesja-066.md](../../prompts/sesja-066.md).
 
 ### 067 — Kreator konfiguracji maszyny
 

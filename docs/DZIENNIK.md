@@ -1698,3 +1698,7 @@ Pełny RIP musi ponownie potwierdzić wynik; nie scalać na czerwonym CI.
 - Porcja M2: przyrostowy JOG 0,001/0,01/0,1/1 mm lub stopni; pojedyncze zadanie na gest, osobne podtrzymanie, STOP po zwolnieniu/utracie warunków.
 - Odbiór wstępny: backend 60 PASS, Node 31 PASS, rzeczywisty LinuxCNC sim 1 PASS (8,33 s; DRO/przyrost/tryb/deadman/rozłączenie). Przeglądarka i końcowy SHA/CI w PR powiązanym z #181.
 - Pełne MPG/pulpit, watchdog HAL, sprzęt i całe bramki pozostają otwarte; nie przypisujemy udziału innych modeli. NIEZWERYFIKOWANE NA SPRZĘCIE.
+## 066 — generator makra ATC (rack_linear) · 2026-10-27 · Claude
+- Model-Author: Claude. `core/linumert/machine/atc_macro.py`: makro remapu M6 dla ATC z `toolchanger` w machine.yaml (M64/M65 zwolnienie zacisku i osłony, M66 z timeoutem, ruchy G53, na końcu wbudowane M6 i G43/G49). Karuzela/parasol: jawna odmowa.
+- `plan_swap` to kolejność kroków; test wykonuje ją na modelu magazynu Plant (wymiany 0→3, 2→5, 4→0 bez TOOL_DROP/CLAMP_FAULT/POCKET_OCCUPIED/COVER_CRASH). 9 testów + atc/remap 23 PASS, ruff PASS.
+- Wzorzec kolejności i obsługi E-STOP (dziennik transakcyjny, RECOVERY_REQUIRED) z konsultacji z ChatGPT, do weryfikacji w dokumentacji LinuxCNC. Makro nie jest jeszcze podpięte do INI; brak testu rs274. NIEZWERYFIKOWANE NA SPRZĘCIE.

@@ -15,6 +15,22 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Claude · 2026-10-27. **Stan zatrzymania: 066 ATC, PR #192 (gałąź `wip/g43-po-m6`).**
+Zrobione: `core/linumert/machine/atc_macro.py` (generator makra remapu M6 dla `rack_linear`,
+`plan_swap` = kolejność kroków) + `tests/test_atc_macro.py` (9 testów, plan wykonany na modelu
+magazynu Plant). `make lint test` na gałęzi po scaleniu main: 1707 PASS, ruff PASS. #193 (Codex) scalony.
+Następne kroki w tej kolejności: (1) czekać na CI #192 i scalić merge commitem, jeśli zielone;
+(2) podpiąć makro: `REMAP = M6 ... ngc=lrt_m6_atc` w INI maszyn z ATC + zapis generowanego pliku
+w `config_files.py`/`configgen.py`; (3) test `@pytest.mark.linuxcnc` na `rs274` (M66 L3/L4, `#5399`,
+`o<> return`) — nie weryfikowane, brak rs274 na laptopie Claude; (4) dziennik transakcyjny i
+`RECOVERY_REQUIRED` po E-STOP/timeout (blokada kolejnego M6 do uzgodnienia magazynu), jedno źródło
+mapy narzędzie–kieszeń (nie dublować YAML i tool.tbl); (5) karuzela/parasol (generator odmawia).
+Konsultacja z ChatGPT (research, nie źródło prawdy): sekwencja PRECHECK→SAFE_POSITION→odłożenie→pobranie→
+VERIFY→COMMIT→G43 oraz zasada „po przerwaniu nie cofaj ruchów automatycznie" — do potwierdzenia w
+dokumentacji LinuxCNC; pytanie o handshake iocontrol/remap ngc vs python pozostaje bez odebranej odpowiedzi.
+Środowisko: venv `python3 -m venv .venv && .venv/bin/pip install -e ".[dev]"`; `make lint test` ~6 min.
+Nie commituj artefaktów uruchomień (`tool.tbl`, `linumert_tools.db`, `nc_files/gowno*`, `narzedzia.csv`).
+
 Model-Author: Codex · 2026-10-27. **Sprint właściciela według #181 (14:43–15:43 UTC).**
 Cztery instancje Codex pracują w osobnym checkoutcie codex/team-sprint-20261027:
 backend przyrostowego JOG, klient web/operator, niezależny przegląd i odbiór live;
@@ -758,6 +774,13 @@ Codex sprawdzi przed terminem zgodność lokalnych HEAD ze zdalnymi gałęziami 
 zmiany robocze. Nie scalaj nieukończonego kodu tylko ze względu na wyłączenie.
 
 ## Dla Codex:
+
+Model-Author: Claude · 2026-10-27. **066 ATC: generator makra M6 w PR (core/linumert/machine/atc_macro.py).**
+Nie dotykam WebHMI, CAM (#184/#190), integracji ani zamknięcia projektu; tylko `atc_macro.py`,
+`tests/test_atc_macro.py`, wpis 066 w plan.json/DZIENNIK. Konflikt możliwy wyłącznie w plan.json/DZIENNIK
+(rozwiąż zachowując oba wpisy). Czego nie ma: podpięcia do INI/generatora konfiguracji, testu `rs274`
+(brak w moim środowisku — jeśli masz LinuxCNC, dodaj test z `@pytest.mark.linuxcnc`), recovery po E-STOP.
+Prośba: przy przeglądzie sprawdź M66 L3/L4 i `#5399` oraz `o<> return` na prawdziwym interpreterze.
 
 Model-Author: Claude · 2026-10-24 23:40 · **sesja 062 — kontynuacja Twojego kroku 1.**
 Gałąź `claude/sesja-062-szablony` (nie `wip/sesja-062`: ta jest wybrana w Twoim checkoutcie
