@@ -19,8 +19,10 @@ Przeglądarka w aplikacji Codex, Windows, lokalna brama `--fake`, port 8876. To 
 3. Przyrost 0,1, Spacja przytrzymana 600 ms: X 0,0010 → 0,1010. Dziennik pokazuje jedno jog_increment, cztery jog_keepalive i jog_stop. Przytrzymanie nie powtarza kroku.
 4. Tryb MDI: wszystkie przyciski JOG zablokowane z powodem „Wymagany tryb MANUAL”. Wpisanie `G0 X1` i Spacji w polu MDI bez wysłania formularza nie zmieniło X (0,1010). Pole wyczyszczono.
 5. Powrót do MANUAL, JOG ciągły, Enter przytrzymany 350 ms: X 0,1010 → 3,8510; po zwolnieniu ACK jog_stop i JOG: BEZ RUCHU. Droga w trybie ciągłym zależy od rzeczywistego czasu zdarzeń.
+6. Późniejszy odczyt X nadal 3,8510; rozłączenie przez przycisk oznacza DRO jako NIEAKTUALNE i blokuje JOG. Po ponownym połączeniu X pozostaje 3,8510 i JOG: BEZ RUCHU, bez automatycznego wznowienia.
+7. Dla 1280×768 szerokość dokumentu 1265 px (brak poziomego przepełnienia), komunikat braku WebGL ukryty. Konsola przeglądarki: brak zarejestrowanych błędów.
 
-Dowód: [DRO i podpowiedź klawiatury 1280×768](WEBHMI_KEYBOARD_2026-10-27/01-keyboard-jog.png).
+Dowody: [DRO i podpowiedź klawiatury 1280×768](WEBHMI_KEYBOARD_2026-10-27/01-keyboard-jog.png), [rozłączenie](WEBHMI_KEYBOARD_2026-10-27/02-disconnected.png) i [odczyty DOM](WEBHMI_KEYBOARD_2026-10-27/browser-result.json). Próba rozłączenia odbyła się po zatrzymaniu, nie podczas ruchu; przerwanie aktywnego gestu jest objęte testami Node, a nie tą próbą GUI.
 
 ## Testy automatyczne
 
