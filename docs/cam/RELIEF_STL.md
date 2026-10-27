@@ -45,7 +45,7 @@ model daje górną obwiednię, a otwory bez kontaktu schodzą do minimalnej Z mo
 Raster obejmuje prostokąt XY modelu, naprzemiennie wzdłuż X. Pomiędzy wierszami
 narzędzie wraca do bezpiecznej Z. Bezpieczna Z musi przewyższać maksimum STL oraz
 zachowawczy naddatek próbkowania. Program ma G21/G90/G17/G94/G40/G80/G54/G61,
-T/M6/G43, M3 i kończy się wycofaniem, M5 i M2.
+T/M6/G43, G97/M3 i kończy się wycofaniem, M5 i M2.
 
 Samo wyznaczenie wysokości w punktach może przeoczyć wąski szczyt między próbkami.
 Dlatego sfera używana do kontaktu ma promień powiększony o największy rzeczywisty
@@ -72,7 +72,9 @@ API poza RT; klient powinien uruchamiać je w osobnym zadaniu/procesie, poza pę
 Testy obejmują analityczne płaszczyzny, krawędź i pionową ścianę, niezależne gęste
 próbkowanie trójkątów, szczyt między próbkami, skalę STL, kolejność wierszy,
 niepoprawne parametry, limit pracy i zachowanie poprzedniego pliku. Osobny test
-`linuxcnc` sprawdza cały program przez `rs274`.
+`linuxcnc` sprawdza cały program przez `rs274`. Test eksportowanego G-code
+w Z-map z kulistym ostrzem potwierdza usunięcie naddatku na płaszczyźnie pochyłej,
+brak ubytku na przejazdach szybkich i brak zejścia poniżej powierzchni docelowej.
 
-Pozostaje odbiór usuwania materiału i przejazdów w symulacji, strategia zgrubna,
+Pozostaje rozszerzony odbiór złożonych płaskorzeźb w symulacji, strategia zgrubna,
 kontrola trzpienia/oprawki oraz integracja funkcji w nowym kliencie web.

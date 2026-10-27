@@ -1636,3 +1636,9 @@ Odbiór pulpitu i pozostały zakres 069 nadal otwarte; NIEZWERYFIKOWANE NA SPRZ�
 - Testy geometrii/CLI i istniejących .lnx; pełny program w rs274 na Debian12 PASS w osobnym kontenerze bez instancji CNC/HAL.
 - Dokumentacja docs/cam/RELIEF_STL.md i pochodzenie uzupełnione; nie dodano zależności ani GUI.
 - Pozostaje symulacja materiału, zgrubna, oprawka i klient web; toczenie/szlifowanie/napędy to dalsze porcje. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## 041/043/051 — STL: odbiór materiału i przejazdów · 2026-10-27 · Codex
+- Model-Author: Codex. Eksportowany G-code przetworzono przez istniejącą Z-map z frezem kulistym i przygotówką po zgrubnej.
+- Przejazdy G0: brak ubytku; cięcie usuwa naddatek, nie schodzi poniżej płaszczyzny STL i nie dotyka częścią nietnącą.
+- Debian12: 36 testów czytnika/rastra/CLI/materiału/rs274 PASS; G97 jawnie ustawia stałe obroty.
+- Odbiór złożonych modeli, oprawki i sprzętu nadal otwarty. Bez zmian progów, RT, HAL i GUI.

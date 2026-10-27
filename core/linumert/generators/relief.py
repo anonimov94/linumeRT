@@ -100,7 +100,7 @@ class ReliefPath:
         s = self.settings
         lines = ["( linumeRT STL: wykanczanie frezem kulistym, przygotowka po zgrubnej )",
                  "G21 G90 G17 G94 G40 G80 G54 G61", f"T{s.tool} M6", f"G43 H{s.tool}",
-                 f"S{s.rpm} M3"]
+                 f"G97 S{s.rpm} M3"]
         for row in self.rows:
             x, y, z = row[0]
             lines += [f"G0 Z{fmt(s.safe_z)}", f"G0 X{fmt(x)} Y{fmt(y)}",

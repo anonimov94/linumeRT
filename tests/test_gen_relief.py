@@ -123,7 +123,7 @@ def test_cli_writes_complete_program(tmp_path, capsys):
                       'vertex 0 0 0\nvertex 1 0 0\nvertex 0 1 0\n'
                       'endloop\nendfacet\nendsolid plane\n')
     assert main([str(source), '-o', str(output), '--tool', '3', '--rpm', '8000']) == 0
-    assert 'T3 M6\nG43 H3\nS8000 M3' in output.read_text()
+    assert 'T3 M6\nG43 H3\nG97 S8000 M3' in output.read_text()
     assert output.read_text().endswith('M2\n')
     assert 'Zapisano' in capsys.readouterr().out
 
@@ -153,3 +153,37 @@ def test_relief_program_in_linuxcnc_interpreter(tmp_path):
     program.write_text(path.gcode())
     result = check_with_linuxcnc(program)
     assert result.ok, result
+
+
+def test_exported_program_removes_near_net_stock_without_gouging_plane():
+    import re
+
+    from linumert_sim.cutter import make_cutter
+    from linumert_sim.zmap import StockMap
+
+    mesh = Mesh(plane(a=0.2, b=0.1, size=1))
+    path = plan_relief(mesh, ReliefSettings(tool_diameter=0.4, sample_step=0.1,
+                                          stepover=0.1, safe_z=2))
+    stock = StockMap('BOX', -1, -1, 1, 1, -1, 1, cell=0.05)
+    xx, yy = np.meshgrid(stock.xs, stock.ys)
+    target = 0.2 * xx + 0.1 * yy
+    stock.h[:] = target + 0.4  # Explicitly roughed, near-net stock.
+    tool = make_cutter(1, 20, 0.4, 'ball', {'d': 0.4, 'l': 10, 'flute_length': 5})
+    before = stock.volume()
+    position = (0, 0, 2)
+    for line in path.gcode().splitlines():
+        if not line.startswith(('G0 ', 'G1 ')):
+            continue
+        words = {k: float(v) for k, v in re.findall(r'([XYZ])(-?[0-9.]+)', line)}
+        end = tuple(words.get(axis, position[i]) for i, axis in enumerate('XYZ'))
+        if line.startswith('G0 '):
+            if end[:2] != position[:2]:
+                assert end[2] == position[2] == 2, line
+            assert stock.cut(tool, position, end).removed == 0, line
+        else:
+            assert not stock.cut(tool, position, end).parts, line
+        position = end
+    assert before - stock.volume() > 0.5
+    assert np.all(stock.h >= target - 1e-6), 'cut below the STL surface'
+    interior = (np.abs(xx) < 0.8) & (np.abs(yy) < 0.8)
+    assert np.max(stock.h[interior] - target[interior]) < 0.13

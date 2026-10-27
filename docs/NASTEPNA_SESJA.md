@@ -24,7 +24,9 @@ następnie raster 3D frezem kulistym i eksport G-code. Zajęte nowe pliki:
 core/linumert/programs/stl_section.py, core/linumert/generators/relief.py i ich testy.
 Nie dubluj czytnika; #184 pozostaje otwarty i nie jest tym scalany w całości.
 Stan zatrzymania: #190; czytnik, raster kulisty i CLI gotowe; rs274 Debian12 PASS.
-Ograniczenia i API: docs/cam/RELIEF_STL.md. Kolejny odbiór: materiał/przejazdy symulacji.
+Ograniczenia i API: docs/cam/RELIEF_STL.md. Debian12: 36 testów PASS, w tym rs274
+i materiał Z-map (brak cięcia w G0/brak podcięcia powierzchni). Pełny zestaw trwa.
+Kolejny krok: rozbudowa strategii zgrubnej STL; web może korzystać z relief_from_stl().
 Wcześniejsze bramki pozostają otwarte; napędy i pozostałe rodziny cykli to dalsze porcje.
 
 Model-Author: Codex · 2026-10-26. **Bieżące zlecenie: backend i funkcje w GUI z edycją.**
