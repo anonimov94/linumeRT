@@ -18,7 +18,8 @@ from starlette.testclient import TestClient
 TOKEN = "test-token-for-webhmi-static"
 ROOT = Path(__file__).resolve().parents[1]
 STATIC = ROOT / "webhmi/server/linumert_webhmi/static"
-MODULES = ("connection.js", "interlocks.js", "jog.js", "dro.js", "scene.js", "main.js")
+MODULES = ("connection.js", "interlocks.js", "jog.js", "dro.js", "scene.js", "main.js",
+           "events.js", "log.js")
 FILES = ("index.html", "app.js", "style.css", *(f"js/{name}" for name in MODULES),
          "js/package.json")
 
@@ -53,6 +54,11 @@ def test_e2e_selectors_still_exist():
     js = (STATIC / "js/jog.js").read_text(encoding="utf-8")
     assert 'node.className = "jog-button"' in js
     assert "INTERVAL_MS = 150" in js
+    for selector in ('id="eventLog"', 'id="logFilter"', 'id="logExport"',
+                     'id="logClear"', 'id="lamps"', 'id="stateRate"',
+                     'id="stateAge"', 'id="ackLatency"', 'id="jogStatus"'):
+        assert selector in html, selector
+    assert '<th title="Błąd nadążania">FERR</th>' in html
 
 
 @pytest.mark.skipif(shutil.which("node") is None, reason="Node.js nie jest zainstalowany")
@@ -79,6 +85,25 @@ def test_js_dom_selector_is_module_local():
                 source,
             ), path.name
 
+
 def test_ws_keepalive_leaves_margin_for_dro_freshness():
     """Dwa okresy keepalive muszą zmieścić się w progu 500 ms po stronie JS."""
     assert KEEPALIVE_S * 2 < 0.5
+
+
+@pytest.mark.skipif(shutil.which("node") is None, reason="Node.js nie jest zainstalowany")
+def test_node_events():
+    subprocess.run(
+        ["node", "--test", str(ROOT / "tests/webhmi_js/test_events.mjs")],
+        cwd=ROOT, check=True, timeout=40,
+    )
+
+
+def test_ferr_schema_and_threshold():
+    from linumert_webhmi.schema import snapshot_to_dict
+
+    result = snapshot_to_dict(FakeMachine().snapshot())
+    assert all("following_error" in axis for axis in result["axes"])
+    source = (STATIC / "js/dro.js").read_text(encoding="utf-8")
+    assert "FERR_WARN_MM = 0.05" in source
+    assert "axis.following_error" in source
