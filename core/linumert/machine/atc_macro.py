@@ -2,6 +2,7 @@
 
 SPDX-License-Identifier: GPL-2.0-or-later
 Model-Author: Claude · sesja 066.
+Geometry and preflight: Model-Author: Codex.
 
 Zakres: magazyn liniowy (`rack_linear`), narzędzie N leży w gnieździe N (RANDOM_TOOLCHANGER=0).
 Karuzela i parasol nie są jeszcze obsługiwane — generator odmawia jawnie, zamiast zgadywać.
@@ -13,6 +14,8 @@ Wszystkie ruchy w G53 (współrzędne maszyny). NIEZWERYFIKOWANE NA SPRZĘCIE.
 from __future__ import annotations
 
 import math
+
+from .toolchanger_geometry import pocket_positions
 
 APPROACH_FEED_MM_MIN = 500.0
 SENSOR_TIMEOUT_S = 3.0
@@ -33,6 +36,49 @@ def _io(cfg, section: str, name: str, what: str) -> int:
     return pins[name]
 
 
+def _positions(cfg) -> list[tuple[float, float, float]]:
+    """Reject a rack that cannot be reached using the generated G53 coordinates."""
+    tc = cfg.toolchanger
+    if tc.type != "rack_linear":
+        raise AtcMacroError(
+            f"toolchanger.type={tc.type}: makro ATC obsługuje na razie tylko rack_linear")
+    if tc.slots < 1:
+        raise AtcMacroError("toolchanger: wymagane slots >= 1")
+    if tc.slot_positions is not None:
+        if len(tc.slot_positions) != tc.slots:
+            raise AtcMacroError("toolchanger.slot_positions: liczba pozycji różna od slots")
+    elif tc.base_position is None or tc.pitch_mm is None:
+        raise AtcMacroError("toolchanger: wymagane slot_positions albo base_position i pitch_mm")
+    elif not all(math.isfinite(v) for v in
+                 (*tc.base_position, tc.pitch_mm, tc.base_orientation_deg)):
+        raise AtcMacroError("toolchanger: geometria bazowa musi być skończona")
+    if tc.approach_z is None or tc.retract_z is None:
+        raise AtcMacroError("toolchanger: wymagane approach_z i retract_z")
+    heights = (tc.approach_z, tc.retract_z, cfg.positions.safe_z)
+    if not all(math.isfinite(v) for v in heights):
+        raise AtcMacroError("toolchanger: wysokości muszą być skończone")
+    if not tc.approach_z <= tc.retract_z <= cfg.positions.safe_z:
+        raise AtcMacroError("toolchanger: wymagane approach_z <= retract_z <= positions.safe_z")
+    points = pocket_positions(tc)
+    checks = [(f"gniazdo {i}", p) for i, p in enumerate(points, 1)]
+    checks += [("retract_z", (None, None, tc.retract_z)),
+               ("safe_z", (None, None, cfg.positions.safe_z))]
+    for label, point in checks:
+        for letter, value in zip("XYZ", point, strict=True):
+            axis = cfg.axis(letter)
+            if axis is None:
+                raise AtcMacroError(f"toolchanger: wymagana oś {letter}")
+            if value is None:
+                continue
+            if not math.isfinite(value):
+                raise AtcMacroError(f"toolchanger: {label} {letter}: wartość nieskończona")
+            lo, hi = axis.soft_limits
+            # Check the geometry and the actual four-decimal command after rounding.
+            if not (lo <= value <= hi and lo <= float(_num(value)) <= hi):
+                raise AtcMacroError(f"toolchanger: {label} {letter} poza zakresem programowym")
+    return points
+
+
 def plan_swap(cfg, old: int, new: int) -> list[tuple]:
     """Kolejność kroków wymiany old → new (0 = puste wrzeciono) w G53; wzorzec dla makra i testów.
 
@@ -40,12 +86,12 @@ def plan_swap(cfg, old: int, new: int) -> list[tuple]:
     ("wait", rola czujnika, "high"|"low").
     """
     tc = cfg.toolchanger
-    a = math.radians(tc.base_orientation_deg)
-    bx, by, _ = tc.base_position
+    positions = _positions(cfg)
+    if any(type(tool) is not int or not 0 <= tool <= tc.slots for tool in (old, new)):
+        raise AtcMacroError("toolchanger: numer narzędzia poza zakresem magazynu")
 
     def xy(slot: int) -> tuple:
-        return ("xy", bx + (slot - 1) * tc.pitch_mm * math.cos(a),
-                by + (slot - 1) * tc.pitch_mm * math.sin(a))
+        return ("xy", *positions[slot - 1][:2])
 
     if old == new:
         return []
@@ -69,13 +115,7 @@ def plan_swap(cfg, old: int, new: int) -> list[tuple]:
 def generate_atc_m6(cfg, name: str = "lrt_m6_atc") -> str:
     """Zwraca tekst podprogramu `o<name>` do `REMAP = M6 modalgroup=6 ngc=<name>`."""
     tc = cfg.toolchanger
-    if tc.type != "rack_linear":
-        raise AtcMacroError(
-            f"toolchanger.type={tc.type}: makro ATC obsługuje na razie tylko rack_linear")
-    if tc.slots < 1 or tc.base_position is None or tc.pitch_mm is None:
-        raise AtcMacroError("toolchanger: wymagane slots, base_position i pitch_mm")
-    if tc.approach_z is None or tc.retract_z is None:
-        raise AtcMacroError("toolchanger: wymagane approach_z i retract_z")
+    positions = _positions(cfg)
     if "clamp_release" not in tc.outputs:
         raise AtcMacroError("toolchanger.outputs: brak roli clamp_release")
     if tc.clamp is None or not tc.clamp.sensor:
@@ -91,9 +131,6 @@ def generate_atc_m6(cfg, name: str = "lrt_m6_atc") -> str:
         cover_open = _io(cfg, "inputs", cover.sensor_open, "czujnik otwarcia osłony")
         cover_closed = _io(cfg, "inputs", cover.sensor_closed, "czujnik zamknięcia osłony")
 
-    a = math.radians(tc.base_orientation_deg)
-    bx, by, _ = tc.base_position
-    dx, dy = tc.pitch_mm * math.cos(a), tc.pitch_mm * math.sin(a)
     feed = _num(APPROACH_FEED_MM_MIN)
     timeout = _num(SENSOR_TIMEOUT_S)
     safe_z, approach_z = _num(cfg.positions.safe_z), _num(tc.approach_z)
@@ -115,25 +152,38 @@ def generate_atc_m6(cfg, name: str = "lrt_m6_atc") -> str:
         f"o<{name}> sub",
         "#<lrt_new> = #<_selected_tool>",
         "#<lrt_old> = #<_current_tool>",
+        f"o<range> if [[#<lrt_new> LT 0] OR [#<lrt_new> GT {tc.slots}] "
+        f"OR [#<lrt_old> LT 0] OR [#<lrt_old> GT {tc.slots}]]",
+        "  (abort, ATC: numer narzędzia poza zakresem magazynu)",
+        "o<range> endif",
         "o<same> if [#<lrt_new> EQ #<lrt_old>]",
         f"  o<{name}> return",
         "o<same> endif",
-        f"o<range> if [#<lrt_new> GT {tc.slots}]",
-        "  (abort, ATC: numer narzędzia poza zakresem magazynu)",
-        "o<range> endif",
+        "o<modes> if [[#<_metric> EQ 0] OR [#<_absolute> EQ 0] "
+        "OR [#<_units_per_minute> EQ 0]]",
+        "  (abort, ATC: wymiana wymaga G21 G90 G94)",
+        "o<modes> endif",
+        "o<spindle> if [#<_spindle_on> NE 0]",
+        "  (abort, ATC: przed wymiana wymagane M5)",
+        "o<spindle> endif",
         f"G53 G0 Z{safe_z}",
     ]
     if cover_out is not None:
         lines += [f"M64 P{cover_out}", *wait(cover_open, "high", "oslona_otwarta")]
 
-    def slot_xy(var: str) -> str:
-        return (f"G53 G0 X[{_num(bx)} + [#<{var}> - 1] * {_num(dx)}] "
-                f"Y[{_num(by)} + [#<{var}> - 1] * {_num(dy)}]")
+    def slot_xy(var: str) -> list[str]:
+        result = []
+        for slot, (x, y, _) in enumerate(positions, 1):
+            label = f"{var}_slot_{slot}"
+            result += [f"  o<{label}> if [#<{var}> EQ {slot}]",
+                       f"    G53 G0 X{_num(x)} Y{_num(y)}",
+                       f"  o<{label}> endif"]
+        return result
 
     lines += [
         "; odłożenie starego narzędzia (T0 w wrzecionie = nic do odłożenia)",
         "o<put> if [#<lrt_old> GT 0]",
-        "  " + slot_xy("lrt_old"),
+        *slot_xy("lrt_old"),
         f"  G53 G1 Z{approach_z} F{feed}",
         f"  M64 P{release}",
         "  " + "\n  ".join(wait(clamped, "low", "zacisk_zwolniony")),
@@ -143,7 +193,7 @@ def generate_atc_m6(cfg, name: str = "lrt_m6_atc") -> str:
         "o<put> endif",
         "; pobranie nowego narzędzia (T0 = zostaw wrzeciono puste)",
         "o<get> if [#<lrt_new> GT 0]",
-        "  " + slot_xy("lrt_new"),
+        *slot_xy("lrt_new"),
         f"  G53 G1 Z{approach_z} F{feed}",
         f"  M65 P{release}",
         "  " + "\n  ".join(wait(clamped, "high", "zacisk_zamkniety")),
