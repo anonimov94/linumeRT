@@ -53,7 +53,9 @@ function updateControls() {
   $("mdiSend").title = mdi.ok ? "" : mdi.reason;
   const jogRule = rules.jog;
   const jogOK = jogRule.ok && (jog.canStart() || jog.isActive());
-  dro.jogButtons(jogOK, jogRule.ok ? "Oczekiwanie na potwierdzenie JOG STOP" : jogRule.reason);
+  const jogReason = jogRule.ok ? (jog.canStart() || jog.isActive() ? "" : "Oczekiwanie na potwierdzenie JOG STOP") : jogRule.reason;
+  dro.jogButtons(jogOK, jogReason);
+  $("jogLockReason").textContent = jogReason;
   $("connect").disabled = connection.isOpening();
   $("disconnect").disabled = !connection.isOpening();
   $("connect").textContent = haveConnected && connection.hasToken() ? "Połącz ponownie" : "Połącz";
