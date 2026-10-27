@@ -16,6 +16,7 @@ NIEZWERYFIKOWANE NA SPRZĘCIE; ``LinuxCNCBackend`` niezweryfikowany na LinuxCNC 
 
 from __future__ import annotations
 
+import math
 import time
 from collections.abc import Callable
 from typing import Any, Protocol
@@ -122,6 +123,7 @@ class LinuxCNCBackend:
         self._reader = reader or LinuxCNCReader(module=module)
         self._command = command
         self._last: MachineSnapshot | None = None
+        self._linear_units: float | None = None
 
     def _lc(self) -> Any:
         if self._module is None:
@@ -159,6 +161,9 @@ class LinuxCNCBackend:
 
     def snapshot(self) -> MachineSnapshot:
         self._last = self._reader.read()
+        # LinuxCNC reports machine units per mm; G20/G21 does not change these.
+        units = getattr(self._reader._stat, "linear_units", None)
+        self._linear_units = float(units) if units is not None else None
         return self._last
 
     def estop(self) -> None:
@@ -226,10 +231,17 @@ class LinuxCNCBackend:
         if self._recent().mode is not Mode.MANUAL:
             raise CommandError("jog: wymagany tryb MANUAL")
         # Jog przegubu (jjogmode=True), nie osi: nie wymaga trybu teleop. Zakładamy kinematykę
-        # tożsamościową (i-ta oś = i-ty przegub), jak czytnik; mm/s -> mm/min dla LinuxCNC.
+        # tożsamościową (i-ta oś = i-ty przegub), jak czytnik.
+        # command.jog takes machine units/SECOND (AXIS get_jog_speed), not per minute.
         joint = self._joint_index(axis)
+        velocity = speed
+        if axis.upper() not in "ABC":
+            units = self._linear_units
+            if units is None or not math.isfinite(units) or units <= 0:
+                raise CommandError("jog: brak poprawnej skali jednostek maszyny")
+            velocity *= units  # API mm/s -> native units/s; angular axes use degrees/s.
         cmd.teleop_enable(0)
-        cmd.jog(lc.JOG_CONTINUOUS, True, joint, speed * 60.0)
+        cmd.jog(lc.JOG_CONTINUOUS, True, joint, velocity)
 
     def jog_stop(self, axis: str | None) -> None:
         lc, cmd = self._lc(), self._cmd()

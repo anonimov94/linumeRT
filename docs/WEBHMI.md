@@ -53,7 +53,10 @@ Ekran nie jest funkcją bezpieczeństwa; E-STOP to obwód sprzętowy.
   uwierzytelnienie (3 s), walidacja pól (jog ≤ 50 mm/s).
 - `LinuxCNCBackend`: nie czyta stanu podczas poleceń (odczyt opróżnia kanał błędów LinuxCNC); jog
   **przegubu** (`jjogmode=True`, `teleop_enable(0)`) przy założeniu kinematyki tożsamościowej jak w
-  czytniku; `wait_complete` -1 (timeout) i `RCS_ERROR` zgłaszane operatorowi. Maszyny z innym
+  czytniku; prędkość liniowa API w mm/s jest przeliczana przez `stat.linear_units` na
+  jednostki maszyny/s (`command.jog` nie przyjmuje jednostek/min). Osie ABC używają stopni/s.
+  Brak poprawnej skali blokuje jog liniowy. `wait_complete` -1 (timeout) i `RCS_ERROR`
+  zgłaszane operatorowi. Maszyny z innym
   układem przegubów (np. gantry z dwoma przegubami na oś) wymagają jawnego mapowania — jeszcze nie ma.
 Sygnał życia do `watchdog` HAL (D35, `linumert.hmi-wd-enable`) **nie jest jeszcze podpięty**:
 brama wystawia `heartbeat` w stanie, wiązanie z HAL to następny krok.
@@ -68,3 +71,25 @@ sprzęt: NIEZWERYFIKOWANE (marker `linuxcnc` do dodania w PoC). NIEZWERYFIKOWANE
 ## Poza zakresem (następne kroki)
 Strona kliencka (DRO, scena WebGL, skórki cyberdeck/sci-fi), podpięcie `watchdog` HAL, `jog_incr`,
 wczytywanie programów, alarmy z katalogu, kiosk Chromium.
+
+## Strona — Cyberdeck PoC
+
+Model-Author: ChatGPT. Klient operatora bez bibliotek i CDN znajduje się w
+`webhmi/server/linumert_webhmi/static/` (`index.html`, `app.js`, `style.css`).
+Brama serwuje stronę pod `/`, gdy katalog statyczny istnieje. Otwórz adres
+bramy w przeglądarce i wpisz token wypisany przy starcie. Token jest utrzymywany
+wyłącznie w pamięci bieżącej strony (nigdy w URL). WebSocket `/ws` najpierw
+otrzymuje `{"auth":"…"}`; klient wymaga `state.schema == 1`, zgodnie z
+`schema.py`, i przetwarza `ack` / `error` według identyfikatora polecenia.
+
+Widok pokazuje DRO, stan, override, wrzeciono, narzędzie i błędy; umożliwia
+polecenia operatorskie i przytrzymywany jog ± (odświeżany co 150 ms, stop
+po zwolnieniu, utracie fokusu i ukryciu karty). Prosta scena WebGL 1 pokazuje
+siatkę XY i marker XYZ, z limitem 30 FPS. To wizualizacja demonstracyjna,
+nie symulacja kolizji, kinematyki ani weryfikator ścieżki. Testy:
+`python -m pytest tests/test_webhmi_static.py`.
+
+**Bezpieczeństwo:** E-STOP z przeglądarki jest wyłącznie poleceniem programowym,
+a jog deadman klienta nie jest funkcją bezpieczeństwa. Przed podłączeniem
+rzeczywistej maszyny wymagany jest sprzętowy E-STOP oraz niezależny watchdog HAL
+powiązany z bramą. Funkcji resetu E-STOP w tym interfejsie nie ma.
