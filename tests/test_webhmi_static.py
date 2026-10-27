@@ -4,6 +4,7 @@ SPDX-License-Identifier: GPL-2.0-or-later
 Model-Author: ChatGPT
 """
 
+import re
 import shutil
 import subprocess
 from pathlib import Path
@@ -11,6 +12,7 @@ from pathlib import Path
 import pytest
 from linumert.cnc import FakeMachine
 from linumert_webhmi import FakeBackend, Gateway, create_app
+from linumert_webhmi.app import KEEPALIVE_S
 from starlette.testclient import TestClient
 
 TOKEN = "test-token-for-webhmi-static"
@@ -65,3 +67,16 @@ def test_node_interlocks():
 def test_node_check_all_modules():
     for name in ("app.js", *[f"js/{module}" for module in MODULES]):
         subprocess.run(["node", "--check", str(STATIC / name)], check=True, timeout=15)
+
+
+def test_js_dom_selector_is_module_local():
+    """Każdy moduł używający $(...) deklaruje lub importuje selektor we własnym scope."""
+    for path in sorted((STATIC / "js").glob("*.js")):
+        source = path.read_text(encoding="utf-8")
+        if re.search(r"(?<![\\w$])\\$\\s*\\(", source):
+            assert re.search(r"\\b(?:const|let|var)\\s+\\$\\s*=|\\bimport\\s+(?:\\$|\\{[^}]*\\$)", source), path.name
+
+
+def test_ws_keepalive_leaves_margin_for_dro_freshness():
+    """Dwa okresy keepalive muszą zmieścić się w progu 500 ms po stronie JS."""
+    assert KEEPALIVE_S * 2 < 0.5
