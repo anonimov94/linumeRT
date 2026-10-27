@@ -1691,6 +1691,13 @@ Pełny RIP musi ponownie potwierdzić wynik; nie scalać na czerwonym CI.
 - rs274: 10 ścieżek CAM + 1 relief PASS; macierz/scenariusze Plant i C 109/109 PASS.
 - Lokalna pełna próba z systemowym gcode: błąd brakującego M2 i SIGSEGV w symulacji. Błąd test_sim_path odtworzony także na czystym main 38a248d; testy offline powtórzone w czystym venv.
 - Końcowe wyniki i SHA w kontrolach #184/#190; scalenie wyłącznie po zielonych kontrolach. Autokontrola, bez niezależnego przeglądu. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## 028/029 — sprint zespołowy WebHMI · 2026-10-27 · Codex
+- Model-Author: Codex. Właściciel: ekipa według #181, niewykonane zadania roadmapy, godzina pracy 14:43–15:43 UTC.
+- Cztery instancje Codex: koordynacja/integracja, backend przyrostów, klient/operator, niezależny przegląd i test live.
+- Porcja M2: przyrostowy JOG 0,001/0,01/0,1/1 mm lub stopni; pojedyncze zadanie na gest, osobne podtrzymanie, STOP po zwolnieniu/utracie warunków.
+- Odbiór wstępny: backend 60 PASS, Node 31 PASS, rzeczywisty LinuxCNC sim 1 PASS (8,33 s; DRO/przyrost/tryb/deadman/rozłączenie). Przeglądarka i końcowy SHA/CI w PR powiązanym z #181.
+- Pełne MPG/pulpit, watchdog HAL, sprzęt i całe bramki pozostają otwarte; nie przypisujemy udziału innych modeli. NIEZWERYFIKOWANE NA SPRZĘCIE.
 ## 066 — generator makra ATC (rack_linear) · 2026-10-27 · Claude
 - Model-Author: Claude. `core/linumert/machine/atc_macro.py`: makro remapu M6 dla ATC z `toolchanger` w machine.yaml (M64/M65 zwolnienie zacisku i osłony, M66 z timeoutem, ruchy G53, na końcu wbudowane M6 i G43/G49). Karuzela/parasol: jawna odmowa.
 - `plan_swap` to kolejność kroków; test wykonuje ją na modelu magazynu Plant (wymiany 0→3, 2→5, 4→0 bez TOOL_DROP/CLAMP_FAULT/POCKET_OCCUPIED/COVER_CRASH). 9 testów + atc/remap 23 PASS, ruff PASS.

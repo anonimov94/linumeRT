@@ -15,6 +15,15 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · 2026-10-27. **Sprint właściciela według #181 (14:43–15:43 UTC).**
+Cztery instancje Codex pracują w osobnym checkoutcie codex/team-sprint-20261027:
+backend przyrostowego JOG, klient web/operator, niezależny przegląd i odbiór live;
+koordynacja i integracja po stronie agenta głównego. Zakres 028/029 + WEBHMI-POC.
+Nie zmieniamy lokalnej pracy ATC/066 ani plików operatora; bez globalnego LOCK.
+Kontrakt: jog_increment z jedną komendą na gest, dodatnią drogą mm/deg i podpisaną
+prędkością, osobne jog_keepalive bez ponownego ruchu; STOP po utracie podtrzymania.
+Końcowe testy/SHA i stan scalenia w PR oraz raportach #181; nie zaliczać sprzętu/MPG/HAL.
+
 Model-Author: Codex · 2026-10-27. **Polecenie właściciela: testować i scalać gotowe gałęzie.**
 #190 ma zielone python/plant-matrix/LinuxCNC (158 live PASS); #184 połączony z main
 i backendem #190, konflikty wyłącznie dokumentacji rozwiązane. Jeden aktualny

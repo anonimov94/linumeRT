@@ -469,3 +469,33 @@ Pozostałe rodziny cykli i napędy są kolejnymi porcjami wspólnego backendu, n
 implementacjami dla skórek. Odbiory M1/M2 i dalsze bramki pozostają otwarte; brak zmian RT/HAL.
 Pierwszy raster obejmuje frez kulisty, górną obwiednię i wykańczanie przygotówki po zgrubnej;
 nie jest jeszcze strategią zgrubną, obsługą podcięć ani kwalifikacją sprzętu.
+
+## Sprint zespołowy M2 — polecenie właściciela 2026-10-27
+
+Model-Author: Codex. Właściciel polecił odtworzyć role zespołu z issue #181, rozdzielić
+niewykonane zadania roadmapy i wdrożyć wynik w godzinę (14:43–15:43 UTC). Dostępne
+są cztery instancje Codex: koordynacja/integracja, backend, klient web, przegląd/odbiór.
+Nie deklarujemy udziału Claude/Gemini/Groka. Wybrano istniejący WEBHMI-POC i sesje
+028/029: przyrostowy JOG w przeglądarce oraz rzeczywisty odbiór przeglądarki/LinuxCNC.
+Zależności otwarte: pełne MPG/pulpit, niezależny watchdog HAL i sprzęt; sprint nie zamyka
+całych sesji ani bramek. Pozostały plan zachowuje kolejność; lokalnej pracy ATC nie przejmujemy.
+Raporty co około 10 minut w #181, kod w osobnym checkoutcie, scalenie po zielonych kontrolach.
+
+## Darmowe czaty jako jedyny zespół — bezwzględne polecenie właściciela 2026-10-27
+
+Model-Author: Codex. Organizując ekipę i raporty według #181, używać wyłącznie
+darmowych czatów już zalogowanych w przeglądarce właściciela. Nie uruchamiać kolejnych
+sesji Claude, płatnych API ani zastępować tej ekipy subagentami Codex. Dotychczasowe
+cztery instancje Codex w sprincie były inną organizacją niż wskazana przez właściciela;
+dalsze delegowanie w ten sposób zakończono. Kod już wykonany podlega zwykłym testom
+i integracji, bez przypisywania go innym modelom. Dokładna, nadrzędna reguła:
+WSPOLPRACA_MODELI.md, „Bezwzględna reguła zespołów i raportów”.
+
+## Precyzja wartości i odbiór pozycjonowania — polecenie właściciela 2026-10-27
+
+Model-Author: Codex. Właściciel określił rozdzielczość pozycji 0,0001 mm, obliczeń
+0,000001 mm oraz akceptację bezwzględnego błędu pozycjonowania poniżej 0,001 mm.
+Wartość 0,999999994 mm dla zadania 1 mm jest poprawna; nie wymagamy zgodności
+bitowej ani dokładniejszych wyników. Kontrakt zapisano w CLAUDE.md. Test kroku
+WebHMI wymaga błędu <0,001 mm zamiast wcześniejszego progu 0,002 mm. Test stabilności
+po STOP pozostaje osobny; nie zmieniono limitów, fizyki, safety ani typów liczbowych.

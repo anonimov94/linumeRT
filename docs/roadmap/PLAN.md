@@ -335,11 +335,11 @@ Pozostaje: Pełny odbiór kompozycji i nowych skórek; HMI-02, SKIN-04…06. Odb
 
 ### 029 — Tryby, JOG i pulpit MPG
 
-**częściowe**. JOG, tryby i edytowalny krok dostępne w HMI.
+**częściowe**. JOG, tryby i edytowalny krok dostępne w HMI. 2026-10-27: sprint właściciela z issue #181, cztery role Codex; implementacja przyrostowego JOG w web i odbiór przeglądarki/LinuxCNC. Końcowe dowody i SHA w PR sprintu; bez deklaracji pełnego odbioru MPG/pulpitu/watchdog HAL.
 
 Pozostaje: Rozliczyć MPG i pełny scenariusz odbioru 029.
 
-Źródła: [docs/DZIENNIK.md](../DZIENNIK.md), [prompts/sesja-029.md](../../prompts/sesja-029.md).
+Źródła: [docs/DZIENNIK.md](../DZIENNIK.md), [PR](https://github.com/anonimov94/linumeRT/issues/181), [prompts/sesja-029.md](../../prompts/sesja-029.md).
 
 ### 030 — MDI i klawiatura ekranowa
 
@@ -1029,11 +1029,11 @@ Pozostaje: Rozszerzony odbiór złożonych płaskorzeźb w symulacji i integracj
 
 ### WEBHMI-POC — HTML/WebGL: integracja strony z bramą LinuxCNC
 
-**częściowe**. Kierunek HTML/WebGL potwierdzony przez właściciela 2026-10-26; GUI Qt zamrożone według DECYZJE.md. Brama Claude (#185), strona Cyberdeck (#187) i jednostki jogu (#186) są w main. 2026-10-27 Codex: odtworzono brak strony w wheel (HTTP 404); dodano zasoby statyczne do danych pakietu i kontrolę artefaktu w CI poza checkoutem. Poprawiona paczka: HTTP zasobów, uwierzytelnienie WebSocket, jog atrapy i zatrzymanie po rozłączeniu PASS; 71 testów WebHMI PASS na Pythonie 3.14.8. Nie jest to odbiór przeglądarki ani LinuxCNC. Pełne lokalne make lint test: 1595 PASS, 124 SKIP, 157 testów LinuxCNC poza zakresem; REQ 22/22. PR #188, CI Debian/LinuxCNC w toku.
+**częściowe**. Kierunek HTML/WebGL potwierdzony przez właściciela 2026-10-26; GUI Qt zamrożone według DECYZJE.md. Brama Claude (#185), strona Cyberdeck (#187) i jednostki jogu (#186) są w main. 2026-10-27 Codex: odtworzono brak strony w wheel (HTTP 404); dodano zasoby statyczne do danych pakietu i kontrolę artefaktu w CI poza checkoutem. Poprawiona paczka: HTTP zasobów, uwierzytelnienie WebSocket, jog atrapy i zatrzymanie po rozłączeniu PASS; 71 testów WebHMI PASS na Pythonie 3.14.8. Nie jest to odbiór przeglądarki ani LinuxCNC. Pełne lokalne make lint test: 1595 PASS, 124 SKIP, 157 testów LinuxCNC poza zakresem; REQ 22/22. PR #188, CI Debian/LinuxCNC w toku. 2026-10-27: sprint właściciela z issue #181, cztery role Codex; implementacja przyrostowego JOG w web i odbiór przeglądarki/LinuxCNC. Końcowe dowody i SHA w PR sprintu; bez deklaracji pełnego odbioru MPG/pulpitu/watchdog HAL.
 
 Pozostaje: Odbiór rzeczywistej przeglądarki: DRO, scena WebGL ≤30 FPS, jog i utrata połączenia. Integracja i odbiór na LinuxCNC RIP; niezależny watchdog HAL przed użyciem sprzętu. Równoważność funkcji web z ekranem awaryjnym Qt; wcześniejsze bramki pozostają otwarte.
 
-Źródła: [docs/DECYZJE.md](../DECYZJE.md), [docs/WEBHMI.md](../WEBHMI.md), [tools/ci/check_webhmi_wheel.py](../../tools/ci/check_webhmi_wheel.py), [PR](https://github.com/anonimov94/linumeRT/pull/185), [PR](https://github.com/anonimov94/linumeRT/pull/187), [PR](https://github.com/anonimov94/linumeRT/pull/188), [docs/SYNTEZA_MODELI_2026-10-26.md](../SYNTEZA_MODELI_2026-10-26.md).
+Źródła: [docs/DECYZJE.md](../DECYZJE.md), [docs/WEBHMI.md](../WEBHMI.md), [tools/ci/check_webhmi_wheel.py](../../tools/ci/check_webhmi_wheel.py), [PR](https://github.com/anonimov94/linumeRT/pull/185), [PR](https://github.com/anonimov94/linumeRT/pull/187), [PR](https://github.com/anonimov94/linumeRT/pull/188), [docs/SYNTEZA_MODELI_2026-10-26.md](../SYNTEZA_MODELI_2026-10-26.md), [PR](https://github.com/anonimov94/linumeRT/issues/181).
 
 ### CAM-2D-TEXT-STL — Strategie CAM 2D, napisy i przekroje STL
 

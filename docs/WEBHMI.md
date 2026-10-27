@@ -1,7 +1,7 @@
 # Brama web-hmi (LinuxCNC ↔ przeglądarka)
 
 Model-Author: Claude · 2026-10-26. Wynik decyzji „Ekran operatora w HTML/WebGL obok QtDragon”
-(`docs/DECYZJE.md`). Backend; strona z WebGL (DRO, skórki) to następny krok (PoC `web-hmi-poc`).
+(`docs/DECYZJE.md`). Backend i strona operatora WebGL są rozwijane w istniejącym `WEBHMI-POC`.
 
 ## Uruchomienie
 ```bash
@@ -65,11 +65,14 @@ brama wystawia `heartbeat` w stanie, wiązanie z HAL to następny krok.
 ```bash
 python -m pytest tests/test_webhmi_gateway.py tests/test_webhmi_app.py tests/test_webhmi_linuxcnc_backend.py
 ```
-Bez LinuxCNC (atrapa i sztuczny moduł `linuxcnc`). Mapowanie `LinuxCNCBackend` na prawdziwy LinuxCNC 2.9 i
-sprzęt: NIEZWERYFIKOWANE (marker `linuxcnc` do dodania w PoC). NIEZWERYFIKOWANE NA SPRZĘCIE.
+Testy podstawowe bez LinuxCNC używają atrapy i sztucznego modułu. Odbiór rzeczywistego
+LinuxCNC sim: `python -m pytest tests/test_webhmi_live_linuxcnc.py -m linuxcnc`. Sprawdza
+DRO względem NML, przyrost, brak powtórki, odmowę w MDI, wygaśnięcie przyrostu i STOP po
+rozłączeniu WebSocket. Test działa w osobnej instancji sim; fixture wykonuje zewnętrzny
+reset, API web nie dostaje resetu E-STOP. Sprzęt: NIEZWERYFIKOWANE NA SPRZĘCIE.
 
 ## Poza zakresem (następne kroki)
-Strona kliencka (DRO, scena WebGL, skórki cyberdeck/sci-fi), podpięcie `watchdog` HAL, `jog_incr`,
+Strona kliencka (DRO, scena WebGL, skórki cyberdeck/sci-fi), podpięcie `watchdog` HAL,
 wczytywanie programów, alarmy z katalogu, kiosk Chromium.
 
 ## Strona — Cyberdeck PoC
@@ -196,3 +199,16 @@ aby strona z importami ES działała również poza repozytorium.
 Nie modyfikowano bramy Python, HAL ani interfejsu poleceń. Etap 2 nie
 dodaje funkcji bezpieczeństwa; do maszyny realnej nadal niezbędny jest
 niezależny watchdog HAL oraz sprzętowy E-STOP.
+
+## JOG przyrostowy — 029 / sprint #181
+
+Model-Author: Codex · 2026-10-27. Klient oferuje tryb ciągły i kroki 0,001/0,01/0,1/1.
+Dla osi liniowych API przyjmuje mm i mm/s, dla obrotowych stopnie i stopnie/s.
+`jog_increment` wysyła raz na gest `axis`, `speed` ze znakiem i dodatnią `distance` ≤ 1;
+`jog_keepalive` podtrzymuje własność sesji, nie zleca następnego przyrostu. Zwolnienie,
+utrata fokusu/ukrycie karty/połączenia i upływ deadman zdejmują ruch. Po osiągnięciu
+przyrostu przytrzymanie nie powtarza ruchu; kolejny wymaga nowego gestu operatora.
+Przyrost może zostać przerwany przez STOP. Wcześniejsze ograniczenia watchdog/HAL pozostają.
+
+Odbiór Pythona, Node, przeglądarki i LinuxCNC raportowany osobno w PR sprintu i #181;
+atrapa ani testy mapowania nie zastępują dowodu rzeczywistego LinuxCNC.
