@@ -73,9 +73,11 @@ def test_js_dom_selector_is_module_local():
     """Każdy moduł używający $(...) deklaruje lub importuje selektor we własnym scope."""
     for path in sorted((STATIC / "js").glob("*.js")):
         source = path.read_text(encoding="utf-8")
-        if re.search(r"(?<![\\w$])\\$\\s*\\(", source):
-            assert re.search(r"\\b(?:const|let|var)\\s+\\$\\s*=|\\bimport\\s+(?:\\$|\\{[^}]*\\$)", source), path.name
-
+        if re.search(r"(?<![\w$])\$\s*\(", source):
+            assert re.search(
+                r"\b(?:const|let|var)\s+\$\s*=|\bimport\s+(?:\$|\{[^}]*\$)",
+                source,
+            ), path.name
 
 def test_ws_keepalive_leaves_margin_for_dro_freshness():
     """Dwa okresy keepalive muszą zmieścić się w progu 500 ms po stronie JS."""
