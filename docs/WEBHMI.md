@@ -138,3 +138,45 @@ Testy lokalne: `node --test tests/webhmi_js/test_interlocks.mjs` oraz
 jeśli Node.js jest dostępny). Przed obsługą maszyny realnej nadal wymagane
 sprzętowy E-STOP, watchdog HAL i niezależne testy ruchu/failure-injection.
 Etap 2 (dziennik i eksport diagnostyki) jest odłożony do osobnego PR.
+
+
+## Diagnostyka — etap 2 (Model-Author: ChatGPT)
+
+Panel diagnostyki w istniejącym wyglądzie WebHMI zawiera:
+- `static/js/events.js` — czystą funkcję `diffState(prev, next)` zwracającą zdarzenia
+  `{level, source, text}`: zmiany zasilania/E-STOP, trybu, interpretera,
+  bazowania, krańcówek osi, numeru narzędzia, programu, błędów bramy
+  i `jog_stop_pending`.
+- `static/js/log.js` — wyłącznie **ulotny bufor pierścieniowy 500 zdarzeń**
+  z lokalnym czasem `HH:MM:SS.mmm`, filtrem Wszystkie/Ostrzeżenia i alarmy/Tylko alarmy,
+  czyszczeniem i eksportem TXT. Przy przewinięciu dziennika w górę nowe zdarzenia
+  nie wymuszają przewijania do dołu. Eksport obejmuje bufor niezależnie od filtra.
+  Dziennik nie przechowuje tokenu ani treści wysyłanych poleceń MDI.
+- Lampki ŁĄCZE, E-STOP, ZASILANIE, BAZOWANIE, KRAŃCÓWKI, JOG, BŁĘDY
+  z **kolorem i jednoznacznym tekstem**. Przy utracie świeżości maszyna
+  otrzymuje oznaczenie NIEAKTUALNE zamiast domniemanego stanu bezpiecznego.
+- DRO: kolumna `FERR` (`following_error`) z czterema miejscami po przecinku,
+  progiem ostrzeżenia `|FERR| > 0.05 mm` na osiach liniowych X/Y/Z/U/V/W
+  (znacznik `!` i podświetlenie). Osie A/B/C pokazują stopnie — próg w mm
+  nie jest stosowany do wartości kątowych.
+- Liczniki pakietów `state` odebranych w ostatniej sekundzie, wieku
+  ostatniej migawki oraz czasu RTT ostatniego `ack` (w milisekundach).
+  Pomiar RTT obejmuje WebSocket i obsługę polecenia przez bramę, a nie
+  rzeczywiste zakończenie ruchu CNC.
+
+**Semantyka `errors`:** `LinuxCNCReader._drain_errors()` odczytuje i opróżnia
+`linuxcnc.error_channel` przy każdej migawce; `FakeMachine` może udostępniać
+listę narastającą. `diffState` porównuje liczności identycznych wpisów pomiędzy
+kolejnymi migawkami: bez duplikowania keepalive/narastających komunikatów,
+ale ponowne wystąpienie po zniknięciu traktuje jako nowe zdarzenie. Bieżąca
+lampka BŁĘDY odzwierciedla wyłącznie ostatnią migawkę, natomiast wcześniejsze
+błędy pozostają w dzienniku do wyparcia lub ręcznego wyczyszczenia.
+
+Testy: `node --test tests/webhmi_js/test_events.mjs`, istniejące testy
+`node:test` interlocks oraz `python -m pytest tests/test_webhmi_static.py`
+(HTTP 200 wszystkich modułów, brak CDN, nagłówki SPDX, sprawdzenie selektorów,
+statyczny kontrakt FERR, `node --check` gdy dostępny Node.js).
+
+Nie modyfikowano bramy Python, HAL ani interfejsu poleceń. Etap 2 nie
+dodaje funkcji bezpieczeństwa; do maszyny realnej nadal niezbędny jest
+niezależny watchdog HAL oraz sprzętowy E-STOP.
