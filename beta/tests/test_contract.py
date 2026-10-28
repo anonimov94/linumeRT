@@ -10,8 +10,13 @@ niewdrożone są jawnie oznaczone zamiast udawać działanie.
 from __future__ import annotations
 
 import json
+from pathlib import Path
 
 import pytest
+
+from linumert_headless import __version__
+
+BETA = Path(__file__).resolve().parent.parent
 
 REQUIRED_DOMAINS = {
     "access", "alarm", "cam", "config", "diag", "machine",
@@ -75,6 +80,39 @@ def test_polecenia_stop_nie_podlegaja_limiterowi(app) -> None:
     # Polecenia zatrzymujące przechodzą mimo to — to warunek bezpieczeństwa obsługi.
     assert app.call("machine.estop").ok is True
     assert app.call("machine.stop").ok is True
+
+
+def _line(lines: list[str], number: int) -> str:
+    """Fragment linii do komunikatu błędu (pełne wiersze kontraktu są za długie)."""
+    return lines[number - 1][:90] if 1 <= number <= len(lines) else "<brak>"
+
+
+def test_zatwierdzony_contract_json_jest_zsynchronizowany_z_kodem(app) -> None:
+    """``api/contract.json`` musi być dokładnie tym, co generuje ``linumertd contract``.
+
+    Plik jest zatwierdzony w repo i służy autorom GUI do codegen, więc cicha rozbieżność
+    z kodem (zmiana schematu bez regeneracji) oszukałaby ich: GUI zbudowane na starym
+    kontrakcie wysyłałoby pola, których usługa już nie przyjmuje. Porównanie dotyczy
+    całych bajtów, nie tylko parsowalności — tak samo zapisuje CLI
+    (``json.dumps(..., ensure_ascii=False, indent=2)``, bez końcowej nowej linii).
+    """
+    path = BETA / "api" / "contract.json"
+    assert path.exists(), f"brak zatwierdzonego kontraktu: {path}"
+    payload = app.contract.export(application="linumeRT headless", version=__version__)
+    generated = json.dumps(payload, ensure_ascii=False, indent=2)
+    committed = path.read_text(encoding="utf-8")
+    if generated != committed:
+        gen_lines = generated.splitlines()
+        com_lines = committed.splitlines()
+        pairs = zip(gen_lines, com_lines, strict=False)
+        first = next((i for i, (a, b) in enumerate(pairs, 1) if a != b),
+                     min(len(gen_lines), len(com_lines)) + 1)
+        raise AssertionError(
+            f"api/contract.json rozjechany z kodem (pierwsza różnica w linii {first}; "
+            f"{len(com_lines)} -> {len(gen_lines)} linii). "
+            f"Zregeneruj: python -m linumert_headless contract --out api/contract.json\n"
+            f"  zatwierdzone: {_line(com_lines, first)}\n"
+            f"  wygenerowane: {_line(gen_lines, first)}")
 
 
 def test_eksport_kontraktu_jest_jsonem_dla_gui(app) -> None:
