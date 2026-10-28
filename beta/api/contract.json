@@ -4657,6 +4657,12 @@
             "title": "Cache Key",
             "type": "string"
           },
+          "source": {
+            "default": "",
+            "description": "rs274 (pełny interpreter LinuxCNC) albo subset (bez LinuxCNC)",
+            "title": "Source",
+            "type": "string"
+          },
           "message": {
             "default": "",
             "title": "Message",

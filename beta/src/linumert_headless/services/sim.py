@@ -83,6 +83,9 @@ class SimService:
                     "max_x": float(high[0]), "max_y": float(high[1]), "max_z": float(high[2])},
             stock_line=str(result.get("stock") or ""),
             cache_key=str(result.get("key", "")),
+            # Bez tego GUI nie wie, czy wynik jest pełny: interpreter podzbioru pomija
+            # pętle o-word i G53, więc removed_mm3 bywa 0 mimo realnego skrawania.
+            source=str(result.get("source") or ""),
             message=f"{result.get('lines', 0)} linii, {result.get('segments', 0)} odcinków",
         )
 

@@ -412,6 +412,8 @@ class SimResultOut(Model):
     bounds: dict[str, float] = Field(default_factory=dict)
     stock_line: str = ""
     cache_key: str = ""
+    source: str = Field(
+        "", description="rs274 (pełny interpreter LinuxCNC) albo subset (bez LinuxCNC)")
     message: str = ""
 
 

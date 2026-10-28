@@ -324,6 +324,25 @@ def test_sim_run_liczy_material_i_kolizje(call) -> None:
     assert {"min_x", "max_x", "min_z", "max_z"} <= set(result["bounds"])
 
 
+def test_sim_run_zglasza_wiarygodnosc_wyniku(call) -> None:
+    """GUI musi wiedzieć, czy wynik jest pełny — bez tego pokaże 0 mm³ jako prawdę.
+
+    Interpreter podzbioru pomija pętle ``o-word`` i ``G53``, więc program, który całe
+    skrawanie ma w pętli, daje ``volume_removed_mm3 = 0`` mimo realnej pracy. Pole
+    ``source`` (``rs274`` | ``subset``) i ``notes`` to jedyne sygnały, że liczby są
+    przybliżone. Regresja: ``simulate()`` zwraca ``source``, ale usługa je gubiła.
+    """
+    result = call("sim.run", {"name": "linumert_demo.ngc"})
+    assert result["source"] in {"rs274", "subset"}, result["source"]
+    assert isinstance(result["notes"], list)
+    if result["source"] == "subset":
+        skipped = [n for n in result["notes"] if "pomini" in n]
+        assert skipped, "subset bez informacji o pominięciach"
+        # demo ma całe skrawanie w pętlach o-word — zero jest skutkiem pominięcia
+        assert result["volume_removed_mm3"] == 0.0
+        assert result["segments"] > 0, "ścieżka mimo pominięć musi mieć odcinki"
+
+
 def test_sim_run_przez_nazwe_programu(call) -> None:
     result = call("sim.run", {"name": "linumert_kwadrat.ngc", "stock": "BOX X150 Y150 Z20",
                               "tools": [[1, 40.0, 6.0]]})
