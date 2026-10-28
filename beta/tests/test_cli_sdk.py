@@ -48,6 +48,41 @@ def test_cli_json_i_kontrakt_do_pliku(capsys, tmp_path, workdir) -> None:
     assert capsys.readouterr().out.startswith("zapisano kontrakt")
 
 
+def test_cli_flagi_globalne_dzialaja_przed_podkomenda_i_po_niej(app, workdir) -> None:
+    """``linumertctl operations --json`` musi działać — tak podaje dokumentacja.
+
+    argparse nie przepuszcza flag parsera głównego za nazwę podpolecenia, więc przy
+    flagach tylko na parserze głównym forma z README/API padała z kodem 2 (błąd
+    użycia), a działała wyłącznie ``linumertctl --json operations``. Oba poziomy
+    dostają ten sam zestaw argumentów, a ``SUPPRESS`` jako domyślna pilnuje, żeby
+    podparser nie skasował wartości podanej przed nazwą podpolecenia.
+    """
+    parser = build_parser(app.contract)
+    przed = parser.parse_args(["--json", "operations"])
+    po = parser.parse_args(["operations", "--json"])
+    assert przed.json is po.json is True, "obie pozycje muszą dawać ten sam wynik"
+
+    # wartość podana z przodu nie może być nadpisana pustą domyślną z podparsera
+    args = parser.parse_args(["--url", "http://x:8080", "machine.state"])
+    assert args.url == "http://x:8080"
+    args = parser.parse_args(["machine.state", "--url", "http://x:8080"])
+    assert args.url == "http://x:8080"
+    args = parser.parse_args(["--root", "/tmp/a", "machine.state", "--url", "http://x:8080"])
+    assert (args.root, args.url) == ("/tmp/a", "http://x:8080")
+
+    # domyślne nadal obowiązują, gdy flagi nie podano wcale
+    args = parser.parse_args(["machine.state"])
+    assert (args.url, args.backend, args.json) == ("", "fake", False)
+
+
+def test_cli_operations_z_json_po_podkomendzie(capsys, workdir) -> None:
+    """Dokładna forma z dokumentacji, wykonana end-to-end (nie tylko sparsowana)."""
+    code = main(["--root", str(workdir), "operations", "--json"])
+    assert code == 0, "forma z README.md i API.md musi działać"
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["operations"] and payload["domains"]
+
+
 def test_cli_blad_operacji_daje_kod_1_i_komunikat(capsys, workdir) -> None:
     code = main(["--root", str(workdir), "program.read", "name=nie_ma.ngc"])
     assert code == 1

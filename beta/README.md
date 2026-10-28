@@ -28,7 +28,7 @@ nie przepisując ani jednej linijki logiki sterowania.
 
 ```bash
 make install                     # pip install -e ".[dev]"
-make test                        # 900 testów (bez LinuxCNC, bez Qt, bez serwera X)
+make test                        # 902 testów (bez LinuxCNC, bez Qt, bez serwera X)
 make lint                        # ruff + strażnik "brak GUI"
 
 make serve                       # serwer API na 127.0.0.1:8080 (backend: atrapa)

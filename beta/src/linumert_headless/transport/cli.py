@@ -95,37 +95,62 @@ class RemoteClient:
                                                "message": f"HTTP {exc.code}"}}
 
 
+def _global_flags() -> argparse.ArgumentParser:
+    """Flagi wspólne dla parsera głównego i każdego podparsera.
+
+    argparse nie przepuszcza flag parsera głównego za nazwę podpolecenia, więc
+    ``linumertctl operations --json`` — forma podana w dokumentacji — padało z kodem 2.
+    Ten sam zestaw argumentów dostają oba poziomy, a ``SUPPRESS`` jako domyślna
+    sprawia, że podparser nie nadpisuje wartości podanej przed nazwą podpolecenia
+    (bez tego ``--url`` podane z przodu byłoby kasowane pustym domyślnym z tyłu).
+    """
+    common = argparse.ArgumentParser(add_help=False)
+    common.add_argument("--url", default=argparse.SUPPRESS,
+                        help="zdalny serwer, np. http://127.0.0.1:8080")
+    common.add_argument("--token", default=argparse.SUPPRESS,
+                        help="token API (albo LRT_TOKEN)")
+    common.add_argument("--backend", default=argparse.SUPPRESS, choices=("fake", "linuxcnc"),
+                        help="backend maszyny w trybie lokalnym (domyślnie fake)")
+    common.add_argument("--root", default=argparse.SUPPRESS,
+                        help="katalog projektu beta (domyślnie ten repo)")
+    common.add_argument("--json", action="store_true", default=argparse.SUPPRESS,
+                        help="zawsze drukuj pełny JSON")
+    return common
+
+
 def build_parser(contract: Any) -> argparse.ArgumentParser:
-    """Parser z operacji kontraktu: ``domena akcja parametry``."""
+    """Parser z operacji kontraktu: ``domena akcja parametry``.
+
+    Flagi globalne działają przed nazwą podpolecenia i po niej, więc obie formy
+    z dokumentacji dają ten sam wynik.
+    """
     parser = argparse.ArgumentParser(
         prog="linumertctl",
         description="CLI aplikacji linumeRT headless — te same operacje co REST i GUI.",
         epilog="Parametry podaj jako nazwa=wartość, np. --axis X. "
                "Listę operacji pokazuje `linumertctl operations`.",
+        parents=[_global_flags()],
     )
-    parser.add_argument("--url", default="", help="zdalny serwer, np. http://127.0.0.1:8080")
-    parser.add_argument("--token", default="", help="token API (albo LRT_TOKEN)")
-    parser.add_argument("--backend", default="fake", choices=("fake", "linuxcnc"),
-                        help="backend maszyny w trybie lokalnym (domyślnie fake)")
-    parser.add_argument("--root", default="", help="katalog projektu beta (domyślnie ten repo)")
-    parser.add_argument("--json", action="store_true", help="zawsze drukuj pełny JSON")
+    parser.set_defaults(url="", token="", backend="fake", root="", json=False)
 
     sub = parser.add_subparsers(dest="command", required=True)
 
     for operation in contract.operations():
-        domain, _, action = operation.name.partition(".")
         command = sub.add_parser(
             operation.name, help=operation.summary,
             description=f"{operation.summary}\n\nstatus: {operation.status}"
                         + (f"\nplan: {operation.plan}" if operation.plan else ""),
+            parents=[_global_flags()],
         )
         command.add_argument("params", nargs="*", metavar="nazwa=wartość",
                              help="parametry operacji (schemat: `linumertctl contract`)")
         command.set_defaults(operation=operation.name)
 
-    extra = sub.add_parser("operations", help="lista operacji (bez schematów)")
+    extra = sub.add_parser("operations", help="lista operacji (bez schematów)",
+                           parents=[_global_flags()])
     extra.set_defaults(operation="@operations")
-    extra_contract = sub.add_parser("contract", help="pełny kontrakt JSON")
+    extra_contract = sub.add_parser("contract", help="pełny kontrakt JSON",
+                                    parents=[_global_flags()])
     extra_contract.add_argument("--out", default="", help="zapisz do pliku zamiast na stdout")
     extra_contract.set_defaults(operation="@contract")
     return parser

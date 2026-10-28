@@ -7,7 +7,7 @@ wymienia każdy usunięty plik, każdą zmianę w przejętym kodzie i każdy tes
 nie został przeniesiony — z powodem. Bez tego nie da się odróżnić „usunięte celowo”
 od „zgubione przy kopiowaniu”.
 
-Stan zweryfikowany: **900 testów przechodzi, 0 pominiętych, 77 podtestów**; `ruff` czysty;
+Stan zweryfikowany: **902 testów przechodzi, 0 pominiętych, 77 podtestów**; `ruff` czysty;
 `tools/check_no_gui.py` zwraca 0.
 
 ## 1. Pliki usunięte (GUI / Qt / OpenGL / panel web)
