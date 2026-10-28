@@ -1,7 +1,7 @@
 <!-- Generowane przez python3 tools/roadmap.py; edytuj docs/roadmap/plan.json. -->
 # Wspólny plan linumeRT
 
-Pierwotny plan: **84 sesje M0–M6**, commit `796c6a2`. Stan na 2026-10-27: planowane: 15; w toku: 0; częściowe: 30; do odbioru: 0; ukończone: 39; zablokowane: 0.
+Pierwotny plan: **84 sesje M0–M6**, commit `796c6a2`. Stan na 2026-10-28: planowane: 15; w toku: 0; częściowe: 30; do odbioru: 0; ukończone: 39; zablokowane: 0.
 
 Zakończenie części implementacji nie oznacza odbioru całej funkcji ani sprzętu.
 
@@ -609,11 +609,11 @@ Pozostaje: Pełna fizyka osi obrotowych, generator kinematyk, DRO/TCP i five_axi
 
 ### 066 — Automatyczna zmiana narzędzia
 
-**częściowe**. Model magazynu i zacisku Plant istnieje. Generator makra remapu M6 dla ATC z machine.yaml (rack_linear): core/linumert/machine/atc_macro.py, plan wymiany sprawdzony na modelu magazynu Plant (tests/test_atc_macro.py, 9 testów). 2026-10-27: #195 w main: Options.atc i eksport makra. Codex: Plant i generator makra M6 korzystają ze wspólnego wyznaczania pozycji gniazd w rdzeniu. Jawne slot_positions z machine.yaml mają pierwszeństwo przed bazą i rozstawem; makro obsługuje też konfigurację bez base_position/pitch_mm. Generator odmawia eksportu nieosiągalnej geometrii i sprawdza numery obu narzędzi przed ruchem. Windows 96 PASS/1 SKIP; rs274 Debian12 8 PASS.
+**częściowe**. Model magazynu i zacisku Plant istnieje. Generator makra remapu M6 dla ATC z machine.yaml (rack_linear): core/linumert/machine/atc_macro.py, plan wymiany sprawdzony na modelu magazynu Plant (tests/test_atc_macro.py, 9 testów). 2026-10-27: #195 w main: Options.atc i eksport makra. Codex: Plant i generator makra M6 korzystają ze wspólnego wyznaczania pozycji gniazd w rdzeniu. Jawne slot_positions z machine.yaml mają pierwszeństwo przed bazą i rozstawem; makro obsługuje też konfigurację bez base_position/pitch_mm. Generator odmawia eksportu nieosiągalnej geometrii i sprawdza numery obu narzędzi przed ruchem. Windows 96 PASS/1 SKIP; rs274 Debian12 8 PASS. 2026-10-28: #197/#198 scalone; generator Plant łączy wyjścia M64/M65 i wejścia M66 z lrt-net, ustawia num_dio i odrzuca kolizje z istniejącymi sieciami. Wspólny zakres: 100 testów offline PASS i 8 prób rzeczywistego rs274 PASS.
 
-Pozostaje: mapowanie motion.digital-* do Plant, pełny remap z czujnikami i awariami, potwierdzenie zatrzymania wrzeciona, przywracanie stanu modalnego programu, dziennik transakcji i RECOVERY_REQUIRED po przerwaniu oraz osobne rozwiązania karuzeli/parasolowego magazynu. Sprawdzenie zakresów punktów nie jest dowodem bezkolizyjności całej drogi narzędzia i oprawki.
+Pozostaje: pełny remap z czujnikami i awariami, potwierdzenie zatrzymania wrzeciona, przywracanie stanu modalnego programu, dziennik transakcji i RECOVERY_REQUIRED po przerwaniu oraz osobne rozwiązania karuzeli/parasolowego magazynu. Sprawdzenie zakresów punktów nie jest dowodem bezkolizyjności całej drogi narzędzia i oprawki.
 
-Źródła: [docs/DZIENNIK.md](../DZIENNIK.md), [core/linumert/machine/atc_macro.py](../../core/linumert/machine/atc_macro.py), [tests/test_atc_macro.py](../../tests/test_atc_macro.py), [docs/raporty/ATC_GEOMETRIA_2026-10-27.md](../raporty/ATC_GEOMETRIA_2026-10-27.md), [core/linumert/machine/toolchanger_geometry.py](../../core/linumert/machine/toolchanger_geometry.py), [PR](https://github.com/anonimov94/linumeRT/pull/195), [prompts/sesja-066.md](../../prompts/sesja-066.md).
+Źródła: [docs/DZIENNIK.md](../DZIENNIK.md), [core/linumert/machine/atc_macro.py](../../core/linumert/machine/atc_macro.py), [tests/test_atc_macro.py](../../tests/test_atc_macro.py), [docs/raporty/ATC_GEOMETRIA_2026-10-27.md](../raporty/ATC_GEOMETRIA_2026-10-27.md), [core/linumert/machine/toolchanger_geometry.py](../../core/linumert/machine/toolchanger_geometry.py), [PR](https://github.com/anonimov94/linumeRT/pull/195), [tests/test_atc_hal.py](../../tests/test_atc_hal.py), [PR](https://github.com/anonimov94/linumeRT/pull/197), [PR](https://github.com/anonimov94/linumeRT/pull/198), [prompts/sesja-066.md](../../prompts/sesja-066.md).
 
 ### 067 — Kreator konfiguracji maszyny
 

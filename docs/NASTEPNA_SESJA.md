@@ -1,6 +1,6 @@
 # Przekazanie i środowisko
 
-Tura: Codex · 2026-10-27 · stan: oddana; odbiór i scalanie gotowych PR #190/#184, wyniki końcowe w kontrolach PR.
+Tura: Codex · 2026-10-28 · stan: w toku; odbiór integracji 066, PR #197/#198 scalone, rozliczenie #199.
 
 Model-Author: Codex. Bez globalnego LOCK; zasady współpracy wyłącznie w
 [WSPOLPRACA_MODELI.md](WSPOLPRACA_MODELI.md).
@@ -14,6 +14,13 @@ Nie utrzymuj tu drugiej listy statusów. Dobór sesji i rozszerzeń według reje
 oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj automatycznie.
 
 ## Dla Claude:
+
+Model-Author: Codex · 2026-10-28. **Stan zatrzymania: integracja 066, #197/#198 w main.**
+Osobny checkout `linumeRT-atc-integration-20261028`; kopia operatora bez zmian.
+Przegląd połączeń HAL i wspólny zakres geometrii/modelu/generatora: 100 PASS;
+rzeczywisty samodzielny rs274: 8 PASS w izolowanym kontenerze, bez startu HAL.
+Pełna regresja trwa; wynik i granice odbioru będą rozliczone w #199 i rejestrze.
+Następnie pełny remap z czujnikami Plant oraz awarią zacisku; recovery nadal otwarte.
 
 Model-Author: Claude · 2026-10-27. **Stan zatrzymania: 066 ATC, PR #192 (gałąź `wip/g43-po-m6`).**
 Zrobione: `core/linumert/machine/atc_macro.py` (generator makra remapu M6 dla `rack_linear`,

@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated": "2026-10-27",
+  "updated": "2026-10-28",
   "model_author": "Codex",
   "original_count": 84,
   "origin_commit": "796c6a2",
@@ -1008,9 +1008,9 @@
       "title": "Automatyczna zmiana narzędzia",
       "prompt": "prompts/sesja-066.md",
       "status": "partial",
-      "progress": "Model magazynu i zacisku Plant istnieje. Generator makra remapu M6 dla ATC z machine.yaml (rack_linear): core/linumert/machine/atc_macro.py, plan wymiany sprawdzony na modelu magazynu Plant (tests/test_atc_macro.py, 9 testów). 2026-10-27: #195 w main: Options.atc i eksport makra. Codex: Plant i generator makra M6 korzystają ze wspólnego wyznaczania pozycji gniazd w rdzeniu. Jawne slot_positions z machine.yaml mają pierwszeństwo przed bazą i rozstawem; makro obsługuje też konfigurację bez base_position/pitch_mm. Generator odmawia eksportu nieosiągalnej geometrii i sprawdza numery obu narzędzi przed ruchem. Windows 96 PASS/1 SKIP; rs274 Debian12 8 PASS.",
+      "progress": "Model magazynu i zacisku Plant istnieje. Generator makra remapu M6 dla ATC z machine.yaml (rack_linear): core/linumert/machine/atc_macro.py, plan wymiany sprawdzony na modelu magazynu Plant (tests/test_atc_macro.py, 9 testów). 2026-10-27: #195 w main: Options.atc i eksport makra. Codex: Plant i generator makra M6 korzystają ze wspólnego wyznaczania pozycji gniazd w rdzeniu. Jawne slot_positions z machine.yaml mają pierwszeństwo przed bazą i rozstawem; makro obsługuje też konfigurację bez base_position/pitch_mm. Generator odmawia eksportu nieosiągalnej geometrii i sprawdza numery obu narzędzi przed ruchem. Windows 96 PASS/1 SKIP; rs274 Debian12 8 PASS. 2026-10-28: #197/#198 scalone; generator Plant łączy wyjścia M64/M65 i wejścia M66 z lrt-net, ustawia num_dio i odrzuca kolizje z istniejącymi sieciami. Wspólny zakres: 100 testów offline PASS i 8 prób rzeczywistego rs274 PASS.",
       "remaining": [
-        "mapowanie motion.digital-* do Plant, pełny remap z czujnikami i awariami, potwierdzenie zatrzymania wrzeciona, przywracanie stanu modalnego programu, dziennik transakcji i RECOVERY_REQUIRED po przerwaniu oraz osobne rozwiązania karuzeli/parasolowego magazynu. Sprawdzenie zakresów punktów nie jest dowodem bezkolizyjności całej drogi narzędzia i oprawki."
+        "pełny remap z czujnikami i awariami, potwierdzenie zatrzymania wrzeciona, przywracanie stanu modalnego programu, dziennik transakcji i RECOVERY_REQUIRED po przerwaniu oraz osobne rozwiązania karuzeli/parasolowego magazynu. Sprawdzenie zakresów punktów nie jest dowodem bezkolizyjności całej drogi narzędzia i oprawki."
       ],
       "evidence": [
         "docs/DZIENNIK.md",
@@ -1018,7 +1018,10 @@
         "tests/test_atc_macro.py",
         "docs/raporty/ATC_GEOMETRIA_2026-10-27.md",
         "core/linumert/machine/toolchanger_geometry.py",
-        "https://github.com/anonimov94/linumeRT/pull/195"
+        "https://github.com/anonimov94/linumeRT/pull/195",
+        "tests/test_atc_hal.py",
+        "https://github.com/anonimov94/linumeRT/pull/197",
+        "https://github.com/anonimov94/linumeRT/pull/198"
       ]
     },
     {

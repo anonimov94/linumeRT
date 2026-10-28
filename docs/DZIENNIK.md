@@ -1714,3 +1714,9 @@ Pełny RIP musi ponownie potwierdzić wynik; nie scalać na czerwonym CI.
 - Odmowa eksportu geometrii poza limitami XYZ (również po zaokrągleniu), błędnej liczby gniazd i kolejności wysokości. Plan/makro sprawdzają stare i nowe narzędzie; makro przed ruchem wymaga G21/G90/G94 i programowego M5.
 - Windows: 96 PASS, 1 SKIP; samodzielny rs274/Debian 12: 8 PASS (geometria gniazd 1/3/6 i odmowy G20/G91/G93/G95/M3). Plant: nieregularne gniazda i regał obrócony PASS. Ruff zakresu PASS.
 - Protokół i ograniczenia: docs/raporty/ATC_GEOMETRIA_2026-10-27.md. Pełna regresja/CI w toku; 066 partial, mapowanie HAL, czujniki, recovery i pełna ochrona modalności pozostają otwarte. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## 066 — integracja geometrii i HAL ATC · 2026-10-28 · Codex
+- Model-Author: Codex. #197/#198 scalone jako 20dd962/d3945d3 po zielonych kontrolach obu SHA i przeglądzie połączeń HAL Claude. Wspólny zakres lokalnie: 100 PASS; samodzielny rs274: 8 PASS, bez HAL.
+- CI połączonego kodu 88070aa/#199: Python 1740 PASS/127 SKIP, macierz Plant PASS; LinuxCNC RIP 177 live PASS, kroki ekranu/renderera SUCCESS. Autokontrola własnej geometrii i integracji, bez niezależnego przeglądu tych części.
+- Lokalny obraz z systemowym gcode: FAIL test_sim_path, potem SIGSEGV test_sim_worker; próba niezaliczona, czysta powtórka offline trwa. Raport ATC_GEOMETRIA_2026-10-27.md zachowuje ograniczenia i odnośniki CI.
+- Rejestr uwzględnia wygenerowane mapowanie motion.digital-* do Plant; 066 partial. Następnie pełny remap z czujnikami i awarią zacisku, potem recovery. NIEZWERYFIKOWANE NA SPRZĘCIE.
