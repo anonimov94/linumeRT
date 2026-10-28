@@ -74,6 +74,21 @@ class WorkpieceOut(Model):
     gcode: str = ""
 
 
+class WorkpieceIn(Model):
+    """Definicja detalu do ustawienia; puste pola zachowują dotychczasowe wartości."""
+
+    shape: str = ""
+    x: float | None = None
+    y: float | None = None
+    height: float | None = None
+    diameter: float | None = None
+    bore: float | None = None
+    anchor: str = ""
+    offset: str = ""
+    material: str = ""
+    position: list[float] | None = None
+
+
 class ProbeCalibrateIn(Model):
     axis: str
     direction: int
@@ -206,4 +221,4 @@ class OffsetService:
 
 
 __all__ = ["OffsetService", "ProbeApplyIn", "ProbeCalibrateIn", "ProbeOut",
-           "StockIn", "StockOut", "WorkpieceOut"]
+           "StockIn", "StockOut", "WorkpieceIn", "WorkpieceOut"]

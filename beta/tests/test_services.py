@@ -311,6 +311,57 @@ def test_plant_start_i_stop_serwera_lrtnet(call) -> None:
     assert call("plant.status")["running"] is False
 
 
+def test_dostep_logout_role_audyt_i_pin(call) -> None:
+    """Zamknięcie asymetrii: był login bez wylogowania i set_pin bez clear_pin.
+
+    GUI musi móc zamknąć sesję przy zmianie operatora, pobrać listę ról z wymaganiami
+    i pokazać historię dostępu — te metody istniały w usłudze, ale nie miały operacji.
+    """
+    roles = call("access.roles")
+    assert isinstance(roles["configured"], list)
+    assert roles["required"], "brak mapy uprawnienie -> rola"
+    assert set(roles["required"].values()) <= {"operator", "technolog", "serwis"}
+
+    assert call("access.logout")["ok"] is True
+
+    assert call("access.clear_pin", {"role": "operator"})["ok"] is True
+    audit = call("access.audit", {"limit": 10})
+    assert audit["entries"], "wyczyszczenie PIN-u musi zostawić ślad w audycie"
+    entry = audit["entries"][0]
+    assert {"time", "role", "action", "detail"} <= set(entry)
+
+
+def test_tool_historia_i_import_tbl(call) -> None:
+    """Export tool.tbl był w kontrakcie, import nie — GUI nie mogło wczytać tabeli."""
+    imported = call("tool.import_tbl", {"text": "T41 P41 Z55.5 D12 ;test\n"})
+    assert imported["ok"] is True
+    assert imported["details"]["numbers"] == [41]
+
+    tool = call("tool.get", {"number": 41})
+    assert tool["pocket"] == 41 and tool["diameter"] == 12.0
+
+    # ten sam tekst drugi raz: nic się nie zmieniło, więc lista numerów jest pusta
+    again = call("tool.import_tbl", {"text": "T41 P41 Z55.5 D12 ;test\n"})
+    assert again["details"]["numbers"] == []
+
+    history = call("tool.history", {"number": 41})
+    assert history["entries"], "zmiana narzędzia musi być w historii"
+
+
+def test_offset_workpiece_set_i_diag_csv(call) -> None:
+    """workpiece_get był w kontrakcie, set nie; dziennik nie miał eksportu CSV."""
+    piece = call("offset.workpiece_set",
+                 {"shape": "box", "x": 120.0, "y": 90.0, "material": "stal"})
+    assert piece["shape"] == "box" and piece["x"] == 120.0
+    assert piece["material"] == "stal"
+    # puste pola nie kasują ustawionych wcześniej
+    assert call("offset.workpiece_set", {"height": 25.0})["x"] == 120.0
+    assert call("offset.workpiece_get")["material"] == "stal"
+
+    export = call("diag.journal_csv", {"limit": 20})
+    assert export["csv"].strip() and export["lines"] >= 1
+
+
 def test_plant_machine_drives_rozwiazuje_szablony(call) -> None:
     """Napędy maszyny: szablon z biblioteki plus nadpisania z machine.yaml.
 

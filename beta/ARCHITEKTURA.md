@@ -42,7 +42,7 @@ logikę bez sprzętu.
 
 Invariant sprawdzany testem: `operation.domain == name.split(".")[0]`.
 
-**Stan zweryfikowany: 76 operacji, 12 domen** (`access, alarm, cam, config, diag,
+**Stan zweryfikowany: 84 operacje, 12 domen** (`access, alarm, cam, config, diag,
 machine, offset, plant, program, sim, system, tool`); **71 `implemented`, 2 `planned`**
 (`machine.tool_change`, `offset.probe_run`). Rozkład `safety`: `none` 49, `motion` 12,
 `stop` 7, `config` 5. Role: `operator`, `technolog`, `serwis`.

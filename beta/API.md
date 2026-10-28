@@ -35,7 +35,7 @@ Kontrakt to lista operacji. Każda ma:
 }
 ```
 
-**Stan: 76 operacji, 12 domen** — `access, alarm, cam, config, diag, machine, offset,
+**Stan: 84 operacje, 12 domen** — `access, alarm, cam, config, diag, machine, offset,
 plant, program, sim, system, tool`. **71 `implemented`, 2 `planned`**
 (`machine.tool_change`, `offset.probe_run`). Rozkład `safety`: `none` 49, `motion` 12,
 `stop` 7, `config` 5.

@@ -669,6 +669,47 @@ class LoginOut(Model):
     message: str = ""
 
 
+class AccessAuditEntry(Model):
+    time: float = 0.0
+    role: str = ""
+    action: str = ""
+    detail: str = ""
+
+
+class AccessAuditOut(Model):
+    entries: list[AccessAuditEntry] = Field(default_factory=list)
+
+
+class AccessAuditRequest(Model):
+    limit: int = Field(200, ge=1, le=10000)
+    action: str = ""
+
+
+class AccessRolesOut(Model):
+    """Role z PIN-ami i minimalna rola wymagana dla każdego uprawnienia."""
+
+    configured: list[str] = Field(default_factory=list)
+    required: dict[str, str] = Field(default_factory=dict)
+
+
+class PinClearRequest(Model):
+    role: str
+
+
+class ToolHistoryOut(Model):
+    entries: list[dict[str, Any]] = Field(default_factory=list)
+
+
+class ToolImportRequest(Model):
+    text: str = Field(description="zawartość tool.tbl")
+    units: str = "mm"
+
+
+class JournalCsvOut(Model):
+    csv: str = ""
+    lines: int = 0
+
+
 class SessionOut(Model):
     role: str = "operator"
     enforced: bool = False

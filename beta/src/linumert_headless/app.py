@@ -35,6 +35,9 @@ from .contract import (
 )
 from .errors import ApiError, BackendUnavailable
 from .schema import (
+    AccessAuditOut,
+    AccessAuditRequest,
+    AccessRolesOut,
     AlarmAckRequest,
     AlarmCodesOut,
     AlarmList,
@@ -61,6 +64,7 @@ from .schema import (
     JogIncrementRequest,
     JogRequest,
     JogStopRequest,
+    JournalCsvOut,
     LimitReportOut,
     LnxCompileRequest,
     LoginOut,
@@ -74,6 +78,7 @@ from .schema import (
     ModeRequest,
     Ok,
     OverrideRequest,
+    PinClearRequest,
     PinSetRequest,
     PlantFaultRequest,
     PlantFaultsOut,
@@ -97,6 +102,8 @@ from .schema import (
     StepEditRequest,
     SystemInfo,
     TelemetryOut,
+    ToolHistoryOut,
+    ToolImportRequest,
     ToolList,
     ToolNumber,
     ToolOut,
@@ -131,6 +138,7 @@ from .services.offset import (
     ProbeOut,
     StockIn,
     StockOut,
+    WorkpieceIn,
     WorkpieceOut,
 )
 from .session import SessionManager
@@ -326,6 +334,12 @@ def _load_program(request: ProgramName, ctx: Context) -> Ok:
     return ctx.services["machine"].load_program(program.path, program.text)
 
 
+def _csv_out(text: str) -> JournalCsvOut:
+    """Dziennik CSV: tekst plus liczba niepustych wierszy dla GUI."""
+    lines = [line for line in str(text).splitlines() if line.strip()]
+    return JournalCsvOut(csv=str(text), lines=len(lines))
+
+
 def register_operations(c: Contract) -> Contract:
     """Rejestruje wszystkie operacje kontraktu.
 
@@ -446,6 +460,12 @@ def register_operations(c: Contract) -> Contract:
     c.command("tool.set_wear", domain="tool", summary="Korekcja zużycia (X/Y/Z)",
               request=ToolWearRequest, role=ROLE_TECHNOLOG,
               handler=lambda r, ctx: ctx.services["tools"].set_wear(r))
+    c.query("tool.history", domain="tool", summary="Historia zmian narzędzia",
+            request=ToolNumber, result=ToolHistoryOut,
+            handler=lambda r, ctx: ToolHistoryOut(**ctx.services["tools"].history(r)))
+    c.command("tool.import_tbl", domain="tool", summary="Import tool.tbl do bazy",
+              request=ToolImportRequest, role=ROLE_TECHNOLOG,
+              handler=lambda r, ctx: ctx.services["tools"].import_tbl(r.text, r.units))
     c.command("tool.export_tbl", domain="tool", summary="Eksport tool.tbl dla LinuxCNC",
               request=ToolTblRequest, result=ToolTblOut, role=ROLE_TECHNOLOG,
               safety=SAFETY_CONFIG, handler=lambda r, ctx: ctx.services["tools"].export_tbl(r))
@@ -466,6 +486,10 @@ def register_operations(c: Contract) -> Contract:
               handler=lambda r, ctx: ctx.services["offset"].stock_set(r))
     c.query("offset.workpiece_get", domain="offset", summary="Definicja detalu",
             result=WorkpieceOut, handler=lambda r, ctx: ctx.services["offset"].workpiece_get())
+    c.command("offset.workpiece_set", domain="offset", summary="Ustaw definicję detalu",
+              request=WorkpieceIn, result=WorkpieceOut,
+              handler=lambda r, ctx: ctx.services["offset"].workpiece_set(
+                  {k: v for k, v in r.model_dump().items() if v not in ("", None)}))
     c.command("offset.probe_calibrate", domain="offset",
               summary="Kalibracja sondy (współczynnik)", request=ProbeCalibrateIn,
               result=ProbeOut, role=ROLE_TECHNOLOG,
@@ -557,6 +581,10 @@ def register_operations(c: Contract) -> Contract:
     # ---- diagnostics -------------------------------------------------------
     c.query("diag.doctor", domain="diag", summary="Inwentaryzacja środowiska (read-only)",
             result=DiagDoctor, handler=lambda r, ctx: ctx.services["diag"].doctor())
+    c.query("diag.journal_csv", domain="diag",
+            summary="Dziennik zdarzeń jako CSV (eksport)",
+            request=DiagJournalRequest, result=JournalCsvOut,
+            handler=lambda r, ctx: _csv_out(ctx.services["diag"].journal_csv(r)))
     c.query("diag.journal", domain="diag", summary="Dziennik zdarzeń",
             request=DiagJournalRequest, result=DiagJournalOut,
             handler=lambda r, ctx: ctx.services["diag"].journal(r))
@@ -574,6 +602,20 @@ def register_operations(c: Contract) -> Contract:
     c.command("access.set_pin", domain="access", summary="Ustaw PIN roli",
               request=PinSetRequest, role=ROLE_SERVICE, safety=SAFETY_CONFIG,
               handler=lambda r, ctx: ctx.services["access"].set_pin(r))
+    # Bez wylogowania GUI nie ma jak zamknąć sesji po zmianie operatora.
+    c.command("access.logout", domain="access", summary="Wyloguj bieżącą sesję",
+              handler=lambda r, ctx: ctx.services["access"].logout(ctx.token))
+    c.query("access.roles", domain="access",
+            summary="Role z PIN-ami i wymagana rola dla uprawnień",
+            result=AccessRolesOut,
+            handler=lambda r, ctx: AccessRolesOut(**ctx.services["access"].roles()))
+    c.query("access.audit", domain="access", summary="Historia zdarzeń dostępu",
+            request=AccessAuditRequest, result=AccessAuditOut,
+            handler=lambda r, ctx: AccessAuditOut(
+                **ctx.services["access"].audit(limit=r.limit, action=r.action)))
+    c.command("access.clear_pin", domain="access", summary="Usuń PIN roli",
+              request=PinClearRequest, role=ROLE_SERVICE, safety=SAFETY_CONFIG,
+              handler=lambda r, ctx: ctx.services["access"].clear_pin(r.role))
 
     # ---- zdarzenia dla GUI -------------------------------------------------
     c.event("machine", summary="Migawka maszyny (DRO, tryb, program) — 50 Hz")

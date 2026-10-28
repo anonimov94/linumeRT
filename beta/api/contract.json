@@ -17,6 +17,98 @@
   ],
   "operations": [
     {
+      "name": "access.audit",
+      "domain": "access",
+      "kind": "query",
+      "summary": "Historia zdarzeń dostępu",
+      "status": "implemented",
+      "safety": "none",
+      "role": "operator",
+      "idempotent": true,
+      "plan": "",
+      "request": {
+        "additionalProperties": false,
+        "properties": {
+          "limit": {
+            "default": 200,
+            "maximum": 10000,
+            "minimum": 1,
+            "title": "Limit",
+            "type": "integer"
+          },
+          "action": {
+            "default": "",
+            "title": "Action",
+            "type": "string"
+          }
+        },
+        "title": "AccessAuditRequest",
+        "type": "object"
+      },
+      "result": {
+        "additionalProperties": false,
+        "properties": {
+          "entries": {
+            "items": {
+              "$ref": "#/$defs/AccessAuditEntry"
+            },
+            "title": "Entries",
+            "type": "array"
+          }
+        },
+        "title": "AccessAuditOut",
+        "type": "object"
+      }
+    },
+    {
+      "name": "access.clear_pin",
+      "domain": "access",
+      "kind": "command",
+      "summary": "Usuń PIN roli",
+      "status": "implemented",
+      "safety": "config",
+      "role": "serwis",
+      "idempotent": false,
+      "plan": "",
+      "request": {
+        "additionalProperties": false,
+        "properties": {
+          "role": {
+            "title": "Role",
+            "type": "string"
+          }
+        },
+        "required": [
+          "role"
+        ],
+        "title": "PinClearRequest",
+        "type": "object"
+      },
+      "result": {
+        "additionalProperties": false,
+        "description": "Standardowy wynik polecenia: potwierdzenie i opcjonalny komunikat dla operatora.",
+        "properties": {
+          "ok": {
+            "default": true,
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "message": {
+            "default": "",
+            "title": "Message",
+            "type": "string"
+          },
+          "details": {
+            "additionalProperties": true,
+            "title": "Details",
+            "type": "object"
+          }
+        },
+        "title": "Ok",
+        "type": "object"
+      }
+    },
+    {
       "name": "access.login",
       "domain": "access",
       "kind": "command",
@@ -82,6 +174,87 @@
           }
         },
         "title": "LoginOut",
+        "type": "object"
+      }
+    },
+    {
+      "name": "access.logout",
+      "domain": "access",
+      "kind": "command",
+      "summary": "Wyloguj bieżącą sesję",
+      "status": "implemented",
+      "safety": "none",
+      "role": "operator",
+      "idempotent": false,
+      "plan": "",
+      "request": {
+        "additionalProperties": false,
+        "description": "Operacje bez parametrów i bez wyniku merytorycznego.",
+        "properties": {},
+        "title": "Empty",
+        "type": "object"
+      },
+      "result": {
+        "additionalProperties": false,
+        "description": "Standardowy wynik polecenia: potwierdzenie i opcjonalny komunikat dla operatora.",
+        "properties": {
+          "ok": {
+            "default": true,
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "message": {
+            "default": "",
+            "title": "Message",
+            "type": "string"
+          },
+          "details": {
+            "additionalProperties": true,
+            "title": "Details",
+            "type": "object"
+          }
+        },
+        "title": "Ok",
+        "type": "object"
+      }
+    },
+    {
+      "name": "access.roles",
+      "domain": "access",
+      "kind": "query",
+      "summary": "Role z PIN-ami i wymagana rola dla uprawnień",
+      "status": "implemented",
+      "safety": "none",
+      "role": "operator",
+      "idempotent": true,
+      "plan": "",
+      "request": {
+        "additionalProperties": false,
+        "description": "Operacje bez parametrów i bez wyniku merytorycznego.",
+        "properties": {},
+        "title": "Empty",
+        "type": "object"
+      },
+      "result": {
+        "additionalProperties": false,
+        "description": "Role z PIN-ami i minimalna rola wymagana dla każdego uprawnienia.",
+        "properties": {
+          "configured": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Configured",
+            "type": "array"
+          },
+          "required": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Required",
+            "type": "object"
+          }
+        },
+        "title": "AccessRolesOut",
         "type": "object"
       }
     },
@@ -968,6 +1141,53 @@
           }
         },
         "title": "DiagJournalOut",
+        "type": "object"
+      }
+    },
+    {
+      "name": "diag.journal_csv",
+      "domain": "diag",
+      "kind": "query",
+      "summary": "Dziennik zdarzeń jako CSV (eksport)",
+      "status": "implemented",
+      "safety": "none",
+      "role": "operator",
+      "idempotent": true,
+      "plan": "",
+      "request": {
+        "additionalProperties": false,
+        "properties": {
+          "limit": {
+            "default": 200,
+            "maximum": 10000,
+            "minimum": 1,
+            "title": "Limit",
+            "type": "integer"
+          },
+          "kind": {
+            "default": "",
+            "title": "Kind",
+            "type": "string"
+          }
+        },
+        "title": "DiagJournalRequest",
+        "type": "object"
+      },
+      "result": {
+        "additionalProperties": false,
+        "properties": {
+          "csv": {
+            "default": "",
+            "title": "Csv",
+            "type": "string"
+          },
+          "lines": {
+            "default": 0,
+            "title": "Lines",
+            "type": "integer"
+          }
+        },
+        "title": "JournalCsvOut",
         "type": "object"
       }
     },
@@ -2696,6 +2916,185 @@
         "description": "Operacje bez parametrów i bez wyniku merytorycznego.",
         "properties": {},
         "title": "Empty",
+        "type": "object"
+      },
+      "result": {
+        "additionalProperties": false,
+        "properties": {
+          "shape": {
+            "default": "",
+            "title": "Shape",
+            "type": "string"
+          },
+          "x": {
+            "default": 0.0,
+            "title": "X",
+            "type": "number"
+          },
+          "y": {
+            "default": 0.0,
+            "title": "Y",
+            "type": "number"
+          },
+          "height": {
+            "default": 0.0,
+            "title": "Height",
+            "type": "number"
+          },
+          "diameter": {
+            "default": 0.0,
+            "title": "Diameter",
+            "type": "number"
+          },
+          "bore": {
+            "default": 0.0,
+            "title": "Bore",
+            "type": "number"
+          },
+          "anchor": {
+            "default": "",
+            "title": "Anchor",
+            "type": "string"
+          },
+          "offset": {
+            "default": "",
+            "title": "Offset",
+            "type": "string"
+          },
+          "material": {
+            "default": "",
+            "title": "Material",
+            "type": "string"
+          },
+          "position": {
+            "default": [],
+            "items": {
+              "type": "number"
+            },
+            "title": "Position",
+            "type": "array"
+          },
+          "gcode": {
+            "default": "",
+            "title": "Gcode",
+            "type": "string"
+          }
+        },
+        "title": "WorkpieceOut",
+        "type": "object"
+      }
+    },
+    {
+      "name": "offset.workpiece_set",
+      "domain": "offset",
+      "kind": "command",
+      "summary": "Ustaw definicję detalu",
+      "status": "implemented",
+      "safety": "none",
+      "role": "operator",
+      "idempotent": false,
+      "plan": "",
+      "request": {
+        "additionalProperties": false,
+        "description": "Definicja detalu do ustawienia; puste pola zachowują dotychczasowe wartości.",
+        "properties": {
+          "shape": {
+            "default": "",
+            "title": "Shape",
+            "type": "string"
+          },
+          "x": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "X"
+          },
+          "y": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Y"
+          },
+          "height": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Height"
+          },
+          "diameter": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Diameter"
+          },
+          "bore": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Bore"
+          },
+          "anchor": {
+            "default": "",
+            "title": "Anchor",
+            "type": "string"
+          },
+          "offset": {
+            "default": "",
+            "title": "Offset",
+            "type": "string"
+          },
+          "material": {
+            "default": "",
+            "title": "Material",
+            "type": "string"
+          },
+          "position": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "number"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Position"
+          }
+        },
+        "title": "WorkpieceIn",
         "type": "object"
       },
       "result": {
@@ -4640,6 +5039,101 @@
           "number"
         ],
         "title": "ToolOut",
+        "type": "object"
+      }
+    },
+    {
+      "name": "tool.history",
+      "domain": "tool",
+      "kind": "query",
+      "summary": "Historia zmian narzędzia",
+      "status": "implemented",
+      "safety": "none",
+      "role": "operator",
+      "idempotent": true,
+      "plan": "",
+      "request": {
+        "additionalProperties": false,
+        "properties": {
+          "number": {
+            "minimum": 0,
+            "title": "Number",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "number"
+        ],
+        "title": "ToolNumber",
+        "type": "object"
+      },
+      "result": {
+        "additionalProperties": false,
+        "properties": {
+          "entries": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Entries",
+            "type": "array"
+          }
+        },
+        "title": "ToolHistoryOut",
+        "type": "object"
+      }
+    },
+    {
+      "name": "tool.import_tbl",
+      "domain": "tool",
+      "kind": "command",
+      "summary": "Import tool.tbl do bazy",
+      "status": "implemented",
+      "safety": "none",
+      "role": "technolog",
+      "idempotent": false,
+      "plan": "",
+      "request": {
+        "additionalProperties": false,
+        "properties": {
+          "text": {
+            "description": "zawartość tool.tbl",
+            "title": "Text",
+            "type": "string"
+          },
+          "units": {
+            "default": "mm",
+            "title": "Units",
+            "type": "string"
+          }
+        },
+        "required": [
+          "text"
+        ],
+        "title": "ToolImportRequest",
+        "type": "object"
+      },
+      "result": {
+        "additionalProperties": false,
+        "description": "Standardowy wynik polecenia: potwierdzenie i opcjonalny komunikat dla operatora.",
+        "properties": {
+          "ok": {
+            "default": true,
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "message": {
+            "default": "",
+            "title": "Message",
+            "type": "string"
+          },
+          "details": {
+            "additionalProperties": true,
+            "title": "Details",
+            "type": "object"
+          }
+        },
+        "title": "Ok",
         "type": "object"
       }
     },

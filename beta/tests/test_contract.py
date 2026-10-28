@@ -24,16 +24,17 @@ REQUIRED_OPERATIONS = {
     "machine.jog", "machine.jog_stop", "machine.mdi", "machine.run",
     "program.list", "program.read", "program.write", "program.compile",
     "program.check", "program.estimate", "program.toolpath",
-    "tool.list", "tool.upsert", "tool.export_tbl",
+    "tool.list", "tool.upsert", "tool.export_tbl", "tool.import_tbl", "tool.history",
     "cam.operations", "cam.generate",
-    "offset.stock_set", "offset.workpiece_get",
+    "offset.stock_set", "offset.workpiece_get", "offset.workpiece_set",
     "sim.run",
     "plant.status", "plant.start", "plant.scenario_run", "plant.drives",
     "plant.faults", "plant.machine_drives",
     "config.machines", "config.generate",
     "alarm.list", "alarm.ack", "alarm.codes",
-    "diag.doctor", "diag.journal", "diag.cia402",
-    "access.login", "access.session",
+    "diag.doctor", "diag.journal", "diag.journal_csv", "diag.cia402",
+    "access.login", "access.logout", "access.session", "access.roles",
+    "access.audit", "access.set_pin", "access.clear_pin",
 }
 
 
