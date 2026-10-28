@@ -920,3 +920,8 @@ NIEZWERYFIKOWANE NA SPRZĘCIE ani na RIP LinuxCNC (num_dio/halcmd sprawdzi CI `l
 
 Model-Author: Codex. Ukończono jedno zadanie dokumentacyjne: scenariusz odbioru
 1280×768 i klawiatury w SPEC_EKRAN_GLOWNY.md. Wykonanie odbioru pozostaje otwarte.
+
+## Stan zatrzymania — widoczność JOG, 2026-10-28
+
+Model-Author: Codex. Jedno zadanie 028: usunięto ucięcie przycisku Z+ w 1280×768,
+uzupełniono test pełnej geometrii i zachowano zrzut Qt z atrapą CNC. Pełny odbiór nadal otwarty.
