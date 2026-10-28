@@ -17,6 +17,7 @@ LinuxCNC pozostaje jedynym interpreterem: ta usługa tylko przygotowuje i sprawd
 
 from __future__ import annotations
 
+import dataclasses
 import logging
 import math
 import tempfile
@@ -75,6 +76,51 @@ def _estimate_with_rs274(text: str, ini: Path):
 
 # Granice domyślne, gdy nie podano INI (maszyna DIY 500 mm/s, 500 mm/s²) — tylko do podglądu.
 DEFAULT_LIMITS = {"X": (500.0, 500.0), "Y": (500.0, 500.0), "Z": (200.0, 200.0)}
+_AXES_XYZ = ("X", "Y", "Z")
+
+
+def _violations_from_moves(moves, table: dict[str, tuple[float, float]]) -> list:
+    """Pierwsze przekroczenie każdej osi i strony limitu; ``count`` liczy punkty.
+
+    Semantyka jak w ``limits.analyze_canon``: oś, która nie ruszyła się z zera, nie jest
+    oceniana — interpreter startuje w zerze maszyny, które bywa poza granicami.
+    """
+    found: list[limits.Violation] = []
+    seen: dict[tuple[str, str], int] = {}
+    touched: set[str] = set()
+    for index in range(len(moves)):
+        end = moves.end[index]
+        line = int(moves.line[index])
+        for i, axis in enumerate(_AXES_XYZ):
+            if axis not in table:
+                continue
+            value = float(end[i])
+            if axis not in touched:
+                if abs(value) < limits.EPS:
+                    continue
+                touched.add(axis)
+            low, high = table[axis]
+            for side, limit, bad in (("min", low, value < low - limits.EPS),
+                                     ("max", high, value > high + limits.EPS)):
+                if not bad:
+                    continue
+                key = (axis, side)
+                if key not in seen:
+                    seen[key] = len(found)
+                    found.append(limits.Violation(line, axis, value, limit, side))
+                else:
+                    first = found[seen[key]]
+                    found[seen[key]] = dataclasses.replace(first, count=first.count + 1)
+    return found
+
+
+def _violation_out(violation) -> ViolationOut:
+    """``message`` jest metodą ``Violation``, nie polem — trzeba ją wywołać."""
+    return ViolationOut(
+        axis=violation.axis, line=violation.line, value=round(violation.value, 4),
+        limit=violation.limit, side=violation.side, count=violation.count,
+        message=violation.message(),
+    )
 KINDS = {".ngc": "ngc", ".nc": "ngc", ".tap": "ngc", ".lnx": "lnx"}
 
 
@@ -155,19 +201,31 @@ class ProgramService:
 
     # ---- granice -----------------------------------------------------------
     def check(self, request: CheckRequest) -> LimitReportOut:
+        """Granice osi programu.
+
+        Liczymy z ruchów interpretera (``linumert_sim.path.load_path``), więc działa
+        też bez LinuxCNC. ``limits.analyze_canon`` odpada w tym miejscu z dwóch
+        powodów: oczekuje **tekstu canon** (wyjścia rs274), a nie surowego G-code —
+        karmiony G-code nie znajdował nic i meldował "program w granicach" — a jego
+        ``Violation.limit`` to pojedynczy float z osobnym ``side``, nie para min/max.
+        """
         text = self._text(request.name, request.text)
         table = self._limits(request.ini)
-        report = limits.analyze_canon(text, table)
+        with tempfile.TemporaryDirectory(prefix="lrt-chk-") as tmp:
+            path = Path(tmp) / "program.ngc"
+            path.write_text(text, encoding="utf-8")
+            try:
+                moves = load_path(path)
+            except (InterpreterUnavailable, ValueError) as exc:
+                raise InvalidRequest(f"nie udało się sprawdzić granic: {exc}") from exc
+        found = _violations_from_moves(moves, table)
         return LimitReportOut(
-            ok=not report.violations,
-            violations=[
-                ViolationOut(axis=v.axis, line=v.line, value=round(v.value, 4),
-                             limit_min=v.limit[0], limit_max=v.limit[1],
-                             kind=getattr(v, "kind", ""), message=getattr(v, "message", ""))
-                for v in report.violations
-            ],
+            ok=not found,
+            violations=[_violation_out(v) for v in found],
             lines=len(text.splitlines()),
             program=request.name,
+            moves=len(moves),
+            interpreter=str(getattr(moves, "source", "")),
         )
 
     # ---- czas i droga ------------------------------------------------------

@@ -3372,6 +3372,17 @@
             "default": "",
             "title": "Program",
             "type": "string"
+          },
+          "moves": {
+            "default": 0,
+            "title": "Moves",
+            "type": "integer"
+          },
+          "interpreter": {
+            "default": "",
+            "description": "rs274 (pełny LinuxCNC) albo subset (bez LinuxCNC)",
+            "title": "Interpreter",
+            "type": "string"
           }
         },
         "required": [

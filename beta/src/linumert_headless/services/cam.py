@@ -46,6 +46,20 @@ def load_generators(registry: GeneratorRegistry | None = None) -> GeneratorRegis
     return target
 
 
+def _summary(generator: Any) -> str:
+    """Opis generatora dla GUI.
+
+    Generatory nie mają pola ``summary`` ani docstringu klasy — mają polski ``title``
+    (np. "Kieszeń okrągła"). Czytanie ``summary`` przez ``getattr`` z domyślną wartością
+    oddawało pusty opis dla wszystkich 16 generatorów, więc menu GUI nie miało etykiet.
+    """
+    text = str(getattr(generator, "summary", "")
+               or getattr(generator, "title", "")
+               or inspect.getdoc(generator)
+               or "").strip()
+    return text.splitlines()[0] if text else ""
+
+
 def _parameters(generator: Any) -> dict[str, Any]:
     """Schemat parametrów generatora — podstawa formularza w GUI.
 
@@ -124,9 +138,7 @@ class CamService:
             items.append(CamOperation(
                 name=name,
                 version=int(getattr(generator, "version", 1)),
-                summary=str(getattr(generator, "summary", "") or
-                            inspect.getdoc(generator) or "").strip().splitlines()[0]
-                if (getattr(generator, "summary", "") or inspect.getdoc(generator)) else "",
+                summary=_summary(generator),
                 parameters=_parameters(generator),
             ))
         return CamCatalog(operations=sorted(items, key=lambda o: o.name))

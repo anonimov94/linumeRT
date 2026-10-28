@@ -52,11 +52,29 @@ def test_program_estimate_liczy_czas_i_droge(call) -> None:
 
 
 def test_program_check_zglasza_granice(call) -> None:
-    result = call("program.check", {"name": "linumert_kwadrat.ngc"})
-    assert isinstance(result["ok"], bool)
-    assert result["lines"] > 0
-    for violation in result["violations"]:
-        assert {"axis", "line", "value", "limit_min", "limit_max"} <= set(violation)
+    """Granice muszą być wykryte naprawdę — bez LinuxCNC.
+
+    Regresja: usługa karmiła surowy G-code do ``limits.analyze_canon``, który oczekuje
+    tekstu canon (wyjścia rs274), więc nie znajdował nic i meldował "program w granicach".
+    Do tego ``Violation.limit`` to pojedynczy float, a ``message`` to metoda — czytanie
+    ``v.limit[0]`` i ``getattr(v, "message")`` dawało TypeError i obiekt metody.
+    Poprzednia wersja testu iterowała po naruszeniach, których nigdy nie było, więc
+    asercja o polach nigdy się nie wykonała.
+    """
+    out = call("program.check", {"text": "G0 X0 Y0 Z0\nG1 X900 Y0 F200\nG1 X-300 Y20 F200\n"})
+    assert out["ok"] is False, "program poza granicami musi być zgłoszony"
+    assert out["moves"] > 0 and out["lines"] > 0
+    assert out["interpreter"] in {"rs274", "subset"}
+    sides = {v["side"] for v in out["violations"]}
+    assert sides == {"min", "max"}, sides
+    for violation in out["violations"]:
+        assert {"axis", "line", "value", "limit", "side", "count", "message"} <= set(violation)
+        assert isinstance(violation["limit"], (int, float))
+        assert violation["message"] and "przekracza" in violation["message"]
+        assert violation["count"] >= 1
+
+    ok = call("program.check", {"text": "G0 X0 Y0 Z0\nG1 X50 Y50 F200\n"})
+    assert ok["ok"] is True and ok["violations"] == []
 
 
 def test_program_toolpath_zwraca_punkty_bez_grafiki(call) -> None:
@@ -151,6 +169,17 @@ def test_cam_katalog_ma_pola_formularza_nie_sygnature(call) -> None:
             assert spec["label"], f"{operation['name']}.{name} bez etykiety"
             assert spec["type"] in ("float", "int", "bool", "choice", "text")
             assert "required" in spec and "default" in spec
+
+
+def test_cam_operacje_maja_opis_dla_menu_gui(call) -> None:
+    """Każdy generator musi mieć opis — GUI buduje z tego menu.
+
+    Regresja: usługa czytała pole ``summary``, którego generatory nie mają (mają polski
+    ``title``), więc wszystkie 16 pozycji wracało z pustym opisem i menu nie miało etykiet.
+    """
+    for operation in call("cam.operations")["operations"]:
+        assert operation["summary"].strip(), f"{operation['name']} bez opisu"
+        assert operation["version"] >= 1
 
 
 def test_cam_generate_dziala_dla_kazdego_generatora(call) -> None:

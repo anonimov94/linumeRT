@@ -198,12 +198,18 @@ class ProgramText(Model):
 
 
 class ViolationOut(Model):
+    """Przekroczenie granicy osi.
+
+    Kształt odpowiada ``linumert.programs.limits.Violation``: jest jeden przekroczony
+    ``limit`` i ``side`` mówiąca, która strona (min/max) — nie para min/max.
+    """
+
     axis: str
     line: int
     value: float
-    limit_min: float
-    limit_max: float
-    kind: str = ""
+    limit: float = Field(description="przekroczony limit osi [mm/°]")
+    side: str = Field("", description="min | max")
+    count: int = Field(1, description="ile ruchów przekracza tę samą stronę limitu")
     message: str = ""
 
 
@@ -212,6 +218,8 @@ class LimitReportOut(Model):
     violations: list[ViolationOut] = Field(default_factory=list)
     lines: int = 0
     program: str = ""
+    moves: int = 0
+    interpreter: str = Field("", description="rs274 (pełny LinuxCNC) albo subset (bez LinuxCNC)")
 
 
 class CheckRequest(Model):
