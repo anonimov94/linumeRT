@@ -7,16 +7,23 @@ w systemie; brak pliku = wpis na liście `missing`, ekran używa fontów zastęp
 """
 
 from pathlib import Path
+from weakref import ref
 
 from PyQt5 import QtGui
 
 FONT_DIR = Path(__file__).with_name("fonts")
 FAMILIES = ("IBM Plex Sans", "JetBrains Mono")
 _registered = {}
+_application = None
 
 
 def register():
     """Rejestruje TTF z `fonts/` (raz na proces). Zwraca (rodziny, brakujące_pliki)."""
+    global _application
+    application = QtGui.QGuiApplication.instance()
+    if _application is None or _application() is not application:
+        _registered.clear()
+        _application = ref(application) if application is not None else None
     missing = []
     for path in sorted(FONT_DIR.glob("*.ttf")):
         if path.name in _registered:

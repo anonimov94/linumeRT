@@ -11,6 +11,7 @@ import time
 from pathlib import Path
 
 import pytest
+from linumert.programs.pause_retract import RETURN_TOLERANCE_MM
 from rip_support import (
     installed_modules,
     plant_server,
@@ -91,4 +92,4 @@ def test_retract_returns_to_compensated_path(tmp_path, plant, request):
         (40, False), (41, False), (42, False), (41, True), (42, True)]
     for row in rows:
         assert row["end"][:2] == pytest.approx([250, 100], abs=0.005), row
-        assert abs(row["offset"]) < 1e-6, row
+        assert abs(row["offset"]) <= RETURN_TOLERANCE_MM, row

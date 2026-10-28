@@ -29,6 +29,53 @@ Procentowe korekcje F, G0 i wrzeciona w Produkcji również przyjmują wpis klaw
 suwak oraz przyciski +/− nadal działają. Korekcja jest wysyłana po zatwierdzeniu wpisu,
 a odświeżanie statusu nie nadpisuje edytowanej wartości. Obowiązują zakresy konfiguracji.
 
+## Cykle — edycja programu dialogowego
+
+W obszarze „Cykle” wybierz generator, wpisz wymiary i użyj „Podgląd”. Błędy pojawiają się
+przy polach po krótkiej przerwie we wpisywaniu. Zmiana parametrów czyści wcześniejszą
+geometrię; „Podgląd” przelicza ją ponownie. Podgląd XY dotyczy wybranego kroku,
+a zakładka „G-code programu” pokazuje wynik wszystkich włączonych kroków.
+
+„Dodaj krok” dopisuje operację na końcu programu. Wybierz istniejący krok, popraw
+parametry i użyj „Zmień wybrany”, aby go zastąpić. „Duplikuj” tworzy niezależną kopię
+za wybranym krokiem. „W górę” i „W dół” zmieniają kolejność; „Wyłącz / włącz” zachowuje
+krok w `.lnx`, ale wyłączony krok nie generuje ruchów. „Usuń wybrany” usuwa wybrany krok.
+„Cofnij” i „Ponów” przywracają program i wybór kroku (do 100 ostatnich zmian).
+
+„Zapisz .lnx” zachowuje edytowalne kroki, a „Zapisz .ngc” zapisuje wynikowy G-code.
+Przed zapisem i wczytaniem do LinuxCNC zatwierdź zmienione parametry przyciskiem
+„Zmień wybrany” lub „Dodaj krok”. Samo wpisanie wartości i „Podgląd” nie zmieniają
+programu. Wczytanie `.lnx` rozpoczyna nową historię Cofnij/Ponów.
+
+Po zmianie kolejności lub wyłączeniu kroku sprawdź wybór narzędzia, G43, układ detalu,
+jednostki i symulację całego programu. Walidacja formularza nie potwierdza bezkolizyjności.
+Edycja kroków nie wykonuje ruchu; „Wczytaj do LinuxCNC” otwiera plik bez uruchamiania cyklu.
+Model-Author: Codex.
+
+## Strategie, napisy i przekroje STL w Cyklach
+
+„Planowanie” oferuje kierunek X/Y, zygzak, ruch jednokierunkowy, przejścia krzyżowe
+i kontury współśrodkowe CW/CCW. „Kształty” daje prostokąt, prostokąt zaokrąglony,
+elipsę/okrąg, wielokąt i gwiazdę, z konturem lub kreskowaniem.
+Pola nieużywane w danej strategii są wyłączone. Tolerancja określa dokładność krzywych.
+
+W „Napis — kontury czcionki” wpisz tekst, wybierz czcionkę, styl i wysokość wersalików.
+Można ustawić odstępy, wyrównanie, położenie, skalę i obrót. To grawerowanie obrysów liter.
+`.lnx` zachowuje geometrię; samo otwarcie pliku nie wymaga oryginalnej czcionki.
+Zmiana tekstu lub kroju wymaga czcionki zawierającej wszystkie wpisane znaki.
+
+W „STL — kontur przekroju XY” użyj „Importuj STL / wybierz przekrój”. Wybierz jednostki
+źródła, skalę, centrowanie i Z przekroju, a następnie „Użyj przekroju”. Kontur przekroju
+ma własne pola położenia i skrawania; Z przekroju modelu nie ustawia Z obróbki.
+Po imporcie użyj „Dodaj krok” lub „Zmień wybrany”. To ścieżka przekroju XY,
+nie wykańczanie powierzchni 3D. Jednostki programu ustal przed tworzeniem geometrii;
+zmiana G20/G21 nie przelicza wymiarów.
+
+W podglądzie kółko powiększa, przeciąganie przesuwa, a podwójny klik dopasowuje geometrię.
+Zakresy X/Y pomagają zweryfikować wymiar. Grawerowanie prowadzi środek narzędzia po konturze,
+bez korekcji jego promienia. Przed wykonaniem sprawdź narzędzie, skrawanie i symulację.
+Szczegóły: [raport CAM 2D](raporty/CAM_2D_2026-10-26.md). Model-Author: Codex.
+
 ## Symulacja i wirtualny bliźniak
 
 Pełne HMI korzysta z LinuxCNC jako interpretera i planera. Dostępne są JOG, MDI,

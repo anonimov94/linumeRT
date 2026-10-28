@@ -26,11 +26,14 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from qtvcp.core import Action, Info, Status
 
 from linumert_alarm_panel import AlarmPanel
-from linumert_layout import PageStack
+from linumert_layout import NavigationRail, PageStack
+from linumert_operator_view import startup_family
 from linumert_operator_controls import OperatorControls
 from linumert_virtual_session import VirtualSession, virtual_config
+import linumert_appearance as appearance
 import linumert_shell_model as model
 import linumert_shell_pages as pages
+from linumert_appearance_page import AppearancePage
 from linumert_homing_page import HomingPage
 from linumert_program_page import ProgramPage
 from linumert_offsets_page import OffsetsPage
@@ -70,9 +73,13 @@ AREAS = (
     ("offsets", "Zero detalu", "zero", "page:offsets"),
     ("probe", "Sonda", "sonda", "btn_probe"),
     ("diag", "Diagnostyka", "diagnostyka", "page:diag"),
+    ("appearance", "Wygląd", "konfiguracja", "page:appearance"),
     ("settings", "Konfiguracja", "konfiguracja", "btn_settings"),
     ("classic", "Pełny QtDragon", "wtyczka", "btn_main"),
 )
+OPERATOR_FAMILY = startup_family()
+if OPERATOR_FAMILY != "shell":
+    AREAS = (("skin", "HMI", "maszyna", "page:skin"), *AREAS)
 
 
 def _icon(name: str, color: str) -> QtGui.QIcon:
@@ -133,9 +140,16 @@ class LinumertShell(QtCore.QObject):
         self.h = handler
         self.w = handler.w
         self.action, self.info, self.status = ACTION, INFO, STATUS
+        self.active_skin = OPERATOR_FAMILY
         # Piny grzyba HMI (D35): ok = 1 grzyb zwolniony, hb = sygnał życia, wd = uzbrojenie watchdoga
         self.hmi_pins = hmi_pins or {}
         self.tokens = model.load_tokens()
+        # M2: zapisany wygląd (paleta lub własne kolory) przed budową widoków; błąd = domyślny wygląd.
+        saved = appearance.load()
+        try:
+            self.tokens = appearance.apply_to_tokens(self.tokens, saved["colors"])
+        except appearance.AppearanceError:
+            pass
         self.c = self.tokens["kolory"]
         self.s = model.ShellState(axes=tuple(a.upper() for a in INFO.AVAILABLE_AXES))
         ini = os.environ.get("INI_FILE_NAME") or getattr(INFO, "INIPATH", "")
@@ -175,7 +189,8 @@ class LinumertShell(QtCore.QObject):
         classic = self.w.takeCentralWidget()
         root = QtWidgets.QWidget()
         root.setObjectName("lrtRoot")
-        root.setStyleSheet(model.shell_qss(self.tokens))
+        self.root = root
+        root.setStyleSheet(self._presentation_qss())
         grid = QtWidgets.QVBoxLayout(root)
         grid.setContentsMargins(0, 0, 0, 0)
         grid.setSpacing(0)
@@ -202,16 +217,19 @@ class LinumertShell(QtCore.QObject):
         ini = os.environ.get("INI_FILE_NAME") or getattr(INFO, "INIPATH", "")
         self.tools = tools_page.ToolsPage(self, ini) if tools_page is not None else None
         self.offsets = OffsetsPage(self)
+        self.appearance = AppearancePage(self)
         self.pages = {"machine": 0, "classic": 1, "diag": self.stack.addWidget(self.diag),
                       "production": self.stack.addWidget(self.production),
                       "start": self.stack.addWidget(self.start),
                       "sim": self.stack.addWidget(self.sim),
                       "homing": self.stack.addWidget(self.homing),
                       "program": self.stack.addWidget(self.program),
-                      "offsets": self.stack.addWidget(self.offsets)}
+                      "offsets": self.stack.addWidget(self.offsets),
+                      "appearance": self.stack.addWidget(self.appearance)}
         self.page_widgets = {"diag": self.diag, "production": self.production,
                              "start": self.start, "sim": self.sim,
-                             "homing": self.homing, "program": self.program, "offsets": self.offsets}
+                             "homing": self.homing, "program": self.program, "offsets": self.offsets,
+                             "appearance": self.appearance}
         self.cycles = cycles_page.CyclesPage(self) if cycles_page is not None else None
         if self.cycles is not None:
             self.pages["cycles"] = self.stack.addWidget(self.cycles)
@@ -223,6 +241,8 @@ class LinumertShell(QtCore.QObject):
         content.setWidgetResizable(True)
         content.setFrameShape(QtWidgets.QFrame.NoFrame)
         content.setWidget(self.stack)
+        self.content = content
+        self._paint_content()
         body.addWidget(content, 1)
         grid.addLayout(body, 1)
         grid.addWidget(self._bottom_bar())
@@ -243,6 +263,16 @@ class LinumertShell(QtCore.QObject):
         self._timer.timeout.connect(self._tick)
         self._timer.start(500)
         self._start_mushroom()
+        if self.active_skin != "shell":
+            from linumert_skin_contract import PresentationPreferences
+            from linumert_skin_qtvcp import OperatorSkin
+
+            preferences = PresentationPreferences(
+                skin=self.active_skin,
+                theme=os.environ.get("LINUMERT_OPERATOR_THEME", "classic-turquoise"),
+                language=self.language)
+            self.skin_host = OperatorSkin(self, preferences)
+            self.pages["skin"] = self.stack.addWidget(self.skin_host)
         if TOOLS_ERROR:
             self.diag.add_log("warn", f"Strona Narzędzia linumeRT niedostępna ({TOOLS_ERROR}); "
                                       "obszar Narzędzia = tabela QtDragon")
@@ -250,7 +280,8 @@ class LinumertShell(QtCore.QObject):
         if ini:
             self.sim.start(ini)  # proces symulacji materiału i kolizji (nice 10)
         # po uruchomieniu Start (HMI_WORKFLOW); LINUMERT_START_AREA tylko do testów i pokazów
-        area = os.environ.get("LINUMERT_START_AREA", "start")
+        area = os.environ.get("LINUMERT_START_AREA", "skin" if hasattr(self, "skin_host")
+                              else "start")
         self.select_area(area if area in self.areas else "start")
         self.refresh()
         return self
@@ -265,10 +296,18 @@ class LinumertShell(QtCore.QObject):
         logo.setObjectName("lrtLogo")
         logo.setTextFormat(QtCore.Qt.RichText)
         logo.setText(f"linume<span style='color:{self.c['teal']}'>RT</span>")
+        from PyQt5.QtSvg import QSvgWidget
+
+        mark = QSvgWidget(os.path.join(os.path.dirname(__file__), "..", "..",
+                                      "docs", "design", "marka", "znak_bez_tla.svg"))
+        mark.setFixedSize(32, 32)
+        mark.setAccessibleName("Znak linumeRT")
+        lay.addWidget(mark)
         lay.addWidget(logo)
         modes = QtWidgets.QButtonGroup(bar)
         for mode in model.MODES:
             btn = QtWidgets.QPushButton(model.MODE_LABEL[mode])
+            btn.setObjectName("lrtModeBtn")
             btn.setCheckable(True)
             btn.setToolTip({"manual": "Tryb ręczny (JOG)", "mdi": "Tryb MDI",
                             "auto": "Tryb automatyczny"}[mode])
@@ -302,15 +341,15 @@ class LinumertShell(QtCore.QObject):
         return self.alarm
 
     def _rail(self) -> QtWidgets.QWidget:
-        rail = QtWidgets.QFrame()
-        rail.setObjectName("lrtRail")
-        rail.setFixedWidth(96)
-        lay = QtWidgets.QVBoxLayout(rail)
-        lay.setContentsMargins(8, 12, 8, 12)
-        lay.setSpacing(6)
+        rail = NavigationRail()
         group = QtWidgets.QButtonGroup(rail)
         for area, text, icon, _btn in AREAS:
-            btn = QtWidgets.QToolButton()
+            if self.active_skin == "shell":
+                btn = QtWidgets.QToolButton()
+            else:
+                from linumert_skin_navigation import FamilyNavigationButton
+
+                btn = FamilyNavigationButton(self.active_skin, self.c)
             btn.setText(text.replace(" ", "\n", 1) if len(text) > 11 else text)
             btn.setObjectName("lrtRailBtn")
             btn.setCheckable(True)
@@ -321,16 +360,9 @@ class LinumertShell(QtCore.QObject):
             btn.setToolTip(f"Obszar: {text} (bez ruchu i bez zmiany trybu)")
             btn.clicked.connect(lambda _c=False, a=area: self.select_area(a))
             group.addButton(btn)
-            lay.addWidget(btn)
+            rail.add_button(btn)
             self.areas[area] = btn
-        lay.addStretch(1)
-        scroll = QtWidgets.QScrollArea()
-        scroll.setFrameShape(QtWidgets.QFrame.NoFrame)
-        scroll.setWidgetResizable(True)
-        scroll.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
-        scroll.setFixedWidth(116)
-        scroll.setWidget(rail)
-        return scroll
+        return rail
 
     def _machine_page(self) -> QtWidgets.QWidget:
         page = QtWidgets.QWidget()
@@ -345,7 +377,10 @@ class LinumertShell(QtCore.QObject):
         right.setSpacing(16)
         right.addWidget(self._tool_card())
         right.addWidget(self._feed_card())
-        right.addWidget(self._manual_card(), 1)
+        self._manual_frame = self._manual_card()
+        right.addWidget(self._manual_frame, 1)
+        self._machine_right = right
+        self._manual_on_top = False
         grid.addLayout(right, 0, 1, 2, 1)
         grid.setColumnStretch(0, 3)
         grid.setColumnStretch(1, 2)
@@ -769,6 +804,34 @@ class LinumertShell(QtCore.QObject):
         if btn is not None and btn.isEnabled():
             btn.click()  # przełącza tylko stronę QtDragon (main_tab_changed), bez ruchu
 
+    def _paint_content(self) -> None:
+        """Tło obszaru stron w kolorze motywu (bez tego poniżej krótkich stron widać szary Qt)."""
+        pal = self.content.viewport().palette()
+        pal.setColor(QtGui.QPalette.Window, QtGui.QColor(self.c["bg"]))
+        self.content.viewport().setPalette(pal)
+        self.content.viewport().setAutoFillBackground(True)
+        pal = self.stack.palette()
+        pal.setColor(QtGui.QPalette.Window, QtGui.QColor(self.c["bg"]))
+        self.stack.setPalette(pal)
+        self.stack.setAutoFillBackground(True)
+
+    def apply_tokens(self, tokens: dict) -> None:
+        """Zmiana kolorystyki na żywo: arkusz stylów i ikony szyny; bez poleceń do CNC."""
+        self.tokens = tokens
+        self.c.clear()
+        self.c.update(tokens["kolory"])       # widoki trzymają odwołanie do tego słownika
+        self.root.setStyleSheet(self._presentation_qss())
+        self._paint_content()
+        for area, _text, icon, _btn in AREAS:
+            self.areas[area].setIcon(_icon(icon, self.c["fg2"]))
+            self.areas[area].update()
+        self._refresh_dro()
+
+    def _presentation_qss(self):
+        from linumert_skin_navigation import frame_qss
+
+        return model.shell_qss(self.tokens) + frame_qss(self.active_skin, self.c)
+
     def set_dro_view(self, view: str) -> None:
         self.dro_view = view
         self._refresh_dro()
@@ -846,8 +909,24 @@ class LinumertShell(QtCore.QObject):
             if homed.property("homed") != want:
                 _restyle(homed, homed=want)
 
+    def _arrange_machine_page(self) -> None:
+        """Panel ruchu ręcznego i MDI na górze prawej kolumny w JOG/MDI, na dole w AUTO.
+
+        W 1280×768 widoczne jest ok. 550 px strony; panel (≈366 px) pod kartami Narzędzie i
+        Posuw wychodził poza ekran, a przyciski osi (także Z) wymagały przewijania."""
+        if not hasattr(self, "_manual_frame"):
+            return                    # strona Maszyna jeszcze nie zbudowana
+        want_top = self.s.mode in ("manual", "mdi")
+        if want_top == self._manual_on_top:
+            return
+        right = self._machine_right
+        right.removeWidget(self._manual_frame)
+        right.insertWidget(0 if want_top else right.count(), self._manual_frame, 1)
+        self._manual_on_top = want_top
+
     def refresh(self) -> None:
         s, g = self.s, model.gates(self.s)
+        self._arrange_machine_page()
         self._alarm_causes()
         for panel in self.operator_panels:
             panel.refresh()
@@ -917,6 +996,8 @@ class LinumertShell(QtCore.QObject):
                 btn.setEnabled(jog_ok.enabled)
                 btn.setToolTip(jog_ok.reason or btn.toolTip())
         self.lbl_jog_side.setText("" if jog_ok.enabled else jog_ok.reason)
+        if getattr(self, "skin_host", None) is not None:
+            self.skin_host.sync()
 
     def _tool_info(self, tool: int) -> str:
         if not tool:

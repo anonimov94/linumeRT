@@ -322,3 +322,189 @@ uznawane za PASS ani usuwane z rejestru; istniejący PR diagnostyki #153 pozosta
 do rozliczenia, bez uruchamiania kolejnej pełnej serii. Claude/033 i ISO pozostają
 odrębnymi zakresami. Pierwszy krok 028: wymagana specyfikacja funkcjonalna i audyt
 już istniejącej powłoki, potem brakujące funkcje i rzeczywisty odbiór GUI.
+
+## Kierunek HMI i pomoc Claude — decyzja właściciela 2026-10-25
+Model-Author: Codex. Skórki i obrazy są luźną inspiracją wizualną, a nie kontraktem
+wiernego odwzorowania czterech kompozycji. Docelowe HMI rozwijamy według pracy
+operatora, wykorzystując ich charakter i istniejące moduły prezentacji. Codex
+implementuje integrację z QtVCP; Claude pomaga odbiorem na laptopie EndeavourOS.
+Nie zastępuje to istniejących wymagań funkcjonalnych, kanału ACTION/STATUS ani HAL.
+Historyczne kryterium „cztery faktycznie odrębne aplikacje” z roadmapy skórek
+nie jest warunkiem bieżącego zlecenia. Nie zaliczamy nieodebranego zakresu.
+
+## Kontynuacja po odbiorze Claude — polecenie właściciela 2026-10-25
+Model-Author: Codex. Po pomyślnych testach Claude na laptopie EndeavourOS kontynuujemy
+rozwój HMI w M2; ukończone zmiany na końcu scalamy przez PR po wymaganych kontrolach.
+Nie trzeba ponownie pytać o zgodę na kontynuację lub scalenie. Wynik dotyczy konkretnego
+SHA i zakresu; zielone CI nie zastępuje odbioru Claude. Błędy poprawiamy i ponawiamy
+odbiór przed scaleniem. Skórki pozostają luźną inspiracją wizualną.
+
+## Skórki HMI: odrębny wygląd i główny ekran holograficzny — decyzja właściciela 2026-10-25
+Model-Author: Claude. Po odbiorze #163 (2ae9103) właściciel potwierdził działanie selektora
+widoku i zażądał: (1) wyraźnie odmiennego wyglądu zakładek każdej z czterech rodzin skórek,
+(2) jednego głównego ekranu w stylu sci-fi/cyberdeck, w którym kształty i menu są nakładką,
+a pod spodem leżą prostokątne podglądy symulacji obróbki detalu (z narzędziem) i symulacji
+z widokiem na maszynę. Wpisane jako rozszerzenie HMI-OWNER-SKINS sesji 028; nie zmienia
+kolejności M2 ani nie otwiera osobnej roadmapy. Kierunek wizualny nie oznacza kopiowania
+cudzych znaków i grafik (WYTYCZNE_IP.md). Prowadzi Codex (D32); Claude odbiera zrzutami.
+
+## Dopracowanie otwartych gałęzi — właściciel 2026-10-25
+Model-Author: Codex. Właściciel polecił kolejno dopracować wszystkie otwarte gałęzie,
+zaczynając od jednej i dopiero potem przechodząc do następnej. Bieżący zakres:
+#163 HMI, zależny #161, #160 raport ISO oraz #159 biblioteka maszyn.
+Każdy zakres otrzymuje przegląd i poprawki konkretnych problemów; testy laptopa
+nadal wykonuje Claude. Oczekiwanie na odbiór nie oznacza zakończenia ani zgody
+na scalenie nieodebranego SHA. Historyczne lokalne gałęzie nie są kasowane.
+
+## Polecenie właściciela — scalenie rozpoczętych PR i gałęzi (2026-10-26)
+
+Model-Author: Codex. Właściciel: „scalaj wszystkie pr i branches”. Obejmuje #172–174
+(LIMITS-PREFLIGHT, rodzice 031/051) oraz #175/#177 (rozpoczęta diagnostyka 069).
+Przed scaleniem naprawiamy odtworzone błędy, testujemy i rozliczamy CI; zachowujemy
+historię przez merge commit i lokalne dane operatora. Polecenie obejmuje domknięcie
+rozpoczętych porcji, nie zamyka wcześniejszych bramek ani całej sesji 069. Po scaleniu
+wracamy do najwcześniejszego otwartego kryterium rejestru.
+
+## Licencja PyQt5 a dystrybucja na GPL-2.0 — 2026-10-26 · Claude · PROPOZYCJA
+
+Model-Author: Claude. Powód: kontrola licencji (Grok, 2026-10-26) wskazała PyQt5 (GPL-3.0-only) jako
+konflikt z D14 („całość rozpowszechniana na GPL-2.0”). `docs/LICENCJE.md` miał ten punkt jako „do
+potwierdzenia” (sesje 005/080). Poniżej stan faktyczny i rekomendacja; **to nie jest porada prawna** —
+ostateczne rozstrzygnięcie przed publiczną premierą (sesja 080).
+
+**Stan faktyczny (repozytorium `main`, 2026-10-26)**
+- ~50 plików ekranu `screens/linumert/` importuje `PyQt5` bezpośrednio (nie przez `qtpy`; `qtpy` jest tylko
+  w 2 plikach), plus `core/linumert/diag/doctor.py` i ~45 plików testów. Nasze pliki mają nagłówek
+  `SPDX-License-Identifier: GPL-2.0-or-later`.
+- Kopia bazowa QtDragon (`linumert_upstream_handler.py`) importuje `PyQt5` i `qtvcp.*`; QtVCP w LinuxCNC 2.9
+  jest zbudowany na PyQt5 — każda instalacja ekranu QtVCP ma tę zależność niezależnie od nas.
+- `UPSTREAM.md` zapisuje licencję kopii jako „GPL-2.0 (LinuxCNC, COPYING)”; nie sprawdzono, czy poszczególne
+  pliki QtVCP mają klauzulę „or later”.
+
+**Ocena (do potwierdzenia)**
+1. Nasz kod jest GPL-2.0-or-later, więc połączone dzieło może zostać rozpowszechnione na GPL-3.0, jeśli
+   wszystkie składniki ze strony LinuxCNC/QtDragon też dopuszczają „or later”. Wtedy PyQt5 (GPL-3.0) nie
+   blokuje dystrybucji — blokuje ją tylko wyłączna GPL-2.0-only w którymś linkowanym składniku.
+   Stwierdzenie „realny konflikt” (Grok) jest więc możliwe, ale **niezweryfikowane**.
+2. Sformułowanie D14 „na GPL-2.0” jest zbyt wąskie; zamiast tego: „GPL-2.0-or-later, dystrybucja całości
+   zgodnie z najsilniejszą z licencji składników (GPL-3.0 przy PyQt5)”.
+3. Migracja na PySide6 (LGPL) oznacza odejście od QtVCP z LinuxCNC 2.9 (PyQt5) lub utrzymanie własnej
+   gałęzi: koszt wysoki (~50 plików ekranu + testy), korzyść licencyjna niepewna.
+
+**Rekomendacja**
+- Nie migrować do PySide teraz. Zostać przy PyQt5/QtVCP (zgodnie z D02).
+- Zadania weryfikacyjne przed sesją 080: (a) sprawdzić nagłówki licencyjne plików QtVCP/QtDragon użytych w
+  kopii (czy „GPL-2.0-or-later”); (b) ustalić z opinią prawną, czy dystrybucja na GPL-3.0 jest
+  dopuszczalna dla projektu z kodem IgH/lcec (GPL-2.0, osobne procesy/moduły); (c) zaktualizować D14 i
+  `docs/LICENCJE.md` po wyniku; (d) opcjonalnie: koszt przejścia na `qtpy` we wszystkich plikach ekranu.
+- Do czasu wyniku: dystrybucja binarna/obrazu z PyQt5 wstrzymana, repozytorium źródłowe bez zmian.
+
+## Ekran operatora w HTML/WebGL obok QtDragon — 2026-10-26 · Claude · PROPOZYCJA, kierunek POTWIERDZONY przez właściciela
+
+Model-Author: Claude. Powód: właściciel (2026-10-26) uznał, że Qt/QSS nie pozwala zrobić zaplanowanych skórek
+(cyberdeck i własny styl sci-fi), i zgodził się na HTML + WebGL. **To zmienia D02/D03 i kolejność z decyzji
+„Priorytet M2” (2026-10-25: rozwój ekranu na bazie QtDragon) — wchodzi w życie dopiero po potwierdzeniu
+właściciela w tym pliku.** Do tego czasu M2 i QtDragon bez zmian.
+
+**Propozycja**
+1. Warstwa wyświetlania (skórki, widok 3D symulacji, DRO, podgląd ścieżki) w przeglądarce: HTML/CSS + WebGL
+   (three.js lub czysty WebGL; wybór w PoC). Nowe zależności JS → wpis w `LICENCJE.md`/`PROVENANCE.md` (MIT).
+2. Brama LinuxCNC ↔ przeglądarka: mały proces Pythona poza RT (FastAPI + WebSocket, jak panel Plant), który
+   czyta `linuxcnc.stat()` i wysyła polecenia przez `linuxcnc.command()`. Żadnej logiki bezpieczeństwa w
+   przeglądarce: E-STOP to obwód sprzętowy, ekran tylko pokazuje stan (CLAUDE.md §6). Polecenia tylko po
+   lokalnym gnieździe/loopback, z tokenem sesji.
+3. Rdzeń `linumert` (generatory, narzędzia, alarmy, `.lnx`) i symulacja bez zmian — przeglądarka jest tylko
+   drugim klientem tych samych kontraktów (D05, HAL `linumert.*`).
+4. QtDragon pozostaje jako działający ekran awaryjny do czasu równoważności funkcji web (bramka odbioru, nie
+   data). Skórki Qt (`linumert_skin_*`) zamrożone, bez nowych funkcji.
+5. Skórki: cyberdeck oraz własny styl sci-fi z własną paletą, kształtami i nazwami. **Bez nazwy, logo i układu
+   „Star Trek”/LCARS (własność Paramount; WYTYCZNE_IP.md)** — nazwa skórki własna.
+6. Skutek uboczny: znika zależność ekranu od PyQt5 (GPL-3.0) z propozycji „Licencja PyQt5…” (wersja web nie
+   linkuje Qt); nie rozstrzyga to dystrybucji kopii QtDragon, dopóki jest wydawana.
+
+**Ryzyka**
+- Duży zakres: ~50 plików ekranu Qt do odtworzenia; ekran wymaga przeglądarki na maszynie (kiosk Chromium) i
+  weryfikacji opóźnień (wejścia MPG/jog nie mogą zależeć od przeglądarki — sprzęt/HAL, nie UI).
+- Kolizja z priorytetem M2 (sesje 028–038): trzeba ustalić, czy M2 zamykamy na QtDragon, czy web przejmuje
+  odbiór GUI.
+
+**Pierwszy krok (po potwierdzeniu):** PoC `web-hmi-poc` — brama + jedna strona z DRO i prostą sceną WebGL w
+stylu cyberdeck, na atrapie `linuxcnc` i na LinuxCNC sim; kryterium: 30 FPS, stan osi i jog z przeglądarki, test
+bez LinuxCNC. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+**Decyzja właściciela (2026-10-26, „ok zatem zaniechać prace na GUI, by nie marnować mocy”):**
+- Kierunek HTML/WebGL potwierdzony; **zaniechać dalszych prac nad GUI Qt** (QtDragon/QtVCP, skórki `linumert_skin_*`, strony ekranu w `screens/linumert/`, testy GUI Qt). To zastępuje decyzję „Priorytet M2” z 2026-10-25 w części dotyczącej rozwoju ekranu Qt.
+- Dotyczy wszystkich modeli (Claude, Codex, ChatGPT). Otwarte PR-y GUI Qt (np. #180) nie są rozwijane dalej; scalić lub zamknąć decyduje właściciel. Naprawy błędów blokujących działanie ekranu awaryjnego i bezpieczeństwa wciąż dozwolone.
+- Rdzeń `linumert`, Plant, HAL, generatory, symulacja i alarmy działają dalej bez zmian.
+- Następny krok: PoC `web-hmi-poc` (brama + strona z DRO i sceną WebGL, atrapa `linuxcnc`).
+
+## Synteza i domknięcie otwartych gałęzi — polecenie właściciela 2026-10-26
+
+Model-Author: Codex. Właściciel polecił dokonać syntezy z Claude i domknąć otwarte gałęzie.
+Łączymy potwierdzony kierunek HTML/WebGL z gotowym backendem CAM i istniejącą integracją
+Qt w #184. Zachowujemy wykonaną pracę i kompatybilność `.lnx`; po domknięciu tej porcji
+nowe GUI rozwijamy w kliencie web, a Qt utrzymujemy jako ekran awaryjny.
+Poprawka routera tekstu/JOG jest naprawą działania istniejącego ekranu, nie nowym kierunkiem Qt.
+Kontrakt i zasady współpracy zsynchronizowano; szczegóły w `SYNTEZA_MODELI_2026-10-26.md`.
+`WEB-HMI-POC` jest następnym zakresem rejestru. Bramka licencyjna, odbiory pulpitu,
+RT/sprzętu i całych kamieni pozostają otwarte; decyzja nie uruchamia publikacji binarnej.
+
+## Praca nocna nad funkcjami — polecenie właściciela 2026-10-26
+
+Model-Author: Codex. Właściciel polecił pracować nad kodem do rana, z pierwszeństwem nowych
+funkcji; optymalizacja dopiero po rzeczywistym wykonaniu wszystkich pozycji roadmapy.
+Koniec nocnej kontynuacji przyjęto na 2026-10-27 07:00 Europe/Warsaw.
+Najpierw domknięcie rozpoczętych PR-ów, potem funkcje z rejestru zgodnie z syntezą i kierunkiem
+web HMI. Ręcznych odbiorów i prób sprzętowych nie oznaczamy jako wykonanych bez dowodów.
+Praca trwa małymi porcjami z testami i pushem; CI oczekujące/czerwone nie jest zgodą na merge.
+
+## Backend CNC i cykle — polecenie właściciela 2026-10-27
+
+Model-Author: Codex. Właściciel przydzielił Codexowi backend obsługi napędów oraz cykli
+frezowania, toczenia, szlifowania, generowania ścieżek G-code i płaskorzeźb ze STL.
+To jawne rozszerzenie zakresu poza dotychczasowy podział HMI; Claude kontynuuje web/GUI.
+Priorytet pierwszej porcji: użyteczny backend STL → raster 3D → G-code, powiązany
+z 041/043/051. Reużywamy backendowy czytnik z #184, bez rozwijania zamrożonych stron Qt.
+Pozostałe rodziny cykli i napędy są kolejnymi porcjami wspólnego backendu, nie osobnymi
+implementacjami dla skórek. Odbiory M1/M2 i dalsze bramki pozostają otwarte; brak zmian RT/HAL.
+Pierwszy raster obejmuje frez kulisty, górną obwiednię i wykańczanie przygotówki po zgrubnej;
+nie jest jeszcze strategią zgrubną, obsługą podcięć ani kwalifikacją sprzętu.
+
+## Sprint zespołowy M2 — polecenie właściciela 2026-10-27
+
+Model-Author: Codex. Właściciel polecił odtworzyć role zespołu z issue #181, rozdzielić
+niewykonane zadania roadmapy i wdrożyć wynik w godzinę (14:43–15:43 UTC). Dostępne
+są cztery instancje Codex: koordynacja/integracja, backend, klient web, przegląd/odbiór.
+Nie deklarujemy udziału Claude/Gemini/Groka. Wybrano istniejący WEBHMI-POC i sesje
+028/029: przyrostowy JOG w przeglądarce oraz rzeczywisty odbiór przeglądarki/LinuxCNC.
+Zależności otwarte: pełne MPG/pulpit, niezależny watchdog HAL i sprzęt; sprint nie zamyka
+całych sesji ani bramek. Pozostały plan zachowuje kolejność; lokalnej pracy ATC nie przejmujemy.
+Raporty co około 10 minut w #181, kod w osobnym checkoutcie, scalenie po zielonych kontrolach.
+
+## Darmowe czaty jako jedyny zespół — bezwzględne polecenie właściciela 2026-10-27
+
+Model-Author: Codex. Organizując ekipę i raporty według #181, używać wyłącznie
+darmowych czatów już zalogowanych w przeglądarce właściciela. Nie uruchamiać kolejnych
+sesji Claude, płatnych API ani zastępować tej ekipy subagentami Codex. Dotychczasowe
+cztery instancje Codex w sprincie były inną organizacją niż wskazana przez właściciela;
+dalsze delegowanie w ten sposób zakończono. Kod już wykonany podlega zwykłym testom
+i integracji, bez przypisywania go innym modelom. Dokładna, nadrzędna reguła:
+WSPOLPRACA_MODELI.md, „Bezwzględna reguła zespołów i raportów”.
+
+## Precyzja wartości i odbiór pozycjonowania — polecenie właściciela 2026-10-27
+
+Model-Author: Codex. Właściciel określił rozdzielczość pozycji 0,0001 mm, obliczeń
+0,000001 mm oraz akceptację bezwzględnego błędu pozycjonowania poniżej 0,001 mm.
+Wartość 0,999999994 mm dla zadania 1 mm jest poprawna; nie wymagamy zgodności
+bitowej ani dokładniejszych wyników. Kontrakt zapisano w CLAUDE.md. Test kroku
+WebHMI wymaga błędu <0,001 mm zamiast wcześniejszego progu 0,002 mm. Test stabilności
+po STOP pozostaje osobny; nie zmieniono limitów, fizyki, safety ani typów liczbowych.
+
+## Odłożenie HMI i priorytet backendu — polecenie właściciela 2026-10-27
+
+Model-Author: Codex. Właściciel polecił na razie odłożyć HMI i zająć się ważniejszymi
+zakresami. Dalszy wybór technologii ekranu pozostaje otwarty; nie rozpoczynamy migracji
+GUI ani nowych prac wizualnych. To jawna zmiana bieżącego priorytetu względem 028/029.
+Wybrana porcja backendu: 066, niespójność pozycji magazynu pomiędzy Plant a generowanym
+makrem M6 oraz kontrola geometrii przed eksportem. Korzystamy z istniejącego modelu
+magazynu i jednego machine.yaml. Pełny ATC i wcześniejsze bramki pozostają otwarte.

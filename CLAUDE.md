@@ -35,6 +35,14 @@ dialogowe, symulację, diagnostykę. Ma **własny** wygląd i własne nazewnictw
 tego projektu** i nie wolno jej tu stosować — jest niezgodna z GPL.
 
 ## 3. Struktura repozytorium
+
+**Aktualizacja właściciela 2026-10-26 (ma pierwszeństwo dla warstwy ekranu):**
+nowy rozwój GUI przechodzi na HTML/CSS/WebGL; QtDragon/QtVCP pozostaje działającym ekranem
+awaryjnym i punktem odniesienia. Rozwój funkcji/skórek Qt jest zamrożony po domknięciu
+istniejącej porcji CAM #184; dozwolone są poprawki błędów blokujących i obsługi sterowania.
+Rdzeń, Plant, HAL i generatory pozostają wspólne. Reguła D36 dotyczy teraz nowego klienta web.
+Decyzja i synteza: `docs/DECYZJE.md`, `docs/SYNTEZA_MODELI_2026-10-26.md`.
+
 ```
 core/linumert/         # rdzeń: alarms/ tools/ programs/ generators/ machine/ plugins/ cnc/ diag/
 simulation/            # ścieżka, czas, materiał, kolizje (proces osobny)
@@ -57,6 +65,16 @@ tests/ docs/ docs/prawne/ prompts/ community/
   integracyjnych (LinuxCNC sim + Plant na localhost, ekran pod Xvfb). Testy z LinuxCNC mają marker
   `@pytest.mark.linuxcnc`.
 - Wszystko dotyczące prawdziwego sprzętu oznaczaj `NIEZWERYFIKOWANE NA SPRZĘCIE`.
+
+### Kontrakt precyzji — polecenie właściciela 2026-10-27
+
+- Pozycje liniowe: rozdzielczość zapisu/prezentacji **0,0001 mm**.
+- Obliczenia współrzędnych: **0,000001 mm**; nie wymagamy większej precyzji wyników.
+- Odbiór pozycjonowania: błąd bezwzględny **poniżej 0,001 mm** jest akceptowalny.
+- Wartości np. 0,999999994 mm przy zadanym 1 mm spełniają kryterium.
+
+To kontrakt wartości i odbioru; typ zmiennoprzecinkowy może zachować dodatkowe bity.
+Nie zastępuje potwierdzenia dokładności sprzętu ani wymagań granic/kolizji/bezpieczeństwa.
 
 ## 5. Czas rzeczywisty
 - UI, rdzeń, SQLite, symulacja i panel Plant działają poza RT. W RT tylko komponenty HAL (`hal/*.comp`):

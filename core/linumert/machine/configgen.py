@@ -21,6 +21,7 @@ Zapis z kopią zapasową i diffem: `config_build.py` (CLI). NIEZWERYFIKOWANE NA 
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -52,6 +53,7 @@ class Options:
     tool_table: str = "../../sim/linumert_xyz/tool.tbl"
     postgui: str = "../../sim/linumert_xyz/linumert_postgui.hal"
     subroutine_path: str = "macros"
+    atc: bool = False     # remap M6 na makro ATC wygenerowane z sekcji toolchanger (rack_linear)
     extra: dict[str, Any] = field(default_factory=dict)
 
 
@@ -198,7 +200,8 @@ def render_ini(cfg: MachineConfig, js: list[Joint], target: str, opt: Options,
         "[EMCIO]", "EMCIO = io", "CYCLE_TIME = 0.100", f"TOOL_TABLE = {opt.tool_table}", "",
         "[RS274NGC]", "PARAMETER_FILE = linumert.var",
         "RS274NGC_STARTUP_CODE = G17 G21 G40 G43H0 G54 G64P0.01 G80 G90 G94 G97 M5 M9",
-        f"SUBROUTINE_PATH = {opt.subroutine_path}", "REMAP = M6 modalgroup=6 ngc=lrt_m6", "",
+        f"SUBROUTINE_PATH = {opt.subroutine_path}",
+        f"REMAP = M6 modalgroup=6 ngc={'lrt_m6_atc' if opt.atc else 'lrt_m6'}", "",
         "[EMCMOT]", "EMCMOT = motmod", "SERVO_PERIOD = 1000000", "COMM_TIMEOUT = 1.0",
         f"BASE_PERIOD = {base_period}",
         "",
@@ -281,10 +284,34 @@ def _switch_nets(cfg: MachineConfig, js: list[Joint], source) -> list[str]:
     return lines
 
 
-def render_plant_hal(cfg: MachineConfig, js: list[Joint]) -> str:
+def atc_dio(macro: str) -> tuple[list[int], list[int]]:
+    """Indeksy M64/M65 (wyjścia) i M66 P (wejścia cyfrowe) użyte w makrze ATC."""
+    outs = sorted({int(p) for p in re.findall(r"(?m)^\s*M6[45] P(\d+)", macro)})
+    ins = sorted({int(p) for p in re.findall(r"(?m)^\s*M66 P(\d+)", macro)})
+    return outs, ins
+
+
+def _atc_nets(outs: list[int], ins: list[int], taken: str) -> list[str]:
+    """Sieci motion.digital-* <-> lrt-net dla makra ATC; indeks M64/M66 = indeks pinu Plant."""
+    busy = [f"dout-{p:02d}" for p in outs if f"lrt-net.0.dout-{p:02d}" in taken]
+    busy += [f"din-{p:02d}" for p in ins if f"lrt-net.0.din-{p:02d}" in taken]
+    if busy:
+        raise ValueError(f"ATC: piny lrt-net już połączone innymi sieciami: {', '.join(busy)}")
+    out = ["", "# ---- ATC: M64/M65 -> wyjścia Plant, M66 <- wejścia Plant (REMAP M6) ----"]
+    out += [f"net linumert.atc.dout-{p:02d}   motion.digital-out-{p:02d} => lrt-net.0.dout-{p:02d}"
+            for p in outs]
+    out += [f"net linumert.atc.din-{p:02d}    lrt-net.0.din-{p:02d} => motion.digital-in-{p:02d}"
+            for p in ins]
+    return out
+
+
+def render_plant_hal(cfg: MachineConfig, js: list[Joint], atc_macro: str | None = None,
+                     taken: str = "") -> str:
     n = len(js)
     sws = switches(cfg)
     inv = [sw for sw in sws if sw.nc]
+    outs, ins = atc_dio(atc_macro) if atc_macro else ([], [])
+    dio = f" num_dio={max(outs + ins) + 1}" if outs or ins else ""
     inputs = cfg.io.inputs
     estop_a = inputs[cfg.io.estop.input]
     estop_b = inputs.get("estop_b")
@@ -296,7 +323,8 @@ def render_plant_hal(cfg: MachineConfig, js: list[Joint]) -> str:
         "# Model-Author: Claude · generator sesji 062. NIEZWERYFIKOWANE NA SPRZĘCIE.",
         "",
         "loadrt [KINS]KINEMATICS",
-        "loadrt [EMCMOT]EMCMOT servo_period_nsec=[EMCMOT]SERVO_PERIOD num_joints=[KINS]JOINTS",
+        "loadrt [EMCMOT]EMCMOT servo_period_nsec=[EMCMOT]SERVO_PERIOD num_joints=[KINS]JOINTS"
+        + dio,
         "loadrt lrt_net personality=[PLANT]AXES ip=[PLANT]IP port=[PLANT]PORT",
         f"loadrt lrt_cia402 count={n}",
         "# Shared postgui expects this virtual M6 acknowledgement, also used by sim.",
@@ -374,6 +402,8 @@ def render_plant_hal(cfg: MachineConfig, js: list[Joint]) -> str:
     out.append("net linumert.io.coolant-flood  iocontrol.0.coolant-flood"
                + (f" => lrt-net.0.dout-{coolant:02d}" if coolant is not None else ""))
     out.append("net linumert.io.coolant-mist   iocontrol.0.coolant-mist")
+    if outs or ins:
+        out += _atc_nets(outs, ins, "\n".join(out) + taken)
     return "\n".join(out) + "\n"
 
 
@@ -480,13 +510,19 @@ def render(cfg: MachineConfig, target: str, opt: Options | None = None,
     js = joints(cfg, scales)
     ini = render_ini(cfg, js, target, opt)
     files = {f"{cfg.machine.name}.ini": ini}
+    macro = None
+    if opt.atc:
+        from .atc_macro import generate_atc_m6
+
+        macro = files[f"{opt.subroutine_path}/lrt_m6_atc.ngc"] = generate_atc_m6(cfg)
     if target == "plant":
         head = ["# SPDX-License-Identifier: GPL-2.0-or-later",
                 "# linumeRT · wrzeciono symulowane lokalnie (sim_spindle); Plant dostaje "
                 "spindle_cmd przez LRT-NET.",
                 "# Wygenerowane z machine.yaml · Model-Author: Claude · generator sesji 062.", ""]
-        files["linumert_plant.hal"] = render_plant_hal(cfg, js)
-        files["spindle_sim.hal"] = "\n".join(head + render_spindle_sim_hal(cfg, True)) + "\n"
+        spindle = "\n".join(head + render_spindle_sim_hal(cfg, True)) + "\n"
+        files["linumert_plant.hal"] = render_plant_hal(cfg, js, macro, spindle)
+        files["spindle_sim.hal"] = spindle
     else:
         files["linumert_sim.hal"] = render_sim_hal(cfg, js)
     return files

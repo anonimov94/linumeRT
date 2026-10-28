@@ -44,7 +44,7 @@ from .scenario import (
 
 CONFIG = ROOT / "config" / "plant" / "linumert_plant_xyz"
 DEFAULT_PORT = 47820
-DRIVER_ACTIONS = ("program", "mdi", "wait", "fault_reset")
+DRIVER_ACTIONS = ("program", "mdi", "wait", "fault_reset", "capture")
 HOST_ACTIONS = ("fault", "clear", "set_param")
 JOINTS = {"X": [0], "Y": [1, 2], "Z": [3]}  # linumert_plant_xyz: drv_x, drv_y1, drv_y2, drv_z
 
@@ -190,6 +190,24 @@ while now() < plan["duration"]:
         elif a == "mdi":
             c.mode(linuxcnc.MODE_MDI); c.wait_complete()
             c.mdi(st["command"])
+            if st.get("settle"):  # blokuj do końca ruchu (sondowanie G38 jest wolne i sekwencyjne)
+                serial = c.serial
+                limit = float(st.get("timeout", 90))
+                wait(lambda: s.echo_serial_number >= serial, limit)
+                quiet = [0]
+                def settled():
+                    still = (abs(s.current_vel) < 1e-4 and s.interp_state == linuxcnc.INTERP_IDLE
+                             and s.state == linuxcnc.RCS_DONE)
+                    quiet[0] = quiet[0] + 1 if still else 0
+                    return quiet[0] >= 15           # ~0,3 s bez ruchu
+                if not wait(settled, limit):
+                    out["errors"].append(
+                        [round(now(), 3), "MDI nie zakończyło się: " + st["command"]])
+        elif a == "capture":  # zrzut wyniku ostatniego G38.x (probed_position, probe_tripped)
+            poll()
+            out.setdefault("probes", {})[st["name"]] = {
+                "tripped": bool(s.probe_tripped),
+                "pos": [round(v, 5) for v in s.probed_position[:3]]}
         elif a == "fault_reset":
             ok = machine_on()
             c.mode(linuxcnc.MODE_MDI); c.wait_complete()
@@ -472,6 +490,7 @@ def _collect(res: ScenarioResult, out: dict, plant: dict, tele: dict) -> None:
         if ds:
             res.drive_states[k] = res.drive_states.get(ds[0], "")
     res.lost_steps = {k: 0 for k in letters}  # serwa z mill_servo_table
+    res.probes = dict(out.get("probes") or {})
     res.alarms = dict(out.get("alarms") or {})
     names = {1: "ESTOP", 2: "ESTOP_RESET", 3: "OFF", 4: "ON"}
     for t, task, interp in out.get("states", []):

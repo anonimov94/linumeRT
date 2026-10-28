@@ -110,7 +110,8 @@ class BaseMacroGenerator(ABC):
                 continue
             limit = _range_problem(f, value)
             if limit is not None:
-                issues.append(Issue("P-5003", {"name": f.name, "value": fmt(float(value)),
+                display = str(value) if f.kind == "int" else fmt(value)
+                issues.append(Issue("P-5003", {"name": f.name, "value": display[:80],
                                                "limit": limit}, f.name))
                 continue
             out[f.name] = value
@@ -168,6 +169,10 @@ def _coerce(f: Field, raw: Any) -> tuple[Any, str | None]:
     if f.kind == "float":
         if isinstance(raw, bool) or not isinstance(raw, (int, float)):
             return None, "liczba"
+        try:
+            raw = float(raw)
+        except OverflowError:
+            return None, "liczba skończona"
         if not math.isfinite(raw):
             return None, "liczba skończona"
         return float(raw), None

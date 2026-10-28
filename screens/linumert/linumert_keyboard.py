@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
-"""Keep numeric editors out of QtVCP machine shortcuts. Model-Author: Codex."""
+"""Keep text and numeric editors out of QtVCP machine shortcuts. Model-Author: Codex."""
 
 from PyQt5 import QtCore, QtWidgets
 
@@ -11,9 +11,14 @@ class NumericKeyboardMixin:
         pressed = getattr(self, "_machine_key_presses", {})
         self._machine_key_presses = pressed
         target = receiver
+        destination = receiver
         editor = False
         while target is not None:
-            if isinstance(target, QtWidgets.QAbstractSpinBox) or (
+            if isinstance(target, (QtWidgets.QPlainTextEdit, QtWidgets.QTextEdit)):
+                editor = True
+                destination = target  # Key events can arrive at the text editor's viewport.
+                break
+            if isinstance(target, (QtWidgets.QAbstractSpinBox, QtWidgets.QLineEdit)) or (
                     isinstance(target, QtWidgets.QComboBox) and target.isEditable()):
                 editor = True
                 break
@@ -21,9 +26,9 @@ class NumericKeyboardMixin:
         # A jog started outside an editor still receives its release after focus moves.
         if editor and not emergency and (is_pressed or code not in pressed):
             if is_pressed:
-                receiver.keyPressEvent(event)
+                destination.keyPressEvent(event)
             else:
-                receiver.keyReleaseEvent(event)
+                destination.keyReleaseEvent(event)
             event.accept()
             return True  # Prevent ignored edit keys bubbling into machine shortcuts.
         if not is_pressed and code in pressed:

@@ -22,6 +22,9 @@ dependencies = [
 [project.scripts]
 # Generator konfiguracji LinuxCNC z machine.yaml (sesja 062)
 linumert-config = "linumert.machine.config_build:main"
+# Brama web-hmi LinuxCNC <-> przegladarka (webhmi/, DECYZJE 2026-10-26)
+linumert-webhmi = "linumert_webhmi.__main__:main"
+linumert-relief = "linumert.generators.relief:main"
 
 [project.optional-dependencies]
 # Panel web Plant (sesja 022); bez tej grupy Plant działa, a panel zgłasza brak zależności.
@@ -41,6 +44,7 @@ dev = [
 #   linumert        - rdzen, niezalezny od UI            (core/linumert)
 #   linumert_sim    - symulacja, osobny proces           (simulation/linumert_sim)
 #   linumert_plant  - serwer Plant (LRT-NET, panel web)  (plant/server/linumert_plant)
+#   linumert_webhmi - brama web-hmi LinuxCNC <-> przegladarka (webhmi/server/linumert_webhmi)
 [tool.setuptools]
 packages = [
     "linumert",
@@ -55,11 +59,14 @@ packages = [
     "linumert_sim",
     "linumert_plant",
     "linumert_plant.panel",
+    "linumert_webhmi",
 ]
 
 [tool.setuptools.package-data]
 "linumert.alarms" = ["catalog.yaml"]
 "linumert.programs" = ["lnx_schema.json"]
+"linumert_webhmi" = ["static/*.html", "static/*.js", "static/*.css",
+                     "static/js/*.js", "static/js/*.json"]
 "linumert_plant.panel" = ["static/*.html", "static/*.js", "static/*.css", "static/*.svg",
                           "static/vendor/*", "static/ikony/*"]
 
@@ -67,10 +74,11 @@ packages = [
 linumert = "core/linumert"
 linumert_sim = "simulation/linumert_sim"
 linumert_plant = "plant/server/linumert_plant"
+linumert_webhmi = "webhmi/server/linumert_webhmi"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-pythonpath = ["core", "simulation", "plant/server"]
+pythonpath = ["core", "simulation", "plant/server", "webhmi/server"]
 markers = [
     "linuxcnc: test wymaga dzialajacego LinuxCNC (sesja 003); domyslnie pomijany",
 ]

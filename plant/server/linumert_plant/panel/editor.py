@@ -16,7 +16,10 @@ czujnik długości i bieżący koniec narzędzia (układ G53, mm). Moduł nie za
 from __future__ import annotations
 
 import copy
+import os
 import re
+import stat
+import tempfile
 import time
 from pathlib import Path
 from typing import Any
@@ -38,6 +41,21 @@ from ..machine_drives import resolve_machine_drives
 
 ENABLED_STATES = {"OPERATION_ENABLED", "QUICK_STOP_ACTIVE", "FAULT_REACTION_ACTIVE"}
 PATH_RE = re.compile(r"^[A-Za-z_][\w]*(\.\w+)*$")
+
+
+def atomic_write_text(path: Path, text: str) -> None:
+    """Publish a complete configuration, retaining the old file on write failure."""
+    fd, temporary = tempfile.mkstemp(dir=path.parent, prefix=path.name, suffix=".tmp")
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8", newline="\n") as stream:
+            stream.write(text)
+            stream.flush()
+            os.fsync(stream.fileno())
+        if path.exists():
+            os.chmod(temporary, stat.S_IMODE(path.stat().st_mode))
+        os.replace(temporary, path)
+    finally:
+        Path(temporary).unlink(missing_ok=True)
 
 
 class EditorError(ValueError):
@@ -123,7 +141,7 @@ class MachineEditor:
         header = (f"# linumeRT · machine.yaml zapisany w panelu Plant "
                   f"{time.strftime('%Y-%m-%d %H:%M:%S')}" + (f" — {comment}" if comment else "")
                   + "\n")
-        self.path.write_text(header + text, encoding="utf-8", newline="\n")
+        atomic_write_text(self.path, header + text)
         name = self._write_version(hist, number, header + text, comment)
         return {"version": number, "file": name, "path": str(self.path)}
 

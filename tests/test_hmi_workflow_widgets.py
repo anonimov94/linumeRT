@@ -514,6 +514,265 @@ def _face_step(page, tool_d="10"):
     page.add_step()
 
 
+def test_cycles_edit_buttons_roundtrip_and_selection(page_env, monkeypatch, tmp_path):
+    from linumert.programs.lnx import load_lnx
+
+    module, page, _shell = _cycles(page_env, monkeypatch)
+    action = page_env[3]
+    _face_step(page)
+    page.step_buttons["duplicate"].click()
+    assert page.step_list.currentRow() == 2 and len(page.program.steps) == 3
+    page.inputs["depth"].setText("2")
+    page.update_step()
+    assert page.program.steps[1].params["depth"] == 1
+    assert page.program.steps[2].params["depth"] == 2
+    page.step_buttons["up"].click()
+    assert page.step_list.currentRow() == 1 and page.program.steps[1].params["depth"] == 2
+    page.step_buttons["toggle"].click()
+    assert not page.program.steps[1].enabled and "wyłączony" in page.step_list.item(1).text()
+    assert "G1 Z-2" not in page.text()
+    page.step_buttons["delete"].click()
+    page.step_buttons["undo"].click()
+    assert not page.program.steps[1].enabled and len(page.program.steps) == 3
+    page.step_buttons["redo"].click()
+    assert len(page.program.steps) == 2
+    target = tmp_path / "edycja.lnx"
+    monkeypatch.setattr(module.QtWidgets.QFileDialog, "getSaveFileName",
+                        lambda *a, **k: (str(target), ""))
+    assert page.save_lnx() and load_lnx(target) == page.program
+    assert not action.mock_calls
+    page.close()
+
+
+def test_cycles_inline_validation_and_uncommitted_load(page_env, monkeypatch):
+    from PyQt5 import QtTest
+
+    _module, page, _shell = _cycles(page_env, monkeypatch)
+    _face_step(page)
+    original = page.text()
+    page.inputs["depth"].setText("-1")
+    QtTest.QTest.qWait(350)
+    assert "Błąd" in page.field_errors["depth"].text()
+    assert not page.field_errors["depth"].isHidden() and not page.view2d.lines
+    page.update_step()
+    assert page.text() == original
+    page.path = "existing.ngc"
+    page.load()
+    assert "Niezatwierdzone" in page.lbl_issue.text() and not page_env[3].mock_calls
+    page.inputs["depth"].setText("1,5")
+    QtTest.QTest.qWait(350)
+    assert page.field_errors["depth"].isHidden()
+    page.update_step()
+    assert page.program.steps[1].params["depth"] == 1.5
+    page.inputs["depth"].setText("1.5")
+    page.update_step()  # re-entering the same value must not block saving
+    assert page._committed_form()
+    page.program.units = "inch"
+    page.select_step(1)
+    assert "[cal]" in page.inputs["depth"].accessibleName()
+    assert "[cal]" in page.result_tabs.tabText(1)
+    page.close()
+
+
+def test_cycles_layout_and_graphical_preview(page_env, monkeypatch):
+    import linumert_fonts
+    import linumert_shell_model as model
+    from PyQt5 import QtCore, QtGui, QtWidgets
+
+    module, page, _shell = _cycles(page_env, monkeypatch)
+    linumert_fonts.register()
+    page.setFont(QtGui.QFont("IBM Plex Sans", 10))
+    page.setObjectName("lrtRoot")
+    page.setStyleSheet(model.shell_qss(model.load_tokens()))
+    _face_step(page)
+    page.resize(1280, 768)
+    page.show()
+    QtWidgets.QApplication.processEvents()
+    assert page.width() == 1280 and page.height() == 768
+    assert page.code.palette().color(QtGui.QPalette.Text).name() == model.load_tokens()[
+        "kolory"]["fg"]
+    for button in page.findChildren(QtWidgets.QPushButton):
+        if button.isVisible():
+            assert page.rect().contains(QtCore.QRect(button.mapTo(page, QtCore.QPoint()),
+                                                    button.size())), button.text()
+    page.result_tabs.setCurrentIndex(1)
+    assert page.view2d.lines
+    # Optional artifact for the author's visual inspection; no repository mutation in CI.
+    output = os.environ.get("LINUMERT_CYCLES_SCREENSHOT")
+    if output:
+        Path(output).parent.mkdir(parents=True, exist_ok=True)
+        assert page.grab().save(output)
+    page.close()
+
+
+def test_cycles_text_font_size_and_saved_geometry(page_env, monkeypatch):
+    module, page, _shell = _cycles(page_env, monkeypatch)
+    page.cmb.setCurrentIndex(page.cmb.findText(module.engraving.EngraveText.title))
+    page.inputs["text"].setPlainText("ABC\n12")
+    assert page.preview() and page.view2d.lines, page.lbl_issue.text()
+    small = max(x for path in page.view2d.lines for x, _ in path)
+    page.inputs["text_height"].setText("20")
+    page.add_step()
+    assert len(page.program.steps) == 1
+    assert max(x for path in page.view2d.lines for x, _ in path) > small * 1.9
+    output = page.text()
+    def unavailable(_values):
+        raise ValueError("czcionka niedostępna")
+    monkeypatch.setattr("linumert_text_geometry.text_paths", unavailable)
+    page.select_step(0)
+    assert page.preview() and page.text() == output  # uses the persisted outline
+    page.inputs["x"].setText("10")
+    assert page.preview()  # placement does not need the font either
+    page.inputs["text_height"].setText("12")
+    assert page.preview() is None and "czcionka" in page.lbl_issue.text()
+    assert page.text() == output
+    assert not page_env[3].mock_calls
+    page.close()
+
+
+def test_stl_dialog_background_section_and_stale_result(page_env, tmp_path):
+    from linumert_stl_dialog import StlDialog
+    from test_stl_section import write_cube
+
+    dialog = StlDialog(None, "mm", {"bg2": "#101010", "fg3": "#aaaaaa", "teal": "#2dd4bf"})
+    dialog.load_path(write_cube(tmp_path / "cube.stl"))
+    dialog._job[0].result(timeout=5)
+    dialog._poll()
+    dialog._job[0].result(timeout=5)
+    dialog._poll()
+    assert dialog.apply.isEnabled() and dialog.paths_json
+    dialog.scale.setValue(2)
+    assert not dialog.apply.isEnabled() and dialog.paths_json is None
+    dialog.calculate_section()
+    dialog.z.setValue(0.75)  # edit while the previous result is in flight
+    dialog._job[0].result(timeout=5)
+    dialog._poll()
+    assert not dialog.apply.isEnabled() and dialog.paths_json is None
+    dialog.calculate_section()
+    dialog._job[0].result(timeout=5)
+    dialog._poll()
+    assert dialog.apply.isEnabled() and "Rozmiar XYZ: 2" in dialog.message.text()
+    dialog.show()
+    dialog.view.setCurrentText("XZ")
+    assert dialog.model_view.mode == "XZ"
+    dialog.view.setCurrentText("iso")
+    from PyQt5 import QtWidgets
+    QtWidgets.QApplication.processEvents()
+    assert dialog.width() <= 1280 and dialog.height() <= 768
+    output = os.environ.get("LINUMERT_CAM_SHOT_DIR")
+    if output:
+        Path(output).mkdir(parents=True, exist_ok=True)
+        assert dialog.grab().save(str(Path(output) / "stl-import.png"))
+    dialog.accept()
+    assert dialog.result() == dialog.Accepted
+    dialog.deleteLater()
+
+
+def test_cycles_stl_capture_is_independent_of_source_file(page_env, monkeypatch):
+    from linumert.generators.path_geometry import decode_paths
+
+    module, page, _shell = _cycles(page_env, monkeypatch)
+    page.cmb.setCurrentIndex(page.cmb.findText(module.stl_trace.StlSection.title))
+    captured = "[[[0,0],[10,0],[10,10],[0,0]]]"
+    monkeypatch.setattr("linumert_stl_dialog.StlDialog", lambda *a: SimpleNamespace(
+        exec_=lambda: 1, paths_json=captured, description=lambda: "cube.stl | Z=0.5",
+        deleteLater=lambda: None))
+    page.stl_button.click()
+    assert page._draft_dirty and page.view2d.lines == decode_paths(captured)
+    page.add_step()
+    assert page.program.steps[0].generator == "stl_section"
+    assert "G1 X10 Y10" in page.text() and not page_env[3].mock_calls
+    page.close()
+
+
+@pytest.mark.parametrize("kind", ["text", "shape", "facing"])
+def test_cam_views_layout_and_preview(page_env, monkeypatch, kind):
+    import linumert_fonts
+    import linumert_shell_model as model
+    from PyQt5 import QtCore, QtGui, QtWidgets
+
+    module, page, shell = _cycles(page_env, monkeypatch)
+    linumert_fonts.register()
+    page.setFont(QtGui.QFont("IBM Plex Sans", 10))
+    tokens = model.load_tokens()
+    shell.c = page.view2d.c = tokens["kolory"]
+    page.setObjectName("lrtRoot")
+    page.setStyleSheet(model.shell_qss(tokens))
+    if kind == "text":
+        title = module.engraving.EngraveText.title
+        values = {"text": "linumeRT\nCNC 2026", "font_style": "bold", "tracking": "0.3"}
+    elif kind == "shape":
+        title = module.shapes.ShapeEngrave.title
+        values = {"shape": "star", "strategy": "crosshatch", "angle": "15", "height": "40"}
+    else:
+        title = module.surfacing.FaceMillStrategies.title
+        values = {"x1": "100", "y1": "70", "tool_d": "16", "depth": "1", "mode": "concentric"}
+    page.cmb.setCurrentIndex(page.cmb.findText(title))
+    for name, value in values.items():
+        widget = page.inputs[name]
+        if isinstance(widget, QtWidgets.QComboBox):
+            widget.setCurrentIndex(widget.findData(value))
+        elif isinstance(widget, QtWidgets.QPlainTextEdit):
+            widget.setPlainText(value)
+        else:
+            widget.setText(value)
+    page.add_step()
+    assert page.program.steps and page.view2d.lines, page.lbl_issue.text()
+    page.result_tabs.setCurrentIndex(1)
+    page.resize(1280, 768)
+    page.show()
+    QtWidgets.QApplication.processEvents()
+    assert page.width() == 1280 and page.height() == 768
+    for button in page.findChildren(QtWidgets.QPushButton):
+        if button.isVisible():
+            assert page.rect().contains(QtCore.QRect(button.mapTo(page, QtCore.QPoint()),
+                                                    button.size()))
+    form_scroll = next(w for w in page.findChildren(QtWidgets.QScrollArea)
+                       if w.widget() is page.form_box)
+    assert form_scroll.horizontalScrollBar().maximum() == 0
+    if kind == "text":
+        assert page.inputs["text"].palette().color(QtGui.QPalette.Text).name() == shell.c["fg"]
+    elif kind == "facing":
+        assert not page.inputs["axis"].isEnabled() and page.inputs["direction"].isEnabled()
+    else:
+        assert not page.inputs["corner_r"].isEnabled() and page.inputs["inner"].isEnabled()
+    output = os.environ.get("LINUMERT_CAM_SHOT_DIR")
+    if output:
+        Path(output).mkdir(parents=True, exist_ok=True)
+        assert page.grab().save(str(Path(output) / f"cycles-{kind}.png"))
+    page.close()
+
+
+def test_cam_preview_camera_does_not_modify_program(page_env, monkeypatch):
+    from PyQt5 import QtCore, QtGui, QtWidgets
+
+    _module, page, _shell = _cycles(page_env, monkeypatch)
+    _face_step(page)
+    page.result_tabs.setCurrentIndex(1)
+    page.show()
+    QtWidgets.QApplication.processEvents()
+    view = page.view2d
+    program = page.text()
+    before = view.grab().toImage()
+    wheel = QtGui.QWheelEvent(QtCore.QPointF(100, 80), QtCore.QPointF(100, 80),
+                              QtCore.QPoint(), QtCore.QPoint(0, 120), QtCore.Qt.NoButton,
+                              QtCore.Qt.NoModifier, QtCore.Qt.ScrollUpdate, False)
+    QtWidgets.QApplication.sendEvent(view, wheel)
+    assert view.grab().toImage() != before
+    for event_type, point, button, buttons in (
+            (QtCore.QEvent.MouseButtonPress, (100, 80), QtCore.Qt.LeftButton, QtCore.Qt.LeftButton),
+            (QtCore.QEvent.MouseMove, (140, 100), QtCore.Qt.NoButton, QtCore.Qt.LeftButton),
+            (QtCore.QEvent.MouseButtonRelease, (140, 100),
+             QtCore.Qt.LeftButton, QtCore.Qt.NoButton),
+            (QtCore.QEvent.MouseButtonDblClick, (100, 80),
+             QtCore.Qt.LeftButton, QtCore.Qt.LeftButton)):
+        QtWidgets.QApplication.sendEvent(view, QtGui.QMouseEvent(
+            event_type, QtCore.QPointF(*point), button, buttons, QtCore.Qt.NoModifier))
+    assert view.grab().toImage() == before
+    assert page.text() == program and not page_env[3].mock_calls
+    page.close()
+
+
 def test_cycles_steps_checked_with_tool_db(page_env, monkeypatch):
     """Cykle (Model-Author: Claude, sesja 040): kroki porównane z bazą narzędzi w GUI."""
     from linumert.tools.db import Tool

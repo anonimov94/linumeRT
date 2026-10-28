@@ -161,6 +161,8 @@ def test_panel_http_api_on_localhost(core, tmp_path) -> None:
             assert page.status_code == 200 and "linumeRT" in page.text
             assert http.get("/static/vendor/uPlot.iife.min.js").status_code == 200
             assert http.get("/static/app.js").status_code == 200
+            assert http.get("/static/library.js").status_code == 200  # zakładka „Maszyny”
+            assert 'data-tab="biblioteka"' in page.text and "/static/library.js" in page.text
             master = Master(len(server.drives), transport=server.handle)
             master.enable()
             master.move(0, 5_000, 200_000.0, 2e6)

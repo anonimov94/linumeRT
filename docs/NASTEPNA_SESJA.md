@@ -1,6 +1,6 @@
 # Przekazanie i środowisko
 
-Tura: Codex · 2026-10-24 · stan: oddana; poprawka awarii podglądu D38 w PR #102, odbiór pełnego HMI PASS.
+Tura: Codex · 2026-10-27 · stan: oddana; odbiór i scalanie gotowych PR #190/#184, wyniki końcowe w kontrolach PR.
 
 Model-Author: Codex. Bez globalnego LOCK; zasady współpracy wyłącznie w
 [WSPOLPRACA_MODELI.md](WSPOLPRACA_MODELI.md).
@@ -14,6 +14,260 @@ Nie utrzymuj tu drugiej listy statusów. Dobór sesji i rozszerzeń według reje
 oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj automatycznie.
 
 ## Dla Claude:
+
+Model-Author: Claude · 2026-10-27. **Stan zatrzymania: 066 ATC, PR #192 (gałąź `wip/g43-po-m6`).**
+Zrobione: `core/linumert/machine/atc_macro.py` (generator makra remapu M6 dla `rack_linear`,
+`plan_swap` = kolejność kroków) + `tests/test_atc_macro.py` (9 testów, plan wykonany na modelu
+magazynu Plant). `make lint test` na gałęzi po scaleniu main: 1707 PASS, ruff PASS. #193 (Codex) scalony.
+Następne kroki w tej kolejności: (1) czekać na CI #192 i scalić merge commitem, jeśli zielone;
+(2) podpiąć makro: `REMAP = M6 ... ngc=lrt_m6_atc` w INI maszyn z ATC + zapis generowanego pliku
+w `config_files.py`/`configgen.py`; (3) test `@pytest.mark.linuxcnc` na `rs274` (M66 L3/L4, `#5399`,
+`o<> return`) — nie weryfikowane, brak rs274 na laptopie Claude; (4) dziennik transakcyjny i
+`RECOVERY_REQUIRED` po E-STOP/timeout (blokada kolejnego M6 do uzgodnienia magazynu), jedno źródło
+mapy narzędzie–kieszeń (nie dublować YAML i tool.tbl); (5) karuzela/parasol (generator odmawia).
+Konsultacja z ChatGPT (research, nie źródło prawdy): sekwencja PRECHECK→SAFE_POSITION→odłożenie→pobranie→
+VERIFY→COMMIT→G43 oraz zasada „po przerwaniu nie cofaj ruchów automatycznie" — do potwierdzenia w
+dokumentacji LinuxCNC; pytanie o handshake iocontrol/remap ngc vs python pozostaje bez odebranej odpowiedzi.
+Środowisko: venv `python3 -m venv .venv && .venv/bin/pip install -e ".[dev]"`; `make lint test` ~6 min.
+Nie commituj artefaktów uruchomień (`tool.tbl`, `linumert_tools.db`, `nc_files/gowno*`, `narzedzia.csv`).
+
+Model-Author: Codex · 2026-10-27. **Sprint właściciela według #181 (14:43–15:43 UTC).**
+Cztery instancje Codex pracują w osobnym checkoutcie codex/team-sprint-20261027:
+backend przyrostowego JOG, klient web/operator, niezależny przegląd i odbiór live;
+koordynacja i integracja po stronie agenta głównego. Zakres 028/029 + WEBHMI-POC.
+Nie zmieniamy lokalnej pracy ATC/066 ani plików operatora; bez globalnego LOCK.
+Kontrakt: jog_increment z jedną komendą na gest, dodatnią drogą mm/deg i podpisaną
+prędkością, osobne jog_keepalive bez ponownego ruchu; STOP po utracie podtrzymania.
+Końcowe testy/SHA i stan scalenia w PR oraz raportach #181; nie zaliczać sprzętu/MPG/HAL.
+
+Model-Author: Codex · 2026-10-27. **Polecenie właściciela: testować i scalać gotowe gałęzie.**
+#190 ma zielone python/plant-matrix/LinuxCNC (158 live PASS); #184 połączony z main
+i backendem #190, konflikty wyłącznie dokumentacji rozwiązane. Jeden aktualny
+WEBHMI-POC zachowuje postęp; CAM-2D-TEXT-STL i CAM-RELIEF-STL pozostają osobno.
+Dodatkowe rs274: 10 CAM + 1 relief PASS; lokalna macierz/scenariusze Plant PASS.
+Pełne testy offline i CI końcowego SHA trwają; scalać dopiero po zielonych kontrolach.
+Systemowy gcode 2.9 w obrazie lokalnym ujawnia istniejący błąd test_sim_path
+(brak M2) i późniejszy SIGSEGV; błąd odtworzony na czystym main 38a248d.
+Powtórka offline w czystym venv bez LinuxCNC; odbiór RIP osobno przez CI.
+Kopia operatora i jej lokalne pliki pozostają zachowane.
+
+Model-Author: Codex · 2026-10-27. **Nowy podział właściciela: backend CNC po stronie Codex.**
+Zakres: obsługa napędów, cykle frezowania/toczenia/szlifowania, generowanie ścieżki
+G-code z cykli i płaskorzeźby ze STL. GUI/web pozostaje po Twojej stronie.
+Checkout `/home/dell/Projekty/linumeRT-cnc-backend-20261027`, gałąź codex/cnc-backend-20261027.
+Pierwszy krok 041/043/051: czytnik STL z backendowej części #184 (bez zmian Qt),
+następnie raster 3D frezem kulistym i eksport G-code. Zajęte nowe pliki:
+core/linumert/programs/stl_section.py, core/linumert/generators/relief.py i ich testy.
+Nie dubluj czytnika; #184 pozostaje otwarty i nie jest tym scalany w całości.
+Stan zatrzymania: #190; czytnik, raster kulisty i CLI gotowe; rs274 Debian12 PASS.
+Ograniczenia i API: docs/cam/RELIEF_STL.md. Debian12: 36 testów PASS, w tym rs274
+i materiał Z-map (brak cięcia w G0/brak podcięcia powierzchni). Pełny make lint test:
+1630 PASS, 124 SKIP, 158 deselected (LinuxCNC), REQ 22/22. CLI demo 441 punktów
+przeszło rs274. #190 scalać po zielonych kontrolach aktualnego HEAD; autokontrola.
+Kolejny krok: rozbudowa strategii zgrubnej STL; web może korzystać z relief_from_stl().
+Wcześniejsze bramki pozostają otwarte; napędy i pozostałe rodziny cykli to dalsze porcje.
+
+Model-Author: Codex · 2026-10-27. **WebHMI: pakowanie strony i odbiór artefaktu.**
+Osobny checkout `/home/dell/Projekty/linumeRT-closeout-20261027`, bez globalnego LOCK.
+Po #185/#186/#187 wheel nie zawierał strony: odtworzone HTTP 404. Dodano package-data
+oraz kontrolę wheel w CI poza checkoutem: 3 zasoby HTTP, auth WS, jog atrapy i stop
+po rozłączeniu PASS; 71 testów WebHMI PASS. Nie zmieniałem bramy ani stron Qt.
+Stan zatrzymania: PR #188 wypchnięty; make lint test: 1595 PASS, 124 SKIP,
+157 deselected (LinuxCNC), REQ 22/22. CI Debian/LinuxCNC PASS; #188 scalony jako d6a9853. Nie zajmuję backend.py/gateway.py/app.py.
+Następny zakres: rzeczywista przeglądarka i LinuxCNC RIP; watchdog HAL nadal otwarty.
+Rekord WEBHMI-POC wiąże zakres z 028/029 i decyzją właściciela; bez zamknięcia M2.
+
+Model-Author: Codex · 2026-10-26. **Nocna praca do 27.10, 07:00 Europe/Warsaw.**
+Właściciel: nowe funkcje przed optymalizacją; optymalizacja po wykonaniu całej roadmapy.
+Najpierw domknięcie #184 z poprawką tekst/JOG, potem WEB-HMI-POC zgodnie z syntezą.
+Kontynuacja tego czatu jest zaplanowana co 30 minut do rana; zachować małe kroki,
+koordynację przez pliki/PR i prawdziwe dowody. Nie zaliczać ręcznych ani sprzętowych bramek.
+
+Model-Author: Codex · 2026-10-26. **Synteza i domknięcie na polecenie właściciela.**
+#183 scalony `3ea8eb7`; przegląd dokumentu SHA 5cc1938 zapisany w komentarzu PR.
+W #184 zachowujemy wspólny CAM i gotowy ekran odniesienia; dalszy rozwój GUI przechodzi
+na HTML/WebGL. Kontrakt i rejestr zsynchronizowane, następny zakres `WEB-HMI-POC`.
+Routing tekstu poprawiony (15 PASS): edycja bez JOG, F1/F2/Esc i stop rozpoczętego JOG zachowane.
+Prośba o przegląd końcowego SHA #184, zwłaszcza tych kontraktów; brak odpowiedzi nie jest
+przeglądem. Pełna synteza: `SYNTEZA_MODELI_2026-10-26.md`; autokontrola CAM i CI w PR.
+
+Model-Author: Codex · 2026-10-26. **Strategie, kształty, napisy i STL — PR #184.**
+Nowy zakres właściciela: planowanie v2, grawerowanie kształtów i konturów czcionek,
+STL ASCII/binary z podglądem i przekrojem XY. Geometria jest zachowana w .lnx.
+GUI 1280×768, zoom/pan, obliczenia STL w tle; raport CAM_2D_2026-10-26.md.
+Stan zatrzymania: kod i testy w codex/cam-strategies, kontrole konkretnego HEAD w #184.
+Nie zamyka to odbioru pulpitu, całych M3/M4 ani obróbki powierzchni STL 3D.
+
+Model-Author: Codex · 2026-10-26. **Bieżące zlecenie: backend i funkcje w GUI z edycją.**
+Porcja sesji 045 w PR #180, gałąź codex/cycles-editing: transakcyjny model kroków,
+przesuwanie/duplikacja/wyłączenie/usuwanie wybranego, Cofnij/Ponów, walidacja przy polach
+oraz zatwierdzanie parametrów przed zapisem/wczytaniem. Odbiór Qt bez maszyny:
+19 testów modelu/cykli PASS; zrzut build/cycles-editing.png, layout 1280×768.
+Stan zatrzymania: kontrole Debiana/LinuxCNC w #180; wcześniejsze bramki nadal otwarte.
+Pozostały zakres 045 i kolejność dalszej pracy wyłącznie w rejestrze roadmapy.
+
+Model-Author: Codex · 2026-10-26. **Nowe polecenie: scalić wszystkie PR i gałęzie.**
+#172 e7aa88a, #173 6818708, #174 69dfeb6: odtworzone błędy G92 i helisy poprawione;
+60 testów/4 subtesty PASS, w tym rs274. #175 b1d9226 / #177 4639b83:
+78 testów dekodera/Plant/IP PASS, niezerowe 0x00xx nie oznaczają braku błędu.
+#172, #174, #175 i #177 są scalone. #173 scalony jako 1436bc2 po zielonych
+kontrolach python, plant-matrix i LinuxCNC RIP (HEAD 6cd556d).
+Końcowe rozliczenie #178 zawiera wyłącznie dokumentację i widoki rejestru;
+zachowuje oba testy regresji: jednostki osi obrotowej i zmiana obrotu XY.
+Stan zatrzymania: #178 scalać po zielonych kontrolach końcowego HEAD;
+następnie wrócić do najwcześniejszego otwartego kryterium rejestru.
+Nie zamyka to 069 ani wcześniejszych bramek; katalog operatora zachowany.
+
+
+Model-Author: Codex · 2026-10-26. **Przegląd na polecenie właściciela.**
+#171: Qt checkbox PASS, HMI 45 kroków PASS (63,06 s), CI HEAD 6a86075 zielone.
+#172–174: nie scalać — odtworzone przeoczenie łuku po G92 (rs274) oraz
+helisy XZ po obrocie XY. Komentarze PR i raport PR_REVIEW_2026-10-26.md.
+Pełna seria z systemowym gcode SIGSEGV w path.py:307 oraz błąd testu bez M2;
+oba odtworzone na main 53ad3ac, bez zmian kodu symulacji. Offline 1368 PASS;
+7 błędów montowania .git usuniętych: 11 PASS/3 SKIP, REQ22/22, C21/21 PASS.
+Kopia operatora ~/linumeRT zachowana z lokalnymi narzędziami/programami.
+Stan zatrzymania: #171 scalony c1eabef, podgląd w linumert-hmi aktywny z
+/home/dell/Projekty/linumeRT-odbior-20261026; lease Codex w ~/linumeRT i
+/tmp/linumert-review-checkbox — nie przerywać okna operatora. Po zamknięciu zwolnić.
+Następnie poprawić oba przypadki LIMITS-PREFLIGHT; nowy draft #175 ma CI python FAIL.
+
+
+Model-Author: Codex · 2026-10-26. **Właściciel: „jest ok”, poprawka checkboxów odebrana.**
+Kod 8faa556 wypchnięty, PR #171 ready; lint i 70 testów Qt/modelu/operatora/IP PASS.
+Czerwony X zastąpiony pustą ramką także w dialogach; logika checkboxów bez zmian.
+Przed scaleniem sprawdzić wymagane CI aktualnego HEAD #171; nie uznawać pending za PASS.
+Checkout: /home/dell/Projekty/linumeRT-checkbox. Podgląd jest uruchamiany w linumert-hmi;
+sprawdzić kontener i lease przed kolejnym testem CNC, nie przerywać okna operatora.
+
+Model-Author: Codex · 2026-10-26. **Poprawka po odbiorze właściciela: puste checkboxy.**
+Ogólne działanie podglądu potwierdzone; unchecked.png z upstream zawiera czerwony X.
+Gałąź codex/hmi-checkbox-empty, checkout /home/dell/Projekty/linumeRT-checkbox:
+ramka bez obrazka w globalnym QSS i stylu powłoki, 55 testów Qt/modelu PASS.
+Podgląd operatora działa osobno w linumert-hmi; jego lease aktywne do zamknięcia okna.
+
+Model-Author: Codex · 2026-10-26. **#169 scalony: 3c20817; zlecone trzy grupy odebrane.**
+Układ 1280×768, Cyberdeck z dwoma podglądami, rzeczywiste odczyty monitora.
+Kod e9ed723: CI python/plant-matrix/linuxcnc SUCCESS; 1542 testy + 184 subtesty
+w środowisku Qt oraz 154 live PASS (run40293747003), REQ 22/22, C PASS.
+Pełny raport i zrzuty: docs/raporty/G2/HMI_CLOSEOUT_2026-10-26.md.
+Obie lease zwolnione, kontenery testowe zakończone; checkout operatora zachowuje
+lokalne narzędzia/programy. Nowy kod: /home/dell/Projekty/linumeRT-hmi-closeout.
+Następnie odbiór pulpitu właściciela dla 028, potem pozostały zakres M2 według rejestru.
+
+Model-Author: Codex · 2026-10-26. **Kontynuacja zlecona przez właściciela: 028 → HMI-OWNER-SKINS → monitor Neon.**
+Osobny checkout `/home/dell/Projekty/linumeRT-hmi-closeout`, gałąź `codex/hmi-028-closeout`.
+Pierwszy rezultat: układ 1280×768 (karty HMI, szyna, Symulacja/przygotówka, marka/alarmy),
+następnie kompozycja dwóch podglądów i odczyty monitora. Bez globalnego LOCK.
+Stan zatrzymania: 9e2fec9 wypchnięty w #169; lint i 9 testów Qt PASS.
+Usunięto powtórzone paski wewnątrz hosta: 4 rodziny mieszczą wszystkie karty
+na 1280×768 (5 testów PASS). QtVCP: 45 kroków PASS / 63,21 s.
+CI python/plant-matrix PASS; pełna seria LinuxCNC anulowana po 35 min (wcześniej
+FAIL home_and_move). Lokalna pełna seria z natywnym gcode: SIGSEGV parse_rs274,
+poza zmienionymi modułami; logi build/hmi-closeout. Obie lease zwolnione.
+Kolejna porcja: odczyty NML programu/posuwu/narzędzia (46 testów PASS, 1 SKIP),
+Cyberdeck AUTO PASS (NML/DTG/program/T1/D6), klatki 2,95–4,31 ms; GL 160 kombinacji PASS.
+Osadzony Cyberdeck: 45 kroków PASS po poprawce samotestu (jawne wejście w Start).
+Bloker CI home_and_move: próbka 99,9947 vs 100±0,005 po sleep(0,5). Dodano
+ciągłe ustalenie w tej samej tolerancji/limicie; 5 testów offline PASS, live PASS
+133,88 s, endpoint po 1,053 s, [100.0000, 199.9977, -20.0000] mm. Obie lease zwolnione.
+Zlecone trzy grupy mają kod i lokalny odbiór; wymagane CI #169 zakończone SUCCESS dla e9ed723, scalenie 3c20817.
+Kolejna porcja: Cyberdeck — dwa podglądy współdzielą scenę Neon, własna nakładka
+narożników, 38 testów Qt/status PASS, 1 SKIP. Zrzut Qt sprawdzony; odbiór live nowej kompozycji otwarty.
+
+Model-Author: Codex · **#159 — poprawki po Twoim raporcie 54fcfe3.**
+Test edycji YAML bierze przyspieszenie z aktualnego pliku źródłowego, zamiast 17100.
+Zapis biblioteki i edytora korzysta z pliku tymczasowego, fsync i os.replace;
+błąd publikacji zachowuje poprzednią konfigurację. Kosz używa unikalnego sufiksu,
+a starsze nazwy bez sufiksu nadal można przywracać. Dwie regresje: błąd publikacji
+oraz dwa usunięcia tej samej nazwy w tej samej sekundzie z odzyskaniem obu treści.
+Sprawdzono składnię/diff; testy i ponowny odbiór dokładnego SHA pozostają po Twojej
+stronie. Nie zmieniono przyspieszeń ani tolerancji. API biblioteki nie oznacza
+ukończonego GUI; odbiór klikania funkcji operatora nadal wymagany przed zamknięciem.
+
+Model-Author: Codex · #163/a165f18: CI 5655900 zatrzymało się na I001
+(kolejność importów w nowej regresji). Poprawiono zgodnie z diagnostyką Ruff;
+bez zmiany zachowania. Lokalnie brak modułu Ruff, więc nie deklaruję lint PASS.
+Nowe CI i odbiór laptopa oczekiwane; bez ponownego uruchamiania testów Claude.
+
+Model-Author: Codex · **#163 / 76fed49 — przegląd stabilności do odbioru.**
+Zmiana pliku programu usuwa starą geometrię przed asynchronicznym wczytaniem;
+utrata STATUS usuwa scenę i tekst programu, odzyskanie statusu wczytuje plik ponownie.
+Przycisk pauzy pokazuje Wznów w stanie paused. Rozszerzono regresję w test_neon_view.py;
+nie uruchamiano testów laptopa. Claude: test tej regresji, zmiana programu A→B,
+utrata/odzyskanie statusu, pauza/wznowienie; następnie wcześniejszy odbiór czterech rodzin.
+82e653b ma wszystkie CI SUCCESS, co nie stanowi odbioru nowego 76fed49.
+Polecenie właściciela: dopracować kolejno wszystkie otwarte gałęzie; po tym przeglądzie
+HMI przechodzimy do #161, #160 i #159. Nie oznacza to zamknięcia pełnego M2.
+
+Model-Author: Codex · **#163 / 7dc2649 — nawigacja czterech rodzin do odbioru.**
+Claude potwierdził selektor 2ae9103 na laptopie (komentarz 18:08 UTC); lint PASS,
+pełny pytest w toku. Połączono jego rejestr HMI-OWNER-SKINS z #164, bez dublowania.
+Nowy mały krok: FamilyNavigationButton maluje cztery odmienne geometrie/typografię
+na całej szynie operatora, także poza stroną HMI; ramy stałych pasków i klawisze
+trybów dopasowane do rodziny. Natywne QToolButton, te same sygnały/strony,
+widoczny fokus. Składnia/diff PASS; nie uruchamiano Qt/testów nowej wersji.
+Claude: 4 rodziny × 1280×768 i 1920×1080, nawigacja mysz/Tab, brak ucięcia
+etykiet i komend od zmiany strony, kontrast/zmiana palety, powrót do zwykłego
+widoku. Obrazów nie deklaruję jako odebranych. Dwa prostokątne podglądy symulacji
+z narzędziem i maszyną oraz kompozycja nakładki nadal do wykonania w tym rozszerzeniu.
+
+Model-Author: Codex · **#163 / 9167442 — selektor rodziny do ponownego odbioru.**
+Na podstawie komentarza Claude z 17:53 UTC: bab3866 startuje w Classic Digital,
+lokalnie lint/1359 testów/check_requirements PASS, ale brak wyboru rodziny w GUI.
+Połączono main/#162 bez utraty zmian. Wygląd → Widok HMI: cztery rodziny + powrót
+do dotychczasowej powłoki, zapis atomowy do ~/.config/linumert/operator-view.json,
+zmiana wyłącznie po kolejnym starcie. LINUMERT_OPERATOR_SKIN jawnie nadpisuje zapis.
+Ustawienia w nagłówku nowego HMI prowadzą do Wyglądu. Nowego kroku nie uruchamiano;
+sprawdzono składnię. Claude: odbiór wszystkich czterech rodzin przez GUI, zapis/
+restart/powrót, niepoprawny plik i odmowa zapisu, brak komend przy wyborze, stałe
+E-STOP/alarmy. Instrukcja w HMI_QTVCP_HOST.md. Nie zaliczać nowego SHA starym PASS.
+
+Model-Author: Codex · **polecenie właściciela 2026-10-25: po PASS pracujemy dalej, na końcu scalamy.**
+Claude wykonuje odbiór na EndeavourOS i zapisuje zakres, dokładny SHA, polecenia,
+wyniki oraz zrzuty w raporcie/PR. Po potwierdzonym PASS Codex kontynuuje małe
+użyteczne kroki M2; Claude pomaga kolejnymi odbiorami. Ukończone zmiany scalamy
+przez PR po wymaganych kontrolach, bez kolejnego pytania właściciela. #163 zależy
+od #161: uwzględnić kolejność/base PR; samo zielone CI nie zastępuje odbioru laptopa.
+Jeśli testy ujawnią błąd, najpierw poprawka i ponowny odbiór właściwego SHA.
+
+Model-Author: Codex · **host HMI do odbioru na EndeavourOS**. Gałąź
+`codex/skin-qtvcp-host`, kod de6b06d. Nowy opcjonalny widok wewnątrz QtVCP;
+STATUS i przyciski obecnego hosta, brak osobnego właściciela komend/HAL.
+Instrukcja i pełny zakres: docs/design/HMI_QTVCP_HOST.md. Uruchomienie przez
+LINUMERT_OPERATOR_SKIN=classic-digital (bez --skin). Nie uruchamiałem testów nowego
+hosta; właściciel powierzył je Tobie. Wynik ma poprzedzać scalenie; 028 nadal partial.
+
+Model-Author: Codex · 2026-10-25. **Właściciel: poprawiona próba software GL też się zamyka.**
+Odpowiedź na polecenie bez --safe (faulthandler + Mesa software + xcb_glx):
+„Nadal się zamyka”. Nie powtarzać tego pytania ani nie uznawać GL za przyczynę.
+W Downloads nadal tylko pierwotne raporty z 14:18 UTC, bez nowego tracebacku.
+Historyczny brak tracebacku pozostaje odnotowany. Aktualny krok: odbiór nowego ISO
+z xfce4-notifyd po diagnozie Claude w VM; SHA obrazu i raport przy ponownej awarii.
+Zakres codex/m2-iso-crash-trace: zapisać negatywną próbę i rozróżnić wersje ISO;
+nie wprowadzać kolejnej spekulatywnej poprawki. Dotychczasowe #153/#155/#156 już
+scalone do main; to nie odbiór startu laptopa. Odbiór M2/ISO pozostaje partial.
+
+Model-Author: Codex · **#161 — korekta wysokości szerokich kart.**
+Po Twoim merge main 1377c8f przegląd wykazał niespójność heightForWidth/setGeometry:
+powyżej 1100 px nadal może być potrzebna jedna kolumna, jeśli minima kart nie mieszczą się.
+Wspólny warunek _needs_stack usuwa zaniżanie wysokości. Nowa regresja w
+test_hmi_page_stack.py używa dwóch kart po 700×200 przy szerokości 1200.
+Sprawdzona składnia/diff; testy Qt i odbiór Start/Narzędzia pozostają po Twojej stronie.
+
+Model-Author: Codex · bieżące polecenie właściciela 2026-10-25: celem jest docelowe HMI
+inspirowane luźno skórkami (bez odwzorowania 1:1 i wymogu czterech aplikacji). Codex implementuje integrację, Claude pomaga testami na laptopie
+EndeavourOS. Stara powłoka nie jest docelową kompozycją. #161 to pomocnicza poprawka
+układu; nie zamyka integracji skórek. Nowy zakres: opcjonalny host skórek w QtVCP.
+
+Model-Author: Codex · 2026-10-25. **#161 — dopasowanie kart M2/028.**
+Układ adaptacyjny Start/Narzędzia, zawijanie checklisty. Złożenie Qt
+1280→1920→1280 bez poziomego przewijania, wpis/Tab, zachowanie fokusu i szkicu
+oraz samodzielny formularz STL 1200×600 PASS. Brak komend ACTION od nawigacji.
+Po zwolnieniu lease próba WSL f76554f zakończyła się FAIL (69,92 s): timeout
+02_estop_zwolniony i 22 błędy wtórne; obie lease zwolnione. Wynik nie jest odbiorem.
+Właściciel przekazał testy laptopa EndeavourOS Claude; dalszych prób tutaj nie uruchamiam.
+CI i szczegóły: docs/raporty/G2/M2_RESPONSIVE_2026-10-25.md. 028 partial, 3/12 bez zmian.
 
 Model-Author: Codex · 2026-10-25. **#155: środowisko i stos stron odebrane, responsywność nadal otwarta.**
 ad17702: cnc_environment(), 45 kroków GUI PASS, tools/cycles=true, 64,90 s.
@@ -637,6 +891,30 @@ Stan zatrzymania: poprawka i regresja gotowe; następny krok — integracja z #1
 Model-Author: Codex. PR #103 jest scalony (3d4ecec), a jego gałąź usunięta.
 Przekierowałem PR #106 na main; pozostaje draftem do pełnego odbioru.
 Nie kieruj już integracji do wip/od-01-kolizje. Brak nowego zadania w „Dla Codex:” na main.
+
+## Dla Claude — korekta prędkości JOG bramy, 2026-10-27
+
+Model-Author: Codex. Przegląd #185 SHA 0161746 wykazał mnożnik 60 w
+LinuxCNCBackend.jog, mimo że linuxcnc.command.jog przyjmuje jednostki/s.
+Dowód pierwotny: AXIS 2.9 get_jog_speed (linia 1706: returns units/sec), jog_on:
+https://github.com/LinuxCNC/linuxcnc/blob/2.9/src/emc/usr_intf/axis/scripts/axis.py#L1706
+Poprawka w codex/webhmi-jog-units, PR kierowany do claude/webhmi-backend:
+bez mnożnika 60, skala stat.linear_units dla mm/s -> native/s, odmowa bez skali.
+69 testów bramy/mapowania/aplikacji PASS, ruff PASS na Windows/Python 3.12.
+Nie jest to pełny PASS niezależnego przeglądu #185 ani weryfikacja backendu na RIP.
+Znane ograniczenia watchdog i mapowania przegubów nadal wymagają domknięcia.
+Równolegle #184: poprawiona sprzeczna asercja testu D38, pełne CI nowego SHA 920bddd w toku.
+
+### Dla Claude: aktualizacja 2026-10-27 (po #192)
+Model-Author: Claude. #192 scalony. Krok (2) zrobiony opcją `Options.atc` (PR claude/atc-m6-wiring); brakuje okablowania HAL M64/M66 -> Plant, testu rs274, recovery po E-STOP (kroki 3-5).
+
+### Dla Claude/Codex: ATC krok 3 — 2026-10-27
+Model-Author: Claude. Gałąź `claude/atc-hal-dio`: przy `Options(atc=True)` cel `plant` łączy piny makra
+(M64/M65 → `motion.digital-out-NN` → `lrt-net.0.dout-NN`, `lrt-net.0.din-NN` → `motion.digital-in-NN`
+dla M66) i ustawia `num_dio` motmod; kolizja z zajętym pinem lrt-net = odmowa. Nie dotykam
+`atc_macro.py` ani `plant atc.py` (lokalna praca Codex nad geometrią). Cel `sim` z ATC nadal bez
+wejść cyfrowych (M66 nie przejdzie) — do decyzji. Zostają kroki 4 (test rs274/LinuxCNC) i 5 (E-STOP).
+NIEZWERYFIKOWANE NA SPRZĘCIE ani na RIP LinuxCNC (num_dio/halcmd sprawdzi CI `linuxcnc`).
 
 ## Stan zatrzymania — 028, 2026-10-28
 
