@@ -609,11 +609,11 @@ Pozostaje: Pełna fizyka osi obrotowych, generator kinematyk, DRO/TCP i five_axi
 
 ### 066 — Automatyczna zmiana narzędzia
 
-**częściowe**. Model magazynu i zacisku Plant istnieje. Generator makra remapu M6 dla ATC z machine.yaml (rack_linear): core/linumert/machine/atc_macro.py, plan wymiany sprawdzony na modelu magazynu Plant (tests/test_atc_macro.py, 9 testów).
+**częściowe**. Model magazynu i zacisku Plant istnieje. Generator makra remapu M6 dla ATC z machine.yaml (rack_linear): core/linumert/machine/atc_macro.py, plan wymiany sprawdzony na modelu magazynu Plant (tests/test_atc_macro.py, 9 testów). 2026-10-27: #195 w main: Options.atc i eksport makra. Codex: Plant i generator makra M6 korzystają ze wspólnego wyznaczania pozycji gniazd w rdzeniu. Jawne slot_positions z machine.yaml mają pierwszeństwo przed bazą i rozstawem; makro obsługuje też konfigurację bez base_position/pitch_mm. Generator odmawia eksportu nieosiągalnej geometrii i sprawdza numery obu narzędzi przed ruchem. Windows 96 PASS/1 SKIP; rs274 Debian12 8 PASS.
 
-Pozostaje: Podpięcie makra do INI sim/Plant i generatora konfiguracji, widok magazynu, scenariusze ATC, walidacja stref wymiany, karuzela i parasol, dziennik transakcyjny i RECOVERY_REQUIRED po E-STOP.
+Pozostaje: mapowanie motion.digital-* do Plant, pełny remap z czujnikami i awariami, potwierdzenie zatrzymania wrzeciona, przywracanie stanu modalnego programu, dziennik transakcji i RECOVERY_REQUIRED po przerwaniu oraz osobne rozwiązania karuzeli/parasolowego magazynu. Sprawdzenie zakresów punktów nie jest dowodem bezkolizyjności całej drogi narzędzia i oprawki.
 
-Źródła: [docs/DZIENNIK.md](../DZIENNIK.md), [core/linumert/machine/atc_macro.py](../../core/linumert/machine/atc_macro.py), [tests/test_atc_macro.py](../../tests/test_atc_macro.py), [prompts/sesja-066.md](../../prompts/sesja-066.md).
+Źródła: [docs/DZIENNIK.md](../DZIENNIK.md), [core/linumert/machine/atc_macro.py](../../core/linumert/machine/atc_macro.py), [tests/test_atc_macro.py](../../tests/test_atc_macro.py), [docs/raporty/ATC_GEOMETRIA_2026-10-27.md](../raporty/ATC_GEOMETRIA_2026-10-27.md), [core/linumert/machine/toolchanger_geometry.py](../../core/linumert/machine/toolchanger_geometry.py), [PR](https://github.com/anonimov94/linumeRT/pull/195), [prompts/sesja-066.md](../../prompts/sesja-066.md).
 
 ### 067 — Kreator konfiguracji maszyny
 
