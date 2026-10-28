@@ -7,7 +7,7 @@ wymienia każdy usunięty plik, każdą zmianę w przejętym kodzie i każdy tes
 nie został przeniesiony — z powodem. Bez tego nie da się odróżnić „usunięte celowo”
 od „zgubione przy kopiowaniu”.
 
-Stan zweryfikowany: **899 testów przechodzi, 0 pominiętych, 77 podtestów**; `ruff` czysty;
+Stan zweryfikowany: **900 testów przechodzi, 0 pominiętych, 77 podtestów**; `ruff` czysty;
 `tools/check_no_gui.py` zwraca 0.
 
 ## 1. Pliki usunięte (GUI / Qt / OpenGL / panel web)
@@ -47,7 +47,11 @@ inny (`plant_core/` zamiast `plant/core/`, `library/` zamiast `plant/library/`).
 
 ## 4. Testy, które nie zostały przeniesione
 
-Przeniesiono **63 pliki testowe** rdzenia (865 testów). Nie przeniesiono:
+W pierwszym commicie (`5fed224`) `beta/tests/` miało **63 pliki**: **56 przeniesionych
+z rdzenia** (766 testów) i **7 napisanych od zera** dla warstwy usług — `test_cli_sdk`,
+`test_contract`, `test_machine_service`, `test_no_gui`, `test_services`,
+`test_transport_rest`, `test_transport_ws` (102 testy). Razem 868 zebranych: **865
+przechodziło, 3 pominięte**. Z rdzenia nie przeniesiono:
 
 **Testy warstwy wizualnej** — w bliźniaku nie ma czego testować:
 `test_access_ui`, `test_appearance`, `test_checkbox_indicator`, `test_design_system`,
