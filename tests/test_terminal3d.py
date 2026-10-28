@@ -65,7 +65,7 @@ def test_z_motion_and_camera_rotation_change_actual_geometry():
     assert "@" in "".join(down)
 
 
-@pytest.mark.parametrize("width,height", [(79, 10), (120, 26), (180, 48)])
+@pytest.mark.parametrize("width,height", [(79, 10), (120, 26), (180, 48), (240, 52), (420, 128)])
 def test_composed_viewports_fit_exact_terminal_dimensions(width, height):
     lines = scene().render(3, width, height, Camera(), color=True)
     plain = [re.sub(r"\033\[[0-9;]*m", "", line) for line in lines]
@@ -86,3 +86,12 @@ def test_camera_idle_keeps_orbit_and_controls_have_bounds():
     assert camera.pitch == 80 and camera.zoom == 4
     camera.key("r")
     assert camera == Camera()
+
+
+def test_hd_grid_really_doubles_visible_raster_in_both_dimensions():
+    model = scene()
+    baseline = model.render(3, 120, 26, Camera())[0]
+    hd = model.render(3, 240, 52, Camera())[0]
+    old = tuple(map(int, re.search(r"(\d+)x(\d+) punktow", baseline).groups()))
+    new = tuple(map(int, re.search(r"(\d+)x(\d+) punktow", hd).groups()))
+    assert new[0] >= old[0] * 2 and new[1] >= old[1] * 2

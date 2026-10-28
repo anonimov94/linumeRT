@@ -8,6 +8,8 @@ param(
     [string]$Raster = 'auto',
     [ValidateRange(0.05, 20)]
     [double]$Speed = 1,
+    [ValidateRange(1, 3)]
+    [int]$Density = 2,
     [switch]$Once
 )
 $ErrorActionPreference = 'Stop'
@@ -30,5 +32,16 @@ if ($LASTEXITCODE -ne 0) {
 $demoArgs = @('tools/console_demo.py', '--scenario', $Scenario, '--raster', $Raster,
     '--speed', $Speed.ToString([Globalization.CultureInfo]::InvariantCulture))
 if ($Once) { $demoArgs += '--once' }
-& wsl.exe -d $Distro --cd $linuxRoot -- .venv-linux/bin/python @demoArgs
-exit $LASTEXITCODE
+if (-not ('LiteConsoleDensity' -as [type])) {
+    Add-Type -Path (Join-Path $PSScriptRoot 'ConsoleDensity.cs')
+}
+$densitySession = [LiteConsoleDensity]::Apply($Density)
+if (-not [Console]::IsOutputRedirected) { Write-Host $densitySession.Message }
+try {
+    & wsl.exe -d $Distro --cd $linuxRoot -- .venv-linux/bin/python @demoArgs
+    $demoExit = $LASTEXITCODE
+}
+finally {
+    [LiteConsoleDensity]::Restore($densitySession)
+}
+exit $demoExit

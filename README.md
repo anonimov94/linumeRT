@@ -52,6 +52,7 @@ W PowerShell, z katalogu głównego lite:
 .\tools\console.cmd
 .\tools\console.cmd -Scenario estop_mid_program
 .\tools\console.cmd -Raster ascii -Once
+.\tools\console-hd.cmd
 ```
 
 Pierwsze uruchomienie przygotowuje osobny `.venv-linux` w WSL
@@ -80,12 +81,26 @@ PASS scenariusza E-STOP oznacza poprawne wykrycie oczekiwanej awarii i zatrzyman
 
 ### Rozdzielczość i widoki terminala
 
+Domyślnie launcher stosuje **`-Density 2`**: w klasycznej konsoli Windows zmniejsza
+komórkę czcionki o połowę i ustawia co najmniej dwukrotnie więcej kolumn oraz wierszy.
+Pomiar testowy: **120×30 → 240×60 komórek**, czyli cztery razy więcej komórek obrazu.
+Po zamknięciu pokazu czcionka, okno i bufor wracają do poprzednich ustawień.
+`-Density 1` zachowuje dotychczasowy rozmiar tekstu. Nie zmieniamy rejestru ani profili terminala.
+
+Jeżeli host, np. Windows Terminal, nie udostępnia tej operacji, uruchom
+**`tools/console-hd.cmd`**: otworzy osobną klasyczną konsolę dla pokazu HD.
+Zwykły launcher wypisuje wtedy informację o ograniczeniu hosta zamiast deklarować
+nieuzyskaną rozdzielczość. W Windows Terminal można też zmniejszyć tekst przez Ctrl+minus.
+To zwiększenie liczby rzeczywistych komórek, nie zoom modelu ani nadpróbkowanie do tej samej siatki.
+
 Raster Braille koduje 2×4 punkty w jednej komórce, z maską punktów, kolorem i buforem
 głębi. Zwykłe znaki terminala tworzą obraz, bez okna graficznego i bibliotek renderujących.
 W konsoli o szerokości co najmniej 111 znaków i wysokości 31 wierszy pojawiają się
 obok głównej sceny trzy mniejsze matryce: rzuty XY, XZ i YZ. W mniejszej konsoli
 całą powierzchnię wykresu zajmuje 3D. Rozmiar dopasowuje się także podczas zmiany okna.
 Przykład: przy `--width 120 --height 38` główny panel ma raster 160×100 punktów.
+Po podwojeniu siatki do `--width 240 --height 76`: **320×252 punktów** w panelu 3D.
+Limit obszaru renderowania zwiększono do 440×150 komórek, aby nie ucinać trybu HD.
 
 - `A/D`: obrót; `W/S`: nachylenie; `+/-`: zoom.
 - `O`: automatyczna orbita; `R`: reset kamery; spacja: pauza ruchu.
@@ -98,6 +113,11 @@ Przesunięcia są pokazywane względem pierwszej próbki, a dane liczbowe pozost
 telemetrii. Kamera nie zmienia ani nie skaluje danych napędów.
 Znaki Braille: [tabela Unicode](https://www.unicode.org/charts/PDF/U2800.pdf).
 Narzędzie jest znacznikiem schematycznym; renderer nie wykonuje CAM 3D ani obliczeń kolizji.
+
+Regresja mechanizmu HD w Windows (ukryta konsola testowa, bez WSL i sprzętu):
+`powershell.exe -NoProfile -ExecutionPolicy Bypass -File tools/test_console_density.ps1`.
+Test sprawdza podwojenie siatki, powtórne uruchomienie i przywrócenie również po wyjątku.
+API bieżącej konsoli: [Microsoft](https://learn.microsoft.com/en-us/windows/console/setcurrentconsolefontex).
 
 Plant bez panelu:
 

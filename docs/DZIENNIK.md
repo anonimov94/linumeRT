@@ -15,3 +15,9 @@ Zwiększono rozdzielczość konsoli przez raster 2×4 Braille, dodano perspektyw
 warstwy z buforem głębi, trzy rzuty boczne, sterowanie kamerą i automatyczne dopasowanie
 do terminala. Warianty block/ASCII oraz launcher .cmd zachowują działanie w konsoli.
 Bez zmian rdzenia, fizyki Plant i danych telemetrii.
+
+2026-10-28 · Model-Author: Codex
+Domyślny tryb HD 2x zwiększa rzeczywistą siatkę klasycznej konsoli w obu kierunkach,
+ze zmianą czcionki ograniczoną do pokazu i przywróceniem po wyjściu. Dodano osobny
+launcher klasycznego hosta i natywny test odzyskiwania ustawień. Limit renderera 440×150.
+Nie zmieniono pakietów ani rdzenia. Pełna edycja pozostaje bez zmian.

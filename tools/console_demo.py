@@ -99,8 +99,8 @@ def main(argv: list[str] | None = None) -> int:
                 size = os.get_terminal_size(sys.stdout.fileno())
             except (OSError, ValueError):
                 size = shutil.get_terminal_size((110, 36))
-            width = max(1, min(220, args.width or size.columns - 1))
-            height = max(1, min(75, args.height or size.lines - 1))
+            width = max(1, min(440, args.width or size.columns - 1))
+            height = max(1, min(150, args.height or size.lines - 1))
             return frame(result, index, width=width, height=height, scene=scene,
                          camera=camera, mode=mode, color=animated and not args.no_color)
 

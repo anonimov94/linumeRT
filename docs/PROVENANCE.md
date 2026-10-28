@@ -602,3 +602,10 @@ pakowanie punktów Braille/bloków/ASCII oraz kompozycja rzutów XYZ/XY/XZ/YZ.
 GPL-2.0-or-later, bez bibliotek graficznych i kopiowania fontów/zasobów.
 Numeracja punktów znaków zgodna z tabelą standardu Unicode U+2800–U+28FF:
 https://www.unicode.org/charts/PDF/U2800.pdf (źródło specyfikacji, bez dołączania tabeli).
+
+### Gęstość konsoli HD — 2026-10-28
+
+Model-Author: Codex. Własny adapter C#/PowerShell do Win32 Console API, GPL-2.0-or-later.
+Zmienia wyłącznie font i bufor bieżącej konsoli, zachowuje i przywraca ich stan.
+Bez nowych bibliotek, fontów, wpisów rejestru ani kopiowania kodu zewnętrznego.
+Specyfikacja API: https://learn.microsoft.com/en-us/windows/console/setcurrentconsolefontex.

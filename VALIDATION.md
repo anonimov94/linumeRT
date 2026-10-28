@@ -56,3 +56,16 @@ Native PowerShell/WSL TTY: obrót, nachylenie, zoom, pauza, Q i przywrócenie te
 sprawdzone; launcher .cmd sprawdzony także z -Once i w trybie ASCII.
 Renderer korzysta z rzeczywistej telemetrii symulatora Plant. Żółte narzędzie i obwiednia
 są schematyczne; nie dodano geometrii skrawania, sterowania sprzętem ani zmian rdzenia.
+
+## HD 2x: rzeczywista siatka terminala
+
+2026-10-28 · Model-Author: Codex. Native Windows Console / PowerShell 5.1:
+zmierzono 120×30 → 240×60 komórek. Dwa kolejne przebiegi potwierdziły przywrócenie
+120×30 i oryginalnej czcionki 8×16, również po wyjątku. -Density 1 nie zmienia stanu.
+Test działa w osobnej ukrytej konsoli: tools/test_console_density.ps1.
+Nie zmienia profili terminala ani rejestru. W pseudokonsoli stosuje jawny fallback;
+console-hd.cmd uruchamia własny klasyczny host. Nie deklarujemy zmiany fontu Windows Terminal.
+
+Pełna regresja Python: 1170 PASS, 61 subtestów PASS (354,76 s). Dodatkowe większe
+obszary i warunek >=2x w obu osiach: zestaw renderera/konsoli 22/22 PASS. Ruff PASS.
+Podniesiono limit płótna z 220×75 do 440×150, bez zmian rdzenia, fizyki ani telemetrii.
