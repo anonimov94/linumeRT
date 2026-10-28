@@ -10,6 +10,8 @@ hamowania za punktem styku (G10 L20 liczy względem ``#5061…#5063``). Wymaga L
 
 from __future__ import annotations
 
+import json
+import os
 from pathlib import Path
 
 import pytest
@@ -71,6 +73,11 @@ def test_lrt_probe_sets_work_offset_on_plant(tmp_path) -> None:
     wall_x = probe["target"]["min"][0]                       # ściana X min: 250
 
     z, x = result["z"], result["x"]
+    if os.environ.get("LINUMERT_PROBE_REPORT"):
+        Path(os.environ["LINUMERT_PROBE_REPORT"]).write_text(json.dumps(
+            {"calls": [call_z, call_x], "expected_offset": {"z": top_z - Z_VALUE,
+                                                            "x": wall_x - X_VALUE},
+             "z": z, "x": x}, indent=1))
     assert z["tripped"] and x["tripped"], result
     # Punkt styku dostał zadaną wartość: offset = pozycja styku - wartość.
     assert z["offset"][2] == pytest.approx(top_z - Z_VALUE, abs=ABS_TOL), z
