@@ -580,3 +580,12 @@ zależność rdzenia; nie dodano biblioteki CAM ani zasobów GUI.
 Model-Author: Codex. Oryginalne rozszerzenie backendu i klienta WebHMI oraz testy
 Python/Node/LinuxCNC w sprincie #181; GPL-2.0-or-later. Bez nowych bibliotek produktu,
 fontów, ikon lub innych zasobów zewnętrznych. Zrzuty odbioru to własny ekran z atrapą CNC.
+
+### linumeRT lite — 2026-10-28
+
+Model-Author: Codex. Źródło: istniejący backend linumeRT, baza a593d6d.
+Przeniesiono wspólne szablony/parametry napędów i headless helpery Plant bez zmiany
+autorstwa oryginalnych algorytmów. Nowy CLI, eksport konfiguracji lite, proces DISPLAY
+bez okna, testy granic i wheel checker: własny kod GPL-2.0-or-later.
+Nie dodano zewnętrznych bibliotek produktu ani zasobów GUI.
+Historyczne wpisy wyżej dotyczą pełnej edycji; usunięte zasoby nie są częścią lite.

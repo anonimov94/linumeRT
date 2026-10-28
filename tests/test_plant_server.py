@@ -20,8 +20,8 @@ import yaml
 from linumert_plant.__main__ import main as plant_main
 from linumert_plant.lrtnet import FLAG_FAULT
 from linumert_plant.server import PlantConfig, PlantConfigError, PlantServer, load_plant_config
+from linumert_plant.test_master import Master, drive_state
 from linumert_plant.trace import TraceWriter
-from test_master import Master, drive_state
 
 ROOT = Path(__file__).resolve().parents[1]
 MACHINE = ROOT / "config" / "machines" / "mill_servo_table.yaml"

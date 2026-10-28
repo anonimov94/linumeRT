@@ -16,9 +16,8 @@ from pathlib import Path
 
 import pytest
 import yaml
-from linumert_plant import drive_library as lib_mod
-from linumert_plant.__main__ import main as cli_main
-from linumert_plant.drive_library import (
+from linumert.machine.drives import drive_library as lib_mod
+from linumert.machine.drives.drive_library import (
     LIBRARY_DIR,
     apply_overrides,
     clone_instance,
@@ -29,7 +28,7 @@ from linumert_plant.drive_library import (
     resolve_instances,
     save_template,
 )
-from linumert_plant.drive_template import (
+from linumert.machine.drives.drive_template import (
     CIA_REQUIRED,
     LIVE_CAPABLE,
     LIVE_TO_C,
@@ -43,6 +42,7 @@ from linumert_plant.drive_template import (
     total_inertia,
     validate_template,
 )
+from linumert_plant.__main__ import main as cli_main
 
 ROOT = Path(__file__).resolve().parents[1]
 CORE = ROOT / "plant" / "core"
@@ -536,7 +536,7 @@ def test_live_params_c_mapping(servo: dict) -> None:
 
 def test_live_to_c_resolves_two_body_for_live_backlash(library: dict[str, dict]) -> None:
     # REQ-VD-04: luz live wymaga modelu dwuczłonowego od startu (sztywność > 0)
-    from linumert_plant.drive_template import to_c_params
+    from linumert.machine.drives.drive_template import to_c_params
 
     tpl = copy.deepcopy(library["spindle_vfd_22kw"])
     tpl["live"] = [*tpl["live"], "mechanics.backlash"]

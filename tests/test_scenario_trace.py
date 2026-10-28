@@ -71,22 +71,3 @@ def test_recorder_drains_and_closes_before_reporting_integrity(
     assert result["valid"] is valid and result["samples"] == 2
     assert calls.index("halcmd setp sampler.0.enable false") < calls.index("terminate")
     assert recorder.output.closed and recorder.errors.closed
-
-
-@pytest.mark.linuxcnc
-def test_servo_trace_with_real_sampler(monkeypatch, tmp_path):
-    from linumert_plant.scenario import load_scenario
-    from linumert_plant.scenario_linuxcnc import ROOT, run_linuxcnc
-    from rip_support import leftovers, rip_root
-
-    rip_root()
-    if leftovers():
-        pytest.skip("another LinuxCNC process is active")
-    evidence = tmp_path / "evidence"
-    monkeypatch.setenv("LINUMERT_SCENARIO_DIAGNOSTICS", str(evidence))
-    monkeypatch.setenv("LINUMERT_SCENARIO_SERVO_TRACE", "1")
-    result = run_linuxcnc(load_scenario(ROOT / "plant/scenarios/first_motion.yaml"), port=47826)
-    meta = json.loads(next(evidence.glob("*/servo_trace.json")).read_text())
-    assert meta["valid"], meta
-    assert meta["samples"] > 100 and "j3.sw" in meta["columns"]
-    assert result.passed, (result.criteria, result.log)

@@ -14,7 +14,7 @@ from pathlib import Path
 import pytest
 from linumert.diag.cia402 import CiA402State, decode_statusword, describe_error_code
 from linumert_plant.server import PlantConfig, PlantServer
-from test_master import Master, drive_state
+from linumert_plant.test_master import Master, drive_state
 
 ROOT = Path(__file__).resolve().parents[1]
 MACHINE = ROOT / "config" / "machines" / "mill_servo_table.yaml"

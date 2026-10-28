@@ -7,8 +7,7 @@ Błędna konfiguracja (machine.yaml, plant.yaml, brak szablonu napędu, brak rdz
 się czytelnym komunikatem i kodem 1 — Plant nie startuje, więc napędy pozostają wyłączone
 (docs/PLANT.md §8). Po starcie żaden błąd ramki ani modelu nie kończy procesu.
 
-Sesja 022: `serve --panel PORT` albo `panel` (= serve z panelem na `network.panel_port`,
-domyślnie 8080) uruchamia panel web w wątku tła; brak fastapi/uvicorn = komunikat i kod 1.
+Lite udostępnia wyłącznie serwer UDP; nie ma panelu web ani zależności HTTP.
 """
 
 from __future__ import annotations
@@ -28,11 +27,9 @@ from .vfd import start_servers
 
 def add_parser(sub) -> None:
     _add_serve_args(sub.add_parser("serve", help="serwer LRT-NET (UDP) wirtualnej obrabiarki"))
-    _add_serve_args(sub.add_parser("panel", help="serwer LRT-NET z panelem web (port 8080)"),
-                    panel=True)
 
 
-def _add_serve_args(serve, panel: bool = False) -> None:
+def _add_serve_args(serve) -> None:
     serve.add_argument("machine", type=Path, nargs="?", default=None,
                        help="machine.yaml (zamiast pola machine w plant.yaml)")
     serve.add_argument("--plant", type=Path, default=None, help="plant.yaml")
@@ -49,25 +46,12 @@ def _add_serve_args(serve, panel: bool = False) -> None:
     serve.add_argument("--report", type=Path, default=None,
                        help="raport JSON na zakończenie (statystyki, wyrocznia REQ-VM-06)")
     serve.add_argument("--dir", type=Path, default=None, help="katalog biblioteki napędów")
-    if panel:
-        serve.add_argument("--panel-port", dest="panel", type=int, default=-1, metavar="PORT",
-                           help="port panelu (domyślnie network.panel_port z plant.yaml, 8080)")
-    else:
-        serve.add_argument("--panel", type=int, default=None, metavar="PORT",
-                           help="uruchom też panel web na porcie PORT (0 = dowolny wolny)")
-    serve.add_argument("--panel-listen", default=None, help="adres panelu (domyślnie 127.0.0.1)")
-    serve.add_argument("--state-dir", type=Path, default=Path("state"),
-                       help="katalog presetów i nagrań CSV panelu (domyślnie state/)")
 
 
 def _config(args: argparse.Namespace) -> PlantConfig:
     cfg = load_plant_config(args.plant) if args.plant else PlantConfig()
     if args.machine is not None:
         cfg.machine = args.machine
-    if getattr(args, "panel", None) is not None and args.panel >= 0:
-        cfg.panel_port = args.panel
-    if getattr(args, "panel_listen", None):
-        cfg.panel_listen = args.panel_listen
     for name in ("mode", "listen", "port", "seed"):
         value = getattr(args, name)
         if value is not None:
@@ -83,9 +67,10 @@ def _config(args: argparse.Namespace) -> PlantConfig:
 
 def build_server(cfg: PlantConfig, library_dir: Path | None = None) -> PlantServer:
     """machine.yaml → model C → serwer (z plikiem stanu enkoderów absolutnych i śladem)."""
+    from linumert.machine.drives.machine_drives import load_machine_drives
+
     from .build_machine import build_model
     from .core_binding import PlantMachine
-    from .machine_drives import load_machine_drives
     from .plant_state import apply_state, load_state
     from .trace import TraceWriter
 
@@ -107,7 +92,7 @@ def run_serve(args: argparse.Namespace) -> int:
     from .plant_state import PlantStateError, save_state
 
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
-    # Pętla UDP dzieli GIL z panelem web; krótszy interwał skraca opóźnienie odpowiedzi LRT-NET.
+    # Krótszy interwał współdzielenia GIL z falownikiem zmniejsza opóźnienie odpowiedzi UDP.
     sys.setswitchinterval(0.0005)
     try:
         cfg = _config(args)
@@ -123,25 +108,12 @@ def run_serve(args: argparse.Namespace) -> int:
     except OSError as exc:
         print(f"Plant nie wystartował: gniazdo UDP: {exc}", file=sys.stderr)
         return 1
-    panel = None
-    if getattr(args, "panel", None) is not None:
-        from .panel import PanelUnavailable, load_app_module
-
-        try:
-            panel = load_app_module().PanelThread(server, cfg.panel_listen, cfg.panel_port,
-                                                  args.state_dir).start()
-        except (PanelUnavailable, OSError, RuntimeError) as exc:
-            sock.close()
-            print(f"Plant nie wystartował: panel: {exc}", file=sys.stderr)
-            return 1
     vfd_servers: list = []
     if cfg.vfd is not None:
         try:
             vfd_servers = start_servers(cfg.vfd, server.spindle, server._lock, server.vfd_faults)
         except OSError as exc:
             sock.close()
-            if panel is not None:
-                panel.close()
             print(f"Plant nie wystartował: falownik (pty/Modbus TCP): {exc}", file=sys.stderr)
             return 1
     signal.signal(signal.SIGTERM, lambda *_: server.stop())
@@ -150,8 +122,6 @@ def run_serve(args: argparse.Namespace) -> int:
     for srv in vfd_servers:
         where = getattr(srv, "link", None) or f"Modbus TCP {cfg.vfd.modbus_listen}:{srv.port}"
         print(f"Plant: falownik wrzeciona — {where}", flush=True)
-    if panel is not None:
-        print(f"Plant: panel http://{panel.listen}:{panel.port}/", flush=True)
     try:
         server.serve(sock, args.frames)
     except KeyboardInterrupt:
@@ -159,8 +129,6 @@ def run_serve(args: argparse.Namespace) -> int:
     finally:
         for srv in vfd_servers:
             srv.close()
-        if panel is not None:
-            panel.close()
         sock.close()
         if server.trace is not None:
             server.trace.close()

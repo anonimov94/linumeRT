@@ -25,7 +25,7 @@ from linumert_plant.lrtnet import (
     reply_size,
     seq_delta,
 )
-from test_master import drive_state, trapezoid
+from linumert_plant.test_master import drive_state, trapezoid
 
 
 def _cmd(n: int = 3, seq: int = 7) -> Command:

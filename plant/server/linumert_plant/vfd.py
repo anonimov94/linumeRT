@@ -3,7 +3,8 @@
 SPDX-License-Identifier: GPL-2.0-or-later
 Model-Author: Claude · sesja 021.
 
-Model: bezwładność, krzywa momentu i tarcie z szablonu napędu wrzeciona (plant/library/drives),
+Model: bezwładność, krzywa momentu i tarcie z szablonu napędu wrzeciona
+(core/linumert/machine/drives/templates),
 rampa falownika (`spindle.ramp_up_s` / `ramp_down_s` z machine.yaml), obciążenie [N·m]
 (parametr w locie), przeciążenie I²t, at-speed (tolerancja 2 %).
 

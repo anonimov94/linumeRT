@@ -311,7 +311,7 @@ def evaluate(result: ScenarioResult) -> None:
                                           res.completed == want,
                                           "ukończony" if res.completed else "przerwany"))
         elif kind == "machine":
-            from .panel.editor import get_path
+            from .editor import get_path
 
             try:
                 got = get_path(res.machine_data, arg["path"])
@@ -405,13 +405,14 @@ class MockRun:
     """Wykonanie scenariusza z atrapą mastera na serwerze Plant w tym samym procesie."""
 
     def __init__(self, scen: Scenario):
-        from test_master import Master
+        from linumert.machine.drives.machine_drives import load_machine_drives
+
+        from linumert_plant.test_master import Master
 
         from .build_machine import build_model
         from .core_binding import PlantMachine
-        from .machine_drives import load_machine_drives
-        from .panel.telemetry import Telemetry
         from .server import PlantConfig, PlantServer
+        from .telemetry import Telemetry
 
         self.scen = scen
         self.workdir = None
@@ -548,7 +549,8 @@ class MockRun:
 
     def do(self, step: Step) -> None:
         """Wykonuje krok; błąd danych kroku (np. zdjęcie nieaktywnej awarii) = kryterium FAIL."""
-        from .drive_template import TemplateError
+        from linumert.machine.drives.drive_template import TemplateError
+
         from .faults import FaultError
         from .homing_master import HomingError
 
@@ -602,7 +604,7 @@ class MockRun:
         elif a == "edit_machine":
             self._edit(p.get("set") or {}, str(p.get("comment", "")))
         elif a == "reload":
-            from .panel.editor import MachineEditor
+            from .editor import MachineEditor
 
             MachineEditor(srv, self.workdir / "state").reload()
             self.result.reloads += 1
@@ -613,7 +615,7 @@ class MockRun:
 
     def _edit(self, changes: dict[str, Any], comment: str) -> None:
         """Zapis machine.yaml przez edytor panelu (walidacja REQ-VM-11, historia wersji)."""
-        from .panel.editor import EditorError, MachineEditor, set_path
+        from .editor import EditorError, MachineEditor, set_path
 
         editor = MachineEditor(self.server, self.workdir / "state")
         data = editor.load()
@@ -652,7 +654,7 @@ class MockRun:
 
     def _exchange(self) -> None:
         """Ramka mastera; brak odpowiedzi (awaria frame_loss) — master idzie dalej jak servo."""
-        from test_master import MasterError
+        from linumert_plant.test_master import MasterError
 
         try:
             self.master.exchange()

@@ -12,11 +12,11 @@ from pathlib import Path
 
 import pytest
 import yaml
+from linumert.machine.drives.drive_library import load_library
+from linumert.machine.drives.drive_real import counts_per_unit, hardware_plan
+from linumert.machine.drives.drive_template import template_issues
+from linumert.machine.drives.machine_drives import resolve_machine_drives
 from linumert.machine.schema import MachineConfigError, parse_machine
-from linumert_plant.drive_library import load_library
-from linumert_plant.drive_real import counts_per_unit, hardware_plan
-from linumert_plant.drive_template import template_issues
-from linumert_plant.machine_drives import resolve_machine_drives
 
 ROOT = Path(__file__).resolve().parents[1]
 ROUTER = ROOT / "config/machines/router_gantry_steppers.yaml"

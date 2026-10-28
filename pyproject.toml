@@ -3,91 +3,42 @@ requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "linumert"
-version = "0.0.1"
-description = "linumeRT - otwarty ekran operatora i narzedzia dla LinuxCNC (maszyny CNC DIY)"
+name = "linumert-lite"
+version = "0.1.0"
+description = "Headless LinuxCNC backend: CAM 2D, machine models, Plant and simulation"
 readme = "README.md"
 requires-python = ">=3.11"
-license = { text = "GPL-2.0-or-later" }
-classifiers = [
-    "License :: OSI Approved :: GNU General Public License v2 or later (GPLv2+)",
-    "Programming Language :: Python :: 3.11",
-]
-dependencies = [
-    "numpy",
-    "pydantic",
-    "pyyaml",
-]
+license = {text = "GPL-2.0-or-later"}
+dependencies = ["numpy>=1.24", "pydantic>=2,<3", "pyyaml>=6"]
 
 [project.scripts]
-# Generator konfiguracji LinuxCNC z machine.yaml (sesja 062)
-linumert-config = "linumert.machine.config_build:main"
-# Brama web-hmi LinuxCNC <-> przegladarka (webhmi/, DECYZJE 2026-10-26)
-linumert-webhmi = "linumert_webhmi.__main__:main"
-linumert-relief = "linumert.generators.relief:main"
+linumert-lite = "linumert.cli:main"
+linumert-plant = "linumert_plant.__main__:main"
+linumert-headless = "linumert.cnc.headless:main"
 
 [project.optional-dependencies]
-# Panel web Plant (sesja 022); bez tej grupy Plant działa, a panel zgłasza brak zależności.
-panel = [
-    "fastapi>=0.100",
-    "uvicorn>=0.23",
-    "websockets>=11",
-]
-dev = [
-    "pytest",
-    "ruff",
-    "httpx",
-    "linumert[panel]",
-]
+dev = ["pytest>=8", "ruff>=0.6", "build>=1"]
 
-# Trzy pakiety w jednym repozytorium (patrz docs/DECYZJE.md, wpis sesji 001):
-#   linumert        - rdzen, niezalezny od UI            (core/linumert)
-#   linumert_sim    - symulacja, osobny proces           (simulation/linumert_sim)
-#   linumert_plant  - serwer Plant (LRT-NET, panel web)  (plant/server/linumert_plant)
-#   linumert_webhmi - brama web-hmi LinuxCNC <-> przegladarka (webhmi/server/linumert_webhmi)
 [tool.setuptools]
-packages = [
-    "linumert",
-    "linumert.alarms",
-    "linumert.tools",
-    "linumert.programs",
-    "linumert.generators",
-    "linumert.machine",
-    "linumert.plugins",
-    "linumert.cnc",
-    "linumert.diag",
-    "linumert_sim",
-    "linumert_plant",
-    "linumert_plant.panel",
-    "linumert_webhmi",
-]
+include-package-data = false
+package-dir = {linumert = "core/linumert", linumert_sim = "simulation/linumert_sim", linumert_plant = "plant/server/linumert_plant"}
+packages = ["linumert", "linumert.alarms", "linumert.tools", "linumert.programs", "linumert.generators", "linumert.machine", "linumert.machine.drives", "linumert.cnc", "linumert.diag", "linumert_sim", "linumert_plant"]
 
 [tool.setuptools.package-data]
 "linumert.alarms" = ["catalog.yaml"]
 "linumert.programs" = ["lnx_schema.json"]
-"linumert_webhmi" = ["static/*.html", "static/*.js", "static/*.css",
-                     "static/js/*.js", "static/js/*.json"]
-"linumert_plant.panel" = ["static/*.html", "static/*.js", "static/*.css", "static/*.svg",
-                          "static/vendor/*", "static/ikony/*"]
-
-[tool.setuptools.package-dir]
-linumert = "core/linumert"
-linumert_sim = "simulation/linumert_sim"
-linumert_plant = "plant/server/linumert_plant"
-linumert_webhmi = "webhmi/server/linumert_webhmi"
+"linumert.machine" = ["resources/*.hal", "resources/*.ngc", "resources/*.tbl"]
+"linumert.machine.drives" = ["templates/*.yaml"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-pythonpath = ["core", "simulation", "plant/server", "webhmi/server"]
-markers = [
-    "linuxcnc: test wymaga dzialajacego LinuxCNC (sesja 003); domyslnie pomijany",
-]
+pythonpath = ["core", "simulation", "plant/server"]
+markers = ["linuxcnc: requires a separate LinuxCNC installation", "plant: requires the Plant C runtime"]
 addopts = "-m 'not linuxcnc'"
 
 [tool.ruff]
 line-length = 100
 target-version = "py311"
-extend-exclude = ["screens/linumert"]
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "B", "UP"]

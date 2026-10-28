@@ -1,3 +1,0 @@
-2026-10-18 15:34:27,297 - QTvcp.QTVCP.LIB.SYS_NOTIFY - WARNING - Desktop Notify not available:: org.freedesktop.DBus.Error.Spawn.ExecFailed: /usr/bin/dbus-launch terminated abnormally without any error message
-2026-10-18 15:34:27,474 - QTvcp.QTVCP.LIB.QT_PDF.PDFVIEWER - WARNING - PDFViwer - Is python3-poppler-qt5 installed?
-2026-10-18 15:34:28,362 - QTvcp.QTVCP.QT_ISTAT - WARNING - INI Parsing Error, No USE_PROBE Entry in PROBE, Using: none

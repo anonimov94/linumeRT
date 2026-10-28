@@ -1,6 +1,5 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
 """Symulacja raportuje zdarzenia bez dostępu do komend CNC. Model-Author: Codex."""
-import ast
 import queue
 import tempfile
 import unittest
@@ -54,24 +53,6 @@ class DiagnosticSimulationTest(unittest.TestCase):
         live.engine.reset_stock.assert_called_once_with()
         self.assertFalse(live.command({"cmd": "quit"}))
 
-    def test_gui_reports_diagnostic_event_without_estop_claim(self):
-        # Wykonujemy rzeczywistą metodę widoku bez instalacji Qt/OpenGL.
-        source = (ROOT / "screens/linumert/linumert_sim_page.py").read_text()
-        tree = ast.parse(source)
-        page = next(n for n in tree.body if isinstance(n, ast.ClassDef) and n.name == "SimPage")
-        method = next(n for n in page.body if isinstance(n, ast.FunctionDef)
-                      and n.name == "_on_event")
-        namespace = {"KIND_LEVEL": {"collision": "err"}}
-        exec(compile(ast.Module(body=[method], type_ignores=[]), str(ROOT), "exec"), namespace)
-        shell = SimpleNamespace(show_alarm=Mock(), sim_cause="")
-        view = SimpleNamespace(shell=shell, _add_event=Mock())
-        namespace["_on_event"](view, {"code": "K-305", "kind": "collision",
-                                     "stop": True, "text": "kolizja", "pos": [1, 2, 3]})
-        alarm = shell.show_alarm.call_args.args[1]
-        self.assertIn("diagnostyka symulacji", alarm)
-        self.assertNotIn("E-STOP", alarm)
-        self.assertEqual(shell.sim_cause, "")
-        view._add_event.assert_called_once()
 
 
 if __name__ == "__main__":

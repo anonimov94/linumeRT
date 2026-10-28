@@ -1,22 +1,13 @@
-"""Generator konfiguracji LinuxCNC z machine.yaml: INI i HAL (sesja 062, krok 2).
+"""Generator INI/HAL dla LinuxCNC sim i Plant.
 
 SPDX-License-Identifier: GPL-2.0-or-later
-Model-Author: Claude · 2026-10-24
+Model-Author: Claude · sesja 062; wydzielenie lite: Codex · 2026-10-28.
 
-Jedno źródło prawdy (REQ-VM-01): osie, zakresy, bazowanie, krańcówki, wejścia/wyjścia i skala
-napędów pochodzą z `machine.yaml` i szablonów napędów; generator nie przyjmuje drugiej kopii
-tych liczb. Wyjścia (`render(cfg, target)` → {nazwa pliku: treść}):
-
-- `plant` — LinuxCNC + wirtualna obrabiarka przez `lrt_net` (wzorzec:
-  config/plant/linumert_plant_xyz, sprawdzony w LinuxCNC; test golden porównuje wynik z nim),
-- `sim` — LinuxCNC sim: napędy jako idealne nadążanie, czujniki bazy z porównania pozycji,
-- `hardware` — step/dir: port równoległy albo Mesa 7i96S/7i76E (`configgen_hw.py`, z kontraktem
-  bezpieczeństwa; odmawia bez pinu E-STOP).
-
-Kontrakt sygnałów D05 (`linumert.jN.*`, `linumert.spindle.*`, `linumert.io.*`) jest ten sam
-dla każdego wyjścia; zmienia się tylko blok „napędy” i źródło wejść. DISPLAY = ekran linumert.
-Jointy = napędy osi w kolejności `drives:` bez wrzeciona (ramka LRT-NET, `joint_drives`).
-Zapis z kopią zapasową i diffem: `config_build.py` (CLI). NIEZWERYFIKOWANE NA SPRZĘCIE.
+machine.yaml i wspólne szablony napędów są jedynym źródłem parametrów.
+Ten moduł generuje tekst; lite_config dodaje zasoby, przenośne ścieżki i kontrolowany zapis.
+Nie importuje Plant ani GUI. Cele hardware i generowanie makr ATC należą do pełnej edycji.
+Kontrakt sygnałów HAL pozostaje wspólny z zachowanym modelem Plant.
+NIEZWERYFIKOWANE NA SPRZĘCIE.
 """
 
 from __future__ import annotations
@@ -27,7 +18,7 @@ from typing import Any
 
 from .schema import Axis, MachineConfig
 
-TARGETS = ("plant", "sim", "hardware")
+TARGETS = ("plant", "sim")
 HOME_INSET = 4.0          # [mm|°] HOME: tyle do środka od programowej granicy po stronie bazy
 FERROR, MIN_FERROR = 2.0, 0.5
 
@@ -51,7 +42,7 @@ class Options:
     hal_dir: str = "../../hal"
     program_prefix: str = "../../sim/nc_files"
     tool_table: str = "../../sim/linumert_xyz/tool.tbl"
-    postgui: str = "../../sim/linumert_xyz/linumert_postgui.hal"
+    postgui: str = ""
     subroutine_path: str = "macros"
     atc: bool = False     # remap M6 na makro ATC wygenerowane z sekcji toolchanger (rack_linear)
     extra: dict[str, Any] = field(default_factory=dict)
@@ -63,14 +54,13 @@ def joint_drives(cfg: MachineConfig) -> list[tuple[Axis, str]]:
 
 
 def plant_scales(cfg: MachineConfig) -> dict[str, float]:
-    """Impulsy na mm/° napędów z modelu Plant (ten sam rachunek co wirtualna obrabiarka)."""
-    # plant/server na PYTHONPATH; rozwiązanie napędów z biblioteki szablonów (REQ-VD-02)
-    from linumert_plant.build_machine import build_model
-    from linumert_plant.drive_library import load_library
-    from linumert_plant.machine_drives import resolve_machine_drives
+    """Shared drive scales; configuration generation never constructs a Plant model."""
+    from .drives.drive_library import load_library
+    from .drives.drive_real import counts_per_unit
+    from .drives.machine_drives import resolve_machine_drives
 
     drives = resolve_machine_drives(cfg, load_library())
-    return dict(build_model(cfg, drives).counts_per_unit)
+    return {name: counts_per_unit(drives[name].params) for _, name in joint_drives(cfg)}
 
 
 def joints(cfg: MachineConfig, scales: dict[str, float]) -> list[Joint]:
@@ -162,13 +152,14 @@ def render_ini(cfg: MachineConfig, js: list[Joint], target: str, opt: Options,
         "# SPDX-License-Identifier: GPL-2.0-or-later",
         f"# linumeRT · konfiguracja z machine.yaml ({cfg.machine.name}), cel: {target}.",
         "# Nie edytuj ręcznie: zmień machine.yaml i uruchom",
-        "# `python -m linumert.machine.config_build`. Jointy = napędy osi w kolejności drives:",
+        "# `linumert-lite config MACHINE.yaml --target sim|plant --out DIR --write`.",
+        "# Jointy = napędy osi w kolejności drives:",
         "# bez wrzeciona. Kontrakt sygnałów: docs/HAL_KONTRAKT.md.",
         "# Model-Author: Claude · generator sesji 062. NIEZWERYFIKOWANE NA SPRZĘCIE.",
         "",
         "[EMC]", "VERSION = 1.1", f"MACHINE = linumeRT {title} {cfg.machine.name}",
         "DEBUG = 0x00000000", "",
-        "[DISPLAY]", "DISPLAY = qtvcp linumert", f"TITLE = linumeRT {title} {coords}",
+        "[DISPLAY]", "DISPLAY = linumert-headless", f"TITLE = linumeRT {title} {coords}",
         "PREFERENCE_FILE_PATH = WORKINGFOLDER/linumert.pref",
         "MAX_FEED_OVERRIDE = 1.2", "MIN_SPINDLE_0_OVERRIDE = 0.5", "MAX_SPINDLE_0_OVERRIDE = 1.2",
         f"DEFAULT_SPINDLE_0_SPEED = {_g(round(sp.max_rpm * 0.75))}",
@@ -486,35 +477,14 @@ def render(cfg: MachineConfig, target: str, opt: Options | None = None,
     if target not in TARGETS:
         raise ValueError(f"nieznany cel {target}; dozwolone: {', '.join(TARGETS)}")
     opt = opt or Options()
-    if target == "hardware":
-        from . import configgen_hw as hwgen
-
-        if cfg.target != "hardware" or cfg.hardware is None:
-            raise hwgen.HardwareConfigError(["cel hardware wymaga target: hardware i sekcji "
-                                             "hardware: w machine.yaml"])
-        if cfg.hardware.interface == "ethercat":
-            raise hwgen.HardwareConfigError(["hardware.interface ethercat: generator EtherCAT "
-                                             "to sesja 063"])
-        plan = hwgen.hardware_plan(cfg)
-        errors = hwgen.check(cfg, plan)
-        if errors:
-            raise hwgen.HardwareConfigError(errors)
-        js = joints(cfg, {e["drive"]: e["scale"] for e in plan if e["axis"] != "S"})
-        return {f"{cfg.machine.name}.ini": render_ini(cfg, js, target, opt,
-                                                      hwgen.ini_extra(cfg, plan)),
-                "linumert_hw.hal": hwgen.render_hal(cfg, js, plan),
-                "spindle_vfd.hal": hwgen.render_spindle(cfg),
-                "linumert_hw_postgui.hal": hwgen.render_postgui(cfg)}
+    if opt.atc:
+        raise ValueError("Generator ATC jest poza zakresem lite")
     if scales is None:
         scales = plant_scales(cfg) if target == "plant" else {}
     js = joints(cfg, scales)
     ini = render_ini(cfg, js, target, opt)
     files = {f"{cfg.machine.name}.ini": ini}
     macro = None
-    if opt.atc:
-        from .atc_macro import generate_atc_m6
-
-        macro = files[f"{opt.subroutine_path}/lrt_m6_atc.ngc"] = generate_atc_m6(cfg)
     if target == "plant":
         head = ["# SPDX-License-Identifier: GPL-2.0-or-later",
                 "# linumeRT · wrzeciono symulowane lokalnie (sim_spindle); Plant dostaje "

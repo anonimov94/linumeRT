@@ -1,8 +1,0 @@
-[Desktop Entry]
-Type=Application
-Name=linumeRT (symulator)
-Comment=Ekran operatora na symulatorze LinuxCNC; uruchamia od nowa, jeśli już działa
-Exec=/usr/local/bin/linumert-gui --restart
-Icon=/opt/linumeRT/docs/design/marka/znak.svg
-Terminal=false
-Categories=Engineering;

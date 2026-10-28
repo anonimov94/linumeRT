@@ -67,7 +67,7 @@ def main(argv: list[str] | None = None) -> int:
     argv = sys.argv[1:] if argv is None else argv
     p = argparse.ArgumentParser(description="Scenariusze Plant (raport HTML)")
     p.add_argument("scenarios", nargs="*", help="pliki albo nazwy z plant/scenarios")
-    p.add_argument("--master", choices=("mock", "linuxcnc"), default=None,
+    p.add_argument("--master", choices=("mock",), default=None,
                    help="domyślnie: mock (atrapa), a dla master: linuxcnc w scenariuszu — LinuxCNC")
     p.add_argument("--machine", type=Path, default=None, help="inna maszyna niż w scenariuszu")
     p.add_argument("--matrix", action="store_true",
@@ -115,9 +115,7 @@ def main(argv: list[str] | None = None) -> int:
         master = args.master or ("linuxcnc" if scen.master == "linuxcnc" else "mock")
         try:
             if master == "linuxcnc":
-                from linumert_plant.scenario_linuxcnc import run_linuxcnc
-
-                res = run_linuxcnc(scen)
+                raise ScenarioError("LinuxCNC REST runner należy do pełnej edycji, nie lite")
             else:
                 res = run_mock(scen)
         except ScenarioError as exc:

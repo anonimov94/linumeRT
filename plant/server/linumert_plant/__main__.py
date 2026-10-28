@@ -3,7 +3,7 @@
 Polecenia napędów: list, show, validate, clone, schema, instances. Maszyna (sesja 014):
 `machine build <machine.yaml> [--keys] [--run]` — model z machine.yaml, z --run próba w rdzeniu C.
 Serwer LRT-NET (sesja 016): `serve [machine.yaml] [--plant plant.yaml] [--lockstep|--realtime]`;
-z panelem web (sesja 022): `serve --panel PORT` albo `panel [--panel-port PORT]`.
+W lite nie ma polecenia `panel` ani opcji `--panel`.
 Z katalogu głównego repozytorium to samo działa jako `python -m plant ...` (plant/__main__.py).
 
 Model-Author: Claude · sesja 013 (REQ-VD-03). Kody wyjścia: 0 = OK, 1 = błąd danych, 2 = użycie.
@@ -17,9 +17,7 @@ import sys
 from pathlib import Path
 
 import yaml
-
-from . import serve as serve_cli
-from .drive_library import (
+from linumert.machine.drives.drive_library import (
     LIBRARY_DIR,
     clone_instance,
     clone_template,
@@ -28,8 +26,10 @@ from .drive_library import (
     resolve_instance,
     save_template,
 )
-from .drive_template import Issue, TemplateError, json_schema, total_inertia
-from .machine_drives import MachineConfigError, load_machine_drives
+from linumert.machine.drives.drive_template import Issue, TemplateError, json_schema, total_inertia
+from linumert.machine.drives.machine_drives import MachineConfigError, load_machine_drives
+
+from . import serve as serve_cli
 
 
 def _build_parser() -> argparse.ArgumentParser:
@@ -127,7 +127,7 @@ def _find_machine_entry(machine: Path, source: str) -> dict:
 
 
 def _run(args: argparse.Namespace) -> int:
-    if args.group in ("serve", "panel"):
+    if args.group == "serve":
         return serve_cli.run_serve(args)
     if args.group == "machine":
         return _run_machine(args)

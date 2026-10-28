@@ -11,9 +11,9 @@ from pathlib import Path
 
 import pytest
 import yaml
+from linumert.machine.drives.machine_drives import load_machine_drives
 from linumert.machine.schema import MachineConfigError, parse_machine
 from linumert.machine.validate import load_valid_machine
-from linumert_plant.machine_drives import load_machine_drives
 
 ROOT = Path(__file__).resolve().parents[1]
 BASE = yaml.safe_load((ROOT / "config/machines/router_gantry_steppers.yaml").read_text("utf-8"))

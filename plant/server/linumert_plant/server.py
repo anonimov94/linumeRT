@@ -36,11 +36,12 @@ from pathlib import Path
 from typing import Any
 
 import yaml
+from linumert.machine.drives.drive_template import LiveParams
 
 from .atc import ToolChangerModel, ToolSetterModel, ToolSpec
 from .collisions import CollisionModel
 from .core_binding import CW_FAULT_RESET, MODE_CSP, PlantMachine
-from .drive_template import LiveParams
+from .desk import Desk, DeskConfig
 from .faults import Faults, FaultState
 from .lrtnet import (
     FLAG_ESTOP_OPEN,
@@ -55,8 +56,7 @@ from .lrtnet import (
     seq_delta,
 )
 from .oracle import Oracle
-from .panel.desk import Desk, DeskConfig
-from .panel.telemetry import Telemetry
+from .telemetry import Telemetry
 from .trace import TraceWriter
 from .vfd import SpindleModel, VfdConfig, VfdFaults
 
@@ -205,10 +205,9 @@ class Stats:
 
 def _spindle_template(mcfg) -> dict | None:
     """Parametry instancji napędu wrzeciona z domyślnej biblioteki (None = brak/niezgodność)."""
+    from linumert.machine.drives.drive_library import TemplateError, load_library
+    from linumert.machine.drives.machine_drives import resolve_machine_drives
     from linumert.machine.schema import MachineConfigError
-
-    from .drive_library import TemplateError, load_library
-    from .machine_drives import resolve_machine_drives
 
     try:
         inst = resolve_machine_drives(mcfg, load_library()).get(mcfg.spindle.drive)

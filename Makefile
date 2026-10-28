@@ -1,37 +1,19 @@
-# linumeRT - zadania deweloperskie. Wymaga Pythona >= 3.11.
 PYTHON ?= python3
-# W CI i w venv zostaw puste; w systemowym Pythonie Debiana: PIP_FLAGS=--break-system-packages
-PIP_FLAGS ?=
 
-.PHONY: install lint test test-c test-san test-linuxcnc plant-matrix
-
+.PHONY: install lint test test-core test-c plant-matrix wheel-check
 install:
-	$(PYTHON) -m pip install $(PIP_FLAGS) -e ".[dev]"
-
+	$(PYTHON) -m pip install -c requirements-dev.lock -e ".[dev]"
 lint:
-	$(PYTHON) tools/roadmap.py --check
 	$(PYTHON) -m ruff check .
-
-# Testy i pokrycie wymagań REQ (sesja 024, REQ-QA-01).
 test:
-	$(PYTHON) -m pytest
-	$(PYTHON) tools/check_requirements.py
-
-# Scenariusze Plant na 5 maszynach z config/machines (sesja 024, REQ-QA-02; job CI plant-matrix).
+	$(PYTHON) -m pytest -q
+test-core:
+	$(PYTHON) -m pytest -q -m "not linuxcnc and not plant" tests/test_architecture.py tests/test_lite_cli.py tests/test_lite_config.py tests/test_lnx.py tests/test_machine_config.py tests/test_tools_db.py tests/test_gen_basic.py tests/test_gen_drilling.py tests/test_gen_pockets.py tests/test_gen_contours.py
+test-c:
+	$(MAKE) -C plant/core test
 plant-matrix:
 	$(MAKE) -C plant/core shared
-	$(PYTHON) tools/run_scenario.py --matrix --out build/raporty/matrix
-	$(PYTHON) tools/run_scenario.py --out build/raporty/scenariusze
-
-# Testy rdzenia dynamiki Plant w C (od sesji 011).
-test-c:
-	@if [ -f plant/core/Makefile ]; then $(MAKE) -C plant/core test; \
-	else echo "test-c: brak plant/core/Makefile - pomijam"; fi
-
-# Te same testy C z ASan/UBSan (osobny katalog plant/core/build-san).
-test-san:
-	$(MAKE) -C plant/core test-san
-
-# Testy z LinuxCNC RIP pod Xvfb (sesja 003; wymaga tools/ci/build-linuxcnc.sh).
-test-linuxcnc:
-	PYTHON=$(PYTHON) xvfb-run -a -s '-screen 0 1440x1100x24' bash tools/ci/test-linuxcnc.sh
+	$(PYTHON) tools/run_scenario.py --matrix --no-report
+wheel-check:
+	$(PYTHON) -m build --wheel
+	$(PYTHON) tools/check_wheel.py dist/linumert_lite-0.1.0-py3-none-any.whl

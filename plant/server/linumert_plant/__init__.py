@@ -1,1 +1,1 @@
-"""linumeRT - serwer Plant (wirtualna maszyna): LRT-NET, scenariusze, panel web."""
+"""Headless Plant: LRT-NET, drive dynamics and scenario testing."""

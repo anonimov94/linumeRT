@@ -138,6 +138,7 @@ def _cut_program(stock, tool, lines):
 
 
 @pytest.mark.parametrize("entry", ["plunge", "ramp"])
+@pytest.mark.plant
 def test_rectangular_pocket_on_stepper_plant(tmp_path, entry):
     from linumert_plant.scenario import Scenario, Step, run_mock
 

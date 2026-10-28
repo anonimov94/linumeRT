@@ -20,10 +20,10 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
+from linumert.machine.drives.drive_real import counts_per_unit
+from linumert.machine.drives.drive_template import to_c_params
+from linumert.machine.drives.machine_drives import load_machine_drives
 from linumert.machine.schema import Axis, Link, MachineConfig, MachineConfigError
-
-from .drive_template import to_c_params
-from .machine_drives import load_machine_drives
 
 MAX_IO = 32          # digital_in / digital_out w LRT-NET v1 (u32)
 FAR_STOP_M = 1.0e3   # zderzak "brak" po jednej stronie [m albo rad]
@@ -272,9 +272,7 @@ def build_model(cfg: MachineConfig, drives: dict[str, Any], seed: int = 1,
             put((f"joint.{j}.initial_max", axis.soft_limits[1] * unit))
         for name in axis.drives[:2]:
             mapped = mapped_of[name]
-            ratio = mapped["axis"]["ratio"]
-            cpr = mapped["drive"]["counts_per_rev"]
-            model.counts_per_unit[name] = unit / ratio * cpr / (2.0 * math.pi)
+            model.counts_per_unit[name] = counts_per_unit(drives[name].params)
             if mapped["type"] == STEPPER_OPEN:
                 encoder = ENC_IDEAL
             elif axis.homing.method == "absolute":

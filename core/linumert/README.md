@@ -1,3 +1,4 @@
-# core/linumert
+# linumert
 
-Rdzen linumeRT (pakiet Pythona linumert): alarms, tools, programs, generators, machine, plugins, cnc, diag. Nie zalezy od UI.
+Backend lite. Zasady: ../../AGENTS.md. Granice: ../../docs/ARCHITECTURE.md.
+CLI jest miejscem łączenia modułów; core nie importuje Plant ani symulacji materiału.

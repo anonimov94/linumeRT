@@ -1,8 +1,0 @@
-[Desktop Entry]
-Type=Application
-Name=linumeRT: zatrzymaj
-Comment=Zatrzymuje LinuxCNC i Plant
-Exec=/usr/local/bin/linumert --stop
-Icon=/opt/linumeRT/docs/design/marka/znak.svg
-Terminal=false
-Categories=Engineering;

@@ -18,7 +18,7 @@ import pytest
 from linumert_plant.faults import FaultError, Faults
 from linumert_plant.lrtnet import FLAG_ESTOP_OPEN, FLAG_FAULT
 from linumert_plant.server import PlantConfig, PlantServer
-from test_master import Master, MasterError
+from linumert_plant.test_master import Master, MasterError
 
 ROOT = Path(__file__).resolve().parents[1]
 MILL = ROOT / "config" / "machines" / "mill_servo_table.yaml"
@@ -37,8 +37,8 @@ def core():
 
 
 def _server(core, machine: Path = MILL, **cfg) -> PlantServer:
+    from linumert.machine.drives.machine_drives import load_machine_drives
     from linumert_plant.build_machine import build_model
-    from linumert_plant.machine_drives import load_machine_drives
 
     mcfg, drives = load_machine_drives(machine)
     return PlantServer(core.PlantMachine(build_model(mcfg, drives, seed=1)), PlantConfig(**cfg),

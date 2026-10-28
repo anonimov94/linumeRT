@@ -182,7 +182,7 @@ def test_magazine_io_over_lrtnet(core):  # REQ-VM-08: wejścia/wyjścia magazynu
     from linumert_plant.server import PlantConfig, PlantServer
 
     sys.path.insert(0, str(ROOT / "plant" / "server"))
-    from test_master import Master
+    from linumert_plant.test_master import Master
 
     server = PlantServer(core.PlantMachine(build_machine(ROUTER)), PlantConfig())
     master = Master(len(server.drives), transport=server.handle)

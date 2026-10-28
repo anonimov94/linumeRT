@@ -8,7 +8,6 @@ from __future__ import annotations
 
 import json
 import os
-import sys
 import time
 from pathlib import Path
 
@@ -125,29 +124,3 @@ def test_worker_cancel_running_and_queued(worker):
 def test_worker_reports_program_error(worker):
     msg = worker.wait(worker.submit(OfflineJob(program="G0 X0 Y0\nG2 X10 Y0 R2 F100\n")), 60)
     assert msg["ev"] == "error" and "promień" in msg["text"]
-
-
-def test_qt_bridge_emits_signals_in_gui_thread(tmp_path):
-    os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
-    pytest.importorskip("PyQt5")
-    from PyQt5 import QtCore
-
-    sys.path.insert(0, str(ROOT / "screens" / "linumert"))
-    from linumert_sim_worker import SimWorkerBridge
-
-    app = QtCore.QCoreApplication.instance() or QtCore.QCoreApplication([])
-    bridge = SimWorkerBridge(tmp_path)
-    got: dict = {}
-    gui = QtCore.QThread.currentThread()
-    bridge.progress.connect(lambda i, f: got.setdefault("progress", f))
-    bridge.finished.connect(
-        lambda i, r, c: got.update(done=r, thread=QtCore.QThread.currentThread() is gui))
-    try:
-        bridge.submit(OfflineJob(program=PROGRAM, tools=TOOLS))
-        end = time.monotonic() + 60
-        while "done" not in got and time.monotonic() < end:
-            app.processEvents(QtCore.QEventLoop.AllEvents, 50)
-            time.sleep(0.01)
-    finally:
-        bridge.close()
-    assert got["done"]["events"] and got["thread"] and "progress" in got

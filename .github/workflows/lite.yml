@@ -1,0 +1,13 @@
+name: lite backend
+on: [push, pull_request, workflow_dispatch]
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: make install lint test-c
+      - run: make -C plant/core shared
+      - run: make test plant-matrix wheel-check

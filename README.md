@@ -1,203 +1,94 @@
-<div align="center">
+# linumeRT lite
 
-<img src="docs/design/marka/baner.png" alt="linumeRT — środowisko operatora CNC" width="100%">
+Backend dla LinuxCNC bez GUI i serwerów HTTP. Python 3.11+, trzy zależności runtime:
+NumPy, Pydantic 2 i PyYAML. Docelowe środowisko: Linux; na Windows użyj WSL.
 
-# linumeRT
+## Zakres
 
-### Sterowanie CNC · wirtualna obrabiarka · programowanie obróbki
+- CAM 2D: planowanie, wiercenie, kieszenie, rowki, kontury, grawerowanie.
+- Wersjonowane `.lnx` → G-code, baza narzędzi SQLite i import/eksport tool.tbl.
+- Wspólny opis maszyny/napędów i eksport INI/HAL dla **sim lub Plant**.
+- Plant: dynamika C, CiA 402, UDP, bazowanie, awarie i scenariusze lockstep.
+- Diagnostyczna symulacja materiału 2.5D, kolizje i raport JSON.
 
-Otwarte środowisko operatora oparte na **LinuxCNC 2.9**, **QtVCP** i **Debianie 12**.
-Własny interfejs, podgląd detalu i ścieżki oraz Plant — model maszyny do badania jej zachowania.
+Poza lite: Qt/WebHMI/panele web, CAM 3D ze STL, wtyczki, ISO,
+generowanie konfiguracji prawdziwego sprzętu i makr ATC. Model Plant zachowuje istniejącą
+kinematykę i magazyny do regresji; nie rozwijamy nowych wariantów w lite.
 
-[**Pobierz ISO Live**](https://github.com/anonimov94/linumeRT/releases) · [**Uruchom projekt**](#uruchomienie-na-linuxie) · [**Kamienie milowe**](#kamienie-milowe) · [**Dokumentacja**](docs/README.md)
+## Instalacja
 
-![LinuxCNC](https://img.shields.io/badge/LinuxCNC-2.9-2dd4bf)
-![Debian](https://img.shields.io/badge/Debian-12-58646f)
-![Etap](https://img.shields.io/badge/etap-rozw%C3%B3j_i_testy-fbbf24)
-![GPL](https://img.shields.io/badge/licencja-GPL--2.0--or--later-blue)
-
-</div>
-
-## Zobacz działający ekran
-
-![Symulacja obróbki w ekranie linumeRT](docs/raporty/hmi_sym/demo_po_obrobce.png)
-
-Rzeczywisty zrzut HMI z LinuxCNC 2.9, 25.10.2026 (po obróbce programu demonstracyjnego, 673,8 cm³ materiału) — nie makieta.
-[Przebieg demonstracyjny i dowody](docs/raporty/hmi_sym/README.md).
-
-### Classic × Neon: podgląd programu na żywo
-
-![Monitor Classic × Neon obok LinuxCNC w AUTO](docs/raporty/neon/02-srodek.png)
-
-Monitor tylko do odczytu obok LinuxCNC (sim) w trybie AUTO, program wstrzymany w środku: numer linii, następny punkt
-i DTG (2,432 mm) oraz pozycja DRO zgadzają się z danymi LinuxCNC. Pomiary i opis: [raport odbioru](docs/raporty/neon/README.md).
-
-## Co oferuje linumeRT
-
-| Obszar | Dostępne możliwości |
-|---|---|
-| Obsługa maszyny | Bazowanie, JOG, MDI, AUTO, narzędzia, wrzeciono, ręczna zmiana narzędzia, alarmy i Reset w ekranie opartym na QtDragon. |
-| Programowanie | Programy `.lnx`, generatory cykli, edytor G-code, podgląd programu i sprawdzanie ograniczeń. |
-| Detal i ścieżka | Definicja przygotówki i zera detalu, narzędzia, podgląd obróbki oraz diagnostyka materiału i kolizji. |
-| Plant | Dynamika osi i napędów, masa i bezwładność, CiA402, krokowce, krańcówki, bazowanie, magazyn narzędzi i wrzeciono. |
-| Konfiguracja | Wspólny `machine.yaml`, biblioteka napędów, generator INI/HAL, podgląd zmian i kopia zapasowa konfiguracji. |
-| Diagnostyka | Raporty scenariuszy, testy LinuxCNC ↔ Plant i opcjonalny ślad HAL z cyklu serwo. |
-| Interfejsy | Cztery autorskie układy skórek, motywy i PL/EN; podglądy oraz osobne monitory odczytu statusu LinuxCNC. |
-
-**Dostępna implementacja nie oznacza odbioru całego obszaru.** Pozostałe kryteria, zależności i dowody są w [rejestrze projektu](docs/roadmap/PLAN.md).
-
-### Plant: znajdź granice swojej maszyny
-
-Plant ma odtwarzać rzeczywistą odpowiedź maszyny: bezwładność, opóźnienie napędu, uchyb nadążania, przeregulowanie i hamowanie. Pomaga badać, jak prędkość, przyspieszenie, obciążenie i nastawy wpływają na ruch.
-
-Celem jest **największa użyteczna dynamika podczas G0 i bardzo szybkich ruchów roboczych przy kontrolowanym uchybie**. Sam fizyczny uchyb nie jest błędem modelu. LinuxCNC pozostaje jedynym interpreterem G-code i planerem ruchu.
-
-[Model i protokół Plant](docs/PLANT.md) · [Uruchomienie](docs/PLANT_START.md) · [Odbiór G1](docs/raporty/G1.md)
-
-### Ostatnie potwierdzone zmiany
-
-- Diagnostyka zachowuje konfigurację, logi LinuxCNC/Plant i dane uchybu także po nieudanej próbie.
-- Opcjonalny sampler zapisuje 21 kanałów X/Z, CiA402 i LRT-NET na końcu cyklu serwo, z kontrolą ciągłości danych.
-- Runner scenariuszy czeka na gotowość wszystkich napędów przed bazowaniem; test odbioru sprawdza pierwsze bazowanie bez retry.
-- Generator konfiguracji tworzy warianty sim/Plant i mapowania sprzętowe z podglądem zmian oraz backupem. Weryfikacja fizycznego sprzętu pozostaje osobnym krokiem.
-
-Dowody: [diagnostyka i rampy](docs/raporty/prototypy/M1_FIRST_MOTION_2026-10-25.md), [ślad serwo](docs/raporty/prototypy/M1_SERVO_TRACE_2026-10-25.md), [gotowość napędów](docs/raporty/prototypy/M1_DRIVE_READY_2026-10-25.md).
-
-## Przetestuj na laptopie — ISO Live
-
-Obraz **amd64 (Intel/AMD 64-bit)** zawiera Debian 12, jądro PREEMPT_RT, LinuxCNC 2.9, pulpit XFCE i linumeRT. Tryb Live pozwala przetestować interfejs i symulację z pendrive’a bez instalowania systemu na dysku laptopa.
-
-1. Pobierz `.iso` i odpowiadający mu plik `.iso.sha256` z [wydań testowych](https://github.com/anonimov94/linumeRT/releases). Nazwa wydania `iso-RRRRMMDD-SHA` wskazuje datę i commit źródeł.
-2. Sprawdź sumę SHA-256, a następnie zapisz ISO jako obraz na pendrive.
-3. Uruchom laptop z USB i wybierz tryb **Live**. Instalator Calamares jest osobną opcją.
-4. Pulpit loguje się automatycznie. Konto Live: **`linumert`**, hasło **`live`**.
-5. Na pulpicie są skróty: **linumeRT (symulator)**, **linumeRT + Plant**, **linumeRT Monitor Neon** i **linumeRT: zatrzymaj**. Symulator startuje sam po zalogowaniu; skrót Plant sam zatrzymuje go i uruchamia od nowa. Błąd startu pokazuje okno terminala z końcem dziennika.
-
-Weryfikacja w Linuxie, w katalogu pobranych plików:
-
-```sh
-sha256sum -c linumert-*.iso.sha256
+```bash
+python3 -m venv .venv
+. .venv/bin/activate
+python -m pip install -c requirements-dev.lock -e '.[dev]'
 ```
 
-W PowerShell porównaj wynik z zawartością pobranego pliku `.sha256`:
+Używaj osobnego venv dla lite: pełna edycja ma te same nazwy pakietów Pythona.
+Wersje narzędzi i zależności użyte w regresji zapisano w `requirements-dev.lock`.
 
-```powershell
-Get-FileHash .\linumert-*-amd64.iso -Algorithm SHA256
+Zainstaluj `make` i kompilator C, jeśli chcesz uruchamiać Plant. Sam CAM,
+walidacja maszyn i symulacja materiału nie wymagają LinuxCNC ani kompilatora.
+
+## Pierwszy przebieg
+
+```bash
+linumert-lite generators
+linumert-lite machine config/machines/mill_servo_table.yaml
+linumert-lite compile examples/part.lnx --out build/part.ngc
+linumert-lite simulate examples/cut.ngc --tool 1:40:6 --out build/report.json
+linumert-lite config config/machines/mill_servo_table.yaml --target sim --out build/machine
+linumert-lite config config/machines/mill_servo_table.yaml --target sim --out build/machine --write
 ```
 
-| Wpis w menu | Przeznaczenie |
-|---|---|
-| linumeRT | Ekran operatora z symulatorem LinuxCNC. |
-| linumeRT + Plant | Wirtualna obrabiarka i panel Plant w przeglądarce. |
-| Monitor skórek | Osobny monitor działającego LinuxCNC, tylko odczyt. |
-| Classic × Neon | Monitor detalu i maszyny z podglądem ścieżki, tylko odczyt. |
+`config` bez `--write` pokazuje diff i zwraca 1 przy zmianach. Zapis tworzy kopię
+istniejącego katalogu; nie nadpisuje programów operatora. `.lnx` jest kompilowany atomowo:
+niepoprawny program nie niszczy istniejącego wyniku.
 
-**Wi-Fi i przeglądarka:** obraz ma NetworkManager z ikoną sieci w pasku (wybierz sieć i wpisz hasło), sterowniki Wi-Fi Intel, Realtek, Atheros, Broadcom i MediaTek (część `non-free-firmware`) oraz Firefox ESR. Skrót **Panel Plant (przeglądarka)** otwiera `http://127.0.0.1:8080/` po uruchomieniu **linumeRT + Plant**. Dzięki Wi-Fi można doinstalować brakujące pakiety (`sudo apt install …`; hasło użytkownika `live`). Karty Wi-Fi spoza tej listy mogą wymagać innego firmware'u. NIEZWERYFIKOWANE NA SPRZĘCIE.
+Plant bez panelu:
 
-Z terminala (po zalogowaniu jako `linumert`):
-
-```sh
-linumert --restart          # symulator od nowa
-linumert --restart --plant  # Plant + panel http://127.0.0.1:8080/
-linumert --stop             # zatrzymaj LinuxCNC i Plant
+```bash
+make test-c
+make -C plant/core shared
+linumert-plant machine build config/machines/mill_servo_table.yaml --run
+linumert-plant serve config/machines/mill_servo_table.yaml --lockstep
+# Osobna próba automatyczna, bez stale działającego serwera:
+python tools/run_scenario.py first_motion --no-report
 ```
 
-Samo `linumert` przy już działającym symulatorze (start przy logowaniu) kończy się komunikatem, że LinuxCNC już działa; użyj wtedy `--restart`.
+Wheel zawiera szablony napędów i zasoby generatora konfiguracji. Rdzeń Plant C buduje
+się osobno. Przy uruchomieniu z wheel ustaw `LINUMERT_PLANT_LIB` na pełną ścieżkę
+`plant/core/build/libplant_core.so` z tej wersji źródeł. Scenariusze i przykładowe maszyny
+należą do checkoutu źródeł.
 
-Najpierw uruchom symulator lub Plant, potem wybrany monitor. Próbę laptopa warto zacząć od grafiki, klawiatury, sieci, bazowania i krótkiego programu demonstracyjnego.
+## Granice wykonania
 
-**Odbiór laptopa jest nadal potrzebny:** start Live, Wi-Fi/grafika, instalacja i pomiar latencji. Budowa obrazu w CI nie kwalifikuje komputera do sterowania fizyczną maszyną. [Procedura odbioru stanowiska](docs/raporty/ODBIOR_STANOWISKA.md).
+Eksport konfiguracji nie jest poleceniem startu ani zgodą na ruch. `linumert-headless`
+jest procesem DISPLAY bez okna: tylko odpytuje LinuxCNC i czeka na zakończenie.
+Nie resetuje E-STOP, nie włącza maszyny i nie potwierdza watchdoga.
+Domyślnie zachowujemy `HMI_ESTOP_BYPASS = 0`. Tylko jawne `config --test-mode`
+włącza dotychczasowy bypass **w konfiguracji sim/Plant**; target hardware jest odrzucany.
+Do uruchomienia wygenerowanej konfiguracji potrzebne są LinuxCNC, zainstalowane komponenty
+HAL z `hal/` i osobny klient poleceń/test. Wirtualne M6 potwierdza symulowany magazyn,
+nie fizyczną zmianę freza.
 
-## Uruchomienie na Linuxie
+Parser `subset` daje diagnostykę ograniczonego podzbioru G-code; pominięte konstrukcje
+są opisane w `notes`. Pełna interpretacja wymaga LinuxCNC (`--source rs274`).
+Symulacja nie jest funkcją bezpieczeństwa ani potwierdzeniem braku kolizji na sprzęcie.
+NIEZWERYFIKOWANE NA SPRZĘCIE.
 
-**Szybki start:** starter pobiera projekt do `~/linumeRT` i uruchamia ekran przez kontener Debian 12 z LinuxCNC. Obsługuje systemy z menedżerem pacman, dnf lub apt; pierwsze uruchomienie instaluje zależności i buduje obraz.
+## Rozwój
 
-```sh
-bash <(curl -fsSL https://raw.githubusercontent.com/anonimov94/linumeRT/main/tools/linumert-start.sh)
+```bash
+make lint           # styl i importy
+make test-core      # krótkie testy kontraktów lite, CAM i danych
+make test           # pełna regresja Pythona bez zewnętrznego LinuxCNC
+make test-c         # fizyka i model Plant w C
+make plant-matrix   # pięć zachowanych konfiguracji Plant
+make wheel-check    # wheel uruchomiony poza źródłami
 ```
 
-Kolejne uruchomienia:
-
-```sh
-~/linumeRT/tools/linumert-start.sh          # symulator i ekran
-~/linumeRT/tools/linumert-start.sh --plant  # wirtualna obrabiarka Plant
-```
-
-W ekranie: **Start → potwierdzenie E-STOP → Włącz → Bazuj wszystkie**. Dalsza obsługa: [instrukcja operatora](docs/OBSLUGA_OPERATORA.md).
-
-## Kamienie milowe
-
-<img src="docs/raporty/postep-sesji.svg" alt="Postęp sesji M0–M6 z rejestru projektu" width="100%">
-
-<!-- MILESTONES:START -->
-<!-- Generowane przez tools/roadmap.py z plan.json. -->
-
-Stan rejestru: **2026-10-27 · 39/84 ukończonych sesji**.
-
-Dodatkowo ukończono **20/42 rozszerzeń**. Wśród sesji: 30 częściowych i 15 planowanych. Rozszerzenia liczymy osobno, bez zwiększania licznika 84 sesji.
-
-| Kamień | Zakres | Sesje ukończone | Rozszerzenia ukończone | Rekordy z otwartymi kryteriami |
-|---|---|---:|---:|---:|
-| M0 | Fundament, prawo, środowisko | 8/8 | 1/2 | 1 |
-| M1 | Wirtualna obrabiarka Plant | 18/18 | 3/5 | 3 |
-| M2 | Ekran linumeRT na bazie QtDragon | 3/12 | 5/24 | 27 |
-| M3 | Programowanie dialogowe | 7/12 | 5/7 | 8 |
-| M4 | Symulacja i kolizje | 3/10 | 4/10 | 14 |
-| M5 | Konfiguracja maszyn hobbystów | 0/12 | 5/10 | 12 |
-| M6 | Wtyczki, instalator, alfa | 0/12 | 5/8 | 9 |
-
-Licznik sesji nie oznacza zaliczenia bramki, odbioru stanowiska ani sprzętu. Otwarte kryteria obejmują sesje i powiązane rozszerzenia; jedno rozszerzenie może dotyczyć kilku kamieni.
-
-[Pełny plan, kryteria i dowody](docs/roadmap/PLAN.md) · [Roadmapa HTML](docs/roadmap/index.html) · [Źródłowy rejestr](docs/roadmap/plan.json)
-<!-- MILESTONES:END -->
-
-Wcześniejsze bramki pozostają priorytetem rozwoju. Automatyczne testy, odbiór pulpitu, kwalifikacja RT i sprawdzenie na sprzęcie mają osobne wyniki. Bieżące zadania są opisane przy odpowiednich rekordach planu.
-
-### Ostatnie zweryfikowane zmiany — 25 października 2026
-
-- **Gotowość napędów przed bazowaniem:** runner czeka na potwierdzenie wszystkich czterech napędów; odbiór CI obejmował 147 testów LinuxCNC PASS, w tym pierwsze bazowanie bez ponowienia. [Raport gotowości](docs/raporty/prototypy/M1_DRIVE_READY_2026-10-25.md).
-- **Diagnostyka Plant:** dodano rejestrację próbek HAL i analizę fazy command/feedback. Trzy celowane próby pierwszego ruchu przeszły po 5/5 kryteriów. [Pomiary aktualnej bazy](docs/raporty/prototypy/M1_CURRENT_X_2026-10-25.md).
-- **Przyspieszenia Plant z jawnego budżetu uchybu:** `tools/tune_accel.py` dobiera przyspieszenia przy uchybie ≤ 0,2 mm. Po odbiorze z prawdziwym LinuxCNC (atrapa mastera zaniża uchyb ok. 1,5×) frezarka ma X/Y 2 000 i Z 2 500 mm/s², router X/Y 3 820 i Z 4 000 mm/s². Progów nie poluzowano. [Raport doboru](docs/raporty/prototypy/M1_ACCEL_TUNING_2026-10-25.md).
-- **Biblioteka maszyn w panelu Plant:** zakładka „Maszyny” — lista, aktywacja, kopia, zmiana nazwy, kosz z przywracaniem i edytor YAML aktywnej maszyny z walidacją (każdy parametr edytowalny). Sprawdzone klikaniem w panelu; aktywację na działającym Plant sprawdzają testy API.
-- **HMI:** obszar „Wygląd” (palety i własne kolory), adaptacyjne karty Start/Narzędzia oraz opcjonalny host czterech rodzin skórek w QtVCP ze zrzutami 4 rodzin w dwóch rozdzielczościach. Wyraźnie odmienny wygląd każdej rodziny i główny ekran holograficzny pozostają otwarte (HMI-OWNER-SKINS).
-- **Sondowanie:** scenariusze `probe_z_touchplate` i `probe_corner` w Plant (wymagają LinuxCNC). Ekran kalibracji sondy w HMI i odbiór na sprzęcie pozostają otwarte.
-- **ISO:** przyczyną zamykania się ekranu przy starcie był brak `xfce4-notifyd`; pakiet dodano do obrazu. Odbiór na laptopie właściciela czeka na nowy obraz.
-- **Pełna powtarzalność M1 pozostaje do odbioru:** trzy pełne przebiegi po 13 testów PASS, czwarty zakończony błędem setup przed testem soft limit. Wymaganych dziesięciu kolejnych PASS nie uzyskano; raport zachowuje wynik FAIL. [Raport serii](docs/raporty/prototypy/M1_REPEAT_2026-10-25.md).
-
-Są to wyniki konkretnych prac i prób. Ukończone sesje oraz rozszerzenia można przejrzeć w [wykazie wykonanych zakresów](prompts/DONE.md); stan wszystkich bramek i pozostałe kryteria znajdują się w [rejestrze projektu](docs/roadmap/PLAN.md).
-
-## Cztery kierunki interfejsu
-
-**Classic Digital · Industrial Pro · Cyberdeck · Organic Vector** korzystają ze wspólnego rdzenia, motywów i języków PL/EN. Działający ekran operatora oraz osobne monitory skórek mają różny zakres — monitory odczytu nie wysyłają poleceń ruchu.
-
-<details>
-<summary>Galeria układów i dokumentacja projektu skórek</summary>
-
-| Classic Digital | Industrial Pro |
-|---|---|
-| ![Podgląd Classic Digital](docs/raporty/hmi_sym/skin_classic-digital.png) | ![Podgląd Industrial Pro](docs/raporty/hmi_sym/skin_industrial-pro.png) |
-| Cyberdeck | Organic Vector |
-| ![Podgląd Cyberdeck](docs/raporty/hmi_sym/skin_cyberdeck.png) | ![Podgląd Organic Vector](docs/raporty/hmi_sym/skin_organic-vector.png) |
-
-Zrzuty podglądów offline z 25.10.2026 (`skin-check.py`, 160 kombinacji PASS). [Raport i odtworzenie galerii](docs/raporty/hmi_sym/README.md) · [Specyfikacja skórek](docs/design/SKIN_SYSTEM_ROADMAP.md).
-
-</details>
-
-## Dokumentacja i rozwój
-
-- [Instrukcja operatora](docs/OBSLUGA_OPERATORA.md) i [Zero detalu](docs/ZERO_DETALU.md).
-- [Plant](docs/PLANT.md), [maszyny i szablony napędów](plant/library/drives/README.md).
-- [Wymagania i pokrycie](docs/wymagania/MACIERZ.md), [raporty odbioru](docs/raporty/ODBIOR_STANOWISKA.md).
-- [Decyzje projektu](docs/DECYZJE.md), [dziennik](docs/DZIENNIK.md), [zasady współpracy](docs/WSPOLPRACA_MODELI.md).
-
-```sh
-make install
-make lint test test-c test-san
-make plant-matrix
-# W odrębnym środowisku z LinuxCNC lub pod wspólną blokadą:
-make test-linuxcnc
-```
-
-Licencja: **GPL-2.0-or-later dla własnego kodu**. Kod LinuxCNC/QtDragon zachowuje swoje nagłówki i licencję GPL-2.0; szczegóły w [LICENSE](LICENSE) i [rejestrze pochodzenia](docs/PROVENANCE.md). Licencja katalogu nadrzędnego nie dotyczy linumeRT.
-
-Ekran nie zastępuje sprzętowego E-STOP/STO. **NIEZWERYFIKOWANE NA SPRZĘCIE.**
+Aktualne instrukcje: `AGENTS.md`. Granice modułów i dobór testów:
+[architektura](docs/ARCHITECTURE.md). Zapisane wyniki: [VALIDATION.md](VALIDATION.md).
+Historyczna pełna edycja: commit `a593d6d4c55f503fbaf4c607099f2d89c61cc670`.
+Nie wznawiaj jej 84 sesji w tej gałęzi. GPL-2.0-or-later dla własnego kodu;
+zachowano nagłówki i rejestr pochodzenia. Patrz `LICENSE` i `docs/PROVENANCE.md`.

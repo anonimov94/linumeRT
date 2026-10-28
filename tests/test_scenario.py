@@ -174,10 +174,10 @@ def test_runner_exit_code_on_fail(core, tmp_path) -> None:
 
 def test_runner_ssh_command_without_ssh(capsys) -> None:
     assert run_scenario.main(["first_motion", "--ssh", "lrt@10.77.0.10", "--remote-dir",
-                              "/opt/linumeRT", "--master", "linuxcnc", "--print-ssh"]) == 0
+                              "/opt/linumeRT", "--master", "mock", "--print-ssh"]) == 0
     cmd = capsys.readouterr().out.strip()
     assert cmd.startswith("ssh -o BatchMode=yes lrt@10.77.0.10 ")
-    assert "cd /opt/linumeRT && python3 tools/run_scenario.py first_motion --master linuxcnc" \
+    assert "cd /opt/linumeRT && python3 tools/run_scenario.py first_motion --master mock" \
         in cmd and "--ssh" not in cmd.split("tools/run_scenario.py")[1]
 
 
@@ -201,9 +201,9 @@ def _mutate(node, rng: random.Random):
 
 def test_fuzz_machine_yaml(core, tmp_path) -> None:  # REQ-QA-03
     """Uszkodzony machine.yaml: albo poprawny model, albo MachineConfigError — nic innego."""
+    from linumert.machine.drives.drive_template import TemplateError
+    from linumert.machine.drives.machine_drives import load_machine_drives
     from linumert_plant.build_machine import build_model
-    from linumert_plant.drive_template import TemplateError
-    from linumert_plant.machine_drives import load_machine_drives
 
     rng = random.Random(24)
     accepted = rejected = 0

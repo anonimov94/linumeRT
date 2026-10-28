@@ -106,7 +106,7 @@ def test_server_oracle_with_real_model(core):  # REQ-VM-06
     from linumert_plant.build_machine import build_machine
     from linumert_plant.server import PlantConfig, PlantServer
     sys.path.insert(0, str(ROOT / "plant" / "server"))
-    from test_master import Master
+    from linumert_plant.test_master import Master
 
     server = PlantServer(core.PlantMachine(build_machine(MACHINE)), PlantConfig())
     # strefa na całą przestrzeń (bez walidacji machine.yaml): narzędzie zawsze w środku

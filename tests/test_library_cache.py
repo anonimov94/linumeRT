@@ -3,8 +3,8 @@
 import shutil
 from pathlib import Path
 
-from linumert_plant import drive_library
-from linumert_plant.drive_library import LIBRARY_DIR, load_library
+from linumert.machine.drives import drive_library
+from linumert.machine.drives.drive_library import LIBRARY_DIR, load_library
 
 
 def _copy(tmp_path: Path) -> Path:

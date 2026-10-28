@@ -12,10 +12,14 @@ import select
 import socket
 import struct
 import threading
-import tty
 
 import pytest
-from linumert_plant.drive_library import load_library
+
+pytest.importorskip("termios", reason="VFD PTY tests require POSIX")
+import tty  # noqa: E402
+
+import pytest
+from linumert.machine.drives.drive_library import load_library
 from linumert_plant.vfd import (
     CMD_RUN_FWD,
     CMD_RUN_REV,
@@ -338,7 +342,7 @@ def _server(core, vfd=None):
 
 def test_server_spindle_from_lrt_net(core):
     # REQ-VD-01 — bez sekcji vfd wrzeciono zadaje spindle_cmd; spindle_actual z modelu
-    from test_master import Master
+    from linumert_plant.test_master import Master
 
     server = _server(core)
     assert server.spindle.max_rpm == 8000 and server.spindle.inertia == pytest.approx(8e-4)
@@ -356,8 +360,8 @@ def test_server_spindle_from_lrt_net(core):
 
 def test_server_spindle_over_modbus_tcp(core):
     # REQ-VD-01 — sekcja vfd: Modbus TCP steruje wrzecionem, LRT-NET tylko odczytuje obroty
+    from linumert_plant.test_master import Master
     from linumert_plant.vfd import VfdConfig, start_servers
-    from test_master import Master
 
     server = _server(core, VfdConfig(modbus_port=0))
     servers = start_servers(server.cfg.vfd, server.spindle, server._lock, server.vfd_faults)

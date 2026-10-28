@@ -1,17 +1,18 @@
-# Wspólna praca nad linumeRT
+# linumeRT lite — instructions
 
-Punkt wejścia każdej sesji: [`docs/PROMPT_NOWEJ_SESJI.md`](docs/PROMPT_NOWEJ_SESJI.md). Kolejność lektury:
-`CLAUDE.md` (kontrakt) → `docs/WSPOLPRACA_MODELI.md` (**jedyne źródło zasad współpracy**) →
-`docs/NASTEPNA_SESJA.md` (czyja tura, stan, zadania) → `docs/DECYZJE.md` → ostatnie wpisy `docs/DZIENNIK.md`
-→ prompt sesji z `prompts/`.
+Backend only: no GUI, HTTP server, CAM 3D, ISO or new hardware support.
+Read this file, `docs/ARCHITECTURE.md` and the README of the module being changed.
+The current user request has priority. Do not resume the full edition roadmap.
 
-Statusy i wspólny plan: `docs/roadmap/plan.json`; `prompts/DONE.md`, spis promptów i roadmapa HTML
-są generowane przez `python3 tools/roadmap.py`, bez ręcznego dopisywania.
-
-Skrót (szczegóły w `WSPOLPRACA_MODELI.md`):
-- Claude i Codex pracują na zmianę: linia `Tura:` w `NASTEPNA_SESJA.md` i `prompts/LOCK`. Praca równoległa
-  tylko wyjątkowo, w osobnych checkoutach i z blokadami zasobów (D28, D30). Od D31 cały zakres prowadzi Claude.
-- Małe kroki: po każdym commit i push; draft PR od pierwszego kroku; limit tokenów może przerwać w każdej chwili.
-- Oszczędzaj tokeny: czytaj zakresy i `diff --stat`, nie całe pliki; bez subagentów, chyba że właściciel poprosi.
-- `Model-Author:` w każdym commicie i PR; autokontrola to nie niezależny przegląd.
-- Na koniec etapu PR jest scalany do `main` (D26); `main` bez niedokończonego kodu; PR nie wiszą.
+- One task changes one module and its callers/tests. State the acceptance criterion first.
+- `linumert.machine.drives` owns templates, mechanics and scales. Never import Plant in core.
+- Plant and material simulation are independent consumers of core; neither imports the other.
+- Keep LinuxCNC as the authoritative execution interpreter/planner. Subset parsing is diagnostic.
+- Preserve `.lnx` generator versions, HAL signal contracts, units and safety behavior.
+- No implicit E-STOP reset, motion enable or watchdog bypass. `--test-mode` is sim/Plant only.
+- Run `python -m ruff check .` and affected pytest files. Before delivery run full `pytest`.
+- Changes to Plant C require `make -C plant/core test` and Plant Python tests on Linux.
+- Build/install the wheel outside the source tree when changing packaging or CLI resources.
+- Retain copyright, provenance and GPL notices. Hardware remains unverified.
+- No subagents unless explicitly requested. Never claim an independent review that did not happen.
+- Never merge this lite branch into the full edition without an explicit user request.

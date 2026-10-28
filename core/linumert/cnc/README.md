@@ -1,11 +1,6 @@
-# linumert.cnc
+# Dostęp do LinuxCNC
 
-Warstwa dostepu do LinuxCNC (linuxcnc.command/stat) z atrapa do testow bez LinuxCNC.
-
-| Moduł | Zawartość |
-|---|---|
-| `model.py` | niezmienna migawka stanu maszyny (sesja 006) |
-| `linuxcnc_reader.py` | czytnik `linuxcnc.stat` (moduł wstrzykiwany, działa bez LinuxCNC w testach) |
-| `fake.py` | atrapa z wirtualnym zegarem do testów |
-
-Opis: `docs/RDZEN.md`.
+model.py: niezmienna migawka. linuxcnc_reader.py: odczyt stanu.
+fake.py: atrapa do testów. headless.py: proces DISPLAY tylko do odczytu, sim/Plant.
+Bez automatycznego resetu E-STOP, włączania maszyny lub podtrzymania bezpieczeństwa.
+Testy: test_cnc_fake, test_cnc_reader, test_lite_cli.
