@@ -1388,3 +1388,9 @@ NIEZWERYFIKOWANE NA SPRZĘCIE.
 - Model-Author: Claude. `core/linumert/machine/atc_macro.py`: makro remapu M6 dla ATC z `toolchanger` w machine.yaml (M64/M65 zwolnienie zacisku i osłony, M66 z timeoutem, ruchy G53, na końcu wbudowane M6 i G43/G49). Karuzela/parasol: jawna odmowa.
 - `plan_swap` to kolejność kroków; test wykonuje ją na modelu magazynu Plant (wymiany 0→3, 2→5, 4→0 bez TOOL_DROP/CLAMP_FAULT/POCKET_OCCUPIED/COVER_CRASH). 9 testów + atc/remap 23 PASS, ruff PASS.
 - Wzorzec kolejności i obsługi E-STOP (dziennik transakcyjny, RECOVERY_REQUIRED) z konsultacji z ChatGPT, do weryfikacji w dokumentacji LinuxCNC. Makro nie jest jeszcze podpięte do INI; brak testu rs274. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## 028 — scenariusz odbioru układu i klawiatury · 2026-10-28 · Codex
+- Model-Author: Codex. Jedno zadanie: uzupełnienie SPEC_EKRAN_GLOWNY.md o siedem kroków odbioru 1280×768, metadane i formularz dowodów.
+- Procedura obejmuje podstrony, fokus, edycję bez JOG, długie teksty i zmianę rozmiaru; odróżnia PASS, FAIL i NIEWYKONANY.
+- Odbiór GUI nie był wykonywany; 028 pozostaje partial. Bez zmian kodu i zasobów graficznych.
+- Weryfikacja: roadmap --check i diff --check PASS; make lint test zatrzymane przez brak modułu ruff w systemowym Pythonie.

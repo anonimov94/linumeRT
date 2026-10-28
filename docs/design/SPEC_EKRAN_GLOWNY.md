@@ -71,3 +71,36 @@ Własne elementy: znaki, tokeny, ikony, nazwy obszarów oraz kompozycja i kolejn
 pracy z dokumentacji linumeRT. Jest to notatka pochodzenia projektu; nie zastępuje
 oceny rzeczywistych zrzutów. Skórki offline i ich odbiór produkcyjny są oddzielnymi
 rozszerzeniami w plan.json. Zaliczenie jednego testu nie zamyka ich automatycznie.
+
+## Scenariusz ręcznego odbioru 1280×768
+
+Model-Author: Codex · 2026-10-28. Procedura do wykonania, bez deklaracji PASS.
+Odbiór dotyczy sesji 028; wymaga działającego LinuxCNC sim i pełnych stron
+Narzędzia/Cykle, nie ich widoków zastępczych. Przed uruchomieniem zajmij zasób
+LinuxCNC zgodnie z WSPOLPRACA_MODELI.md. Używaj wyłącznie konfiguracji sim,
+bez podłączonej maszyny. Nie wykonuj tego scenariusza podczas innego testu ruchu.
+
+Zapisz SHA, konfigurację INI, wersje LinuxCNC/Qt, skórkę, język, skalowanie pulpitu
+oraz rzeczywisty rozmiar obszaru klienta okna. Obszar klienta ustaw na 1280×768;
+rozdzielczość pulpitu z dekoracjami okna nie jest równoważnym pomiarem.
+Zachowaj log startu oraz zrzuty całego okna, bez kadrowania problematycznych miejsc.
+
+| Krok | Czynność | Oczekiwany wynik i dowód |
+|---|---|---|
+| 1 | Uruchom HMI w sim i otwórz Start. | Brak wyjątków handlera i widoków zastępczych; log, zrzut Start. DRO i dolne akcje mieszczą się w oknie. |
+| 2 | Otwórz kolejno Program, Narzędzia, Symulacja, Diagnostyka i Konfiguracja. | Zrzut każdej strony: czytelne pola, brak nakładania, ucięcia prawej krawędzi i poziomego przewijania potrzebnego do podstawowych akcji. E-STOP stale dostępny. |
+| 3 | Wróć z każdej strony na Start. | Układ wraca do rozmiaru okna; szerokość ukrytej strony nie wymusza przewijania. Zapisz stan trybu, programu i pozycji przed/po nawigacji. Nawigacja nie wydaje poleceń ruchu ani resetu. |
+| 4 | Przejdź Tab i Shift+Tab przez dostępne kontrolki każdej strony. | Fokus jest widoczny, kolejność logiczna, ukryte strony nie otrzymują fokusu; wszystkie podstawowe akcje są osiągalne. Nie aktywuj poleceń ruchu. Zapisz kolejność i ewentualną pułapkę fokusu. |
+| 5 | Ustaw fokus w polu MDI, następnie w edytorze Programu; użyj strzałek do przesuwania kursora. | Kursor porusza się w tekście, brak JOG i zmiany pozycji osi. Nie wysyłaj MDI ani nie uruchamiaj programu; zapisz obserwację stanu i log. |
+| 6 | Pokaż długą nazwę pliku oraz pełny komunikat odmowy dostępny w sim. | Tekst zawija się lub można odczytać jego całość; DRO i dolne akcje pozostają widoczne. Zrzut z użytym tekstem. |
+| 7 | Powiększ okno, po czym wróć do 1280×768 na Start i Narzędziach. | Układ ponownie mieści się w oknie; pola i fokus pozostają dostępne. Zrzuty po zmniejszeniu. |
+
+Dla każdej obsługiwanej skórki i języka wykonaj osobny przebieg. Obsługę dotykową
+sprawdź osobno na stanowisku z dotykiem; wynik klawiatury jej nie zastępuje.
+Przy nieoczekiwanym ruchu przerwij przebieg i zachowaj log; nie powtarzaj czynności
+przed diagnozą. Po zakończeniu zamknij własną instancję sim i zwolnij blokadę.
+
+Raport umieść w `docs/raporty/G2/`: metadane środowiska powyżej oraz tabela
+`krok | PASS/FAIL/NIEWYKONANY | obserwacja | plik dowodu`. Brak środowiska lub
+niedostępna strona oznacza NIEWYKONANY, nie PASS. FAIL zawiera kroki odtworzenia.
+Pełny odbiór wymaga dowodów wszystkich kroków; ta procedura sama nie zamyka 028.

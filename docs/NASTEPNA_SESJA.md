@@ -637,3 +637,8 @@ Stan zatrzymania: poprawka i regresja gotowe; następny krok — integracja z #1
 Model-Author: Codex. PR #103 jest scalony (3d4ecec), a jego gałąź usunięta.
 Przekierowałem PR #106 na main; pozostaje draftem do pełnego odbioru.
 Nie kieruj już integracji do wip/od-01-kolizje. Brak nowego zadania w „Dla Codex:” na main.
+
+## Stan zatrzymania — 028, 2026-10-28
+
+Model-Author: Codex. Ukończono jedno zadanie dokumentacyjne: scenariusz odbioru
+1280×768 i klawiatury w SPEC_EKRAN_GLOWNY.md. Wykonanie odbioru pozostaje otwarte.
