@@ -575,10 +575,12 @@ class DeploymentCheckOut(Model):
 class AlarmOut(Model):
     id: int
     code: str
-    level: str = ""
+    level: str = ""            # warning | simulation | program | error (z katalogu)
     message: str = ""
     raised: float = 0.0
     acknowledged: bool = False
+    state: str = "active"      # active | acknowledged | cleared
+    count: int = 1             # ile razy zgłoszono ten sam alarm, gdy był aktywny
     params: dict[str, Any] = Field(default_factory=dict)
 
 
@@ -586,6 +588,21 @@ class AlarmList(Model):
     active: list[AlarmOut] = Field(default_factory=list)
     history: list[AlarmOut] = Field(default_factory=list)
     worst_level: str | None = None
+
+
+class AlarmCodeOut(Model):
+    """Pozycja katalogu alarmów — GUI buduje z tego listę i opisy (PL/EN)."""
+
+    code: str
+    level: str = ""
+    clear: str = ""                      # "ack" | "reset" — jak operator gasi alarm
+    params: list[str] = Field(default_factory=list)   # parametry komunikatu
+    message_pl: str = ""
+    message_en: str = ""
+
+
+class AlarmCodesOut(Model):
+    codes: list[AlarmCodeOut] = Field(default_factory=list)
 
 
 class AlarmRaiseRequest(Model):

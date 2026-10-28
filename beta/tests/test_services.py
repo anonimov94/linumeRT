@@ -342,24 +342,72 @@ def test_config_nieznana_maszyna_daje_not_found(call) -> None:
 # --------------------------------------------------------------------------- alarmy
 
 
+def test_alarm_codes_daje_gui_katalog_z_tlumaczeniami(call) -> None:
+    """GUI nie trzyma własnych tłumaczeń — bierze komunikaty z katalogu.
+
+    Regresja: usługa czytała nieistniejący atrybut ``definitions`` katalogu i oddawała
+    pustą listę, więc GUI nie miało jak opisać żadnego alarmu.
+    """
+    codes = call("alarm.codes")["codes"]
+    assert len(codes) >= 50
+    for item in codes:
+        assert item["code"] and item["level"]
+        assert item["message_pl"], f"{item['code']} bez komunikatu PL"
+        assert item["message_en"], f"{item['code']} bez komunikatu EN"
+        assert item["clear"] in ("ack", "auto", "reset"), item
+        assert isinstance(item["params"], list)
+    # kod z parametrami musi je zadeklarować — GUI podstawi wartości
+    with_params = [c for c in codes if c["params"]]
+    assert with_params, "katalog bez kodów parametryzowanych"
+
+
 def test_alarm_raise_ack_reset(call) -> None:
     codes = call("alarm.list")
     assert isinstance(codes["active"], list)
 
-    from linumert_headless.services.alarm import AlarmService
-
-    service = AlarmService()
-    known = sorted(getattr(service.catalog, "definitions", {}) or {})
-    if not known:
-        pytest.skip("katalog alarmów pusty")
-    raised = call("alarm.raise", {"code": known[0]})
-    assert raised["code"] == known[0]
+    # Katalog jest ładowany z catalog.yaml i ma kilkadziesiąt kodów — jeśli jest pusty,
+    # to jest błąd, a nie powód do pominięcia testu.
+    catalog = call("alarm.codes")["codes"]
+    assert len(catalog) >= 50, f"katalog alarmów podejrzanie mały: {len(catalog)}"
+    # clear=auto: potwierdzenie tylko oznacza alarm, więc zostaje na liście aktywnej
+    # (przy clear=ack potwierdzenie od razu go kasuje). Bez parametrów, żeby komunikat
+    # dał się sformatować bez dodatkowych danych.
+    target = next(c for c in catalog if not c["params"] and c["clear"] == "auto")
+    raised = call("alarm.raise", {"code": target["code"]})
+    assert raised["code"] == target["code"]
     assert raised["message"]
+    assert "{" not in raised["message"], "niesformatowany parametr w komunikacie"
+    assert raised["level"] == target["level"], "poziom musi pochodzić z katalogu"
+    assert raised["state"] == "active" and raised["acknowledged"] is False
 
+    # Ponowne zgłoszenie tego samego alarmu zwiększa licznik, nie dokłada wpisu.
+    call("alarm.raise", {"code": target["code"]})
     active = call("alarm.list")["active"]
-    assert any(a["code"] == known[0] for a in active)
+    ours = [a for a in active if a["code"] == target["code"]]
+    assert len(ours) == 1, "powtórzenie nie może tworzyć drugiego alarmu"
+    assert ours[0]["count"] == 2
+    assert call("alarm.list")["worst_level"] == target["level"]
+
     assert call("alarm.ack", {"alarm_id": None})["ok"] is True
+    after = [a for a in call("alarm.list")["active"] if a["code"] == target["code"]][0]
+    assert after["acknowledged"] is True and after["state"] == "acknowledged"
+
+    # Reset NIE kasuje wszystkiego: alarmy z clear=auto czekają na swoje zdarzenie
+    # (semantyka udokumentowana w linumert.alarms.manager).
     assert call("alarm.reset")["ok"] is True
+    assert any(a["code"] == target["code"] for a in call("alarm.list")["active"]), \
+        "reset nie może skasować alarmu z clear=auto"
+
+    # Alarm z clear=reset znika po resecie i trafia do historii.
+    resettable = next(c for c in catalog if not c["params"] and c["clear"] == "reset")
+    call("alarm.raise", {"code": resettable["code"]})
+    assert any(a["code"] == resettable["code"] for a in call("alarm.list")["active"])
+    assert call("alarm.reset")["ok"] is True
+    assert not any(a["code"] == resettable["code"] for a in call("alarm.list")["active"]), \
+        "reset musi skasować alarm z clear=reset"
+    history = call("alarm.list")["history"]
+    assert history, "skasowany alarm musi trafić do historii"
+    assert history[0]["state"] == "cleared"
 
 
 def test_alarm_nieznany_kod_daje_not_found_z_lista(call) -> None:

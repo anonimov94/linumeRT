@@ -13,7 +13,7 @@ nie przepisując ani jednej linijki logiki sterowania.
                 │  REST / WebSocket / SDK / CLI
 ┌───────────────▼─────────────────────────────────────────────┐
 │  linumert_headless  — warstwa usługi                        │
-│  kontrakt (73 operacje, 12 domen) · sesje · deadman jogu    │
+│  kontrakt (74 operacje, 12 domen) · sesje · deadman jogu    │
 │  limiter · token · strażnik Host/Origin · magazyn stanu     │
 ├─────────────────────────────────────────────────────────────┤
 │  rdzeń: linumert · linumert_sim · linumert_plant            │

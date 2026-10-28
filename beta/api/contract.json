@@ -241,6 +241,38 @@
       }
     },
     {
+      "name": "alarm.codes",
+      "domain": "alarm",
+      "kind": "query",
+      "summary": "Katalog kodów alarmów z komunikatami PL/EN",
+      "status": "implemented",
+      "safety": "none",
+      "role": "operator",
+      "idempotent": true,
+      "plan": "",
+      "request": {
+        "additionalProperties": false,
+        "description": "Operacje bez parametrów i bez wyniku merytorycznego.",
+        "properties": {},
+        "title": "Empty",
+        "type": "object"
+      },
+      "result": {
+        "additionalProperties": false,
+        "properties": {
+          "codes": {
+            "items": {
+              "$ref": "#/$defs/AlarmCodeOut"
+            },
+            "title": "Codes",
+            "type": "array"
+          }
+        },
+        "title": "AlarmCodesOut",
+        "type": "object"
+      }
+    },
+    {
       "name": "alarm.list",
       "domain": "alarm",
       "kind": "query",
@@ -350,6 +382,16 @@
             "default": false,
             "title": "Acknowledged",
             "type": "boolean"
+          },
+          "state": {
+            "default": "active",
+            "title": "State",
+            "type": "string"
+          },
+          "count": {
+            "default": 1,
+            "title": "Count",
+            "type": "integer"
           },
           "params": {
             "additionalProperties": true,

@@ -98,9 +98,10 @@ def test_drive_fault_table_is_consistent() -> None:
 
 
 def test_every_drive_fault_has_alarm_in_catalog() -> None:  # kryterium sesji 012
-    catalog = ROOT / "core" / "linumert" / "alarms" / "catalog.yaml"
-    if not catalog.exists():
-        pytest.skip("katalog alarmów dochodzi w PR sesji 007; test działa po scaleniu")
+    # W bliźniaku pakiet leży w src/ (upstream miał core/linumert) — katalog jest
+    # częścią tego drzewa, więc jego brak to błąd, nie powód do pominięcia testu.
+    catalog = ROOT / "src" / "linumert" / "alarms" / "catalog.yaml"
+    assert catalog.exists(), f"brak katalogu alarmów pod {catalog}"
     codes = set(re.findall(r"^- code: (E-4[02]\d\d)\s*$", catalog.read_text("utf-8"), flags=re.M))
     for name, _num, _cia, alarm in _drive_fault_rows():
         assert alarm in codes, f"awaria {name}: brak {alarm} w catalog.yaml"

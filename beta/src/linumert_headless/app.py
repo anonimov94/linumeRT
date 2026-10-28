@@ -36,6 +36,7 @@ from .contract import (
 from .errors import ApiError, BackendUnavailable
 from .schema import (
     AlarmAckRequest,
+    AlarmCodesOut,
     AlarmList,
     AlarmRaiseRequest,
     AxisList,
@@ -528,6 +529,10 @@ def register_operations(c: Contract) -> Contract:
     # ---- alarms ------------------------------------------------------------
     c.query("alarm.list", domain="alarm", summary="Aktywne alarmy i historia",
             result=AlarmList, handler=lambda r, ctx: ctx.services["alarm"].list())
+    # Katalog kodów z komunikatami PL/EN — GUI nie trzyma własnych tłumaczeń.
+    c.query("alarm.codes", domain="alarm",
+            summary="Katalog kodów alarmów z komunikatami PL/EN",
+            result=AlarmCodesOut, handler=lambda r, ctx: ctx.services["alarm"].codes())
     c.command("alarm.raise", domain="alarm", summary="Zgłoś alarm (testy i integracje)",
               request=AlarmRaiseRequest, result=AlarmOut, role=ROLE_SERVICE,
               handler=lambda r, ctx: ctx.services["alarm"].raise_alarm(r))

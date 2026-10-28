@@ -11,22 +11,44 @@ Potwierdzenie (ack) nie kasuje przyczyny: E-STOP i interlocki pozostają w HAL/s
 from __future__ import annotations
 
 from linumert.alarms.catalog import CatalogError, load_catalog
-from linumert.alarms.manager import Alarm, AlarmManager
+from linumert.alarms.manager import Alarm, AlarmManager, AlarmState
 
 from ..errors import InvalidRequest, NotFound
-from ..schema import AlarmAckRequest, AlarmList, AlarmOut, AlarmRaiseRequest, Ok
+from ..schema import (
+    AlarmAckRequest,
+    AlarmCodeOut,
+    AlarmCodesOut,
+    AlarmList,
+    AlarmOut,
+    AlarmRaiseRequest,
+    Ok,
+)
 
 
 def _out(alarm: Alarm, manager: AlarmManager, lang: str = "pl") -> AlarmOut:
+    """``Alarm`` nie ma pól ``level``/``raised``/``acknowledged``.
+
+    Poziom siedzi w katalogu (``catalog.get(code).level``), czas w ``raised_at``,
+    a stan w ``state: AlarmState``. Czytanie ich przez ``getattr`` z domyślną
+    wartością cicho oddawało pusty poziom, zero i "niepotwierdzony" — GUI nie
+    widziało ani powagi alarmu, ani potwierdzenia.
+    """
     try:
         message = manager.message(alarm, lang)
-    except (CatalogError, KeyError):
+    except (CatalogError, KeyError, ValueError):
         message = alarm.code
+    try:
+        level = str(manager.catalog.get(alarm.code).level)
+    except (CatalogError, KeyError):
+        level = ""
+    state = alarm.state
     return AlarmOut(
-        id=alarm.id, code=alarm.code, level=str(getattr(alarm, "level", "")),
-        message=message, raised=float(getattr(alarm, "raised", 0.0) or 0.0),
-        acknowledged=bool(getattr(alarm, "acknowledged", False)),
-        params=dict(getattr(alarm, "params", {}) or {}),
+        id=alarm.id, code=alarm.code, level=level, message=message,
+        raised=float(alarm.raised_at),
+        acknowledged=state is AlarmState.ACKNOWLEDGED,
+        state=str(getattr(state, "value", state)),
+        count=int(alarm.count),
+        params=dict(alarm.params or {}),
     )
 
 
@@ -51,21 +73,34 @@ class AlarmService:
             worst_level=self.manager.worst_level(),
         )
 
-    def codes(self) -> dict:
-        """Katalog kodów — GUI buduje z niego listę i opisy."""
+    def codes(self) -> AlarmCodesOut:
+        """Katalog kodów — GUI buduje z niego listę i opisy.
+
+        Katalog (``linumert.alarms.catalog``) exposes ``codes()`` (krotka kodów) i
+        ``get(code)`` → ``AlarmDef(code, level, clear, params, texts)``; komunikaty
+        siedzą w ``texts`` pod kluczami języków, nie w polach ``message_pl/_en``.
+        """
         if self.catalog is None:
-            return {"codes": []}
-        return {"codes": [
-            {"code": d.code, "level": getattr(d, "level", ""),
-             "message_pl": getattr(d, "message_pl", ""), "message_en": getattr(d, "message_en", "")}
-            for d in getattr(self.catalog, "definitions", {}).values()
-        ]}
+            return AlarmCodesOut(codes=[])
+        items = []
+        for code in self.catalog.codes():
+            definition = self.catalog.get(code)
+            texts = dict(getattr(definition, "texts", {}) or {})
+            items.append(AlarmCodeOut(
+                code=definition.code,
+                level=str(getattr(definition, "level", "")),
+                clear=str(getattr(definition, "clear", "")),
+                params=list(getattr(definition, "params", ()) or ()),
+                message_pl=texts.get("pl", ""),
+                message_en=texts.get("en", ""),
+            ))
+        return AlarmCodesOut(codes=items)
 
     def raise_alarm(self, request: AlarmRaiseRequest) -> AlarmOut:
         try:
             alarm = self.manager.raise_alarm(request.code, **request.params)
         except (CatalogError, KeyError) as exc:
-            known = sorted(getattr(self.catalog, "definitions", {}) or {})[:40]
+            known = sorted(self.catalog.codes())[:40] if self.catalog is not None else []
             raise NotFound(f"nieznany kod alarmu {request.code}",
                            details={"code": request.code, "known": known,
                                     "reason": str(exc)}) from exc
