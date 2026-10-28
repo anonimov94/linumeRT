@@ -29,8 +29,9 @@ REQUIRED_OPERATIONS = {
     "offset.stock_set", "offset.workpiece_get",
     "sim.run",
     "plant.status", "plant.start", "plant.scenario_run", "plant.drives",
+    "plant.faults", "plant.machine_drives",
     "config.machines", "config.generate",
-    "alarm.list", "alarm.ack",
+    "alarm.list", "alarm.ack", "alarm.codes",
     "diag.doctor", "diag.journal", "diag.cia402",
     "access.login", "access.session",
 }

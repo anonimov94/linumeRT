@@ -2813,23 +2813,28 @@
       "plan": "",
       "request": {
         "additionalProperties": false,
+        "description": "Wstrzyknięcie albo zdjęcie awarii w Plant.\n\nKatalog (``plant.faults``) ma rodzaje o różnych parametrach: ``drive_fault`` chce\n``drive`` i ``code``, ``frame_loss`` — ``percent``, ``delay`` — ``ms``, ``limit``\ni ``atc_sensor`` — ``input``/``closed``, ``axis_jam`` — ``axis``. Poprzedni schemat\nmiał tylko pole ``drive``, które usługa przekazywała jako ``target``, więc żaden\nrodzaj z parametrami nie dawał się wstrzyknąć.",
         "properties": {
-          "drive": {
-            "default": "",
-            "title": "Drive",
-            "type": "string"
-          },
-          "fault": {
-            "default": "",
-            "title": "Fault",
+          "kind": {
+            "description": "rodzaj awarii z katalogu plant.faults",
+            "title": "Kind",
             "type": "string"
           },
           "enabled": {
             "default": true,
             "title": "Enabled",
             "type": "boolean"
+          },
+          "params": {
+            "additionalProperties": true,
+            "description": "parametry rodzaju, np. drive, code, percent, ms",
+            "title": "Params",
+            "type": "object"
           }
         },
+        "required": [
+          "kind"
+        ],
         "title": "PlantFaultRequest",
         "type": "object"
       },
@@ -2854,6 +2859,101 @@
           }
         },
         "title": "Ok",
+        "type": "object"
+      }
+    },
+    {
+      "name": "plant.faults",
+      "domain": "plant",
+      "kind": "query",
+      "summary": "Aktywne awarie Plant i katalog rodzajów",
+      "status": "implemented",
+      "safety": "none",
+      "role": "operator",
+      "idempotent": true,
+      "plan": "",
+      "request": {
+        "additionalProperties": false,
+        "description": "Operacje bez parametrów i bez wyniku merytorycznego.",
+        "properties": {},
+        "title": "Empty",
+        "type": "object"
+      },
+      "result": {
+        "additionalProperties": false,
+        "properties": {
+          "active": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Active",
+            "type": "array"
+          },
+          "catalog": {
+            "items": {
+              "$ref": "#/$defs/FaultCatalogItem"
+            },
+            "title": "Catalog",
+            "type": "array"
+          }
+        },
+        "title": "PlantFaultsOut",
+        "type": "object"
+      }
+    },
+    {
+      "name": "plant.machine_drives",
+      "domain": "plant",
+      "kind": "query",
+      "summary": "Rozwiązane parametry napędów maszyny",
+      "status": "implemented",
+      "safety": "none",
+      "role": "operator",
+      "idempotent": true,
+      "plan": "",
+      "request": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "title": "MachineConfigName",
+        "type": "object"
+      },
+      "result": {
+        "additionalProperties": false,
+        "description": "Rozwiązane napędy maszyny: szablon z biblioteki plus nadpisania z machine.yaml.",
+        "properties": {
+          "machine": {
+            "title": "Machine",
+            "type": "string"
+          },
+          "axes": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Axes",
+            "type": "array"
+          },
+          "drives": {
+            "additionalProperties": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Drives",
+            "type": "object"
+          }
+        },
+        "required": [
+          "machine"
+        ],
+        "title": "MachineDrivesOut",
         "type": "object"
       }
     },

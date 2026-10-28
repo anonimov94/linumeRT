@@ -311,6 +311,58 @@ def test_plant_start_i_stop_serwera_lrtnet(call) -> None:
     assert call("plant.status")["running"] is False
 
 
+def test_plant_machine_drives_rozwiazuje_szablony(call) -> None:
+    """Napędy maszyny: szablon z biblioteki plus nadpisania z machine.yaml.
+
+    Regresja: ``load_machine_drives`` zwraca krotkę ``(MachineConfig, dict)``, a usługa
+    wołała ``.items()`` na krotce — każda taka operacja kończyła się AttributeError.
+    Metoda nie była też zarejestrowana w kontrakcie, więc GUI nie miało do niej drogi.
+    """
+    result = call("plant.machine_drives", {"name": "router_xyza"})
+    assert result["machine"] == "router_xyza"
+    assert result["axes"] == ["X", "Y", "Z", "A"]
+    assert result["drives"], "maszyna bez napędów"
+    for name, params in result["drives"].items():
+        assert name and isinstance(params, dict)
+        assert params, f"napęd {name} bez parametrów"
+        assert "id" in params
+
+
+def test_plant_faults_ma_katalog_i_pozwala_wstrzyknac(call) -> None:
+    """Panel testowy GUI: katalog awarii i wstrzyknięcie z parametrami rodzaju.
+
+    Regresja: ``plant.fault_set`` miał w schemacie tylko pole ``drive``, które usługa
+    przekazywała jako ``target`` — a ``Faults.inject`` dla ``drive_fault`` czyta
+    ``drive``. Żaden rodzaj z parametrami nie dawał się wstrzyknąć.
+    """
+    call("plant.start", {"machine": "mill_servo_table.yaml", "port": 0})
+    try:
+        catalog = call("plant.faults")
+        kinds = {item["kind"] for item in catalog["catalog"]}
+        assert {"estop", "drive_fault", "frame_loss", "delay"} <= kinds
+        for item in catalog["catalog"]:
+            assert item["desc"] and isinstance(item["params"], list)
+
+        # rodzaj z parametrami — wcześniej nie do wstrzyknięcia
+        drive = next(iter(call("plant.machine_drives", {"name": "mill_servo_table"})["drives"]))
+        call("plant.fault_set", {"kind": "drive_fault",
+                                 "params": {"drive": drive, "code": "FOLLOWING_ERROR"}})
+        active = call("plant.faults")["active"]
+        assert len(active) == 1 and active[0]["kind"] == "drive_fault"
+        call("plant.fault_set", {"kind": "drive_fault", "enabled": False,
+                                 "params": {"drive": drive, "code": "FOLLOWING_ERROR"}})
+        assert call("plant.faults")["active"] == []
+
+        # zły kod awarii: błąd musi wyliczyć znane kody, nie tylko odrzucić
+        with pytest.raises(ApiError) as excinfo:
+            call("plant.fault_set", {"kind": "drive_fault",
+                                     "params": {"drive": drive, "code": "NIE-MA-TAKIEGO"}})
+        assert excinfo.value.code == "invalid_request"
+        assert excinfo.value.details.get("catalog")
+    finally:
+        call("plant.stop")
+
+
 def test_plant_drugi_start_daje_conflict(call) -> None:
     call("plant.start", {"machine": "mill_servo_table.yaml", "port": 0})
     try:

@@ -68,6 +68,7 @@ from .schema import (
     MachineConfigList,
     MachineConfigName,
     MachineConfigOut,
+    MachineDrivesOut,
     MachineState,
     MdiRequest,
     ModeRequest,
@@ -75,6 +76,7 @@ from .schema import (
     OverrideRequest,
     PinSetRequest,
     PlantFaultRequest,
+    PlantFaultsOut,
     PlantLiveRequest,
     PlantStartRequest,
     PlantStatus,
@@ -506,6 +508,16 @@ def register_operations(c: Contract) -> Contract:
     c.query("plant.telemetry", domain="plant", summary="Próbki telemetrii osi",
             request=PlantTelemetryRequest, result=TelemetryOut,
             handler=lambda r, ctx: TelemetryOut(**ctx.services["plant"].telemetry(r)))
+    # Awarie wstrzyknięte w Plant + katalog rodzajów — GUI rysuje panel testowy.
+    c.query("plant.faults", domain="plant",
+            summary="Aktywne awarie Plant i katalog rodzajów",
+            result=PlantFaultsOut,
+            handler=lambda r, ctx: PlantFaultsOut(**ctx.services["plant"].faults()))
+    # Parametry napędów po rozwiązaniu szablonu z biblioteki nadpisaniami z machine.yaml.
+    c.query("plant.machine_drives", domain="plant",
+            summary="Rozwiązane parametry napędów maszyny",
+            request=MachineConfigName, result=MachineDrivesOut,
+            handler=lambda r, ctx: MachineDrivesOut(**ctx.services["plant"].machine_drives(r)))
 
     # ---- config ------------------------------------------------------------
     c.query("config.machines", domain="config",

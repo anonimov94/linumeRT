@@ -94,7 +94,7 @@ w procesach potomnych albo plików `config/hal/` zależnych od HMI.
   podłączeniem fizycznego GUI należy dołożyć `linumert_hmi_estop.hal` (fail-safe:
   łańcuch otwarty, dopóki ekran nie żyje).
 - **`machine.tool_change` i `offset.probe_run`** są w kontrakcie jako `planned`
-  (2 z 74 operacji) — GUI może je rysować, ale dostanie `not_implemented`.
+  (2 z 76 operacji) — GUI może je rysować, ale dostanie `not_implemented`.
 - **Wszystko, co dotyczy fizycznej maszyny, jest NIEZWERYFIKOWANE NA SPRZĘCIE** —
   testy idą na atrapie (`backend=fake`). Backend LinuxCNC nie był uruchamiany
   na prawdziwym sterowniku w tym środowisku.

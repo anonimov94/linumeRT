@@ -453,6 +453,27 @@ class ScenarioList(Model):
     scenarios: list[str] = Field(default_factory=list)
 
 
+class FaultCatalogItem(Model):
+    """Rodzaj awarii, którą można wstrzyknąć w Plant (``plant.fault_set``)."""
+
+    kind: str
+    desc: str = ""
+    params: list[str] = Field(default_factory=list)
+
+
+class PlantFaultsOut(Model):
+    active: list[dict[str, Any]] = Field(default_factory=list)
+    catalog: list[FaultCatalogItem] = Field(default_factory=list)
+
+
+class MachineDrivesOut(Model):
+    """Rozwiązane napędy maszyny: szablon z biblioteki plus nadpisania z machine.yaml."""
+
+    machine: str
+    axes: list[str] = Field(default_factory=list)
+    drives: dict[str, dict[str, Any]] = Field(default_factory=dict)
+
+
 class DriveTemplateOut(Model):
     id: str
     kind: str = ""
@@ -480,9 +501,19 @@ class PlantLiveRequest(Model):
 
 
 class PlantFaultRequest(Model):
-    drive: str = ""
-    fault: str = ""
+    """Wstrzyknięcie albo zdjęcie awarii w Plant.
+
+    Katalog (``plant.faults``) ma rodzaje o różnych parametrach: ``drive_fault`` chce
+    ``drive`` i ``code``, ``frame_loss`` — ``percent``, ``delay`` — ``ms``, ``limit``
+    i ``atc_sensor`` — ``input``/``closed``, ``axis_jam`` — ``axis``. Poprzedni schemat
+    miał tylko pole ``drive``, które usługa przekazywała jako ``target``, więc żaden
+    rodzaj z parametrami nie dawał się wstrzyknąć.
+    """
+
+    kind: str = Field(description="rodzaj awarii z katalogu plant.faults")
     enabled: bool = True
+    params: dict[str, Any] = Field(default_factory=dict,
+                                   description="parametry rodzaju, np. drive, code, percent, ms")
 
 
 class PlantTelemetryRequest(Model):

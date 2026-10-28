@@ -86,13 +86,21 @@ class PlantService:
         return DriveLibrary(root=str(self.paths.drives), templates=items)
 
     def machine_drives(self, request: MachineConfigName) -> dict:
+        """Rozwiązane parametry napędów maszyny — szablon z biblioteki plus nadpisania.
+
+        ``load_machine_drives`` zwraca **krotkę** ``(MachineConfig, dict[str, DriveInstance])``;
+        poprzedni kod wołał ``.items()`` na krotce, więc każda taka operacja kończyła się
+        ``AttributeError: 'tuple' object has no attribute 'items'``.
+        """
         path = self.paths.machine(request.name)
         try:
-            drives = load_machine_drives(path, self.paths.drives)
+            config, drives = load_machine_drives(path, self.paths.drives)
         except (MachineConfigError, DrivesError, TemplateError) as exc:
             raise InvalidRequest(f"napędy maszyny {request.name} są niepoprawne: {exc}") from exc
         return {"machine": request.name,
-                "drives": {name: getattr(inst, "params", {}) for name, inst in drives.items()}}
+                "drives": {name: dict(inst.params or {}) for name, inst in drives.items()},
+                # Axis to model pydantic z polem letter — str(a) dałoby GUI repr modelu.
+                "axes": [str(getattr(a, "letter", a)) for a in config.axes or []]}
 
     # ---- scenariusze -------------------------------------------------------
     def scenarios(self) -> ScenarioList:
@@ -209,18 +217,23 @@ class PlantService:
                   details={"applied": applied})
 
     def set_fault(self, request: PlantFaultRequest) -> Ok:
-        """Wstrzyknięcie albo zdjęcie awarii (``Faults.inject`` / ``Faults.clear``)."""
+        """Wstrzyknięcie albo zdjęcie awarii (``Faults.inject`` / ``Faults.clear``).
+
+        Parametry idą do ``Faults`` bez zmiany nazw — ``drive_fault`` czyta ``drive``,
+        nie ``target``, a ``FaultError`` jest podklasą ``ValueError``.
+        """
         server = self._require()
-        params = {"target": request.drive} if request.drive else {}
+        params = dict(request.params or {})
         try:
             if request.enabled:
-                server.faults.inject(request.fault, **params)
+                server.faults.inject(request.kind, **params)
             else:
-                server.faults.clear(request.fault, **params)
+                server.faults.clear(request.kind, **params)
         except (KeyError, ValueError) as exc:
-            raise InvalidRequest(f"awaria {request.fault} nie jest znana: {exc}",
-                                 details={"known": Faults.catalog()}) from exc
-        return Ok(message=f"awaria {request.fault}: "
+            raise InvalidRequest(
+                f"awaria {request.kind} nie jest znana albo ma złe parametry: {exc}",
+                details={"kind": request.kind, "catalog": Faults.catalog()}) from exc
+        return Ok(message=f"awaria {request.kind}: "
                           f"{'wstrzyknięta' if request.enabled else 'zdjęta'}")
 
     def faults(self) -> dict:
