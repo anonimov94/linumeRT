@@ -594,3 +594,11 @@ Historyczne wpisy wyżej dotyczą pełnej edycji; usunięte zasoby nie są czę�
 
 Model-Author: Codex. Własny renderer tekstowy telemetrii Plant i launcher PowerShell/WSL,
 GPL-2.0-or-later. Bez nowych bibliotek, zasobów graficznych i zmian fizyki symulatora.
+
+### Raster terminalowy 3D — 2026-10-28
+
+Model-Author: Codex. Własna projekcja perspektywiczna, bufor głębi i kolorów,
+pakowanie punktów Braille/bloków/ASCII oraz kompozycja rzutów XYZ/XY/XZ/YZ.
+GPL-2.0-or-later, bez bibliotek graficznych i kopiowania fontów/zasobów.
+Numeracja punktów znaków zgodna z tabelą standardu Unicode U+2800–U+28FF:
+https://www.unicode.org/charts/PDF/U2800.pdf (źródło specyfikacji, bez dołączania tabeli).

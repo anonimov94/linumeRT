@@ -49,13 +49,16 @@ niepoprawny program nie niszczy istniejącego wyniku.
 W PowerShell, z katalogu głównego lite:
 
 ```powershell
-.\tools\console.ps1
-.\tools\console.ps1 -Scenario estop_mid_program
+.\tools\console.cmd
+.\tools\console.cmd -Scenario estop_mid_program
+.\tools\console.cmd -Raster ascii -Once
 ```
 
 Pierwsze uruchomienie przygotowuje osobny `.venv-linux` w WSL
 (`linumeRT-Debian12`; inną dystrybucję wskaż przez `-Distro`). Potrzebne są Python,
-venv, make i kompilator C. Nie korzysta z fizycznego sterowania ani serwera sieciowego.
+venv, make i kompilator C. Launcher `.cmd` uruchamia własny skrypt PowerShell
+z jednorazową polityką wykonania dla tego procesu; ustawienia systemowe pozostają bez zmian.
+Nie korzysta z fizycznego sterowania ani serwera sieciowego.
 
 W aktywnym środowisku Linux:
 
@@ -66,12 +69,35 @@ python tools/console_demo.py --plain
 ```
 
 Podgląd pokazuje tabelę napędów (pozycja zadana/rzeczywista, błąd nadążania,
-prędkość, moment i zgubione kroki), ślad XY i alarmy. Najpierw oblicza scenariusz
+prędkość, moment i zgubione kroki), perspektywiczny widok XYZ i alarmy. Najpierw oblicza scenariusz
 na rzeczywistym rdzeniu symulatora Plant C, potem odtwarza jego telemetrię w terminalu.
 To odtwarzanie danych symulacji z atrapą mastera; nie jest monitoringiem LinuxCNC
 ani fizycznej maszyny. Przy przekierowaniu wyjścia drukuje trzy statyczne klatki.
-`--speed 2` przyspiesza odtwarzanie dwukrotnie. Ctrl+C kończy pokaz.
+`--speed 2` przyspiesza odtwarzanie dwukrotnie; launcher przyjmuje `-Speed 2`.
+Po zakończeniu ruchu można dalej oglądać i obracać scenę. `--once` / `-Once`
+kończy pokaz po jednym przebiegu. `Q` lub Ctrl+C kończy pokaz.
 PASS scenariusza E-STOP oznacza poprawne wykrycie oczekiwanej awarii i zatrzymania.
+
+### Rozdzielczość i widoki terminala
+
+Raster Braille koduje 2×4 punkty w jednej komórce, z maską punktów, kolorem i buforem
+głębi. Zwykłe znaki terminala tworzą obraz, bez okna graficznego i bibliotek renderujących.
+W konsoli o szerokości co najmniej 111 znaków i wysokości 31 wierszy pojawiają się
+obok głównej sceny trzy mniejsze matryce: rzuty XY, XZ i YZ. W mniejszej konsoli
+całą powierzchnię wykresu zajmuje 3D. Rozmiar dopasowuje się także podczas zmiany okna.
+Przykład: przy `--width 120 --height 38` główny panel ma raster 160×100 punktów.
+
+- `A/D`: obrót; `W/S`: nachylenie; `+/-`: zoom.
+- `O`: automatyczna orbita; `R`: reset kamery; spacja: pauza ruchu.
+- Cyjan: przebieg rzeczywisty; niebieski: pełny tor zadany; żółty: schemat narzędzia.
+- Szara siatka i prostopadłościan opisują obwiednię toru, nie materiał ani bryły kolizyjne.
+- `-Raster braille`, `-Raster block`, `-Raster ascii`: wybór matrycy znaków.
+
+Rzut 3D zachowuje wspólną skalę XYZ, ma perspektywę, odniesienie osi i bufor głębi.
+Przesunięcia są pokazywane względem pierwszej próbki, a dane liczbowe pozostają w układzie
+telemetrii. Kamera nie zmienia ani nie skaluje danych napędów.
+Znaki Braille: [tabela Unicode](https://www.unicode.org/charts/PDF/U2800.pdf).
+Narzędzie jest znacznikiem schematycznym; renderer nie wykonuje CAM 3D ani obliczeń kolizji.
 
 Plant bez panelu:
 

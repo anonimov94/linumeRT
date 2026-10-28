@@ -44,3 +44,15 @@ Po dopracowaniu mapowania czasu rozruchu na czas scenariusza: 3/3 testy konsoli 
 w tym brak przedwczesnego alarmu E-STOP. Ruff i ponowny wheel-check PASS.
 Launcher sprawdzono przy pierwszej instalacji .venv-linux i przy ponownym uruchomieniu.
 To odtwarzanie telemetrii symulatora z atrapą mastera, bez monitorowania żywego LinuxCNC.
+
+## Raster 3D w terminalu
+
+2026-10-28 · Model-Author: Codex. Pełna regresja: 1170 PASS, 61 subtestów PASS
+(399,91 s), testy wymagające LinuxCNC wyłączone. Po dopracowaniu dopasowania kamery
+i zmiany rozmiaru okna: 19/19 testów renderera oraz konsoli PASS. Ruff PASS.
+Testy obejmują osiem bitów Braille, głębię/kolor, rastry block/ASCII, zmianę Z,
+obrót kamery, granice zoomu oraz dokładny rozmiar złożonych paneli dla trzech terminali.
+Native PowerShell/WSL TTY: obrót, nachylenie, zoom, pauza, Q i przywrócenie terminala
+sprawdzone; launcher .cmd sprawdzony także z -Once i w trybie ASCII.
+Renderer korzysta z rzeczywistej telemetrii symulatora Plant. Żółte narzędzie i obwiednia
+są schematyczne; nie dodano geometrii skrawania, sterowania sprzętem ani zmian rdzenia.

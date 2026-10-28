@@ -3,7 +3,12 @@
 param(
     [ValidateSet('first_motion', 'estop_mid_program')]
     [string]$Scenario = 'first_motion',
-    [string]$Distro = 'linumeRT-Debian12'
+    [string]$Distro = 'linumeRT-Debian12',
+    [ValidateSet('auto', 'braille', 'block', 'ascii')]
+    [string]$Raster = 'auto',
+    [ValidateRange(0.05, 20)]
+    [double]$Speed = 1,
+    [switch]$Once
 )
 $ErrorActionPreference = 'Stop'
 $liteRoot = Split-Path -Parent $PSScriptRoot
@@ -22,5 +27,8 @@ if ($LASTEXITCODE -ne 0) {
     & wsl.exe -d $Distro --cd $linuxRoot -- .venv-linux/bin/python -m pip install -c requirements-dev.lock -e .
     if ($LASTEXITCODE -ne 0) { throw 'Nie udalo sie zainstalowac zaleznosci lite.' }
 }
-& wsl.exe -d $Distro --cd $linuxRoot -- .venv-linux/bin/python tools/console_demo.py --scenario $Scenario
+$demoArgs = @('tools/console_demo.py', '--scenario', $Scenario, '--raster', $Raster,
+    '--speed', $Speed.ToString([Globalization.CultureInfo]::InvariantCulture))
+if ($Once) { $demoArgs += '--once' }
+& wsl.exe -d $Distro --cd $linuxRoot -- .venv-linux/bin/python @demoArgs
 exit $LASTEXITCODE
