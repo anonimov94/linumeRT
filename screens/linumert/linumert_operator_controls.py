@@ -34,13 +34,13 @@ class OperatorControls(QtWidgets.QWidget):
         self.increment.setToolTip("Wpisz własny krok w mm; 0 oznacza ruch ciągły.")
         row.addWidget(self.increment)
         layout.addLayout(row)
-        jog = QtWidgets.QHBoxLayout()
-        for axis in shell.s.axes:
+        jog = QtWidgets.QGridLayout()
+        for column, axis in enumerate(shell.s.axes):
             for direction, sign in ((-1, "−"), (1, "+")):
                 btn = QtWidgets.QPushButton(axis + sign)
                 btn.pressed.connect(lambda a=axis, d=direction: self.jog(a, d))
                 btn.released.connect(lambda a=axis: self.jog(a, 0))
-                jog.addWidget(btn)
+                jog.addWidget(btn, 0 if direction < 0 else 1, column)
                 self.buttons[f"jog_{axis}{direction}"] = btn
         layout.addLayout(jog)
         row = QtWidgets.QHBoxLayout()
@@ -68,6 +68,8 @@ class OperatorControls(QtWidgets.QWidget):
         self.button(row, "previous", "Poprzednie", lambda: self.adjacent_tool(-1))
         row.addWidget(self.tool)
         self.button(row, "next", "Następne", lambda: self.adjacent_tool(1))
+        layout.addLayout(row)
+        row = QtWidgets.QHBoxLayout()
         self.button(row, "m6", "WYMIANA M6", self.change_tool)
         layout.addLayout(row)
         self.reason = QtWidgets.QLabel()

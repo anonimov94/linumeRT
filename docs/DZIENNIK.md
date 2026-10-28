@@ -1720,3 +1720,9 @@ Pełny RIP musi ponownie potwierdzić wynik; nie scalać na czerwonym CI.
 - Procedura obejmuje podstrony, fokus, edycję bez JOG, długie teksty i zmianę rozmiaru; odróżnia PASS, FAIL i NIEWYKONANY.
 - Odbiór GUI nie był wykonywany; 028 pozostaje partial. Bez zmian kodu i zasobów graficznych.
 - Weryfikacja: roadmap --check i diff --check PASS; make lint test zatrzymane przez brak modułu ruff w systemowym Pythonie.
+
+## 028 — widoczność JOG przy 1280×768 · 2026-10-28 · Codex
+- Model-Author: Codex. Test sprawdzał wyłącznie wysokość: pełna geometria ujawniła ucięcie Z+ po prawej.
+- JOG ma dwa rzędy kierunków, M6 osobny rząd; sygnały sterowania bez zmian. Test odrzuca także ukryty przycisk i ucięcie o 1 px.
+- Zrzut docs/raporty/G2/JOG_1280_2026-10-28.png: rzeczywiste Qt offscreen, atrapa CNC, 1280×768; wszystkie przyciski XYZ widoczne.
+- Pełny odbiór GUI/LinuxCNC i pozostałe przewijanie strony nadal otwarte. NIEZWERYFIKOWANE NA SPRZĘCIE.
