@@ -47,9 +47,32 @@ def load_generators(registry: GeneratorRegistry | None = None) -> GeneratorRegis
 
 
 def _parameters(generator: Any) -> dict[str, Any]:
-    """Schemat parametrów generatora — podstawa formularza w GUI."""
+    """Schemat parametrów generatora — podstawa formularza w GUI.
+
+    Generatory opisują pola krotką dataklas ``Field`` (``linumert.generators.base``):
+    nazwa, rodzaj, etykieta po polsku, jednostka, wartość domyślna, zakres i lista
+    wyborów. Z tego GUI buduje formularz bez wiedzy o Pythonie.
+    """
     params: dict[str, Any] = {}
     fields = getattr(generator, "fields", None) or getattr(generator, "PARAMETERS", None)
+    if isinstance(fields, (tuple, list)) and fields:
+        for field in fields:
+            name = getattr(field, "name", None)
+            if not name:
+                continue
+            default = getattr(field, "default", None)
+            params[name] = {
+                "label": getattr(field, "label", name),
+                "type": getattr(field, "kind", "float"),
+                "unit": getattr(field, "unit", ""),
+                "default": default,
+                "required": default is None,
+                "min": getattr(field, "minimum", None),
+                "max": getattr(field, "maximum", None),
+                "choices": list(getattr(field, "choices", ()) or ()),
+            }
+        if params:
+            return params
     if isinstance(fields, dict):
         for key, spec in fields.items():
             if isinstance(spec, dict):
@@ -118,16 +141,28 @@ class CamService:
                                details={"known": known})
             raise NotFound(f"brak wersji {request.version} generatora {request.operation}",
                            details={"operation": request.operation})
+        # Rejestr zwraca INSTANCJE generatorów (nie klasy): parametry walidujemy
+        # i generujemy przez API generatora, a nie przez konstruktor.
+        validate = getattr(generator, "validate", None)
+        if callable(validate):
+            issues = list(validate(request.parameters))
+            if issues:
+                # Błędy polowe z kodami z katalogu alarmów — GUI podświetla pola.
+                raise InvalidRequest(
+                    f"parametry operacji {request.operation} są niepoprawne",
+                    details={"operation": request.operation,
+                             "errors": [{"code": i.code, "field": i.field,
+                                         "message": i.message()} for i in issues],
+                             "parameters": _parameters(generator)})
+            values, _issues = generator.normalize(request.parameters)
+        else:
+            values = dict(request.parameters)
         try:
-            instance = generator(**request.parameters)
-            text = instance.render() if hasattr(instance, "render") else instance.gcode()
-        except TypeError as exc:
-            raise InvalidRequest(f"parametry operacji {request.operation} są niepoprawne: {exc}",
-                                 details={"operation": request.operation,
-                                          "parameters": _parameters(generator)}) from exc
+            lines = generator.generate(values)
         except Exception as exc:
             raise InvalidRequest(f"generator {request.operation} zgłosił błąd: {exc}",
                                  details={"operation": request.operation}) from exc
+        text = "\n".join(lines) if isinstance(lines, (list, tuple)) else str(lines)
         return CamGenerateOut(
             operation=request.operation,
             version=int(getattr(generator, "version", 1)),

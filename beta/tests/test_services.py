@@ -111,20 +111,71 @@ def test_cam_katalog_operacji_ma_schematy_parametrow(call) -> None:
         assert isinstance(operation["parameters"], dict)
 
 
-def test_cam_generate_zwraca_gcode(call) -> None:
+def _cam_params(operation: dict) -> dict:
+    """Poprawne parametry generatora — domyślne plus sensowne wartości pól wymaganych."""
+    params = {}
+    for name, spec in operation["parameters"].items():
+        default = spec.get("default")
+        if default not in (None, ""):
+            params[name] = default
+        elif name == "paths":            # JSON: lista ścieżek, każda >= 2 punkty XY
+            params[name] = json.dumps([[[0, 0], [10, 0], [10, 10], [0, 10]]])
+        elif name == "segments":         # opis pola: "L x,y x,y; A x,y x,y cx,cy CW|CCW"
+            params[name] = "L 0,0 20,0; L 20,0 20,20; L 20,20 0,20; L 0,20 0,0"
+        elif name == "text":
+            params[name] = "lrt"
+        elif name in ("depth", "diameter"):
+            params[name] = 6.0
+        elif name == "tool_d":
+            params[name] = 4.0
+        elif spec.get("type") in ("float", "int"):
+            params[name] = 5.0
+        elif spec.get("type") == "choice":
+            params[name] = spec["choices"][0]
+        elif spec.get("type") == "bool":
+            params[name] = False
+        else:
+            params[name] = ""
+    return params
+
+
+def test_cam_katalog_ma_pola_formularza_nie_sygnature(call) -> None:
+    """Schemat parametrów musi opisywać pola generatora, nie ``args``/``kwargs``.
+
+    Regresja: rejestr zwraca instancje, więc czytanie sygnatury ``__init__`` dawało
+    GUI bezużyteczny formularz z polami ``args`` i ``kwargs``.
+    """
+    for operation in call("cam.operations")["operations"]:
+        assert set(operation["parameters"]) != {"args", "kwargs"}, operation["name"]
+        for name, spec in operation["parameters"].items():
+            assert spec["label"], f"{operation['name']}.{name} bez etykiety"
+            assert spec["type"] in ("float", "int", "bool", "choice", "text")
+            assert "required" in spec and "default" in spec
+
+
+def test_cam_generate_dziala_dla_kazdego_generatora(call) -> None:
+    """Wszystkie generatory z katalogu muszą produkować G-code — bez wyjątków i skipów."""
     catalog = call("cam.operations")
-    target = next((o for o in catalog["operations"] if o["parameters"]), None)
-    assert target is not None, "brak generatora z parametrami"
-    defaults = {name: spec.get("default")
-                for name, spec in target["parameters"].items()
-                if spec.get("default") is not None}
-    try:
-        result = call("cam.generate", {"operation": target["name"], "parameters": defaults})
-    except ApiError as exc:
-        assert exc.code == "invalid_request", exc
-        pytest.skip(f"generator {target['name']} wymaga innych parametrów: {exc.message}")
-    assert result["gcode"]
-    assert result["operation"] == target["name"]
+    assert len(catalog["operations"]) >= 16
+    for operation in catalog["operations"]:
+        result = call("cam.generate",
+                      {"operation": operation["name"], "parameters": _cam_params(operation)})
+        assert result["operation"] == operation["name"]
+        assert result["gcode"].strip(), f"{operation['name']} bez G-code"
+        assert result["version"] >= 1
+
+
+def test_cam_zle_parametry_daja_bledy_polowe_z_kodami(call) -> None:
+    """GUI podświetla pola: błąd niesie kod z katalogu alarmów i nazwę pola."""
+    with pytest.raises(ApiError) as excinfo:
+        # depth jest wymagany — bez niego wróciłby błąd brakującego pola (P-5014),
+        # a nie konflikt geometrii (P-5007), który tu sprawdzamy.
+        call("cam.generate", {"operation": "pocket_circle",
+                              "parameters": {"diameter": 6.0, "depth": 3.0, "tool_d": 50.0}})
+    assert excinfo.value.code == "invalid_request"
+    errors = excinfo.value.details["errors"]
+    assert errors and all(e["code"] and e["message"] for e in errors)
+    assert any(e["field"] == "tool_d" for e in errors)
 
 
 def test_cam_nieznana_operacja_daje_not_found_z_lista(call) -> None:

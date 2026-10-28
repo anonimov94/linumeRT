@@ -51,6 +51,19 @@ linumertctl machine.jog axis=X speed=10
 linumertctl operations --json
 ```
 
+Zainstalowane polecenia (`pip install -e .`):
+
+| Polecenie | Przeznaczenie |
+| --- | --- |
+| `linumertd` | serwer API (REST + WebSocket) — do niego podłącza się GUI |
+| `linumertctl` | CLI generowane z kontraktu operacji |
+| `linumert-config` | generator konfiguracji LinuxCNC z `machine.yaml` (INI + HAL) |
+| `linumert-plant` | wirtualna obrabiarka i serwer LRT-NET (bez panelu web) |
+
+Kompilacja `.lnx` → G-code nie ma osobnego skryptu: to operacja `program.compile`
+w kontrakcie, więc działa przez REST, WebSocket, SDK i `linumertctl program.compile`
+— jedna ścieżka walidacji zamiast dwóch.
+
 Python:
 
 ```python

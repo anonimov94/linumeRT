@@ -54,8 +54,10 @@ linumertd = "linumert_headless.__main__:main"
 linumertctl = "linumert_headless.transport.cli:main"
 # Wirtualna obrabiarka (LRT-NET) bez panelu web.
 linumert-plant = "linumert_plant.__main__:main"
-# Kompilacja programów .lnx → G-code (bez GUI).
-linumert-compile = "linumert.programs.compiler:main"
+# Generator konfiguracji LinuxCNC z machine.yaml (INI + HAL).
+# Kompilacja .lnx → G-code nie ma osobnego skryptu: to operacja `program.compile`
+# w kontrakcie, więc działa przez REST, WebSocket, SDK i `linumertctl program.compile`.
+linumert-config = "linumert.machine.config_build:main"
 
 [tool.setuptools]
 packages = [
