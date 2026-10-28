@@ -24,6 +24,8 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass, field
 
+from linumert.machine.toolchanger_geometry import pocket_positions
+
 MANUAL_TOLERANCE_MM = 2.0
 SETTER_RADIUS_MM = 10.0
 FOOTPRINT_MARGIN_MM = 40.0
@@ -247,25 +249,6 @@ class ToolChangerModel:
             if state:
                 value |= bit
         return mask, value
-
-
-def pocket_positions(tc) -> list[tuple[float, float, float]]:
-    """Pozycje gniazd w G53 z parametrów magazynu (z = approach_z, gdy podane)."""
-    if tc.type == "manual" or tc.slots == 0:
-        return []
-    if tc.slot_positions is not None:
-        pts = [tuple(float(v) for v in p) for p in tc.slot_positions]
-    else:
-        bx, by, bz = tc.base_position
-        if tc.type == "rack_linear":
-            a = math.radians(tc.base_orientation_deg)
-            pts = [(bx + i * tc.pitch_mm * math.cos(a), by + i * tc.pitch_mm * math.sin(a), bz)
-                   for i in range(tc.slots)]
-        else:  # karuzela i parasolowy: każde gniazdo podjeżdża do jednej pozycji wymiany
-            pts = [(bx, by, bz)] * tc.slots
-    if tc.approach_z is not None:
-        pts = [(x, y, float(tc.approach_z)) for x, y, _ in pts]
-    return [(round(x, 6), round(y, 6), round(z, 6)) for x, y, z in pts]
 
 
 @dataclass

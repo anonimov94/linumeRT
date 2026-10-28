@@ -1714,3 +1714,23 @@ Pełny RIP musi ponownie potwierdzić wynik; nie scalać na czerwonym CI.
 - Przeglądarka z atrapą: przyrosty 0,001 i 0,1 mm, 600 ms bez powtórzenia kroku, Enter w trybie ciągłym i STOP, blokady MDI oraz brak JOG przy wpisywaniu w polu PASS. Zrzut 1280×768 i ograniczenia w docs/raporty/G2/WEBHMI_KEYBOARD_2026-10-27.md.
 - Node 18 PASS; Python/Windows 97 PASS. Debian 12 (kod 099691a): 1703 PASS, 138 SKIP, 169 deselected, 1 FAIL — pominięty wpis własnego zrzutu w PROVENANCE. W 2e8f298 zarejestrowano oba zrzuty; powtórka kontroli IP 10 PASS, make lint test-c i REQ 22/22 PASS. Pełnej serii po zmianie dokumentacji nie powtarzano; CI końcowego HEAD w PR #196. Autokontrola, bez niezależnego przeglądu.
 - Pełne 028/029, odbiór LinuxCNC/Plant, MPG, watchdog HAL i sprzęt pozostają otwarte. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## 066 — ATC: wspólna geometria i preflight · 2026-10-27 · Codex
+
+- Model-Author: Codex. Właściciel odłożył HMI; wybrano konkretną niespójność backendu 066. Osobny checkout z main eb2deea; bez zmian ekranów i plików operatora.
+- Plant honorował slot_positions, a makro i plan wymiany ignorowały je na rzecz baza/rozstaw. Wyznaczanie pozycji przeniesiono do wspólnego rdzenia; plan i makro używają tych samych współrzędnych, także bez base_position/pitch_mm.
+- Odmowa eksportu geometrii poza limitami XYZ (również po zaokrągleniu), błędnej liczby gniazd i kolejności wysokości. Plan/makro sprawdzają stare i nowe narzędzie; makro przed ruchem wymaga G21/G90/G94 i programowego M5.
+- Windows: 96 PASS, 1 SKIP; samodzielny rs274/Debian 12: 8 PASS (geometria gniazd 1/3/6 i odmowy G20/G91/G93/G95/M3). Plant: nieregularne gniazda i regał obrócony PASS. Ruff zakresu PASS.
+- Protokół i ograniczenia: docs/raporty/ATC_GEOMETRIA_2026-10-27.md. Pełna regresja/CI w toku; 066 partial, mapowanie HAL, czujniki, recovery i pełna ochrona modalności pozostają otwarte. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## 028 — scenariusz odbioru układu i klawiatury · 2026-10-28 · Codex
+- Model-Author: Codex. Jedno zadanie: uzupełnienie SPEC_EKRAN_GLOWNY.md o siedem kroków odbioru 1280×768, metadane i formularz dowodów.
+- Procedura obejmuje podstrony, fokus, edycję bez JOG, długie teksty i zmianę rozmiaru; odróżnia PASS, FAIL i NIEWYKONANY.
+- Odbiór GUI nie był wykonywany; 028 pozostaje partial. Bez zmian kodu i zasobów graficznych.
+- Weryfikacja: roadmap --check i diff --check PASS; make lint test zatrzymane przez brak modułu ruff w systemowym Pythonie.
+
+## 028 — widoczność JOG przy 1280×768 · 2026-10-28 · Codex
+- Model-Author: Codex. Test sprawdzał wyłącznie wysokość: pełna geometria ujawniła ucięcie Z+ po prawej.
+- JOG ma dwa rzędy kierunków, M6 osobny rząd; sygnały sterowania bez zmian. Test odrzuca także ukryty przycisk i ucięcie o 1 px.
+- Zrzut docs/raporty/G2/JOG_1280_2026-10-28.png: rzeczywiste Qt offscreen, atrapa CNC, 1280×768; wszystkie przyciski XYZ widoczne.
+- Pełny odbiór GUI/LinuxCNC i pozostałe przewijanie strony nadal otwarte. NIEZWERYFIKOWANE NA SPRZĘCIE.

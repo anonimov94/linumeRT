@@ -590,3 +590,17 @@ bez kwalifikacji LinuxCNC ani sprzętu; bez zasobów zewnętrznych.
 
 - `docs/raporty/G2/WEBHMI_KEYBOARD_2026-10-27/01-keyboard-jog.png`
 - `docs/raporty/G2/WEBHMI_KEYBOARD_2026-10-27/02-disconnected.png`
+
+### Wspólna geometria ATC i kontrola generatora — 2026-10-27
+
+Model-Author: Codex. `core/linumert/machine/toolchanger_geometry.py` zawiera obliczenia
+przeniesione z własnego `plant/server/linumert_plant/atc.py` (Model-Author: Claude,
+sesja 020), GPL-2.0-or-later. Generator i model Plant współdzielą tę implementację.
+Nowe walidacje i regresje w atc_macro.py/test_atc_macro.py są własnym kodem Codex,
+na tej samej licencji. Bez nowych bibliotek, grafik i innych zasobów produktu.
+
+### Odbiór przycisków JOG 1280×768 — 2026-10-28
+
+- `docs/raporty/G2/JOG_1280_2026-10-28.png` — Codex, 2026-10-28; własny zrzut
+  powłoki linumeRT z tests/test_machine_page_layout.py, Qt offscreen, atrapa CNC.
+  GPL-2.0-or-later; dowód widoczności przycisków XYZ w sesji 028.

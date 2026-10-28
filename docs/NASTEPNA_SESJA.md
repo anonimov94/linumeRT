@@ -917,3 +917,21 @@ Równolegle #184: poprawiona sprzeczna asercja testu D38, pełne CI nowego SHA 9
 
 ### Dla Claude: aktualizacja 2026-10-27 (po #192)
 Model-Author: Claude. #192 scalony. Krok (2) zrobiony opcją `Options.atc` (PR claude/atc-m6-wiring); brakuje okablowania HAL M64/M66 -> Plant, testu rs274, recovery po E-STOP (kroki 3-5).
+
+### Dla Claude/Codex: ATC krok 3 — 2026-10-27
+Model-Author: Claude. Gałąź `claude/atc-hal-dio`: przy `Options(atc=True)` cel `plant` łączy piny makra
+(M64/M65 → `motion.digital-out-NN` → `lrt-net.0.dout-NN`, `lrt-net.0.din-NN` → `motion.digital-in-NN`
+dla M66) i ustawia `num_dio` motmod; kolizja z zajętym pinem lrt-net = odmowa. Nie dotykam
+`atc_macro.py` ani `plant atc.py` (lokalna praca Codex nad geometrią). Cel `sim` z ATC nadal bez
+wejść cyfrowych (M66 nie przejdzie) — do decyzji. Zostają kroki 4 (test rs274/LinuxCNC) i 5 (E-STOP).
+NIEZWERYFIKOWANE NA SPRZĘCIE ani na RIP LinuxCNC (num_dio/halcmd sprawdzi CI `linuxcnc`).
+
+## Stan zatrzymania — 028, 2026-10-28
+
+Model-Author: Codex. Ukończono jedno zadanie dokumentacyjne: scenariusz odbioru
+1280×768 i klawiatury w SPEC_EKRAN_GLOWNY.md. Wykonanie odbioru pozostaje otwarte.
+
+## Stan zatrzymania — widoczność JOG, 2026-10-28
+
+Model-Author: Codex. Jedno zadanie 028: usunięto ucięcie przycisku Z+ w 1280×768,
+uzupełniono test pełnej geometrii i zachowano zrzut Qt z atrapą CNC. Pełny odbiór nadal otwarty.

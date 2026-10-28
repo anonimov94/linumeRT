@@ -68,14 +68,28 @@ def check():
     def visible(key):
         btn = shell.buttons[key]
         view = shell.content.viewport()
-        top = btn.mapTo(view, btn.rect().topLeft()).y()
-        return top >= 0 and top + btn.height() <= view.height()
+        rect = btn.rect().translated(btn.mapTo(view, btn.rect().topLeft()))
+        return btn.isVisible() and view.rect().contains(rect)
 
     shell.s.mode = "manual"
     settle()
     hidden = [k for k in ("jog_X-1", "jog_X1", "jog_Y-1", "jog_Y1", "jog_Z-1", "jog_Z1")
               if not visible(k)]
     assert not hidden, f"przyciski poza widocznym obszarem w JOG: {hidden}"
+    if len(sys.argv) > 1:
+        assert window.grab().save(sys.argv[1])
+    # Dowód, że kontrola wykrywa również ucięcie poziome i ukryty przycisk.
+    btn = shell.buttons["jog_Z1"]
+    original = btn.pos()
+    view = shell.content.viewport()
+    offset = btn.mapTo(view, btn.rect().topLeft())
+    btn.move(original.x() + view.width() - offset.x() - btn.width() + 1, original.y())
+    assert not visible("jog_Z1"), "kontrola przepuszcza prawą krawędź poza viewportem"
+    btn.move(original)
+    btn.hide()
+    assert not visible("jog_Z1"), "kontrola przepuszcza ukryty przycisk"
+    btn.show()
+    assert visible("jog_Z1")
     shell.s.mode = "mdi"
     settle()
     assert visible("jog_Z1"), "przycisk Z+ poza widocznym obszarem w MDI"
