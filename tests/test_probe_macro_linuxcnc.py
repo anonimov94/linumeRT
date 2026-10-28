@@ -16,9 +16,8 @@ from pathlib import Path
 
 import pytest
 import yaml
-from plant_session import run_generated_plant
-
 from linumert.programs.probe_macro import PROBE_MACRO, probe_call
+from plant_session import run_generated_plant
 
 ROOT = Path(__file__).resolve().parents[1]
 MILL = ROOT / "config/machines/mill_servo_table.yaml"
