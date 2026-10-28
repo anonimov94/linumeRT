@@ -47,6 +47,7 @@ from .schema import (
     CheckRequest,
     Cia402Out,
     Cia402Request,
+    CompileOut,
     ConfigGenerateOut,
     ConfigGenerateRequest,
     ConfigValidateOut,
@@ -67,6 +68,7 @@ from .schema import (
     JournalCsvOut,
     LimitReportOut,
     LnxCompileRequest,
+    LnxCompileTextRequest,
     LoginOut,
     LoginRequest,
     MachineConfigList,
@@ -431,6 +433,13 @@ def register_operations(c: Contract) -> Contract:
     c.command("program.compile", domain="program", summary="Kompiluj .lnx → G-code",
               request=LnxCompileRequest, role=ROLE_TECHNOLOG,
               handler=lambda r, ctx: ctx.services["program"].compile_lnx(r))
+    # To samo, ale z tekstu i bez zapisu — edytor GUI podgląda wynik przed zapisem.
+    c.query("program.compile_text", domain="program",
+            summary="Kompiluj .lnx z tekstu (bez zapisu na dysk)",
+            request=LnxCompileTextRequest, result=CompileOut,
+            handler=lambda r, ctx: CompileOut(
+                gcode=ctx.services["program"].compile_text(r.text),
+                message="skompilowano w pamięci"))
     c.query("program.check", domain="program", summary="Sprawdź granice osi programu",
             request=CheckRequest, result=LimitReportOut,
             handler=lambda r, ctx: ctx.services["program"].check(r))

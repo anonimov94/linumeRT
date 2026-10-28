@@ -51,6 +51,61 @@ def test_program_estimate_liczy_czas_i_droge(call) -> None:
     assert "min" in result["message"]
 
 
+LNX_PROGRAM = {
+    "name": "pokrywa_gui",
+    "comment": "program zbudowany przez GUI",
+    "stock": {"shape": "BOX", "x": 120, "y": 80, "z": 30, "origin": "TOP_FRONT_LEFT",
+              "top": 1.0, "material": "aluminium"},
+    "steps": [
+        {"generator": "header", "version": 1, "params": {}},
+        {"generator": "tool_change", "version": 1, "params": {"tool": 1}},
+        {"generator": "pocket_rect", "version": 1, "comment": "kieszen",
+         "params": {"cx": 60, "cy": 40, "width": 40, "height": 30, "depth": 4, "tool_d": 6}},
+        {"generator": "program_end", "version": 1, "params": {}},
+    ],
+}
+
+
+def test_program_compile_text_bez_zapisu_na_dysk(call) -> None:
+    """Edytor GUI kompiluje z tekstu, żeby pokazać wynik przed zapisem."""
+    from linumert.programs.lnx import dump_lnx, parse_lnx
+
+    text = dump_lnx(parse_lnx(LNX_PROGRAM))
+    result = call("program.compile_text", {"text": text})
+    assert result["gcode"].strip(), "kompilacja bez G-code"
+    assert "pokrywa_gui" in result["gcode"]
+    assert result["path"] == "", "kompilacja z tekstu nie zapisuje pliku"
+
+    with pytest.raises(ApiError) as excinfo:
+        call("program.compile_text", {"text": "to nie jest .lnx"})
+    assert excinfo.value.code == "invalid_request"
+
+
+def test_programservice_rejestr_nie_zalezy_od_kolejnosci_uslug(tmp_path) -> None:
+    """Kompilacja .lnx nie może zależeć od tego, że ktoś wcześniej utworzył CamService.
+
+    Regresja: ProgramService wołał ``compile_file`` bez rejestru, więc trafiał w pusty
+    ``DEFAULT_REGISTRY`` i każdy krok dostawał "brak generatora X" — dopóki CamService
+    nie zapełnił rejestru skutkiem ubocznym swojego konstruktora.
+    """
+    from pathlib import Path as _Path
+
+    from linumert.generators.registry import GeneratorRegistry
+    from linumert_headless.services.paths import ProjectPaths
+    from linumert_headless.services.program import ProgramService
+
+    # Czysty rejestr, jak w świeżym procesie bez CamService.
+    pristine = GeneratorRegistry()
+    service = ProgramService(ProjectPaths(_Path.cwd()), registry=pristine)
+    assert len(service.registry.names()) >= 16, "rejestr generatorów musi być zapełniony"
+    assert len(pristine.names()) >= 16
+
+    from linumert.programs.lnx import dump_lnx, parse_lnx
+
+    gcode = service.compile_text(dump_lnx(parse_lnx(LNX_PROGRAM)))
+    assert "G0" in gcode or "G1" in gcode, "kompilacja bez ruchów"
+
+
 def test_program_check_zglasza_granice(call) -> None:
     """Granice muszą być wykryte naprawdę — bez LinuxCNC.
 

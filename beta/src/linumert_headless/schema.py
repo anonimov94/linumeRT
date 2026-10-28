@@ -279,6 +279,12 @@ class LnxCompileRequest(Model):
     save: bool = Field(False, description="zapisz wynik .ngc obok źródła")
 
 
+class LnxCompileTextRequest(Model):
+    """Kompilacja .lnx z tekstu — edytor GUI podgląda wynik przed zapisem."""
+
+    text: str = Field(description="zawartość programu .lnx")
+
+
 class CompileOut(Model):
     ok: bool = True
     name: str = ""

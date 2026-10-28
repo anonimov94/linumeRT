@@ -3947,6 +3947,65 @@
       }
     },
     {
+      "name": "program.compile_text",
+      "domain": "program",
+      "kind": "query",
+      "summary": "Kompiluj .lnx z tekstu (bez zapisu na dysk)",
+      "status": "implemented",
+      "safety": "none",
+      "role": "operator",
+      "idempotent": true,
+      "plan": "",
+      "request": {
+        "additionalProperties": false,
+        "description": "Kompilacja .lnx z tekstu — edytor GUI podgląda wynik przed zapisem.",
+        "properties": {
+          "text": {
+            "description": "zawartość programu .lnx",
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "text"
+        ],
+        "title": "LnxCompileTextRequest",
+        "type": "object"
+      },
+      "result": {
+        "additionalProperties": false,
+        "properties": {
+          "ok": {
+            "default": true,
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "name": {
+            "default": "",
+            "title": "Name",
+            "type": "string"
+          },
+          "gcode": {
+            "default": "",
+            "title": "Gcode",
+            "type": "string"
+          },
+          "path": {
+            "default": "",
+            "title": "Path",
+            "type": "string"
+          },
+          "message": {
+            "default": "",
+            "title": "Message",
+            "type": "string"
+          }
+        },
+        "title": "CompileOut",
+        "type": "object"
+      }
+    },
+    {
       "name": "program.delete",
       "domain": "program",
       "kind": "command",

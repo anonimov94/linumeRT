@@ -23,6 +23,7 @@ import math
 import tempfile
 from pathlib import Path
 
+from linumert.generators.registry import GeneratorRegistry
 from linumert.programs import compiler, estimate, limits, lnx, step_editor
 from linumert.programs.files import read_editable, save_new_program
 from linumert_sim.path import KIND_RAPID, InterpreterUnavailable, load_path
@@ -129,9 +130,17 @@ class ProgramService:
 
     domain = "program"
 
-    def __init__(self, paths: ProjectPaths, default_ini: Path | None = None):
+    def __init__(self, paths: ProjectPaths, default_ini: Path | None = None,
+                 registry: GeneratorRegistry | None = None):
         self.paths = paths
         self.default_ini = default_ini or paths.default_ini
+        # Rejestr generatorów jest zapełniany przez load_generators(), który woła
+        # CamService. Poleganie na tym skutku ubocznym sprawiało, że kompilacja .lnx
+        # zależała od kolejności tworzenia usług: bez CamService DEFAULT_REGISTRY jest
+        # pusty i każdy krok dostaje "brak generatora X". Ładujemy go jawnie.
+        from .cam import load_generators
+
+        self.registry = load_generators(registry)
 
     # ---- katalog -----------------------------------------------------------
     def list(self) -> ProgramList:
@@ -179,8 +188,10 @@ class ProgramService:
                                  details={"name": path.name})
         try:
             out = compiler.compile_file(path, None if not request.save else
-                                        path.with_suffix(".ngc"))
-        except compiler.CompileError as exc:
+                                        path.with_suffix(".ngc"), registry=self.registry)
+        except (compiler.CompileError, lnx.LnxError) as exc:
+            # LnxError (uszkodzony/zły schemat .lnx) nie jest podklasą CompileError,
+            # a to błąd wejścia użytkownika — bez niego GUI dostałoby błąd wewnętrzny.
             raise InvalidRequest(f"kompilacja {path.name} nie powiodła się: {exc}",
                                  details={"program": path.name}) from exc
         text = Path(out).read_text(encoding="utf-8") if Path(out).exists() else ""
@@ -194,8 +205,8 @@ class ProgramService:
             source.write_text(text, encoding="utf-8")
             target = Path(tmp) / "program.ngc"
             try:
-                compiler.compile_file(source, target)
-            except compiler.CompileError as exc:
+                compiler.compile_file(source, target, registry=self.registry)
+            except (compiler.CompileError, lnx.LnxError) as exc:
                 raise InvalidRequest(f"kompilacja nie powiodła się: {exc}") from exc
             return target.read_text(encoding="utf-8")
 
