@@ -159,13 +159,6 @@ def test_offset_pracy_idzie_przez_backend(ready_machine) -> None:
     assert state["work_offset_name"] == "G54"
 
 
-def test_zmiana_narzedzia_jest_jawnie_planowana(call) -> None:
-    with pytest.raises(ApiError) as excinfo:
-        call("machine.tool_change")
-    assert excinfo.value.code == "not_implemented"
-    assert "ATC" in excinfo.value.details["plan"]
-
-
 def test_stan_publikowany_jest_w_magazynie(app) -> None:
     app.publish_state()
     topics = app.hub.snapshot()["topics"]
@@ -188,3 +181,14 @@ def test_pętla_stanu_odswieza_migawke(app, call, clock) -> None:
         time.sleep(0.02)
     app.stop()
     assert app.hub.get("machine")["all_homed"] is True
+
+
+def test_backend_linuxcnc_ma_zegar_czytnika() -> None:
+    """`now()` wołało nieistniejące `self._clock` — każdy `machine.state` padał."""
+    from linumert.cnc.linuxcnc_reader import LinuxCNCReader
+    from linumert_headless.backends.linuxcnc import LinuxCNCBackend
+
+    backend = LinuxCNCBackend(module=object(), reader=LinuxCNCReader(module=object(),
+                                                                     clock=lambda: 42.0))
+    assert backend.now() == 42.0
+    assert "subroutines" in backend.capabilities

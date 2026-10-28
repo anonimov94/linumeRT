@@ -90,8 +90,12 @@ def test_eksport_kontraktu_jest_jsonem_dla_gui(app) -> None:
 
 
 def test_operacje_planned_zglaszaja_not_implemented_z_planem(app) -> None:
+    # Wszystkie operacje są wdrożone; mechanizm "planned" zostaje dla przyszłych funkcji,
+    # więc sprawdzamy go na operacji dopisanej w teście.
+    app.contract.command("system.przyszla_funkcja", domain="system", summary="test",
+                         status="planned", plan="opis wdrożenia")
     planned = [o for o in app.contract.operations() if o.status == "planned"]
-    assert planned, "kontrakt powinien pokazywać zakres funkcji planowanych"
+    assert [o.name for o in planned] == ["system.przyszla_funkcja"]
     for operation in planned:
         assert operation.plan, f"{operation.name}: brak opisu planu wdrożenia"
         with pytest.raises(Exception) as excinfo:

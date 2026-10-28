@@ -2317,16 +2317,31 @@
       "domain": "machine",
       "kind": "command",
       "summary": "Zmiana narzędzia (M6/ATC)",
-      "status": "planned",
+      "status": "implemented",
       "safety": "motion",
       "role": "operator",
       "idempotent": false,
-      "plan": "makro ATC (linumert.machine.atc_macro) + sekwencja HAL + potwierdzenia GUI",
+      "plan": "",
       "request": {
         "additionalProperties": false,
-        "description": "Operacje bez parametrów i bez wyniku merytorycznego.",
-        "properties": {},
-        "title": "Empty",
+        "properties": {
+          "tool": {
+            "description": "numer narzędzia; 0 = pusty uchwyt",
+            "minimum": 0,
+            "title": "Tool",
+            "type": "integer"
+          },
+          "confirm": {
+            "default": false,
+            "description": "operator potwierdził zmianę narzędzia",
+            "title": "Confirm",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "tool"
+        ],
+        "title": "ToolChangeRequest",
         "type": "object"
       },
       "result": {
@@ -2523,40 +2538,135 @@
       "name": "offset.probe_run",
       "domain": "offset",
       "kind": "command",
-      "summary": "Sondowanie G38.x (ruch)",
-      "status": "planned",
+      "summary": "Sondowanie G38.2 jednej osi i zapis offsetu (ruch)",
+      "status": "implemented",
       "safety": "motion",
-      "role": "operator",
+      "role": "technolog",
       "idempotent": false,
-      "plan": "G38.2 + ProbeCalibration.check_feed + zapis offsetu; wymaga backendu i HAL",
+      "plan": "",
       "request": {
         "additionalProperties": false,
-        "description": "Operacje bez parametrów i bez wyniku merytorycznego.",
-        "properties": {},
-        "title": "Empty",
+        "description": "Sondowanie jednej osi: szukaj styku na ``distance`` i nadaj punktowi ``value``.",
+        "properties": {
+          "axis": {
+            "title": "Axis",
+            "type": "string"
+          },
+          "direction": {
+            "enum": [
+              -1,
+              1
+            ],
+            "title": "Direction",
+            "type": "integer"
+          },
+          "distance": {
+            "default": 10.0,
+            "description": "maksymalna droga szukania styku [mm]",
+            "exclusiveMinimum": 0,
+            "maximum": 200.0,
+            "title": "Distance",
+            "type": "number"
+          },
+          "feed": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0,
+                "maximum": 1000.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "posuw [mm/min]; None = posuw kalibracji sondy",
+            "title": "Feed"
+          },
+          "offset": {
+            "default": "G54",
+            "pattern": "^G5[4-9](\\.[1-3])?$",
+            "title": "Offset",
+            "type": "string"
+          },
+          "value": {
+            "default": 0.0,
+            "description": "współrzędna powierzchni w układzie offset [mm]",
+            "title": "Value",
+            "type": "number"
+          },
+          "retract": {
+            "default": 2.0,
+            "description": "odjazd po styku [mm]",
+            "exclusiveMinimum": 0,
+            "maximum": 50.0,
+            "title": "Retract",
+            "type": "number"
+          },
+          "confirm": {
+            "default": false,
+            "description": "operator potwierdził: sonda podłączona, droga wolna",
+            "title": "Confirm",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "axis",
+          "direction"
+        ],
+        "title": "ProbeRunIn",
         "type": "object"
       },
       "result": {
         "additionalProperties": false,
-        "description": "Standardowy wynik polecenia: potwierdzenie i opcjonalny komunikat dla operatora.",
         "properties": {
           "ok": {
             "default": true,
             "title": "Ok",
             "type": "boolean"
           },
+          "axis": {
+            "default": "",
+            "title": "Axis",
+            "type": "string"
+          },
+          "direction": {
+            "default": 0,
+            "title": "Direction",
+            "type": "integer"
+          },
+          "offset": {
+            "default": "",
+            "title": "Offset",
+            "type": "string"
+          },
+          "value": {
+            "default": 0.0,
+            "title": "Value",
+            "type": "number"
+          },
+          "correction": {
+            "default": 0.0,
+            "title": "Correction",
+            "type": "number"
+          },
+          "feed": {
+            "default": 0.0,
+            "title": "Feed",
+            "type": "number"
+          },
+          "gcode": {
+            "default": "",
+            "title": "Gcode",
+            "type": "string"
+          },
           "message": {
             "default": "",
             "title": "Message",
             "type": "string"
-          },
-          "details": {
-            "additionalProperties": true,
-            "title": "Details",
-            "type": "object"
           }
         },
-        "title": "Ok",
+        "title": "ProbeRunOut",
         "type": "object"
       }
     },

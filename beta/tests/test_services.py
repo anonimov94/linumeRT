@@ -305,12 +305,6 @@ def test_offset_kalibracja_z_duzym_rozrzutem_jest_odrzucona(call) -> None:
     assert "rozrzut" in excinfo.value.message
 
 
-def test_offset_sondowanie_ruchem_jest_planowane(call) -> None:
-    with pytest.raises(ApiError) as excinfo:
-        call("offset.probe_run")
-    assert excinfo.value.code == "not_implemented"
-
-
 # --------------------------------------------------------------------------- symulacja
 
 

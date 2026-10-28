@@ -104,6 +104,7 @@ from .schema import (
     StepEditRequest,
     SystemInfo,
     TelemetryOut,
+    ToolChangeRequest,
     ToolHistoryOut,
     ToolImportRequest,
     ToolList,
@@ -138,6 +139,8 @@ from .services.offset import (
     ProbeApplyIn,
     ProbeCalibrateIn,
     ProbeOut,
+    ProbeRunIn,
+    ProbeRunOut,
     StockIn,
     StockOut,
     WorkpieceIn,
@@ -336,6 +339,13 @@ def _load_program(request: ProgramName, ctx: Context) -> Ok:
     return ctx.services["machine"].load_program(program.path, program.text)
 
 
+def _tool_change(request: ToolChangeRequest, ctx: Context) -> Ok:
+    """Narzędzie musi być w bazie (T0 = pusty uchwyt), zanim makro M6 ruszy maszyną."""
+    if request.tool > 0:
+        ctx.services["tools"].get(ToolNumber(number=request.tool))
+    return ctx.services["machine"].tool_change(request)
+
+
 def _csv_out(text: str) -> JournalCsvOut:
     """Dziennik CSV: tekst plus liczba niepustych wierszy dla GUI."""
     lines = [line for line in str(text).splitlines() if line.strip()]
@@ -416,8 +426,8 @@ def register_operations(c: Contract) -> Contract:
     c.query("machine.axes", domain="machine", summary="Znane litery osi", result=AxisList,
             handler=lambda r, ctx: AxisList(axes=list(ctx.services["machine"].known_axes())))
     c.command("machine.tool_change", domain="machine", summary="Zmiana narzędzia (M6/ATC)",
-              safety=SAFETY_MOTION, status="planned",
-              plan="makro ATC (linumert.machine.atc_macro) + sekwencja HAL + potwierdzenia GUI")
+              request=ToolChangeRequest, safety=SAFETY_MOTION,
+              handler=_tool_change)
 
     # ---- program -----------------------------------------------------------
     c.query("program.list", domain="program", summary="Programy w katalogu NC",
@@ -506,9 +516,12 @@ def register_operations(c: Contract) -> Contract:
     c.command("offset.probe_apply", domain="offset", summary="Zastosuj kalibrację do pomiaru",
               request=ProbeApplyIn, result=ProbeOut, role=ROLE_TECHNOLOG,
               handler=lambda r, ctx: ctx.services["offset"].probe_apply(r))
-    c.command("offset.probe_run", domain="offset", summary="Sondowanie G38.x (ruch)",
-              safety=SAFETY_MOTION, status="planned",
-              plan="G38.2 + ProbeCalibration.check_feed + zapis offsetu; wymaga backendu i HAL")
+    c.command("offset.probe_run", domain="offset",
+              summary="Sondowanie G38.2 jednej osi i zapis offsetu (ruch)",
+              request=ProbeRunIn, result=ProbeRunOut, safety=SAFETY_MOTION,
+              role=ROLE_TECHNOLOG,
+              handler=lambda r, ctx: ctx.services["offset"].probe_run(
+                  r, ctx.services["machine"]))
 
     # ---- sim ---------------------------------------------------------------
     c.command("sim.run", domain="sim",

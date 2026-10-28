@@ -25,6 +25,7 @@ import re
 from dataclasses import dataclass, field
 from typing import Any
 
+from ..programs.probe_macro import PROBE_MACRO
 from .schema import Axis, MachineConfig
 
 TARGETS = ("plant", "sim", "hardware")
@@ -507,12 +508,15 @@ def render(cfg: MachineConfig, target: str, opt: Options | None = None,
                                                       hwgen.ini_extra(cfg, plan)),
                 "linumert_hw.hal": hwgen.render_hal(cfg, js, plan),
                 "spindle_vfd.hal": hwgen.render_spindle(cfg),
-                "linumert_hw_postgui.hal": hwgen.render_postgui(cfg)}
+                "linumert_hw_postgui.hal": hwgen.render_postgui(cfg),
+                f"{opt.subroutine_path}/lrt_probe.ngc": PROBE_MACRO}
     if scales is None:
         scales = plant_scales(cfg) if target == "plant" else {}
     js = joints(cfg, scales)
     ini = render_ini(cfg, js, target, opt)
-    files = {f"{cfg.machine.name}.ini": ini}
+    # Makro sondowania (operacja offset.probe_run) w SUBROUTINE_PATH każdej konfiguracji.
+    files = {f"{cfg.machine.name}.ini": ini,
+             f"{opt.subroutine_path}/lrt_probe.ngc": PROBE_MACRO}
     macro = None
     if opt.atc:
         from .atc_macro import generate_atc_m6

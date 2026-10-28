@@ -17,6 +17,7 @@ Wymaga LinuxCNC 2.9 (RIP albo pakiet Debiana). NIEZWERYFIKOWANE NA SPRZĘCIE.
 from __future__ import annotations
 
 import importlib
+import time
 from typing import Any
 
 from linumert.cnc.linuxcnc_reader import LinuxCNCReader
@@ -31,6 +32,8 @@ class LinuxCNCBackend:
     """``MachinePort`` na ``linuxcnc.command``/``linuxcnc.stat``."""
 
     name = "linuxcnc"
+    # Interpreter LinuxCNC wykonuje podprogramy o<...> call (makra M6, lrt_probe).
+    capabilities = frozenset({"subroutines"})
 
     def __init__(self, module: Any = None, reader: LinuxCNCReader | None = None,
                  timeout: float = 2.0):
@@ -39,6 +42,8 @@ class LinuxCNCBackend:
         self._command: Any = None
         # Czytnik sam tworzy `linuxcnc.stat()`; nazwy osi bierze z `stat.axis_mask`.
         self.reader = reader or LinuxCNCReader(module=module)
+        # Wiek migawki liczymy tym samym zegarem, którym czytnik ją stempluje.
+        self._clock = getattr(self.reader, "_clock", time.monotonic)
 
     # ---- dostęp do modułu --------------------------------------------------
     def _lc(self) -> Any:

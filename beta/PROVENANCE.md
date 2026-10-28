@@ -7,7 +7,7 @@ wymienia każdy usunięty plik, każdą zmianę w przejętym kodzie i każdy tes
 nie został przeniesiony — z powodem. Bez tego nie da się odróżnić „usunięte celowo”
 od „zgubione przy kopiowaniu”.
 
-Stan zweryfikowany: **865 testów przechodzi, 3 pominięte, 77 podtestów**; `ruff` czysty;
+Stan zweryfikowany: **899 testów przechodzi, 0 pominiętych, 77 podtestów**; `ruff` czysty;
 `tools/check_no_gui.py` zwraca 0.
 
 ## 1. Pliki usunięte (GUI / Qt / OpenGL / panel web)
@@ -93,8 +93,9 @@ w procesach potomnych albo plików `config/hal/` zależnych od HMI.
 - **Brak grzyba E-STOP w HMI** — łańcuch E-STOP jest sprzętowy/emulowany. Przed
   podłączeniem fizycznego GUI należy dołożyć `linumert_hmi_estop.hal` (fail-safe:
   łańcuch otwarty, dopóki ekran nie żyje).
-- **`machine.tool_change` i `offset.probe_run`** są w kontrakcie jako `planned`
-  (2 z 85 operacji) — GUI może je rysować, ale dostanie `not_implemented`.
+- **`machine.tool_change` i `offset.probe_run`** działają jako makra LinuxCNC
+  (`T<n> M6` z remapem, `o<lrt_probe>`); atrapa wykonuje M6, ale sondowanie odrzuca
+  (`conflict`) — pełna ścieżka wymaga LinuxCNC (VM-A + Plant).
 - **Wszystko, co dotyczy fizycznej maszyny, jest NIEZWERYFIKOWANE NA SPRZĘCIE** —
   testy idą na atrapie (`backend=fake`). Backend LinuxCNC nie był uruchamiany
   na prawdziwym sterowniku w tym środowisku.

@@ -156,6 +156,11 @@ class WorkOffsetRequest(Model):
     values: dict[AxisName, float] = Field(default_factory=dict)
 
 
+class ToolChangeRequest(Model):
+    tool: int = Field(ge=0, description="numer narzędzia; 0 = pusty uchwyt")
+    confirm: bool = Field(False, description="operator potwierdził zmianę narzędzia")
+
+
 class AxisList(Model):
     axes: list[AxisName] = Field(default_factory=list)
 

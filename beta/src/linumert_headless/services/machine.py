@@ -21,7 +21,7 @@ from collections.abc import Callable
 
 from linumert.cnc.model import AXIS_LETTERS, MachineSnapshot, Mode
 
-from ..errors import Conflict, NotImplementedCapability, SafetyRefused
+from ..errors import Conflict, InvalidRequest, SafetyRefused
 from ..ports import MachinePort
 from ..schema import (
     AxisState,
@@ -37,6 +37,7 @@ from ..schema import (
     RunRequest,
     SpindleRequest,
     SpindleState,
+    ToolChangeRequest,
     WorkOffsetRequest,
     finite,
 )
@@ -234,13 +235,53 @@ class MachineService:
                 self.sessions.jog_start(axis, "watchdog")
         return axes
 
-    # ---- funkcje planowane -------------------------------------------------
-    def tool_change(self) -> Ok:
-        """Ręczna/automatyczna zmiana narzędzia: wymaga sekwencji HAL i potwierdzeń GUI."""
-        raise NotImplementedCapability(
-            "machine.tool_change",
-            "wdrożenie po podpięciu ATC: makro M6 (machine.atc_macro) + potwierdzenia operatora",
-        )
+    # ---- makra ruchu (M6, sondowanie) --------------------------------------
+    def tool_change(self, request: ToolChangeRequest) -> Ok:
+        """Zmiana narzędzia ``T<n> M6``.
+
+        Sekwencję (ręczną albo ATC) wykonuje remap M6 konfiguracji (``lrt_m6`` /
+        ``lrt_m6_atc``), który włącza też korekcję długości G43 H<n> (T0 → G49).
+        Usługa pilnuje warunków wstępnych i potwierdzenia operatora.
+        """
+        snap = self.backend.snapshot()
+        if snap.tool_number == request.tool:
+            return Ok(message=f"T{request.tool} już w uchwycie",
+                      details={"tool": request.tool, "gcode": ""})
+        if snap.spindle_running:
+            raise SafetyRefused("zmiana narzędzia przy pracującym wrzecionie — zatrzymaj "
+                                "wrzeciono", details={"spindle_speed": snap.spindle_speed})
+        gcode = f"T{request.tool} M6"
+        self.run_macro(gcode, "zmiana narzędzia", confirm=request.confirm)
+        return Ok(message=f"zmiana narzędzia T{snap.tool_number} → T{request.tool}",
+                  details={"tool": request.tool, "previous": snap.tool_number, "gcode": gcode})
+
+    def run_macro(self, gcode: str, what: str, *, confirm: bool, axis: str | None = None,
+                  capability: str | None = None) -> None:
+        """Wysyła makro ruchu jako jedno MDI po sprawdzeniu warunków wstępnych.
+
+        Kolejność sprawdzeń: potwierdzenie operatora, możliwości backendu, zasilanie,
+        bazowanie, brak ruchu. Tryb MDI ustawiamy sami (LinuxCNC robi to i tak w ``mdi``).
+        """
+        if not confirm:
+            raise SafetyRefused(f"{what} wymaga potwierdzenia operatora (confirm=true)")
+        if capability is not None and capability not in getattr(self.backend,
+                                                                 "capabilities", ()):
+            raise Conflict(f"{what}: backend {getattr(self.backend, 'name', '?')} nie "
+                           f"wykonuje makr ({capability}) — wymagany LinuxCNC",
+                           details={"capability": capability})
+        self._require_power(what)
+        snap: MachineSnapshot = self.backend.snapshot()
+        if not snap.all_homed:
+            raise SafetyRefused(f"{what} wymaga zbazowanych osi")
+        if axis is not None and axis not in snap.axis_names:
+            raise InvalidRequest(f"maszyna nie ma osi {axis}",
+                                 details={"axes": list(snap.axis_names)})
+        if snap.interp_state.value != "idle":
+            raise Conflict(f"{what}: maszyna wykonuje ruch albo program",
+                           details={"interp_state": snap.interp_state.value})
+        if snap.mode is not Mode.MDI:
+            self.backend.set_mode(Mode.MDI)
+        self.backend.mdi(gcode)
 
     # ---- pomocnicze --------------------------------------------------------
     def _require_power(self, what: str) -> None:

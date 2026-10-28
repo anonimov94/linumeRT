@@ -51,6 +51,7 @@ def _parport(data: dict) -> dict:
 def _write(tmp: Path, files: dict[str, str]) -> Path:
     tmp.mkdir(parents=True, exist_ok=True)
     for name, text in files.items():
+        (tmp / name).parent.mkdir(parents=True, exist_ok=True)  # macros/lrt_probe.ngc
         (tmp / name).write_text(text, encoding="utf-8")
     return next(tmp / n for n in files if n.endswith(".ini"))
 

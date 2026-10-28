@@ -43,9 +43,9 @@ logikę bez sprzętu.
 Invariant sprawdzany testem: `operation.domain == name.split(".")[0]`.
 
 **Stan zweryfikowany: 85 operacji, 12 domen** (`access, alarm, cam, config, diag,
-machine, offset, plant, program, sim, system, tool`); **71 `implemented`, 2 `planned`**
-(`machine.tool_change`, `offset.probe_run`). Rozkład `safety`: `none` 49, `motion` 12,
-`stop` 7, `config` 5. Role: `operator`, `technolog`, `serwis`.
+machine, offset, plant, program, sim, system, tool`); **85 `implemented`, 0 `planned`**
+(ostatnie dwie: `machine.tool_change`, `offset.probe_run`). Rozkład `safety`: `none` 60, `motion` 12,
+`stop` 7, `config` 6. Role: `operator`, `technolog`, `serwis`.
 
 Dodanie funkcji = jedna rejestracja w kontrakcie + handler. REST, WebSocket, CLI i SDK
 dostają ją automatycznie (CLI i SDK są generowane z kontraktu w locie).
@@ -129,5 +129,5 @@ atrybut na współdzielonym hubie nadpisywałby się przy drugim kliencie GUI i 
 | `linumert_sim` (symulacja offline) | 2 771 |
 | **razem `src/`** | **26 437** |
 
-Testy: 63 pliki, **865 przechodzi, 3 pominięte, 77 podtestów** — bez LinuxCNC, bez Qt,
+Testy: 65 plików, **899 przechodzi, 0 pominiętych, 77 podtestów** — bez LinuxCNC, bez Qt,
 bez serwera X.

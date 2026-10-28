@@ -7,13 +7,15 @@ detalu, korekcje). Backend liczy i waliduje, **nie rysuje**: definicja przygotó
 jako dane (``Stock``/``Workpiece``), a GUI decyduje, jak je pokazać.
 
 Kalibracja sondy (``linumert.programs.probe_calibration``) działa na liczbach: pomiar →
-współczynnik → zapis JSON. Samo sondowanie (ruch G38.x) wymaga maszyny i jest osobną
-operacją ``offset.probe_run`` — w kontrakcie jako ``planned``, bo potrzebuje sprzętu.
+współczynnik → zapis JSON. Samo sondowanie (ruch G38.2) to ``offset.probe_run``: jedno
+wywołanie makra ``o<lrt_probe>`` (``linumert.programs.probe_macro``) z poprawką kalibracji;
+wymaga backendu wykonującego podprogramy (LinuxCNC), atrapa je odrzuca.
 """
 
 from __future__ import annotations
 
 from pathlib import Path
+from typing import TYPE_CHECKING, Literal
 
 from pydantic import Field
 
@@ -22,14 +24,20 @@ from linumert.programs.probe_calibration import (
     ProbeCalibration,
     key,
 )
+from linumert.programs.probe_macro import PROBE_AXES, probe_call
 from linumert.programs.stock import Stock, StockError, format_stock_line, parse_stock_line
 from linumert.programs.workpiece import Workpiece
 
-from ..errors import InvalidRequest, NotImplementedCapability
-from ..schema import Model, Ok
+from ..errors import InvalidRequest
+from ..schema import Model
 from .paths import ProjectPaths
 
+if TYPE_CHECKING:
+    from .machine import MachineService
+
 PROBE_FEED_MM_MIN = 100.0  # posuw dokładnego przejazdu sondy [mm/min]
+MAX_PROBE_DISTANCE_MM = 200.0
+MAX_PROBE_FEED_MM_MIN = 1000.0
 
 
 class StockOut(Model):
@@ -100,6 +108,34 @@ class ProbeApplyIn(Model):
     axis: str
     direction: int
     measured: float
+
+
+class ProbeRunIn(Model):
+    """Sondowanie jednej osi: szukaj styku na ``distance`` i nadaj punktowi ``value``."""
+
+    axis: str
+    direction: Literal[-1, 1]
+    distance: float = Field(10.0, gt=0, le=MAX_PROBE_DISTANCE_MM,
+                            description="maksymalna droga szukania styku [mm]")
+    feed: float | None = Field(None, gt=0, le=MAX_PROBE_FEED_MM_MIN,
+                               description="posuw [mm/min]; None = posuw kalibracji sondy")
+    offset: str = Field("G54", pattern=r"^G5[4-9](\.[1-3])?$")
+    value: float = Field(0.0, description="współrzędna powierzchni w układzie offset [mm]")
+    retract: float = Field(2.0, gt=0, le=50.0, description="odjazd po styku [mm]")
+    confirm: bool = Field(False, description="operator potwierdził: sonda podłączona, "
+                                             "droga wolna")
+
+
+class ProbeRunOut(Model):
+    ok: bool = True
+    axis: str = ""
+    direction: int = 0
+    offset: str = ""
+    value: float = 0.0
+    correction: float = 0.0
+    feed: float = 0.0
+    gcode: str = ""
+    message: str = ""
 
 
 class ProbeOut(Model):
@@ -212,13 +248,40 @@ class OffsetService:
         return ProbeOut(axis=request.axis, direction=request.direction, value=value,
                         message="skorygowany pomiar")
 
-    def probe_run(self) -> Ok:
-        """Sondowanie G38.x: wymaga maszyny, potwierdzeń i nadzoru posuwu."""
-        raise NotImplementedCapability(
-            "offset.probe_run",
-            "sekwencja G38.2 + check_feed() + zapis do .var; wymaga backendu maszyny i HAL",
-        )
+    def probe_run(self, request: ProbeRunIn, machine: MachineService) -> ProbeRunOut:
+        """Sondowanie G38.2 jednej osi i zapis offsetu — jedno wywołanie makra ``lrt_probe``.
+
+        Poprawka kalibracji (``true - średnia(odczytów)``) obowiązuje tylko dla posuwu,
+        przy którym ją wyznaczono, więc inny posuw jest odrzucany (``check_feed``). Punkt
+        styku dostaje w układzie ``offset`` wartość ``value - poprawka``, żeby rzeczywista
+        powierzchnia miała współrzędną ``value``. NIEZWERYFIKOWANE NA SPRZĘCIE.
+        """
+        axis = request.axis.upper()
+        if axis not in PROBE_AXES:
+            raise InvalidRequest(f"sondowanie obsługuje osie {', '.join(PROBE_AXES)}",
+                                 details={"axis": request.axis})
+        calibration = self._calibration()
+        correction = calibration.corrections.get(key(axis, request.direction))
+        feed = request.feed if request.feed is not None else calibration.feed
+        if correction is not None:
+            try:
+                calibration.check_feed(feed)
+            except CalibrationError as exc:
+                raise InvalidRequest(f"posuw sondowania niezgodny z kalibracją: {exc}",
+                                     details={"feed": feed,
+                                              "calibration_feed": calibration.feed}) from exc
+        correction = correction or 0.0
+        target = round(request.value - correction, 6)
+        gcode = probe_call(axis, request.direction, request.distance, feed, request.offset,
+                           target, request.retract)
+        machine.run_macro(gcode, "sondowanie", confirm=request.confirm, axis=axis,
+                          capability="subroutines")
+        return ProbeRunOut(axis=axis, direction=request.direction, offset=request.offset,
+                           value=request.value, correction=round(correction, 6), feed=feed,
+                           gcode=gcode,
+                           message=f"sondowanie {axis}{'+' if request.direction > 0 else '-'} "
+                                   f"uruchomione; zapis {request.offset} {axis}={target:g}")
 
 
-__all__ = ["OffsetService", "ProbeApplyIn", "ProbeCalibrateIn", "ProbeOut",
-           "StockIn", "StockOut", "WorkpieceIn", "WorkpieceOut"]
+__all__ = ["OffsetService", "ProbeApplyIn", "ProbeCalibrateIn", "ProbeOut", "ProbeRunIn",
+           "ProbeRunOut", "StockIn", "StockOut", "WorkpieceIn", "WorkpieceOut"]

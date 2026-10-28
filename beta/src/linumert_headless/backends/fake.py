@@ -33,6 +33,8 @@ class FakeBackend:
     """``MachinePort`` na atrapie; czas płynie w wątku tła."""
 
     name = "fake"
+    # Atrapa nie ma interpretera podprogramów ani G38.x — sondowanie wymaga LinuxCNC.
+    capabilities: frozenset[str] = frozenset()
 
     def __init__(self, machine: FakeMachine | None = None, *,
                  axes: tuple[str, ...] = ("X", "Y", "Z"),

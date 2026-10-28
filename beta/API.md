@@ -36,9 +36,9 @@ Kontrakt to lista operacji. Każda ma:
 ```
 
 **Stan: 85 operacji, 12 domen** — `access, alarm, cam, config, diag, machine, offset,
-plant, program, sim, system, tool`. **71 `implemented`, 2 `planned`**
-(`machine.tool_change`, `offset.probe_run`). Rozkład `safety`: `none` 49, `motion` 12,
-`stop` 7, `config` 5.
+plant, program, sim, system, tool`. **85 `implemented`, 0 `planned`**
+(ostatnie dwie: `machine.tool_change`, `offset.probe_run`). Rozkład `safety`: `none` 60, `motion` 12,
+`stop` 7, `config` 6.
 
 ### Co z tym zrobić w GUI
 
@@ -241,42 +241,28 @@ GUI nie może rysować „auto-reset” ani zwalniać E-STOP przy starcie.
 `machine.jog_increment axis=X speed=10 distance=2` — oś stanie dokładnie na zadanym
 dystansie. Jog należy do sesji: inne połączenie go nie zatrzyma, ale zerwanie własnego — tak.
 
----
+### Zmiana narzędzia i sondowanie (makra ruchu)
 
-## 8. Wiarygodność wyniku — GUI musi ją pokazywać
+Obie operacje wymagają `confirm=true` (potwierdzenie operatora w GUI), zasilania,
+zbazowanych osi i maszyny bez ruchu; tryb MDI usługa ustawia sama.
 
-Cztery operacje liczą na interpreterze G-code. Z modułem `gcode` LinuxCNC jest to pełny
-`rs274`; bez niego działa interpreter podzbioru (`subset`), który **pomija pętle `o-word`
-i ruchy `G53`**. Wynik jest wtedy prawdziwy, ale niepełny — i nie da się tego zgadnąć
-z samych liczb.
-
-Przykład z `config/nc_files/linumert_demo.ngc`: całe skrawanie siedzi w pętlach
-`o100`/`o110`, więc bez LinuxCNC `sim.run` daje `volume_removed_mm3: 0.0` przy
-116 odcinkach i 3077 mm drogi. Zero wygląda na „program nic nie obrabia”, a znaczy
-„interpreter nie wszedł w pętle”.
-
-| Operacja | Pole wiarygodności | Co zrobić w GUI |
-| --- | --- | --- |
-| `sim.run` | `source`, `notes` | przy `source: "subset"` oznacz wynik jako przybliżony i pokaż `notes` |
-| `program.toolpath` | `source`, `notes` | jw. — podgląd ścieżki może nie mieć pętli |
-| `program.estimate` | `source` | przy `subset` czas i droga bez pętli |
-| `program.check` | `interpreter` | jw. — granice osi policzone z dostępnych ruchów |
-
-`notes` to lista czytelnych komunikatów po polsku (`"Linia 30: o-word while pominięte
-(tylko interpreter LinuxCNC)."`). Nie chowaj ich — to jedyne miejsce, gdzie użytkownik
-dowie się, dlaczego liczby są mniejsze niż oczekuje.
+- `machine.tool_change tool=3 confirm=true` → MDI `T3 M6`. Sekwencję wykonuje remap M6
+  konfiguracji (`lrt_m6` / `lrt_m6_atc`, z G43 H<n>). Narzędzie musi być w bazie
+  (`not_found`), wrzeciono stać (`safety_refused`); ten sam numer = nic się nie dzieje.
+- `offset.probe_run axis=Z direction=-1 distance=10 offset=G54 value=0 confirm=true`
+  (rola technolog) → jedno MDI `o<lrt_probe> call [...]`: G38.2, zapis offsetu G10 L20
+  w punkcie styku, odjazd `retract`. Wartość uwzględnia poprawkę z `offset.probe_calibrate`;
+  inny posuw niż posuw kalibracji → `invalid_request`. Makro: `macros/lrt_probe.ngc`
+  (generator konfiguracji je dokłada). Atrapa nie wykonuje G38.x → `conflict`.
+  Wynik pomiaru GUI widzi w `machine.state` (`work_offset`) po zakończeniu ruchu.
 
 ---
 
-## 9. Czego jeszcze nie ma
+## 8. Czego jeszcze nie ma
 
-| Operacja | Stan | Co dostanie GUI |
-| --- | --- | --- |
-| `machine.tool_change` | `planned` | `not_implemented` + `details.plan` |
-| `offset.probe_run` | `planned` | `not_implemented` + `details.plan` |
-
-Rysuj je normalnie (kontrakt je opisuje), ale obsługuj `not_implemented` jako
-„funkcja w planie”, nie jako błąd aplikacji.
+Wszystkie operacje kontraktu są `implemented`. Mechanizm `planned` zostaje dla przyszłych
+funkcji: rysuj je normalnie, a `not_implemented` obsługuj jako „funkcja w planie”,
+nie jako błąd aplikacji.
 
 Wszystko, co dotyczy fizycznej maszyny, jest **NIEZWERYFIKOWANE NA SPRZĘCIE** —
 testy idą na atrapie (`backend=fake`).
