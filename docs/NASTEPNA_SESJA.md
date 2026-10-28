@@ -915,3 +915,8 @@ dla M66) i ustawia `num_dio` motmod; kolizja z zajętym pinem lrt-net = odmowa. 
 `atc_macro.py` ani `plant atc.py` (lokalna praca Codex nad geometrią). Cel `sim` z ATC nadal bez
 wejść cyfrowych (M66 nie przejdzie) — do decyzji. Zostają kroki 4 (test rs274/LinuxCNC) i 5 (E-STOP).
 NIEZWERYFIKOWANE NA SPRZĘCIE ani na RIP LinuxCNC (num_dio/halcmd sprawdzi CI `linuxcnc`).
+
+## Stan zatrzymania — 028, 2026-10-28
+
+Model-Author: Codex. Ukończono jedno zadanie dokumentacyjne: scenariusz odbioru
+1280×768 i klawiatury w SPEC_EKRAN_GLOWNY.md. Wykonanie odbioru pozostaje otwarte.
