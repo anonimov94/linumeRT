@@ -589,3 +589,8 @@ autorstwa oryginalnych algorytmów. Nowy CLI, eksport konfiguracji lite, proces 
 bez okna, testy granic i wheel checker: własny kod GPL-2.0-or-later.
 Nie dodano zewnętrznych bibliotek produktu ani zasobów GUI.
 Historyczne wpisy wyżej dotyczą pełnej edycji; usunięte zasoby nie są częścią lite.
+
+### Konsola lite — 2026-10-28
+
+Model-Author: Codex. Własny renderer tekstowy telemetrii Plant i launcher PowerShell/WSL,
+GPL-2.0-or-later. Bez nowych bibliotek, zasobów graficznych i zmian fizyki symulatora.

@@ -44,6 +44,35 @@ linumert-lite config config/machines/mill_servo_table.yaml --target sim --out bu
 istniejącego katalogu; nie nadpisuje programów operatora. `.lnx` jest kompilowany atomowo:
 niepoprawny program nie niszczy istniejącego wyniku.
 
+## Podgląd w konsoli
+
+W PowerShell, z katalogu głównego lite:
+
+```powershell
+.\tools\console.ps1
+.\tools\console.ps1 -Scenario estop_mid_program
+```
+
+Pierwsze uruchomienie przygotowuje osobny `.venv-linux` w WSL
+(`linumeRT-Debian12`; inną dystrybucję wskaż przez `-Distro`). Potrzebne są Python,
+venv, make i kompilator C. Nie korzysta z fizycznego sterowania ani serwera sieciowego.
+
+W aktywnym środowisku Linux:
+
+```bash
+python tools/console_demo.py
+python tools/console_demo.py --scenario estop_mid_program
+python tools/console_demo.py --plain
+```
+
+Podgląd pokazuje tabelę napędów (pozycja zadana/rzeczywista, błąd nadążania,
+prędkość, moment i zgubione kroki), ślad XY i alarmy. Najpierw oblicza scenariusz
+na rzeczywistym rdzeniu symulatora Plant C, potem odtwarza jego telemetrię w terminalu.
+To odtwarzanie danych symulacji z atrapą mastera; nie jest monitoringiem LinuxCNC
+ani fizycznej maszyny. Przy przekierowaniu wyjścia drukuje trzy statyczne klatki.
+`--speed 2` przyspiesza odtwarzanie dwukrotnie. Ctrl+C kończy pokaz.
+PASS scenariusza E-STOP oznacza poprawne wykrycie oczekiwanej awarii i zatrzymania.
+
 Plant bez panelu:
 
 ```bash

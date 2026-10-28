@@ -33,3 +33,4 @@ config/**/linumert_workpiece.json
 
 # Sesja 036: baza ról i PIN-ów tworzona obok INI maszyny (nie wersjonujemy)
 linumert_access.sqlite
+.venv-linux/

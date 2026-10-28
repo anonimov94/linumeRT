@@ -34,3 +34,13 @@ NIEZWERYFIKOWANE NA SPRZĘCIE. Wyniki Plant/subset nie kwalifikują fizycznego s
 
 Duża redukcja drzewa dotyczy także dawnych instrukcji, raportów, GUI i zasobów.
 Nie oznacza zmniejszenia złożoności fizyki ani udowodnienia możliwości konkretnego LLM.
+
+## Podgląd konsolowy
+
+2026-10-28 · Model-Author: Codex. tools/console_demo.py i launcher PowerShell/WSL
+sprawdzono na rdzeniu Plant C dla first_motion i estop_mid_program, także w terminalu TTY.
+Pełna regresja po dodaniu pokazu: 1153 PASS, 61 subtestów PASS (368,13 s).
+Po dopracowaniu mapowania czasu rozruchu na czas scenariusza: 3/3 testy konsoli PASS,
+w tym brak przedwczesnego alarmu E-STOP. Ruff i ponowny wheel-check PASS.
+Launcher sprawdzono przy pierwszej instalacji .venv-linux i przy ponownym uruchomieniu.
+To odtwarzanie telemetrii symulatora z atrapą mastera, bez monitorowania żywego LinuxCNC.
