@@ -1734,3 +1734,9 @@ Pełny RIP musi ponownie potwierdzić wynik; nie scalać na czerwonym CI.
 - JOG ma dwa rzędy kierunków, M6 osobny rząd; sygnały sterowania bez zmian. Test odrzuca także ukryty przycisk i ucięcie o 1 px.
 - Zrzut docs/raporty/G2/JOG_1280_2026-10-28.png: rzeczywiste Qt offscreen, atrapa CNC, 1280×768; wszystkie przyciski XYZ widoczne.
 - Pełny odbiór GUI/LinuxCNC i pozostałe przewijanie strony nadal otwarte. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## 033 — makro sondowania o<lrt_probe> na LinuxCNC + Plant · 2026-10-28 · Claude
+- Model-Author: Claude. Kontynuacja #202 (bliźniak bez GUI, operacja offset.probe_run): makro sprawdzone w prawdziwym interpreterze, nie tylko jako tekst.
+- `core/linumert/programs/probe_macro.py` + `config/{sim,plant}/.../macros/lrt_probe.ngc`: jedno MDI `o<lrt_probe> call [oś] [kierunek] [droga] [posuw] [P] [wartość] [odjazd]` — G38.2, G10 L20 względem punktu styku (`#<_x> - #5061 + wartość`), odjazd, przywrócenie G90/G91 wywołującego.
+- LinuxCNC 2.9 RIP + wygenerowany Plant (mill_servo_table, cel sondy z machine.yaml): offset G54 Z −35,0119 mm (oczekiwane −35), X 253,0168 mm (oczekiwane 253); błąd = luz modelu napędu, jak w teście 033 (−0,011/+0,016). Offset równy punktowi styku − wartość z dokładnością 1e-4 mm (hamowanie za stykiem nie wpływa), odjazd ≈ 2 mm, G91 przywrócony.
+- Generator konfiguracji w main jeszcze nie dokłada makra (robi to bliźniak #202); harness testów kopiuje `config/sim/linumert_xyz/macros`. NIEZWERYFIKOWANE NA SPRZĘCIE.
