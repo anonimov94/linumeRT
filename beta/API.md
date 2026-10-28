@@ -258,7 +258,32 @@ zbazowanych osi i maszyny bez ruchu; tryb MDI usługa ustawia sama.
 
 ---
 
-## 8. Czego jeszcze nie ma
+## 8. Wiarygodność wyniku — GUI musi ją pokazywać
+
+Cztery operacje liczą na interpreterze G-code. Z modułem `gcode` LinuxCNC jest to pełny
+`rs274`; bez niego działa interpreter podzbioru (`subset`), który **pomija pętle `o-word`
+i ruchy `G53`**. Wynik jest wtedy prawdziwy, ale niepełny — i nie da się tego zgadnąć
+z samych liczb.
+
+Przykład z `config/nc_files/linumert_demo.ngc`: całe skrawanie siedzi w pętlach
+`o100`/`o110`, więc bez LinuxCNC `sim.run` daje `volume_removed_mm3: 0.0` przy
+116 odcinkach i 3077 mm drogi. Zero wygląda na „program nic nie obrabia”, a znaczy
+„interpreter nie wszedł w pętle”.
+
+| Operacja | Pole wiarygodności | Co zrobić w GUI |
+| --- | --- | --- |
+| `sim.run` | `source`, `notes` | przy `source: "subset"` oznacz wynik jako przybliżony i pokaż `notes` |
+| `program.toolpath` | `source`, `notes` | jw. — podgląd ścieżki może nie mieć pętli |
+| `program.estimate` | `source` | przy `subset` czas i droga bez pętli |
+| `program.check` | `interpreter` | jw. — granice osi policzone z dostępnych ruchów |
+
+`notes` to lista czytelnych komunikatów po polsku (`"Linia 30: o-word while pominięte
+(tylko interpreter LinuxCNC)."`). Nie chowaj ich — to jedyne miejsce, gdzie użytkownik
+dowie się, dlaczego liczby są mniejsze niż oczekuje.
+
+---
+
+## 9. Czego jeszcze nie ma
 
 Wszystkie operacje kontraktu są `implemented`. Mechanizm `planned` zostaje dla przyszłych
 funkcji: rysuj je normalnie, a `not_implemented` obsługuj jako „funkcja w planie”,
