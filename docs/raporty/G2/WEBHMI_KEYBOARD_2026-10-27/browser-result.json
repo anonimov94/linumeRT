@@ -1,0 +1,11 @@
+{
+  "viewport1280": {
+    "documentWidth": 1265,
+    "jog": "JOG: BEZ RUCHU",
+    "viewport": 1280,
+    "webglUnavailableMessageHidden": true
+  },
+  "axes": "X\t3.8510\t3.8510\tOK\tOK\t0.0000\t−\t+\nY\t0.0000\t0.0000\tOK\tOK\t0.0000\t−\t+\nZ\t0.0000\t0.0000\tOK\tOK\t0.0000\t−\t+",
+  "errors": [],
+  "reconnect": "X remained 3.8510; no restart"
+}

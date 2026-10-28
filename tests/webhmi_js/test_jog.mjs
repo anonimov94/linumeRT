@@ -96,3 +96,76 @@ test("invalid increment or speed never dispatches movement", () => {
     const h = setup(); h.nodes.jogSpeed.value = speed; h.press(); assert.deepEqual(h.sent, []);
   }
 });
+
+function key(button, name, value, extra = {}) {
+  button.emit(name, { key: value, currentTarget: button, preventDefault() {}, ...extra });
+}
+
+for (const value of [" ", "Enter"]) {
+  test("focused keyboard hold sends one increment and stops on release: " + value, () => {
+    const h = setup(), button = h.jog.button("X", -1);
+    button.disabled = false;
+    key(button, "keydown", value);
+    key(button, "keydown", value, { repeat: true });
+    h.tick(); h.tick();
+    assert.deepEqual(h.sent, [
+      { cmd: "jog_increment", axis: "X", speed: -10, distance: 0.1 },
+      { cmd: "jog_keepalive", axis: "X" }, { cmd: "jog_keepalive", axis: "X" },
+    ]);
+    key(button, "keyup", value);
+    h.tick();
+    assert.deepEqual(h.sent.at(-1), { cmd: "jog_stop", axis: "X" });
+    assert.equal(h.timers.size, 0);
+    assert.equal(h.jog.canStart(), true);
+  });
+}
+
+test("keyboard continuous jog stops when Tab moves focus and repeat cannot restart it", () => {
+  const h = setup("continuous"), button = h.jog.button("Y", 1);
+  button.disabled = false;
+  key(button, "keydown", " "); h.tick();
+  button.emit("blur");
+  key(button, "keydown", " ", { repeat: true }); h.tick();
+  assert.deepEqual(h.sent.map(c => c.cmd), ["jog", "jog", "jog_stop"]);
+  assert.equal(h.timers.size, 0);
+});
+
+test("disabled buttons, modifier chords and unrelated keys never start keyboard jog", () => {
+  const h = setup(), button = h.jog.button("X", 1);
+  key(button, "keydown", "Enter");
+  button.disabled = false;
+  for (const modifier of ["altKey", "ctrlKey", "metaKey", "shiftKey"]) {
+    key(button, "keydown", "Enter", { [modifier]: true });
+  }
+  key(button, "keydown", "ArrowRight");
+  key(button, "keydown", "Enter", { repeat: true });
+  assert.deepEqual(h.sent, []);
+});
+
+test("release from a different key, button or pointer cannot own keyboard jog", () => {
+  const h = setup(), button = h.jog.button("X", 1), other = h.jog.button("Y", 1);
+  button.disabled = other.disabled = false;
+  key(button, "keydown", " ");
+  key(button, "keyup", "Enter");
+  key(other, "keyup", " ");
+  button.emit("pointerup", { pointerId: 7 });
+  assert.equal(h.jog.isActive(), true);
+  key(button, "keyup", " ");
+  assert.equal(h.jog.isActive(), false);
+});
+
+for (const loss of ["blur", "visibility", "disconnect"]) {
+  test("held keyboard jog clears its timer on " + loss, () => {
+    const h = setup(), button = h.jog.button("Z", 1);
+    button.disabled = false;
+    key(button, "keydown", "Enter");
+    if (loss === "blur") h.window.emit("blur");
+    else if (loss === "visibility") { h.document.hidden = true; h.document.emit("visibilitychange"); }
+    else h.jog.onLost();
+    h.tick();
+    assert.equal(h.timers.size, 0);
+    assert.equal(h.jog.isActive(), false);
+    if (loss === "disconnect") assert.equal(h.jog.canStart(), false);
+    else assert.deepEqual(h.sent.at(-1), { cmd: "jog_stop", axis: "Z" });
+  });
+}

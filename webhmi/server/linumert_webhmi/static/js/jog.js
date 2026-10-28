@@ -2,6 +2,7 @@
 SPDX-License-Identifier: GPL-2.0-or-later
 Model-Author: ChatGPT
 Incremental jog: Model-Author: Codex
+Focused keyboard jog: Model-Author: Codex
 */
 "use strict";
 
@@ -83,8 +84,8 @@ export function createJog({ send, ready, mayJog, onAlarm, onChange, onEvent = ()
     });
     if (id === null) fault("Nie można ponowić JOG STOP.");
   }
-  function start(event, axis, direction) {
-    if (!AXES.has(axis) || !event.isPrimary || event.button !== 0) return;
+  function start(event, axis, direction, keyboard = false) {
+    if (!AXES.has(axis) || (!keyboard && (!event.isPrimary || event.button !== 0))) return;
     if (phase !== "idle" || !ready() || !mayJog(axis)) return;
     const magnitude = Number(slider.value);
     if (!Number.isFinite(magnitude) || magnitude <= 0 || magnitude > 50) return;
@@ -92,12 +93,16 @@ export function createJog({ send, ready, mayJog, onAlarm, onChange, onEvent = ()
     if (!choices.has(selected)) return;
     const distance = selected === "continuous" ? null : Number(selected);
     event.preventDefault();
-    active = { axis, pointerId: event.pointerId, speed: direction * magnitude, distance, sent: false };
+    active = { axis, pointerId: keyboard ? null : event.pointerId,
+      key: keyboard ? event.key : null, node: event.currentTarget,
+      speed: direction * magnitude, distance, sent: false };
     reason = "";
     indicate("JOG: " + axis + " " + (direction > 0 ? "+" : "−"), "moving");
     units(axis);
-    try { event.currentTarget.setPointerCapture(event.pointerId); }
-    catch (_) { stop("Utrata przechwycenia wskaźnika"); return; }
+    if (!keyboard) {
+      try { event.currentTarget.setPointerCapture(event.pointerId); }
+      catch (_) { stop("Utrata przechwycenia wskaźnika"); return; }
+    }
     function pulse() {
       if (!active) return;
       if (!ready() || !mayJog(axis) || document.hidden || !document.hasFocus()) {
@@ -131,12 +136,32 @@ export function createJog({ send, ready, mayJog, onAlarm, onChange, onEvent = ()
     node.textContent = direction < 0 ? "−" : "+";
     node.disabled = true;
     node.setAttribute("aria-label", "Jog " + axis + " " + (direction < 0 ? "minus" : "plus"));
+    node.setAttribute("aria-keyshortcuts", "Space Enter");
     node.addEventListener("pointerdown", (event) => start(event, axis, direction));
     for (const eventName of ["pointerup", "pointercancel", "lostpointercapture"]) {
       node.addEventListener(eventName, (event) => {
-        if (active && active.pointerId === event.pointerId) stop("Zwolnienie przycisku JOG");
+        if (active && active.key === null && active.pointerId === event.pointerId) {
+          stop("Zwolnienie przycisku JOG");
+        }
       });
     }
+    // Only the focused JOG button handles keys; typing in a field never starts movement.
+    node.addEventListener("keydown", (event) => {
+      if (event.key !== " " && event.key !== "Enter") return;
+      event.preventDefault();
+      if (event.repeat || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
+      if (!node.disabled) start(event, axis, direction, true);
+    });
+    node.addEventListener("keyup", (event) => {
+      if (event.key !== " " && event.key !== "Enter") return;
+      event.preventDefault();
+      if (active && active.node === node && active.key === event.key) {
+        stop("Zwolnienie klawisza JOG");
+      }
+    });
+    node.addEventListener("blur", () => {
+      if (active && active.node === node && active.key !== null) stop("Utrata fokusu przycisku JOG");
+    });
     node.addEventListener("pointerenter", () => { if (!active) units(axis); });
     node.addEventListener("focus", () => { if (!active) units(axis); });
     return node;

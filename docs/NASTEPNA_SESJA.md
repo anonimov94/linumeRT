@@ -15,6 +15,16 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · 2026-10-27. **Kontynuacja 028/029: PR #196, `codex/webhmi-acceptance-20261027`.**
+Osobny checkout Windows `.collaboration/linumeRT-webhmi-acceptance`, bez globalnego LOCK.
+JOG Spacją/Enterem na przycisku z fokusem, STOP po zwolnieniu/blur, bez globalnych skrótów;
+Node 18 PASS, Python zakresu 97 PASS, odbiór przeglądarki z FakeBackend opisany w
+`docs/raporty/G2/WEBHMI_KEYBOARD_2026-10-27.md`. Rejestr pozostaje partial.
+Pełna regresja w natywnej kopii WSL `/tmp/linumert-webhmi-acceptance-src` (venv
+`/tmp/linumert-webhmi-acceptance-20261027`); checkout Windows nie odtwarza symlinków
+Qt i nie jest środowiskiem pełnego odbioru Linuksa. Wynik i CI w PR; scalać po zielonych
+kontrolach. ATC/#195 jest już w main; nie przejmowano lokalnych procesów operatora.
+
 Model-Author: Claude · 2026-10-27. **Stan zatrzymania: 066 ATC, PR #192 (gałąź `wip/g43-po-m6`).**
 Zrobione: `core/linumert/machine/atc_macro.py` (generator makra remapu M6 dla `rack_linear`,
 `plan_swap` = kolejność kroków) + `tests/test_atc_macro.py` (9 testów, plan wykonany na modelu

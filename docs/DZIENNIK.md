@@ -1707,6 +1707,14 @@ Pełny RIP musi ponownie potwierdzić wynik; nie scalać na czerwonym CI.
 - Model-Author: Claude. `Options.atc` w `configgen.py`: przy `atc=True` INI dostaje `REMAP = M6 modalgroup=6 ngc=lrt_m6_atc`, a `render` zwraca `macros/lrt_m6_atc.ngc` z `generate_atc_m6`. Domyślnie bez zmian (`lrt_m6`); karuzela/parasol: jawna odmowa `AtcMacroError`.
 - 2 nowe testy w `tests/test_atc_macro.py`; atc/remap/configgen 31 PASS, ruff PASS (Windows, Python 3.12). Nie ma: okablowania HAL dla M64/M66 (motion.digital-*) do Plant, testu rs274, recovery po E-STOP. NIEZWERYFIKOWANE NA SPRZĘCIE.
 
+## 028/029 — WebHMI: JOG klawiaturą · 2026-10-27 · Codex
+
+- Model-Author: Codex. Kontynuacja najwcześniejszej otwartej sesji 028 i powiązanego 029, osobny checkout z main eb2deea; nie przejęto ATC ani procesów operatora.
+- Odtworzono brak działania Spacji/Entera na przyciskach JOG. Dodano przytrzymanie na przycisku z fokusem, STOP po zwolnieniu/blur oraz ignorowanie autorepeat i kombinacji modyfikatorów; bez globalnych skrótów ruchu.
+- Przeglądarka z atrapą: przyrosty 0,001 i 0,1 mm, 600 ms bez powtórzenia kroku, Enter w trybie ciągłym i STOP, blokady MDI oraz brak JOG przy wpisywaniu w polu PASS. Zrzut 1280×768 i ograniczenia w docs/raporty/G2/WEBHMI_KEYBOARD_2026-10-27.md.
+- Node 18 PASS; Python/Windows 97 PASS. Debian 12 (kod 099691a): 1703 PASS, 138 SKIP, 169 deselected, 1 FAIL — pominięty wpis własnego zrzutu w PROVENANCE. W 2e8f298 zarejestrowano oba zrzuty; powtórka kontroli IP 10 PASS, make lint test-c i REQ 22/22 PASS. Pełnej serii po zmianie dokumentacji nie powtarzano; CI końcowego HEAD w PR #196. Autokontrola, bez niezależnego przeglądu.
+- Pełne 028/029, odbiór LinuxCNC/Plant, MPG, watchdog HAL i sprzęt pozostają otwarte. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
 ## 066 — ATC: wspólna geometria i preflight · 2026-10-27 · Codex
 
 - Model-Author: Codex. Właściciel odłożył HMI; wybrano konkretną niespójność backendu 066. Osobny checkout z main eb2deea; bez zmian ekranów i plików operatora.
