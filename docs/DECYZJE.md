@@ -499,3 +499,12 @@ Wartość 0,999999994 mm dla zadania 1 mm jest poprawna; nie wymagamy zgodności
 bitowej ani dokładniejszych wyników. Kontrakt zapisano w CLAUDE.md. Test kroku
 WebHMI wymaga błędu <0,001 mm zamiast wcześniejszego progu 0,002 mm. Test stabilności
 po STOP pozostaje osobny; nie zmieniono limitów, fizyki, safety ani typów liczbowych.
+
+## Odłożenie HMI i priorytet backendu — polecenie właściciela 2026-10-27
+
+Model-Author: Codex. Właściciel polecił na razie odłożyć HMI i zająć się ważniejszymi
+zakresami. Dalszy wybór technologii ekranu pozostaje otwarty; nie rozpoczynamy migracji
+GUI ani nowych prac wizualnych. To jawna zmiana bieżącego priorytetu względem 028/029.
+Wybrana porcja backendu: 066, niespójność pozycji magazynu pomiędzy Plant a generowanym
+makrem M6 oraz kontrola geometrii przed eksportem. Korzystamy z istniejącego modelu
+magazynu i jednego machine.yaml. Pełny ATC i wcześniejsze bramki pozostają otwarte.

@@ -580,3 +580,11 @@ zależność rdzenia; nie dodano biblioteki CAM ani zasobów GUI.
 Model-Author: Codex. Oryginalne rozszerzenie backendu i klienta WebHMI oraz testy
 Python/Node/LinuxCNC w sprincie #181; GPL-2.0-or-later. Bez nowych bibliotek produktu,
 fontów, ikon lub innych zasobów zewnętrznych. Zrzuty odbioru to własny ekran z atrapą CNC.
+
+### Wspólna geometria ATC i kontrola generatora — 2026-10-27
+
+Model-Author: Codex. `core/linumert/machine/toolchanger_geometry.py` zawiera obliczenia
+przeniesione z własnego `plant/server/linumert_plant/atc.py` (Model-Author: Claude,
+sesja 020), GPL-2.0-or-later. Generator i model Plant współdzielą tę implementację.
+Nowe walidacje i regresje w atc_macro.py/test_atc_macro.py są własnym kodem Codex,
+na tej samej licencji. Bez nowych bibliotek, grafik i innych zasobów produktu.

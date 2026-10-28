@@ -1706,3 +1706,11 @@ Pełny RIP musi ponownie potwierdzić wynik; nie scalać na czerwonym CI.
 ## 066 — podpięcie makra ATC do generatora konfiguracji · 2026-10-27 · Claude
 - Model-Author: Claude. `Options.atc` w `configgen.py`: przy `atc=True` INI dostaje `REMAP = M6 modalgroup=6 ngc=lrt_m6_atc`, a `render` zwraca `macros/lrt_m6_atc.ngc` z `generate_atc_m6`. Domyślnie bez zmian (`lrt_m6`); karuzela/parasol: jawna odmowa `AtcMacroError`.
 - 2 nowe testy w `tests/test_atc_macro.py`; atc/remap/configgen 31 PASS, ruff PASS (Windows, Python 3.12). Nie ma: okablowania HAL dla M64/M66 (motion.digital-*) do Plant, testu rs274, recovery po E-STOP. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## 066 — ATC: wspólna geometria i preflight · 2026-10-27 · Codex
+
+- Model-Author: Codex. Właściciel odłożył HMI; wybrano konkretną niespójność backendu 066. Osobny checkout z main eb2deea; bez zmian ekranów i plików operatora.
+- Plant honorował slot_positions, a makro i plan wymiany ignorowały je na rzecz baza/rozstaw. Wyznaczanie pozycji przeniesiono do wspólnego rdzenia; plan i makro używają tych samych współrzędnych, także bez base_position/pitch_mm.
+- Odmowa eksportu geometrii poza limitami XYZ (również po zaokrągleniu), błędnej liczby gniazd i kolejności wysokości. Plan/makro sprawdzają stare i nowe narzędzie; makro przed ruchem wymaga G21/G90/G94 i programowego M5.
+- Windows: 96 PASS, 1 SKIP; samodzielny rs274/Debian 12: 8 PASS (geometria gniazd 1/3/6 i odmowy G20/G91/G93/G95/M3). Plant: nieregularne gniazda i regał obrócony PASS. Ruff zakresu PASS.
+- Protokół i ograniczenia: docs/raporty/ATC_GEOMETRIA_2026-10-27.md. Pełna regresja/CI w toku; 066 partial, mapowanie HAL, czujniki, recovery i pełna ochrona modalności pozostają otwarte. NIEZWERYFIKOWANE NA SPRZĘCIE.
