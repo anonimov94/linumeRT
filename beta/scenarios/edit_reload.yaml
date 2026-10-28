@@ -1,0 +1,19 @@
+# linumeRT · scenariusz Plant (sesja 023, edytor panelu). Model-Author: Claude.
+name: edit_reload
+description: "Edycja machine.yaml jak w panelu (cięższy stół X, wolniejsza oś), walidacja i zapis wersji, przeładowanie modelu przy wyłączonych napędach bez restartu Plant, potem ruch z nowym limitem prędkości."
+requirements: [REQ-VM-12, REQ-VM-11]
+machine: ../../config/machines/mill_servo_table.yaml
+duration: 2.0
+steps:
+  - {at: 0.0, action: edit_machine, comment: "cięższy stół X", set: {"drives.0.overrides": {mechanics: {load: 160.0}}, "axes.0.max_velocity": 120}}
+  - {at: 0.01, action: reload}
+  - {at: 0.02, action: set_param, drive: drv_x, path: mechanics.load, value: 170.0}
+  - {at: 0.03, action: enable}
+  - {at: 0.05, action: move, X: 30, feed: 12000, accel: 1000}   # ruch porównawczy, niezależny od max_acceleration
+  - {at: 0.06, action: wait, until: {idle: true}, timeout: 1.5}
+expect:
+  - reloaded: {count: 1}
+  - machine: {path: axes.0.max_velocity, value: 120}
+  - machine: {path: drives.0.overrides.mechanics.load, value: 160.0}
+  - position: {axis: X, value: 30.0, tol: 0.01}
+  - no_alarm: true

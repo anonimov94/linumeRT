@@ -1,0 +1,61 @@
+# linumeRT headless (beta) — bliźniak bez GUI.
+# Osobny workflow, bo beta/ ma własny pyproject.toml, Makefile i zestaw testów.
+name: beta
+
+on:
+  push:
+    branches: [main, "arena/**", "wip/**"]
+    paths: ["beta/**", ".github/workflows/beta.yml"]
+  pull_request:
+    paths: ["beta/**", ".github/workflows/beta.yml"]
+  workflow_dispatch:
+
+defaults:
+  run:
+    working-directory: beta
+
+jobs:
+  python:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Zależności
+        run: python -m pip install -e ".[dev]"
+
+      # ruff + strażnik: w beta nie ma Qt, OpenGL, ekranu ani panelu web.
+      - name: Lint i strażnik braku GUI
+        run: make lint
+
+      # Testy idą bez LinuxCNC, bez Qt i bez serwera X — Xvfb nie jest potrzebny.
+      - name: Testy (usługa + przejęty rdzeń)
+        run: make test
+
+      - name: Kontrakt operacji daje się wygenerować
+        run: |
+          python -m linumert_headless contract --out /tmp/contract.json
+          python - <<'PY'
+          import json
+          payload = json.load(open("/tmp/contract.json", encoding="utf-8"))
+          ops = payload["operations"]
+          assert ops, "kontrakt bez operacji"
+          domains = {o["domain"] for o in ops}
+          assert len(domains) >= 12, f"za mało domen: {sorted(domains)}"
+          planned = [o["name"] for o in ops if o["status"] != "implemented"]
+          print(f"kontrakt: {len(ops)} operacji, {len(domains)} domen, planned={planned}")
+          # Niezmiennik kontraktu: domena musi wynikać z nazwy operacji.
+          for o in ops:
+              assert o["domain"] == o["name"].split(".")[0], o["name"]
+              assert o["request"] and o["result"], o["name"]
+          PY
+
+  # Rdzeń dynamiki Plant w C11 — budowa i testy bez zależności zewnętrznych.
+  plant-core:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Testy rdzenia C
+        run: make test-c

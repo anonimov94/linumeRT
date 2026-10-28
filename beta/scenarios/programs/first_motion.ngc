@@ -1,0 +1,8 @@
+( linumeRT · scenariusz first_motion: pierwszy ruch, przyrostowo, powrót do punktu startu )
+G21 G91 G17
+G1 X20 F1200
+G1 Y10
+G1 Z-5
+G0 X-20 Y-10 Z5
+G90
+M2

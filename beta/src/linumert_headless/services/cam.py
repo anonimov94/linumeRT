@@ -1,0 +1,139 @@
+"""Usługa CAM: katalog generatorów cykli i generowanie G-code z parametrów.
+
+SPDX-License-Identifier: GPL-2.0-or-later
+
+Generatory (``linumert.generators``) rejestrują się przez ``register()`` w każdym module —
+``load_generators()`` robi to raz dla całego procesu. Dzięki temu GUI dostaje **katalog
+operacji CAM razem ze schematem parametrów** (``cam.operations``) i może zbudować formularze
+bez wiedzy o Pythonie: nazwa, wersja, pola, wartości domyślne.
+
+Backend zwraca wyłącznie tekst G-code. Podgląd, walidacja wizualna i rysowanie pozostają
+w GUI — serwer nie generuje grafiki.
+"""
+
+from __future__ import annotations
+
+import importlib
+import inspect
+from typing import Any
+
+from linumert.generators.registry import DEFAULT_REGISTRY, GeneratorRegistry, RegistryError
+
+from ..errors import InvalidRequest, NotFound
+from ..schema import CamCatalog, CamGenerateOut, CamGenerateRequest, CamOperation
+
+GENERATOR_MODULES = (
+    "basic", "shapes", "contours", "pockets", "pockets_v1", "drilling",
+    "surfacing", "engraving", "relief", "stl_trace", "subroutines",
+)
+
+_loaded = False
+
+
+def load_generators(registry: GeneratorRegistry | None = None) -> GeneratorRegistry:
+    """Rejestruje wszystkie generatory (idempotentne)."""
+    global _loaded
+    target = registry or DEFAULT_REGISTRY
+    for name in GENERATOR_MODULES:
+        module = importlib.import_module(f"linumert.generators.{name}")
+        register = getattr(module, "register", None)
+        if callable(register):
+            try:
+                register(target)
+            except RegistryError:
+                continue  # już zarejestrowane
+    _loaded = True
+    return target
+
+
+def _parameters(generator: Any) -> dict[str, Any]:
+    """Schemat parametrów generatora — podstawa formularza w GUI."""
+    params: dict[str, Any] = {}
+    fields = getattr(generator, "fields", None) or getattr(generator, "PARAMETERS", None)
+    if isinstance(fields, dict):
+        for key, spec in fields.items():
+            if isinstance(spec, dict):
+                params[key] = {
+                    "label": spec.get("label", key),
+                    "type": spec.get("type", "float"),
+                    "default": spec.get("default"),
+                    "unit": spec.get("unit", ""),
+                    "min": spec.get("min"),
+                    "max": spec.get("max"),
+                }
+            else:
+                params[key] = {"label": key, "type": "float", "default": spec}
+        return params
+    init = getattr(generator, "__init__", None)
+    if init is None:
+        return params
+    try:
+        signature = inspect.signature(init)
+    except (TypeError, ValueError):
+        return params
+    for name, parameter in signature.parameters.items():
+        if name in {"self", "cls"}:
+            continue
+        default = parameter.default
+        params[name] = {
+            "label": name,
+            "type": "float" if isinstance(default, (int, float)) else "any",
+            "default": None if default is inspect.Parameter.empty else default,
+            "required": default is inspect.Parameter.empty,
+        }
+    return params
+
+
+class CamService:
+    """Operacje domeny ``cam``."""
+
+    domain = "cam"
+
+    def __init__(self, registry: GeneratorRegistry | None = None):
+        self.registry = load_generators(registry)
+
+    def operations(self) -> CamCatalog:
+        items: list[CamOperation] = []
+        for name in self.registry.names():
+            generator = self.registry.latest(name)
+            if generator is None:
+                continue
+            items.append(CamOperation(
+                name=name,
+                version=int(getattr(generator, "version", 1)),
+                summary=str(getattr(generator, "summary", "") or
+                            inspect.getdoc(generator) or "").strip().splitlines()[0]
+                if (getattr(generator, "summary", "") or inspect.getdoc(generator)) else "",
+                parameters=_parameters(generator),
+            ))
+        return CamCatalog(operations=sorted(items, key=lambda o: o.name))
+
+    def generate(self, request: CamGenerateRequest) -> CamGenerateOut:
+        generator = (self.registry.get(request.operation, request.version)
+                     if request.version else self.registry.latest(request.operation))
+        if generator is None:
+            known = self.registry.names()
+            if request.operation not in known:
+                raise NotFound(f"nieznana operacja CAM {request.operation!r}",
+                               details={"known": known})
+            raise NotFound(f"brak wersji {request.version} generatora {request.operation}",
+                           details={"operation": request.operation})
+        try:
+            instance = generator(**request.parameters)
+            text = instance.render() if hasattr(instance, "render") else instance.gcode()
+        except TypeError as exc:
+            raise InvalidRequest(f"parametry operacji {request.operation} są niepoprawne: {exc}",
+                                 details={"operation": request.operation,
+                                          "parameters": _parameters(generator)}) from exc
+        except Exception as exc:
+            raise InvalidRequest(f"generator {request.operation} zgłosił błąd: {exc}",
+                                 details={"operation": request.operation}) from exc
+        return CamGenerateOut(
+            operation=request.operation,
+            version=int(getattr(generator, "version", 1)),
+            gcode=text if isinstance(text, str) else "\n".join(text),
+            message="wygenerowano G-code",
+        )
+
+
+__all__ = ["CamService", "load_generators"]

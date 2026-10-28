@@ -1,0 +1,17 @@
+# linumeRT · scenariusz Plant (sesja 024). Model-Author: Claude.
+name: homing_all
+description: "Bazowanie wszystkich osi według homing.order z machine.yaml, potem ruch na pozycję."
+requirements: [REQ-VM-07]
+machine: machines/mill_servo_table_y2.yaml
+duration: 6.0
+steps:
+  - {at: 0.0, action: enable}
+  - {at: 0.01, action: home}
+  - {at: 0.1, action: mdi, command: "G90 G1 X100 Y200 Z-20 F3000"}
+  - {at: 0.11, action: wait, until: {idle: true}, timeout: 5.8}
+expect:
+  - no_alarm: true
+  - position: {axis: X, value: 100.0, tol: 0.01}
+  - position: {axis: Y, value: 200.0, tol: 0.01}
+  - position: {axis: Z, value: -20.0, tol: 0.01}
+  - event: {name: CRASH_HARDSTOP, present: false}
