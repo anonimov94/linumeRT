@@ -40,7 +40,27 @@ PROBE_MACRO = f"""\
 ; os: 0=X 1=Y 2=Z; kierunek +1/-1; droga i odjazd > 0 [mm]; P: 1..9 = G54..G59.3;
 ; wartosc: wspolrzedna punktu styku w ukladzie P (juz z poprawka kalibracji sondy).
 ; G38.2 konczy sie bledem, gdy sonda nie zadziala na drodze - offset nie jest wtedy zapisany.
+; Odmowa przed ruchem (abort): zly argument, G20 albo aktywne G92. #5061..#5063 i #<_x> sa
+; w tym samym ukladzie aktywnym, wiec roznica nie zalezy od offsetu, obrotu ani wyboru P.
 o<lrt_probe> sub
+o1 if [#1 LT 0 OR #1 GT 2]
+  (abort, lrt_probe: os musi byc 0, 1 albo 2)
+o1 endif
+o2 if [#2 NE 1 AND #2 NE -1]
+  (abort, lrt_probe: kierunek musi byc +1 albo -1)
+o2 endif
+o3 if [#3 LE 0 OR #4 LE 0 OR #7 LE 0]
+  (abort, lrt_probe: droga, posuw i odjazd musza byc dodatnie)
+o3 endif
+o4 if [#5 LT 1 OR #5 GT 9]
+  (abort, lrt_probe: P musi byc 1..9)
+o4 endif
+o5 if [#<_metric> EQ 0]
+  (abort, lrt_probe: wymagany G21 - milimetry)
+o5 endif
+o6 if [#5210 NE 0]
+  (abort, lrt_probe: aktywne G92 - wylacz przed sondowaniem)
+o6 endif
 #<abs> = #<_absolute>
 #<dist> = [#2 * #3]
 #<back> = [0 - #2 * #7]
