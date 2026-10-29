@@ -145,6 +145,10 @@ def create_app(app: Application, *, token: str = "",
     # ---- WebSocket ---------------------------------------------------------
     @fastapi_app.websocket("/ws")
     async def websocket(socket: WebSocket) -> None:
+        # Middleware HTTP nie obejmuje handshake WebSocket.
+        if not host_ok(socket.headers.get("host")) or not origin_ok(socket.headers.get("origin")):
+            await socket.close(code=4403)
+            return
         token = socket.query_params.get("token", "") or socket.headers.get("x-lrt-token", "")
         if not token_ok(token):
             await socket.close(code=4401)

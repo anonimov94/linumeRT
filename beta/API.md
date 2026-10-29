@@ -291,3 +291,9 @@ nie jako błąd aplikacji.
 
 Wszystko, co dotyczy fizycznej maszyny, jest **NIEZWERYFIKOWANE NA SPRZĘCIE** —
 testy idą na atrapie (`backend=fake`).
+
+Kontrola Host/Origin obejmuje także handshake WebSocket: niedozwolony Host albo
+Origin spoza skonfigurowanej listy kończy połączenie kodem 4403 przed utworzeniem
+sesji. Niepoprawny token zachowuje kod 4401. Pusta lista Origin zachowuje dotychczasową
+politykę REST (bez filtrowania Origin); listę dla klienta przeglądarkowego ustawiaj
+jawnie przez `--allow-origin`.

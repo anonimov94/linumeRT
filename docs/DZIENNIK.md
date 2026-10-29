@@ -1734,3 +1734,10 @@ Pełny RIP musi ponownie potwierdzić wynik; nie scalać na czerwonym CI.
 - JOG ma dwa rzędy kierunków, M6 osobny rząd; sygnały sterowania bez zmian. Test odrzuca także ukryty przycisk i ucięcie o 1 px.
 - Zrzut docs/raporty/G2/JOG_1280_2026-10-28.png: rzeczywiste Qt offscreen, atrapa CNC, 1280×768; wszystkie przyciski XYZ widoczne.
 - Pełny odbiór GUI/LinuxCNC i pozostałe przewijanie strony nadal otwarte. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## Beta — kontrola połączeń WebSocket · 2026-10-29 · Codex
+- Model-Author: Codex. Kontynuacja wskazanej przez właściciela beta, rozszerzenie 028/029 BETA-WS-GUARD; bez GUI i bez globalnego LOCK.
+- Odtworzone 4 FAIL: obcy Host i Origin spoza listy były akceptowane przez WS z tokenem i bez. Middleware HTTP nie obejmuje handshake WS.
+- Dodano sprawdzenie wspólnej polityki przed accept/sesją; odmowa 4403, błędny token nadal 4401; dozwolony Origin przechodzi.
+- 30 testów REST/WS PASS, lint i check_no_gui PASS; pełna regresja beta w toku. Autokontrola tej poprawki, bez deklaracji przeglądu całego PR #202.
+- Odbiór LinuxCNC/Plant i sprzętu nadal otwarty. NIEZWERYFIKOWANE NA SPRZĘCIE.

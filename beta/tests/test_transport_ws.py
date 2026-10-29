@@ -198,3 +198,26 @@ def test_jog_przez_ws_dostaje_sesje_i_staje_po_rozlaczeniu(app, client) -> None:
     # oznacza zatrzymany ruch — deadman zadziałał po zerwaniu połączenia.
     assert app.backend.machine._jog.get("X", 0.0) == 0.0, \
         "jog musi stanąć po zerwaniu połączenia"
+
+
+@pytest.mark.parametrize("token", ["", "sekret"])
+@pytest.mark.parametrize("headers", [
+    {"host": "foreign.example"},
+    {"host": "testserver", "origin": "https://foreign.example"},
+])
+def test_ws_odrzuca_host_i_origin_przed_sesja(app, token, headers):
+    server = create_app(app, token=token, extra_hosts=(TEST_HOST,),
+                        allow_origins=("https://panel.example",))
+    with TestClient(server) as http:
+        with pytest.raises(WebSocketDisconnect) as exc:
+            with http.websocket_connect(ws_url(token), headers=headers):
+                pytest.fail("niedozwolone polaczenie zostalo przyjete")
+        assert exc.value.code == 4403
+
+
+def test_ws_dozwolony_origin_przechodzi(app):
+    server = create_app(app, token="sekret", extra_hosts=(TEST_HOST,),
+                        allow_origins=("https://panel.example",))
+    with TestClient(server) as http:
+        with http.websocket_connect(ws_url(), headers={"origin": "https://panel.example"}) as ws:
+            assert ws.receive_json()["type"] == "hello"

@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated": "2026-10-27",
+  "updated": "2026-10-29",
   "model_author": "Codex",
   "original_count": 84,
   "origin_commit": "796c6a2",
@@ -2038,6 +2038,22 @@
         "core/linumert/generators/surfacing.py",
         "core/linumert/programs/stl_section.py",
         "tests/test_cam_interpreter.py"
+      ]
+    },
+    {
+      "id": "BETA-WS-GUARD",
+      "title": "Beta bez GUI: kontrola Host/Origin WebSocket",
+      "parents": [
+        "028",
+        "029"
+      ],
+      "status": "done",
+      "progress": "2026-10-29 Codex: na jawne polecenie kontynuacji beta odtworzono cztery przypadki obejścia Host/Origin w WebSocket (z tokenem i bez). Handshake sprawdza tę samą politykę co REST przed accept i utworzeniem sesji; odmowa 4403. 30 testów transportów oraz lint i check_no_gui PASS. To zamknięcie poprawki transportu, nie całego PR beta ani odbioru LinuxCNC/Plant.",
+      "remaining": [],
+      "evidence": [
+        "beta/tests/test_transport_ws.py",
+        "beta/src/linumert_headless/transport/rest.py",
+        "https://github.com/anonimov94/linumeRT/pull/202"
       ]
     }
   ]

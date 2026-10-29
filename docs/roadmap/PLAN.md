@@ -1,7 +1,7 @@
 <!-- Generowane przez python3 tools/roadmap.py; edytuj docs/roadmap/plan.json. -->
 # Wspólny plan linumeRT
 
-Pierwotny plan: **84 sesje M0–M6**, commit `796c6a2`. Stan na 2026-10-27: planowane: 15; w toku: 0; częściowe: 30; do odbioru: 0; ukończone: 39; zablokowane: 0.
+Pierwotny plan: **84 sesje M0–M6**, commit `796c6a2`. Stan na 2026-10-29: planowane: 15; w toku: 0; częściowe: 30; do odbioru: 0; ukończone: 39; zablokowane: 0.
 
 Zakończenie części implementacji nie oznacza odbioru całej funkcji ani sprzętu.
 
@@ -154,6 +154,7 @@ Nie są kolejnym harmonogramem. Ich status dotyczy tylko wskazanego kroku.
 | CNC-BACKEND | 039, 041, 043, 051, 061, 063, 069 | Backend napędów, cykli technologicznych i płaskorzeźby STL | częściowe |
 | WEBHMI-POC | 028, 029, 055 | HTML/WebGL: integracja strony z bramą LinuxCNC | częściowe |
 | CAM-2D-TEXT-STL | 040, 043, 045, 046 | Strategie CAM 2D, napisy i przekroje STL | ukończone |
+| BETA-WS-GUARD | 028, 029 | Beta bez GUI: kontrola Host/Origin WebSocket | ukończone |
 
 ## Postęp, pozostały zakres i dowody
 
@@ -1040,4 +1041,10 @@ Pozostaje: Odbiór rzeczywistej przeglądarki: DRO, scena WebGL ≤30 FPS, jog i
 **ukończone**. Polecenie właściciela 2026-10-26: więcej strategii, kształtów, napisy/czcionki i STL. Planowanie v2 X/Y: zygzak, jednokierunkowo, krzyżowo i współśrodkowo CW/CCW; v1 zachowana. Kształty parametryczne z konturem i kreskowaniem, tolerancja krzywych; napisy z czcionką, stylem, rozmiarem i układem. STL ASCII/binary w tle, model poglądowy 3D i zamknięty przekrój XY do kroku. Geometria utrwalona w .lnx, zoom/pan, GUI 1280×768; kontrola zakresów i budżetów. Zakres STL ograniczony do przekroju XY, bez frezowania powierzchni 3D. Autokontrola i dowody PR #184; nie zamyka odbioru pulpitu ani M3/M4.
 
 Źródła: [PR](https://github.com/anonimov94/linumeRT/pull/184), [docs/raporty/CAM_2D_2026-10-26.md](../raporty/CAM_2D_2026-10-26.md), [core/linumert/generators/shapes.py](../../core/linumert/generators/shapes.py), [core/linumert/generators/engraving.py](../../core/linumert/generators/engraving.py), [core/linumert/generators/surfacing.py](../../core/linumert/generators/surfacing.py), [core/linumert/programs/stl_section.py](../../core/linumert/programs/stl_section.py), [tests/test_cam_interpreter.py](../../tests/test_cam_interpreter.py).
+
+### BETA-WS-GUARD — Beta bez GUI: kontrola Host/Origin WebSocket
+
+**ukończone**. 2026-10-29 Codex: na jawne polecenie kontynuacji beta odtworzono cztery przypadki obejścia Host/Origin w WebSocket (z tokenem i bez). Handshake sprawdza tę samą politykę co REST przed accept i utworzeniem sesji; odmowa 4403. 30 testów transportów oraz lint i check_no_gui PASS. To zamknięcie poprawki transportu, nie całego PR beta ani odbioru LinuxCNC/Plant.
+
+Źródła: [beta/tests/test_transport_ws.py](../../beta/tests/test_transport_ws.py), [beta/src/linumert_headless/transport/rest.py](../../beta/src/linumert_headless/transport/rest.py), [PR](https://github.com/anonimov94/linumeRT/pull/202).
 
