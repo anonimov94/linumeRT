@@ -1739,5 +1739,5 @@ Pełny RIP musi ponownie potwierdzić wynik; nie scalać na czerwonym CI.
 - Model-Author: Codex. Kontynuacja wskazanej przez właściciela beta, rozszerzenie 028/029 BETA-WS-GUARD; bez GUI i bez globalnego LOCK.
 - Odtworzone 4 FAIL: obcy Host i Origin spoza listy były akceptowane przez WS z tokenem i bez. Middleware HTTP nie obejmuje handshake WS.
 - Dodano sprawdzenie wspólnej polityki przed accept/sesją; odmowa 4403, błędny token nadal 4401; dozwolony Origin przechodzi.
-- 30 testów REST/WS PASS, lint i check_no_gui PASS; pełna regresja beta w toku. Autokontrola tej poprawki, bez deklaracji przeglądu całego PR #202.
+- 30 testów REST/WS PASS, lint i check_no_gui PASS; pełna regresja beta: 907 testów PASS w Debian12/Python3.11; CI beta python i plant-core PASS dla 3b5bf78. Autokontrola tej poprawki, bez deklaracji przeglądu całego PR #202.
 - Odbiór LinuxCNC/Plant i sprzętu nadal otwarty. NIEZWERYFIKOWANE NA SPRZĘCIE.

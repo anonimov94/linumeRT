@@ -1044,7 +1044,7 @@ Pozostaje: Odbiór rzeczywistej przeglądarki: DRO, scena WebGL ≤30 FPS, jog i
 
 ### BETA-WS-GUARD — Beta bez GUI: kontrola Host/Origin WebSocket
 
-**ukończone**. 2026-10-29 Codex: na jawne polecenie kontynuacji beta odtworzono cztery przypadki obejścia Host/Origin w WebSocket (z tokenem i bez). Handshake sprawdza tę samą politykę co REST przed accept i utworzeniem sesji; odmowa 4403. 30 testów transportów oraz lint i check_no_gui PASS. To zamknięcie poprawki transportu, nie całego PR beta ani odbioru LinuxCNC/Plant.
+**ukończone**. 2026-10-29 Codex: na jawne polecenie kontynuacji beta odtworzono cztery przypadki obejścia Host/Origin w WebSocket (z tokenem i bez). Handshake sprawdza tę samą politykę co REST przed accept i utworzeniem sesji; odmowa 4403. 30 testów transportów oraz lint i check_no_gui PASS. To zamknięcie poprawki transportu, nie całego PR beta ani odbioru LinuxCNC/Plant. Pełna regresja Debian12/Python3.11: 907 testów PASS; CI beta python i plant-core PASS dla 3b5bf78.
 
 Źródła: [beta/tests/test_transport_ws.py](../../beta/tests/test_transport_ws.py), [beta/src/linumert_headless/transport/rest.py](../../beta/src/linumert_headless/transport/rest.py), [PR](https://github.com/anonimov94/linumeRT/pull/202).
 
