@@ -508,3 +508,10 @@ GUI ani nowych prac wizualnych. To jawna zmiana bieżącego priorytetu względem
 Wybrana porcja backendu: 066, niespójność pozycji magazynu pomiędzy Plant a generowanym
 makrem M6 oraz kontrola geometrii przed eksportem. Korzystamy z istniejącego modelu
 magazynu i jednego machine.yaml. Pełny ATC i wcześniejsze bramki pozostają otwarte.
+
+## Kontynuacja beta bez GUI — 2026-10-29
+
+Model-Author: Codex. Właściciel wskazał jawnie checkout linumeRT-beta i kontynuację
+według AGENTS.md. Zakres bieżącej porcji: zgodność ochrony transportów REST/WS
+w beta/, powiązana z 028/029. Nie wznawiamy prac wizualnych ani edycji lite.
+Odbiory LinuxCNC/Plant i wcześniejsze bramki pozostają otwarte.

@@ -1,0 +1,20 @@
+# Artefakty projektu beta (aplikacja bez GUI).
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+build/
+dist/
+*.egg-info/
+.venv/
+
+# Stan działania: baza narzędzi tworzona na miejscu, logi, raporty, konfiguracje z podglądu.
+state/
+
+# Kontrakt jest generowany (`make contract`) — trzymamy go w repo jako dowód wersji API,
+# ale lokalne nadpisania nie powinny zaśmiecać diffów.
+api/contract.local.json
+
+# Rdzeń dynamiki Plant w C.
+plant_core/build/
+plant_core/build-san/

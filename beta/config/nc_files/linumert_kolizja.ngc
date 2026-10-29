@@ -1,0 +1,16 @@
+( linumeRT · program testowy kolizji: ruch szybki G0 w materiał → K-302 i E-STOP )
+( SPDX-License-Identifier: GPL-2.0-or-later )
+( Reset: grzyb E-STOP w HMI; potem wyjazd w górę w trybie ręcznym )
+;@STOCK BOX X150 Y150 Z30 ORIGIN=TOP_FRONT_LEFT OFFSET=G54 MAT="aluminium"
+G21 G90 G17 G40 G49 G80 G54
+G53 G0 Z0
+T1 M6
+G43 H1
+S12000 M3
+G0 Z10
+G0 X50 Y50
+G0 Z-3
+G1 X100 F600
+G0 Z10
+M5
+M2

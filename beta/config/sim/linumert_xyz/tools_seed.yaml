@@ -1,0 +1,29 @@
+# Narzędzia startowe symulatora linumeRT XYZ (pierwsze uruchomienie: baza narzędzi ← ten plik,
+# potem tool.tbl ← baza). length = Z w tool.tbl (wierzchołek → nos wrzeciona) [mm].
+# params jak w core/linumert/tools/types.py: d, l (wysięg z oprawki), flute_length, flutes,
+# max_rpm, hand (1 = prawe M3, -1 = lewe M4), d_wear (korekcja średnicy ±1 mm), holder_d, holder_l.
+# Wartości przykładowe. Model-Author: Claude · 2026-10-19.
+tools:
+  - {number: 1, type: flat, description: "frez palcowy 6 mm, 2 ostrza", length: 75,
+     params: {d: 6, l: 35, flute_length: 18, flutes: 2, max_rpm: 24000, hand: 1, d_wear: 0}}
+  - {number: 2, type: flat, description: "frez palcowy 10 mm, 3 ostrza", length: 80,
+     params: {d: 10, l: 40, flute_length: 22, flutes: 3, max_rpm: 18000, hand: 1, d_wear: 0}}
+  - {number: 3, type: drill_118, description: "wiertło 5 mm 118°", length: 95,
+     params: {d: 5, l: 55, flute_length: 40, flutes: 2, max_rpm: 6000, hand: 1}}
+  - {number: 4, type: chamfer, description: "fazownik 90° 10 mm", length: 70,
+     params: {d: 10, angle: 90, l: 30, flutes: 2, max_rpm: 15000, hand: 1}}
+  - {number: 5, type: face_mill, description: "głowica 50 mm, 4 płytki", length: 65,
+     params: {d: 50, h: 8, l: 30, flutes: 4, max_rpm: 9000, hand: 1, holder_d: 40}}
+  - {number: 6, type: ball, description: "frez kulowy 8 mm", length: 80,
+     params: {d: 8, l: 40, flute_length: 16, flutes: 2, max_rpm: 24000, hand: 1}}
+  - {number: 7, type: bull, description: "frez torusowy 12 mm R1", length: 80,
+     params: {d: 12, l: 40, corner_radius: 1, flute_length: 24, flutes: 4, max_rpm: 15000,
+              hand: 1}}
+  - {number: 8, type: tslot, description: "frez teowy 20 × 4 mm", length: 75,
+     params: {d: 20, width: 4, neck_d: 8, neck_l: 12, l: 30, flutes: 6, max_rpm: 8000, hand: 1}}
+  - {number: 9, type: lollipop, description: "frez lizakowy 6 mm", length: 75,
+     params: {d: 6, neck_d: 3.5, neck_l: 15, l: 30, max_rpm: 20000, hand: 1}}
+  - {number: 10, type: tap, description: "gwintownik M6", length: 85,
+     params: {d: 6, l: 45, pitch: 1, flute_length: 15, max_rpm: 800, hand: 1}}
+  - {number: 11, type: flat, description: "frez palcowy 8 mm lewy (M4)", length: 75,
+     params: {d: 8, l: 35, flute_length: 20, flutes: 3, max_rpm: 20000, hand: -1}}

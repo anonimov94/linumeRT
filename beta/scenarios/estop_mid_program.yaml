@@ -1,0 +1,17 @@
+# linumeRT · scenariusz Plant (sesja 024). Model-Author: Claude.
+name: estop_mid_program
+description: "E-STOP w trakcie ruchu: pętla otwarta (E-1100), napędy w STO, program przerwany."
+requirements: [REQ-QA-03]
+machine: ../../config/machines/mill_servo_table.yaml
+program: programs/long_feed.ngc
+master: both
+duration: 2.0
+steps:
+  - {at: 0.0, action: enable}
+  - {at: 0.05, action: program}
+  - {at: 1.0, action: fault, fault: estop}
+expect:
+  - alarm: {code: E-1100, within_s: 1.5}   # LinuxCNC: odczyt stanu co 10–20 ms + reakcja estop_latch
+  - completed: false
+  - event: {name: ESTOP}
+  - drive_state: {axis: X, is: FAULT}

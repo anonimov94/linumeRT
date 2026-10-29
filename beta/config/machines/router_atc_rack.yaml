@@ -1,0 +1,72 @@
+# Frezarka portalowa z liniowym magazynem narzedzi (ATC, 6 gniazd).
+schema_version: 1
+machine: {name: router_atc_rack, type: router}
+kinematics: {preset: router_gantry_xyz}
+axes:
+  - letter: X
+    drives: [drv_x]
+    travel: [0, 600]
+    soft_limits: [1, 599]
+    limits:
+      min: {position: 0.5, input: lim_x_min}
+      max: {position: 599.5, input: lim_x_max}
+    hardstops: {min: {position: -2}, max: {position: 602}}
+    home_sensor: {shared_with: limit_min}
+    max_velocity: 200
+    max_acceleration: 1000
+    homing: {method: switch, direction: -1, search_speed: 40, latch_speed: 4, order: 1}
+  - letter: Y
+    drives: [drv_y1, drv_y2]
+    travel: [0, 900]
+    soft_limits: [1, 899]
+    limits:
+      min: {position: 0.5, input: lim_y_min}
+      max: {position: 899.5, input: lim_y_max}
+    hardstops: {min: {position: -2}, max: {position: 902}}
+    home_sensor: {shared_with: limit_min}
+    max_velocity: 200
+    max_acceleration: 1000
+    homing: {method: switch, direction: -1, search_speed: 40, latch_speed: 4, order: 1, gantry_square: true}
+    gantry_max_skew: 0.5
+  - letter: Z
+    drives: [drv_z]
+    travel: [-120, 0]
+    soft_limits: [-119, -1]
+    limits:
+      max: {position: -0.5, input: lim_z_max}
+    hardstops: {max: {position: 2}}
+    home_sensor: {shared_with: limit_max}
+    max_velocity: 80
+    max_acceleration: 500
+    homing: {method: switch, direction: 1, search_speed: 20, latch_speed: 2, order: 0}
+drives:
+  - {id: drv_x, template: stepper_nema23_3nm}
+  - {id: drv_y1, template: stepper_nema23_3nm}
+  - {id: drv_y2, template: stepper_nema23_3nm}
+  - {id: drv_z, template: stepper_nema23_3nm}
+  - {id: drv_spindle, template: spindle_vfd_22kw}
+toolchanger:
+  type: rack_linear
+  slots: 6
+  base_position: [20, 20, -5]
+  pitch_mm: 60
+  approach_z: -20
+  retract_z: -5
+  cover: {actuation_ms: 800, sensor_open: cover_opened, sensor_closed: cover_closed}
+  clamp: {time_ms: 300, sensor: tool_clamped}
+  outputs: {clamp_release: tool_release, cover_open: cover_open}
+spindle: {drive: drv_spindle, max_rpm: 24000, min_rpm: 6000}
+positions:
+  manual_change: [300, 450, -5]
+  safe_z: -5
+  tool_setter: {position: [50, 50, -100], height: 30, input: toolsetter}
+collision_bodies:
+  - {name: wrzeciono, shape: cylinder, attached_to: spindle, size: [80, 150], position: [0, 0, 75]}
+  - {name: stol, shape: box, attached_to: table, size: [700, 1000, 40], position: [300, 450, -150]}
+  # regał 6 gniazd (x 20…320, y 20) poniżej wysokości gniazda approach_z = -20 (sesja 020)
+  - {name: magazyn, shape: box, attached_to: magazine, size: [380, 60, 60], position: [170, 20, -60]}
+io:
+  inputs: {estop: 0, lim_x_min: 1, lim_x_max: 2, lim_y_min: 3, lim_y_max: 4, lim_z_max: 5, toolsetter: 6,
+           tool_clamped: 7, cover_opened: 8, cover_closed: 9}
+  outputs: {spindle_on: 0, coolant: 1, tool_release: 2, cover_open: 3}
+  estop: {input: estop, contact: NC}

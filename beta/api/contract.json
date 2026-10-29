@@ -1,0 +1,5553 @@
+{
+  "application": "linumeRT headless",
+  "version": "0.1.0",
+  "domains": [
+    "access",
+    "alarm",
+    "cam",
+    "config",
+    "diag",
+    "machine",
+    "offset",
+    "plant",
+    "program",
+    "sim",
+    "system",
+    "tool"
+  ],
+  "operations": [
+    {
+      "name": "access.audit",
+      "domain": "access",
+      "kind": "query",
+      "summary": "Historia zdarzeń dostępu",
+      "status": "implemented",
+      "safety": "none",
+      "role": "operator",
+      "idempotent": true,
+      "plan": "",
+      "request": {
+        "additionalProperties": false,
+        "properties": {
+          "limit": {
+            "default": 200,
+            "maximum": 10000,
+            "minimum": 1,
+            "title": "Limit",
+            "type": "integer"
+          },
+          "action": {
+            "default": "",
+            "title": "Action",
+            "type": "string"
+          }
+        },
+        "title": "AccessAuditRequest",
+        "type": "object"
+      },
+      "result": {
+        "additionalProperties": false,
+        "properties": {
+          "entries": {
+            "items": {
+              "$ref": "#/$defs/AccessAuditEntry"
+            },
+            "title": "Entries",
+            "type": "array"
+          }
+        },
+        "title": "AccessAuditOut",
+        "type": "object"
+      }
+    },
+    {
+      "name": "access.clear_pin",
+      "domain": "access",
+      "kind": "command",
+      "summary": "Usuń PIN roli",
+      "status": "implemented",
+      "safety": "config",
+      "role": "serwis",
+      "idempotent": false,
+      "plan": "",
+      "request": {
+        "additionalProperties": false,
+        "properties": {
+          "role": {
+            "title": "Role",
+            "type": "string"
+          }
+        },
+        "required": [
+          "role"
+        ],
+        "title": "PinClearRequest",
+        "type": "object"
+      },
+      "result": {
+        "additionalProperties": false,
+        "description": "Standardowy wynik polecenia: potwierdzenie i opcjonalny komunikat dla operatora.",
+        "properties": {
+          "ok": {
+            "default": true,
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "message": {
+            "default": "",
+            "title": "Message",
+            "type": "string"
+          },
+          "details": {
+            "additionalProperties": true,
+            "title": "Details",
+            "type": "object"
+          }
+        },
+        "title": "Ok",
+        "type": "object"
+      }
+    },
+    {
+      "name": "access.login",
+      "domain": "access",
+      "kind": "command",
+      "summary": "Zaloguj rolę PIN-em",
+      "status": "implemented",
+      "safety": "none",
+      "role": "operator",
+      "idempotent": false,
+      "plan": "",
+      "request": {
+        "additionalProperties": false,
+        "properties": {
+          "role": {
+            "enum": [
+              "operator",
+              "technolog",
+              "serwis"
+            ],
+            "title": "Role",
+            "type": "string"
+          },
+          "pin": {
+            "maxLength": 32,
+            "minLength": 1,
+            "title": "Pin",
+            "type": "string"
+          }
+        },
+        "required": [
+          "role",
+          "pin"
+        ],
+        "title": "LoginRequest",
+        "type": "object"
+      },
+      "result": {
+        "additionalProperties": false,
+        "properties": {
+          "ok": {
+            "default": true,
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "role": {
+            "default": "operator",
+            "title": "Role",
+            "type": "string"
+          },
+          "token": {
+            "default": "",
+            "title": "Token",
+            "type": "string"
+          },
+          "enforced": {
+            "default": false,
+            "title": "Enforced",
+            "type": "boolean"
+          },
+          "message": {
+            "default": "",
+            "title": "Message",
+            "type": "string"
+          }
+        },
+        "title": "LoginOut",
+        "type": "object"
+      }
+    },
+    {
+      "name": "access.logout",
+      "domain": "access",
+      "kind": "command",
+      "summary": "Wyloguj bieżącą sesję",
+      "status": "implemented",
+      "safety": "none",
+      "role": "operator",
+      "idempotent": false,
+      "plan": "",
+      "request": {
+        "additionalProperties": false,
+        "description": "Operacje bez parametrów i bez wyniku merytorycznego.",
+        "properties": {},
+        "title": "Empty",
+        "type": "object"
+      },
+      "result": {
+        "additionalProperties": false,
+        "description": "Standardowy wynik polecenia: potwierdzenie i opcjonalny komunikat dla operatora.",
+        "properties": {
+          "ok": {
+            "default": true,
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "message": {
+            "default": "",
+            "title": "Message",
+            "type": "string"
+          },
+          "details": {
+            "additionalProperties": true,
+            "title": "Details",
+            "type": "object"
+          }
+        },
+        "title": "Ok",
+        "type": "object"
+      }
+    },
+    {
+      "name": "access.roles",
+      "domain": "access",
+      "kind": "query",
+      "summary": "Role z PIN-ami i wymagana rola dla uprawnień",
+      "status": "implemented",
+      "safety": "none",
+      "role": "operator",
+      "idempotent": true,
+      "plan": "",
+      "request": {
+        "additionalProperties": false,
+        "description": "Operacje bez parametrów i bez wyniku merytorycznego.",
+        "properties": {},
+        "title": "Empty",
+        "type": "object"
+      },
+      "result": {
+        "additionalProperties": false,
+        "description": "Role z PIN-ami i minimalna rola wymagana dla każdego uprawnienia.",
+        "properties": {
+          "configured": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Configured",
+            "type": "array"
+          },
+          "required": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Required",
+            "type": "object"
+          }
+        },
+        "title": "AccessRolesOut",
+        "type": "object"
+      }
+    },
+    {
+      "name": "access.session",
+      "domain": "access",
+      "kind": "query",
+      "summary": "Bieżąca sesja i uprawnienia",
+      "status": "implemented",
+      "safety": "none",
+      "role": "operator",
+      "idempotent": true,
+      "plan": "",
+      "request": {
+        "additionalProperties": false,
+        "description": "Operacje bez parametrów i bez wyniku merytorycznego.",
+        "properties": {},
+        "title": "Empty",
+        "type": "object"
+      },
+      "result": {
+        "additionalProperties": false,
+        "properties": {
+          "role": {
+            "default": "operator",
+            "title": "Role",
+            "type": "string"
+          },
+          "enforced": {
+            "default": false,
+            "title": "Enforced",
+            "type": "boolean"
+          },
+          "permissions": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Permissions",
+            "type": "array"
+          }
+        },
+        "title": "SessionOut",
+        "type": "object"
+      }
+    },
+    {
+      "name": "access.set_pin",
+      "domain": "access",
+      "kind": "command",
+      "summary": "Ustaw PIN roli",
+      "status": "implemented",
+      "safety": "config",
+      "role": "serwis",
+      "idempotent": false,
+      "plan": "",
+      "request": {
+        "additionalProperties": false,
+        "properties": {
+          "role": {
+            "enum": [
+              "technolog",
+              "serwis"
+            ],
+            "title": "Role",
+            "type": "string"
+          },
+          "pin": {
+            "maxLength": 32,
+            "minLength": 4,
+            "title": "Pin",
+            "type": "string"
+          }
+        },
+        "required": [
+          "role",
+          "pin"
+        ],
+        "title": "PinSetRequest",
+        "type": "object"
+      },
+      "result": {
+        "additionalProperties": false,
+        "description": "Standardowy wynik polecenia: potwierdzenie i opcjonalny komunikat dla operatora.",
+        "properties": {
+          "ok": {
+            "default": true,
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "message": {
+            "default": "",
+            "title": "Message",
+            "type": "string"
+          },
+          "details": {
+            "additionalProperties": true,
+            "title": "Details",
+            "type": "object"
+          }
+        },
+        "title": "Ok",
+        "type": "object"
+      }
+    },
+    {
+      "name": "alarm.ack",
+      "domain": "alarm",
+      "kind": "command",
+      "summary": "Potwierdź alarm albo wszystkie",
+      "status": "implemented",
+      "safety": "none",
+      "role": "operator",
+      "idempotent": false,
+      "plan": "",
+      "request": {
+        "additionalProperties": false,
+        "properties": {
+          "alarm_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "None = potwierdź wszystkie",
+            "title": "Alarm Id"
+          }
+        },
+        "title": "AlarmAckRequest",
+        "type": "object"
+      },
+      "result": {
+        "additionalProperties": false,
+        "description": "Standardowy wynik polecenia: potwierdzenie i opcjonalny komunikat dla operatora.",
+        "properties": {
+          "ok": {
+            "default": true,
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "message": {
+            "default": "",
+            "title": "Message",
+            "type": "string"
+          },
+          "details": {
+            "additionalProperties": true,
+            "title": "Details",
+            "type": "object"
+          }
+        },
+        "title": "Ok",
+        "type": "object"
+      }
+    },
+    {
+      "name": "alarm.codes",
+      "domain": "alarm",
+      "kind": "query",
+      "summary": "Katalog kodów alarmów z komunikatami PL/EN",
+      "status": "implemented",
+      "safety": "none",
+      "role": "operator",
+      "idempotent": true,
+      "plan": "",
+      "request": {
+        "additionalProperties": false,
+        "description": "Operacje bez parametrów i bez wyniku merytorycznego.",
+        "properties": {},
+        "title": "Empty",
+        "type": "object"
+      },
+      "result": {
+        "additionalProperties": false,
+        "properties": {
+          "codes": {
+            "items": {
+              "$ref": "#/$defs/AlarmCodeOut"
+            },
+            "title": "Codes",
+            "type": "array"
+          }
+        },
+        "title": "AlarmCodesOut",
+        "type": "object"
+      }
+    },
+    {
+      "name": "alarm.list",
+      "domain": "alarm",
+      "kind": "query",
+      "summary": "Aktywne alarmy i historia",
+      "status": "implemented",
+      "safety": "none",
+      "role": "operator",
+      "idempotent": true,
+      "plan": "",
+      "request": {
+        "additionalProperties": false,
+        "description": "Operacje bez parametrów i bez wyniku merytorycznego.",
+        "properties": {},
+        "title": "Empty",
+        "type": "object"
+      },
+      "result": {
+        "additionalProperties": false,
+        "properties": {
+          "active": {
+            "items": {
+              "$ref": "#/$defs/AlarmOut"
+            },
+            "title": "Active",
+            "type": "array"
+          },
+          "history": {
+            "items": {
+              "$ref": "#/$defs/AlarmOut"
+            },
+            "title": "History",
+            "type": "array"
+          },
+          "worst_level": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Worst Level"
+          }
+        },
+        "title": "AlarmList",
+        "type": "object"
+      }
+    },
+    {
+      "name": "alarm.raise",
+      "domain": "alarm",
+      "kind": "command",
+      "summary": "Zgłoś alarm (testy i integracje)",
+      "status": "implemented",
+      "safety": "none",
+      "role": "serwis",
+      "idempotent": false,
+      "plan": "",
+      "request": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "params": {
+            "additionalProperties": true,
+            "title": "Params",
+            "type": "object"
+          }
+        },
+        "required": [
+          "code"
+        ],
+        "title": "AlarmRaiseRequest",
+        "type": "object"
+      },
+      "result": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "level": {
+            "default": "",
+            "title": "Level",
+            "type": "string"
+          },
+          "message": {
+            "default": "",
+            "title": "Message",
+            "type": "string"
+          },
+          "raised": {
+            "default": 0.0,
+            "title": "Raised",
+            "type": "number"
+          },
+          "acknowledged": {
+            "default": false,
+            "title": "Acknowledged",
+            "type": "boolean"
+          },
+          "state": {
+            "default": "active",
+            "title": "State",
+            "type": "string"
+          },
+          "count": {
+            "default": 1,
+            "title": "Count",
+            "type": "integer"
+          },
+          "params": {
+            "additionalProperties": true,
+            "title": "Params",
+            "type": "object"
+          }
+        },
+        "required": [
+          "id",
+          "code"
+        ],
+        "title": "AlarmOut",
+        "type": "object"
+      }
+    },
+    {
+      "name": "alarm.reset",
+      "domain": "alarm",
+      "kind": "command",
+      "summary": "Wyczyść alarmy (nie zwalnia E-STOP)",
+      "status": "implemented",
+      "safety": "none",
+      "role": "technolog",
+      "idempotent": false,
+      "plan": "",
+      "request": {
+        "additionalProperties": false,
+        "description": "Operacje bez parametrów i bez wyniku merytorycznego.",
+        "properties": {},
+        "title": "Empty",
+        "type": "object"
+      },
+      "result": {
+        "additionalProperties": false,
+        "description": "Standardowy wynik polecenia: potwierdzenie i opcjonalny komunikat dla operatora.",
+        "properties": {
+          "ok": {
+            "default": true,
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "message": {
+            "default": "",
+            "title": "Message",
+            "type": "string"
+          },
+          "details": {
+            "additionalProperties": true,
+            "title": "Details",
+            "type": "object"
+          }
+        },
+        "title": "Ok",
+        "type": "object"
+      }
+    },
+    {
+      "name": "cam.generate",
+      "domain": "cam",
+      "kind": "command",
+      "summary": "Generuj G-code z parametrów",
+      "status": "implemented",
+      "safety": "none",
+      "role": "technolog",
+      "idempotent": false,
+      "plan": "",
+      "request": {
+        "additionalProperties": false,
+        "properties": {
+          "operation": {
+            "title": "Operation",
+            "type": "string"
+          },
+          "version": {
+            "default": 0,
+            "description": "0 = najnowsza wersja generatora",
+            "title": "Version",
+            "type": "integer"
+          },
+          "parameters": {
+            "additionalProperties": true,
+            "title": "Parameters",
+            "type": "object"
+          }
+        },
+        "required": [
+          "operation"
+        ],
+        "title": "CamGenerateRequest",
+        "type": "object"
+      },
+      "result": {
+        "additionalProperties": false,
+        "properties": {
+          "ok": {
+            "default": true,
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "operation": {
+            "default": "",
+            "title": "Operation",
+            "type": "string"
+          },
+          "version": {
+            "default": 0,
+            "title": "Version",
+            "type": "integer"
+          },
+          "gcode": {
+            "default": "",
+            "title": "Gcode",
+            "type": "string"
+          },
+          "message": {
+            "default": "",
+            "title": "Message",
+            "type": "string"
+          }
+        },
+        "title": "CamGenerateOut",
+        "type": "object"
+      }
+    },
+    {
+      "name": "cam.operations",
+      "domain": "cam",
+      "kind": "query",
+      "summary": "Katalog operacji CAM ze schematem parametrów (formularze GUI)",
+      "status": "implemented",
+      "safety": "none",
+      "role": "operator",
+      "idempotent": true,
+      "plan": "",
+      "request": {
+        "additionalProperties": false,
+        "description": "Operacje bez parametrów i bez wyniku merytorycznego.",
+        "properties": {},
+        "title": "Empty",
+        "type": "object"
+      },
+      "result": {
+        "additionalProperties": false,
+        "properties": {
+          "operations": {
+            "items": {
+              "$ref": "#/$defs/CamOperation"
+            },
+            "title": "Operations",
+            "type": "array"
+          }
+        },
+        "title": "CamCatalog",
+        "type": "object"
+      }
+    },
+    {
+      "name": "config.check_deployment",
+      "domain": "config",
+      "kind": "query",
+      "summary": "Sprawdź wdrożoną konfigurację LinuxCNC",
+      "status": "implemented",
+      "safety": "none",
+      "role": "operator",
+      "idempotent": true,
+      "plan": "",
+      "request": {
+        "additionalProperties": false,
+        "properties": {
+          "ini": {
+            "title": "Ini",
+            "type": "string"
+          }
+        },
+        "required": [
+          "ini"
+        ],
+        "title": "DeploymentCheckRequest",
+        "type": "object"
+      },
+      "result": {
+        "additionalProperties": false,
+        "properties": {
+          "ok": {
+            "default": true,
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "issues": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Issues",
+            "type": "array"
+          },
+          "hal_files": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Hal Files",
+            "type": "array"
+          }
+        },
+        "title": "DeploymentCheckOut",
+        "type": "object"
+      }
+    },
+    {
+      "name": "config.generate",
+      "domain": "config",
+      "kind": "command",
+      "summary": "Generuj INI/HAL (podgląd albo zapis)",
+      "status": "implemented",
+      "safety": "config",
+      "role": "technolog",
+      "idempotent": false,
+      "plan": "",
+      "request": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "target": {
+            "default": "sim",
+            "enum": [
+              "sim",
+              "plant"
+            ],
+            "title": "Target",
+            "type": "string"
+          },
+          "write": {
+            "default": false,
+            "description": "zapisz pliki na dysku (inaczej tylko podgląd)",
+            "title": "Write",
+            "type": "boolean"
+          },
+          "out_dir": {
+            "default": "",
+            "title": "Out Dir",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "title": "ConfigGenerateRequest",
+        "type": "object"
+      },
+      "result": {
+        "additionalProperties": false,
+        "properties": {
+          "ok": {
+            "default": true,
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "files": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "nazwa → treść",
+            "title": "Files",
+            "type": "object"
+          },
+          "written": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Written",
+            "type": "array"
+          },
+          "message": {
+            "default": "",
+            "title": "Message",
+            "type": "string"
+          }
+        },
+        "title": "ConfigGenerateOut",
+        "type": "object"
+      }
+    },
+    {
+      "name": "config.machine_get",
+      "domain": "config",
+      "kind": "query",
+      "summary": "Konfiguracja maszyny",
+      "status": "implemented",
+      "safety": "none",
+      "role": "operator",
+      "idempotent": true,
+      "plan": "",
+      "request": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "title": "MachineConfigName",
+        "type": "object"
+      },
+      "result": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "path": {
+            "title": "Path",
+            "type": "string"
+          },
+          "axes": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Axes",
+            "type": "array"
+          },
+          "data": {
+            "additionalProperties": true,
+            "title": "Data",
+            "type": "object"
+          }
+        },
+        "required": [
+          "name",
+          "path"
+        ],
+        "title": "MachineConfigOut",
+        "type": "object"
+      }
+    },
+    {
+      "name": "config.machines",
+      "domain": "config",
+      "kind": "query",
+      "summary": "Maszyny z config/machines wraz z walidacją",
+      "status": "implemented",
+      "safety": "none",
+      "role": "operator",
+      "idempotent": true,
+      "plan": "",
+      "request": {
+        "additionalProperties": false,
+        "description": "Operacje bez parametrów i bez wyniku merytorycznego.",
+        "properties": {},
+        "title": "Empty",
+        "type": "object"
+      },
+      "result": {
+        "additionalProperties": false,
+        "properties": {
+          "root": {
+            "default": "",
+            "title": "Root",
+            "type": "string"
+          },
+          "machines": {
+            "items": {
+              "$ref": "#/$defs/MachineConfigSummary"
+            },
+            "title": "Machines",
+            "type": "array"
+          }
+        },
+        "title": "MachineConfigList",
+        "type": "object"
+      }
+    },
+    {
+      "name": "config.validate",
+      "domain": "config",
+      "kind": "query",
+      "summary": "Walidacja machine.yaml",
+      "status": "implemented",
+      "safety": "none",
+      "role": "operator",
+      "idempotent": true,
+      "plan": "",
+      "request": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "title": "MachineConfigName",
+        "type": "object"
+      },
+      "result": {
+        "additionalProperties": false,
+        "properties": {
+          "ok": {
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "errors": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Errors",
+            "type": "array"
+          }
+        },
+        "required": [
+          "ok"
+        ],
+        "title": "ConfigValidateOut",
+        "type": "object"
+      }
+    },
+    {
+      "name": "diag.cia402",
+      "domain": "diag",
+      "kind": "query",
+      "summary": "Dekoduj statusword CiA 402",
+      "status": "implemented",
+      "safety": "none",
+      "role": "operator",
+      "idempotent": true,
+      "plan": "",
+      "request": {
+        "additionalProperties": false,
+        "properties": {
+          "statusword": {
+            "maximum": 65535,
+            "minimum": 0,
+            "title": "Statusword",
+            "type": "integer"
+          },
+          "error_code": {
+            "default": 0,
+            "maximum": 65535,
+            "minimum": 0,
+            "title": "Error Code",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "statusword"
+        ],
+        "title": "Cia402Request",
+        "type": "object"
+      },
+      "result": {
+        "additionalProperties": false,
+        "properties": {
+          "state": {
+            "default": "",
+            "title": "State",
+            "type": "string"
+          },
+          "description": {
+            "default": "",
+            "title": "Description",
+            "type": "string"
+          },
+          "flags": {
+            "additionalProperties": {
+              "type": "boolean"
+            },
+            "title": "Flags",
+            "type": "object"
+          },
+          "error_text": {
+            "default": "",
+            "title": "Error Text",
+            "type": "string"
+          }
+        },
+        "title": "Cia402Out",
+        "type": "object"
+      }
+    },
+    {
+      "name": "diag.doctor",
+      "domain": "diag",
+      "kind": "query",
+      "summary": "Inwentaryzacja środowiska (read-only)",
+      "status": "implemented",
+      "safety": "none",
+      "role": "operator",
+      "idempotent": true,
+      "plan": "",
+      "request": {
+        "additionalProperties": false,
+        "description": "Operacje bez parametrów i bez wyniku merytorycznego.",
+        "properties": {},
+        "title": "Empty",
+        "type": "object"
+      },
+      "result": {
+        "additionalProperties": false,
+        "properties": {
+          "ok": {
+            "default": true,
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "entries": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Entries",
+            "type": "array"
+          },
+          "report": {
+            "default": "",
+            "title": "Report",
+            "type": "string"
+          }
+        },
+        "title": "DiagDoctor",
+        "type": "object"
+      }
+    },
+    {
+      "name": "diag.journal",
+      "domain": "diag",
+      "kind": "query",
+      "summary": "Dziennik zdarzeń",
+      "status": "implemented",
+      "safety": "none",
+      "role": "operator",
+      "idempotent": true,
+      "plan": "",
+      "request": {
+        "additionalProperties": false,
+        "properties": {
+          "limit": {
+            "default": 200,
+            "maximum": 10000,
+            "minimum": 1,
+            "title": "Limit",
+            "type": "integer"
+          },
+          "kind": {
+            "default": "",
+            "title": "Kind",
+            "type": "string"
+          }
+        },
+        "title": "DiagJournalRequest",
+        "type": "object"
+      },
+      "result": {
+        "additionalProperties": false,
+        "properties": {
+          "entries": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Entries",
+            "type": "array"
+          },
+          "warning": {
+            "default": "",
+            "title": "Warning",
+            "type": "string"
+          }
+        },
+        "title": "DiagJournalOut",
+        "type": "object"
+      }
+    },
+    {
+      "name": "diag.journal_csv",
+      "domain": "diag",
+      "kind": "query",
+      "summary": "Dziennik zdarzeń jako CSV (eksport)",
+      "status": "implemented",
+      "safety": "none",
+      "role": "operator",
+      "idempotent": true,
+      "plan": "",
+      "request": {
+        "additionalProperties": false,
+        "properties": {
+          "limit": {
+            "default": 200,
+            "maximum": 10000,
+            "minimum": 1,
+            "title": "Limit",
+            "type": "integer"
+          },
+          "kind": {
+            "default": "",
+            "title": "Kind",
+            "type": "string"
+          }
+        },
+        "title": "DiagJournalRequest",
+        "type": "object"
+      },
+      "result": {
+        "additionalProperties": false,
+        "properties": {
+          "csv": {
+            "default": "",
+            "title": "Csv",
+            "type": "string"
+          },
+          "lines": {
+            "default": 0,
+            "title": "Lines",
+            "type": "integer"
+          }
+        },
+        "title": "JournalCsvOut",
+        "type": "object"
+      }
+    },
+    {
+      "name": "machine.axes",
+      "domain": "machine",
+      "kind": "query",
+      "summary": "Znane litery osi",
+      "status": "implemented",
+      "safety": "none",
+      "role": "operator",
+      "idempotent": true,
+      "plan": "",
+      "request": {
+        "additionalProperties": false,
+        "description": "Operacje bez parametrów i bez wyniku merytorycznego.",
+        "properties": {},
+        "title": "Empty",
+        "type": "object"
+      },
+      "result": {
+        "additionalProperties": false,
+        "properties": {
+          "axes": {
+            "items": {
+              "enum": [
+                "X",
+                "Y",
+                "Z",
+                "A",
+                "B",
+                "C",
+                "U",
+                "V",
+                "W"
+              ],
+              "type": "string"
+            },
+            "title": "Axes",
+            "type": "array"
+          }
+        },
+        "title": "AxisList",
+        "type": "object"
+      }
+    },
+    {
+      "name": "machine.estop",
+      "domain": "machine",
+      "kind": "command",
+      "summary": "Aktywuj E-STOP",
+      "status": "implemented",
+      "safety": "stop",
+      "role": "operator",
+      "idempotent": true,
+      "plan": "",
+      "request": {
+        "additionalProperties": false,
+        "description": "Operacje bez parametrów i bez wyniku merytorycznego.",
+        "properties": {},
+        "title": "Empty",
+        "type": "object"
+      },
+      "result": {
+        "additionalProperties": false,
+        "description": "Standardowy wynik polecenia: potwierdzenie i opcjonalny komunikat dla operatora.",
+        "properties": {
+          "ok": {
+            "default": true,
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "message": {
+            "default": "",
+            "title": "Message",
+            "type": "string"
+          },
+          "details": {
+            "additionalProperties": true,
+            "title": "Details",
+            "type": "object"
+          }
+        },
+        "title": "Ok",
+        "type": "object"
+      }
+    },
+    {
+      "name": "machine.estop_reset",
+      "domain": "machine",
+      "kind": "command",
+      "summary": "Reset E-STOP (rola serwisu)",
+      "status": "implemented",
+      "safety": "stop",
+      "role": "serwis",
+      "idempotent": false,
+      "plan": "",
+      "request": {
+        "additionalProperties": false,
+        "description": "Operacje bez parametrów i bez wyniku merytorycznego.",
+        "properties": {},
+        "title": "Empty",
+        "type": "object"
+      },
+      "result": {
+        "additionalProperties": false,
+        "description": "Standardowy wynik polecenia: potwierdzenie i opcjonalny komunikat dla operatora.",
+        "properties": {
+          "ok": {
+            "default": true,
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "message": {
+            "default": "",
+            "title": "Message",
+            "type": "string"
+          },
+          "details": {
+            "additionalProperties": true,
+            "title": "Details",
+            "type": "object"
+          }
+        },
+        "title": "Ok",
+        "type": "object"
+      }
+    },
+    {
+      "name": "machine.home",
+      "domain": "machine",
+      "kind": "command",
+      "summary": "Bazuj oś albo wszystkie osie",
+      "status": "implemented",
+      "safety": "motion",
+      "role": "operator",
+      "idempotent": false,
+      "plan": "",
+      "request": {
+        "additionalProperties": false,
+        "properties": {
+          "axis": {
+            "anyOf": [
+              {
+                "enum": [
+                  "X",
+                  "Y",
+                  "Z",
+                  "A",
+                  "B",
+                  "C",
+                  "U",
+                  "V",
+                  "W"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "None = bazuj wszystkie osie",
+            "title": "Axis"
+          }
+        },
+        "title": "HomeRequest",
+        "type": "object"
+      },
+      "result": {
+        "additionalProperties": false,
+        "description": "Standardowy wynik polecenia: potwierdzenie i opcjonalny komunikat dla operatora.",
+        "properties": {
+          "ok": {
+            "default": true,
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "message": {
+            "default": "",
+            "title": "Message",
+            "type": "string"
+          },
+          "details": {
+            "additionalProperties": true,
+            "title": "Details",
+            "type": "object"
+          }
+        },
+        "title": "Ok",
+        "type": "object"
+      }
+    },
+    {
+      "name": "machine.jog",
+      "domain": "machine",
+      "kind": "command",
+      "summary": "Jog ciągły z deadmanem sesji",
+      "status": "implemented",
+      "safety": "motion",
+      "role": "operator",
+      "idempotent": false,
+      "plan": "",
+      "request": {
+        "additionalProperties": false,
+        "properties": {
+          "axis": {
+            "enum": [
+              "X",
+              "Y",
+              "Z",
+              "A",
+              "B",
+              "C",
+              "U",
+              "V",
+              "W"
+            ],
+            "title": "Axis",
+            "type": "string"
+          },
+          "speed": {
+            "description": "mm/s; 0 = zatrzymanie jogu tej osi",
+            "title": "Speed",
+            "type": "number"
+          },
+          "session": {
+            "default": "",
+            "description": "identyfikator sesji — deadman jogu",
+            "title": "Session",
+            "type": "string"
+          }
+        },
+        "required": [
+          "axis",
+          "speed"
+        ],
+        "title": "JogRequest",
+        "type": "object"
+      },
+      "result": {
+        "additionalProperties": false,
+        "description": "Standardowy wynik polecenia: potwierdzenie i opcjonalny komunikat dla operatora.",
+        "properties": {
+          "ok": {
+            "default": true,
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "message": {
+            "default": "",
+            "title": "Message",
+            "type": "string"
+          },
+          "details": {
+            "additionalProperties": true,
+            "title": "Details",
+            "type": "object"
+          }
+        },
+        "title": "Ok",
+        "type": "object"
+      }
+    },
+    {
+      "name": "machine.jog_increment",
+      "domain": "machine",
+      "kind": "command",
+      "summary": "Jog przyrostowy o zadany krok",
+      "status": "implemented",
+      "safety": "motion",
+      "role": "operator",
+      "idempotent": false,
+      "plan": "",
+      "request": {
+        "additionalProperties": false,
+        "properties": {
+          "axis": {
+            "enum": [
+              "X",
+              "Y",
+              "Z",
+              "A",
+              "B",
+              "C",
+              "U",
+              "V",
+              "W"
+            ],
+            "title": "Axis",
+            "type": "string"
+          },
+          "speed": {
+            "exclusiveMinimum": 0,
+            "maximum": 50.0,
+            "title": "Speed",
+            "type": "number"
+          },
+          "distance": {
+            "description": "krok przyrostowy [mm]",
+            "exclusiveMinimum": 0,
+            "title": "Distance",
+            "type": "number"
+          }
+        },
+        "required": [
+          "axis",
+          "speed",
+          "distance"
+        ],
+        "title": "JogIncrementRequest",
+        "type": "object"
+      },
+      "result": {
+        "additionalProperties": false,
+        "description": "Standardowy wynik polecenia: potwierdzenie i opcjonalny komunikat dla operatora.",
+        "properties": {
+          "ok": {
+            "default": true,
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "message": {
+            "default": "",
+            "title": "Message",
+            "type": "string"
+          },
+          "details": {
+            "additionalProperties": true,
+            "title": "Details",
+            "type": "object"
+          }
+        },
+        "title": "Ok",
+        "type": "object"
+      }
+    },
+    {
+      "name": "machine.jog_stop",
+      "domain": "machine",
+      "kind": "command",
+      "summary": "Zatrzymaj jog",
+      "status": "implemented",
+      "safety": "stop",
+      "role": "operator",
+      "idempotent": true,
+      "plan": "",
+      "request": {
+        "additionalProperties": false,
+        "properties": {
+          "axis": {
+            "anyOf": [
+              {
+                "enum": [
+                  "X",
+                  "Y",
+                  "Z",
+                  "A",
+                  "B",
+                  "C",
+                  "U",
+                  "V",
+                  "W"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "None = zatrzymaj wszystkie osie",
+            "title": "Axis"
+          }
+        },
+        "title": "JogStopRequest",
+        "type": "object"
+      },
+      "result": {
+        "additionalProperties": false,
+        "description": "Standardowy wynik polecenia: potwierdzenie i opcjonalny komunikat dla operatora.",
+        "properties": {
+          "ok": {
+            "default": true,
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "message": {
+            "default": "",
+            "title": "Message",
+            "type": "string"
+          },
+          "details": {
+            "additionalProperties": true,
+            "title": "Details",
+            "type": "object"
+          }
+        },
+        "title": "Ok",
+        "type": "object"
+      }
+    },
+    {
+      "name": "machine.mdi",
+      "domain": "machine",
+      "kind": "command",
+      "summary": "Wykonaj blok MDI",
+      "status": "implemented",
+      "safety": "motion",
+      "role": "operator",
+      "idempotent": false,
+      "plan": "",
+      "request": {
+        "additionalProperties": false,
+        "properties": {
+          "text": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "text"
+        ],
+        "title": "MdiRequest",
+        "type": "object"
+      },
+      "result": {
+        "additionalProperties": false,
+        "description": "Standardowy wynik polecenia: potwierdzenie i opcjonalny komunikat dla operatora.",
+        "properties": {
+          "ok": {
+            "default": true,
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "message": {
+            "default": "",
+            "title": "Message",
+            "type": "string"
+          },
+          "details": {
+            "additionalProperties": true,
+            "title": "Details",
+            "type": "object"
+          }
+        },
+        "title": "Ok",
+        "type": "object"
+      }
+    },
+    {
+      "name": "machine.pause",
+      "domain": "machine",
+      "kind": "command",
+      "summary": "Pauza programu",
+      "status": "implemented",
+      "safety": "stop",
+      "role": "operator",
+      "idempotent": false,
+      "plan": "",
+      "request": {
+        "additionalProperties": false,
+        "description": "Operacje bez parametrów i bez wyniku merytorycznego.",
+        "properties": {},
+        "title": "Empty",
+        "type": "object"
+      },
+      "result": {
+        "additionalProperties": false,
+        "description": "Standardowy wynik polecenia: potwierdzenie i opcjonalny komunikat dla operatora.",
+        "properties": {
+          "ok": {
+            "default": true,
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "message": {
+            "default": "",
+            "title": "Message",
+            "type": "string"
+          },
+          "details": {
+            "additionalProperties": true,
+            "title": "Details",
+            "type": "object"
+          }
+        },
+        "title": "Ok",
+        "type": "object"
+      }
+    },
+    {
+      "name": "machine.power_off",
+      "domain": "machine",
+      "kind": "command",
+      "summary": "Wyłącz zasilanie",
+      "status": "implemented",
+      "safety": "stop",
+      "role": "operator",
+      "idempotent": true,
+      "plan": "",
+      "request": {
+        "additionalProperties": false,
+        "description": "Operacje bez parametrów i bez wyniku merytorycznego.",
+        "properties": {},
+        "title": "Empty",
+        "type": "object"
+      },
+      "result": {
+        "additionalProperties": false,
+        "description": "Standardowy wynik polecenia: potwierdzenie i opcjonalny komunikat dla operatora.",
+        "properties": {
+          "ok": {
+            "default": true,
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "message": {
+            "default": "",
+            "title": "Message",
+            "type": "string"
+          },
+          "details": {
+            "additionalProperties": true,
+            "title": "Details",
+            "type": "object"
+          }
+        },
+        "title": "Ok",
+        "type": "object"
+      }
+    },
+    {
+      "name": "machine.power_on",
+      "domain": "machine",
+      "kind": "command",
+      "summary": "Włącz zasilanie",
+      "status": "implemented",
+      "safety": "motion",
+      "role": "operator",
+      "idempotent": false,
+      "plan": "",
+      "request": {
+        "additionalProperties": false,
+        "description": "Operacje bez parametrów i bez wyniku merytorycznego.",
+        "properties": {},
+        "title": "Empty",
+        "type": "object"
+      },
+      "result": {
+        "additionalProperties": false,
+        "description": "Standardowy wynik polecenia: potwierdzenie i opcjonalny komunikat dla operatora.",
+        "properties": {
+          "ok": {
+            "default": true,
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "message": {
+            "default": "",
+            "title": "Message",
+            "type": "string"
+          },
+          "details": {
+            "additionalProperties": true,
+            "title": "Details",
+            "type": "object"
+          }
+        },
+        "title": "Ok",
+        "type": "object"
+      }
+    },
+    {
+      "name": "machine.resume",
+      "domain": "machine",
+      "kind": "command",
+      "summary": "Wznów program",
+      "status": "implemented",
+      "safety": "motion",
+      "role": "operator",
+      "idempotent": false,
+      "plan": "",
+      "request": {
+        "additionalProperties": false,
+        "description": "Operacje bez parametrów i bez wyniku merytorycznego.",
+        "properties": {},
+        "title": "Empty",
+        "type": "object"
+      },
+      "result": {
+        "additionalProperties": false,
+        "description": "Standardowy wynik polecenia: potwierdzenie i opcjonalny komunikat dla operatora.",
+        "properties": {
+          "ok": {
+            "default": true,
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "message": {
+            "default": "",
+            "title": "Message",
+            "type": "string"
+          },
+          "details": {
+            "additionalProperties": true,
+            "title": "Details",
+            "type": "object"
+          }
+        },
+        "title": "Ok",
+        "type": "object"
+      }
+    },
+    {
+      "name": "machine.run",
+      "domain": "machine",
+      "kind": "command",
+      "summary": "Uruchom program od linii",
+      "status": "implemented",
+      "safety": "motion",
+      "role": "operator",
+      "idempotent": false,
+      "plan": "",
+      "request": {
+        "additionalProperties": false,
+        "properties": {
+          "from_line": {
+            "default": 1,
+            "minimum": 0,
+            "title": "From Line",
+            "type": "integer"
+          }
+        },
+        "title": "RunRequest",
+        "type": "object"
+      },
+      "result": {
+        "additionalProperties": false,
+        "description": "Standardowy wynik polecenia: potwierdzenie i opcjonalny komunikat dla operatora.",
+        "properties": {
+          "ok": {
+            "default": true,
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "message": {
+            "default": "",
+            "title": "Message",
+            "type": "string"
+          },
+          "details": {
+            "additionalProperties": true,
+            "title": "Details",
+            "type": "object"
+          }
+        },
+        "title": "Ok",
+        "type": "object"
+      }
+    },
+    {
+      "name": "machine.set_mode",
+      "domain": "machine",
+      "kind": "command",
+      "summary": "Ustaw tryb MANUAL/AUTO/MDI",
+      "status": "implemented",
+      "safety": "motion",
+      "role": "operator",
+      "idempotent": false,
+      "plan": "",
+      "request": {
+        "additionalProperties": false,
+        "properties": {
+          "mode": {
+            "enum": [
+              "manual",
+              "auto",
+              "mdi"
+            ],
+            "title": "Mode",
+            "type": "string"
+          }
+        },
+        "required": [
+          "mode"
+        ],
+        "title": "ModeRequest",
+        "type": "object"
+      },
+      "result": {
+        "additionalProperties": false,
+        "description": "Standardowy wynik polecenia: potwierdzenie i opcjonalny komunikat dla operatora.",
+        "properties": {
+          "ok": {
+            "default": true,
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "message": {
+            "default": "",
+            "title": "Message",
+            "type": "string"
+          },
+          "details": {
+            "additionalProperties": true,
+            "title": "Details",
+            "type": "object"
+          }
+        },
+        "title": "Ok",
+        "type": "object"
+      }
+    },
+    {
+      "name": "machine.set_override",
+      "domain": "machine",
+      "kind": "command",
+      "summary": "Nastawy posuwu, G0 i wrzeciona",
+      "status": "implemented",
+      "safety": "none",
+      "role": "operator",
+      "idempotent": false,
+      "plan": "",
+      "request": {
+        "additionalProperties": false,
+        "properties": {
+          "feed": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0,
+                "maximum": 3.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "1.0 = 100 %",
+            "title": "Feed"
+          },
+          "rapid": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0,
+                "maximum": 3.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Rapid"
+          },
+          "spindle": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0,
+                "maximum": 3.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Spindle"
+          }
+        },
+        "title": "OverrideRequest",
+        "type": "object"
+      },
+      "result": {
+        "additionalProperties": false,
+        "description": "Standardowy wynik polecenia: potwierdzenie i opcjonalny komunikat dla operatora.",
+        "properties": {
+          "ok": {
+            "default": true,
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "message": {
+            "default": "",
+            "title": "Message",
+            "type": "string"
+          },
+          "details": {
+            "additionalProperties": true,
+            "title": "Details",
+            "type": "object"
+          }
+        },
+        "title": "Ok",
+        "type": "object"
+      }
+    },
+    {
+      "name": "machine.set_work_offset",
+      "domain": "machine",
+      "kind": "command",
+      "summary": "Ustaw offset G54–G59.3",
+      "status": "implemented",
+      "safety": "none",
+      "role": "technolog",
+      "idempotent": false,
+      "plan": "",
+      "request": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "pattern": "^G5[4-9](\\.[1-3])?$",
+            "title": "Name",
+            "type": "string"
+          },
+          "values": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "propertyNames": {
+              "enum": [
+                "X",
+                "Y",
+                "Z",
+                "A",
+                "B",
+                "C",
+                "U",
+                "V",
+                "W"
+              ]
+            },
+            "title": "Values",
+            "type": "object"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "title": "WorkOffsetRequest",
+        "type": "object"
+      },
+      "result": {
+        "additionalProperties": false,
+        "description": "Standardowy wynik polecenia: potwierdzenie i opcjonalny komunikat dla operatora.",
+        "properties": {
+          "ok": {
+            "default": true,
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "message": {
+            "default": "",
+            "title": "Message",
+            "type": "string"
+          },
+          "details": {
+            "additionalProperties": true,
+            "title": "Details",
+            "type": "object"
+          }
+        },
+        "title": "Ok",
+        "type": "object"
+      }
+    },
+    {
+      "name": "machine.spindle",
+      "domain": "machine",
+      "kind": "command",
+      "summary": "Wrzeciono: obroty i kierunek",
+      "status": "implemented",
+      "safety": "motion",
+      "role": "operator",
+      "idempotent": false,
+      "plan": "",
+      "request": {
+        "additionalProperties": false,
+        "properties": {
+          "speed": {
+            "description": "obr/min; 0 = zatrzymanie",
+            "minimum": 0,
+            "title": "Speed",
+            "type": "number"
+          },
+          "direction": {
+            "default": 1,
+            "enum": [
+              -1,
+              0,
+              1
+            ],
+            "title": "Direction",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "speed"
+        ],
+        "title": "SpindleRequest",
+        "type": "object"
+      },
+      "result": {
+        "additionalProperties": false,
+        "description": "Standardowy wynik polecenia: potwierdzenie i opcjonalny komunikat dla operatora.",
+        "properties": {
+          "ok": {
+            "default": true,
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "message": {
+            "default": "",
+            "title": "Message",
+            "type": "string"
+          },
+          "details": {
+            "additionalProperties": true,
+            "title": "Details",
+            "type": "object"
+          }
+        },
+        "title": "Ok",
+        "type": "object"
+      }
+    },
+    {
+      "name": "machine.state",
+      "domain": "machine",
+      "kind": "query",
+      "summary": "Migawka maszyny (DRO, tryb, program)",
+      "status": "implemented",
+      "safety": "none",
+      "role": "operator",
+      "idempotent": true,
+      "plan": "",
+      "request": {
+        "additionalProperties": false,
+        "description": "Operacje bez parametrów i bez wyniku merytorycznego.",
+        "properties": {},
+        "title": "Empty",
+        "type": "object"
+      },
+      "result": {
+        "additionalProperties": false,
+        "description": "Pełna migawka maszyny — to GUI rysuje jako DRO, status i pasek programu.",
+        "properties": {
+          "schema_version": {
+            "default": 1,
+            "title": "Schema Version",
+            "type": "integer"
+          },
+          "fresh": {
+            "description": "czy migawka jest świeża (backend odpowiada)",
+            "title": "Fresh",
+            "type": "boolean"
+          },
+          "age_s": {
+            "default": 0.0,
+            "title": "Age S",
+            "type": "number"
+          },
+          "task_state": {
+            "default": "estop",
+            "enum": [
+              "estop",
+              "estop_reset",
+              "off",
+              "on"
+            ],
+            "title": "Task State",
+            "type": "string"
+          },
+          "mode": {
+            "default": "manual",
+            "enum": [
+              "manual",
+              "auto",
+              "mdi"
+            ],
+            "title": "Mode",
+            "type": "string"
+          },
+          "interp_state": {
+            "default": "idle",
+            "enum": [
+              "idle",
+              "reading",
+              "paused",
+              "waiting"
+            ],
+            "title": "Interp State",
+            "type": "string"
+          },
+          "axes": {
+            "items": {
+              "$ref": "#/$defs/AxisState"
+            },
+            "title": "Axes",
+            "type": "array"
+          },
+          "all_homed": {
+            "default": false,
+            "title": "All Homed",
+            "type": "boolean"
+          },
+          "current_line": {
+            "default": 0,
+            "title": "Current Line",
+            "type": "integer"
+          },
+          "program": {
+            "default": "",
+            "title": "Program",
+            "type": "string"
+          },
+          "feed_override": {
+            "default": 1.0,
+            "title": "Feed Override",
+            "type": "number"
+          },
+          "rapid_override": {
+            "default": 1.0,
+            "title": "Rapid Override",
+            "type": "number"
+          },
+          "spindle": {
+            "$ref": "#/$defs/SpindleState"
+          },
+          "tool_number": {
+            "default": 0,
+            "title": "Tool Number",
+            "type": "integer"
+          },
+          "work_offset_name": {
+            "default": "G54",
+            "title": "Work Offset Name",
+            "type": "string"
+          },
+          "work_offset": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "title": "Work Offset",
+            "type": "object"
+          },
+          "gcodes": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Gcodes",
+            "type": "array"
+          },
+          "mcodes": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Mcodes",
+            "type": "array"
+          },
+          "errors": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Errors",
+            "type": "array"
+          },
+          "backend": {
+            "default": "",
+            "title": "Backend",
+            "type": "string"
+          }
+        },
+        "required": [
+          "fresh"
+        ],
+        "title": "MachineState",
+        "type": "object"
+      }
+    },
+    {
+      "name": "machine.stop",
+      "domain": "machine",
+      "kind": "command",
+      "summary": "Zatrzymaj ruch i program",
+      "status": "implemented",
+      "safety": "stop",
+      "role": "operator",
+      "idempotent": true,
+      "plan": "",
+      "request": {
+        "additionalProperties": false,
+        "description": "Operacje bez parametrów i bez wyniku merytorycznego.",
+        "properties": {},
+        "title": "Empty",
+        "type": "object"
+      },
+      "result": {
+        "additionalProperties": false,
+        "description": "Standardowy wynik polecenia: potwierdzenie i opcjonalny komunikat dla operatora.",
+        "properties": {
+          "ok": {
+            "default": true,
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "message": {
+            "default": "",
+            "title": "Message",
+            "type": "string"
+          },
+          "details": {
+            "additionalProperties": true,
+            "title": "Details",
+            "type": "object"
+          }
+        },
+        "title": "Ok",
+        "type": "object"
+      }
+    },
+    {
+      "name": "machine.tool_change",
+      "domain": "machine",
+      "kind": "command",
+      "summary": "Zmiana narzędzia (M6/ATC)",
+      "status": "implemented",
+      "safety": "motion",
+      "role": "operator",
+      "idempotent": false,
+      "plan": "",
+      "request": {
+        "additionalProperties": false,
+        "properties": {
+          "tool": {
+            "description": "numer narzędzia; 0 = pusty uchwyt",
+            "minimum": 0,
+            "title": "Tool",
+            "type": "integer"
+          },
+          "confirm": {
+            "default": false,
+            "description": "operator potwierdził zmianę narzędzia",
+            "title": "Confirm",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "tool"
+        ],
+        "title": "ToolChangeRequest",
+        "type": "object"
+      },
+      "result": {
+        "additionalProperties": false,
+        "description": "Standardowy wynik polecenia: potwierdzenie i opcjonalny komunikat dla operatora.",
+        "properties": {
+          "ok": {
+            "default": true,
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "message": {
+            "default": "",
+            "title": "Message",
+            "type": "string"
+          },
+          "details": {
+            "additionalProperties": true,
+            "title": "Details",
+            "type": "object"
+          }
+        },
+        "title": "Ok",
+        "type": "object"
+      }
+    },
+    {
+      "name": "offset.probe_apply",
+      "domain": "offset",
+      "kind": "command",
+      "summary": "Zastosuj kalibrację do pomiaru",
+      "status": "implemented",
+      "safety": "none",
+      "role": "technolog",
+      "idempotent": false,
+      "plan": "",
+      "request": {
+        "additionalProperties": false,
+        "properties": {
+          "axis": {
+            "title": "Axis",
+            "type": "string"
+          },
+          "direction": {
+            "title": "Direction",
+            "type": "integer"
+          },
+          "measured": {
+            "title": "Measured",
+            "type": "number"
+          }
+        },
+        "required": [
+          "axis",
+          "direction",
+          "measured"
+        ],
+        "title": "ProbeApplyIn",
+        "type": "object"
+      },
+      "result": {
+        "additionalProperties": false,
+        "description": "Wynik kalibracji albo zastosowania poprawki sondy.\n\n``correction`` to poprawka w mm wyznaczona z powtórzonych odczytów wzorca\n(``true_value - średnia(odczytów)``) — tak liczy ją rdzeń, więc nie udajemy\nwspółczynnika. ``value`` wypełnia tylko ``probe_apply`` (odczyt po poprawce).",
+        "properties": {
+          "ok": {
+            "default": true,
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "axis": {
+            "default": "",
+            "title": "Axis",
+            "type": "string"
+          },
+          "direction": {
+            "default": 0,
+            "title": "Direction",
+            "type": "integer"
+          },
+          "correction": {
+            "default": 0.0,
+            "title": "Correction",
+            "type": "number"
+          },
+          "spread": {
+            "default": 0.0,
+            "description": "rozrzut odczytów [mm] — miara powtarzalności",
+            "title": "Spread",
+            "type": "number"
+          },
+          "value": {
+            "default": 0.0,
+            "title": "Value",
+            "type": "number"
+          },
+          "message": {
+            "default": "",
+            "title": "Message",
+            "type": "string"
+          }
+        },
+        "title": "ProbeOut",
+        "type": "object"
+      }
+    },
+    {
+      "name": "offset.probe_calibrate",
+      "domain": "offset",
+      "kind": "command",
+      "summary": "Kalibracja sondy (współczynnik)",
+      "status": "implemented",
+      "safety": "none",
+      "role": "technolog",
+      "idempotent": false,
+      "plan": "",
+      "request": {
+        "additionalProperties": false,
+        "properties": {
+          "axis": {
+            "title": "Axis",
+            "type": "string"
+          },
+          "direction": {
+            "title": "Direction",
+            "type": "integer"
+          },
+          "measured": {
+            "items": {
+              "type": "number"
+            },
+            "title": "Measured",
+            "type": "array"
+          },
+          "true_value": {
+            "title": "True Value",
+            "type": "number"
+          }
+        },
+        "required": [
+          "axis",
+          "direction",
+          "measured",
+          "true_value"
+        ],
+        "title": "ProbeCalibrateIn",
+        "type": "object"
+      },
+      "result": {
+        "additionalProperties": false,
+        "description": "Wynik kalibracji albo zastosowania poprawki sondy.\n\n``correction`` to poprawka w mm wyznaczona z powtórzonych odczytów wzorca\n(``true_value - średnia(odczytów)``) — tak liczy ją rdzeń, więc nie udajemy\nwspółczynnika. ``value`` wypełnia tylko ``probe_apply`` (odczyt po poprawce).",
+        "properties": {
+          "ok": {
+            "default": true,
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "axis": {
+            "default": "",
+            "title": "Axis",
+            "type": "string"
+          },
+          "direction": {
+            "default": 0,
+            "title": "Direction",
+            "type": "integer"
+          },
+          "correction": {
+            "default": 0.0,
+            "title": "Correction",
+            "type": "number"
+          },
+          "spread": {
+            "default": 0.0,
+            "description": "rozrzut odczytów [mm] — miara powtarzalności",
+            "title": "Spread",
+            "type": "number"
+          },
+          "value": {
+            "default": 0.0,
+            "title": "Value",
+            "type": "number"
+          },
+          "message": {
+            "default": "",
+            "title": "Message",
+            "type": "string"
+          }
+        },
+        "title": "ProbeOut",
+        "type": "object"
+      }
+    },
+    {
+      "name": "offset.probe_run",
+      "domain": "offset",
+      "kind": "command",
+      "summary": "Sondowanie G38.2 jednej osi i zapis offsetu (ruch)",
+      "status": "implemented",
+      "safety": "motion",
+      "role": "technolog",
+      "idempotent": false,
+      "plan": "",
+      "request": {
+        "additionalProperties": false,
+        "description": "Sondowanie jednej osi: szukaj styku na ``distance`` i nadaj punktowi ``value``.",
+        "properties": {
+          "axis": {
+            "title": "Axis",
+            "type": "string"
+          },
+          "direction": {
+            "enum": [
+              -1,
+              1
+            ],
+            "title": "Direction",
+            "type": "integer"
+          },
+          "distance": {
+            "default": 10.0,
+            "description": "maksymalna droga szukania styku [mm]",
+            "exclusiveMinimum": 0,
+            "maximum": 200.0,
+            "title": "Distance",
+            "type": "number"
+          },
+          "feed": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0,
+                "maximum": 1000.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "posuw [mm/min]; None = posuw kalibracji sondy",
+            "title": "Feed"
+          },
+          "offset": {
+            "default": "G54",
+            "pattern": "^G5[4-9](\\.[1-3])?$",
+            "title": "Offset",
+            "type": "string"
+          },
+          "value": {
+            "default": 0.0,
+            "description": "współrzędna powierzchni w układzie offset [mm]",
+            "title": "Value",
+            "type": "number"
+          },
+          "retract": {
+            "default": 2.0,
+            "description": "odjazd po styku [mm]",
+            "exclusiveMinimum": 0,
+            "maximum": 50.0,
+            "title": "Retract",
+            "type": "number"
+          },
+          "confirm": {
+            "default": false,
+            "description": "operator potwierdził: sonda podłączona, droga wolna",
+            "title": "Confirm",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "axis",
+          "direction"
+        ],
+        "title": "ProbeRunIn",
+        "type": "object"
+      },
+      "result": {
+        "additionalProperties": false,
+        "properties": {
+          "ok": {
+            "default": true,
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "axis": {
+            "default": "",
+            "title": "Axis",
+            "type": "string"
+          },
+          "direction": {
+            "default": 0,
+            "title": "Direction",
+            "type": "integer"
+          },
+          "offset": {
+            "default": "",
+            "title": "Offset",
+            "type": "string"
+          },
+          "value": {
+            "default": 0.0,
+            "title": "Value",
+            "type": "number"
+          },
+          "correction": {
+            "default": 0.0,
+            "title": "Correction",
+            "type": "number"
+          },
+          "feed": {
+            "default": 0.0,
+            "title": "Feed",
+            "type": "number"
+          },
+          "gcode": {
+            "default": "",
+            "title": "Gcode",
+            "type": "string"
+          },
+          "message": {
+            "default": "",
+            "title": "Message",
+            "type": "string"
+          }
+        },
+        "title": "ProbeRunOut",
+        "type": "object"
+      }
+    },
+    {
+      "name": "offset.stock_get",
+      "domain": "offset",
+      "kind": "query",
+      "summary": "Przygotówka",
+      "status": "implemented",
+      "safety": "none",
+      "role": "operator",
+      "idempotent": true,
+      "plan": "",
+      "request": {
+        "additionalProperties": false,
+        "description": "Operacje bez parametrów i bez wyniku merytorycznego.",
+        "properties": {},
+        "title": "Empty",
+        "type": "object"
+      },
+      "result": {
+        "additionalProperties": false,
+        "properties": {
+          "line": {
+            "default": "",
+            "title": "Line",
+            "type": "string"
+          },
+          "shape": {
+            "default": "",
+            "title": "Shape",
+            "type": "string"
+          },
+          "x": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "X"
+          },
+          "y": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Y"
+          },
+          "z": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Z"
+          },
+          "d": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "D"
+          },
+          "h": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "H"
+          },
+          "origin": {
+            "default": "",
+            "title": "Origin",
+            "type": "string"
+          },
+          "offset": {
+            "default": "",
+            "title": "Offset",
+            "type": "string"
+          },
+          "top": {
+            "default": 0.0,
+            "title": "Top",
+            "type": "number"
+          },
+          "material": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Material"
+          }
+        },
+        "title": "StockOut",
+        "type": "object"
+      }
+    },
+    {
+      "name": "offset.stock_set",
+      "domain": "offset",
+      "kind": "command",
+      "summary": "Ustaw przygotówkę",
+      "status": "implemented",
+      "safety": "none",
+      "role": "technolog",
+      "idempotent": false,
+      "plan": "",
+      "request": {
+        "additionalProperties": false,
+        "properties": {
+          "line": {
+            "default": "",
+            "title": "Line",
+            "type": "string"
+          },
+          "shape": {
+            "default": "BOX",
+            "title": "Shape",
+            "type": "string"
+          },
+          "x": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "X"
+          },
+          "y": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Y"
+          },
+          "z": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Z"
+          },
+          "d": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "D"
+          },
+          "h": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "H"
+          },
+          "origin": {
+            "default": "TOP_FRONT_LEFT",
+            "title": "Origin",
+            "type": "string"
+          },
+          "offset": {
+            "default": "G54",
+            "title": "Offset",
+            "type": "string"
+          },
+          "top": {
+            "default": 0.0,
+            "title": "Top",
+            "type": "number"
+          },
+          "material": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Material"
+          }
+        },
+        "title": "StockIn",
+        "type": "object"
+      },
+      "result": {
+        "additionalProperties": false,
+        "properties": {
+          "line": {
+            "default": "",
+            "title": "Line",
+            "type": "string"
+          },
+          "shape": {
+            "default": "",
+            "title": "Shape",
+            "type": "string"
+          },
+          "x": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "X"
+          },
+          "y": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Y"
+          },
+          "z": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Z"
+          },
+          "d": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "D"
+          },
+          "h": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "H"
+          },
+          "origin": {
+            "default": "",
+            "title": "Origin",
+            "type": "string"
+          },
+          "offset": {
+            "default": "",
+            "title": "Offset",
+            "type": "string"
+          },
+          "top": {
+            "default": 0.0,
+            "title": "Top",
+            "type": "number"
+          },
+          "material": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Material"
+          }
+        },
+        "title": "StockOut",
+        "type": "object"
+      }
+    },
+    {
+      "name": "offset.workpiece_get",
+      "domain": "offset",
+      "kind": "query",
+      "summary": "Definicja detalu",
+      "status": "implemented",
+      "safety": "none",
+      "role": "operator",
+      "idempotent": true,
+      "plan": "",
+      "request": {
+        "additionalProperties": false,
+        "description": "Operacje bez parametrów i bez wyniku merytorycznego.",
+        "properties": {},
+        "title": "Empty",
+        "type": "object"
+      },
+      "result": {
+        "additionalProperties": false,
+        "properties": {
+          "shape": {
+            "default": "",
+            "title": "Shape",
+            "type": "string"
+          },
+          "x": {
+            "default": 0.0,
+            "title": "X",
+            "type": "number"
+          },
+          "y": {
+            "default": 0.0,
+            "title": "Y",
+            "type": "number"
+          },
+          "height": {
+            "default": 0.0,
+            "title": "Height",
+            "type": "number"
+          },
+          "diameter": {
+            "default": 0.0,
+            "title": "Diameter",
+            "type": "number"
+          },
+          "bore": {
+            "default": 0.0,
+            "title": "Bore",
+            "type": "number"
+          },
+          "anchor": {
+            "default": "",
+            "title": "Anchor",
+            "type": "string"
+          },
+          "offset": {
+            "default": "",
+            "title": "Offset",
+            "type": "string"
+          },
+          "material": {
+            "default": "",
+            "title": "Material",
+            "type": "string"
+          },
+          "position": {
+            "default": [],
+            "items": {
+              "type": "number"
+            },
+            "title": "Position",
+            "type": "array"
+          },
+          "gcode": {
+            "default": "",
+            "title": "Gcode",
+            "type": "string"
+          }
+        },
+        "title": "WorkpieceOut",
+        "type": "object"
+      }
+    },
+    {
+      "name": "offset.workpiece_set",
+      "domain": "offset",
+      "kind": "command",
+      "summary": "Ustaw definicję detalu",
+      "status": "implemented",
+      "safety": "none",
+      "role": "operator",
+      "idempotent": false,
+      "plan": "",
+      "request": {
+        "additionalProperties": false,
+        "description": "Definicja detalu do ustawienia; puste pola zachowują dotychczasowe wartości.",
+        "properties": {
+          "shape": {
+            "default": "",
+            "title": "Shape",
+            "type": "string"
+          },
+          "x": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "X"
+          },
+          "y": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Y"
+          },
+          "height": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Height"
+          },
+          "diameter": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Diameter"
+          },
+          "bore": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Bore"
+          },
+          "anchor": {
+            "default": "",
+            "title": "Anchor",
+            "type": "string"
+          },
+          "offset": {
+            "default": "",
+            "title": "Offset",
+            "type": "string"
+          },
+          "material": {
+            "default": "",
+            "title": "Material",
+            "type": "string"
+          },
+          "position": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "number"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Position"
+          }
+        },
+        "title": "WorkpieceIn",
+        "type": "object"
+      },
+      "result": {
+        "additionalProperties": false,
+        "properties": {
+          "shape": {
+            "default": "",
+            "title": "Shape",
+            "type": "string"
+          },
+          "x": {
+            "default": 0.0,
+            "title": "X",
+            "type": "number"
+          },
+          "y": {
+            "default": 0.0,
+            "title": "Y",
+            "type": "number"
+          },
+          "height": {
+            "default": 0.0,
+            "title": "Height",
+            "type": "number"
+          },
+          "diameter": {
+            "default": 0.0,
+            "title": "Diameter",
+            "type": "number"
+          },
+          "bore": {
+            "default": 0.0,
+            "title": "Bore",
+            "type": "number"
+          },
+          "anchor": {
+            "default": "",
+            "title": "Anchor",
+            "type": "string"
+          },
+          "offset": {
+            "default": "",
+            "title": "Offset",
+            "type": "string"
+          },
+          "material": {
+            "default": "",
+            "title": "Material",
+            "type": "string"
+          },
+          "position": {
+            "default": [],
+            "items": {
+              "type": "number"
+            },
+            "title": "Position",
+            "type": "array"
+          },
+          "gcode": {
+            "default": "",
+            "title": "Gcode",
+            "type": "string"
+          }
+        },
+        "title": "WorkpieceOut",
+        "type": "object"
+      }
+    },
+    {
+      "name": "plant.drives",
+      "domain": "plant",
+      "kind": "query",
+      "summary": "Biblioteka szablonów napędów",
+      "status": "implemented",
+      "safety": "none",
+      "role": "operator",
+      "idempotent": true,
+      "plan": "",
+      "request": {
+        "additionalProperties": false,
+        "description": "Operacje bez parametrów i bez wyniku merytorycznego.",
+        "properties": {},
+        "title": "Empty",
+        "type": "object"
+      },
+      "result": {
+        "additionalProperties": false,
+        "properties": {
+          "root": {
+            "default": "",
+            "title": "Root",
+            "type": "string"
+          },
+          "templates": {
+            "items": {
+              "$ref": "#/$defs/DriveTemplateOut"
+            },
+            "title": "Templates",
+            "type": "array"
+          }
+        },
+        "title": "DriveLibrary",
+        "type": "object"
+      }
+    },
+    {
+      "name": "plant.fault_set",
+      "domain": "plant",
+      "kind": "command",
+      "summary": "Wstrzyknij albo zdejmij awarię",
+      "status": "implemented",
+      "safety": "none",
+      "role": "serwis",
+      "idempotent": false,
+      "plan": "",
+      "request": {
+        "additionalProperties": false,
+        "description": "Wstrzyknięcie albo zdjęcie awarii w Plant.\n\nKatalog (``plant.faults``) ma rodzaje o różnych parametrach: ``drive_fault`` chce\n``drive`` i ``code``, ``frame_loss`` — ``percent``, ``delay`` — ``ms``, ``limit``\ni ``atc_sensor`` — ``input``/``closed``, ``axis_jam`` — ``axis``. Poprzedni schemat\nmiał tylko pole ``drive``, które usługa przekazywała jako ``target``, więc żaden\nrodzaj z parametrami nie dawał się wstrzyknąć.",
+        "properties": {
+          "kind": {
+            "description": "rodzaj awarii z katalogu plant.faults",
+            "title": "Kind",
+            "type": "string"
+          },
+          "enabled": {
+            "default": true,
+            "title": "Enabled",
+            "type": "boolean"
+          },
+          "params": {
+            "additionalProperties": true,
+            "description": "parametry rodzaju, np. drive, code, percent, ms",
+            "title": "Params",
+            "type": "object"
+          }
+        },
+        "required": [
+          "kind"
+        ],
+        "title": "PlantFaultRequest",
+        "type": "object"
+      },
+      "result": {
+        "additionalProperties": false,
+        "description": "Standardowy wynik polecenia: potwierdzenie i opcjonalny komunikat dla operatora.",
+        "properties": {
+          "ok": {
+            "default": true,
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "message": {
+            "default": "",
+            "title": "Message",
+            "type": "string"
+          },
+          "details": {
+            "additionalProperties": true,
+            "title": "Details",
+            "type": "object"
+          }
+        },
+        "title": "Ok",
+        "type": "object"
+      }
+    },
+    {
+      "name": "plant.faults",
+      "domain": "plant",
+      "kind": "query",
+      "summary": "Aktywne awarie Plant i katalog rodzajów",
+      "status": "implemented",
+      "safety": "none",
+      "role": "operator",
+      "idempotent": true,
+      "plan": "",
+      "request": {
+        "additionalProperties": false,
+        "description": "Operacje bez parametrów i bez wyniku merytorycznego.",
+        "properties": {},
+        "title": "Empty",
+        "type": "object"
+      },
+      "result": {
+        "additionalProperties": false,
+        "properties": {
+          "active": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Active",
+            "type": "array"
+          },
+          "catalog": {
+            "items": {
+              "$ref": "#/$defs/FaultCatalogItem"
+            },
+            "title": "Catalog",
+            "type": "array"
+          }
+        },
+        "title": "PlantFaultsOut",
+        "type": "object"
+      }
+    },
+    {
+      "name": "plant.machine_drives",
+      "domain": "plant",
+      "kind": "query",
+      "summary": "Rozwiązane parametry napędów maszyny",
+      "status": "implemented",
+      "safety": "none",
+      "role": "operator",
+      "idempotent": true,
+      "plan": "",
+      "request": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "title": "MachineConfigName",
+        "type": "object"
+      },
+      "result": {
+        "additionalProperties": false,
+        "description": "Rozwiązane napędy maszyny: szablon z biblioteki plus nadpisania z machine.yaml.",
+        "properties": {
+          "machine": {
+            "title": "Machine",
+            "type": "string"
+          },
+          "axes": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Axes",
+            "type": "array"
+          },
+          "drives": {
+            "additionalProperties": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Drives",
+            "type": "object"
+          }
+        },
+        "required": [
+          "machine"
+        ],
+        "title": "MachineDrivesOut",
+        "type": "object"
+      }
+    },
+    {
+      "name": "plant.scenario_run",
+      "domain": "plant",
+      "kind": "command",
+      "summary": "Przebieg scenariusza z kryteriami i raportem",
+      "status": "implemented",
+      "safety": "none",
+      "role": "technolog",
+      "idempotent": false,
+      "plan": "",
+      "request": {
+        "additionalProperties": false,
+        "properties": {
+          "scenario": {
+            "description": "nazwa albo ścieżka scenariusza YAML",
+            "title": "Scenario",
+            "type": "string"
+          },
+          "machine": {
+            "default": "",
+            "title": "Machine",
+            "type": "string"
+          }
+        },
+        "required": [
+          "scenario"
+        ],
+        "title": "ScenarioRunRequest",
+        "type": "object"
+      },
+      "result": {
+        "additionalProperties": false,
+        "properties": {
+          "ok": {
+            "default": true,
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "name": {
+            "default": "",
+            "title": "Name",
+            "type": "string"
+          },
+          "passed": {
+            "default": false,
+            "title": "Passed",
+            "type": "boolean"
+          },
+          "criteria": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Criteria",
+            "type": "array"
+          },
+          "events": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Events",
+            "type": "array"
+          },
+          "report_html": {
+            "default": "",
+            "title": "Report Html",
+            "type": "string"
+          },
+          "message": {
+            "default": "",
+            "title": "Message",
+            "type": "string"
+          }
+        },
+        "title": "ScenarioResultOut",
+        "type": "object"
+      }
+    },
+    {
+      "name": "plant.scenarios",
+      "domain": "plant",
+      "kind": "query",
+      "summary": "Scenariusze testowe",
+      "status": "implemented",
+      "safety": "none",
+      "role": "operator",
+      "idempotent": true,
+      "plan": "",
+      "request": {
+        "additionalProperties": false,
+        "description": "Operacje bez parametrów i bez wyniku merytorycznego.",
+        "properties": {},
+        "title": "Empty",
+        "type": "object"
+      },
+      "result": {
+        "additionalProperties": false,
+        "properties": {
+          "root": {
+            "default": "",
+            "title": "Root",
+            "type": "string"
+          },
+          "scenarios": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Scenarios",
+            "type": "array"
+          }
+        },
+        "title": "ScenarioList",
+        "type": "object"
+      }
+    },
+    {
+      "name": "plant.set_live",
+      "domain": "plant",
+      "kind": "command",
+      "summary": "Parametry live napędu",
+      "status": "implemented",
+      "safety": "none",
+      "role": "technolog",
+      "idempotent": false,
+      "plan": "",
+      "request": {
+        "additionalProperties": false,
+        "properties": {
+          "drive": {
+            "default": "",
+            "title": "Drive",
+            "type": "string"
+          },
+          "parameters": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "title": "Parameters",
+            "type": "object"
+          }
+        },
+        "title": "PlantLiveRequest",
+        "type": "object"
+      },
+      "result": {
+        "additionalProperties": false,
+        "description": "Standardowy wynik polecenia: potwierdzenie i opcjonalny komunikat dla operatora.",
+        "properties": {
+          "ok": {
+            "default": true,
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "message": {
+            "default": "",
+            "title": "Message",
+            "type": "string"
+          },
+          "details": {
+            "additionalProperties": true,
+            "title": "Details",
+            "type": "object"
+          }
+        },
+        "title": "Ok",
+        "type": "object"
+      }
+    },
+    {
+      "name": "plant.start",
+      "domain": "plant",
+      "kind": "command",
+      "summary": "Uruchom serwer LRT-NET",
+      "status": "implemented",
+      "safety": "none",
+      "role": "technolog",
+      "idempotent": false,
+      "plan": "",
+      "request": {
+        "additionalProperties": false,
+        "properties": {
+          "machine": {
+            "description": "nazwa maszyny z config/machines albo ścieżka YAML",
+            "title": "Machine",
+            "type": "string"
+          },
+          "plant": {
+            "default": "",
+            "description": "ścieżka plant.yaml (opcjonalnie)",
+            "title": "Plant",
+            "type": "string"
+          },
+          "mode": {
+            "default": "lockstep",
+            "enum": [
+              "lockstep",
+              "realtime"
+            ],
+            "title": "Mode",
+            "type": "string"
+          },
+          "listen": {
+            "default": "127.0.0.1",
+            "title": "Listen",
+            "type": "string"
+          },
+          "port": {
+            "default": 0,
+            "description": "0 = port wybrany przez system",
+            "maximum": 65535,
+            "minimum": 0,
+            "title": "Port",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "machine"
+        ],
+        "title": "PlantStartRequest",
+        "type": "object"
+      },
+      "result": {
+        "additionalProperties": false,
+        "properties": {
+          "running": {
+            "default": false,
+            "title": "Running",
+            "type": "boolean"
+          },
+          "machine": {
+            "default": "",
+            "title": "Machine",
+            "type": "string"
+          },
+          "listen": {
+            "default": "",
+            "title": "Listen",
+            "type": "string"
+          },
+          "port": {
+            "default": 0,
+            "title": "Port",
+            "type": "integer"
+          },
+          "mode": {
+            "default": "",
+            "title": "Mode",
+            "type": "string"
+          },
+          "frames": {
+            "default": 0,
+            "title": "Frames",
+            "type": "integer"
+          },
+          "rejected": {
+            "default": 0,
+            "title": "Rejected",
+            "type": "integer"
+          },
+          "lost": {
+            "default": 0,
+            "title": "Lost",
+            "type": "integer"
+          },
+          "late": {
+            "default": 0,
+            "title": "Late",
+            "type": "integer"
+          },
+          "message": {
+            "default": "",
+            "title": "Message",
+            "type": "string"
+          }
+        },
+        "title": "PlantStatus",
+        "type": "object"
+      }
+    },
+    {
+      "name": "plant.status",
+      "domain": "plant",
+      "kind": "query",
+      "summary": "Stan wirtualnej obrabiarki",
+      "status": "implemented",
+      "safety": "none",
+      "role": "operator",
+      "idempotent": true,
+      "plan": "",
+      "request": {
+        "additionalProperties": false,
+        "description": "Operacje bez parametrów i bez wyniku merytorycznego.",
+        "properties": {},
+        "title": "Empty",
+        "type": "object"
+      },
+      "result": {
+        "additionalProperties": false,
+        "properties": {
+          "running": {
+            "default": false,
+            "title": "Running",
+            "type": "boolean"
+          },
+          "machine": {
+            "default": "",
+            "title": "Machine",
+            "type": "string"
+          },
+          "listen": {
+            "default": "",
+            "title": "Listen",
+            "type": "string"
+          },
+          "port": {
+            "default": 0,
+            "title": "Port",
+            "type": "integer"
+          },
+          "mode": {
+            "default": "",
+            "title": "Mode",
+            "type": "string"
+          },
+          "frames": {
+            "default": 0,
+            "title": "Frames",
+            "type": "integer"
+          },
+          "rejected": {
+            "default": 0,
+            "title": "Rejected",
+            "type": "integer"
+          },
+          "lost": {
+            "default": 0,
+            "title": "Lost",
+            "type": "integer"
+          },
+          "late": {
+            "default": 0,
+            "title": "Late",
+            "type": "integer"
+          },
+          "message": {
+            "default": "",
+            "title": "Message",
+            "type": "string"
+          }
+        },
+        "title": "PlantStatus",
+        "type": "object"
+      }
+    },
+    {
+      "name": "plant.stop",
+      "domain": "plant",
+      "kind": "command",
+      "summary": "Zatrzymaj Plant",
+      "status": "implemented",
+      "safety": "stop",
+      "role": "operator",
+      "idempotent": false,
+      "plan": "",
+      "request": {
+        "additionalProperties": false,
+        "description": "Operacje bez parametrów i bez wyniku merytorycznego.",
+        "properties": {},
+        "title": "Empty",
+        "type": "object"
+      },
+      "result": {
+        "additionalProperties": false,
+        "description": "Standardowy wynik polecenia: potwierdzenie i opcjonalny komunikat dla operatora.",
+        "properties": {
+          "ok": {
+            "default": true,
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "message": {
+            "default": "",
+            "title": "Message",
+            "type": "string"
+          },
+          "details": {
+            "additionalProperties": true,
+            "title": "Details",
+            "type": "object"
+          }
+        },
+        "title": "Ok",
+        "type": "object"
+      }
+    },
+    {
+      "name": "plant.telemetry",
+      "domain": "plant",
+      "kind": "query",
+      "summary": "Próbki telemetrii osi",
+      "status": "implemented",
+      "safety": "none",
+      "role": "operator",
+      "idempotent": true,
+      "plan": "",
+      "request": {
+        "additionalProperties": false,
+        "properties": {
+          "drive": {
+            "default": "",
+            "title": "Drive",
+            "type": "string"
+          },
+          "limit": {
+            "default": 500,
+            "maximum": 20000,
+            "minimum": 1,
+            "title": "Limit",
+            "type": "integer"
+          }
+        },
+        "title": "PlantTelemetryRequest",
+        "type": "object"
+      },
+      "result": {
+        "additionalProperties": false,
+        "description": "Próbki telemetrii Plant: kolumny (nazwy kanałów) i wiersze próbek.",
+        "properties": {
+          "drive": {
+            "default": "",
+            "title": "Drive",
+            "type": "string"
+          },
+          "cursor": {
+            "default": 0,
+            "title": "Cursor",
+            "type": "integer"
+          },
+          "columns": {
+            "additionalProperties": true,
+            "title": "Columns",
+            "type": "object"
+          },
+          "samples": {
+            "items": {
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            },
+            "title": "Samples",
+            "type": "array"
+          }
+        },
+        "title": "TelemetryOut",
+        "type": "object"
+      }
+    },
+    {
+      "name": "program.check",
+      "domain": "program",
+      "kind": "query",
+      "summary": "Sprawdź granice osi programu",
+      "status": "implemented",
+      "safety": "none",
+      "role": "operator",
+      "idempotent": true,
+      "plan": "",
+      "request": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "default": "",
+            "description": "program z katalogu nc_files albo puste przy text",
+            "title": "Name",
+            "type": "string"
+          },
+          "text": {
+            "default": "",
+            "title": "Text",
+            "type": "string"
+          },
+          "ini": {
+            "default": "",
+            "title": "Ini",
+            "type": "string"
+          }
+        },
+        "title": "CheckRequest",
+        "type": "object"
+      },
+      "result": {
+        "additionalProperties": false,
+        "properties": {
+          "ok": {
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "violations": {
+            "items": {
+              "$ref": "#/$defs/ViolationOut"
+            },
+            "title": "Violations",
+            "type": "array"
+          },
+          "lines": {
+            "default": 0,
+            "title": "Lines",
+            "type": "integer"
+          },
+          "program": {
+            "default": "",
+            "title": "Program",
+            "type": "string"
+          },
+          "moves": {
+            "default": 0,
+            "title": "Moves",
+            "type": "integer"
+          },
+          "interpreter": {
+            "default": "",
+            "description": "rs274 (pełny LinuxCNC) albo subset (bez LinuxCNC)",
+            "title": "Interpreter",
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ],
+        "title": "LimitReportOut",
+        "type": "object"
+      }
+    },
+    {
+      "name": "program.compile",
+      "domain": "program",
+      "kind": "command",
+      "summary": "Kompiluj .lnx → G-code",
+      "status": "implemented",
+      "safety": "none",
+      "role": "technolog",
+      "idempotent": false,
+      "plan": "",
+      "request": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "description": "program .lnx w katalogu nc_files",
+            "title": "Name",
+            "type": "string"
+          },
+          "save": {
+            "default": false,
+            "description": "zapisz wynik .ngc obok źródła",
+            "title": "Save",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "title": "LnxCompileRequest",
+        "type": "object"
+      },
+      "result": {
+        "additionalProperties": false,
+        "description": "Standardowy wynik polecenia: potwierdzenie i opcjonalny komunikat dla operatora.",
+        "properties": {
+          "ok": {
+            "default": true,
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "message": {
+            "default": "",
+            "title": "Message",
+            "type": "string"
+          },
+          "details": {
+            "additionalProperties": true,
+            "title": "Details",
+            "type": "object"
+          }
+        },
+        "title": "Ok",
+        "type": "object"
+      }
+    },
+    {
+      "name": "program.compile_text",
+      "domain": "program",
+      "kind": "query",
+      "summary": "Kompiluj .lnx z tekstu (bez zapisu na dysk)",
+      "status": "implemented",
+      "safety": "none",
+      "role": "operator",
+      "idempotent": true,
+      "plan": "",
+      "request": {
+        "additionalProperties": false,
+        "description": "Kompilacja .lnx z tekstu — edytor GUI podgląda wynik przed zapisem.",
+        "properties": {
+          "text": {
+            "description": "zawartość programu .lnx",
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "text"
+        ],
+        "title": "LnxCompileTextRequest",
+        "type": "object"
+      },
+      "result": {
+        "additionalProperties": false,
+        "properties": {
+          "ok": {
+            "default": true,
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "name": {
+            "default": "",
+            "title": "Name",
+            "type": "string"
+          },
+          "gcode": {
+            "default": "",
+            "title": "Gcode",
+            "type": "string"
+          },
+          "path": {
+            "default": "",
+            "title": "Path",
+            "type": "string"
+          },
+          "message": {
+            "default": "",
+            "title": "Message",
+            "type": "string"
+          }
+        },
+        "title": "CompileOut",
+        "type": "object"
+      }
+    },
+    {
+      "name": "program.delete",
+      "domain": "program",
+      "kind": "command",
+      "summary": "Usuń program",
+      "status": "implemented",
+      "safety": "config",
+      "role": "technolog",
+      "idempotent": false,
+      "plan": "",
+      "request": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "title": "ProgramName",
+        "type": "object"
+      },
+      "result": {
+        "additionalProperties": false,
+        "description": "Standardowy wynik polecenia: potwierdzenie i opcjonalny komunikat dla operatora.",
+        "properties": {
+          "ok": {
+            "default": true,
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "message": {
+            "default": "",
+            "title": "Message",
+            "type": "string"
+          },
+          "details": {
+            "additionalProperties": true,
+            "title": "Details",
+            "type": "object"
+          }
+        },
+        "title": "Ok",
+        "type": "object"
+      }
+    },
+    {
+      "name": "program.edit_step",
+      "domain": "program",
+      "kind": "command",
+      "summary": "Zmień parametr kroku .lnx",
+      "status": "implemented",
+      "safety": "none",
+      "role": "technolog",
+      "idempotent": false,
+      "plan": "",
+      "request": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "line": {
+            "minimum": 1,
+            "title": "Line",
+            "type": "integer"
+          },
+          "changes": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "description": "słowo G-code → nowa wartość",
+            "title": "Changes",
+            "type": "object"
+          }
+        },
+        "required": [
+          "name",
+          "line"
+        ],
+        "title": "StepEditRequest",
+        "type": "object"
+      },
+      "result": {
+        "additionalProperties": false,
+        "description": "Standardowy wynik polecenia: potwierdzenie i opcjonalny komunikat dla operatora.",
+        "properties": {
+          "ok": {
+            "default": true,
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "message": {
+            "default": "",
+            "title": "Message",
+            "type": "string"
+          },
+          "details": {
+            "additionalProperties": true,
+            "title": "Details",
+            "type": "object"
+          }
+        },
+        "title": "Ok",
+        "type": "object"
+      }
+    },
+    {
+      "name": "program.estimate",
+      "domain": "program",
+      "kind": "query",
+      "summary": "Czas, droga i narzędzia programu",
+      "status": "implemented",
+      "safety": "none",
+      "role": "operator",
+      "idempotent": true,
+      "plan": "",
+      "request": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "default": "",
+            "title": "Name",
+            "type": "string"
+          },
+          "text": {
+            "default": "",
+            "title": "Text",
+            "type": "string"
+          },
+          "ini": {
+            "default": "",
+            "title": "Ini",
+            "type": "string"
+          }
+        },
+        "title": "EstimateRequest",
+        "type": "object"
+      },
+      "result": {
+        "additionalProperties": false,
+        "properties": {
+          "ok": {
+            "default": true,
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "source": {
+            "default": "",
+            "description": "rs274 (LinuxCNC) albo subset (szacunek bez przyspieszeń)",
+            "title": "Source",
+            "type": "string"
+          },
+          "seconds": {
+            "default": 0.0,
+            "title": "Seconds",
+            "type": "number"
+          },
+          "distance_mm": {
+            "default": 0.0,
+            "title": "Distance Mm",
+            "type": "number"
+          },
+          "rapid_mm": {
+            "default": 0.0,
+            "title": "Rapid Mm",
+            "type": "number"
+          },
+          "feed_mm": {
+            "default": 0.0,
+            "title": "Feed Mm",
+            "type": "number"
+          },
+          "tools": {
+            "items": {
+              "type": "integer"
+            },
+            "title": "Tools",
+            "type": "array"
+          },
+          "message": {
+            "default": "",
+            "title": "Message",
+            "type": "string"
+          }
+        },
+        "title": "EstimateOut",
+        "type": "object"
+      }
+    },
+    {
+      "name": "program.list",
+      "domain": "program",
+      "kind": "query",
+      "summary": "Programy w katalogu NC",
+      "status": "implemented",
+      "safety": "none",
+      "role": "operator",
+      "idempotent": true,
+      "plan": "",
+      "request": {
+        "additionalProperties": false,
+        "description": "Operacje bez parametrów i bez wyniku merytorycznego.",
+        "properties": {},
+        "title": "Empty",
+        "type": "object"
+      },
+      "result": {
+        "additionalProperties": false,
+        "properties": {
+          "root": {
+            "title": "Root",
+            "type": "string"
+          },
+          "programs": {
+            "items": {
+              "$ref": "#/$defs/ProgramSummary"
+            },
+            "title": "Programs",
+            "type": "array"
+          }
+        },
+        "required": [
+          "root"
+        ],
+        "title": "ProgramList",
+        "type": "object"
+      }
+    },
+    {
+      "name": "program.load",
+      "domain": "program",
+      "kind": "command",
+      "summary": "Wczytaj program do sterowania",
+      "status": "implemented",
+      "safety": "motion",
+      "role": "operator",
+      "idempotent": false,
+      "plan": "",
+      "request": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "title": "ProgramName",
+        "type": "object"
+      },
+      "result": {
+        "additionalProperties": false,
+        "description": "Standardowy wynik polecenia: potwierdzenie i opcjonalny komunikat dla operatora.",
+        "properties": {
+          "ok": {
+            "default": true,
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "message": {
+            "default": "",
+            "title": "Message",
+            "type": "string"
+          },
+          "details": {
+            "additionalProperties": true,
+            "title": "Details",
+            "type": "object"
+          }
+        },
+        "title": "Ok",
+        "type": "object"
+      }
+    },
+    {
+      "name": "program.read",
+      "domain": "program",
+      "kind": "query",
+      "summary": "Treść programu",
+      "status": "implemented",
+      "safety": "none",
+      "role": "operator",
+      "idempotent": true,
+      "plan": "",
+      "request": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "title": "ProgramName",
+        "type": "object"
+      },
+      "result": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "path": {
+            "title": "Path",
+            "type": "string"
+          },
+          "text": {
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "path",
+          "text"
+        ],
+        "title": "ProgramRead",
+        "type": "object"
+      }
+    },
+    {
+      "name": "program.toolpath",
+      "domain": "program",
+      "kind": "query",
+      "summary": "Punkty ścieżki do podglądu — GUI rysuje u siebie",
+      "status": "implemented",
+      "safety": "none",
+      "role": "operator",
+      "idempotent": true,
+      "plan": "",
+      "request": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "default": "",
+            "title": "Name",
+            "type": "string"
+          },
+          "text": {
+            "default": "",
+            "title": "Text",
+            "type": "string"
+          },
+          "max_points": {
+            "default": 20000,
+            "maximum": 200000,
+            "minimum": 10,
+            "title": "Max Points",
+            "type": "integer"
+          }
+        },
+        "title": "ToolpathRequest",
+        "type": "object"
+      },
+      "result": {
+        "additionalProperties": false,
+        "description": "Polilinia ścieżki: GUI rysuje z punktów (backend bez OpenGL).",
+        "properties": {
+          "ok": {
+            "default": true,
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "unit": {
+            "default": "mm",
+            "title": "Unit",
+            "type": "string"
+          },
+          "source": {
+            "default": "",
+            "description": "rs274 (LinuxCNC) albo subset (interpreter rdzenia)",
+            "title": "Source",
+            "type": "string"
+          },
+          "points": {
+            "items": {
+              "$ref": "#/$defs/ToolpathPoint"
+            },
+            "title": "Points",
+            "type": "array"
+          },
+          "bounds": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "title": "Bounds",
+            "type": "object"
+          },
+          "length_mm": {
+            "default": 0.0,
+            "title": "Length Mm",
+            "type": "number"
+          },
+          "notes": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Notes",
+            "type": "array"
+          },
+          "message": {
+            "default": "",
+            "title": "Message",
+            "type": "string"
+          }
+        },
+        "title": "ToolpathOut",
+        "type": "object"
+      }
+    },
+    {
+      "name": "program.write",
+      "domain": "program",
+      "kind": "command",
+      "summary": "Zapisz program (.ngc/.lnx)",
+      "status": "implemented",
+      "safety": "config",
+      "role": "technolog",
+      "idempotent": false,
+      "plan": "",
+      "request": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "text": {
+            "title": "Text",
+            "type": "string"
+          },
+          "overwrite": {
+            "default": false,
+            "title": "Overwrite",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "name",
+          "text"
+        ],
+        "title": "ProgramWriteRequest",
+        "type": "object"
+      },
+      "result": {
+        "additionalProperties": false,
+        "description": "Standardowy wynik polecenia: potwierdzenie i opcjonalny komunikat dla operatora.",
+        "properties": {
+          "ok": {
+            "default": true,
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "message": {
+            "default": "",
+            "title": "Message",
+            "type": "string"
+          },
+          "details": {
+            "additionalProperties": true,
+            "title": "Details",
+            "type": "object"
+          }
+        },
+        "title": "Ok",
+        "type": "object"
+      }
+    },
+    {
+      "name": "sim.run",
+      "domain": "sim",
+      "kind": "command",
+      "summary": "Symulacja: materiał, kolizje, czas (dane, bez grafiki)",
+      "status": "implemented",
+      "safety": "none",
+      "role": "operator",
+      "idempotent": false,
+      "plan": "",
+      "request": {
+        "additionalProperties": false,
+        "properties": {
+          "program": {
+            "default": "",
+            "description": "G-code jako tekst (albo puste i wtedy name)",
+            "title": "Program",
+            "type": "string"
+          },
+          "name": {
+            "default": "",
+            "description": "nazwa programu z katalogu nc_files",
+            "title": "Name",
+            "type": "string"
+          },
+          "stock": {
+            "default": "",
+            "description": "przygotówka: 'BOX X100 Y80 Z20' albo pełna linia ;@STOCK",
+            "title": "Stock",
+            "type": "string"
+          },
+          "tools": {
+            "items": {
+              "maxItems": 3,
+              "minItems": 3,
+              "prefixItems": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "type": "array"
+            },
+            "title": "Tools",
+            "type": "array"
+          },
+          "origin": {
+            "default": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "maxItems": 3,
+            "minItems": 3,
+            "prefixItems": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              }
+            ],
+            "title": "Origin",
+            "type": "array"
+          },
+          "rapid": {
+            "default": 5000.0,
+            "title": "Rapid",
+            "type": "number"
+          },
+          "dt": {
+            "default": 0.05,
+            "exclusiveMinimum": 0,
+            "maximum": 1.0,
+            "title": "Dt",
+            "type": "number"
+          }
+        },
+        "title": "SimRunRequest",
+        "type": "object"
+      },
+      "result": {
+        "additionalProperties": false,
+        "description": "Wynik symulacji jako dane — GUI rysuje podgląd u siebie (backend bez OpenGL).",
+        "properties": {
+          "ok": {
+            "default": true,
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "volume_removed_mm3": {
+            "default": 0.0,
+            "title": "Volume Removed Mm3",
+            "type": "number"
+          },
+          "seconds": {
+            "default": 0.0,
+            "title": "Seconds",
+            "type": "number"
+          },
+          "rapid_seconds": {
+            "default": 0.0,
+            "title": "Rapid Seconds",
+            "type": "number"
+          },
+          "feed_seconds": {
+            "default": 0.0,
+            "title": "Feed Seconds",
+            "type": "number"
+          },
+          "length_mm": {
+            "default": 0.0,
+            "title": "Length Mm",
+            "type": "number"
+          },
+          "lines": {
+            "default": 0,
+            "title": "Lines",
+            "type": "integer"
+          },
+          "segments": {
+            "default": 0,
+            "title": "Segments",
+            "type": "integer"
+          },
+          "collisions": {
+            "items": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "title": "Collisions",
+            "type": "array"
+          },
+          "events": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Events",
+            "type": "array"
+          },
+          "notes": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Notes",
+            "type": "array"
+          },
+          "bounds": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "title": "Bounds",
+            "type": "object"
+          },
+          "stock_line": {
+            "default": "",
+            "title": "Stock Line",
+            "type": "string"
+          },
+          "cache_key": {
+            "default": "",
+            "title": "Cache Key",
+            "type": "string"
+          },
+          "source": {
+            "default": "",
+            "description": "rs274 (pełny interpreter LinuxCNC) albo subset (bez LinuxCNC)",
+            "title": "Source",
+            "type": "string"
+          },
+          "message": {
+            "default": "",
+            "title": "Message",
+            "type": "string"
+          }
+        },
+        "title": "SimResultOut",
+        "type": "object"
+      }
+    },
+    {
+      "name": "system.contract",
+      "domain": "system",
+      "kind": "query",
+      "summary": "Pełny kontrakt operacji ze schematami JSON — podstawa budowy GUI",
+      "status": "implemented",
+      "safety": "none",
+      "role": "operator",
+      "idempotent": true,
+      "plan": "",
+      "request": {
+        "additionalProperties": false,
+        "description": "Operacje bez parametrów i bez wyniku merytorycznego.",
+        "properties": {},
+        "title": "Empty",
+        "type": "object"
+      },
+      "result": {
+        "additionalProperties": false,
+        "properties": {
+          "schema_version": {
+            "default": 1,
+            "title": "Schema Version",
+            "type": "integer"
+          },
+          "application": {
+            "default": "",
+            "title": "Application",
+            "type": "string"
+          },
+          "version": {
+            "default": "",
+            "title": "Version",
+            "type": "string"
+          },
+          "operations": {
+            "items": {
+              "$ref": "#/$defs/CapabilityOut"
+            },
+            "title": "Operations",
+            "type": "array"
+          },
+          "events": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Events",
+            "type": "array"
+          }
+        },
+        "title": "ContractOut",
+        "type": "object"
+      }
+    },
+    {
+      "name": "system.health",
+      "domain": "system",
+      "kind": "query",
+      "summary": "Zdrowie backendu i wersja stanu",
+      "status": "implemented",
+      "safety": "none",
+      "role": "operator",
+      "idempotent": true,
+      "plan": "",
+      "request": {
+        "additionalProperties": false,
+        "description": "Operacje bez parametrów i bez wyniku merytorycznego.",
+        "properties": {},
+        "title": "Empty",
+        "type": "object"
+      },
+      "result": {
+        "additionalProperties": false,
+        "properties": {
+          "ok": {
+            "default": true,
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "backend": {
+            "default": "",
+            "title": "Backend",
+            "type": "string"
+          },
+          "backend_alive": {
+            "default": false,
+            "title": "Backend Alive",
+            "type": "boolean"
+          },
+          "uptime_s": {
+            "default": 0.0,
+            "title": "Uptime S",
+            "type": "number"
+          },
+          "threads": {
+            "default": 0,
+            "title": "Threads",
+            "type": "integer"
+          },
+          "state_version": {
+            "default": 0,
+            "title": "State Version",
+            "type": "integer"
+          }
+        },
+        "title": "HealthOut",
+        "type": "object"
+      }
+    },
+    {
+      "name": "system.info",
+      "domain": "system",
+      "kind": "query",
+      "summary": "Informacje o aplikacji i backendzie",
+      "status": "implemented",
+      "safety": "none",
+      "role": "operator",
+      "idempotent": true,
+      "plan": "",
+      "request": {
+        "additionalProperties": false,
+        "description": "Operacje bez parametrów i bez wyniku merytorycznego.",
+        "properties": {},
+        "title": "Empty",
+        "type": "object"
+      },
+      "result": {
+        "additionalProperties": false,
+        "properties": {
+          "application": {
+            "title": "Application",
+            "type": "string"
+          },
+          "version": {
+            "title": "Version",
+            "type": "string"
+          },
+          "schema_version": {
+            "default": 1,
+            "title": "Schema Version",
+            "type": "integer"
+          },
+          "backend": {
+            "default": "",
+            "title": "Backend",
+            "type": "string"
+          },
+          "python": {
+            "default": "",
+            "title": "Python",
+            "type": "string"
+          },
+          "platform": {
+            "default": "",
+            "title": "Platform",
+            "type": "string"
+          },
+          "gui": {
+            "default": false,
+            "title": "Gui",
+            "type": "boolean"
+          },
+          "opengl": {
+            "default": false,
+            "title": "Opengl",
+            "type": "boolean"
+          },
+          "notes": {
+            "default": "",
+            "title": "Notes",
+            "type": "string"
+          }
+        },
+        "required": [
+          "application",
+          "version"
+        ],
+        "title": "SystemInfo",
+        "type": "object"
+      }
+    },
+    {
+      "name": "system.state",
+      "domain": "system",
+      "kind": "query",
+      "summary": "Migawka stanu wszystkich domen",
+      "status": "implemented",
+      "safety": "none",
+      "role": "operator",
+      "idempotent": true,
+      "plan": "",
+      "request": {
+        "additionalProperties": false,
+        "description": "Operacje bez parametrów i bez wyniku merytorycznego.",
+        "properties": {},
+        "title": "Empty",
+        "type": "object"
+      },
+      "result": {
+        "additionalProperties": false,
+        "description": "Wersjonowany stan wszystkich domen — to GUI subskrybuje przez WebSocket.",
+        "properties": {
+          "version": {
+            "default": 0,
+            "title": "Version",
+            "type": "integer"
+          },
+          "topics": {
+            "additionalProperties": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Topics",
+            "type": "object"
+          }
+        },
+        "title": "StateSnapshot",
+        "type": "object"
+      }
+    },
+    {
+      "name": "tool.delete",
+      "domain": "tool",
+      "kind": "command",
+      "summary": "Usuń narzędzie",
+      "status": "implemented",
+      "safety": "none",
+      "role": "technolog",
+      "idempotent": false,
+      "plan": "",
+      "request": {
+        "additionalProperties": false,
+        "properties": {
+          "number": {
+            "minimum": 0,
+            "title": "Number",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "number"
+        ],
+        "title": "ToolNumber",
+        "type": "object"
+      },
+      "result": {
+        "additionalProperties": false,
+        "description": "Standardowy wynik polecenia: potwierdzenie i opcjonalny komunikat dla operatora.",
+        "properties": {
+          "ok": {
+            "default": true,
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "message": {
+            "default": "",
+            "title": "Message",
+            "type": "string"
+          },
+          "details": {
+            "additionalProperties": true,
+            "title": "Details",
+            "type": "object"
+          }
+        },
+        "title": "Ok",
+        "type": "object"
+      }
+    },
+    {
+      "name": "tool.export_tbl",
+      "domain": "tool",
+      "kind": "command",
+      "summary": "Eksport tool.tbl dla LinuxCNC",
+      "status": "implemented",
+      "safety": "config",
+      "role": "technolog",
+      "idempotent": false,
+      "plan": "",
+      "request": {
+        "additionalProperties": false,
+        "properties": {
+          "units": {
+            "default": "mm",
+            "enum": [
+              "mm",
+              "inch"
+            ],
+            "title": "Units",
+            "type": "string"
+          },
+          "path": {
+            "default": "",
+            "title": "Path",
+            "type": "string"
+          }
+        },
+        "title": "ToolTblRequest",
+        "type": "object"
+      },
+      "result": {
+        "additionalProperties": false,
+        "properties": {
+          "path": {
+            "default": "",
+            "title": "Path",
+            "type": "string"
+          },
+          "text": {
+            "default": "",
+            "title": "Text",
+            "type": "string"
+          },
+          "units": {
+            "default": "mm",
+            "title": "Units",
+            "type": "string"
+          }
+        },
+        "title": "ToolTblOut",
+        "type": "object"
+      }
+    },
+    {
+      "name": "tool.get",
+      "domain": "tool",
+      "kind": "query",
+      "summary": "Narzędzie po numerze",
+      "status": "implemented",
+      "safety": "none",
+      "role": "operator",
+      "idempotent": true,
+      "plan": "",
+      "request": {
+        "additionalProperties": false,
+        "properties": {
+          "number": {
+            "minimum": 0,
+            "title": "Number",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "number"
+        ],
+        "title": "ToolNumber",
+        "type": "object"
+      },
+      "result": {
+        "additionalProperties": false,
+        "properties": {
+          "number": {
+            "title": "Number",
+            "type": "integer"
+          },
+          "pocket": {
+            "default": 0,
+            "title": "Pocket",
+            "type": "integer"
+          },
+          "type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Type"
+          },
+          "description": {
+            "default": "",
+            "title": "Description",
+            "type": "string"
+          },
+          "holder": {
+            "default": "",
+            "title": "Holder",
+            "type": "string"
+          },
+          "diameter": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Diameter"
+          },
+          "params": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "title": "Params",
+            "type": "object"
+          },
+          "offsets": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "title": "Offsets",
+            "type": "object"
+          },
+          "life_min": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Life Min"
+          },
+          "used_min": {
+            "default": 0.0,
+            "title": "Used Min",
+            "type": "number"
+          }
+        },
+        "required": [
+          "number"
+        ],
+        "title": "ToolOut",
+        "type": "object"
+      }
+    },
+    {
+      "name": "tool.history",
+      "domain": "tool",
+      "kind": "query",
+      "summary": "Historia zmian narzędzia",
+      "status": "implemented",
+      "safety": "none",
+      "role": "operator",
+      "idempotent": true,
+      "plan": "",
+      "request": {
+        "additionalProperties": false,
+        "properties": {
+          "number": {
+            "minimum": 0,
+            "title": "Number",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "number"
+        ],
+        "title": "ToolNumber",
+        "type": "object"
+      },
+      "result": {
+        "additionalProperties": false,
+        "properties": {
+          "entries": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Entries",
+            "type": "array"
+          }
+        },
+        "title": "ToolHistoryOut",
+        "type": "object"
+      }
+    },
+    {
+      "name": "tool.import_tbl",
+      "domain": "tool",
+      "kind": "command",
+      "summary": "Import tool.tbl do bazy",
+      "status": "implemented",
+      "safety": "none",
+      "role": "technolog",
+      "idempotent": false,
+      "plan": "",
+      "request": {
+        "additionalProperties": false,
+        "properties": {
+          "text": {
+            "description": "zawartość tool.tbl",
+            "title": "Text",
+            "type": "string"
+          },
+          "units": {
+            "default": "mm",
+            "title": "Units",
+            "type": "string"
+          }
+        },
+        "required": [
+          "text"
+        ],
+        "title": "ToolImportRequest",
+        "type": "object"
+      },
+      "result": {
+        "additionalProperties": false,
+        "description": "Standardowy wynik polecenia: potwierdzenie i opcjonalny komunikat dla operatora.",
+        "properties": {
+          "ok": {
+            "default": true,
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "message": {
+            "default": "",
+            "title": "Message",
+            "type": "string"
+          },
+          "details": {
+            "additionalProperties": true,
+            "title": "Details",
+            "type": "object"
+          }
+        },
+        "title": "Ok",
+        "type": "object"
+      }
+    },
+    {
+      "name": "tool.list",
+      "domain": "tool",
+      "kind": "query",
+      "summary": "Narzędzia z bazy",
+      "status": "implemented",
+      "safety": "none",
+      "role": "operator",
+      "idempotent": true,
+      "plan": "",
+      "request": {
+        "additionalProperties": false,
+        "description": "Operacje bez parametrów i bez wyniku merytorycznego.",
+        "properties": {},
+        "title": "Empty",
+        "type": "object"
+      },
+      "result": {
+        "additionalProperties": false,
+        "properties": {
+          "tools": {
+            "items": {
+              "$ref": "#/$defs/ToolOut"
+            },
+            "title": "Tools",
+            "type": "array"
+          },
+          "path": {
+            "default": "",
+            "title": "Path",
+            "type": "string"
+          }
+        },
+        "title": "ToolList",
+        "type": "object"
+      }
+    },
+    {
+      "name": "tool.set_wear",
+      "domain": "tool",
+      "kind": "command",
+      "summary": "Korekcja zużycia (X/Y/Z)",
+      "status": "implemented",
+      "safety": "none",
+      "role": "technolog",
+      "idempotent": false,
+      "plan": "",
+      "request": {
+        "additionalProperties": false,
+        "properties": {
+          "number": {
+            "minimum": 0,
+            "title": "Number",
+            "type": "integer"
+          },
+          "axis": {
+            "default": "Z",
+            "enum": [
+              "X",
+              "Y",
+              "Z"
+            ],
+            "title": "Axis",
+            "type": "string"
+          },
+          "value": {
+            "title": "Value",
+            "type": "number"
+          }
+        },
+        "required": [
+          "number",
+          "value"
+        ],
+        "title": "ToolWearRequest",
+        "type": "object"
+      },
+      "result": {
+        "additionalProperties": false,
+        "description": "Standardowy wynik polecenia: potwierdzenie i opcjonalny komunikat dla operatora.",
+        "properties": {
+          "ok": {
+            "default": true,
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "message": {
+            "default": "",
+            "title": "Message",
+            "type": "string"
+          },
+          "details": {
+            "additionalProperties": true,
+            "title": "Details",
+            "type": "object"
+          }
+        },
+        "title": "Ok",
+        "type": "object"
+      }
+    },
+    {
+      "name": "tool.upsert",
+      "domain": "tool",
+      "kind": "command",
+      "summary": "Dodaj albo zaktualizuj narzędzie",
+      "status": "implemented",
+      "safety": "none",
+      "role": "technolog",
+      "idempotent": false,
+      "plan": "",
+      "request": {
+        "additionalProperties": false,
+        "properties": {
+          "number": {
+            "minimum": 0,
+            "title": "Number",
+            "type": "integer"
+          },
+          "pocket": {
+            "default": 0,
+            "title": "Pocket",
+            "type": "integer"
+          },
+          "type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Type"
+          },
+          "description": {
+            "default": "",
+            "title": "Description",
+            "type": "string"
+          },
+          "holder": {
+            "default": "",
+            "title": "Holder",
+            "type": "string"
+          },
+          "diameter": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Diameter"
+          },
+          "params": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "title": "Params",
+            "type": "object"
+          },
+          "offsets": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "title": "Offsets",
+            "type": "object"
+          },
+          "life_min": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Life Min"
+          }
+        },
+        "required": [
+          "number"
+        ],
+        "title": "ToolUpsertRequest",
+        "type": "object"
+      },
+      "result": {
+        "additionalProperties": false,
+        "description": "Standardowy wynik polecenia: potwierdzenie i opcjonalny komunikat dla operatora.",
+        "properties": {
+          "ok": {
+            "default": true,
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "message": {
+            "default": "",
+            "title": "Message",
+            "type": "string"
+          },
+          "details": {
+            "additionalProperties": true,
+            "title": "Details",
+            "type": "object"
+          }
+        },
+        "title": "Ok",
+        "type": "object"
+      }
+    }
+  ],
+  "events": [
+    {
+      "topic": "alarms",
+      "summary": "Aktywne alarmy i najgorszy poziom",
+      "payload": {}
+    },
+    {
+      "topic": "health",
+      "summary": "Zdrowie backendu",
+      "payload": {}
+    },
+    {
+      "topic": "machine",
+      "summary": "Migawka maszyny (DRO, tryb, program) — 50 Hz",
+      "payload": {}
+    },
+    {
+      "topic": "plant",
+      "summary": "Stan Plant (ramki LRT-NET, wyrocznia)",
+      "payload": {}
+    }
+  ]
+}

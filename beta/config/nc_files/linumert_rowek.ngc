@@ -1,0 +1,21 @@
+( linumeRT · program testowy 3: rowek okrągły Ø30 mm warstwami po 2 mm, pętla o100 while )
+( SPDX-License-Identifier: GPL-2.0-or-later )
+;@STOCK BOX X100 Y100 Z30 ORIGIN=TOP_FRONT_LEFT OFFSET=G54 MAT="aluminium"
+G21 G90 G17 G40 G49 G80
+T2 M6
+G43 H2
+S10000 M3
+G0 Z10
+G0 X50 Y50
+#<glebokosc> = 0
+o100 while [#<glebokosc> GT -6]
+  #<glebokosc> = [#<glebokosc> - 2]
+  G1 Z#<glebokosc> F200
+  G1 X65 F600
+  G2 X65 Y50 I-15 J0
+  G1 X50
+o100 endwhile
+G0 Z10
+M5
+G53 G0 Z0
+M2

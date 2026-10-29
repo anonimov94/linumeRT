@@ -1,0 +1,9 @@
+# linumeRT · Plant dla konfiguracji LinuxCNC config/plant/linumert_plant_xyz (sesja 018).
+# Lockstep: czas modelu = suma okresów wątku servo LinuxCNC (time_ns ramek), deterministyczny.
+# VM-B w osobnej maszynie: mode realtime, listen 0.0.0.0, a w INI [PLANT]IP = adres VM-B.
+machine: ../../machines/mill_servo_table.yaml
+network: {listen: 127.0.0.1, port: 47700}
+timing: {cycle_ns: 1000000, substeps: 4, watchdog_ms: 50}
+mode: lockstep
+seed: 1
+oracle: {arm_bit: 31}     # wyrocznia REQ-VM-06 aktywna, gdy LinuxCNC ustawi dout-31 (is-all-homed)

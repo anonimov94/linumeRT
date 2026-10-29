@@ -1,0 +1,105 @@
+# linumeRT headless (beta) — samodzielna aplikacja CNC bez GUI.
+#
+# Cztery pakiety w jednym drzewie (bez Qt, bez OpenGL, bez panelu web):
+#   linumert          - rdzeń: programy, narzędzia, CAM, konfiguracja, alarmy, diagnostyka
+#   linumert_sim      - symulacja materiału, kolizje, czas (bez renderera GL)
+#   linumert_plant    - wirtualna obrabiarka: dynamika, napędy, LRT-NET, scenariusze
+#   linumert_headless - aplikacja: kontrakt operacji, usługi, REST/WebSocket/CLI, SDK
+#
+# Instalacja w osobnym środowisku (pakiet `linumert` jest wspólną nazwą z projektem
+# macierzystym — nie instaluj obu w tym samym venv):
+#   python3 -m venv .venv && .venv/bin/pip install -e ".[dev]"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "linumert-headless"
+version = "0.1.0"
+description = "linumeRT headless (beta) - aplikacja CNC bez GUI: kontrakt operacji, REST/WebSocket/CLI/SDK"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "GPL-2.0-or-later" }
+classifiers = [
+    "License :: OSI Approved :: GNU General Public License v2 or later (GPLv2+)",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Scientific/Engineering :: Interface Engine/Protocol Translator",
+]
+dependencies = [
+    "numpy",
+    "pydantic>=2",
+    "pyyaml",
+]
+
+[project.optional-dependencies]
+# Serwer REST/WebSocket. Bez tej grupy działają CLI, SDK w trybie lokalnym i testy usług.
+server = [
+    "fastapi>=0.100",
+    "uvicorn>=0.23",
+    "websockets>=11",
+]
+dev = [
+    "pytest",
+    "pytest-timeout",
+    "ruff",
+    "httpx",
+    "linumert-headless[server]",
+]
+
+[project.scripts]
+# Serwer API (REST + WebSocket) — do tego podłącza się dowolne GUI.
+linumertd = "linumert_headless.__main__:main"
+# CLI zbudowane z kontraktu operacji.
+linumertctl = "linumert_headless.transport.cli:main"
+# Wirtualna obrabiarka (LRT-NET) bez panelu web.
+linumert-plant = "linumert_plant.__main__:main"
+# Generator konfiguracji LinuxCNC z machine.yaml (INI + HAL).
+# Kompilacja .lnx → G-code nie ma osobnego skryptu: to operacja `program.compile`
+# w kontrakcie, więc działa przez REST, WebSocket, SDK i `linumertctl program.compile`.
+linumert-config = "linumert.machine.config_build:main"
+
+[tool.setuptools]
+packages = [
+    "linumert",
+    "linumert.access",
+    "linumert.alarms",
+    "linumert.cnc",
+    "linumert.diag",
+    "linumert.generators",
+    "linumert.machine",
+    "linumert.plugins",
+    "linumert.programs",
+    "linumert.tools",
+    "linumert_sim",
+    "linumert_plant",
+    "linumert_plant.panel",
+    "linumert_headless",
+    "linumert_headless.backends",
+    "linumert_headless.sdk",
+    "linumert_headless.services",
+    "linumert_headless.transport",
+]
+
+[tool.setuptools.package-dir]
+"" = "src"
+
+[tool.setuptools.package-data]
+"linumert.alarms" = ["catalog.yaml"]
+"linumert.programs" = ["lnx_schema.json"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+addopts = "-q"
+# Zabezpieczenie przed zawieszeniem: transporty (WebSocket, żywy serwer) blokują się
+# na odbiorze, więc test bez odpowiedzi musi paść, a nie wisieć w nieskończoność.
+timeout = 60
+timeout_method = "thread"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP"]

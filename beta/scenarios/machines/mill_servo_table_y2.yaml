@@ -1,0 +1,70 @@
+# linumeRT · wariant mill_servo_table dla scenariusza homing_all (sesja 024): czujnik drugiej strony
+# belki Y (lim_y_min_2, din-08) — atrapa mastera bazuje gantry z wyrównaniem na dwóch czujnikach.
+# Frezarka stolowa 3-osiowa, serwonapedy CiA 402 (EtherCAT), os Y jako portal 2-napedowy.
+schema_version: 1
+machine: {name: mill_servo_table, type: mill}
+kinematics: {preset: mill_table_xyz}
+axes:
+  - letter: X
+    drives: [drv_x]
+    travel: [0, 600]
+    soft_limits: [1, 599]
+    limits:
+      min: {position: 0.5, input: lim_x_min}
+      max: {position: 599.5, input: lim_x_max}
+    hardstops: {min: {position: -2}, max: {position: 602}, drive_fault: true}
+    home_sensor: {shared_with: limit_min}
+    max_velocity: 200
+    max_acceleration: 2000
+    homing: {method: switch_index, direction: -1, search_speed: 40, latch_speed: 4, order: 1}
+  - letter: Y
+    drives: [drv_y1, drv_y2]
+    travel: [0, 900]
+    soft_limits: [1, 899]
+    limits:
+      min: {position: 0.5, input: lim_y_min}
+      max: {position: 899.5, input: lim_y_max}
+    hardstops: {min: {position: -2}, max: {position: 902}}
+    home_sensor: {shared_with: limit_min}
+    max_velocity: 200
+    max_acceleration: 2000
+    homing: {method: switch, direction: -1, search_speed: 40, latch_speed: 4, order: 1, gantry_square: true}
+    gantry_max_skew: 0.5
+  - letter: Z
+    drives: [drv_z]
+    travel: [-120, 0]
+    soft_limits: [-119, -1]
+    limits:
+      max: {position: -0.5, input: lim_z_max}
+    hardstops: {max: {position: 2}}
+    home_sensor: {shared_with: limit_max}
+    max_velocity: 80
+    max_acceleration: 2500
+    homing: {method: switch, direction: 1, search_speed: 20, latch_speed: 2, order: 0}
+drives:
+  - {id: drv_x, template: servo_400w}
+  - {id: drv_y1, template: servo_400w}
+  - {id: drv_y2, template: servo_400w}
+  - {id: drv_z, template: servo_750w, overrides: {mechanics: {load: 40.0}}}
+  - {id: drv_spindle, template: spindle_vfd_22kw}
+spindle: {drive: drv_spindle, max_rpm: 8000, min_rpm: 100}
+# Strefa zakazana: magazyn narzędzi w rogu stołu (wyrocznia Plant, REQ-VM-06, sesja 019)
+forbidden_zones:
+  - {name: magazyn_narzedzi, min: [520, 820, -200], max: [600, 900, 0]}
+positions:
+  manual_change: [300, 450, -5]
+  safe_z: -5
+  tool_setter: {position: [50, 50, -100], height: 30, input: toolsetter}
+collision_bodies:
+  - {name: wrzeciono, shape: cylinder, attached_to: spindle, size: [80, 150], position: [0, 0, 75]}
+  - {name: stol, shape: box, attached_to: table, size: [700, 1000, 40], position: [300, 450, -150]}
+# Sonda w wrzecionie i przygotówka na stole (sesja 014)
+probe:
+  input: probe
+  tip_length: 60
+  target: {type: box, min: [250, 350, -110], max: [350, 450, -90]}
+io:
+  inputs: {estop: 0, lim_x_min: 1, lim_x_max: 2, lim_y_min: 3, lim_y_max: 4, lim_z_max: 5, toolsetter: 6, probe: 7,
+           lim_y_min_2: 8}
+  outputs: {spindle_on: 0, coolant: 1}
+  estop: {input: estop, contact: NC}

@@ -1,0 +1,44 @@
+// SPDX-License-Identifier: GPL-2.0-or-later
+// linumeRT - bazowanie na twardym zderzaku po stronie LinuxCNC (REQ-VM-07, metoda c).
+// Model-Author: Claude · sesja 015
+//
+// LinuxCNC (homemod) bazuje na czujniku `joint.N.home-sw-in`. Ten komponent robi z zderzaka
+// czujnik: gdy |value| >= threshold nieprzerwanie przez detect-time [s], home-sw = 1.
+// value = moment z napedu (6077h, promile) albo blad nadazania (joint.N.f-error).
+// W czasie bazowania (enable = joint.N.homing) wystawia zredukowany limit momentu
+// (torque-limit = torque-limit-homing, do 6072h napedu), poza nim torque-limit-normal.
+// Ta sama logika jest w plant/server/linumert_plant/homing_master.py (HardstopDetector).
+// Zalecane INI (docs/DECYZJE.md, sesja 015): HOME_SEARCH_VEL i HOME_LATCH_VEL ze znakiem
+// w strone zderzaka, HOME_IGNORE_LIMITS = YES, FERROR wiekszy niz detekcja.
+// Zasady RT (CLAUDE.md §5): bez alokacji, bez I/O. NIEZWERYFIKOWANE NA SPRZECIE.
+component lrt_hardstop_home "linumeRT: czujnik bazowy z twardego zderzaka (moment albo blad nadazania)";
+pin in bit enable "1 w czasie bazowania osi (joint.N.homing)";
+pin in float value "moment [promile] albo blad nadazania [jedn. osi]";
+pin in float threshold "prog |value| (> 0; 0 = detekcja wylaczona)";
+pin in float detect_time = 0.02 "czas nieprzerwanego przekroczenia progu [s]";
+pin in float torque_limit_normal = 1000 "limit momentu poza bazowaniem [promile]";
+pin in float torque_limit_homing = 300 "zredukowany limit momentu w czasie bazowania [promile]";
+pin out bit home_sw "syntetyczny czujnik bazowy (do joint.N.home-sw-in)";
+pin out float torque_limit "limit momentu dla napedu (6072h) [promile]";
+pin out float timer "czas przekroczenia progu [s] (diagnostyka)";
+function _;
+license "GPL-2.0-or-later";
+author "linumeRT";
+;;
+#include <rtapi_math.h>
+
+FUNCTION(_) {
+    if (!enable) {
+        timer = 0.0;
+        home_sw = 0;
+        torque_limit = torque_limit_normal;
+        return;
+    }
+    torque_limit = torque_limit_homing;
+    if (threshold > 0.0 && fabs(value) >= threshold) {
+        timer = timer + fperiod;
+    } else {
+        timer = 0.0;
+    }
+    home_sw = threshold > 0.0 && timer >= detect_time;
+}

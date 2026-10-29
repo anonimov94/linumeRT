@@ -935,3 +935,12 @@ Model-Author: Codex. Ukończono jedno zadanie dokumentacyjne: scenariusz odbioru
 
 Model-Author: Codex. Jedno zadanie 028: usunięto ucięcie przycisku Z+ w 1280×768,
 uzupełniono test pełnej geometrii i zachowano zrzut Qt z atrapą CNC. Pełny odbiór nadal otwarty.
+
+## Stan zatrzymania — beta WebSocket, 2026-10-29
+
+Model-Author: Codex. Checkout linumeRT-beta, gałąź arena/dac91208-linumert, PR #202.
+Poprawiono obejście kontroli Host/Origin przez WS; 30 testów transportów, lint,
+check_no_gui i roadmap --check PASS. Pełna regresja beta: 907 testów PASS, CI beta python/plant-core PASS dla 3b5bf78. Osobny venv
+WSL Debian12 /tmp/linumert-beta-review-20261029; log /tmp/linumert-beta-review-tests.log.
+Następny krok: odbiór makr tool_change/probe_run na LinuxCNC/Plant przed domknięciem beta.
+Nie uznawać tej poprawki za przegląd wszystkich 85 operacji ani zamknięcie G2.

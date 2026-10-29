@@ -1,0 +1,102 @@
+# Szablon napędu wirtualnego linumeRT: Krokowiec NEMA 34, ok. 8,5 N·m (bez sprzężenia).
+# Wartości przykładowe — typowe dla klasy napędu, zaokrąglone; NIE pochodzą z dokumentacji
+# żadnego producenta (docs/PROVENANCE.md). NIEZWERYFIKOWANE NA SPRZĘCIE.
+# Wszystkie pola są jawne; format i zakresy: plant/library/drives/README.md.
+# Model-Author: Claude · sesja 013
+id: stepper_nema34_85nm
+version: 1
+based_on: null
+name: "Krokowiec NEMA 34, ok. 8,5 N·m (bez sprzężenia)"
+description: "Krokowiec bez sprzężenia, korpus 86 mm, śruba 10 mm/obr; typowy napęd osi ciężkiego routera."
+value_source: "przykładowe wartości typowe dla klasy NEMA 34 / 8,5 N·m; zaokrąglone, nie pochodzą z karty katalogowej żadnego producenta"
+type: stepper_open
+
+# Parametry zmieniane w locie (REQ-VD-04); pozostałe wymagają przeładowania modelu.
+live:
+  - motor.rotor_inertia
+  - mechanics.load
+  - mechanics.j_screw
+  - mechanics.friction_coulomb
+  - mechanics.friction_static
+  - mechanics.friction_viscous
+  - mechanics.backlash
+  - limits.torque_limit_permille
+  - electrical.supply_voltage
+
+motor:
+  rated_torque: 8.5           # [N·m] moment trzymania
+  peak_torque: 8.5            # [N·m]
+  peak_time_s: 0.0            # [s] czas pracy ze szczytem (I2t); 0 = bez ochrony
+  rotor_inertia: 2.8000e-04       # [kg·m²]
+  torque_constant: 1.4167      # [N·m/A] = moment znamionowy / prąd znamionowy
+  rated_current: 6.0         # [A]
+  peak_current: 6.0          # [A]
+  encoder_counts_per_rev: 6400   # [imp/obr]
+  encoder_noise_counts: 0.0
+  # Krzywa moment–prędkość: [omega rad/s, moment N·m]; poniżej pierwszego punktu stała, powyżej ostatniego 0.
+  torque_curve: [[0.0, 8.5], [25.0, 8.0], [80.0, 5.5], [160.0, 3.0], [240.0, 1.4], [320.0, 0.5], [400.0, 0.0]]
+  brake_present: false
+  brake_release_ms: 0.0
+  brake_engage_ms: 0.0
+
+electrical:
+  nominal_voltage: 70.0       # [V]
+  supply_voltage: 70.0        # [V] bieżące; skaluje krzywą momentu (live)
+
+# Regulatory: kv, ti, kp_pos i inertia_est dobrane jak lrt_drive_tune_servo() dla pasma 150 rad/s
+# przy kroku 1 ms i bezwładności zastępczej 7.0396e-04 kg·m² (J wirnika + J śruby + load·ratio²).
+controller:
+  kp_pos: 0.0
+  kv: 0.0
+  ti: 0.0
+  kff_vel: 1.0
+  kff_acc: 1.0
+  inertia_est: 0.0
+  vel_filter_hz: 400.0
+  ff_filter_hz: 300.0
+  max_speed: 500.0
+
+limits:
+  torque_limit_permille: 1000   # 6072h [‰ znamionowego]
+  following_window: 4294967295       # 6065h [imp]
+  following_window_ms: 0
+  quick_stop_decel: 320000      # 6085h [imp/s²]
+  standstill_speed: 0.1
+  boot_time_s: 0.5
+
+reactions:
+  quick_stop_option: 2     # 605Ah: 1 = wyłącz napęd, 2 = rampa i wyłączenie
+  fault_reaction_option: 0  # 605Eh: 0 = wyłącz napęd, 2 = rampa quick stop
+  brake_on_fault: false
+
+cia402:
+  objects: ["603Fh", "6040h", "6041h", "605Ah", "605Eh", "6060h", "6061h", "6064h", "6065h", "6066h", "606Ch", "6072h", "6077h", "607Ah", "6085h", "6098h", "6099h", "609Ah", "60B1h", "60B2h"]
+  homing_method: 35        # 6098h (sekwencje bazowania: sesja 015)
+  homing_speed_switch: 6400
+  homing_speed_zero: 1600
+  homing_accel: 320000
+
+# Mechanika domyślna; maszyna może ją nadpisać w instancji (overrides).
+mechanics:
+  kind: linear
+  load: 120.0            # [kg] masa osi
+  ratio: 0.00159155          # [m/rad]
+  j_screw: 1.2000e-04       # [kg·m²]
+  friction_coulomb: 0.25    # [N·m]
+  friction_static: 0.35     # [N·m]
+  friction_viscous: 0.002  # [N·m·s/rad]
+  backlash: 3.0000e-05      # [m]
+  contact_stiffness: 3000.0   # [N·m/rad] na wale
+  gravity_force: 0.0
+
+# Parametry krokowca (rdzeń C: 4 pełne kroki na okres elektryczny).
+stepper:
+  full_steps_per_rev: 200
+  damping_ratio: 0.2      # względne tłumienie wirnika, ograniczone w rdzeniu do 20 % amplitudy
+
+# Napęd rzeczywisty (REQ-VD-06, sesja 061): sterownik LinuxCNC; skala impulsów na mm/° wynika
+# z motor.encoder_counts_per_rev i mechanics.ratio. Czasy impulsów przykładowe dla typowych
+# sterowników krokowych. NIEZWERYFIKOWANE NA SPRZĘCIE.
+real:
+  driver: stepgen
+  timing_ns: {steplen: 5000, stepspace: 5000, dirsetup: 20000, dirhold: 20000}
