@@ -65,8 +65,15 @@ mdi("G53 G0 Z-5")
 # Zly argument (kierunek 2): makro odmawia przed ruchem, offset i pozycja bez zmian.
 s.poll()
 before_off, before_pos = list(s.g5x_offset[:3]), list(s.actual_position[:3])
+ech = linuxcnc.error_channel()
 mdi("o<lrt_probe> call [2] [2] [10] [100] [1] [0] [2]", timeout=30)
 s.poll()
+errors = []
+for _ in range(5):
+    err = ech.poll()
+    if err:
+        errors.append(str(err[1]))
+out["bad_arg_errors"] = errors
 out["bad_arg"] = {"offset_same": before_off == list(s.g5x_offset[:3]),
                   "moved": max(abs(a - b) for a, b in zip(before_pos, s.actual_position[:3]))}
 out["estop"] = s.estop
@@ -120,6 +127,8 @@ def test_lrt_probe_sets_work_offset_on_plant(tmp_path) -> None:
     # P=2 przy aktywnym G54: G55 dostaje offset, aktywny układ zostaje G54 (index 1).
     assert result["active_after_p2"] == 1, result
     assert result["g55"][2] == pytest.approx(top_z - Z_VALUE, abs=ABS_TOL), result
+    # Odmowa to komunikat interpretera (abort), nie E-STOP: maszyna zostaje włączona.
+    assert any("kierunek" in e for e in result["bad_arg_errors"]), result
     assert result["bad_arg"]["offset_same"] and result["bad_arg"]["moved"] < 1e-3, result
     # Drugie sondowanie nie zmieniło Z zapisanego przez pierwsze.
     assert x["offset"][2] == pytest.approx(z["offset"][2], abs=1e-6), (z, x)
