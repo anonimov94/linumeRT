@@ -47,6 +47,21 @@ out["x"] = {"offset": list(s.g5x_offset[:3]), "tripped": s.probe_tripped,
             "gcodes": [g for g in s.gcodes if g > 0]}
 mdi("G90")
 mdi("G53 G0 Z-5")
+# Ponowne sondowanie Z przy aktywnym, niezerowym offsecie G54: wynik nie może się zmienić.
+mdi("G53 G0 X300 Y400")
+mdi("@CALL_Z@", timeout=180)
+s.poll()
+out["z2"] = {"offset": list(s.g5x_offset[:3]), "tripped": s.probe_tripped}
+# P=2 przy aktywnym G54: offset trafia do G55, aktywny układ się nie zmienia.
+mdi("G53 G0 Z-5")
+mdi("@CALL_Z55@", timeout=180)
+s.poll()
+out["active_after_p2"] = s.g5x_index
+mdi("G55")
+s.poll()
+out["g55"] = list(s.g5x_offset[:3])
+mdi("G54")
+mdi("G53 G0 Z-5")
 out["estop"] = s.estop
 print("RESULT " + json.dumps(out))
 """
@@ -63,7 +78,9 @@ def test_macro_file_matches_core() -> None:
 def test_lrt_probe_sets_work_offset_on_plant(tmp_path) -> None:
     call_z = probe_call("Z", -1, 100, 100, "G54", Z_VALUE, RETRACT)
     call_x = probe_call("X", 1, 100, 100, "G54", X_VALUE, RETRACT)
-    driver = DRIVER.replace("@CALL_Z@", call_z).replace("@CALL_X@", call_x)
+    call_z55 = probe_call("Z", -1, 100, 100, "G55", Z_VALUE, RETRACT)
+    driver = (DRIVER.replace("@CALL_Z55@", call_z55).replace("@CALL_Z@", call_z)
+              .replace("@CALL_X@", call_x))
     result, _, _ = run_generated_plant(tmp_path, MILL, driver, port=47853)
     assert result["on"] and result["homed"] and not result["estop"], result
 
@@ -90,5 +107,11 @@ def test_lrt_probe_sets_work_offset_on_plant(tmp_path) -> None:
     # Tryb odległości wywołującego przywrócony (G90 = 900, G91 = 910 w stat.gcodes).
     assert 900 in z["gcodes"] and 910 not in z["gcodes"], z
     assert 910 in x["gcodes"] and 900 not in x["gcodes"], x
+    # #5061…#5063 są w układzie aktywnym (jak #<_x>): sondowanie przy offsecie −35 daje to samo.
+    assert result["z2"]["tripped"], result
+    assert result["z2"]["offset"][2] == pytest.approx(z["offset"][2], abs=0.01), result
+    # P=2 przy aktywnym G54: G55 dostaje offset, aktywny układ zostaje G54 (index 1).
+    assert result["active_after_p2"] == 1, result
+    assert result["g55"][2] == pytest.approx(top_z - Z_VALUE, abs=ABS_TOL), result
     # Drugie sondowanie nie zmieniło Z zapisanego przez pierwsze.
     assert x["offset"][2] == pytest.approx(z["offset"][2], abs=1e-6), (z, x)
