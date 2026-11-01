@@ -5,7 +5,8 @@ Model-Author: Claude · 2026-10-24
 
 Dwa źródła ruchów, ten sam wynik:
 - `PathCanon` — odbiornik `gcode.parse` z LinuxCNC 2.9 (interpreter rs274: o-word, korekcja,
-  pełne cykle); używany zawsze, gdy moduł `gcode` jest dostępny;
+  pełne cykle); używany zawsze, gdy moduł `gcode` jest dostępny, w procesie potomnym
+  (`_rs274_worker`), bo awaria albo pętla w interpreterze nie mogą dotknąć serwera;
 - `SubsetInterpreter` — zapasowy interpreter podzbioru G-code dla CI i maszyn bez LinuxCNC:
   G0/G1/G2/G3 (płaszczyzny G17/G18/G19, IJK lub R, linia śrubowa), G20/G21, G90/G91, G90.1/G91.1,
   F, T…M6, G81/G82/G83/G73 z G98/G99 i Q, G80. Czego nie zna (o-word call, korekcja G41/G42,
@@ -19,8 +20,13 @@ NIEZWERYFIKOWANE NA SPRZĘCIE.
 
 from __future__ import annotations
 
+import bisect
+import importlib.util
 import math
+import os
 import re
+import subprocess
+import sys
 import tempfile
 from collections.abc import Iterable, Sequence
 from dataclasses import dataclass, field
@@ -28,11 +34,15 @@ from pathlib import Path
 
 import numpy as np
 
+from linumert.programs._interpreter_process import InterpreterOutputLimit, run_bounded
+
 INCH = 25.4
 CHORD_TOL = 0.01            # [mm] maks. odległość cięciwy od łuku
 KIND_RAPID, KIND_FEED, KIND_ARC = 0, 1, 2
 KIND_NAMES = ("G0", "G1", "łuk")
 PECK_CLEARANCE = 0.010 * INCH   # [mm] odstęp nad dnem po wycofaniu w G73/G83 (LinuxCNC)
+RS274_TIMEOUT = 60.0        # [s] analiza jednego programu w procesie potomnym
+WORKER_PROGRAM_ERROR = 3    # kod wyjścia: interpreter odrzucił program
 
 
 class InterpreterUnavailable(RuntimeError):
@@ -171,25 +181,56 @@ PLANE_AXES = {1: (0, 1, 2), 2: (2, 0, 1), 3: (1, 2, 0)}   # G17 XY, G18 ZX, G19 
 
 # --------------------------------------------------------------------------- rs274 (LinuxCNC)
 
+_TOOL_COMMENT = re.compile(r"\([^)]*\)|;.*$")
+_TOOL_NUMBER = re.compile(r"(?<![A-Za-z0-9.#<_])[Tt]\s*(\d+)(?![\d.])")
+_TOOL_EXPRESSION = re.compile(r"(?<![A-Za-z0-9.#<_])[Tt]\s*[#\[]")
+_TOOL_CHANGE = re.compile(r"(?<![A-Za-z0-9.])[Mm]\s*0*6(?!\d)")
+_SUB_CALL = re.compile(r"\bcall\b", re.IGNORECASE)
+TOOL_UNKNOWN_NOTE = ("Numer narzędzia z wyrażenia T albo z podprogramu nie jest znany: "
+                     "symulacja przyjmuje ostatni T z programu głównego.")
+
+
+def tool_changes(text: str) -> tuple[list[tuple[int, int]], list[str]]:
+    """Zmiany narzędzia (linia, T) z tekstu programu, w kolejności linii, i notatki.
+
+    `gcode.parse` nie podaje numeru T: `SELECT_TOOL` jest tam puste, `change_tool` dostaje
+    indeks tablicy, a przy braku tablicy słowo T kończy proces. Stąd odczyt ze źródła.
+    """
+    changes: list[tuple[int, int]] = []
+    pending = 0
+    unknown = False
+    for number, line in enumerate(text.splitlines(), 1):
+        code = _TOOL_COMMENT.sub("", line)
+        unknown = unknown or bool(_TOOL_EXPRESSION.search(code) or _SUB_CALL.search(code))
+        selected = _TOOL_NUMBER.search(code)
+        if selected:
+            pending = int(selected.group(1))
+        if _TOOL_CHANGE.search(code):
+            changes.append((number, pending))
+    return changes, [TOOL_UNKNOWN_NOTE] if unknown else []
+
+
 class PathCanon:
     """Odbiornik `gcode.parse` z LinuxCNC 2.9 → MoveList.
 
     Interpreter podaje współrzędne w calach (jednostki wewnętrzne), bez G5x/G92; offsety
     trafiają do `set_g5x_offset`/`set_g92_offset` i są tylko zapamiętywane (`offset`).
+    Narzędzie ruchu wynika z numeru linii i `tool_changes`.
     """
 
     # gcodemodule czyta ten atrybut jako tekst; bez niego __getattr__ zwraca funkcję
     # i parse() kończy się TypeError. parse_rs274 ustawia plik w katalogu tymczasowym.
     parameter_file = ""
 
-    def __init__(self, axis_mask: int = 0x7):
+    def __init__(self, axis_mask: int = 0x7, tool_changes: Sequence[tuple[int, int]] = ()):
         self.out = MoveListBuilder()
         self.lineno = 0
         self.pos: np.ndarray | None = None
         self.feed = 0.0
         self.plane = 1
         self.tool = 0
-        self.pending_tool = 0
+        self._change_lines = [line for line, _ in tool_changes]
+        self._change_tools = [tool for _, tool in tool_changes]
         self.rpm = 0.0
         self.g5x = np.zeros(3)
         self.g92 = np.zeros(3)
@@ -217,6 +258,8 @@ class PathCanon:
     # --- stan ---
     def next_line(self, state):
         self.lineno = int(state.sequence_number)
+        index = bisect.bisect_right(self._change_lines, self.lineno)
+        self.tool = self._change_tools[index - 1] if index else 0
         # Stan modalny wrzeciona (M3/M4/M5) i S z interpretera; gcodemodule nie woła
         # osobnych metod wrzeciona.
         direction = {3: 1.0, 4: -1.0}.get(int(getattr(state, "spindle", 5)), 0.0)
@@ -237,12 +280,6 @@ class PathCanon:
     def set_xy_rotation(self, theta):
         if theta:
             self.out.note("Obrót układu (G10 L2 R) nie jest uwzględniony w ścieżce.")
-
-    def select_tool(self, tool, *rest):
-        self.pending_tool = int(tool)
-
-    def change_tool(self, *rest):
-        self.tool = self.pending_tool
 
     def __getattr__(self, name):
         # Pozostałe wywołania (komentarze, wrzeciono, chłodziwo, M-funkcje) nie zmieniają ścieżki.
@@ -294,20 +331,39 @@ class PathCanon:
 
 def parse_rs274(path: Path | str, unitcode: str = "G21",
                 initcode: str = "G17 G90 G94 G54") -> MoveList:
-    """Ścieżka z interpretera LinuxCNC; bez LinuxCNC: InterpreterUnavailable."""
-    try:
-        import gcode  # type: ignore[import-not-found]
-    except ImportError as exc:
-        raise InterpreterUnavailable("Brak modułu gcode z LinuxCNC 2.9.") from exc
-    canon = PathCanon()
-    # Zapisy parametrów interpretera zostają w analizie, z dala od stanu operatora
-    # (jak load_ngc po poprawce N1 Codex, PR #123).
+    """Ścieżka z interpretera LinuxCNC w procesie potomnym.
+
+    Brak modułu `gcode` albo awaria interpretera: InterpreterUnavailable. Błąd programu albo
+    przekroczony limit analizy: ValueError. INI maszyny nie wpływa na wynik (jak `load_ngc`).
+    """
+    if importlib.util.find_spec("gcode") is None:
+        raise InterpreterUnavailable("Brak modułu gcode z LinuxCNC 2.9.")
+    path = Path(path).resolve()
+    env = os.environ.copy()
+    env.pop("INI_FILE_NAME", None)
+    package_root = str(Path(__file__).resolve().parents[1])
+    env["PYTHONPATH"] = os.pathsep.join(p for p in (package_root, env.get("PYTHONPATH")) if p)
     with tempfile.TemporaryDirectory(prefix="linumert-path-") as directory:
-        canon.parameter_file = str(Path(directory) / "path.var")
-        result, seq = gcode.parse(str(path), canon, unitcode, initcode)
-    if result > gcode.MIN_ERROR:
-        raise ValueError(f"linia {seq}: {gcode.strerror(result)}")
-    return canon.movelist()
+        target = Path(directory) / "moves.npz"
+        # -P: katalog programu (cwd podprogramów) nie trafia na ścieżkę importu Pythona.
+        command = [sys.executable, "-P", "-m", "linumert_sim._rs274_worker",
+                   str(path), unitcode, initcode, str(target)]
+        try:
+            run = run_bounded(command, cwd=path.parent, env=env, timeout=RS274_TIMEOUT)
+        except subprocess.TimeoutExpired as exc:
+            raise ValueError("Przekroczony czas analizy programu (pętla bez końca?).") from exc
+        except InterpreterOutputLimit as exc:
+            raise ValueError(str(exc)) from exc
+        lines = run.stderr.strip().splitlines()
+        if run.returncode == WORKER_PROGRAM_ERROR:
+            raise ValueError(lines[-1] if lines else "Interpreter odrzucił program.")
+        if run.returncode:
+            raise InterpreterUnavailable(
+                f"Interpreter LinuxCNC zakończył się kodem {run.returncode}.")
+        with np.load(target, allow_pickle=False) as data:
+            return MoveList(data["start"], data["end"], data["line"], data["tool"], data["kind"],
+                            data["feed"], data["spindle"],
+                            tuple(str(note) for note in data["notes"]), "rs274")
 
 
 # --------------------------------------------------------------------------- podzbiór (CI)

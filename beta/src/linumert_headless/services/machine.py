@@ -16,11 +16,14 @@ Usługa nie wie, czy pod spodem jest atrapa, LinuxCNC czy Plant — widzi tylko 
 
 from __future__ import annotations
 
+import re
 import time
 from collections.abc import Callable
 from pathlib import Path
 
 from linumert.cnc.model import AXIS_LETTERS, MachineSnapshot, Mode
+from linumert.generators.basic import SAFE_Z_MOVE
+from linumert.programs.limits import limits_from_ini
 
 from ..errors import Conflict, InvalidRequest, SafetyRefused
 from ..ports import MachinePort
@@ -239,6 +242,20 @@ class MachineService:
             except Exception:  # ponowimy w następnym cyklu
                 self.sessions.jog_start(axis, "watchdog")
         return axes
+
+    # ---- aktywna konfiguracja ----------------------------------------------
+    def active_ini(self) -> Path | None:
+        """INI działającego sterowania; atrapa go nie ma."""
+        source = getattr(self.backend, "active_ini", None)
+        return source() if callable(source) else None
+
+    def localize_gcode(self, text: str) -> str:
+        """Bezpieczna wysokość z generatorów (G53 Z0) na górny limit Z tej maszyny."""
+        ini = self.active_ini()
+        top = limits_from_ini(ini).get("Z") if ini is not None else None
+        if top is None or top[1] == 0.0:
+            return text
+        return re.sub(rf"^{re.escape(SAFE_Z_MOVE)}$", f"G53 G0 Z{top[1]:g}", text, flags=re.M)
 
     # ---- tabela narzędzi --------------------------------------------------
     def active_tool_table(self) -> Path | None:

@@ -84,6 +84,24 @@ def _with_machine_remaps(config: str, machine_ini: Path) -> str:
     return config if count else config + "\n[RS274NGC]\n" + "\n".join(extra) + "\n"
 
 
+def _machine_tool_table(machine_ini: Path) -> Path | None:
+    """``[EMCIO]TOOL_TABLE`` maszyny: długości z przykładowego sim.tbl dają fałszywe granice."""
+    import configparser
+
+    ini = configparser.RawConfigParser(strict=False)
+    if not ini.read(machine_ini, encoding="utf-8"):
+        return None
+    name = ini.get("EMCIO", "TOOL_TABLE", fallback="").strip()
+    table = machine_ini.resolve().parent / name if name else None
+    return table if table is not None and table.is_file() else None
+
+
+def _without_sample_tool_change(config: str) -> str:
+    """Ruchy zmiany narzędzia z przykładowego INI nie należą do maszyny (remap M6 je określa)."""
+    return re.sub(r"(?im)^[ \t]*TOOL_CHANGE_(QUILL_UP|POSITION|WITH_SPINDLE_ON)[ \t]*=.*(?:\n|$)",
+                  "", config)
+
+
 def run_interpreter(ngc: Path | str, root: Path | str | None = None,
                     timeout: float = 20.0,
                     parameters_from: Path | str | None = None,
@@ -115,13 +133,14 @@ def run_interpreter(ngc: Path | str, root: Path | str | None = None,
                 config += "\n[RS274NGC]\nPARAMETER_FILE = analysis.var\n"
             if machine_ini is not None:  # remapy i podprogramy maszyny (np. M6 → G43)
                 config = _with_machine_remaps(config, Path(machine_ini))
+                config = _without_sample_tool_change(config)
             if linear_units:  # parametry z .var są w jednostkach maszyny, nie domyślnych (cale)
                 config = re.sub(r"(?im)^([ \t]*LINEAR_UNITS[ \t]*=).*$",
                                 rf"\g<1> {linear_units}", config)
             ini = private / "analysis.ini"
             ini.write_text(config)
-            options = ["-i", str(ini),
-                       "-t", str((sim / "sim.tbl").resolve())]
+            table = _machine_tool_table(Path(machine_ini)) if machine_ini is not None else None
+            options = ["-i", str(ini), "-t", str((table or sim / "sim.tbl").resolve())]
             if (sim / "sim.var").exists():
                 shutil.copyfile(sim / "sim.var", parameters)
         if parameters_from is not None and Path(parameters_from).is_file():

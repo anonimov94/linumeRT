@@ -372,6 +372,28 @@ def _export_tools(request: ToolTblRequest, ctx: Context) -> ToolTblOut:
     return ctx.services["tools"].export_tbl(request)
 
 
+def _on_active_ini(method: Callable[[Any], Any], ctx: Context, request: Any) -> Any:
+    """Bez jawnego INI liczymy dla konfiguracji, na której działa sterowanie."""
+    active = ctx.services["machine"].active_ini()
+    if active is not None and not request.ini:
+        request = request.model_copy(update={"ini": str(active)})
+    return method(request)
+
+
+def _cam_generate(request: Any, ctx: Context) -> Any:
+    result = ctx.services["cam"].generate(request)
+    return result.model_copy(
+        update={"gcode": ctx.services["machine"].localize_gcode(result.gcode)})
+
+
+def _compile(request: LnxCompileRequest, ctx: Context) -> CompileOut:
+    result = ctx.services["program"].compile_lnx(request)
+    gcode = ctx.services["machine"].localize_gcode(result.gcode)
+    if gcode != result.gcode and result.path:
+        Path(result.path).write_text(gcode, encoding="utf-8")
+    return result.model_copy(update={"gcode": gcode})
+
+
 def _csv_out(text: str) -> JournalCsvOut:
     """Dziennik CSV: tekst plus liczba niepustych wierszy dla GUI."""
     lines = [line for line in str(text).splitlines() if line.strip()]
@@ -468,20 +490,21 @@ def register_operations(c: Contract) -> Contract:
               handler=lambda r, ctx: ctx.services["program"].delete(r))
     c.command("program.compile", domain="program", summary="Kompiluj .lnx → G-code",
               request=LnxCompileRequest, role=ROLE_TECHNOLOG,
-              handler=lambda r, ctx: ctx.services["program"].compile_lnx(r))
+              handler=_compile)
     # To samo, ale z tekstu i bez zapisu — edytor GUI podgląda wynik przed zapisem.
     c.query("program.compile_text", domain="program",
             summary="Kompiluj .lnx z tekstu (bez zapisu na dysk)",
             request=LnxCompileTextRequest, result=CompileOut,
             handler=lambda r, ctx: CompileOut(
-                gcode=ctx.services["program"].compile_text(r.text),
+                gcode=ctx.services["machine"].localize_gcode(
+                    ctx.services["program"].compile_text(r.text)),
                 message="skompilowano w pamięci"))
     c.query("program.check", domain="program", summary="Sprawdź granice osi programu",
             request=CheckRequest, result=LimitReportOut,
-            handler=lambda r, ctx: ctx.services["program"].check(r))
+            handler=lambda r, ctx: _on_active_ini(ctx.services["program"].check, ctx, r))
     c.query("program.estimate", domain="program", summary="Czas, droga i narzędzia programu",
             request=EstimateRequest, result=EstimateOut,
-            handler=lambda r, ctx: ctx.services["program"].estimate(r))
+            handler=lambda r, ctx: _on_active_ini(ctx.services["program"].estimate, ctx, r))
     c.query("program.toolpath", domain="program",
             summary="Punkty ścieżki do podglądu — GUI rysuje u siebie",
             request=ToolpathRequest, result=ToolpathOut,
@@ -523,7 +546,7 @@ def register_operations(c: Contract) -> Contract:
             result=CamCatalog, handler=lambda r, ctx: ctx.services["cam"].operations())
     c.command("cam.generate", domain="cam", summary="Generuj G-code z parametrów",
               request=CamGenerateRequest, result=CamGenerateOut, role=ROLE_TECHNOLOG,
-              handler=lambda r, ctx: ctx.services["cam"].generate(r))
+              handler=lambda r, ctx: _cam_generate(r, ctx))
 
     # ---- offset ------------------------------------------------------------
     c.query("offset.stock_get", domain="offset", summary="Przygotówka", result=StockOut,

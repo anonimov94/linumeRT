@@ -209,3 +209,92 @@ def test_server_rest_and_websocket_on_linuxcnc_plant(tmp_path, monkeypatch):
     assert r["tool"] == pytest.approx([5, 33.0], abs=1e-6), r
     assert r["tool_wear"] == pytest.approx([5, 33.25], abs=1e-6), r
     assert r["export"] and r["doctor_ok"], r
+
+
+PIPELINE = r'''
+from pathlib import Path
+from linumert_headless.app import build_application
+from linumert_headless.config import AppConfig
+app = build_application(AppConfig(root=Path.cwd(), backend="linuxcnc", autostart=False))
+call = app.call_json
+out = {"on": on, "homed": homed}
+table = linuxcnc.ini(os.environ["INI_FILE_NAME"]).find("EMCIO", "TOOL_TABLE")
+call("tool.import_tbl", {"text": Path(table).read_text()})
+length = call("tool.get", {"number": 1})["offsets"]["Z"]
+# Powierzchnia detalu 80 mm pod bazą Z, narzędzie T1 z korektą długości.
+assert mdi(f"G10 L2 P1 X200 Y300 Z{-80 - length}")
+def gen(operation, **params):
+    return call("cam.generate", {"operation": operation, "parameters": params})
+parts = [gen("header", title="odbior"),
+         gen("tool_change", tool=1, rpm=6000, safe_z=10),
+         gen("pocket_rect", cx=20, cy=15, width=30, height=20, depth=2, step_down=1, tool_d=6,
+             feed=1500, plunge=600, safe_z=5),
+         gen("program_end", retract="z_home")]
+text = "\n".join(p["gcode"] for p in parts) + "\nM2\n"   # generatory zwracają fragmenty
+out["program"] = text[:1500]
+call("program.write", {"name": "cam.ngc", "text": text, "overwrite": True})
+check = call("program.check", {"name": "cam.ngc"})
+out["check"] = {k: check[k] for k in ("ok", "violations", "interpreter", "moves")}
+estimate = call("program.estimate", {"name": "cam.ngc"})
+out["estimate"] = {k: estimate[k] for k in ("ok", "source", "seconds", "feed_mm", "rapid_mm")}
+path = call("program.toolpath", {"name": "cam.ngc"})
+over = call("program.check", {"text": "G21 G90 G54\nG0 X9000\nM2\n"})
+out["over"] = [[v["axis"], v["side"]] for v in over["violations"]]
+out["toolpath"] = {k: path[k] for k in ("ok", "source", "bounds", "length_mm", "notes")}
+sim = call("sim.run", {"name": "cam.ngc", "stock": "BOX X60 Y50 Z10",
+                       "tools": [[1, length, 6.0]]})
+out["sim"] = {k: sim[k] for k in ("ok", "source", "seconds", "volume_removed_mm3", "length_mm",
+                                  "collisions", "notes")}
+call("program.load", {"name": "cam.ngc"})
+start = time.time()
+call("machine.run", {})
+assert wait(lambda: s.interp_state != linuxcnc.INTERP_IDLE, 20)
+low, high, spindle, line = [1e9] * 3, [-1e9] * 3, 0.0, 0
+while time.time() - start < 200:
+    s.poll()
+    if s.interp_state == linuxcnc.INTERP_IDLE:
+        break
+    line = max(line, s.motion_line)
+    spindle = max(spindle, abs(s.spindle[0]["speed"]))
+    if s.tool_in_spindle == 1 and s.spindle[0]["enabled"]:
+        work = [s.position[i] - s.g5x_offset[i] - s.tool_offset[i] for i in range(3)]
+        low = [min(a, b) for a, b in zip(low, work)]
+        high = [max(a, b) for a, b in zip(high, work)]
+    time.sleep(0.01)
+out["run"] = {"seconds": round(time.time() - start, 2),
+              "idle": s.interp_state == linuxcnc.INTERP_IDLE,
+              "low": [round(v, 3) for v in low], "high": [round(v, 3) for v in high],
+              "spindle": spindle, "tool": s.tool_in_spindle, "line": line,
+              "errors": call("machine.state")["errors"]}
+print("RESULT " + json.dumps(out))
+'''
+
+
+@pytest.mark.linuxcnc
+@pytest.mark.timeout(420)
+def test_cam_program_pipeline_on_linuxcnc_plant(tmp_path, monkeypatch):
+    """CAM -> zapis -> sprawdzenie -> szacunek -> symulacja -> wczytanie -> przebieg."""
+    monkeypatch.setattr(plant_session, "ROOT", BETA)
+    monkeypatch.setattr(rip_support, "ROOT", BETA)
+    monkeypatch.setattr(rip_support, "HAL", BETA / "hal")
+    monkeypatch.setenv("PYTHONPATH", os.pathsep.join(
+        filter(None, [str(BETA / "src"), os.environ.get("PYTHONPATH", "")])))
+    machine = BETA / "config/machines/mill_servo_table.yaml"
+    r, log, _ = plant_session.run_generated_plant(
+        tmp_path, machine, PIPELINE, port=47862, timeout=360, copy_macros=False)
+    if os.environ.get("LINUMERT_BETA_REPORT"):
+        Path(os.environ["LINUMERT_BETA_REPORT"]).write_text(
+            json.dumps(r, indent=2), encoding="utf-8")
+    assert r["check"]["ok"] and not r["check"]["violations"], r
+    assert r["run"]["idle"] and r["run"]["errors"] == [], r
+    assert r["run"]["tool"] == 1 and r["run"]["spindle"] > 0, r
+    assert "G53 G0 Z-1" in r["program"] and "G53 G0 Z0" not in r["program"], r
+    assert r["over"] == [["X", "max"]], r
+    # Kieszeń 30x20 wokół (20, 15), frez 6 mm, głębokość 2: to samo w podglądzie i na maszynie.
+    bounds = r["toolpath"]["bounds"]
+    assert [bounds["max_x"], bounds["max_y"], bounds["min_z"]] == pytest.approx([32, 22, -2]), r
+    assert r["run"]["high"][:2] == pytest.approx([32, 22], abs=0.3), r
+    assert r["run"]["low"][2] == pytest.approx(-2, abs=0.05), r
+    assert r["estimate"]["source"] == "rs274" and r["sim"]["source"] == "rs274", r
+    # 30x20x2 minus zaokrąglenia naroży: objętość kieszeni 1200 mm3.
+    assert r["sim"]["volume_removed_mm3"] == pytest.approx(1200, rel=0.1), r

@@ -20,6 +20,7 @@ from __future__ import annotations
 import dataclasses
 import logging
 import math
+import shutil
 import tempfile
 from pathlib import Path
 
@@ -221,15 +222,19 @@ class ProgramService:
         ``Violation.limit`` to pojedynczy float z osobnym ``side``, nie para min/max.
         """
         text = self._text(request.name, request.text)
-        table = self._limits(request.ini)
         with tempfile.TemporaryDirectory(prefix="lrt-chk-") as tmp:
             path = Path(tmp) / "program.ngc"
             path.write_text(text, encoding="utf-8")
             try:
                 moves = load_path(path)
+                if request.ini and shutil.which("rs274"):
+                    # Sterowanie obecne: położenie maszynowe z G5x i korektą narzędzia.
+                    ini = Path(request.ini)
+                    found = limits.analyze_ngc(path, ini, limits.parameter_file(ini)).violations
+                else:
+                    found = _violations_from_moves(moves, self._limits(request.ini))
             except (InterpreterUnavailable, ValueError) as exc:
                 raise InvalidRequest(f"nie udało się sprawdzić granic: {exc}") from exc
-        found = _violations_from_moves(moves, table)
         return LimitReportOut(
             ok=not found,
             violations=[_violation_out(v) for v in found],
@@ -379,14 +384,15 @@ class ProgramService:
         return read_editable(self.paths.program(name))
 
     def _limits(self, ini: str) -> dict[str, tuple[float, float]]:
+        """Granice z INI; bez nich nie ma czego sprawdzać (``DEFAULT_LIMITS`` to prędkości)."""
         source = Path(ini) if ini else self.default_ini
-        if not source.exists():
-            return dict(DEFAULT_LIMITS)
         try:
-            table = limits.limits_from_ini(source)
-        except Exception:
-            return dict(DEFAULT_LIMITS)
-        return table or dict(DEFAULT_LIMITS)
+            table = limits.limits_from_ini(source) if source.exists() else {}
+        except Exception as exc:
+            raise Conflict(f"nie można odczytać granic z {source.name}: {exc}") from exc
+        if not table:
+            raise Conflict("brak granic osi: wskaż INI maszyny", details={"ini": str(source)})
+        return table
 
 
 def _default_spec() -> estimate.Limits:

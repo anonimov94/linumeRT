@@ -13,6 +13,8 @@ import pytest
 from linumert.cnc.linuxcnc_reader import LinuxCNCReader
 from linumert_headless.backends.linuxcnc import ERROR_RETENTION_S, LinuxCNCBackend
 from linumert_headless.errors import Conflict, InvalidRequest, SafetyRefused
+from linumert_headless.services.machine import MachineService
+from linumert_headless.session import SessionManager
 
 
 class Command:
@@ -130,6 +132,18 @@ def test_tabela_narzedzi_z_ini_i_wczytanie() -> None:
     assert backend.active_tool_table().name == "tool.tbl"
     backend.reload_tools()
     assert module.cmd.calls == [("load_tool_table",)]
+
+
+def test_bezpieczna_wysokosc_generatorow_bierze_limit_maszyny(tmp_path) -> None:
+    ini = tmp_path / "m.ini"
+    ini.write_text("[TRAJ]\nLINEAR_UNITS = mm\n[AXIS_Z]\nMIN_LIMIT = -119\nMAX_LIMIT = -1\n",
+                   encoding="utf-8")
+    backend = SimpleNamespace(active_ini=lambda: ini)
+    machine = MachineService(backend, SessionManager())
+    assert machine.localize_gcode("M5\nG53 G0 Z0\nT1 M6\n") == "M5\nG53 G0 Z-1\nT1 M6\n"
+    assert machine.localize_gcode("G53 G0 Z0 X5\n") == "G53 G0 Z0 X5\n"
+    assert MachineService(SimpleNamespace(), SessionManager()).localize_gcode(
+        "G53 G0 Z0") == "G53 G0 Z0"
 
 
 def test_numer_osi_teleop_jest_z_dziewieciu_liter_nie_z_kolejnosci() -> None:

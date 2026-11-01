@@ -129,5 +129,5 @@ atrybut na współdzielonym hubie nadpisywałby się przy drugim kliencie GUI i 
 | `linumert_sim` (symulacja offline) | 2 771 |
 | **razem `src/`** | **26 437** |
 
-Testy: 66 plików, **928 przechodzi, 0 pominiętych, 77 podtestów** — bez LinuxCNC, bez Qt,
+Testy: 67 plików, **933 przechodzi, 0 pominiętych, 77 podtestów** — bez LinuxCNC, bez Qt,
 bez serwera X.

@@ -243,12 +243,15 @@ class LinuxCNCBackend:
             self._wait()
         return (False, AXIS_LETTERS.index(axis.upper())) if homed else (True, joints[0])
 
+    def active_ini(self) -> Path:
+        self.snapshot()
+        return Path(self.reader.stat.ini_filename).resolve()
+
     def active_tool_table(self) -> Path | None:
         """``[EMCIO]TOOL_TABLE`` działającej konfiguracji (ścieżka względem katalogu INI)."""
-        self.snapshot()
-        path = self.reader.stat.ini_filename
-        name = self._lc().ini(path).find("EMCIO", "TOOL_TABLE")
-        return (Path(path).parent / name).resolve() if name else None
+        path = self.active_ini()
+        name = self._lc().ini(str(path)).find("EMCIO", "TOOL_TABLE")
+        return (path.parent / name).resolve() if name else None
 
     def reload_tools(self) -> None:
         self._cmd().load_tool_table()

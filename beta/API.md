@@ -267,6 +267,13 @@ Cztery operacje liczą na interpreterze G-code. Z modułem `gcode` LinuxCNC jest
 i ruchy `G53`**. Wynik jest wtedy prawdziwy, ale niepełny — i nie da się tego zgadnąć
 z samych liczb.
 
+`gcode.parse` działa w procesie potomnym. Bez działającego LinuxCNC interpreter kończy się
+awarią przy `G43 Hn`, `G41 Dn`, `G10 L1/L10`, `M61`; serwer przeżywa, a wynik ma wtedy
+`source: "subset"`, także na maszynie z LinuxCNC. Dotyczy to programów z generatorów CAM
+(`G43 H1`), więc `subset` przy zatrzymanym LinuxCNC nie jest błędem. Pętla bez końca kończy
+się błędem po 60 s. Numer narzędzia pochodzi z tekstu programu (interpreter go nie podaje):
+przy `T#…` albo podprogramach `notes` mówi, że może być nieznany.
+
 Przykład z `config/nc_files/linumert_demo.ngc`: całe skrawanie siedzi w pętlach
 `o100`/`o110`, więc bez LinuxCNC `sim.run` daje `volume_removed_mm3: 0.0` przy
 116 odcinkach i 3077 mm drogi. Zero wygląda na „program nic nie obrabia”, a znaczy
@@ -296,6 +303,14 @@ reszta testów idzie na atrapie (`backend=fake`). Wszystko, co dotyczy fizycznej
 jest **NIEZWERYFIKOWANE NA SPRZĘCIE**. Konfiguracja sprzętowa zostawia w łańcuchu E-STOP
 grzyb HMI z sygnałem życia (D35): sam backend bez klienta, który go obsługuje, nie zdejmie
 E-STOP (zabezpieczenie celowe).
+
+`cam.generate` zwraca fragment G-code bez `M2`: składając program samodzielnie, dopisz koniec
+programu (`program.compile` robi to dla `.lnx`). Na LinuxCNC `cam.generate` i kompilacja
+zamieniają bezpieczną wysokość generatorów `G53 G0 Z0` na `[AXIS_Z]MAX_LIMIT` aktywnej maszyny.
+
+`program.check` i `program.estimate` bez pola `ini` liczą na LinuxCNC dla działającej konfiguracji.
+`program.check` porównuje wtedy położenie maszynowe (G5x, korekta narzędzia) z limitami; bez INI
+zwraca `conflict`, a nie wynik wyliczony z domysłu.
 
 `tool.upsert`, `delete`, `set_wear` i `import_tbl` na LinuxCNC od razu zapisują i wczytują
 aktywną tabelę (`[EMCIO]TOOL_TABLE`), a przy pracującym programie zwracają `conflict`. Baza jest

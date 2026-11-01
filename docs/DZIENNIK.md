@@ -1752,3 +1752,10 @@ Pełny RIP musi ponownie potwierdzić wynik; nie scalać na czerwonym CI.
 - Model-Author: Claude. `beta/integration/test_server_linuxcnc.py`: prawdziwy `linumertd` i klient jak GUI. Deadman: pojedynczy jog stoi po 0,26 s, odświeżanie co 100 ms trzyma ruch, zamknięcie i zerwanie gniazda zatrzymują oś, E-STOP w trakcie jogu działa.
 - Naprawione: odczyty stanu zużywały limiter poleceń i odbierały tokeny jogowi; odświeżanie jogu zalewało komunikatami o zmianie trybu; zmiany bazy narzędzi nie docierały do tabeli LinuxCNC (M6 brał starą długość); README podawało nieistniejące `--ini`.
 - Wynik: 4 testy `linuxcnc` PASS, 928 testów bety PASS, ruff i check_no_gui PASS. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## Beta — odbiór ścieżki CAM na LinuxCNC + Plant · 2026-11-01 · Claude
+- Model-Author: Claude. `cam.generate` → `program.check` → `estimate` → `toolpath` → `sim.run` → przebieg: czas 34,05 s przy szacunku 39,2 s, X/Y high 32/22, Z −2, wrzeciono 6000, usunięte 1184 mm³ przy oczekiwanych 1200 mm³ (siatka wokseli).
+- Naprawione: `G53 G0 Z0` z generatorów przekraczało `[AXIS_Z]MAX_LIMIT` maszyny (teraz limit z aktywnego INI, PROPOZYCJA w DECYZJE); `program.check` porównywał granice z `DEFAULT_LIMITS` i liczył Z na długościach z `sim.tbl` oraz ruchu zmiany narzędzia z przykładowego INI; `sim.run` pod rs274 zawsze dawał 0 mm³, bo `gcode.parse` nie podaje numeru T i wszystko szło na T0.
+- Awaria odkryta przy diagnozie: bez działającego LinuxCNC `gcode.parse` kończy proces (SIGSEGV) przy `T`, `M6`, `G43 Hn`, `G41 Dn`, `G10 L1/L10`, `M61`, a pętla bez końca wieszała serwer. `parse_rs274` działa teraz w procesie potomnym z limitem czasu; po awarii zostaje `source: subset`.
+- Otwarte: `load_ngc` w `linumert/programs/toolpath.py` usuwa tylko T/M6, więc `G43 H1` nadal może zabić proces wywołujący. Ten sam kod jest na `main`. Odbiór na `main` i przegląd drugiego modelu nadal otwarte.
+- Wynik: 12 testów `linuxcnc` PASS, 933 testy bety PASS, ruff i check_no_gui PASS. NIEZWERYFIKOWANE NA SPRZĘCIE.

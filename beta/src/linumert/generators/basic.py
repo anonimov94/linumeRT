@@ -39,8 +39,12 @@ class Header(BaseMacroGenerator):
         lines = [f"( {v['title']} )"] if v["title"] else []
         if v["stock"]:
             lines.append(v["stock"])
-        lines += [f"{v['units']} G90 G17 G40 G49 G80 G94 {v['offset']}", "G53 G0 Z0"]
+        lines += [f"{v['units']} G90 G17 G40 G49 G80 G94 {v['offset']}", SAFE_Z_MOVE]
         return lines
+
+
+# Generator nie zna maszyny; wysokość z INI wstawia warstwa, która zna aktywną konfigurację.
+SAFE_Z_MOVE = "G53 G0 Z0"
 
 
 class ProgramEnd(BaseMacroGenerator):
@@ -57,7 +61,7 @@ class ProgramEnd(BaseMacroGenerator):
     def generate(self, v: dict[str, Any]) -> list[str]:
         lines = ["M5", "M9"]
         if v["retract"] != "none":
-            lines.append("G53 G0 Z0")
+            lines.append(SAFE_Z_MOVE)
         if v["retract"] == "z_home_xy":
             lines.append(f"G53 G0 X{fmt(v['park_x'])} Y{fmt(v['park_y'])}")
         return lines
@@ -77,7 +81,7 @@ class ToolChange(BaseMacroGenerator):
 
     def generate(self, v: dict[str, Any]) -> list[str]:
         t = v["tool"]
-        lines = ["M5", "G53 G0 Z0", f"T{t} M6", f"G43 H{t}"]
+        lines = ["M5", SAFE_Z_MOVE, f"T{t} M6", f"G43 H{t}"]
         if v["rpm"] > 0:
             lines.append(f"S{round(v['rpm'])} {v['direction']}")
         if v["coolant"] != "off":
