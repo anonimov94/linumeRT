@@ -116,8 +116,15 @@ class JogRequest(Model):
 
 class JogIncrementRequest(Model):
     axis: AxisName
-    speed: float = Field(gt=0, le=50.0)
+    speed: float = Field(ge=-50.0, le=50.0, description="mm/s; znak = kierunek, różna od 0")
     distance: float = Field(gt=0, description="krok przyrostowy [mm]")
+
+    @field_validator("speed")
+    @classmethod
+    def _speed(cls, v: float) -> float:
+        if v == 0.0:
+            raise ValueError("prędkość jogu przyrostowego nie może być zerowa")
+        return v
 
 
 class JogStopRequest(Model):

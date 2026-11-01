@@ -238,8 +238,10 @@ GUI nie może rysować „auto-reset” ani zwalniać E-STOP przy starcie.
 
 ### Jog przyrostowy
 
-`machine.jog_increment axis=X speed=10 distance=2` — oś stanie dokładnie na zadanym
-dystansie. Jog należy do sesji: inne połączenie go nie zatrzyma, ale zerwanie własnego — tak.
+`machine.jog_increment axis=X speed=-10 distance=2` — kierunek niesie znak `speed`, a oś
+stanie dokładnie na zadanym dystansie. Na LinuxCNC przed bazowaniem jog idzie jointem; oś
+portalowa odmawia (`safety_refused`), a joint z `HOME_SEQUENCE` < 0 odmawia w LinuxCNC i
+komunikat przychodzi w `errors`. Jog należy do sesji: inne połączenie go nie zatrzyma, ale zerwanie własnego — tak.
 
 ### Zmiana narzędzia i sondowanie (makra ruchu)
 
@@ -289,8 +291,15 @@ Wszystkie operacje kontraktu są `implemented`. Mechanizm `planned` zostaje dla 
 funkcji: rysuj je normalnie, a `not_implemented` obsługuj jako „funkcja w planie”,
 nie jako błąd aplikacji.
 
-Wszystko, co dotyczy fizycznej maszyny, jest **NIEZWERYFIKOWANE NA SPRZĘCIE** —
-testy idą na atrapie (`backend=fake`).
+Operacje maszyny mają odbiór na LinuxCNC 2.9 + Plant (`integration/`, marker `linuxcnc`);
+reszta testów idzie na atrapie (`backend=fake`). Wszystko, co dotyczy fizycznej maszyny,
+jest **NIEZWERYFIKOWANE NA SPRZĘCIE**. Konfiguracja sprzętowa zostawia w łańcuchu E-STOP
+grzyb HMI z sygnałem życia (D35): sam backend bez klienta, który go obsługuje, nie zdejmie
+E-STOP (zabezpieczenie celowe).
+
+`errors` w `machine.state` na LinuxCNC to komunikaty z ostatnich 10 s: ten sam tekst wraca w
+kolejnych odczytach, więc GUI pokazuje go raz. Polecenie przyjęte (`ok`) LinuxCNC może jeszcze
+odrzucić asynchronicznie i wtedy powód przychodzi właśnie tu.
 
 Kontrola Host/Origin obejmuje także handshake WebSocket: niedozwolony Host albo
 Origin spoza skonfigurowanej listy kończy połączenie kodem 4403 przed utworzeniem

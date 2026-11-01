@@ -134,6 +134,10 @@ class MachineService:
         return Ok(message="E-STOP zresetowany; wymagane włączenie zasilania")
 
     def power_on(self) -> Ok:
+        state = self.backend.snapshot().task_state.value
+        if state == "estop":
+            raise SafetyRefused("E-STOP aktywny: najpierw machine.estop_reset",
+                                details={"task_state": state})
         self.backend.power_on()
         return Ok(message="zasilanie włączone")
 

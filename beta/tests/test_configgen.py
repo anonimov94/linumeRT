@@ -87,12 +87,15 @@ def test_every_example_machine_generates_d05_contract(path, target):
     assert "linumert.io.estop-ok" in hal and "iocontrol.0.emc-enable-in" in hal
     if target == "plant":
         assert "linumert.hmi.estop-ok" not in hal
-        assert "estop_chain.out => estop_latch.ok-in" in hal
+        assert "estop_chain.out => estop_chain_sw.in0" in hal
+        assert "iocontrol.0.user-enable-out => estop_chain_sw.in1" in hal
+        assert "estop_chain_sw.out => estop_latch.ok-in" in hal
         assert "lrt-net.0.connected => estop_chain.in1" in hal
         assert "sim_toolchange.out => iocontrol.0.tool-changed" in hal
         assert "macros/lrt_m6.ngc" in files
     else:
-        assert "linumert.hmi.estop-ok" in hal
+        assert "linumert.hmi.estop-ok" not in hal
+        assert "iocontrol.0.user-enable-out => estop_latch.ok-in" in hal
     for name in ("linumert.spindle.on", "linumert.spindle.speed-cmd", "linumert.spindle.revs"):
         assert name in hal
     # Każda oś ma czujnik bazy podłączony do jointów (wspólny dla bramy).

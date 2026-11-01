@@ -1481,8 +1481,9 @@
             "type": "string"
           },
           "speed": {
-            "exclusiveMinimum": 0,
+            "description": "mm/s; znak = kierunek, różna od 0",
             "maximum": 50.0,
+            "minimum": -50.0,
             "title": "Speed",
             "type": "number"
           },

@@ -1741,3 +1741,9 @@ Pełny RIP musi ponownie potwierdzić wynik; nie scalać na czerwonym CI.
 - Dodano sprawdzenie wspólnej polityki przed accept/sesją; odmowa 4403, błędny token nadal 4401; dozwolony Origin przechodzi.
 - 30 testów REST/WS PASS, lint i check_no_gui PASS; pełna regresja beta: 907 testów PASS w Debian12/Python3.11; CI beta python i plant-core PASS dla 3b5bf78. Autokontrola tej poprawki, bez deklaracji przeglądu całego PR #202.
 - Odbiór LinuxCNC/Plant i sprzętu nadal otwarty. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## Beta — odbiór operacji maszyny na LinuxCNC + Plant · 2026-11-01 · Claude
+- Model-Author: Claude. Dokończony odbiór makr M6/sondy Codex (commit c680ada) i nowy odbiór domeny machine przez kontrakt: `beta/integration/`, marker `linuxcnc`, krok w CI.
+- Błędy niewidoczne na atrapie, naprawione: `machine.estop` i `estop_reset` wołały nieistniejące `command.estop`; `home axis=Z` na portalu bazował Y2; czytnik brał `homed` i `limit` z numeru osi, więc niezbazowany Z dawał `all_homed=true`; `jog_increment` nie miał kierunku ujemnego; `set_work_offset` zawsze odmawiał; `power_on` w E-STOP zwracał ok; komunikaty LinuxCNC ginęły przy pierwszej migawce.
+- Konfiguracje bez ekranu: E-STOP z API zatrzaskuje się przez `user-enable-out` (plant, sim); symulacja wcześniej nie mogła zejść z E-STOP. Konfiguracja sprzętowa bez zmian (D35).
+- Wynik: 3 testy `linuxcnc` PASS na LinuxCNC 2.9 + Plant (WSL Debian12), 923 testy bety PASS, ruff i check_no_gui PASS. Przegląd drugiego modelu nadal otwarty. NIEZWERYFIKOWANE NA SPRZĘCIE.

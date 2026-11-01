@@ -11,7 +11,7 @@ loadrt lrt_cia402 count=4
 # Shared postgui expects this virtual M6 acknowledgement, also used by sim.
 loadrt timedelay names=sim_toolchange
 loadrt not names=nc_x_min,nc_x_max,nc_y_min,nc_y_max,nc_z_max
-loadrt and2 names=estop_chain
+loadrt and2 names=estop_chain,estop_chain_sw
 loadrt estop_latch names=estop_latch
 loadrt lrt_estop2
 
@@ -30,6 +30,7 @@ addf nc_y_max servo-thread
 addf nc_z_max servo-thread
 addf lrt-estop2.0 servo-thread
 addf estop_chain servo-thread
+addf estop_chain_sw servo-thread
 addf estop_latch servo-thread
 
 # ---- napędy (Plant przez LRT-NET) ----
@@ -94,7 +95,9 @@ setp lrt-estop2.0.discrepancy-time 0.1
 net linumert.io.estop-2ch    lrt-estop2.0.ok => estop_chain.in0
 net linumert.io.estop-fault  lrt-estop2.0.fault
 net lrt.connected            lrt-net.0.connected => estop_chain.in1
-net lrt.estop-ok-in          estop_chain.out => estop_latch.ok-in
+net lrt.estop-hw-ok          estop_chain.out => estop_chain_sw.in0
+net linumert.io.user-enable  iocontrol.0.user-enable-out => estop_chain_sw.in1
+net lrt.estop-ok-in          estop_chain_sw.out => estop_latch.ok-in
 net lrt.drive-fault          lrt-net.0.drive-fault
 net lrt.estop-reset          iocontrol.0.user-request-enable => estop_latch.reset lrt-estop2.0.reset
 net linumert.io.estop-ok     estop_latch.ok-out => iocontrol.0.emc-enable-in

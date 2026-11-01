@@ -944,3 +944,11 @@ check_no_gui i roadmap --check PASS. Pełna regresja beta: 907 testów PASS, CI 
 WSL Debian12 /tmp/linumert-beta-review-20261029; log /tmp/linumert-beta-review-tests.log.
 Następny krok: odbiór makr tool_change/probe_run na LinuxCNC/Plant przed domknięciem beta.
 Nie uznawać tej poprawki za przegląd wszystkich 85 operacji ani zamknięcie G2.
+
+## Stan zatrzymania — beta, odbiór maszyny na LinuxCNC, 2026-11-01
+
+Model-Author: Claude. Checkout linumeRT-beta, gałąź arena/dac91208-linumert, PR #202. Odbiór domeny
+machine, makr i symulacji bez ekranu: `beta/integration/` (3 PASS), 923 testy bety PASS.
+Do przeniesienia na main: mapa oś→jointy w `core/linumert/cnc/linuxcnc_reader.py` (ten sam błąd
+`all_homed` na portalu). Następny krok bety: odbiór reszty domen na LinuxCNC (offset poza sondą,
+cam/sim na żywym programie, deadman jogu przez WebSocket) i przegląd Codex. NIEZWERYFIKOWANE NA SPRZĘCIE.

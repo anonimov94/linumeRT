@@ -16,16 +16,24 @@ Wymaga LinuxCNC 2.9 (RIP albo pakiet Debiana). NIEZWERYFIKOWANE NA SPRZĘCIE.
 
 from __future__ import annotations
 
+import dataclasses
 import importlib
 import time
 from typing import Any
 
 from linumert.cnc.linuxcnc_reader import LinuxCNCReader
-from linumert.cnc.model import MachineSnapshot, Mode
+from linumert.cnc.model import AXIS_LETTERS, MachineSnapshot, Mode
 
-from ..errors import BackendUnavailable, Conflict, SafetyRefused
+from ..errors import BackendUnavailable, Conflict, InvalidRequest, SafetyRefused
 
 _MODE = {Mode.MANUAL: "MODE_MANUAL", Mode.AUTO: "MODE_AUTO", Mode.MDI: "MODE_MDI"}
+# Numer P układu w G10 L2.
+_WORK_P = {"G54": 1, "G55": 2, "G56": 3, "G57": 4, "G58": 5, "G59": 6,
+           "G59.1": 7, "G59.2": 8, "G59.3": 9}
+
+
+# Kanał błędów LinuxCNC oddaje komunikat raz, a migawki czytają też usługi i pętla stanu.
+ERROR_RETENTION_S = 10.0
 
 
 class LinuxCNCBackend:
@@ -44,6 +52,7 @@ class LinuxCNCBackend:
         self.reader = reader or LinuxCNCReader(module=module)
         # Wiek migawki liczymy tym samym zegarem, którym czytnik ją stempluje.
         self._clock = getattr(self.reader, "_clock", time.monotonic)
+        self._errors: list[tuple[float, str]] = []
 
     # ---- dostęp do modułu --------------------------------------------------
     def _lc(self) -> Any:
@@ -75,16 +84,20 @@ class LinuxCNCBackend:
 
     def snapshot(self) -> MachineSnapshot:
         try:
-            return self.reader.read()
+            snap = self.reader.read()
         except Exception as exc:
             raise BackendUnavailable(f"odczyt stanu LinuxCNC nie powiódł się: {exc}") from exc
+        now = self._clock()
+        self._errors = [e for e in self._errors if now - e[0] < ERROR_RETENTION_S]
+        self._errors += [(now, text) for text in snap.errors]
+        return dataclasses.replace(snap, errors=tuple(text for _, text in self._errors))
 
     # ---- polecenia ---------------------------------------------------------
     def estop(self) -> None:
-        self._cmd().estop(self._lc().ESTOP_ACTIVATE)
+        self._cmd().state(self._lc().STATE_ESTOP)
 
     def estop_reset(self) -> None:
-        self._cmd().estop(self._lc().ESTOP_RESET)
+        self._cmd().state(self._lc().STATE_ESTOP_RESET)
 
     def power_on(self) -> None:
         self._cmd().state(self._lc().STATE_ON)
@@ -99,10 +112,14 @@ class LinuxCNCBackend:
         self._wait()
 
     def home(self, axis: str | None) -> None:
-        if axis is None:
-            self._cmd().home(-1)
-            return
-        self._cmd().home(self._joint(axis))
+        """LinuxCNC bazuje jointy w trybie MANUAL bez teleop; portal startuje całą grupą."""
+        joint = -1 if axis is None else self._joints_of(axis)[0]
+        cmd = self._cmd()
+        cmd.mode(self._lc().MODE_MANUAL)
+        self._wait()
+        cmd.teleop_enable(0)
+        self._wait()
+        cmd.home(joint)
 
     def mdi(self, text: str) -> None:
         self._cmd().mode(self._lc().MODE_MDI)
@@ -150,40 +167,72 @@ class LinuxCNCBackend:
         cmd.mdi(f"S{speed:g} {code}")
 
     def jog(self, axis: str, speed: float) -> None:
-        cmd = self._cmd()
-        cmd.mode(self._lc().MODE_MANUAL)
-        self._wait()
         if speed == 0.0:
-            cmd.jog(self._lc().JOG_STOP, False, self._joint(axis))
+            self.jog_stop(axis)
             return
-        cmd.jog(self._lc().JOG_CONTINUOUS, False, self._joint(axis), speed)
+        joint_mode, number = self._jog_target(axis)
+        self._cmd().jog(self._lc().JOG_CONTINUOUS, joint_mode, number, speed)
 
     def jog_increment(self, axis: str, speed: float, distance: float) -> None:
-        cmd = self._cmd()
-        cmd.mode(self._lc().MODE_MANUAL)
-        self._wait()
-        cmd.jog(self._lc().JOG_INCREMENT, False, self._joint(axis), speed, distance)
+        """Kierunek niesie znak prędkości, dystans jest dodatni (jak w ``linuxcnc.jog``)."""
+        joint_mode, number = self._jog_target(axis)
+        self._cmd().jog(self._lc().JOG_INCREMENT, joint_mode, number, speed, distance)
 
     def jog_stop(self, axis: str | None) -> None:
-        cmd = self._cmd()
-        if axis is None:
-            for name in self.snapshot().axis_names:
-                cmd.jog(self._lc().JOG_STOP, False, self._joint(name))
-            return
-        cmd.jog(self._lc().JOG_STOP, False, self._joint(axis))
+        """Stop idzie bezwarunkowo w obu trybach: nie zależy od stanu bazowania."""
+        cmd, stop = self._cmd(), self._lc().JOG_STOP
+        for name in self.snapshot().axis_names if axis is None else (axis.upper(),):
+            cmd.jog(stop, False, AXIS_LETTERS.index(name))
+            for joint in self._joints_of(name):
+                cmd.jog(stop, True, joint)
 
     def set_work_offset(self, name: str, values: dict[str, float]) -> None:
-        raise Conflict("ustawienie offsetu w LinuxCNC idzie przez MDI (G10 L2); "
-                       "użyj machine.mdi albo offset.set z generacją G10")
+        if name not in _WORK_P:
+            raise InvalidRequest(f"nieznany układ {name}", details={"known": sorted(_WORK_P)})
+        snap = self.snapshot()
+        if snap.task_state.value != "on":
+            raise SafetyRefused("offset wymaga włączonego zasilania",
+                                details={"task_state": snap.task_state.value})
+        if snap.interp_state.value != "idle":
+            raise Conflict("offset: maszyna wykonuje ruch albo program",
+                           details={"interp_state": snap.interp_state.value})
+        unknown = sorted({a.upper() for a in values} - set(snap.axis_names))
+        if unknown:
+            raise InvalidRequest(f"maszyna nie ma osi {unknown}",
+                                 details={"axes": list(snap.axis_names)})
+        if values:
+            words = " ".join(f"{a.upper()}{v:.6f}" for a, v in values.items())
+            self.mdi(f"G10 L2 P{_WORK_P[name]} {words}")
 
     # ---- pomocnicze --------------------------------------------------------
-    def _joint(self, axis: str) -> int:
-        """Numer jointa z nazwy osi; lista osi pochodzi z migawki (``stat.axis_mask``)."""
+    def _joints_of(self, axis: str) -> tuple[int, ...]:
+        """Jointy osi z konfiguracji; oś i joint to co innego na maszynie z portalem."""
         names = list(self.snapshot().axis_names)
         letter = axis.upper()
         if letter not in names:
             raise SafetyRefused(f"nieznana oś {axis!r}", details={"axes": names})
-        return names.index(letter)
+        joints = self.reader.joint_map(names)
+        if len(names) > 1 and all(joints[name] == joints[letter] for name in names):
+            raise Conflict("INI bez [JOINT_n]AXIS: nie wiadomo, które jointy należą do osi",
+                           details={"axis": letter})
+        return joints[letter]
+
+    def _jog_target(self, axis: str) -> tuple[bool, int]:
+        """Tryb i numer dla ``jog``: po bazowaniu oś (teleop), przed bazowaniem joint.
+
+        Przed bazowaniem jeden joint portalu rozjechałby bramę, więc taki jog jest odrzucany.
+        """
+        joints = self._joints_of(axis)
+        homed = self.snapshot().all_homed
+        if not homed and len(joints) != 1:
+            raise SafetyRefused(f"jog osi portalowej {axis.upper()} wymaga bazowania",
+                                details={"joints": list(joints)})
+        cmd = self._cmd()
+        cmd.mode(self._lc().MODE_MANUAL)
+        self._wait()
+        cmd.teleop_enable(1 if homed else 0)
+        self._wait()
+        return (False, AXIS_LETTERS.index(axis.upper())) if homed else (True, joints[0])
 
     def close(self) -> None:
         self._command = None

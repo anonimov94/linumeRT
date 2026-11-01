@@ -16,7 +16,7 @@ from __future__ import annotations
 
 import importlib
 import time
-from collections.abc import Callable
+from collections.abc import Callable, Iterable
 from typing import Any
 
 from .model import (
@@ -72,6 +72,7 @@ class LinuxCNCReader:
         self._stat = stat
         self._error_channel = error_channel
         self._clock = clock
+        self._joints: dict[str, tuple[int, ...]] | None = None
 
     def _linuxcnc(self) -> Any:
         if self._module is None:
@@ -83,6 +84,32 @@ class LinuxCNCReader:
                 ) from error
         return self._module
 
+    def joint_map(self, names: Iterable[str]) -> dict[str, tuple[int, ...]]:
+        """Jointy każdej osi z ``[JOINT_n]AXIS``; portal ma ich kilka, więc oś != joint.
+
+        Bez wpisów w INI: tyle jointów co osi = kolejność osi. Inaczej każda oś dostaje
+        wszystkie jointy, żeby niezbazowany joint nie ukrył się jako ``all_homed``.
+        """
+        if self._joints is not None:
+            return self._joints
+        module, stat, names = self._linuxcnc(), self._stat, list(names)
+        count = int(getattr(stat, "joints", len(names)))
+        found: dict[str, list[int]] = {name: [] for name in names}
+        path, ini_class = getattr(stat, "ini_filename", ""), getattr(module, "ini", None)
+        if path and ini_class is not None:
+            ini = ini_class(path)
+            for joint in range(count):
+                letter = (ini.find(f"JOINT_{joint}", "AXIS") or "").upper()
+                if letter in found:
+                    found[letter].append(joint)
+        if all(found.values()):
+            self._joints = {name: tuple(found[name]) for name in names}
+        elif count == len(names):
+            self._joints = {name: (joint,) for joint, name in enumerate(names)}
+        else:
+            self._joints = {name: tuple(range(count)) for name in names}
+        return self._joints
+
     def read(self) -> MachineSnapshot:
         module = self._linuxcnc()
         if self._stat is None:
@@ -92,9 +119,10 @@ class LinuxCNCReader:
         mask = int(stat.axis_mask)
         indices = [i for i in range(len(AXIS_LETTERS)) if mask & (1 << i)]
         names = [AXIS_LETTERS[i] for i in indices]
+        joints = self.joint_map(names)
         axes = tuple(
-            self._axis(stat, joint, index, name)
-            for joint, (index, name) in enumerate(zip(indices, names, strict=True))
+            self._axis(stat, joints[name], index, name)
+            for index, name in zip(indices, names, strict=True)
         )
         spindle = _item(getattr(stat, "spindle", ()), 0, {}) or {}
         index = int(getattr(stat, "g5x_index", 1))
@@ -122,16 +150,16 @@ class LinuxCNCReader:
         )
 
     @staticmethod
-    def _axis(stat: Any, joint: int, index: int, name: str) -> AxisSnapshot:
+    def _axis(stat: Any, joints: tuple[int, ...], index: int, name: str) -> AxisSnapshot:
         limits = _item(getattr(stat, "axis", ()), index, {}) or {}
         return AxisSnapshot(
             name=name,
             position=float(_item(stat.actual_position, index, 0.0)),
             commanded=float(_item(stat.position, index, 0.0)),
-            homed=bool(_item(stat.homed, joint, False)),
+            homed=all(_item(stat.homed, joint, False) for joint in joints),
             soft_min=float(limits.get("min_position_limit", float("-inf"))),
             soft_max=float(limits.get("max_position_limit", float("inf"))),
-            limit_hit=bool(_item(getattr(stat, "limit", ()), joint, 0)),
+            limit_hit=any(_item(getattr(stat, "limit", ()), joint, 0) for joint in joints),
         )
 
     @staticmethod
