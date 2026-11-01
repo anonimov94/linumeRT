@@ -19,6 +19,7 @@ from __future__ import annotations
 import dataclasses
 import importlib
 import time
+from pathlib import Path
 from typing import Any
 
 from linumert.cnc.linuxcnc_reader import LinuxCNCReader
@@ -88,8 +89,10 @@ class LinuxCNCBackend:
         except Exception as exc:
             raise BackendUnavailable(f"odczyt stanu LinuxCNC nie powiódł się: {exc}") from exc
         now = self._clock()
-        self._errors = [e for e in self._errors if now - e[0] < ERROR_RETENTION_S]
-        self._errors += [(now, text) for text in snap.errors]
+        fresh = set(snap.errors)
+        self._errors = [e for e in self._errors
+                        if now - e[0] < ERROR_RETENTION_S and e[1] not in fresh]
+        self._errors += [(now, text) for text in dict.fromkeys(snap.errors)]
         return dataclasses.replace(snap, errors=tuple(text for _, text in self._errors))
 
     # ---- polecenia ---------------------------------------------------------
@@ -223,16 +226,33 @@ class LinuxCNCBackend:
         Przed bazowaniem jeden joint portalu rozjechałby bramę, więc taki jog jest odrzucany.
         """
         joints = self._joints_of(axis)
-        homed = self.snapshot().all_homed
+        snap = self.snapshot()
+        homed = snap.all_homed
         if not homed and len(joints) != 1:
             raise SafetyRefused(f"jog osi portalowej {axis.upper()} wymaga bazowania",
                                 details={"joints": list(joints)})
-        cmd = self._cmd()
-        cmd.mode(self._lc().MODE_MANUAL)
-        self._wait()
-        cmd.teleop_enable(1 if homed else 0)
-        self._wait()
+        # Odświeżanie jogu co 100 ms: zmiana trybu w ruchu to odmowa i komunikat LinuxCNC.
+        cmd, lc = self._cmd(), self._lc()
+        if snap.mode is not Mode.MANUAL:
+            cmd.mode(lc.MODE_MANUAL)
+            self._wait()
+        stat = self.reader.stat
+        stat.poll()
+        if stat.motion_mode != (lc.TRAJ_MODE_TELEOP if homed else lc.TRAJ_MODE_FREE):
+            cmd.teleop_enable(1 if homed else 0)
+            self._wait()
         return (False, AXIS_LETTERS.index(axis.upper())) if homed else (True, joints[0])
+
+    def active_tool_table(self) -> Path | None:
+        """``[EMCIO]TOOL_TABLE`` działającej konfiguracji (ścieżka względem katalogu INI)."""
+        self.snapshot()
+        path = self.reader.stat.ini_filename
+        name = self._lc().ini(path).find("EMCIO", "TOOL_TABLE")
+        return (Path(path).parent / name).resolve() if name else None
+
+    def reload_tools(self) -> None:
+        self._cmd().load_tool_table()
+        self._wait()
 
     def close(self) -> None:
         self._command = None

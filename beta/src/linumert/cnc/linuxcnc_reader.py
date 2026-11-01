@@ -84,6 +84,11 @@ class LinuxCNCReader:
                 ) from error
         return self._module
 
+    @property
+    def stat(self) -> Any:
+        """``linuxcnc.stat`` po pierwszym odczycie; kto go potrzebuje świeżego, woła ``poll``."""
+        return self._stat
+
     def joint_map(self, names: Iterable[str]) -> dict[str, tuple[int, ...]]:
         """Jointy każdej osi z ``[JOINT_n]AXIS``; portal ma ich kilka, więc oś != joint.
 

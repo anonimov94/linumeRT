@@ -1747,3 +1747,8 @@ Pełny RIP musi ponownie potwierdzić wynik; nie scalać na czerwonym CI.
 - Błędy niewidoczne na atrapie, naprawione: `machine.estop` i `estop_reset` wołały nieistniejące `command.estop`; `home axis=Z` na portalu bazował Y2; czytnik brał `homed` i `limit` z numeru osi, więc niezbazowany Z dawał `all_homed=true`; `jog_increment` nie miał kierunku ujemnego; `set_work_offset` zawsze odmawiał; `power_on` w E-STOP zwracał ok; komunikaty LinuxCNC ginęły przy pierwszej migawce.
 - Konfiguracje bez ekranu: E-STOP z API zatrzaskuje się przez `user-enable-out` (plant, sim); symulacja wcześniej nie mogła zejść z E-STOP. Konfiguracja sprzętowa bez zmian (D35).
 - Wynik: 3 testy `linuxcnc` PASS na LinuxCNC 2.9 + Plant (WSL Debian12), 923 testy bety PASS, ruff i check_no_gui PASS. Przegląd drugiego modelu nadal otwarty. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## Beta — odbiór serwera REST/WebSocket na LinuxCNC + Plant · 2026-11-01 · Claude
+- Model-Author: Claude. `beta/integration/test_server_linuxcnc.py`: prawdziwy `linumertd` i klient jak GUI. Deadman: pojedynczy jog stoi po 0,26 s, odświeżanie co 100 ms trzyma ruch, zamknięcie i zerwanie gniazda zatrzymują oś, E-STOP w trakcie jogu działa.
+- Naprawione: odczyty stanu zużywały limiter poleceń i odbierały tokeny jogowi; odświeżanie jogu zalewało komunikatami o zmianie trybu; zmiany bazy narzędzi nie docierały do tabeli LinuxCNC (M6 brał starą długość); README podawało nieistniejące `--ini`.
+- Wynik: 4 testy `linuxcnc` PASS, 928 testów bety PASS, ruff i check_no_gui PASS. NIEZWERYFIKOWANE NA SPRZĘCIE.

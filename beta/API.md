@@ -297,6 +297,11 @@ jest **NIEZWERYFIKOWANE NA SPRZĘCIE**. Konfiguracja sprzętowa zostawia w łań
 grzyb HMI z sygnałem życia (D35): sam backend bez klienta, który go obsługuje, nie zdejmie
 E-STOP (zabezpieczenie celowe).
 
+`tool.upsert`, `delete`, `set_wear` i `import_tbl` na LinuxCNC od razu zapisują i wczytują
+aktywną tabelę (`[EMCIO]TOOL_TABLE`), a przy pracującym programie zwracają `conflict`. Baza jest
+jedynym źródłem: narzędzia spoza bazy znikają z tabeli. Korekta aktywnego narzędzia działa od
+kolejnego `G43` albo M6. Limiter poleceń nie liczy zapytań (`query`).
+
 `errors` w `machine.state` na LinuxCNC to komunikaty z ostatnich 10 s: ten sam tekst wraca w
 kolejnych odczytach, więc GUI pokazuje go raz. Polecenie przyjęte (`ok`) LinuxCNC może jeszcze
 odrzucić asynchronicznie i wtedy powód przychodzi właśnie tu.

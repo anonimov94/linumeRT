@@ -33,27 +33,31 @@ class Command:
     def home(self, joint): self._log("home", joint)
     def jog(self, *args): self._log("jog", *args)
     def mdi(self, text): self._log("mdi", text)
+    def load_tool_table(self): self._log("load_tool_table")
     def wait_complete(self, timeout=5.0): return 0
 
 
-def module_for(joint_axes, *, homed=None, axis_mask=0b111, task_state=4, interp=1):
+def module_for(joint_axes, *, homed=None, axis_mask=0b111, task_state=4, interp=1,
+               motion_mode=1, task_mode=1):
     module = SimpleNamespace(
         STATE_ESTOP=1, STATE_ESTOP_RESET=2, STATE_OFF=3, STATE_ON=4,
         MODE_MANUAL=1, MODE_AUTO=2, MODE_MDI=3,
         INTERP_IDLE=1, INTERP_READING=2, INTERP_PAUSED=3, INTERP_WAITING=4,
         JOG_STOP=0, JOG_CONTINUOUS=1, JOG_INCREMENT=2,
+        TRAJ_MODE_FREE=1, TRAJ_MODE_COORD=2, TRAJ_MODE_TELEOP=3,
     )
     module.cmd = Command(module)
     module.command = lambda: module.cmd
     module.ini = lambda _path: SimpleNamespace(
-        find=lambda section, key: dict(enumerate(joint_axes)).get(
-            int(section.split("_")[1])) if key == "AXIS" else None)
+        find=lambda section, key: "tool.tbl" if key == "TOOL_TABLE" else (
+            dict(enumerate(joint_axes)).get(int(section.split("_")[1]))))
     count = len(joint_axes)
     stat = SimpleNamespace(
         poll=lambda: None, axis_mask=axis_mask, joints=count, ini_filename="m.ini",
         actual_position=(0.0,) * 9, position=(0.0,) * 9,
         homed=tuple(homed if homed is not None else (1,) * count), limit=(0,) * count,
-        axis=(), task_state=task_state, task_mode=1, interp_state=interp)
+        axis=(), task_state=task_state, task_mode=task_mode, interp_state=interp,
+        motion_mode=motion_mode)
     module.stat = lambda: stat
     module.error_channel = lambda: SimpleNamespace(poll=lambda: None)
     return module
@@ -108,6 +112,26 @@ def test_jog_po_bazowaniu_to_teleop_z_numerem_osi() -> None:
                                      ("jog", module.JOG_INCREMENT, False, 2, -10.0, 3.0)]
 
 
+def test_odswiezanie_jogu_nie_zmienia_trybu_w_ruchu() -> None:
+    module = module_for(GANTRY, motion_mode=3)
+    LinuxCNCBackend(module=module).jog("X", 5.0)
+    assert module.cmd.calls == [("jog", module.JOG_CONTINUOUS, False, 0, 5.0)]
+
+
+def test_jog_z_mdi_przelacza_tryb_i_teleop() -> None:
+    module = module_for(GANTRY, motion_mode=2, task_mode=3)
+    LinuxCNCBackend(module=module).jog("X", 5.0)
+    assert module.cmd.calls[:2] == [("mode", module.MODE_MANUAL), ("teleop_enable", 1)]
+
+
+def test_tabela_narzedzi_z_ini_i_wczytanie() -> None:
+    module = module_for(GANTRY)
+    backend = LinuxCNCBackend(module=module)
+    assert backend.active_tool_table().name == "tool.tbl"
+    backend.reload_tools()
+    assert module.cmd.calls == [("load_tool_table",)]
+
+
 def test_numer_osi_teleop_jest_z_dziewieciu_liter_nie_z_kolejnosci() -> None:
     module = module_for(["X", "Y", "Z", "C"], axis_mask=0b100111)
     LinuxCNCBackend(module=module).jog("C", 5.0)
@@ -145,6 +169,14 @@ def test_komunikat_linuxcnc_przezywa_odczyty_i_wygasa() -> None:
     assert backend.snapshot().errors == ("odmowa",)
     now[0] += ERROR_RETENTION_S
     assert backend.snapshot().errors == ()
+
+
+def test_powtorzony_komunikat_jest_jeden_raz() -> None:
+    module = module_for(GANTRY)
+    messages = [(1, "odmowa"), (1, "odmowa")]
+    module.error_channel = lambda: SimpleNamespace(
+        poll=lambda: messages.pop() if messages else None)
+    assert LinuxCNCBackend(module=module).snapshot().errors == ("odmowa",)
 
 
 def test_offset_pracy_to_g10_l2_z_wlasciwym_p() -> None:

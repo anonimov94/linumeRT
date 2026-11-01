@@ -20,6 +20,7 @@ import logging
 import threading
 import time
 from collections.abc import Callable
+from pathlib import Path
 from typing import Any
 
 from .backends.fake import FakeBackend
@@ -178,8 +179,8 @@ class Application:
         ctx = Context(services=self.services, session=access.session(token), channel=channel,
                       call_id=call_id, state=self.hub, contract=self.contract, token=token)
         operation = self.contract.get(command)
-        stopping = operation.safety == SAFETY_STOP
-        if not stopping:
+        # Limiter chroni maszynę przed serią poleceń; odczyt stanu nie może odebrać tokenów jogowi.
+        if operation.safety != SAFETY_STOP and operation.kind != "query":
             self.sessions.charge(stopping=False)
         result = self.contract.call(command, params, ctx)
         self._log(command, channel)
@@ -346,6 +347,31 @@ def _tool_change(request: ToolChangeRequest, ctx: Context) -> Ok:
     return ctx.services["machine"].tool_change(request)
 
 
+def _synced_tools(handler: Callable[[Any, Context], Any]) -> Callable[[Any, Context], Any]:
+    """Zmiana bazy narzędzi trafia od razu do tabeli LinuxCNC: inaczej M6 weźmie starą długość."""
+    def run(request: Any, ctx: Context) -> Any:
+        machine = ctx.services["machine"]
+        machine.require_idle_for_tools()
+        result = handler(request, ctx)
+        machine.sync_tools(ctx.services["tools"].db.export_tbl)
+        return result
+    return run
+
+
+def _export_tools(request: ToolTblRequest, ctx: Context) -> ToolTblOut:
+    """Bez ścieżki: aktywna tabela maszyny (na atrapie katalog symulacji)."""
+    machine = ctx.services["machine"]
+    active = machine.active_tool_table()
+    if active is not None and not request.path:
+        request = request.model_copy(update={"path": str(active)})
+    if active is not None and Path(request.path).resolve() == active:
+        machine.require_idle_for_tools()
+        result = ctx.services["tools"].export_tbl(request)
+        machine.backend.reload_tools()
+        return result
+    return ctx.services["tools"].export_tbl(request)
+
+
 def _csv_out(text: str) -> JournalCsvOut:
     """Dziennik CSV: tekst plus liczba niepustych wierszy dla GUI."""
     lines = [line for line in str(text).splitlines() if line.strip()]
@@ -473,21 +499,23 @@ def register_operations(c: Contract) -> Contract:
             result=ToolOut, handler=lambda r, ctx: ctx.services["tools"].get(r))
     c.command("tool.upsert", domain="tool", summary="Dodaj albo zaktualizuj narzędzie",
               request=ToolUpsertRequest, role=ROLE_TECHNOLOG,
-              handler=lambda r, ctx: ctx.services["tools"].upsert(r))
+              handler=_synced_tools(lambda r, ctx: ctx.services["tools"].upsert(r)))
     c.command("tool.delete", domain="tool", summary="Usuń narzędzie", request=ToolNumber,
-              role=ROLE_TECHNOLOG, handler=lambda r, ctx: ctx.services["tools"].delete(r))
+              role=ROLE_TECHNOLOG,
+              handler=_synced_tools(lambda r, ctx: ctx.services["tools"].delete(r)))
     c.command("tool.set_wear", domain="tool", summary="Korekcja zużycia (X/Y/Z)",
               request=ToolWearRequest, role=ROLE_TECHNOLOG,
-              handler=lambda r, ctx: ctx.services["tools"].set_wear(r))
+              handler=_synced_tools(lambda r, ctx: ctx.services["tools"].set_wear(r)))
     c.query("tool.history", domain="tool", summary="Historia zmian narzędzia",
             request=ToolNumber, result=ToolHistoryOut,
             handler=lambda r, ctx: ToolHistoryOut(**ctx.services["tools"].history(r)))
     c.command("tool.import_tbl", domain="tool", summary="Import tool.tbl do bazy",
               request=ToolImportRequest, role=ROLE_TECHNOLOG,
-              handler=lambda r, ctx: ctx.services["tools"].import_tbl(r.text, r.units))
+              handler=_synced_tools(
+                  lambda r, ctx: ctx.services["tools"].import_tbl(r.text, r.units)))
     c.command("tool.export_tbl", domain="tool", summary="Eksport tool.tbl dla LinuxCNC",
               request=ToolTblRequest, result=ToolTblOut, role=ROLE_TECHNOLOG,
-              safety=SAFETY_CONFIG, handler=lambda r, ctx: ctx.services["tools"].export_tbl(r))
+              safety=SAFETY_CONFIG, handler=_export_tools)
 
     # ---- cam ---------------------------------------------------------------
     c.query("cam.operations", domain="cam",

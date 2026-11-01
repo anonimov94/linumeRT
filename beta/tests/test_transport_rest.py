@@ -145,7 +145,8 @@ def test_obcy_origin_jest_odrzucony(app) -> None:
 
 def test_ciagnienie_za_duzej_liczby_polecen_daje_429(client) -> None:
     codes = [client.post(f"{API}/call",
-                         json={"command": "machine.state", "params": {}}).status_code
+                         json={"command": "machine.set_override",
+                               "params": {"feed": 1.0}}).status_code
              for _ in range(200)]
     assert 429 in codes, "limiter poleceń powinien zadziałać"
     # Polecenie zatrzymujące przechodzi mimo wyczerpania tokenów.

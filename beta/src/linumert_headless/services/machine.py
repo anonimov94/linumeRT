@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import time
 from collections.abc import Callable
+from pathlib import Path
 
 from linumert.cnc.model import AXIS_LETTERS, MachineSnapshot, Mode
 
@@ -238,6 +239,27 @@ class MachineService:
             except Exception:  # ponowimy w następnym cyklu
                 self.sessions.jog_start(axis, "watchdog")
         return axes
+
+    # ---- tabela narzędzi --------------------------------------------------
+    def active_tool_table(self) -> Path | None:
+        """Tabela, z której czyta sterowanie; atrapa jej nie ma."""
+        source = getattr(self.backend, "active_tool_table", None)
+        return source() if callable(source) else None
+
+    def require_idle_for_tools(self) -> None:
+        if self.active_tool_table() is None:
+            return
+        state = self.backend.snapshot().interp_state.value
+        if state != "idle":
+            raise Conflict("tabela narzędzi: maszyna wykonuje ruch albo program",
+                           details={"interp_state": state})
+
+    def sync_tools(self, export: Callable[[Path], object]) -> None:
+        """Zapis tabeli i wczytanie jej przez sterowanie (konfiguracje linumeRT są w mm)."""
+        active = self.active_tool_table()
+        if active is not None:
+            export(active)
+            self.backend.reload_tools()
 
     # ---- makra ruchu (M6, sondowanie) --------------------------------------
     def tool_change(self, request: ToolChangeRequest) -> Ok:

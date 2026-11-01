@@ -28,7 +28,7 @@ nie przepisując ani jednej linijki logiki sterowania.
 
 ```bash
 make install                     # pip install -e ".[dev]"
-make test                        # 923 testy (bez LinuxCNC, bez Qt, bez serwera X)
+make test                        # 928 testów (bez LinuxCNC, bez Qt, bez serwera X)
 make lint                        # ruff + strażnik "brak GUI"
 
 make serve                       # serwer API na 127.0.0.1:8080 (backend: atrapa)
@@ -39,7 +39,7 @@ Serwer:
 
 ```bash
 linumertd serve --backend fake --host 127.0.0.1 --port 8080 --print-contract
-linumertd serve --backend linuxcnc --ini /path/to/machine.ini   # na maszynie
+linumertd serve --backend linuxcnc   # na maszynie, przy działającym LinuxCNC (DISPLAY z INI)
 ```
 
 Klient (CLI zbudowane z kontraktu — nowa operacja jest w CLI bez zmian w kodzie):

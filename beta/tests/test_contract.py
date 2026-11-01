@@ -63,6 +63,13 @@ def test_kazda_operacja_ma_poprawny_opis(app) -> None:
         assert operation.domain == operation.name.split(".", 1)[0]
 
 
+def test_odczyt_nie_zuzywa_tokenow_polecen(app) -> None:
+    before = app.sessions._limiter._tokens
+    for _ in range(200):
+        app.call("machine.state")
+    assert app.sessions._limiter._tokens >= before
+
+
 def test_polecenia_stop_nie_podlegaja_limiterowi(app) -> None:
     """E-STOP i stop muszą przejść nawet po wyczerpaniu tokenów."""
     from linumert_headless.errors import RateLimited
