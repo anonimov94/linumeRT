@@ -122,11 +122,84 @@ def test_home_one_axis_and_all_and_unknown():
     b, c = backend()
     b.home("Y")
     b.home(None)
-    assert c.calls == [("mode", 1), ("wait_complete", 2.0), ("home", 1),
-                       ("mode", 1), ("wait_complete", 2.0), ("home", 0), ("home", 1),
-                       ("home", 2)]
+    prepare = [("mode", 1), ("wait_complete", 2.0), ("teleop_enable", 0), ("wait_complete", 2.0)]
+    assert c.calls == [*prepare, ("home", 1), *prepare, ("home", -1)]
     with pytest.raises(CommandError, match="nieznana"):
         b.home("A")
+
+
+def gantry(homed=(1, 1, 1, 1), joint_axes=("X", "Y", "Y", "Z")):
+    """mill_servo_table: osie X Y Z na jointach X Y Y Z."""
+    b, c = backend()
+    stat = b._reader._stat
+    stat.joints, stat.ini_filename, stat.homed = len(joint_axes), "m.ini", homed
+    stat.limit = (0,) * len(joint_axes)
+    b._lc().ini = lambda _path: SimpleNamespace(
+        find=lambda section, key: dict(enumerate(joint_axes)).get(int(section[6:])))
+    return b, c
+
+
+def motion(calls):
+    return [call for call in calls if call[0] in ("home", "jog", "teleop_enable")]
+
+
+def test_gantry_home_axis_z_is_joint_3_not_second_y():
+    b, c = gantry()
+    b.home("Z")
+    assert c.calls[-1] == ("home", 3)
+
+
+def test_gantry_home_all_includes_last_joint_through_home_sequence():
+    b, c = gantry()
+    b.home(None)
+    assert c.calls[-1] == ("home", -1)
+
+
+def test_gantry_joint_jog_z_goes_to_joint_3():
+    b, c = gantry()
+    b.jog("Z", 2.0)
+    assert motion(c.calls) == [("teleop_enable", 0), ("jog", 21, True, 3, 2.0)]
+
+
+@pytest.mark.parametrize("method, args", [("jog", (2.0,)), ("jog_increment", (2.0, 0.5))])
+def test_gantry_axis_is_never_jogged_by_one_joint_before_homing(method, args):
+    b, c = gantry(homed=(1, 0, 0, 1))
+    with pytest.raises(CommandError, match="bazowania|bazowanie"):
+        getattr(b, method)("Y", *args)
+    assert motion(c.calls) == []
+
+
+def test_gantry_axis_after_homing_jogs_in_teleop_by_axis_number():
+    b, c = gantry()
+    b.jog("Y", -2.0)
+    assert motion(c.calls) == [("teleop_enable", 1), ("jog", 21, False, 1, -2.0)]
+    c.calls.clear()
+    b.jog_increment("Y", -2.0, 0.5)
+    assert motion(c.calls) == [("teleop_enable", 1), ("jog", 22, False, 1, -2.0, 0.5)]
+
+
+def test_gantry_stop_reaches_both_y_joints_and_teleop_and_z():
+    b, c = gantry()
+    b.jog_stop(None)
+    assert c.calls == [("jog", 20, True, 0), ("jog", 20, False, 1), ("jog", 20, True, 1),
+                       ("jog", 20, True, 2), ("jog", 20, True, 3)]
+
+
+def test_unhomed_z_blocks_increment_on_gantry():
+    b, c = gantry(homed=(1, 1, 1, 0))
+    with pytest.raises(CommandError, match="bazowanie"):
+        b.jog_increment("X", 1, 0.1)
+    assert motion(c.calls) == []
+
+
+def test_ini_without_joint_map_refuses_motion_but_still_stops():
+    b, c = gantry(joint_axes=(None, None, None, None))
+    for call in (lambda: b.home("Z"), lambda: b.jog("Z", 1.0)):
+        with pytest.raises(CommandError, match="JOINT_n"):
+            call()
+    assert motion(c.calls) == []
+    b.jog_stop("Z")
+    assert c.calls == [("jog", 20, False, 2)] + [("jog", 20, True, j) for j in range(4)]
 
 
 def test_overrides_only_send_given_values():
@@ -182,7 +255,7 @@ def test_increment_rotary_is_in_degrees_even_with_inch_linear_machine():
     b._reader._stat.homed = (1,) * 4
     b.snapshot()
     b.jog_increment("A", -2, 1)
-    assert c.calls == [("teleop_enable", 0), ("jog", 22, True, 3, -2, 1)]
+    assert c.calls[-1] == ("jog", 22, True, 3, -2, 1)
 
 
 def test_increment_rejects_state_units_and_limits_before_any_motion():
