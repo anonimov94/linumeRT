@@ -161,6 +161,18 @@ def test_makro_jest_w_konfiguracjach_i_generatorze() -> None:
     assert files["macros/lrt_probe.ngc"] == PROBE_MACRO
 
 
+def test_makro_m6_jest_w_konfiguracjach_i_generatorze() -> None:
+    from linumert.machine import configgen
+    from linumert.machine.schema import load_machine
+    from linumert.programs.m6_macro import M6_MACRO
+
+    for path in ("config/sim/linumert_xyz/macros/lrt_m6.ngc",
+                 "config/plant/linumert_plant_xyz/macros/lrt_m6.ngc"):
+        assert (BETA / path).read_text(encoding="utf-8") == M6_MACRO, path
+    cfg = load_machine(BETA / "config/machines/router_gantry_steppers.yaml")
+    assert configgen.render(cfg, "sim")["macros/lrt_m6.ngc"] == M6_MACRO
+
+
 def test_wygenerowany_kontrakt_nie_ma_operacji_planowanych() -> None:
     contract = json.loads((BETA / "api/contract.json").read_text(encoding="utf-8"))
     planned = [o["name"] for o in contract["operations"] if o["status"] == "planned"]

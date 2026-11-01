@@ -25,6 +25,7 @@ import re
 from dataclasses import dataclass, field
 from typing import Any
 
+from ..programs.m6_macro import M6_MACRO
 from ..programs.probe_macro import PROBE_MACRO
 from .schema import Axis, MachineConfig
 
@@ -336,14 +337,14 @@ def render_plant_hal(cfg: MachineConfig, js: list[Joint], atc_macro: str | None 
     ]
     if inv:
         out.append(f"loadrt not names={','.join(sw.comp for sw in inv)}")
-    out += ["loadrt and2 names=estop_chain,estop_chain_hmi", "loadrt estop_latch names=estop_latch",
+    out += ["loadrt and2 names=estop_chain", "loadrt estop_latch names=estop_latch",
             "loadrt lrt_estop2", "",
             "addf motion-command-handler servo-thread", "addf motion-controller servo-thread"]
     out += [f"addf lrt-cia402.{j.index} servo-thread" for j in js]
     out += ["addf lrt-net.0 servo-thread", "addf sim_toolchange servo-thread"]
     out += [f"addf {sw.comp} servo-thread" for sw in inv]
     out += ["addf lrt-estop2.0 servo-thread", "addf estop_chain servo-thread",
-            "addf estop_chain_hmi servo-thread", "addf estop_latch servo-thread", "",
+            "addf estop_latch servo-thread", "",
             "# ---- napędy (Plant przez LRT-NET) ----"]
     out += [f"setp lrt-net.0.axis.{j.index}.scale [JOINT_{j.index}]SCALE" for j in js]
     out.append("")
@@ -390,15 +391,16 @@ def render_plant_hal(cfg: MachineConfig, js: list[Joint], atc_macro: str | None 
         "net linumert.io.estop-2ch    lrt-estop2.0.ok => estop_chain.in0",
         "net linumert.io.estop-fault  lrt-estop2.0.fault",
         "net lrt.connected            lrt-net.0.connected => estop_chain.in1",
-        "net lrt.estop-hw-ok          estop_chain.out => estop_chain_hmi.in0",
-        "net linumert.hmi.estop-ok    => estop_chain_hmi.in1",
-        "net lrt.estop-ok-in          estop_chain_hmi.out => estop_latch.ok-in",
+        "net lrt.estop-ok-in          estop_chain.out => estop_latch.ok-in",
         "net lrt.drive-fault          lrt-net.0.drive-fault",
         "net lrt.estop-reset          iocontrol.0.user-request-enable => estop_latch.reset "
         "lrt-estop2.0.reset",
         "net linumert.io.estop-ok     estop_latch.ok-out => iocontrol.0.emc-enable-in", "",
         "# ---- wyrocznia Plant (REQ-VM-06): uzbrojona po bazowaniu wszystkich osi ----",
         "net linumert.homed           motion.is-all-homed => lrt-net.0.dout-31", "",
+        "# ---- wirtualna zmiana narzedzia (tylko Plant), bez postgui ----",
+        "net linumert.io.tool-change iocontrol.0.tool-change => sim_toolchange.in",
+        "net linumert.io.tool-changed sim_toolchange.out => iocontrol.0.tool-changed",
         "# ---- narzędzia i chłodzenie ----",
         "net linumert.io.tool-prepare   iocontrol.0.tool-prepare => iocontrol.0.tool-prepared",
     ]
@@ -518,6 +520,8 @@ def render(cfg: MachineConfig, target: str, opt: Options | None = None,
     files = {f"{cfg.machine.name}.ini": ini,
              f"{opt.subroutine_path}/lrt_probe.ngc": PROBE_MACRO}
     macro = None
+    if not opt.atc:
+        files[f"{opt.subroutine_path}/lrt_m6.ngc"] = M6_MACRO
     if opt.atc:
         from .atc_macro import generate_atc_m6
 

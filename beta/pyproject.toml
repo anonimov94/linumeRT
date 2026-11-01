@@ -92,6 +92,7 @@ packages = [
 testpaths = ["tests"]
 pythonpath = ["src"]
 addopts = "-q"
+markers = ["linuxcnc: odbiór na LinuxCNC RIP + Plant (katalog integration/, poza make test)"]
 # Zabezpieczenie przed zawieszeniem: transporty (WebSocket, żywy serwer) blokują się
 # na odbiorze, więc test bez odpowiedzi musi paść, a nie wisieć w nieskończoność.
 timeout = 60

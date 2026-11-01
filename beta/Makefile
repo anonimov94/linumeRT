@@ -9,7 +9,7 @@ install:
 	$(PYTHON) -m pip install $(PIP_FLAGS) -e ".[dev]"
 
 lint:
-	$(PYTHON) -m ruff check src tests tools
+	$(PYTHON) -m ruff check src tests tools integration
 	$(PYTHON) tools/check_no_gui.py
 
 # Testy aplikacji headless i przejętego rdzenia leżą razem w tests/ — rdzeń liczy
