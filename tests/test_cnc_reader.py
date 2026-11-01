@@ -85,6 +85,78 @@ def test_axis_mask_selects_letters_for_four_axis_machine():
     assert snap.axis("A").position == 90.0 and snap.all_homed
 
 
+def gantry_reader(joint_axes, homed, limit=None, **stat_values):
+    """mill_servo_table: osie X Y Z na jointach X Y Y Z, z mapą w ``[JOINT_n]AXIS``."""
+    values = {"joints": len(joint_axes), "ini_filename": "m.ini", "homed": homed,
+              "limit": limit or (0,) * len(joint_axes)}
+    module = fake_module(**{**values, **stat_values})
+    module.ini = lambda _path: SimpleNamespace(
+        find=lambda section, key: dict(enumerate(joint_axes)).get(int(section[6:]))
+        if key == "AXIS" else None)
+    return LinuxCNCReader(module=module, clock=lambda: 0.0)
+
+
+GANTRY = ("X", "Y", "Y", "Z")
+
+
+def test_gantry_unhomed_z_is_not_read_from_second_y_joint():
+    snap = gantry_reader(GANTRY, (1, 1, 1, 0)).read()
+    assert snap.axis("X").homed and snap.axis("Y").homed
+    assert not snap.axis("Z").homed and not snap.all_homed
+
+
+def test_gantry_axis_needs_all_its_joints_homed():
+    snap = gantry_reader(GANTRY, (1, 1, 0, 1)).read()
+    assert not snap.axis("Y").homed and snap.axis("Z").homed and not snap.all_homed
+    assert gantry_reader(GANTRY, (1, 1, 1, 1)).read().all_homed
+
+
+def test_gantry_limit_on_any_joint_marks_axis():
+    snap = gantry_reader(GANTRY, (1,) * 4, limit=(0, 0, 1, 0)).read()
+    assert snap.axis("Y").limit_hit and not snap.axis("Z").limit_hit
+    snap = gantry_reader(GANTRY, (1,) * 4, limit=(0, 0, 0, 1)).read()
+    assert snap.axis("Z").limit_hit and not snap.axis("Y").limit_hit
+
+
+@pytest.mark.parametrize("joint_axes", [
+    (None, None, None, None),       # stare INI bez wpisów
+    ("X", "Y", None, "Z"),          # joint bez osi nie może zniknąć z kontroli
+    ("X", "Y", "Y", "W"),           # joint osi spoza axis_mask, Z bez jointa
+])
+def test_incomplete_joint_map_never_hides_unhomed_joint(joint_axes):
+    for unhomed in range(4):
+        homed = tuple(int(joint != unhomed) for joint in range(4))
+        assert not gantry_reader(joint_axes, homed).read().all_homed
+
+
+def test_incomplete_map_with_equal_counts_falls_back_to_axis_order():
+    snap = gantry_reader((None, None, None), (1, 1, 0)).read()
+    assert snap.axis("Y").homed and not snap.axis("Z").homed
+
+
+def test_unreadable_ini_is_safe():
+    reader = gantry_reader(GANTRY, (1, 1, 1, 0))
+    def missing(_path):
+        raise RuntimeError("nie można otworzyć INI")
+    reader._module.ini = missing
+    assert not reader.read().all_homed
+
+
+def test_zero_joints_from_stat_never_reports_homed():
+    snap = gantry_reader(GANTRY, (), joints=0).read()
+    assert not any(a.homed for a in snap.axes) and not snap.all_homed
+
+
+def test_joint_map_follows_linuxcnc_restart_with_other_machine():
+    reader = gantry_reader(GANTRY, (1, 1, 1, 0))
+    assert not reader.read().axis("Z").homed
+    stat = reader._stat
+    stat.joints, stat.ini_filename, stat.homed = 3, "other.ini", (1, 1, 1)
+    reader._module.ini = lambda _path: SimpleNamespace(
+        find=lambda section, key: "XYZ"[int(section[6:])])
+    assert reader.read().all_homed
+
+
 def test_spindle_tool_overrides_and_work_offset():
     snap = read()
     assert snap.spindle_direction == -1 and snap.spindle_speed == 1200.0
