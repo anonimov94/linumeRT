@@ -15,6 +15,12 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Claude · 2026-11-01. **Portal na ekranie Qt nadal otwarty (po PR czytnika i WebHMI).**
+`linumert_operator_controls.jog`: numer osi z liter idzie do `ACTION.JOG`, które przed bazowaniem traktuje go
+jako joint, więc na XYYZ jog Z rusza Y2, a jog Y sam Y1 (bramka `jog` nie wymaga bazowania).
+`linumert_shell._homed`: oś Y uznana za zbazowaną po pierwszym z dwóch jointów. Blokady `tools/lock.py`
+domyślnie leżą w `state/locks` każdego worktree, więc nie wykluczają się między worktree. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
 Model-Author: Codex · 2026-10-27. **Kontynuacja 028/029: PR #196, `codex/webhmi-acceptance-20261027`.**
 Osobny checkout Windows `.collaboration/linumeRT-webhmi-acceptance`, bez globalnego LOCK.
 JOG Spacją/Enterem na przycisku z fokusem, STOP po zwolnieniu/blur, bez globalnych skrótów;
