@@ -23,10 +23,11 @@ i brak M2/M30 (koniec programu dopisuje kompilator).
 
 from __future__ import annotations
 
+import math
 import re
 from pathlib import Path
 
-from linumert.generators.base import Issue
+from linumert.generators.base import SAFE_Z_MOVE, Issue, fmt
 from linumert.generators.registry import DEFAULT_REGISTRY, GeneratorRegistry
 from linumert.generators.tooling import ToolLookup, check_steps
 
@@ -67,16 +68,26 @@ def _check_output(lines: list[str], step: int) -> list[Issue]:
     return issues
 
 
+def _safe_z_line(safe_z: float, inch: bool) -> str:
+    """Wycofanie G53 w jednostkach programu, zaokrąglone w dół: nigdy ponad limit maszyny."""
+    value = safe_z / 25.4 if inch else safe_z
+    return f"G53 G0 Z{fmt(math.floor(value * 10000) / 10000)}"
+
+
 def compile_program(program: LnxProgram, registry: GeneratorRegistry | None = None,
-                    source: str | None = None, tools: ToolLookup | None = None) -> str:
+                    source: str | None = None, tools: ToolLookup | None = None,
+                    safe_z: float | None = None) -> str:
     """Program → tekst `.ngc` (CompileError przy dowolnym błędzie).
 
     `tools` (np. `ToolDB.get`): kroki sprawdzane dodatkowo z bazą narzędzi (P-5206…P-5211).
+    `safe_z` [mm] (`limits.safe_z_from_ini`): wysokość G53 aktywnej maszyny zamiast `G53 G0 Z0`
+    z generatorów; bez niej tekst nie zależy od maszyny (test golden).
     """
     registry = registry or DEFAULT_REGISTRY
     issues: list[Issue] = []
     body: list[str] = []
     checked: list[tuple[int, str, dict]] = []
+    inch = program.units == "inch"
     for number, step in enumerate(program.steps, start=1):
         label = f"krok {number}: {step.generator} v{step.version}"
         if step.comment:
@@ -97,6 +108,10 @@ def compile_program(program: LnxProgram, registry: GeneratorRegistry | None = No
             continue
         checked.append((number, step.generator, values))
         lines = generator.generate(values)
+        if step.generator == "header":
+            inch = values["units"] == "G20"
+        if safe_z is not None:
+            lines = [_safe_z_line(safe_z, inch) if line == SAFE_Z_MOVE else line for line in lines]
         problems = _check_output(lines, number)
         if problems:
             issues += problems
@@ -120,13 +135,14 @@ def compile_program(program: LnxProgram, registry: GeneratorRegistry | None = No
 
 def compile_file(lnx_path: Path | str, ngc_path: Path | str | None = None,
                  registry: GeneratorRegistry | None = None,
-                 tools: ToolLookup | None = None) -> Path:
+                 tools: ToolLookup | None = None, safe_z: float | None = None) -> Path:
     """Kompiluje plik `.lnx` i zapisuje `.ngc` atomowo (domyślnie obok, z rozszerzeniem .ngc).
 
     Przy błędzie (LnxError albo CompileError) istniejący `.ngc` zostaje nietknięty.
     """
     lnx_path = Path(lnx_path)
     program = load_lnx(lnx_path)
-    text = compile_program(program, registry, source=lnx_path.name, tools=tools)
+    text = compile_program(program, registry, source=lnx_path.name, tools=tools,
+                           safe_z=safe_z)
     target = Path(ngc_path) if ngc_path is not None else lnx_path.with_suffix(".ngc")
     return atomic_write(target, text)

@@ -68,6 +68,10 @@ def _catalog():
     return _CATALOG
 
 
+# Generator nie zna maszyny: tę linię zamienia kompilator, gdy dostanie wysokość z INI (`safe_z`).
+SAFE_Z_MOVE = "G53 G0 Z0"
+
+
 def fmt(value: float, decimals: int = 4) -> str:
     """Liczba dla G-code: zapis stały, bez wykładnika i zbędnych zer, bez „-0”."""
     if not math.isfinite(value):

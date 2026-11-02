@@ -508,3 +508,18 @@ GUI ani nowych prac wizualnych. To jawna zmiana bieżącego priorytetu względem
 Wybrana porcja backendu: 066, niespójność pozycji magazynu pomiędzy Plant a generowanym
 makrem M6 oraz kontrola geometrii przed eksportem. Korzystamy z istniejącego modelu
 magazynu i jednego machine.yaml. Pełny ATC i wcześniejsze bramki pozostają otwarte.
+
+## PROPOZYCJA: wycofanie Z generatorów CAM na main — 2026-11-01
+
+Model-Author: Claude. Generatory piszą `G53 G0 Z0`, a przykładowe machine.yaml mają `soft_limits` Z
+do -1, więc LinuxCNC odrzuca taki ruch („would exceed Z's positive limit”). Generator nie zna maszyny,
+dlatego zamianę robi warstwa wyżej: `compile_program(..., safe_z=)` podmienia dokładnie tę linię,
+a ekran cykli podaje `limits.safe_z_from_ini` (`[AXIS_Z]MAX_LIMIT`, w jednostkach programu, zaokrąglone
+w dół). Bez `safe_z` tekst się nie zmienia (testy golden). Maszyna z limitem 0 dostaje ten sam program.
+Odrzucone: pole w każdym generatorze (nie obejmuje zapisanych `.lnx`), `#<_ini[...]>` (analiza offline
+nie zna INI), `soft_limits` Z do 0 (krańcówka jest na -0,5), `positions.safe_z` (nie ma go w INI, które
+ekran czyta; do rozważenia, jeśli wycofanie ma mieć zapas poniżej limitu).
+Ekran: `btn_goto_sensor_clicked` QtDragon też jechał `G53 G0 Z0` i po odrzuceniu ruszał w XY na bieżącej
+wysokości; nadpisanie w `linumert_handler.py` używa MAX_LIMIT i przerywa dojazd. To poprawka błędu
+sterowania, dozwolona mimo zamrożenia Qt. Właściciel może wybrać inne rozwiązanie.
+NIEZWERYFIKOWANE NA SPRZĘCIE.

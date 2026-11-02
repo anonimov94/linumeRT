@@ -26,7 +26,7 @@ from pathlib import Path
 
 import numpy as np
 
-from .linuxcnc_check import InterpreterUnavailable
+from .linuxcnc_check import run_parse_worker
 
 INCH = 25.4
 ARC_STEP = math.pi / 24   # maks. kąt odcinka łuku [rad]
@@ -359,19 +359,14 @@ def strip_tool_words(text: str) -> tuple[str, bool]:
     return "".join(out), changed
 
 
-def load_ngc(path: Path | str, unitcode: str = "G21",
-             initcode: str = "G17 G90 G94 G54") -> Toolpath:
-    """Ścieżka z interpretera LinuxCNC (moduł `gcode`); bez LinuxCNC: InterpreterUnavailable.
+def parse_preview(path: Path, unitcode: str, initcode: str) -> tuple[PreviewCanon, bool]:
+    """`gcode.parse` w bieżącym procesie: wywołuje tylko `_toolpath_worker` (może zabić proces).
 
     Bez działającego LinuxCNC (brak mapowania narzędzi) słowa T/M6 są wycinane z tymczasowej kopii
-    (te same numery linii) i podgląd dostaje notatkę.
+    (te same numery linii). Zwraca odbiornik i informację o wycięciu.
     """
-    try:
-        import gcode  # type: ignore[import-not-found]
-    except ImportError as exc:
-        raise InterpreterUnavailable("Brak modułu gcode z LinuxCNC 2.9.") from exc
-    path = Path(path)
-    source_text = path.read_text(encoding="utf-8", errors="replace")
+    import gcode  # type: ignore[import-not-found]
+
     canon = PreviewCanon()
     skipped = False
     # gcode reads this attribute as a string, not a callback. Keep interpreter
@@ -382,24 +377,37 @@ def load_ngc(path: Path | str, unitcode: str = "G21",
         canon.parameter_file = str(var)
         parse_path = path
         if not tool_data_available():
-            stripped, skipped = strip_tool_words(source_text)
+            stripped, skipped = strip_tool_words(path.read_text(encoding="utf-8",
+                                                                errors="replace"))
             if skipped:
                 parse_path = Path(directory) / path.name
                 parse_path.write_text(stripped, encoding="utf-8")
-        # Interpreter czyta INI z INI_FILE_NAME (REMAP, SUBROUTINE_PATH względem cwd): podgląd ma
-        # być niezależny od katalogu uruchomienia, więc analizuje program bez INI maszyny.
-        saved = os.environ.pop("INI_FILE_NAME", None)
-        try:
-            result, seq = gcode.parse(str(parse_path), canon, unitcode, initcode)
-        finally:
-            if saved is not None:
-                os.environ["INI_FILE_NAME"] = saved
+        result, seq = gcode.parse(str(parse_path), canon, unitcode, initcode)
     if result > gcode.MIN_ERROR:
         raise ValueError(f"linia {seq}: {gcode.strerror(result)}")
-    toolpath = canon.toolpath(source_text.splitlines())
-    if skipped:
-        toolpath.notes = (*toolpath.notes, TOOL_SKIPPED_NOTE)
-    return toolpath
+    return canon, skipped
+
+
+def load_ngc(path: Path | str, unitcode: str = "G21",
+             initcode: str = "G17 G90 G94 G54") -> Toolpath:
+    """Ścieżka z interpretera LinuxCNC w procesie potomnym (`_toolpath_worker`).
+
+    Brak modułu `gcode` albo awaria interpretera (np. `G43 Hn`, `G41 Dn` bez działającego
+    LinuxCNC): InterpreterUnavailable. Błąd programu albo przekroczony limit analizy: ValueError.
+    Zmiany narzędzi T/M6 bez działającego LinuxCNC są pomijane z notatką dla operatora.
+    """
+    path = Path(path).resolve()
+    source_text = path.read_text(encoding="utf-8", errors="replace")
+    with tempfile.TemporaryDirectory(prefix="linumert-preview-") as directory:
+        target = Path(directory) / "moves.npz"
+        run_parse_worker("linumert.programs._toolpath_worker", path, unitcode, initcode, target)
+        with np.load(target, allow_pickle=False) as data:
+            points = np.split(data["points"], np.cumsum(data["sizes"])[:-1])
+            moves = [make_move(int(line), bool(rapid), float(feed), pts)
+                     for line, rapid, feed, pts in zip(data["line"], data["rapid"], data["feed"],
+                                                       points, strict=False)]
+            return Toolpath(moves, source_text.splitlines(), data["offset"],
+                            tuple(str(note) for note in data["notes"]))
 
 
 # --------------------------------------------------------------------------- program demo
