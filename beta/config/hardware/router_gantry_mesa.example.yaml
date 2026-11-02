@@ -1,0 +1,80 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+# linumeRT · PRZYKŁAD maszyny rzeczywistej: router_gantry_steppers na karcie Mesa 7i96S (hm2_eth,
+# stepgen karty, sterowniki krokowe step/dir) z falownikiem RS485.
+# To nie jest gotowa konfiguracja maszyny: piny wejść/wyjść, kontrakt bezpieczeństwa i obwód
+# E-STOP/STO należą do projektu elektrycznego (docs/bezpieczenstwo/). Nazwy pinów przykładowe —
+# sprawdź na karcie (`halcmd show pin hm2_7i96s`). Port równoległy ma tylko 5 wejść, za mało
+# dla tej maszyny (6 krańcówek, E-STOP, watchdog).
+# Generowanie: linumert-config build <ten plik> --target hardware --out DIR.
+# Model-Author: Claude · sesja 062. NIEZWERYFIKOWANE NA SPRZĘCIE.
+schema_version: 1
+target: hardware
+hardware:
+  interface: mesa
+  board: 7i96s
+  address: 10.10.10.10
+  channels: {drv_x: 0, drv_y1: 1, drv_y2: 2, drv_z: 3}
+  inputs:
+    estop: hm2_7i96s.0.inm.00.input-00       # monitor przekaźnika bezpieczeństwa (1 = OK)
+    lim_x_min: hm2_7i96s.0.inm.00.input-01
+    lim_x_max: hm2_7i96s.0.inm.00.input-02
+    lim_y_min: hm2_7i96s.0.inm.00.input-03
+    lim_y_max: hm2_7i96s.0.inm.00.input-04
+    lim_z_max: hm2_7i96s.0.inm.00.input-05
+  outputs: {spindle_on: hm2_7i96s.0.ssr.00.out-00}
+  heartbeat_output: hm2_7i96s.0.ssr.00.out-01
+  watchdog_monitor: hm2_7i96s.0.inm.00.input-06
+  spindle_device: /dev/ttyUSB0
+machine: {name: router_gantry_mesa, type: router}
+kinematics: {preset: router_gantry_xyz}
+axes:
+  - letter: X
+    drives: [drv_x]
+    travel: [0, 600]
+    soft_limits: [1, 599]
+    limits:
+      min: {position: 0.5, input: lim_x_min}
+      max: {position: 599.5, input: lim_x_max}
+    hardstops: {min: {position: -2}, max: {position: 602}}
+    home_sensor: {shared_with: limit_min}
+    max_velocity: 200
+    max_acceleration: 1000
+    homing: {method: switch, direction: -1, search_speed: 40, latch_speed: 4, order: 1}
+  - letter: Y
+    drives: [drv_y1, drv_y2]
+    travel: [0, 900]
+    soft_limits: [1, 899]
+    limits:
+      min: {position: 0.5, input: lim_y_min}
+      max: {position: 899.5, input: lim_y_max}
+    hardstops: {min: {position: -2}, max: {position: 902}}
+    home_sensor: {shared_with: limit_min}
+    max_velocity: 200
+    max_acceleration: 1000
+    homing: {method: switch, direction: -1, search_speed: 40, latch_speed: 4, order: 1, gantry_square: true}
+    gantry_max_skew: 0.5
+  - letter: Z
+    drives: [drv_z]
+    travel: [-120, 0]
+    soft_limits: [-119, -1]
+    limits:
+      max: {position: -0.5, input: lim_z_max}
+    hardstops: {max: {position: 2}}
+    home_sensor: {shared_with: limit_max}
+    max_velocity: 80
+    max_acceleration: 500
+    homing: {method: switch, direction: 1, search_speed: 20, latch_speed: 2, order: 0}
+drives:
+  - {id: drv_x, template: stepper_nema23_3nm}
+  - {id: drv_y1, template: stepper_nema23_3nm}
+  - {id: drv_y2, template: stepper_nema23_3nm}
+  - {id: drv_z, template: stepper_nema23_3nm, overrides: {mechanics: {load: 15.0}}}
+  - {id: drv_spindle, template: spindle_vfd_22kw}
+spindle: {drive: drv_spindle, max_rpm: 24000, min_rpm: 6000}
+positions:
+  manual_change: [300, 450, -5]
+  safe_z: -5
+io:
+  inputs: {estop: 0, lim_x_min: 1, lim_x_max: 2, lim_y_min: 3, lim_y_max: 4, lim_z_max: 5}
+  outputs: {spindle_on: 0, coolant: 1}
+  estop: {input: estop, contact: NC}

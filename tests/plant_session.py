@@ -71,7 +71,7 @@ c.teleop_enable(1); c.wait_complete()
 
 
 def run_generated_plant(tmp_path: Path, machine: Path, driver_body: str, *, port: int,
-                        timeout: float = 300) -> tuple[dict, str, Path]:
+                        timeout: float = 300, copy_macros: bool = True) -> tuple[dict, str, Path]:
     """Zwraca (wynik kierowcy, log LinuxCNC, katalog konfiguracji). Pomija test, gdy zajęte."""
     root = rip.rip_root()
     if rip.leftovers():
@@ -84,13 +84,15 @@ def run_generated_plant(tmp_path: Path, machine: Path, driver_body: str, *, port
     assert "lrt_net" in (out / "linumert_plant.hal").read_text(encoding="utf-8")
     # Bez ekranu: zastępczy DISPLAY i jawne obejście grzyba HMI (tylko w teście bez ekranu).
     text = text.replace("DISPLAY = qtvcp linumert", "DISPLAY = linumert_bez_ekranu")
+    text = text.replace("DISPLAY = linumert_headless", "DISPLAY = linumert_bez_ekranu")
     text = text.replace("HMI_ESTOP_BYPASS = 0", "HMI_ESTOP_BYPASS = 1")
     # Katalog tymczasowy: ścieżki względne z repozytorium zamieniamy na bezwzględne.
     text = text.replace("../../hal/", f"{ROOT / 'config/hal'}/")
     text = text.replace("../../sim/", f"{ROOT / 'config/sim'}/")
     ini.write_text(text, encoding="utf-8")
     shutil.copy(ROOT / "config/sim/linumert_xyz/linumert.var.default", out / "linumert.var")
-    shutil.copytree(ROOT / "config/sim/linumert_xyz/macros", out / "macros")
+    if copy_macros:
+        shutil.copytree(ROOT / "config/sim/linumert_xyz/macros", out / "macros", dirs_exist_ok=True)
     script = out / "linumert_bez_ekranu"
     script.write_text("#!/bin/sh\nexec sleep 3600\n")
     script.chmod(0o755)

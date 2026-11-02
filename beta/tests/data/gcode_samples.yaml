@@ -1,0 +1,49 @@
+# Próbki składni G-code LinuxCNC (sesja 044). ok: oczekiwany werdykt leksera (true = brak błędów),
+# code: oczekiwany kod pierwszego błędu. oracle: porównanie z interpreterem rs274 LinuxCNC 2.9
+# (tests/test_lexer.py, marker linuxcnc): same (domyślnie) = ten sam werdykt; strict = lekser
+# celowo surowszy (rs274 przyjmuje albo zawiesza się); semantic = składnia poprawna, błąd
+# wykrywa dopiero interpreter (to nie zadanie leksera).
+- {id: proste_ruchy, ok: true, text: "G21 G90\nG0 X10 Y-5.5 Z.5\nG1 X1 F100\nM2"}
+- {id: komentarze, ok: true, text: "(start)\nG0 X1 (ruch) ; koniec\n;sam komentarz\nM2"}
+- {id: parametry, ok: true, text: "#1=5\n#<dl>=[#1*2]\nG0 X#1 Y#<dl>\nM2"}
+- {id: wyrazenia, ok: true, text: "G0 X[1+2*3] Y[SIN[30]*10] Z[ATAN[1]/[1]]\nM2"}
+- {id: numery_linii, ok: true, text: "N10 G0 X1\nN20 G0 X2\nM2"}
+- {id: podprogram, ok: true, text: "o<a> sub\nG0 X#1\no<a> endsub\no<a> call [5]\nM2"}
+- {id: if_else, ok: true, text: "#1=1\no100 if [#1 GT 0]\nG0 X1\no100 elseif [#1 LT 0]\nG0 X3\no100 else\nG0 X2\no100 endif\nM2"}
+- {id: while, ok: true, text: "#1=0\no101 while [#1 LT 3]\n#1=[#1+1]\no101 endwhile\nM2"}
+- {id: do_while, ok: true, text: "#1=0\no102 do\n#1=[#1+1]\no102 while [#1 LT 2]\nM2"}
+- {id: repeat, ok: true, text: "o103 repeat [2]\nG0 X1\no103 endrepeat\nM2"}
+- {id: usun_blok, ok: true, text: "/G0 X1\nM2"}
+- {id: ograniczniki, ok: true, text: "%\nG0 X1\nM2\n%"}
+- {id: spacje, ok: true, text: "G 0 X 1 . 5\nM2"}
+- {id: male_litery, ok: true, text: "g0 x1\nm2"}
+- {id: parametr_posredni, ok: true, text: "#1=2\n#2=7\nG0 X##1\nM2"}
+- {id: minus_parametr, ok: true, text: "#1=2\nG0 X[-#1]\nM2"}
+- {id: globalny, ok: true, text: "#<_glob>=3\nG0 X#<_glob>\nM2"}
+- {id: funkcja_wprost, ok: true, text: "G0 Xabs[-2]\nM2"}
+- {id: exists, ok: true, text: "#<x>=1\no1 if [EXISTS[#<x>]]\no1 endif\nM2"}
+- {id: operatory, ok: true, text: "#1=[5 MOD 2]\n#2=[1 AND 0]\n#3=[2**3]\n#4=[1 OR 0 XOR 1]\nM2"}
+- {id: break_continue, ok: true, text: "#1=0\no7 while [#1 LT 5]\n#1=[#1+1]\no8 if [#1 EQ 2]\no7 continue\no8 endif\no9 if [#1 EQ 4]\no7 break\no9 endif\no7 endwhile\nM2"}
+- {id: return, ok: true, text: "o<f> sub\no<f> return [2]\no<f> endsub\no<f> call\nM2"}
+- {id: niezamkniety_komentarz, ok: false, code: P-5101, text: "G0 X1 (abc\nM2"}
+- {id: zagniezdzony_komentarz, ok: false, code: P-5102, text: "G0 (a (b) c)\nM2"}
+- {id: litera_e, ok: true, oracle: semantic, text: "G0 E1\nM2"}
+- {id: obcy_znak, ok: false, code: P-5103, text: "G0 X1 $2\nM2"}
+- {id: posuw_zero, ok: true, oracle: semantic, text: "G21\nG1 X2\nM2"}
+- {id: brak_wartosci, ok: false, code: P-5104, text: "G0 X\nM2"}
+- {id: brak_wartosci_koniec, ok: false, code: P-5104, text: "G0 X1 Y\nM2"}
+- {id: zla_liczba, ok: false, code: P-5105, text: "G0 X1.2.3\nM2"}
+- {id: nawias, ok: false, code: P-5106, text: "G0 X[1+2\nM2"}
+- {id: nieznana_funkcja, ok: false, code: P-5107, text: "G0 X[FOO[1]]\nM2"}
+- {id: nieznany_operator, ok: false, code: P-5107, text: "G0 X[1 FOO 2]\nM2"}
+- {id: puste_wyrazenie, ok: false, code: P-5110, text: "G0 X[]\nM2"}
+- {id: zly_parametr, ok: false, oracle: strict, code: P-5108, text: "#<>=1\nM2"}
+- {id: parametr_bez_rownosci, ok: false, code: P-5108, text: "#1 5\nM2"}
+- {id: endsub_bez_sub, ok: false, code: P-5109, text: "o<a> endsub\nM2"}
+- {id: brak_endif, ok: false, oracle: strict, code: P-5109, text: "o1 if [1]\nG0 X1\nM2"}
+- {id: o_bez_slowa, ok: false, oracle: strict, code: P-5109, text: "o100\nM2"}
+- {id: rozne_etykiety, ok: false, oracle: strict, code: P-5109, text: "o1 while [0]\no2 endwhile\nM2"}
+- {id: else_poza_if, ok: false, code: P-5109, text: "o5 else\nM2"}
+- {id: n_w_srodku, ok: false, code: P-5111, text: "G0 N10 X1\nM2"}
+- {id: atan_bez_dzielenia, ok: false, code: P-5110, text: "G0 X[ATAN[1]]\nM2"}
+- {id: nawias_zamykajacy, ok: false, code: P-5101, text: "G0 X1)\nM2"}

@@ -1,0 +1,18 @@
+# linumeRT · scenariusz Plant (sesja 024). Model-Author: Claude.
+name: drive_fault_mid_program
+description: "Awaria napędu X w trakcie programu przerywa ruch (E-4200); po zdjęciu przyczyny reset przywraca pracę."
+requirements: [REQ-QA-03]
+machine: ../../config/machines/mill_servo_table.yaml
+program: programs/long_feed.ngc
+master: both
+duration: 3.0
+steps:
+  - {at: 0.0, action: enable}
+  - {at: 0.05, action: program}
+  - {at_line: 4, action: fault, fault: drive_fault, drive: drv_x}
+  - {at: 2.0, action: clear, fault: drive_fault, drive: drv_x}
+  - {at: 2.1, action: fault_reset}
+expect:
+  - alarm: {code: E-4200}
+  - completed: false
+  - drive_state: {drive: drv_x, is: OPERATION_ENABLED}

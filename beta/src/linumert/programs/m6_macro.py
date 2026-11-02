@@ -1,0 +1,20 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+"""Remap M6: wspolny tekst makra Claude, pakowanie przez Codex."""
+
+M6_MACRO = """\
+; SPDX-License-Identifier: GPL-2.0-or-later
+; Model-Author: Claude
+; Remap M6 (INI: REMAP=M6 modalgroup=6 ngc=lrt_m6): po wymianie narzedzia od razu wlacza
+; korekte dlugosci (G43 H<narzedzie>), jak w sterownikach przemyslowych. M6 wewnatrz wlasnego
+; remapu to wbudowany M6. Numer narzedzia z T czytany przed wymiana; T0 = G49.
+o<lrt_m6> sub
+#<lrt_tool> = #<_selected_tool>
+M6
+o100 if [#<lrt_tool> GT 0]
+  G43 H#<lrt_tool>
+o100 else
+  G49
+o100 endif
+o<lrt_m6> endsub
+M2
+"""

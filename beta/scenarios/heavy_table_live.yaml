@@ -1,0 +1,14 @@
+# linumeRT · scenariusz Plant (sesja 024). Model-Author: Claude.
+name: heavy_table_live
+description: "Masa stołu X ×4 w trakcie pracy (parametr live) — ten sam ruch, większy błąd nadążania."
+requirements: [REQ-VD-04]
+machine: ../../config/machines/mill_servo_table.yaml
+duration: 3.0
+steps:
+  - {at: 0.0, action: enable}
+  - {at: 0.05, action: move, X: 40, feed: 6000, accel: 1000}   # stały ruch porównawczy, niezależny od max_acceleration
+  - {at: 1.2, action: set_param, drive: drv_x, path: mechanics.load, value: 320.0}
+  - {at: 1.3, action: move, X: 0, feed: 6000, accel: 1000}
+expect:
+  - no_alarm: true
+  - position: {axis: X, value: 0.0, tol: 0.01}

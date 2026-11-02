@@ -1,0 +1,114 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+# linumeRT · LinuxCNC <-> Plant (LRT-NET), z machine.yaml (mill_servo_table).
+# Kontrakt D05 (docs/HAL_KONTRAKT.md); wejścia Plant = stan elektryczny
+# (1 = obwód zamknięty).
+# Model-Author: Claude · generator sesji 062. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+loadrt [KINS]KINEMATICS
+loadrt [EMCMOT]EMCMOT servo_period_nsec=[EMCMOT]SERVO_PERIOD num_joints=[KINS]JOINTS
+loadrt lrt_net personality=[PLANT]AXES ip=[PLANT]IP port=[PLANT]PORT
+loadrt lrt_cia402 count=4
+# Shared postgui expects this virtual M6 acknowledgement, also used by sim.
+loadrt timedelay names=sim_toolchange
+loadrt not names=nc_x_min,nc_x_max,nc_y_min,nc_y_max,nc_z_max
+loadrt and2 names=estop_chain,estop_chain_sw
+loadrt estop_latch names=estop_latch
+loadrt lrt_estop2
+
+addf motion-command-handler servo-thread
+addf motion-controller servo-thread
+addf lrt-cia402.0 servo-thread
+addf lrt-cia402.1 servo-thread
+addf lrt-cia402.2 servo-thread
+addf lrt-cia402.3 servo-thread
+addf lrt-net.0 servo-thread
+addf sim_toolchange servo-thread
+addf nc_x_min servo-thread
+addf nc_x_max servo-thread
+addf nc_y_min servo-thread
+addf nc_y_max servo-thread
+addf nc_z_max servo-thread
+addf lrt-estop2.0 servo-thread
+addf estop_chain servo-thread
+addf estop_chain_sw servo-thread
+addf estop_latch servo-thread
+
+# ---- napędy (Plant przez LRT-NET) ----
+setp lrt-net.0.axis.0.scale [JOINT_0]SCALE
+setp lrt-net.0.axis.1.scale [JOINT_1]SCALE
+setp lrt-net.0.axis.2.scale [JOINT_2]SCALE
+setp lrt-net.0.axis.3.scale [JOINT_3]SCALE
+
+net linumert.j0.pos-cmd   joint.0.motor-pos-cmd => lrt-net.0.axis.0.pos-cmd
+net linumert.j0.pos-fb    lrt-net.0.axis.0.pos-fb => joint.0.motor-pos-fb
+net linumert.j1.pos-cmd   joint.1.motor-pos-cmd => lrt-net.0.axis.1.pos-cmd
+net linumert.j1.pos-fb    lrt-net.0.axis.1.pos-fb => joint.1.motor-pos-fb
+net linumert.j2.pos-cmd   joint.2.motor-pos-cmd => lrt-net.0.axis.2.pos-cmd
+net linumert.j2.pos-fb    lrt-net.0.axis.2.pos-fb => joint.2.motor-pos-fb
+net linumert.j3.pos-cmd   joint.3.motor-pos-cmd => lrt-net.0.axis.3.pos-cmd
+net linumert.j3.pos-fb    lrt-net.0.axis.3.pos-fb => joint.3.motor-pos-fb
+net linumert.j0.enable    joint.0.amp-enable-out => lrt-cia402.0.enable
+net linumert.j1.enable    joint.1.amp-enable-out => lrt-cia402.1.enable
+net linumert.j2.enable    joint.2.amp-enable-out => lrt-cia402.2.enable
+net linumert.j3.enable    joint.3.amp-enable-out => lrt-cia402.3.enable
+net linumert.j0.fault     lrt-cia402.0.fault => joint.0.amp-fault-in
+net linumert.j1.fault     lrt-cia402.1.fault => joint.1.amp-fault-in
+net linumert.j2.fault     lrt-cia402.2.fault => joint.2.amp-fault-in
+net linumert.j3.fault     lrt-cia402.3.fault => joint.3.amp-fault-in
+net lrt.j0.cw   lrt-cia402.0.controlword => lrt-net.0.axis.0.controlword
+net lrt.j1.cw   lrt-cia402.1.controlword => lrt-net.0.axis.1.controlword
+net lrt.j2.cw   lrt-cia402.2.controlword => lrt-net.0.axis.2.controlword
+net lrt.j3.cw   lrt-cia402.3.controlword => lrt-net.0.axis.3.controlword
+net lrt.j0.sw   lrt-net.0.axis.0.statusword => lrt-cia402.0.statusword
+net lrt.j1.sw   lrt-net.0.axis.1.statusword => lrt-cia402.1.statusword
+net lrt.j2.sw   lrt-net.0.axis.2.statusword => lrt-cia402.2.statusword
+net lrt.j3.sw   lrt-net.0.axis.3.statusword => lrt-cia402.3.statusword
+net lrt.j0.mode   lrt-cia402.0.mode => lrt-net.0.axis.0.mode
+net lrt.j1.mode   lrt-cia402.1.mode => lrt-net.0.axis.1.mode
+net lrt.j2.mode   lrt-cia402.2.mode => lrt-net.0.axis.2.mode
+net lrt.j3.mode   lrt-cia402.3.mode => lrt-net.0.axis.3.mode
+net lrt.j0.md   lrt-net.0.axis.0.mode-display => lrt-cia402.0.mode-display
+net lrt.j1.md   lrt-net.0.axis.1.mode-display => lrt-cia402.1.mode-display
+net lrt.j2.md   lrt-net.0.axis.2.mode-display => lrt-cia402.2.mode-display
+net lrt.j3.md   lrt-net.0.axis.3.mode-display => lrt-cia402.3.mode-display
+
+# ---- krańcówki i czujniki bazy (NC: zadziałanie = obwód otwarty = din 0) ----
+net lrt.in.lim-x-min lrt-net.0.din-01 => nc_x_min.in
+net lrt.in.lim-x-max lrt-net.0.din-02 => nc_x_max.in
+net lrt.in.lim-y-min lrt-net.0.din-03 => nc_y_min.in
+net lrt.in.lim-y-max lrt-net.0.din-04 => nc_y_max.in
+net lrt.in.lim-z-max lrt-net.0.din-05 => nc_z_max.in
+net linumert.j0.home-sw   nc_x_min.out => joint.0.neg-lim-sw-in joint.0.home-sw-in
+net linumert.j0.pos-lim   nc_x_max.out => joint.0.pos-lim-sw-in
+net linumert.j1.home-sw   nc_y_min.out => joint.1.neg-lim-sw-in joint.1.home-sw-in joint.2.neg-lim-sw-in joint.2.home-sw-in
+net linumert.j1.pos-lim   nc_y_max.out => joint.1.pos-lim-sw-in joint.2.pos-lim-sw-in
+net linumert.j3.home-sw   nc_z_max.out => joint.3.pos-lim-sw-in joint.3.home-sw-in
+
+# ---- sonda ----
+net linumert.io.probe        lrt-net.0.din-07 => motion.probe-input
+net linumert.io.toolsetter   lrt-net.0.din-06
+
+# ---- E-STOP: obwód NC z Plant (kanały A/B), łączność, grzyb HMI ----
+net linumert.io.estop-button lrt-net.0.din-00 => lrt-estop2.0.ch-a
+net linumert.io.estop-b      lrt-net.0.din-15 => lrt-estop2.0.ch-b
+setp lrt-estop2.0.discrepancy-time 0.1
+net linumert.io.estop-2ch    lrt-estop2.0.ok => estop_chain.in0
+net linumert.io.estop-fault  lrt-estop2.0.fault
+net lrt.connected            lrt-net.0.connected => estop_chain.in1
+net lrt.estop-hw-ok          estop_chain.out => estop_chain_sw.in0
+net linumert.io.user-enable  iocontrol.0.user-enable-out => estop_chain_sw.in1
+net lrt.estop-ok-in          estop_chain_sw.out => estop_latch.ok-in
+net lrt.drive-fault          lrt-net.0.drive-fault
+net lrt.estop-reset          iocontrol.0.user-request-enable => estop_latch.reset lrt-estop2.0.reset
+net linumert.io.estop-ok     estop_latch.ok-out => iocontrol.0.emc-enable-in
+
+# ---- wyrocznia Plant (REQ-VM-06): uzbrojona po bazowaniu wszystkich osi ----
+net linumert.homed           motion.is-all-homed => lrt-net.0.dout-31
+
+# ---- wirtualna zmiana narzedzia (tylko Plant), bez postgui ----
+net linumert.io.tool-change iocontrol.0.tool-change => sim_toolchange.in
+net linumert.io.tool-changed sim_toolchange.out => iocontrol.0.tool-changed
+# ---- narzędzia i chłodzenie ----
+net linumert.io.tool-prepare   iocontrol.0.tool-prepare => iocontrol.0.tool-prepared
+net linumert.io.coolant-flood  iocontrol.0.coolant-flood => lrt-net.0.dout-01
+net linumert.io.coolant-mist   iocontrol.0.coolant-mist

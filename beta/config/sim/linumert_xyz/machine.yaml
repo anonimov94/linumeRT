@@ -1,0 +1,39 @@
+# Model maszyny symulatora linumeRT XYZ (config/sim/linumert_xyz): zakresy jak w INI, napędy
+# z plant/library/drives, bryły kolizyjne do symulacji materiału i kolizji w HMI.
+# Stół: blat Z -180 (układ maszyny, wierzchołek narzędzia), przygotówka 150 × 150 × 30 stoi na
+# blacie, zero G54 = lewy przedni róg wierzchu przygotówki (X100 Y100 Z-150, linumert.var.default).
+# Wartości przykładowe — NIEZWERYFIKOWANE NA SPRZĘCIE. Model-Author: Claude · 2026-10-19.
+schema_version: 1
+machine: {name: linumert_sim_xyz, type: mill}
+kinematics: {preset: mill_table_xyz}
+axes:
+  - letter: X
+    drives: [drv_x]
+    travel: [0, 600]
+    soft_limits: [0, 600]
+    max_velocity: 100
+    max_acceleration: 1000
+  - letter: Y
+    drives: [drv_y1, drv_y2]
+    travel: [0, 400]
+    soft_limits: [0, 400]
+    max_velocity: 100
+    max_acceleration: 1000
+  - letter: Z
+    drives: [drv_z]
+    travel: [-120, 0]
+    soft_limits: [-120, 0]
+    max_velocity: 100
+    max_acceleration: 1000
+drives:
+  - {id: drv_x, template: servo_400w}
+  - {id: drv_y1, template: servo_400w}
+  - {id: drv_y2, template: servo_400w}
+  - {id: drv_z, template: servo_750w}
+  - {id: drv_spindle, template: spindle_vfd_22kw}
+spindle: {drive: drv_spindle, max_rpm: 24000, min_rpm: 1000}
+collision_bodies:
+  - {name: wrzeciono, shape: cylinder, attached_to: spindle, size: [80, 150], position: [0, 0, 75]}
+  - {name: stol, shape: box, attached_to: table, size: [700, 500, 40], position: [300, 200, -200]}
+  - {name: docisk_lewy, shape: box, attached_to: fixture, size: [25, 40, 15], position: [82, 175, -172.5]}
+  - {name: docisk_prawy, shape: box, attached_to: fixture, size: [25, 40, 15], position: [268, 175, -172.5]}
