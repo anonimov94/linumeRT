@@ -1,0 +1,96 @@
+# Szablon napędu wirtualnego linumeRT: Serwo 400 W (CSP).
+# Wartości przykładowe — typowe dla klasy napędu, zaokrąglone; NIE pochodzą z dokumentacji
+# żadnego producenta (docs/PROVENANCE.md). NIEZWERYFIKOWANE NA SPRZĘCIE.
+# Wszystkie pola są jawne; format i zakresy: plant/library/drives/README.md.
+# Model-Author: Claude · sesja 013
+id: servo_400w
+version: 1
+based_on: null
+name: "Serwo 400 W (CSP)"
+description: "Serwo AC 400 W, enkoder 17 bit, tryb CSP; śruba 10 mm/obr, masa osi 80 kg."
+value_source: "przykładowe wartości typowe dla serwa klasy 400 W; zaokrąglone, nie pochodzą z karty katalogowej żadnego producenta"
+type: servo_csp
+
+# Parametry zmieniane w locie (REQ-VD-04); pozostałe wymagają przeładowania modelu.
+live:
+  - motor.rotor_inertia
+  - mechanics.load
+  - mechanics.j_screw
+  - mechanics.friction_coulomb
+  - mechanics.friction_static
+  - mechanics.friction_viscous
+  - mechanics.backlash
+  - limits.torque_limit_permille
+  - electrical.supply_voltage
+
+motor:
+  rated_torque: 1.27           # [N·m] moment znamionowy
+  peak_torque: 3.8            # [N·m]
+  peak_time_s: 1.0            # [s] czas pracy ze szczytem (I2t); 0 = bez ochrony
+  rotor_inertia: 3.0000e-05       # [kg·m²]
+  torque_constant: 0.4885      # [N·m/A] = moment znamionowy / prąd znamionowy
+  rated_current: 2.6         # [A]
+  peak_current: 7.8          # [A]
+  encoder_counts_per_rev: 131072   # [imp/obr]
+  encoder_noise_counts: 0.0
+  # Krzywa moment–prędkość: [omega rad/s, moment N·m]; poniżej pierwszego punktu stała, powyżej ostatniego 0.
+  torque_curve: [[0.0, 3.8], [200.0, 3.8], [314.0, 1.9], [450.0, 1.0], [523.0, 0.6]]
+  brake_present: false
+  brake_release_ms: 0.0
+  brake_engage_ms: 0.0
+
+electrical:
+  nominal_voltage: 230.0       # [V]
+  supply_voltage: 230.0        # [V] bieżące; skaluje krzywą momentu (live)
+
+# Regulatory: kv, ti, kp_pos i inertia_est dobrane jak lrt_drive_tune_servo() dla pasma 150 rad/s
+# przy kroku 1 ms i bezwładności zastępczej 2.7264e-04 kg·m² (J wirnika + J śruby + load·ratio²).
+controller:
+  kp_pos: 30.0
+  kv: 0.040896
+  ti: 0.026667
+  kff_vel: 1.0
+  kff_acc: 1.0
+  inertia_est: 2.7264e-04
+  vel_filter_hz: 400.0
+  ff_filter_hz: 300.0
+  max_speed: 500.0
+
+limits:
+  torque_limit_permille: 2992   # 6072h [‰ znamionowego]
+  following_window: 3640       # 6065h [imp]
+  following_window_ms: 20
+  quick_stop_decel: 26214400      # 6085h [imp/s²]
+  standstill_speed: 0.1
+  boot_time_s: 1.0
+
+reactions:
+  quick_stop_option: 2     # 605Ah: 1 = wyłącz napęd, 2 = rampa i wyłączenie
+  fault_reaction_option: 0  # 605Eh: 0 = wyłącz napęd, 2 = rampa quick stop
+  brake_on_fault: false
+
+cia402:
+  objects: ["603Fh", "6040h", "6041h", "605Ah", "605Eh", "6060h", "6061h", "6064h", "6065h", "6066h", "606Ch", "6072h", "6077h", "607Ah", "6085h", "6098h", "6099h", "609Ah", "60B1h", "60B2h"]
+  homing_method: 35        # 6098h (sekwencje bazowania: sesja 015)
+  homing_speed_switch: 131072
+  homing_speed_zero: 32768
+  homing_accel: 26214400
+
+# Mechanika domyślna; maszyna może ją nadpisać w instancji (overrides).
+mechanics:
+  kind: linear
+  load: 80.0            # [kg] masa osi
+  ratio: 0.00159155          # [m/rad]
+  j_screw: 4.0000e-05       # [kg·m²]
+  friction_coulomb: 0.05    # [N·m]
+  friction_static: 0.07     # [N·m]
+  friction_viscous: 0.001  # [N·m·s/rad]
+  backlash: 1.0000e-05      # [m]
+  contact_stiffness: 5000.0   # [N·m/rad] na wale
+  gravity_force: 0.0
+
+# Napęd rzeczywisty (REQ-VD-06, sesja 061): CSP przez linuxcnc-ethercat; 60C2h (okres
+# interpolacji) ustawia generator równy okresowi wątku serwo. NIEZWERYFIKOWANE NA SPRZĘCIE.
+real:
+  driver: ethercat_cia402
+  pdo: [6040h, 6041h, 6060h, 6061h, 607Ah, 6064h, 603Fh]

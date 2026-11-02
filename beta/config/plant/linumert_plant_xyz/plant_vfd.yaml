@@ -1,0 +1,9 @@
+# linumeRT · Plant dla linumert_plant_xyz_vfd.ini (sesja 021): jak plant.yaml + falownik wrzeciona
+# hy_vfd na pseudoterminalu (dowiązanie = [VFD]DEVICE w INI) i Modbus TCP dla mb2hal.
+machine: ../../machines/mill_servo_table.yaml
+network: {listen: 127.0.0.1, port: 47700}
+timing: {cycle_ns: 1000000, substeps: 4, watchdog_ms: 50}
+mode: lockstep
+seed: 1
+oracle: {arm_bit: 31}
+vfd: {device: /tmp/linumert-hy_vfd, modbus_listen: 127.0.0.1, modbus_port: 1502, slave: 1}

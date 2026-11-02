@@ -14,6 +14,7 @@ on:
       - 'pyproject.toml'
       - 'screens/**'
       - 'Makefile'
+      - 'beta/**'
   workflow_dispatch:
   schedule:
     - cron: '23 4 * * 1'
@@ -87,6 +88,16 @@ jobs:
         env:
           LINUXCNC_SCREENSHOT: ${{ github.workspace }}/state/spike_qtdragon.png
         run: runuser -u codex -- env HOME=/home/codex .venv/bin/python tools/agent_tests/run.py --model Codex --linuxcnc
+      # beta ma własny rdzeń `linumert`, więc osobne venv i uruchomienie z katalogu beta/.
+      - name: Beta API on LinuxCNC + Plant
+        run: |
+          runuser -u codex -- python3 -m venv --system-site-packages .venv-beta
+          runuser -u codex -- .venv-beta/bin/python -m pip install -e 'beta[dev]'
+          runuser -u codex -- env HOME=/home/codex PATH="$PWD/.venv-beta/bin:$PATH" bash -c '
+            source "$HOME/.cache/linuxcnc-2.9/scripts/rip-environment"
+            export LINUXCNC_DIR="$HOME/.cache/linuxcnc-2.9"
+            cd beta
+            xvfb-run -a ../.venv-beta/bin/python -m pytest -o addopts= -m linuxcnc -v integration'
       - uses: actions/upload-artifact@v4
         if: always()
         with:

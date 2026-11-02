@@ -1,0 +1,26 @@
+# linumeRT Plant: przykład plant.yaml (uruchomienie Plant, nie maszyna). Model-Author: Claude · sesja 016.
+# Start: python -m linumert_plant serve --plant config/plant/plant.example.yaml
+# Ścieżki względne liczone od katalogu tego pliku.
+machine: ../machines/mill_servo_table.yaml
+network: {listen: 127.0.0.1, port: 47700, panel_port: 8080}   # VM-B w sieci lrtnet: listen 0.0.0.0
+timing: {cycle_ns: 1000000, substeps: 4, watchdog_ms: 50}
+mode: lockstep            # lockstep (testy, CI, deterministyczny) | realtime (VM-B)
+seed: 1
+state_file: ../../state/plant_state.json
+trace: {path: ../../state/traces/plant.csv, format: csv}   # csv | jsonl
+# Falownik wrzeciona (sesja 021). Bez tej sekcji wrzeciono zadaje spindle_cmd z LRT-NET.
+# device: dowiązanie pty dla `hy_vfd -d <device>`; modbus_port: Modbus TCP dla mb2hal.
+# Rejestry Modbus (domyślne): command 0, speed_cmd 1, speed_actual 2, status 3,
+# current_x10 4, load_pct 5, fault_code 6 (opis: plant/server/linumert_plant/vfd.py).
+# vfd: {device: /tmp/linumert-hy_vfd, modbus_listen: 127.0.0.1, modbus_port: 1502, slave: 1}
+# Panel web (sesja 022): python -m linumert_plant panel --plant config/plant/plant.example.yaml
+panel: {telemetry_ms: 5}
+# Wirtualny pulpit (sesja 022, docs/PLANT.md §7a): bity digital_in LRT-NET, bez kolizji z io.inputs.
+desk:
+  mpg_a: 20
+  mpg_b: 21
+  axis: {X: 22, Y: 23, Z: 24}
+  step: {1: 25, 10: 26, 100: 27}
+  cycle_start: 28
+  feed_hold: 29
+  key: 30

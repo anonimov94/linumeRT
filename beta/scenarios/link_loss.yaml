@@ -1,0 +1,16 @@
+# linumeRT · scenariusz Plant (sesja 024). Model-Author: Claude.
+name: link_loss
+description: "Zerwane łącze LinuxCNC–Plant na 100 ms: watchdog E-4003, napędy w stan błędu, po resecie praca wraca."
+requirements: [REQ-QA-03]
+machine: ../../config/machines/mill_servo_table.yaml
+duration: 1.5
+steps:
+  - {at: 0.0, action: enable}
+  - {at: 0.2, action: fault, fault: frame_loss, percent: 100}
+  - {at: 0.3, action: clear, fault: frame_loss}
+  - {at: 0.5, action: fault_reset}
+  - {at: 0.6, action: move, X: 5, feed: 1200}
+expect:
+  - alarm: {code: E-4003}
+  - drive_state: {axis: X, is: OPERATION_ENABLED}
+  - position: {axis: X, value: 5.0, tol: 0.01}

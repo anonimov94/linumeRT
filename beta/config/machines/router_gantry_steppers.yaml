@@ -1,0 +1,65 @@
+# Frezarka portalowa 3-osiowa, silniki krokowe step/dir, bazowanie na krancowkach.
+schema_version: 1
+machine: {name: router_gantry_steppers, type: router}
+kinematics: {preset: router_gantry_xyz}
+axes:
+  - letter: X
+    drives: [drv_x]
+    travel: [0, 600]
+    soft_limits: [1, 599]
+    limits:
+      min: {position: 0.5, input: lim_x_min}
+      max: {position: 599.5, input: lim_x_max}
+    hardstops: {min: {position: -2}, max: {position: 602}}
+    home_sensor: {shared_with: limit_min}
+    max_velocity: 200
+    max_acceleration: 3820
+    homing: {method: switch, direction: -1, search_speed: 40, latch_speed: 4, order: 1}
+  - letter: Y
+    drives: [drv_y1, drv_y2]
+    travel: [0, 900]
+    soft_limits: [1, 899]
+    limits:
+      min: {position: 0.5, input: lim_y_min}
+      max: {position: 899.5, input: lim_y_max}
+    hardstops: {min: {position: -2}, max: {position: 902}}
+    home_sensor: {shared_with: limit_min}
+    max_velocity: 200
+    max_acceleration: 3820
+    homing: {method: switch, direction: -1, search_speed: 40, latch_speed: 4, order: 1, gantry_square: true}
+    gantry_max_skew: 0.5
+  - letter: Z
+    drives: [drv_z]
+    travel: [-120, 0]
+    soft_limits: [-119, -1]
+    limits:
+      max: {position: -0.5, input: lim_z_max}
+    hardstops: {max: {position: 2}}
+    home_sensor: {shared_with: limit_max}
+    max_velocity: 80
+    max_acceleration: 4000
+    homing: {method: switch, direction: 1, search_speed: 20, latch_speed: 2, order: 0}
+drives:
+  - {id: drv_x, template: stepper_nema23_3nm}
+  - {id: drv_y1, template: stepper_nema23_3nm}
+  - {id: drv_y2, template: stepper_nema23_3nm}
+  - {id: drv_z, template: stepper_nema23_3nm, overrides: {mechanics: {load: 15.0}}}
+  - {id: drv_spindle, template: spindle_vfd_22kw}
+spindle: {drive: drv_spindle, max_rpm: 24000, min_rpm: 6000}
+positions:
+  manual_change: [300, 450, -5]
+  safe_z: -5
+  tool_setter: {position: [50, 50, -100], height: 30, input: toolsetter}
+collision_bodies:
+  - {name: wrzeciono, shape: cylinder, attached_to: spindle, size: [80, 150], position: [0, 0, 75]}
+  - {name: stol, shape: box, attached_to: table, size: [700, 1000, 40], position: [300, 450, -150]}
+# Płytka do pomiaru wysokości detalu (sesja 014): kontakt poniżej Z = -100 w obrysie XY
+probe:
+  input: probe
+  tip_length: 20
+  target: {type: plate, min: [100, 100, -110], max: [160, 160, -100]}
+io:
+  inputs: {estop: 0, lim_x_min: 1, lim_x_max: 2, lim_y_min: 3, lim_y_max: 4, lim_z_max: 5,
+           toolsetter: 6, probe: 7, lim_y_min_2: 8}
+  outputs: {spindle_on: 0, coolant: 1}
+  estop: {input: estop, contact: NC}

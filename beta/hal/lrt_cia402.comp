@@ -1,0 +1,174 @@
+// SPDX-License-Identifier: GPL-2.0-or-later
+// linumeRT - maszyna stanow CiA 402 po stronie mastera (jedna instancja na naped).
+// Model-Author: Claude · sesja 017
+//
+// Laczy joint LinuxCNC z napedem CiA 402 (Plant przez lrt_net, w M5 EtherCAT przez lcec):
+//   joint.N.amp-enable-out -> enable;   statusword <- 6041h;   controlword -> 6040h
+//   fault -> joint.N.amp-fault-in;      mode -> 6060h;         mode-display <- 6061h
+// Wlaczanie: SWITCH ON DISABLED -06h-> READY -07h-> SWITCHED ON -0Fh-> OPERATION ENABLED.
+// Fault: przy enable kasowanie zboczem bitu 7 (0x80/0x00 na przemian); `fault` dla LinuxCNC
+// dopiero po fault-grace [s], zeby wlaczenie maszyny moglo skasowac stary fault napedu.
+// Bazowanie w napedzie (tryb 6, metoda 6098h ustawiona w napedzie): zbocze home-start przy
+// wlaczonym napedzie -> mode 6, bit 4; koniec przy 6041h bit 12 (attained) + bit 10 (target
+// reached), blad przy bicie 13; potem powrot do mode-request (zwykle 8 = CSP).
+// Zderzak (sesja 015): torque-limit = torque-limit-homing przy `homing` (joint.N.homing),
+// poza nim torque-limit-normal (6072h; w LRT-NET v1 bez pola w ramce - patrz HAL_KONTRAKT.md).
+// Nazwy pinow zblizone do komponentu cia402 z linuxcnc-ethercat (zamiana w M5 = zmiana net).
+// Kod wlasny. Zasady RT (CLAUDE.md §5). NIEZWERYFIKOWANE NA SPRZECIE.
+component lrt_cia402 "linumeRT: maszyna stanow CiA 402 mastera (wlaczanie, fault, bazowanie w napedzie)";
+
+pin in  bit   enable "zezwolenie z LinuxCNC (joint.N.amp-enable-out)";
+pin in  u32   statusword "slowo stanu napedu 6041h";
+pin in  s32   mode-display "tryb pracy napedu 6061h";
+pin in  s32   mode-request = 8 "tryb pracy poza bazowaniem (8 = CSP)";
+pin in  bit   home-start "zbocze: bazowanie w napedzie (tryb 6)";
+pin in  bit   homing "bazowanie LinuxCNC w toku (joint.N.homing) - zredukowany moment";
+pin in  float torque-limit-normal = 1000 "limit momentu poza bazowaniem [promile]";
+pin in  float torque-limit-homing = 300 "limit momentu przy bazowaniu na zderzak [promile]";
+pin in  float fault-grace = 0.5 "czas kasowania faultu po wlaczeniu, zanim fault trafi do LinuxCNC [s]";
+
+pin out u32   controlword "slowo sterujace 6040h";
+pin out s32   mode "tryb pracy 6060h";
+pin out bit   enabled "naped w OPERATION ENABLED";
+pin out bit   fault "fault napedu dla LinuxCNC (joint.N.amp-fault-in)";
+pin out bit   drive-fault "fault napedu (bez zwloki, diagnostyka)";
+pin out s32   state "stan CiA 402: 0 NOT READY, 1 SW ON DISABLED, 2 READY, 3 SWITCHED ON, 4 OP ENABLED, 5 QUICK STOP, 6 FAULT REACTION, 7 FAULT";
+pin out bit   homing-active "bazowanie w napedzie w toku";
+pin out bit   homed "bazowanie w napedzie zakonczone (do ponownego home-start)";
+pin out bit   homing-error "blad bazowania w napedzie (6041h bit 13)";
+pin out float torque-limit "limit momentu dla napedu 6072h [promile]";
+
+variable int prev_home;
+variable int reset_phase;
+variable double grace;
+variable int hm_phase;
+
+function _ fp;
+license "GPL-2.0-or-later";
+author "linumeRT";
+;;
+#define ST_NOT_READY 0
+#define ST_SW_ON_DISABLED 1
+#define ST_READY 2
+#define ST_SWITCHED_ON 3
+#define ST_OP_ENABLED 4
+#define ST_QUICK_STOP 5
+#define ST_FAULT_REACTION 6
+#define ST_FAULT 7
+
+#define CW_SHUTDOWN 0x0006u
+#define CW_SWITCH_ON 0x0007u
+#define CW_ENABLE 0x000Fu
+#define CW_FAULT_RESET 0x0080u
+#define CW_HOMING_START 0x0010u
+
+#define SW_TARGET_REACHED (1u << 10)
+#define SW_HOMING_ATTAINED (1u << 12)
+#define SW_HOMING_ERROR (1u << 13)
+
+#define HM_IDLE 0
+#define HM_MODE 1   /* czekamy na 6061h = 6 */
+#define HM_RUN 2    /* bit 4 ustawiony */
+#define HM_DONE 3   /* powrot do mode-request */
+
+static int decode_state(unsigned sw)
+{
+    if ((sw & 0x4Fu) == 0x00u) return ST_NOT_READY;
+    if ((sw & 0x4Fu) == 0x40u) return ST_SW_ON_DISABLED;
+    if ((sw & 0x6Fu) == 0x21u) return ST_READY;
+    if ((sw & 0x6Fu) == 0x23u) return ST_SWITCHED_ON;
+    if ((sw & 0x6Fu) == 0x27u) return ST_OP_ENABLED;
+    if ((sw & 0x6Fu) == 0x07u) return ST_QUICK_STOP;
+    if ((sw & 0x4Fu) == 0x0Fu) return ST_FAULT_REACTION;
+    if ((sw & 0x4Fu) == 0x08u) return ST_FAULT;
+    return ST_NOT_READY;
+}
+
+FUNCTION(_) {
+    unsigned sw = statusword;
+    unsigned cw;
+    int st = decode_state(sw);
+    int start = home_start && !prev_home;
+
+    prev_home = home_start;
+    state = st;
+    drive_fault = st == ST_FAULT || st == ST_FAULT_REACTION;
+    enabled = st == ST_OP_ENABLED;
+    torque_limit = homing ? torque_limit_homing : torque_limit_normal;
+
+    if (!enable) {
+        cw = CW_SHUTDOWN;
+        grace = 0.0;
+        reset_phase = 0;
+        if (hm_phase == HM_MODE || hm_phase == HM_RUN) {
+            homing_error = 1; /* przerwane wylaczeniem */
+        }
+        hm_phase = HM_IDLE;
+        homing_active = 0;
+        fault = 0;
+    } else {
+        switch (st) {
+        case ST_FAULT:
+        case ST_FAULT_REACTION:
+            reset_phase = !reset_phase;
+            cw = reset_phase ? CW_FAULT_RESET : 0u;
+            grace += fperiod;
+            break;
+        case ST_SW_ON_DISABLED:
+        case ST_NOT_READY:
+            cw = CW_SHUTDOWN;
+            break;
+        case ST_READY:
+            cw = CW_SWITCH_ON;
+            break;
+        default: /* SWITCHED ON, OP ENABLED, QUICK STOP */
+            cw = CW_ENABLE;
+            break;
+        }
+        if (!drive_fault) {
+            grace = 0.0;
+        }
+        fault = drive_fault && grace >= fault_grace;
+    }
+
+    /* bazowanie w napedzie */
+    if (start && enabled && hm_phase != HM_MODE && hm_phase != HM_RUN) {
+        hm_phase = HM_MODE;
+        homed = 0;
+        homing_error = 0;
+    }
+    if ((hm_phase == HM_MODE || hm_phase == HM_RUN) && drive_fault) {
+        homing_error = 1;
+        hm_phase = HM_DONE;
+    }
+    switch (hm_phase) {
+    case HM_MODE:
+        if (mode_display == 6) {
+            hm_phase = HM_RUN;
+        }
+        break;
+    case HM_RUN:
+        if ((sw & SW_HOMING_ERROR) != 0u) {
+            homing_error = 1;
+            hm_phase = HM_DONE;
+        } else if ((sw & (SW_HOMING_ATTAINED | SW_TARGET_REACHED)) ==
+                   (SW_HOMING_ATTAINED | SW_TARGET_REACHED)) {
+            homed = 1;
+            hm_phase = HM_DONE;
+        }
+        break;
+    case HM_DONE:
+        if (mode_display == mode_request) {
+            hm_phase = HM_IDLE;
+        }
+        break;
+    default:
+        break;
+    }
+    homing_active = hm_phase == HM_MODE || hm_phase == HM_RUN;
+    mode = (hm_phase == HM_MODE || hm_phase == HM_RUN) ? 6 : mode_request;
+    if (hm_phase == HM_RUN && cw == CW_ENABLE) {
+        cw |= CW_HOMING_START;
+    }
+    controlword = cw;
+}
