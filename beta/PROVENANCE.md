@@ -117,7 +117,8 @@ W testach generatorów usunięto asercje składni z lekseru, a z `test_sim_engin
   łańcuch otwarty, dopóki ekran nie żyje).
 - **`machine.tool_change` i `offset.probe_run`** działają jako makra LinuxCNC
   (`T<n> M6` z remapem, `o<lrt_probe>`); atrapa wykonuje M6, ale sondowanie odrzuca
-  (`conflict`) — pełna ścieżka wymaga LinuxCNC (VM-A + Plant).
+  (`conflict`). Na LinuxCNC 2.9 + Plant są odebrane w `integration/test_motion_linuxcnc.py`
+  (sonda Z, kalibracja, próba w powietrzu).
 - **Wszystko, co dotyczy fizycznej maszyny, jest NIEZWERYFIKOWANE NA SPRZĘCIE** —
-  testy idą na atrapie (`backend=fake`). Backend LinuxCNC nie był uruchamiany
-  na prawdziwym sterowniku w tym środowisku.
+  testy jednostkowe idą na atrapie (`backend=fake`), a `integration/` (12 testów) na
+  LinuxCNC 2.9 + Plant (maszyna wirtualna, nie sterownik fizyczny).
