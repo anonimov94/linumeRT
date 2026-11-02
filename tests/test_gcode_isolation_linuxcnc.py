@@ -7,6 +7,7 @@ NIEZWERYFIKOWANE NA SPRZĘCIE.
 
 from __future__ import annotations
 
+import os
 import signal
 import subprocess
 import sys
@@ -219,6 +220,8 @@ def plant(tmp_path_factory):
     """Jedna sesja LinuxCNC + Plant dla kilku asercji (ok. 2 min)."""
     with pytest.MonkeyPatch.context() as patch:
         patch.setenv("LRT_ROOT", str(ROOT))
+        # Kierowca używa rdzenia (yaml, numpy): `python3` ma być interpreterem testów.
+        patch.setenv("PATH", f"{Path(sys.executable).parent}{os.pathsep}{os.environ['PATH']}")
         result, _log, _out = plant_session.run_generated_plant(
             tmp_path_factory.mktemp("gcode_plant"), MACHINE, DRIVER, port=PORT)
     assert result["on"] and result["homed"], result
