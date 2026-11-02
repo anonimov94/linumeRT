@@ -1759,3 +1759,8 @@ Pełny RIP musi ponownie potwierdzić wynik; nie scalać na czerwonym CI.
 - Awaria odkryta przy diagnozie: bez działającego LinuxCNC `gcode.parse` kończy proces (SIGSEGV) przy `T`, `M6`, `G43 Hn`, `G41 Dn`, `G10 L1/L10`, `M61`, a pętla bez końca wieszała serwer. `parse_rs274` działa teraz w procesie potomnym z limitem czasu; po awarii zostaje `source: subset`.
 - Otwarte: `load_ngc` w `linumert/programs/toolpath.py` usuwa tylko T/M6, więc `G43 H1` nadal może zabić proces wywołujący. Ten sam kod jest na `main`. Odbiór na `main` i przegląd drugiego modelu nadal otwarte.
 - Wynik: 12 testów `linuxcnc` PASS, 933 testy bety PASS, ruff i check_no_gui PASS. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## Beta — odchudzenie kodu · 2026-11-02 · Claude
+- Model-Author: Claude. Polecenie właściciela: bez GUI i bez zbędnego kodu. Usunięto moduły bez użytkownika w kontrakcie, serwerze, CLI, rejestrze generatorów i workerze rs274: `src/` 26 437 → 24 220 linii (w tym 2 750 z usuniętych plików), testy 933 → 864. Wykaz i kryterium: `beta/PROVENANCE.md` §5a.
+- Kontrakt bez zmian: 85 operacji, 12 domen, `contract cmp=0`. Beta nadal ma 24 tys. linii kodu; dalsze cięcie wymaga decyzji, które operacje wyrzucić z kontraktu.
+- Wynik: 864 testy PASS, 7 testów ścieżki rs274 PASS na LinuxCNC 2.9, ruff i check_no_gui PASS. NIEZWERYFIKOWANE NA SPRZĘCIE.

@@ -8,7 +8,7 @@ Wszystko, co GUI pokazuje na stronie „Program", idzie przez tę usługę:
 - kompilacja ``.lnx`` → G-code (``linumert.programs.compiler``),
 - sprawdzanie granic (``linumert.programs.limits``) — z INI maszyny albo z wartościami domyślnymi,
 - szacowanie czasu i drogi (``linumert.programs.estimate``),
-- ścieżka narzędzia do podglądu (``linumert.programs.toolpath``) — **punkty, nie obraz**:
+- ścieżka narzędzia do podglądu (``linumert_sim.path``) — **punkty, nie obraz**:
   GUI rysuje je u siebie (SVG/canvas/WebGL), backend nie generuje grafiki,
 - edycja kroku programu dialogowego (``linumert.programs.step_editor``).
 

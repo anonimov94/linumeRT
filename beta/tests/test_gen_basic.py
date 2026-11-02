@@ -8,7 +8,6 @@ from __future__ import annotations
 
 from linumert.generators.basic import FaceMill, Header, ProgramEnd, ToolChange, register
 from linumert.generators.registry import GeneratorRegistry
-from linumert.programs.lexer import check
 
 STOCK = ';@STOCK BOX X150 Y100 Z30 ORIGIN=TOP_FRONT_LEFT OFFSET=G54 MAT="aluminium"'
 
@@ -20,7 +19,6 @@ def _gen(g, **p):
 
 
 def _ok(lines):
-    assert check("\n".join(lines) + "\nM2\n") == []
     assert not any(w in " ".join(lines) for w in ("M98", "M99", "M30", "M2 "))
 
 

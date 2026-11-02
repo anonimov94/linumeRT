@@ -948,7 +948,7 @@ Nie uznawać tej poprawki za przegląd wszystkich 85 operacji ani zamknięcie G2
 ## Stan zatrzymania — beta, odbiór maszyny na LinuxCNC, 2026-11-01
 
 Model-Author: Claude. Checkout linumeRT-beta, gałąź arena/dac91208-linumert, PR #202. Odbiór domeny
-machine, serwera REST/WS (deadman), makr, symulacji bez ekranu i ścieżki CAM: `beta/integration/` (12 PASS), 933 testy PASS.
+machine, serwera REST/WS (deadman), makr, symulacji bez ekranu i ścieżki CAM: `beta/integration/` (12 PASS), 864 testy PASS po odchudzeniu kodu (PROVENANCE §5a).
 Do przeniesienia na main: mapa oś→jointy w `core/linumert/cnc/linuxcnc_reader.py` (ten sam błąd
 `all_homed` na portalu), `G53 G0 Z0` z generatorów, tabela maszyny w `run_interpreter`, numer T
 i awaria `gcode.parse` bez LinuxCNC (`load_ngc`, `parse_rs274`). Następny krok bety: przegląd Codex

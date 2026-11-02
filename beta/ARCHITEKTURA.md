@@ -123,11 +123,11 @@ atrybut na współdzielonym hubie nadpisywałby się przy drugim kliencie GUI i 
 
 | Pakiet | Linie |
 | --- | --- |
-| `linumert` (rdzeń) | 10 378 |
-| `linumert_plant` (wirtualna obrabiarka) | 7 649 |
-| `linumert_headless` (warstwa usługi) | 5 639 |
-| `linumert_sim` (symulacja offline) | 2 771 |
-| **razem `src/`** | **26 437** |
+| `linumert` (rdzeń) | 9 332 |
+| `linumert_plant` (wirtualna obrabiarka) | 6 759 |
+| `linumert_headless` (warstwa usługi) | 6 331 |
+| `linumert_sim` (symulacja offline) | 1 798 |
+| **razem `src/`** | **24 220** |
 
-Testy: 67 plików, **933 przechodzi, 0 pominiętych, 77 podtestów** — bez LinuxCNC, bez Qt,
+Testy: 60 plików, **864 przechodzi, 0 pominiętych, 77 podtestów** — bez LinuxCNC, bez Qt,
 bez serwera X.

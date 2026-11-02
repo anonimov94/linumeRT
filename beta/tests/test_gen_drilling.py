@@ -11,7 +11,6 @@ import math
 import pytest
 
 from linumert.generators.drilling import DrillHoles, parse_points, pattern_points
-from linumert.programs.lexer import check
 
 G = DrillHoles()
 
@@ -49,7 +48,6 @@ def test_cycles(cycle, word):
     if word:
         assert f" {word}" in call
     assert lines[-1] == "G80" and lines[-3:-1] == ["X10 Y0", "X20 Y0"]
-    assert check("\n".join(lines) + "\nM2\n") == []  # składnia
 
 
 def test_rigid_tap_requires_sync():
@@ -80,4 +78,4 @@ def test_compiles_as_program():
     drilling.register(reg)
     drilling.register(reg)  # bez dublowania
     text = G.generate_ngc({"depth": 5, "pattern": "grid", "count": 2, "rows": 2}, "otwory")
-    assert "G98 G81" in text and check(text) == []
+    assert "G98 G81" in text

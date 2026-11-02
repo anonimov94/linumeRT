@@ -11,14 +11,46 @@ NIEZWERYFIKOWANE NA SPRZĘCIE.
 
 from __future__ import annotations
 
+import os
+import re
 import sys
 import tempfile
 from pathlib import Path
 
 import numpy as np
 
-from linumert.programs.toolpath import strip_tool_words, tool_data_available
 from linumert_sim.path import WORKER_PROGRAM_ERROR, PathCanon, tool_changes
+
+_COMMENT = re.compile(r"\([^)]*\)|;.*$")
+_TOOL_WORDS = re.compile(
+    r"(?<![A-Za-z0-9.])(?:[Tt]\s*(?:\d+|#<[^>]*>|#\d+|\[[^\]]*\])|[Mm]\s*0*6(?!\d))")
+
+
+def tool_data_available() -> bool:
+    """Czy LinuxCNC utworzył ~/.tool.mmap; poll() mapuje tablicę dla G43 Hn i G41 Dn."""
+    if not (Path(os.environ.get("HOME", "/tmp")) / ".tool.mmap").exists():
+        return False
+    try:
+        import linuxcnc  # type: ignore[import-not-found]
+
+        linuxcnc.stat().poll()
+    except Exception:  # noqa: BLE001 - brak NML/modułu = brak danych narzędzi
+        return False
+    return True
+
+
+def strip_tool_words(text: str) -> str:
+    """Wycina słowa T i M6 poza komentarzami; numeracja linii bez zmian."""
+    out = []
+    for line in text.splitlines(keepends=True):
+        parts, last = [], 0
+        for m in _COMMENT.finditer(line):
+            parts.append(_TOOL_WORDS.sub("", line[last:m.start()]))
+            parts.append(m.group(0))
+            last = m.end()
+        parts.append(_TOOL_WORDS.sub("", line[last:]))
+        out.append("".join(parts))
+    return "".join(out)
 
 
 def main(argv: list[str]) -> int:
@@ -28,7 +60,7 @@ def main(argv: list[str]) -> int:
     path = Path(source)
     text = path.read_text(encoding="utf-8", errors="replace")
     changes, notes = tool_changes(text)
-    stripped, _ = strip_tool_words(text)
+    stripped = strip_tool_words(text)
     tool_data_available()  # mapuje tablicę dla G43 Hn i G41 Dn, gdy LinuxCNC działa
     canon = PathCanon(tool_changes=changes)
     for note in notes:

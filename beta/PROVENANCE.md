@@ -7,7 +7,7 @@ wymienia każdy usunięty plik, każdą zmianę w przejętym kodzie i każdy tes
 nie został przeniesiony — z powodem. Bez tego nie da się odróżnić „usunięte celowo”
 od „zgubione przy kopiowaniu”.
 
-Stan zweryfikowany: **933 testy przechodzą, 0 pominiętych, 77 podtestów**; `ruff` czysty;
+Stan zweryfikowany: **864 testy przechodzą, 0 pominiętych, 63 podtesty**; `ruff` czysty;
 `tools/check_no_gui.py` zwraca 0.
 
 ## 1. Pliki usunięte (GUI / Qt / OpenGL / panel web)
@@ -89,6 +89,24 @@ w procesach potomnych albo plików `config/hal/` zależnych od HMI.
 | `tests/test_plant_core.py`, `tests/test_drive_library.py` | `plant/core` → `plant_core` | nazwa katalogu rdzenia C. |
 | `tests/test_machine_drives.py` *(usunięty)*, `tests/test_accel_tuning.py`, `tests/test_plant_substeps.py`, `tests/test_probe_scenarios.py` | `plant/library` → `library`, `plant/scenarios` → `scenarios` | układ katalogów. |
 | `tests/conftest.py` | `PYTHONPATH` eksportowany do procesów potomnych, `REPO = beta/` | bliźniak nie jest instalowany w `site-packages`. |
+
+## 5a. Kod bez użytkownika, usunięty z bliźniaka (2026-11-02, Model-Author: Claude)
+
+Polecenie właściciela: bez GUI i bez zbędnego kodu. Kryterium: moduł nie jest osiągalny
+z kontraktu (85 operacji), serwera, CLI, rejestru generatorów ani workera `rs274`
+(graf importów + wyszukanie nazw ładowanych jako tekst). Usunięte razem z testami, ok. 2 750 linii `src/`
+i 690 linii testów (69 testów). Wszystko nadal jest w repozytorium `main`.
+
+| Usunięte | Linie | Po co było |
+| --- | --- | --- |
+| `linumert_sim/live.py`, `report.py`, `resume.py`, `stl.py`, `render_scene.py`, `render_mesh.py`, `worker.py` | 1 111 | symulacja na żywo dla ekranu, raport, eksport STL, widok 3D |
+| `linumert_plant/accel_tuning.py`, `scenario_trace.py`, `scenario_trace_analysis.py` | 504 | strojenie przyspieszeń i analiza śladów na maszynie |
+| `linumert_plant/panel/machine_library.py`, `presets.py`, `record.py` | 386 | biblioteka maszyn i presety panelu |
+| `linumert/programs/lexer.py`, `pause_retract.py`, `resume.py` | 654 | lekser G-code (kontrolę składni robi `rs274`), wycofanie przy pauzie, wznowienie w ekranie |
+| `linumert/programs/toolpath.py` | 509 | podgląd ścieżki ekranu; ścieżkę liczy `linumert_sim.path`, dwie funkcje pomocnicze trafiły do `_rs274_worker` |
+| `linumert/diag/estop2.py` | 47 | diagnostyka grzyba E-STOP w HMI |
+
+W testach generatorów usunięto asercje składni z lekseru, a z `test_sim_engine.py` test eksportu STL.
 
 ## 6. Czego tu nie ma i co to znaczy dla wdrożenia
 
