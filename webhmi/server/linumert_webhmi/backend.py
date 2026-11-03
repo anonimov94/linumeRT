@@ -25,6 +25,7 @@ from typing import Any, Protocol
 
 from linumert.cnc import FakeMachine, MachineSnapshot, Mode
 from linumert.cnc.linuxcnc_reader import LinuxCNCReader
+from linumert.cnc.model import AXIS_LETTERS
 
 from .schema import PROGRAM_NAME
 
@@ -259,11 +260,33 @@ class LinuxCNCBackend:
     def _joint_axes(self) -> tuple[str, ...]:
         return self._recent().axis_names
 
-    def _joint_index(self, axis: str) -> int:
+    def _joints_of(self, axis: str) -> tuple[int, ...]:
+        """Jointy osi z mapy czytnika; na portalu numer osi to nie numer jointa."""
         names = self._joint_axes()
-        if axis.upper() not in names:
+        letter = axis.upper()
+        if letter not in names:
             raise CommandError(f"nieznana oś {axis!r}")
-        return names.index(axis.upper())
+        joints = self._reader.joint_map(names)
+        if len(names) > 1 and all(joints[name] == joints[letter] for name in names):
+            raise CommandError("INI bez [JOINT_n]AXIS: nie wiadomo, które jointy należą do osi")
+        return joints[letter]
+
+    def _jog_target(self, axis: str) -> tuple[bool, int]:
+        """(tryb jointa, numer) dla ``cmd.jog``. Jeden joint portalu rozjechałby bramę, więc
+        oś portalową jogujemy tylko po bazowaniu, w teleop, numerem osi z dziewięciu liter."""
+        joints = self._joints_of(axis)
+        if len(joints) == 1:
+            return True, joints[0]
+        if not self._recent().all_homed:
+            raise CommandError(f"jog osi portalowej {axis.upper()} wymaga bazowania")
+        return False, AXIS_LETTERS.index(axis.upper())
+
+    def _send_jog(self, joint_mode: bool, jog_type: Any, number: int, *values: float) -> None:
+        cmd = self._cmd()
+        cmd.teleop_enable(0 if joint_mode else 1)
+        if not joint_mode:
+            self._wait(cmd)
+        cmd.jog(jog_type, joint_mode, number, *values)
 
     def _wait(self, cmd: Any) -> None:
         result = cmd.wait_complete(self.WAIT_TIMEOUT_S)
@@ -301,15 +324,14 @@ class LinuxCNCBackend:
         self._wait(cmd)
 
     def home(self, axis: str | None) -> None:
-        names = self._joint_axes()
-        if axis and axis.upper() not in names:
-            raise CommandError(f"nieznana oś {axis!r}")
-        targets = (names.index(axis.upper()),) if axis else tuple(range(len(names)))
+        # -1 = cała maszyna wg HOME_SEQUENCE; joint portalu startuje całą swoją grupę.
+        joint = self._joints_of(axis)[0] if axis else -1
         cmd = self._cmd()
         cmd.mode(self._lc().MODE_MANUAL)
         self._wait(cmd)
-        for joint in targets:
-            cmd.home(joint)
+        cmd.teleop_enable(0)
+        self._wait(cmd)
+        cmd.home(joint)
 
     def mdi(self, text: str) -> None:
         lc, cmd = self._lc(), self._cmd()
@@ -343,34 +365,34 @@ class LinuxCNCBackend:
             cmd.spindleoverride(spindle)
 
     def jog(self, axis: str, speed: float) -> None:
-        lc, cmd = self._lc(), self._cmd()
         if self._recent().mode is not Mode.MANUAL:
             raise CommandError("jog: wymagany tryb MANUAL")
-        # Jog przegubu (jjogmode=True), nie osi: nie wymaga trybu teleop. Zakładamy kinematykę
-        # tożsamościową (i-ta oś = i-ty przegub), jak czytnik.
+        # Jog przegubu (jjogmode=True): nie wymaga trybu teleop; wyjątek to oś portalu.
         # command.jog takes machine units/SECOND (AXIS get_jog_speed), not per minute.
-        joint = self._joint_index(axis)
+        joint_mode, number = self._jog_target(axis)
         velocity = speed
         if axis.upper() not in "ABC":
             units = self._linear_units
             if units is None or not math.isfinite(units) or units <= 0:
                 raise CommandError("jog: brak poprawnej skali jednostek maszyny")
             velocity *= units  # API mm/s -> native units/s; angular axes use degrees/s.
-        cmd.teleop_enable(0)
-        cmd.jog(lc.JOG_CONTINUOUS, True, joint, velocity)
+        self._send_jog(joint_mode, self._lc().JOG_CONTINUOUS, number, velocity)
 
     def jog_stop(self, axis: str | None) -> None:
         lc, cmd = self._lc(), self._cmd()
         names = self._joint_axes()
+        joints = self._reader.joint_map(names)  # stop bez warunków: także przy niepełnej mapie
         for name in (axis.upper(),) if axis else names:
             if name in names:
-                cmd.jog(lc.JOG_STOP, True, names.index(name))
+                if len(joints[name]) > 1:
+                    cmd.jog(lc.JOG_STOP, False, AXIS_LETTERS.index(name))
+                for joint in joints[name]:
+                    cmd.jog(lc.JOG_STOP, True, joint)
 
     def jog_increment(self, axis: str, speed: float, distance: float) -> None:
-        lc, cmd = self._lc(), self._cmd()
         if self._recent().mode is not Mode.MANUAL:
             raise CommandError("jog: wymagany tryb MANUAL")
-        joint = self._joint_index(axis)
+        joint_mode, number = self._jog_target(axis)
         scale = 1.0
         if axis.upper() not in "ABC":
             units = self._linear_units
@@ -378,8 +400,8 @@ class LinuxCNCBackend:
                 raise CommandError("jog: brak poprawnej skali jednostek maszyny")
             scale = units
         _increment_target(self._recent(), axis, speed, distance, scale)
-        cmd.teleop_enable(0)
-        cmd.jog(lc.JOG_INCREMENT, True, joint, speed * scale, distance * scale)
+        self._send_jog(joint_mode, self._lc().JOG_INCREMENT, number, speed * scale,
+                       distance * scale)
 
     def _wait_idle(self, timeout: float) -> None:
         """Czeka, aż interpreter wróci do IDLE (po MDI); czyta stat bez kanału błędów."""

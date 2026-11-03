@@ -1764,3 +1764,11 @@ Pełny RIP musi ponownie potwierdzić wynik; nie scalać na czerwonym CI.
 - Model-Author: Claude. Polecenie właściciela: bez GUI i bez zbędnego kodu. Usunięto moduły bez użytkownika w kontrakcie, serwerze, CLI, rejestrze generatorów i workerze rs274: `src/` 26 437 → 24 220 linii (w tym 2 750 z usuniętych plików), testy 933 → 864. Wykaz i kryterium: `beta/PROVENANCE.md` §5a.
 - Kontrakt bez zmian: 85 operacji, 12 domen, `contract cmp=0`. Beta nadal ma 24 tys. linii kodu; dalsze cięcie wymaga decyzji, które operacje wyrzucić z kontraktu.
 - Wynik: 864 testy PASS, 7 testów ścieżki rs274 PASS na LinuxCNC 2.9, ruff i check_no_gui PASS. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## Portal: czytnik stanu i WebHMI, jointy osi · 2026-11-01 · Claude
+- Model-Author: Claude. Przeniesienie na main błędu z odbioru bety (4d8397d): na XYYZ oś Z czytała joint 2, więc niezbazowany Z dawał all_homed=true.
+- Czytnik: `joint_map` z `[JOINT_n]AXIS`; niepełna mapa, nieczytelny INI i `stat.joints == 0` nie ukrywają niezbazowanego jointa.
+- WebHMI miało ten sam błąd w poleceniach ruchu (home/jog Z na Y2, jog Y na samym Y1, stop Z bez Z). Naprawione; oś portalowa joguje tylko po bazowaniu, w teleop.
+- `machine.estop` na main: `cmd.state(STATE_ESTOP)`, prawdziwe API; `command.estop` nie istnieje w LinuxCNC 2.9 i main go nie woła.
+- LinuxCNC 2.9 + Plant, mill_servo_table: 4 nowe testy PASS, z reader i webhmi_live razem 7 PASS. `make lint test`: 1903 PASS, 15 SKIP, REQ 22/22.
+- Otwarte: ekran Qt, jog przed bazowaniem i `_homed` na portalu (`docs/NASTEPNA_SESJA.md`). NIEZWERYFIKOWANE NA SPRZĘCIE.
