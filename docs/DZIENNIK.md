@@ -1772,3 +1772,10 @@ Pełny RIP musi ponownie potwierdzić wynik; nie scalać na czerwonym CI.
 - `machine.estop` na main: `cmd.state(STATE_ESTOP)`, prawdziwe API; `command.estop` nie istnieje w LinuxCNC 2.9 i main go nie woła.
 - LinuxCNC 2.9 + Plant, mill_servo_table: 4 nowe testy PASS, z reader i webhmi_live razem 7 PASS. `make lint test`: 1903 PASS, 15 SKIP, REQ 22/22.
 - Otwarte: ekran Qt, jog przed bazowaniem i `_homed` na portalu (`docs/NASTEPNA_SESJA.md`). NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## Organizacja — G2: scenariusz operatora w WebHMI na LinuxCNC + Plant · 2026-11-03 · Claude
+- Model-Author: Claude. WebHMI: zero detalu (`G10 L20`), lista i wczytanie programu z `PROGRAM_PREFIX`, pasek alarmów z Resetem D37 (E-1000/E-1100/E-1200, brama nie kasuje E-STOP). Gałąź zawiera #205.
+- 7 kroków (zasilanie po E-STOP, bazowanie, JOG, zero detalu, program, AUTO, alarm i Reset) kliknięte w przeglądarce na LinuxCNC 2.9 + Plant; zrzuty i wartości w `docs/raporty/G2/G2_WEBHMI_2026-11-03.md`. Ten sam scenariusz: `tests/test_g2_webhmi_linuxcnc.py`.
+- Naprawione: JOG po bazowaniu w teleop (joint jog odrzucany przy `HOME_SEQUENCE < 0`); E-STOP z API w konfiguracji Plant bez ekranu wracał do ESTOP_RESET — `user-enable-out` szeregowo przed zatrzaskiem (PROPOZYCJA w DECYZJE); alarm warunkowy rósł co odczyt.
+- Testy: `make lint test` 1920 PASS; linuxcnc 174 PASS, 7 porażek identycznych na `main` (środowisko), kalibracja sondy osobno PASS.
+- Otwarte: przegląd podobieństwa ekranów (G2 w plan.json nieoznaczone), watchdog HAL klienta web, sonda w GUI. NIEZWERYFIKOWANE NA SPRZĘCIE.
