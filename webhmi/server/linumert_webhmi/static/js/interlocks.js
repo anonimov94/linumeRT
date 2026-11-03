@@ -17,6 +17,7 @@ export function allowed(state, link) {
   const ruleKeys = [
     "power_on", "power_off", "home", "jog", "mdi", "run",
     "pause", "resume", "override", "mode:manual", "mode:mdi", "mode:auto",
+    "work_zero", "open", "reset",
   ];
   const rejectAll = (reason) => {
     for (const key of ruleKeys) result[key] = deny(reason);
@@ -58,6 +59,17 @@ export function allowed(state, link) {
   result.resume = !machineOn ? deny(common) : paused ? permit()
     : deny("Program nie jest wstrzymany");
   result.override = machineOn ? permit() : deny(common);
+  const jogging = Array.isArray(state.jog_active) && state.jog_active.length > 0;
+  result.work_zero = !machineOn ? deny(common) : mode !== "manual"
+    ? deny(modeReason("manual")) : !idle ? deny(needsIdle)
+      : !homed ? deny("Wymagane bazowanie wszystkich osi")
+        : jogging ? deny("Najpierw zatrzymaj JOG") : permit();
+  const programs = Array.isArray(state.programs) ? state.programs : [];
+  result.open = !machineOn ? deny(common) : !idle ? deny(needsIdle)
+    : !homed ? deny("Wymagane bazowanie wszystkich osi")
+      : !programs.length ? deny("Brak plików w katalogu programów") : permit();
+  const alarms = Array.isArray(state.alarms) ? state.alarms : [];
+  result.reset = alarms.length ? permit() : deny("Brak aktywnych alarmów");
 
   for (const target of ["manual", "mdi", "auto"]) {
     const key = "mode:" + target;

@@ -11,6 +11,7 @@ jako ``null``, bo JSON nie zna ``inf``.
 from __future__ import annotations
 
 import math
+import re
 from typing import Literal
 
 from linumert.cnc import MachineSnapshot
@@ -20,6 +21,8 @@ SCHEMA_VERSION = 1
 MAX_MDI_CHARS = 200
 MAX_JOG_SPEED_MM_S = 50.0  # górna granica jogu z przeglądarki (3000 mm/min)
 AXIS = Literal["X", "Y", "Z", "A", "B", "C", "U", "V", "W"]
+# Nazwa pliku programu z katalogu [DISPLAY]PROGRAM_PREFIX: bez ścieżki, bez pliku ukrytego.
+PROGRAM_NAME = re.compile(r"[A-Za-z0-9_][A-Za-z0-9_ .-]{0,99}\.(ngc|nc|tap)", re.IGNORECASE)
 
 
 def _num(value: float) -> float | None:
@@ -66,7 +69,7 @@ class Command(BaseModel):
 
     cmd: Literal["estop", "power_on", "power_off", "mode", "home", "mdi", "run", "pause",
                  "resume", "stop", "override", "jog", "jog_stop", "jog_increment",
-                 "jog_keepalive"]
+                 "jog_keepalive", "work_zero", "open", "reset"]
     mode: Literal["manual", "mdi", "auto"] | None = None
     axis: AXIS | None = None
     text: str | None = Field(default=None, max_length=MAX_MDI_CHARS)
@@ -76,6 +79,14 @@ class Command(BaseModel):
     spindle: float | None = Field(default=None, ge=0.0, le=2.0)
     speed: float | None = None  # mm/s ze znakiem (jog)
     distance: float | None = Field(default=None, gt=0, le=1, allow_inf_nan=False)
+    name: str | None = Field(default=None, max_length=104)  # plik programu (open)
+
+    @field_validator("name")
+    @classmethod
+    def _program_name(cls, value: str | None) -> str | None:
+        if value is not None and not PROGRAM_NAME.fullmatch(value):
+            raise ValueError("program: sama nazwa pliku .ngc/.nc/.tap z katalogu programów")
+        return value
 
     @field_validator("text")
     @classmethod

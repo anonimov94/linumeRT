@@ -9,7 +9,9 @@ Brama działa poza RT (zwykły wątek Pythona), jak panel Plant. Trzy zasady bez
   właściciela albo po ``estop`` brama wysyła stop jogu i ponawia go, dopóki się nie powiedzie.
   To nie jest funkcja bezpieczeństwa: ciągły jog w LinuxCNC trwa dalej, gdy proces bramy padnie;
   dlatego przed sprzętem wymagane jest wiązanie ``heartbeat`` z ``watchdog`` HAL (E-STOP).
-- **Brak zwolnienia E-STOP:** brama nie ma polecenia resetu (CLAUDE.md §6, D35/D37).
+- **Brak zwolnienia E-STOP:** brama nie ma polecenia resetu E-STOP (CLAUDE.md §6, D35/D37).
+  ``reset`` to pojedynczy Reset z D37: kasuje alarmy, których przyczyna ustała; alarm E-STOP
+  (E-1100) i krańcówki (E-1200) wracają, dopóki przyczyna trwa. Zatrzasku E-STOP nie dotyka.
 - **Limit poleceń:** wiadra tokenów, żeby błąd lub atak z przeglądarki nie zalał LinuxCNC; polecenia
   zatrzymujące (``estop``, ``stop``, ``pause``, ``jog_stop``, ``power_off``, ``jog`` z prędkością 0)
   limitera nie podlegają.
@@ -23,7 +25,8 @@ import threading
 import time
 from collections.abc import Callable
 
-from linumert.cnc import Mode
+from linumert.alarms.manager import AlarmManager
+from linumert.cnc import MachineSnapshot, Mode
 
 from .backend import CommandError, MachineBackend
 from .schema import Command, snapshot_to_dict
@@ -33,6 +36,8 @@ LOCAL_SESSION = "local"  # polecenia z REST (bez sesji WebSocket)
 POLL_HZ = 50.0
 JOG_HOLD_S = 0.4  # klient odświeża jog co ~100-150 ms
 HEARTBEAT_S = 1.0  # tyle życia przeglądarki uznajemy za "ekran żyje"
+PROGRAMS_S = 2.0  # odświeżanie listy programów
+MAX_ALARMS = 20  # tyle aktywnych alarmów idzie do przeglądarki (najnowsze)
 
 
 class RateLimiter:
@@ -64,6 +69,9 @@ class Gateway:
         self._jog_retry: set[str] = set()  # osie, dla których stop jogu się nie udał
         self._limiter = RateLimiter(command_rate, command_rate, clock)
         self._sessions: dict[str, float] = {}  # sesja -> ostatnia aktywność
+        self._alarms = AlarmManager(clock=clock)
+        self._programs: tuple[str, ...] = ()
+        self._programs_at = -PROGRAMS_S
         self._version = 0
         self._state: dict = {}
         self._stop = threading.Event()
@@ -103,7 +111,13 @@ class Gateway:
                 self._stop_axis(axis)
             self._retry_stops()
             self.backend.tick()
-            state = snapshot_to_dict(self.backend.snapshot())
+            snap = self.backend.snapshot()
+            self._raise_alarms(snap)
+            if now - self._programs_at >= PROGRAMS_S:
+                self._programs, self._programs_at = self.backend.programs(), now
+            state = snapshot_to_dict(snap)
+            state["alarms"] = self._alarm_rows()
+            state["programs"] = list(self._programs)
             state["heartbeat"] = any(now - seen <= HEARTBEAT_S
                                      for seen in self._sessions.values())
             state["jog_active"] = sorted(self._jog)
@@ -112,6 +126,22 @@ class Gateway:
             if state != self._state:
                 self._version += 1
                 self._state = state
+
+    # ---- alarmy (katalog core/linumert/alarms/catalog.yaml) --------------------
+    def _raise_alarms(self, snap: MachineSnapshot) -> None:
+        """Komunikaty LinuxCNC i trwające przyczyny (E-STOP, krańcówka) jako alarmy z katalogu."""
+        for message in snap.errors:
+            self._alarms.raise_alarm("E-1000", message=message)
+        if snap.task_state.value == "estop":
+            self._alarms.raise_alarm("E-1100")
+        for axis in snap.axes:
+            if axis.limit_hit:
+                self._alarms.raise_alarm("E-1200", axis=axis.name)
+
+    def _alarm_rows(self) -> list[dict]:
+        rows = sorted(self._alarms.active(), key=lambda a: a.id, reverse=True)[:MAX_ALARMS]
+        return [{"id": a.id, "code": a.code, "text": self._alarms.message(a),
+                 "count": a.count} for a in rows]
 
     # ---- klienci ------------------------------------------------------------
     def client_connected(self, session: str = LOCAL_SESSION) -> None:
@@ -253,3 +283,15 @@ class Gateway:
                 self._stop_all_jog()
             else:
                 self._stop_axis(c.axis)
+        elif name == "work_zero":
+            if self._jog:
+                raise CommandError("zero detalu: najpierw zatrzymaj JOG")
+            b.work_zero(c.axis)
+        elif name == "open":
+            if c.name is None:
+                raise CommandError("program: brak nazwy pliku")
+            self._stop_all_jog()
+            b.open_program(c.name)
+        elif name == "reset":
+            self._alarms.reset()
+            self.step()  # trwające przyczyny wracają od razu, nie po kolejnym obiegu

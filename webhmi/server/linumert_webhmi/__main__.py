@@ -10,6 +10,7 @@ import argparse
 import os
 import secrets
 import sys
+from pathlib import Path
 
 from linumert.cnc import FakeMachine, Mode
 
@@ -40,6 +41,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--token", default=os.environ.get("LINUMERT_WEBHMI_TOKEN"))
     parser.add_argument("--allow-remote", action="store_true",
                         help="pozwól na adres inny niż loopback (tylko zaufana sieć)")
+    parser.add_argument("--programs", type=Path, default=None,
+                        help="katalog programów (domyślnie [DISPLAY]PROGRAM_PREFIX z INI)")
     args = parser.parse_args(argv)
     if args.host not in ("127.0.0.1", "localhost", "::1") and not args.allow_remote:
         print("Odmowa: adres inny niż loopback wymaga --allow-remote.", file=sys.stderr)
@@ -50,7 +53,8 @@ def main(argv: list[str] | None = None) -> int:
         print("Brak uvicorn: pip install 'linumert[panel]'", file=sys.stderr)
         return 2
     token = args.token or secrets.token_urlsafe(24)
-    backend = FakeBackend(_demo_machine()) if args.fake else LinuxCNCBackend()
+    backend = (FakeBackend(_demo_machine(), programs_dir=args.programs) if args.fake
+               else LinuxCNCBackend(programs_dir=args.programs))
     gateway = Gateway(backend)
     gateway.start()
     extra = (args.host,) if args.allow_remote else ()

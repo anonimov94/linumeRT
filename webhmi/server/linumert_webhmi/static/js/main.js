@@ -67,6 +67,10 @@ function updateControls() {
   $("mdiSend").title = mdi.ok ? "" : mdi.reason;
   const mdiHint = $("mdiSend").querySelector(".interlock-reason");
   mdiHint.textContent = mdi.ok ? "" : mdi.reason;
+  const open = rules.open;
+  $("programSelect").disabled = !open.ok;
+  setButton($("programOpen"), open.ok && !$("programSelect").value
+    ? { ok: false, reason: "Wybierz plik programu" } : open);
   const jogRule = rules.jog;
   const needsHoming = $("jogIncrement").value !== "continuous" && state?.all_homed !== true;
   const jogOK = jogRule.ok && !needsHoming && (jog.canStart() || jog.isActive());
@@ -78,6 +82,44 @@ function updateControls() {
   $("connect").textContent = haveConnected && connection.hasToken() ? "Połącz ponownie" : "Połącz";
   dro.freshness(age(), connected);
   refreshDiagnostics();
+}
+function renderAlarms(items) {
+  const list = $("alarmRows");
+  const alarms = Array.isArray(items) ? items.slice(0, 3) : [];
+  list.replaceChildren();
+  if (!alarms.length) {
+    const li = document.createElement("li");
+    li.className = "alarm-none";
+    li.textContent = "Brak aktywnych alarmów.";
+    list.appendChild(li);
+  }
+  for (const alarm of alarms) {
+    const li = document.createElement("li");
+    const code = document.createElement("strong");
+    code.textContent = String(alarm.code ?? "?");
+    li.append(code, " " + String(alarm.text ?? "") +
+      (alarm.count > 1 ? " (×" + alarm.count + ")" : ""));
+    list.appendChild(li);
+  }
+  document.querySelector(".alarm-strip").classList.toggle("active", alarms.length > 0);
+}
+function renderPrograms(items) {
+  const select = $("programSelect");
+  const names = Array.isArray(items) ? items.map(String) : [];
+  const current = [...select.options].map((option) => option.value).filter(Boolean);
+  if (names.join("\n") === current.join("\n")) return;
+  const chosen = select.value;
+  select.replaceChildren();
+  const empty = document.createElement("option");
+  empty.value = "";
+  empty.textContent = names.length ? "— wybierz plik —" : "— brak plików —";
+  select.appendChild(empty);
+  for (const name of names) {
+    const option = document.createElement("option");
+    option.value = option.textContent = name;
+    select.appendChild(option);
+  }
+  if (names.includes(chosen)) select.value = chosen;
 }
 function send(command, onReply = null) {
   const id = connection.send(command, onReply);
@@ -122,6 +164,8 @@ const connection = createConnection({
     telemetryWasFresh = true;
     version = nextVersion;
     dro.render(state, version);
+    renderAlarms(state.alarms);
+    renderPrograms(state.programs);
     jog.onState(state);
     updateControls();
     if (Array.isArray(state.jog_stop_pending) && state.jog_stop_pending.length) {
@@ -195,9 +239,19 @@ for (const button of controls) {
     const command = button.dataset.mode
       ? { cmd: "mode", mode: button.dataset.mode }
       : { cmd: button.dataset.cmd };
+    if (button.dataset.axis) command.axis = button.dataset.axis;
     execute(command);
   });
 }
+$("programSelect").addEventListener("change", updateControls);
+$("programOpen").addEventListener("click", () => {
+  const name = $("programSelect").value;
+  if (!name) {
+    result("Program: wybierz plik z listy.", "error");
+    return;
+  }
+  execute({ cmd: "open", name });
+});
 $("connect").addEventListener("click", () => {
   const entered = $("token").value;
   if (connection.connect(entered)) {
