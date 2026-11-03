@@ -51,7 +51,9 @@ def wait(cond, timeout):
 def idle():
     return s.interp_state == linuxcnc.INTERP_IDLE and s.state == linuxcnc.RCS_DONE
 def mdi(cmd, timeout=90):
-    print("MDI", cmd, flush=True)
+    now = time.time()                           # znacznik czasu jak w logu Plant
+    print("MDI %s.%03d %s" % (time.strftime("%H:%M:%S", time.localtime(now)),
+                              int(now % 1 * 1000), cmd), flush=True)
     c.mode(linuxcnc.MODE_MDI); c.wait_complete()
     c.mdi(cmd)
     serial = c.serial
@@ -100,6 +102,14 @@ def run_generated_plant(tmp_path: Path, machine: Path, driver_body: str, *, port
     hal_text += "".join(f"addf {name} servo-thread\nnet {sig} => {name}.ok-in\n"
                         f"net lrt.estop-reset => {name}.reset\n"
                         for name, sig in DIAG_LATCHES.items())
+    # Najdłuższy i najkrótszy okres wątku servo [takty TSC; uspace nie ma last-period-ns]:
+    # po wstrzymaniu mastera uspace nadrabia zaległe cykle serią bez przerw.
+    hal_text += ("loadrt conv_u32_float names=lrt_diag_period_f\n"
+                 "loadrt minmax names=lrt_diag_period\n"
+                 "addf lrt_diag_period_f servo-thread\naddf lrt_diag_period servo-thread\n"
+                 "net lrt.diag.period motion.servo.last-period => lrt_diag_period_f.in\n"
+                 "net lrt.diag.period-f lrt_diag_period_f.out => lrt_diag_period.in\n"
+                 "net lrt.estop-reset => lrt_diag_period.reset\n")
     hal.write_text(hal_text, encoding="utf-8")
     # Bez ekranu: zastępczy DISPLAY i jawne obejście grzyba HMI (tylko w teście bez ekranu).
     text = text.replace("DISPLAY = qtvcp linumert", "DISPLAY = linumert_bez_ekranu")
