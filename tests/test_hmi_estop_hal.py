@@ -58,12 +58,15 @@ def test_chains_take_hmi_in_series() -> None:
     assert "iocontrol.0.user-enable-out => iocontrol.0.emc-enable-in" not in sim  # bez obejścia
     plant = (ROOT / "config/plant/linumert_plant_xyz/linumert_plant.hal").read_text(
         encoding="utf-8")
-    assert "loadrt and2 names=estop_chain,estop_chain_hmi" in plant  # (din ∧ łącze) ∧ HMI
+    # (din ∧ łącze) ∧ HMI ∧ user-enable-out LinuxCNC (E-STOP z ekranu/API też zatrzaskuje)
+    assert "loadrt and2 names=estop_chain,estop_chain_hmi,estop_chain_sw" in plant
     for line in ("lrt-net.0.din-00 => lrt-estop2.0.ch-a", "lrt-estop2.0.ok => estop_chain.in0",
                  "lrt-net.0.connected => estop_chain.in1",
                  "estop_chain.out => estop_chain_hmi.in0",
                  "net linumert.hmi.estop-ok    => estop_chain_hmi.in1",
-                 "estop_chain_hmi.out => estop_latch.ok-in"):
+                 "estop_chain_hmi.out => estop_chain_sw.in0",
+                 "net linumert.io.user-enable  => estop_chain_sw.in1",
+                 "estop_chain_sw.out => estop_latch.ok-in"):
         assert line in plant, line
     hmi = HMI_HAL.read_text(encoding="utf-8")
     assert "personality=0x103" in hmi  # grzyb ∧ watchdog ∧ potwierdzenie

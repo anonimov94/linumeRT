@@ -1,0 +1,14 @@
+( linumeRT · odbiór G2: kwadrat 20 x 20 mm od zera detalu, bez narzędzia i wrzeciona )
+( SPDX-License-Identifier: GPL-2.0-or-later )
+( Model-Author: Claude. Zero detalu ustaw co najmniej 5 mm pod górnym limitem Z. )
+;@STOCK BOX X40 Y40 Z10 ORIGIN=TOP_FRONT_LEFT OFFSET=G54 MAT="aluminium"
+G21 G90 G17 G40 G49 G80
+G0 Z5
+G0 X0 Y0
+G1 Z-1 F300
+G1 X20 F1200
+G1 Y20
+G1 X0
+G1 Y0
+G0 Z5
+M2

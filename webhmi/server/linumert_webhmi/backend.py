@@ -272,14 +272,16 @@ class LinuxCNCBackend:
         return joints[letter]
 
     def _jog_target(self, axis: str) -> tuple[bool, int]:
-        """(tryb jointa, numer) dla ``cmd.jog``. Jeden joint portalu rozjechałby bramę, więc
-        oś portalową jogujemy tylko po bazowaniu, w teleop, numerem osi z dziewięciu liter."""
+        """(tryb jointa, numer) dla ``cmd.jog``. Po bazowaniu zawsze teleop, numerem osi z
+        dziewięciu liter: LinuxCNC 2.9 odmawia jogu jointa z ``HOME_SEQUENCE`` < 0 („home_sequence
+        is synchronized”, każdy joint konfiguracji Plant). Przed bazowaniem tylko oś z jednym
+        jointem; jeden joint portalu rozjechałby bramę."""
         joints = self._joints_of(axis)
+        if self._recent().all_homed:
+            return False, AXIS_LETTERS.index(axis.upper())
         if len(joints) == 1:
             return True, joints[0]
-        if not self._recent().all_homed:
-            raise CommandError(f"jog osi portalowej {axis.upper()} wymaga bazowania")
-        return False, AXIS_LETTERS.index(axis.upper())
+        raise CommandError(f"jog osi portalowej {axis.upper()} wymaga bazowania")
 
     def _send_jog(self, joint_mode: bool, jog_type: Any, number: int, *values: float) -> None:
         cmd = self._cmd()
@@ -384,8 +386,8 @@ class LinuxCNCBackend:
         joints = self._reader.joint_map(names)  # stop bez warunków: także przy niepełnej mapie
         for name in (axis.upper(),) if axis else names:
             if name in names:
-                if len(joints[name]) > 1:
-                    cmd.jog(lc.JOG_STOP, False, AXIS_LETTERS.index(name))
+                # Ruch po bazowaniu jest w teleop (numer osi), przed nim w jointach: stop obu.
+                cmd.jog(lc.JOG_STOP, False, AXIS_LETTERS.index(name))
                 for joint in joints[name]:
                     cmd.jog(lc.JOG_STOP, True, joint)
 

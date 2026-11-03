@@ -332,14 +332,16 @@ def render_plant_hal(cfg: MachineConfig, js: list[Joint], atc_macro: str | None 
     ]
     if inv:
         out.append(f"loadrt not names={','.join(sw.comp for sw in inv)}")
-    out += ["loadrt and2 names=estop_chain,estop_chain_hmi", "loadrt estop_latch names=estop_latch",
+    out += ["loadrt and2 names=estop_chain,estop_chain_hmi,estop_chain_sw",
+            "loadrt estop_latch names=estop_latch",
             "loadrt lrt_estop2", "",
             "addf motion-command-handler servo-thread", "addf motion-controller servo-thread"]
     out += [f"addf lrt-cia402.{j.index} servo-thread" for j in js]
     out += ["addf lrt-net.0 servo-thread", "addf sim_toolchange servo-thread"]
     out += [f"addf {sw.comp} servo-thread" for sw in inv]
     out += ["addf lrt-estop2.0 servo-thread", "addf estop_chain servo-thread",
-            "addf estop_chain_hmi servo-thread", "addf estop_latch servo-thread", "",
+            "addf estop_chain_hmi servo-thread", "addf estop_chain_sw servo-thread",
+            "addf estop_latch servo-thread", "",
             "# ---- napędy (Plant przez LRT-NET) ----"]
     out += [f"setp lrt-net.0.axis.{j.index}.scale [JOINT_{j.index}]SCALE" for j in js]
     out.append("")
@@ -388,7 +390,11 @@ def render_plant_hal(cfg: MachineConfig, js: list[Joint], atc_macro: str | None 
         "net lrt.connected            lrt-net.0.connected => estop_chain.in1",
         "net lrt.estop-hw-ok          estop_chain.out => estop_chain_hmi.in0",
         "net linumert.hmi.estop-ok    => estop_chain_hmi.in1",
-        "net lrt.estop-ok-in          estop_chain_hmi.out => estop_latch.ok-in",
+        "net lrt.estop-hmi-ok         estop_chain_hmi.out => estop_chain_sw.in0",
+        # E-STOP z LinuxCNC (ekran, API) też otwiera zatrzask; inaczej przy obejściu grzyba
+        # HMI (testy bez ekranu) wracał sam do ESTOP_RESET. Tylko odbiera zezwolenie (beta).
+        "net linumert.io.user-enable  => estop_chain_sw.in1",
+        "net lrt.estop-ok-in          estop_chain_sw.out => estop_latch.ok-in",
         "net lrt.drive-fault          lrt-net.0.drive-fault",
         "net lrt.estop-reset          iocontrol.0.user-request-enable => estop_latch.reset "
         "lrt-estop2.0.reset",

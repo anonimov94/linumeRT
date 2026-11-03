@@ -87,11 +87,20 @@ def test_mdi_run_pause_resume_stop():
 @pytest.mark.parametrize("speed", [2.5, -2.5, 0.05])
 @pytest.mark.parametrize("units", [1.0, 1 / 25.4])
 def test_jog_uses_native_units_per_second(speed, units):
+    # Po bazowaniu teleop numerem osi: LinuxCNC 2.9 odmawia jogu jointa z HOME_SEQUENCE < 0.
     b, c = backend(task_mode=1, linear_units=units)
     b.jog("z", speed)
     b.jog_stop("Z")
-    assert c.calls == [("teleop_enable", 0), ("jog", 21, True, 2, speed * units),
+    assert c.calls == [("teleop_enable", 1), ("wait_complete", 2.0),
+                       ("jog", 21, False, 2, speed * units), ("jog", 20, False, 2),
                        ("jog", 20, True, 2)]
+
+
+def test_jog_before_homing_moves_the_axis_joint():
+    b, c = backend(task_mode=1)
+    b._reader._stat.homed = (0, 0, 0)
+    b.jog("Z", 2.0)
+    assert c.calls == [("teleop_enable", 0), ("jog", 21, True, 2, 2.0)]
 
 
 @pytest.mark.parametrize("units", [None, 0, -1, float("nan"), float("inf")])
@@ -115,7 +124,8 @@ def test_jog_refused_outside_manual_and_for_unknown_axis():
 def test_jog_stop_all_stops_every_configured_axis():
     b, c = backend()
     b.jog_stop(None)
-    assert c.calls == [("jog", 20, True, 0), ("jog", 20, True, 1), ("jog", 20, True, 2)]
+    assert c.calls == [("jog", 20, False, 0), ("jog", 20, True, 0), ("jog", 20, False, 1),
+                       ("jog", 20, True, 1), ("jog", 20, False, 2), ("jog", 20, True, 2)]
 
 
 def test_home_one_axis_and_all_and_unknown():
@@ -156,7 +166,7 @@ def test_gantry_home_all_includes_last_joint_through_home_sequence():
 
 
 def test_gantry_joint_jog_z_goes_to_joint_3():
-    b, c = gantry()
+    b, c = gantry(homed=(0, 0, 0, 0))  # przed bazowaniem: joint osi
     b.jog("Z", 2.0)
     assert motion(c.calls) == [("teleop_enable", 0), ("jog", 21, True, 3, 2.0)]
 
@@ -181,8 +191,9 @@ def test_gantry_axis_after_homing_jogs_in_teleop_by_axis_number():
 def test_gantry_stop_reaches_both_y_joints_and_teleop_and_z():
     b, c = gantry()
     b.jog_stop(None)
-    assert c.calls == [("jog", 20, True, 0), ("jog", 20, False, 1), ("jog", 20, True, 1),
-                       ("jog", 20, True, 2), ("jog", 20, True, 3)]
+    assert c.calls == [("jog", 20, False, 0), ("jog", 20, True, 0), ("jog", 20, False, 1),
+                       ("jog", 20, True, 1), ("jog", 20, True, 2), ("jog", 20, False, 2),
+                       ("jog", 20, True, 3)]
 
 
 def test_unhomed_z_blocks_increment_on_gantry():
@@ -246,7 +257,8 @@ def test_increment_converts_both_velocity_and_distance_without_reissuing_mode(un
     b, c = backend(linear_units=units)
     b.snapshot()
     b.jog_increment("X", speed, 0.1)
-    assert c.calls == [("teleop_enable", 0), ("jog", 22, True, 0, speed * units, 0.1 * units)]
+    assert c.calls == [("teleop_enable", 1), ("wait_complete", 2.0),
+                       ("jog", 22, False, 0, speed * units, 0.1 * units)]
 
 
 def test_increment_rotary_is_in_degrees_even_with_inch_linear_machine():
@@ -255,7 +267,7 @@ def test_increment_rotary_is_in_degrees_even_with_inch_linear_machine():
     b._reader._stat.homed = (1,) * 4
     b.snapshot()
     b.jog_increment("A", -2, 1)
-    assert c.calls[-1] == ("jog", 22, True, 3, -2, 1)
+    assert c.calls[-1] == ("jog", 22, False, 3, -2, 1)
 
 
 def test_increment_rejects_state_units_and_limits_before_any_motion():
@@ -279,5 +291,5 @@ def test_increment_checks_soft_limits_in_native_inch_units():
         b.jog_increment("X", 1, 1)
     assert c.calls == []
     b.jog_increment("X", 1, 0.1)
-    assert c.calls[-1][:4] == ("jog", 22, True, 0)
+    assert c.calls[-1][:4] == ("jog", 22, False, 0)
     assert c.calls[-1][4:] == pytest.approx((1 / 25.4, 0.1 / 25.4))

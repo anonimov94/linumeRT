@@ -71,8 +71,12 @@ c.teleop_enable(1); c.wait_complete()
 
 
 def run_generated_plant(tmp_path: Path, machine: Path, driver_body: str, *, port: int,
-                        timeout: float = 300, copy_macros: bool = True) -> tuple[dict, str, Path]:
-    """Zwraca (wynik kierowcy, log LinuxCNC, katalog konfiguracji). Pomija test, gdy zajęte."""
+                        timeout: float = 300, copy_macros: bool = True,
+                        prelude: str = DRIVER_PRELUDE) -> tuple[dict, str, Path]:
+    """Zwraca (wynik kierowcy, log LinuxCNC, katalog konfiguracji). Pomija test, gdy zajęte.
+
+    ``prelude=""`` oddaje włączenie i bazowanie kierowcy (odbiór G2 robi je przez WebHMI).
+    """
     root = rip.rip_root()
     if rip.leftovers():
         pytest.skip(f"działa inny LinuxCNC: {rip.leftovers()}")
@@ -97,7 +101,7 @@ def run_generated_plant(tmp_path: Path, machine: Path, driver_body: str, *, port
     script.write_text("#!/bin/sh\nexec sleep 3600\n")
     script.chmod(0o755)
     driver = tmp_path / "driver.py"
-    driver.write_text(DRIVER_PRELUDE + driver_body, encoding="utf-8")
+    driver.write_text(prelude + driver_body, encoding="utf-8")
     env = {**os.environ, "PATH": f"{out}{os.pathsep}{os.environ['PATH']}",
            "INI_FILE_NAME": str(ini), "CONFIG_DIR": str(out)}
     with contextlib.ExitStack() as stack:

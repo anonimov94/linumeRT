@@ -525,3 +525,13 @@ W beta/ usługa zamienia dokładnie tę linię na `[AXIS_Z]MAX_LIMIT` aktywnej k
 generatorze (nie obejmuje zapisanych `.lnx`), `#<_ini[...]>` (analiza offline nie zna INI),
 `soft_limits` Z do 0 (krańcówka jest na -0,5). Na `main` problem nadal istnieje. Właściciel może
 wybrać inne rozwiązanie. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## PROPOZYCJA: E-STOP z LinuxCNC w łańcuchu konfiguracji Plant — 2026-11-03
+
+Model-Author: Claude. W konfiguracji Plant uruchamianej bez ekranu Qt (`HMI_ESTOP_BYPASS`, testy, WebHMI)
+`STATE_ESTOP` z API wracał od razu do `ESTOP_RESET`: obejście grzyba HMI trzymało łańcuch zamknięty,
+a zatrzask nie miał wejścia od LinuxCNC. Generator Plant (`render_plant_hal`) i
+`config/plant/linumert_plant_xyz` dodają `estop_chain_sw`: `linumert.io.user-enable`
+(`iocontrol.0.user-enable-out`) szeregowo przed `estop_latch.ok-in`. Ten człon tylko odbiera
+zezwolenie (D35); reset nadal wyłącznie przez `iocontrol.0.user-request-enable` → `estop_latch.reset`.
+To przeniesienie poprawki z bety (2026-11-01). Konfiguracja sprzętowa bez zmian. NIEZWERYFIKOWANE NA SPRZĘCIE.

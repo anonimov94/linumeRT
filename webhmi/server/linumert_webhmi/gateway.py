@@ -132,11 +132,16 @@ class Gateway:
         """Komunikaty LinuxCNC i trwające przyczyny (E-STOP, krańcówka) jako alarmy z katalogu."""
         for message in snap.errors:
             self._alarms.raise_alarm("E-1000", message=message)
-        if snap.task_state.value == "estop":
-            self._alarms.raise_alarm("E-1100")
-        for axis in snap.axes:
-            if axis.limit_hit:
-                self._alarms.raise_alarm("E-1200", axis=axis.name)
+        causes = [("E-1100", {})] if snap.task_state.value == "estop" else []
+        # Czujnik bazy bywa krańcówką (``home_sensor: shared_with``): bazowanie najeżdża na nią
+        # celowo, więc alarm krańcówki liczymy dopiero po bazowaniu wszystkich osi.
+        causes += [("E-1200", {"axis": a.name})
+                   for a in (snap.axes if snap.all_homed else ()) if a.limit_hit]
+        # Trwająca przyczyna to jedno zgłoszenie, nie jedno na obieg (licznik = wystąpienia).
+        active = [(a.code, a.params) for a in self._alarms.active()]
+        for code, params in causes:
+            if (code, params) not in active:
+                self._alarms.raise_alarm(code, **params)
 
     def _alarm_rows(self) -> list[dict]:
         rows = sorted(self._alarms.active(), key=lambda a: a.id, reverse=True)[:MAX_ALARMS]
