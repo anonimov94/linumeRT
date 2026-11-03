@@ -525,3 +525,24 @@ W beta/ usługa zamienia dokładnie tę linię na `[AXIS_Z]MAX_LIMIT` aktywnej k
 generatorze (nie obejmuje zapisanych `.lnx`), `#<_ini[...]>` (analiza offline nie zna INI),
 `soft_limits` Z do 0 (krańcówka jest na -0,5). Na `main` problem nadal istnieje. Właściciel może
 wybrać inne rozwiązanie. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## Jeden ekran: WebHMI — polecenie właściciela 2026-11-03
+
+Model-Author: Claude. Po przeglądzie stanu (84 sesje: 39 ukończonych, 30 częściowych, 15
+planowanych; bramka G2 nieprzekroczona) właściciel wybrał **WebHMI** (`webhmi/`) jako jedyny
+rozwijany ekran operatora. Zamyka to otwarty wybór technologii z „Odłożenie HMI i priorytet
+backendu” (2026-10-27). QtDragon (`screens/linumert/`) pozostaje ekranem awaryjnym: tylko
+poprawki błędów blokujących, bez nowych funkcji i skórek. D36 dotyczy WebHMI.
+
+**PROPOZYCJA (do potwierdzenia przez właściciela) — kolejność:**
+1. Domknąć otwarte PR (#204, #207, #206, #205); drafty #194 i #203 zamknąć albo scalić.
+2. Bramka G2 jako jeden pionowy przekrój w WebHMI na Plant (LinuxCNC 2.9): włączenie,
+   bazowanie, JOG, zero detalu / sonda, wczytanie programu, AUTO, alarm i Reset. Każdy krok
+   kliknięty w przeglądarce, ze zrzutem, i z testem `linuxcnc` w CI.
+3. Dopiero potem nowe funkcje. Backend `beta/` służy jako zaplecze WebHMI, nie jako osobny
+   produkt; edycja `lite` nie jest rozwijana.
+
+**PROPOZYCJA — odłożone do przekroczenia G2:** 063 (EtherCAT), 067 (kreator), 068 (latencja),
+071 (strojenie), 073–076 (wtyczki i społeczność), 5 osi z 065, karuzela/parasol z 066, materiał
+2.5D, widok 3D i STL (055, 057, 059), CAM relief/tekst. Statusy w `plan.json` bez zmian.
+NIEZWERYFIKOWANE NA SPRZĘCIE.

@@ -43,6 +43,10 @@ istniejącej porcji CAM #184; dozwolone są poprawki błędów blokujących i ob
 Rdzeń, Plant, HAL i generatory pozostają wspólne. Reguła D36 dotyczy teraz nowego klienta web.
 Decyzja i synteza: `docs/DECYZJE.md`, `docs/SYNTEZA_MODELI_2026-10-26.md`.
 
+**Polecenie właściciela 2026-11-03:** WebHMI (`webhmi/`) jest jedynym rozwijanym ekranem
+operatora. Najpierw bramka G2 jako jeden pionowy przekrój w WebHMI na Plant; kolejność i
+odłożone zakresy: `docs/DECYZJE.md`, „Jeden ekran: WebHMI”.
+
 ```
 core/linumert/         # rdzeń: alarms/ tools/ programs/ generators/ machine/ plugins/ cnc/ diag/
 simulation/            # ścieżka, czas, materiał, kolizje (proces osobny)
