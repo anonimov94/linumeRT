@@ -36,6 +36,7 @@ from linumert.generators import (  # noqa: E402
 from linumert.generators.registry import GeneratorRegistry  # noqa: E402
 from linumert.generators.tooling import check_steps  # noqa: E402
 from linumert.programs.compiler import CompileError, compile_program  # noqa: E402
+from linumert.programs.limits import safe_z_from_ini  # noqa: E402
 from linumert.programs.lnx import LnxError, LnxProgram, Step, load_lnx, save_lnx  # noqa: E402
 from linumert.programs.step_editor import StepEditor  # noqa: E402
 
@@ -539,7 +540,7 @@ class CyclesPage(QtWidgets.QWidget):
             self.edit_steps("delete", restore_form=False)
 
     def text(self) -> str:
-        return compile_program(self.program, self.registry)
+        return compile_program(self.program, self.registry, safe_z=safe_z_from_ini(self._ini()))
 
     def _show(self) -> None:
         self._revision += 1

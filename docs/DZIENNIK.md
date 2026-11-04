@@ -1789,6 +1789,17 @@ Pełny RIP musi ponownie potwierdzić wynik; nie scalać na czerwonym CI.
 - LinuxCNC 2.9 + Plant, mill_servo_table: 4 nowe testy PASS, z reader i webhmi_live razem 7 PASS. `make lint test`: 1903 PASS, 15 SKIP, REQ 22/22.
 - Otwarte: ekran Qt, jog przed bazowaniem i `_homed` na portalu (`docs/NASTEPNA_SESJA.md`). NIEZWERYFIKOWANE NA SPRZĘCIE.
 
+## Błędy z odbioru bety na main — 2026-11-01 · Claude
+
+- Model-Author: Claude. Cztery błędy z odbioru bety (#202, 72eebe3) sprawdzone na `main` db6848c; wszystkie występowały. Osobna gałąź, bez #202 i #205.
+- `gcode.parse` bez LinuxCNC: `parse_rs274` kod -11 przy T, M6, G43 H, G41 D, G10 L1/L10, M61; `load_ngc` kod -11 przy tych samych bez T/M6; pętla bez końca w obu. Teraz proces potomny (`run_parse_worker`) z limitem 60 s; awaria = `InterpreterUnavailable`, `load_path` przechodzi na `subset`. Proces potomny kończy się sam (`SIGALRM`), gdy ekran zabije rodzica.
+- Numer T: na `main` przy działającym LinuxCNC ruchy miały T0. Teraz `tool_changes()` czyta T (oraz `M61 Q`) z tekstu.
+- `run_interpreter`: `sim.tbl` i `TOOL_CHANGE_*` z `axis.ini` dawały fałszywe Z 0,0 przy M6 i długość T1 12,98 mm zamiast 75 mm. Teraz `[EMCIO]TOOL_TABLE` maszyny.
+- `G53 G0 Z0`: Plant odrzuca ruch przy MAX_LIMIT -1. Rozwiązanie i wpływ na ekran: `docs/DECYZJE.md` (PROPOZYCJA). Nietknięte: `config/sim/nc_files/*.ngc` nadal mają Z0 (konfiguracja sim ma limit 0; na Plant zostaną odrzucone).
+- Ograniczenie: bez działającego LinuxCNC `load_ngc` zwraca teraz błąd zamiast podglądu dla programów z `G43 Hn` (dawniej SIGSEGV).
+- Testy: `tests/test_gcode_isolation_linuxcnc.py` (LinuxCNC 2.9 + Plant, 27 PASS), `tests/test_safe_z_tool_numbers.py`. `make lint test` w kopii tar z NTFS: 1888 PASS, 10 FAIL (dowiązania i launcher), te same 10 na `main` bez poprawek; ruff, roadmapa i REQ 22/22 PASS.
+- Nierozwiązane, także na `main` bez poprawek: 4 testy ekranu w WSL (`test_hmi_shell_gui` x3, `test_hmi_runtime_linuxcnc`, samotest nie kończy się w 300 s) oraz 3 testy programów bez M2, gdy moduł `gcode` jest dostępny (`test_sim_path`, `test_sim_worker` x2). Autokontrola, bez niezależnego przeglądu. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
 ## Organizacja — G2: scenariusz operatora w WebHMI na LinuxCNC + Plant · 2026-11-03 · Claude
 - Model-Author: Claude. WebHMI: zero detalu (`G10 L20`), lista i wczytanie programu z `PROGRAM_PREFIX`, pasek alarmów z Resetem D37 (E-1000/E-1100/E-1200, brama nie kasuje E-STOP). Gałąź zawiera #205.
 - 7 kroków (zasilanie po E-STOP, bazowanie, JOG, zero detalu, program, AUTO, alarm i Reset) kliknięte w przeglądarce na LinuxCNC 2.9 + Plant; zrzuty i wartości w `docs/raporty/G2/G2_WEBHMI_2026-11-03.md`. Ten sam scenariusz: `tests/test_g2_webhmi_linuxcnc.py`.
