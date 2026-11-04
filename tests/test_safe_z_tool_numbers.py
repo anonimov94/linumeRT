@@ -104,6 +104,7 @@ def test_komentarze_i_nazwy_nie_sa_slowem_t():
 
 @pytest.mark.parametrize("text", ["T#1 M6\n", "T[1+1]\n", "TABS[-1] M6\n",
     "T+#1 M6\n", "o<zmiana> call [1]\n",
+    "T1M6\nN1 0 O1 0 0 IF[0]\nT7M6\nO100ENDIF\n",
     "T1 M6\no100 if [0]\nT7 M6\no100 endif\nG1 X1 F100\nM2\n"])
 def test_nieznane_wykonanie_nie_dostaje_zgadywanego_t(text):
     with pytest.raises(ValueError, match="wyrażenia|O-word"):
@@ -120,6 +121,7 @@ def test_zwarte_slowa_i_odstepy_nie_zmieniaja_t(code, expected):
 
 def test_nazwy_parametrow_i_etykiet_nie_sa_t_m():
     assert tool_changes("#<_T12M6>=1\nG83Q#<_T12M6>\n") == ([], [])
+    assert tool_changes("O100WHILE[0]\n; call w komentarzu\nO100ENDWHILE\n") == ([], [])
 
 
 def test_ruch_dostaje_narzedzie_z_numeru_linii():

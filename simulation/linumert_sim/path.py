@@ -174,7 +174,7 @@ PLANE_AXES = {1: (0, 1, 2), 2: (2, 0, 1), 3: (1, 2, 0)}   # G17 XY, G18 ZX, G19 
 # --------------------------------------------------------------------------- rs274 (LinuxCNC)
 
 _TOOL_COMMENT = re.compile(r"\([^)]*\)|;.*$")
-_TOOL_FLOW = re.compile(r"^\s*(?:/\s*)?(?:N\s*\d+\s*)?O\s*(?:<|\d)", re.IGNORECASE)
+_TOOL_FLOW = re.compile(r"^/?(?:N\d+)?O(?:<[^>]+>|\d+)([A-Z]+)", re.IGNORECASE)
 
 
 def tool_changes(text: str) -> tuple[list[tuple[int, int]], list[str]]:
@@ -188,10 +188,13 @@ def tool_changes(text: str) -> tuple[list[tuple[int, int]], list[str]]:
     changes: list[tuple[int, int]] = []
     pending = 0
     control_flow = False
+    sub_call = False
     for number, line in enumerate(text.splitlines(), 1):
         code = _TOOL_COMMENT.sub("", line)
-        control_flow = control_flow or bool(_TOOL_FLOW.match(code))
-        _, tokens = preview_words(code)
+        compact, tokens = preview_words(code)
+        flow = _TOOL_FLOW.match(compact)
+        control_flow = control_flow or bool(flow)
+        sub_call = sub_call or bool(flow and flow[1].lower() == "call")
         try:
             mvalues = [float(value) for letter, value, _, _ in tokens if letter == "M"]
         except ValueError as exc:
@@ -224,7 +227,7 @@ def tool_changes(text: str) -> tuple[list[tuple[int, int]], list[str]]:
             changes.append((number, int(q)))
         elif 6 in mcodes:
             changes.append((number, pending))
-    if control_flow and (changes or re.search(r"\bcall\b", text, re.IGNORECASE)):
+    if control_flow and (changes or sub_call):
         raise ValueError("Zmiany narzędzi w programie z przepływem O-word wymagają analizy "
                          "wykonania; symulacja nie może zgadywać numeru narzędzia.")
     return changes, []
