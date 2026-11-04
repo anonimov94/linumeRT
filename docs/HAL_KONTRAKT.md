@@ -108,7 +108,7 @@ net lrt.j0.md   lrt-net.0.axis.0.mode-display => lrt-cia402.0.mode-display
 | `din-00…31` / `dout-00…31` | bit | out / in | wejścia (stan elektryczny: 1 = obwód zamknięty, NC w spoczynku = 1; odwrócenie w HAL) / wyjścia cyfrowe Plant (`machine.yaml io`) |
 | `spindle-speed-cmd` / `-fb` | float | in / out | wrzeciono [obr/min]; Plant modeluje wał (bez falownika steruje nim `-cmd`), docs/PLANT.md §5a |
 | `drive-fault`, `estop-open` | bit | out | flagi odpowiedzi Plant |
-| `connected` | bit | out | odpowiedź w ostatnich `timeout-cycles` (20) cyklach |
+| `connected` | bit | out | odpowiedź w ciągu `timeout-cycles` (20) okresów wątku liczonych w czasie rzeczywistym (seria nadrabiająca po opóźnieniu wątku uspace nie wydłuża ciszy) |
 | `sent`, `received`, `missed`, `bad-frames`, `send-errors` | u32 | out | liczniki mastera (`reset-stats`: zbocze zeruje też Plant) |
 | `plant-lost`, `plant-late`, `plant-jitter-us`, `reply-age` | u32 | out | statystyki Plant; `reply-age` = 1 → odpowiedź z poprzedniego cyklu |
 

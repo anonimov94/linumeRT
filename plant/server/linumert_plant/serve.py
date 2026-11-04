@@ -145,6 +145,7 @@ def run_serve(args: argparse.Namespace) -> int:
             print(f"Plant nie wystartował: falownik (pty/Modbus TCP): {exc}", file=sys.stderr)
             return 1
     signal.signal(signal.SIGTERM, lambda *_: server.stop())
+    server.watch_gc()
     print(f"Plant: {server.machine.model.name}, {len(server.drives)} osi LRT-NET, "
           f"{cfg.mode}, UDP {cfg.listen}:{cfg.port}", flush=True)
     for srv in vfd_servers:
@@ -168,7 +169,9 @@ def run_serve(args: argparse.Namespace) -> int:
             save_state(server.machine, cfg.state_file)
     s = server.stats
     print(f"Plant: ramki {s.received}, odrzucone {s.rejected}, utracone {s.lost}, "
-          f"spóźnione {s.late}; ślad SHA-256 {server.digest}", flush=True)
+          f"spóźnione {s.late}, przerwy obsługi {s.stalls} (maks. {s.stall_max_ms:.0f} ms), "
+          f"odśmiecanie maks. {s.gc_max_ms:.1f} ms; "
+          f"ślad SHA-256 {server.digest}", flush=True)
     o = server.oracle
     print(f"Plant: wyrocznia {'PASS' if o.passed else 'FAIL'} (naruszenia {o.total}, "
           f"sprawdzone ramki {o.checked})", flush=True)
