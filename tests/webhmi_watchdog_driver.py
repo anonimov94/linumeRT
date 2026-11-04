@@ -101,6 +101,12 @@ out["silent_to_estop_s"] = wait_task("estop", 8)
 out["silent_wd_ok"] = halget("watchdog.ok-out")
 alive.set()
 time.sleep(0.5)
+# Reset z innego procesu (bez potwierdzenia w zatrzasku HAL) nie zamyka łańcucha HMI.
+direct = linuxcnc.command()
+direct.state(linuxcnc.STATE_ESTOP_RESET)
+direct.wait_complete()
+time.sleep(1.5)
+out["direct_reset_task"] = task()
 out["ack2"] = acknowledge_and_power()
 
 gateway.stop()  # zawieszona brama: brak obiegów, brak zboczy (stan czytamy wprost z NML)

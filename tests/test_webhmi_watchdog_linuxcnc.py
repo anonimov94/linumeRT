@@ -2,7 +2,8 @@
 """WebHMI z pinami HAL na LinuxCNC 2.9 + Plant: łańcuch HMI (D35) bez obejścia.
 
 Model-Author: Claude · 2026-11-04. Sprawdza: start w E-STOP, pojedynczy Reset nie zwalnia,
-podwójny Reset potwierdza zatrzask HAL i pozwala włączyć maszynę; milcząca przeglądarka
+podwójny Reset potwierdza zatrzask HAL i pozwala włączyć maszynę, reset z innego
+procesu bez potwierdzenia nie; milcząca przeglądarka
 i zawieszona brama → E-STOP z ``watchdog`` HAL w ``[LINUMERT]HMI_HEARTBEAT_TIMEOUT``.
 Kierowca: ``tests/webhmi_watchdog_driver.py``. NIEZWERYFIKOWANE NA SPRZĘCIE.
 """
@@ -50,6 +51,7 @@ def test_webhmi_heartbeat_drives_hal_watchdog(tmp_path, monkeypatch):  # REQ-QA-
     assert r["silent_to_estop_s"] is not None, r
     assert TIMEOUT_S + 0.8 <= r["silent_to_estop_s"] <= TIMEOUT_S + 2.5, r
     assert r["silent_wd_ok"] == "FALSE"
+    assert r["direct_reset_task"] == "estop", r  # reset poza bramą bez potwierdzenia HAL
     _acknowledged(r["ack2"])  # po powrocie przeglądarki: znowu podwójny Reset
     # Zawieszona brama: E-STOP bez udziału bramy.
     assert r["frozen_task"] == 1, r  # linuxcnc.STATE_ESTOP
