@@ -16,6 +16,7 @@ import os
 import shlex
 import shutil
 import subprocess
+import sys
 import time
 from pathlib import Path
 
@@ -119,8 +120,11 @@ def run_generated_plant(tmp_path: Path, machine: Path, driver_body: str, *, port
                     break
             assert cnc.poll() is None, cnc.stdout.read() if cnc.stdout else "LinuxCNC zakończony"
             time.sleep(1)                       # początkowa informacja zwrotna Plant
+            # Interpreter testów, nie systemowy python3: kierowca importuje zależności z venv
+            # (np. fastapi dla WebHMI); `linuxcnc` daje PYTHONPATH z rip-environment.
+            python = shlex.quote(sys.executable)
             try:
-                run = rip.rip_run(root, "python3 " + shlex.quote(str(driver)), out,
+                run = rip.rip_run(root, f"{python} {shlex.quote(str(driver))}", out,
                                   timeout=timeout, env=env)
             except subprocess.TimeoutExpired as exc:
                 tail = (exc.stdout or b"")[-2500:]
