@@ -72,13 +72,18 @@ def refused(call, setup=None):
         mdi(setup)
     s.poll()
     before_off, before_pos = list(s.g5x_offset[:3]), list(s.actual_position[:3])
-    mdi(call, timeout=30)
-    s.poll()
-    errors = []
-    for _ in range(5):
+    # Po abort stan to RCS_ERROR, więc mdi() czekałoby do limitu: czekamy na komunikat.
+    print("MDI", call, flush=True)
+    c.mode(linuxcnc.MODE_MDI); c.wait_complete()
+    c.mdi(call)
+    errors, end = [], time.time() + 30
+    while not errors and time.time() < end:
         err = ech.poll()
         if err:
             errors.append(str(err[1]))
+        time.sleep(0.02)
+    time.sleep(1)                           # ewentualny ruch zdążyłby się zacząć
+    s.poll()
     mdi("G21 G90 G94")
     return {"errors": errors, "offset_same": before_off == list(s.g5x_offset[:3]),
             "moved": max(abs(a - b) for a, b in zip(before_pos, s.actual_position[:3]))}
