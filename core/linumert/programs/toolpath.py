@@ -371,23 +371,6 @@ def preview_words(code: str) -> tuple[str, list[tuple[str, str, int, int]]]:
     return code, words
 
 
-def _strip_preview_tools(code: str, include_m61: bool) -> str:
-    original = code
-    positions = [i for i, char in enumerate(code) if not char.isspace()]
-    code, words = preview_words(code)
-    has_m61 = include_m61 and any(letter == "M" and _PREVIEW_NUMBER.fullmatch(value)
-                                  and float(value) == 61 for letter, value, _, _ in words)
-    cuts = [(start, end) for letter, value, start, end in words
-            if letter == "T" or (has_m61 and letter == "Q")
-            or (letter == "M" and _PREVIEW_NUMBER.fullmatch(value)
-                and (float(value) == 6 or (has_m61 and float(value) == 61)))]
-    if not cuts:
-        return original
-    for start, end in reversed(cuts):
-        original = original[:positions[start]] + original[positions[end - 1] + 1:]
-    return original
-
-
 def tool_data_available() -> bool:
     """Czy interpreter może czytać dane narzędzi (LinuxCNC utworzył ~/.tool.mmap).
 
@@ -411,15 +394,20 @@ def strip_tool_words(text: str, *, include_m61: bool = False) -> tuple[str, bool
     changed = False
     out = []
     for line in text.splitlines(keepends=True):
-        parts, last = [], 0
+        positions, last = [], 0
         for m in _COMMENT.finditer(line):
-            parts.append(_strip_preview_tools(line[last:m.start()], include_m61))
-            parts.append(m.group(0))
+            positions.extend(i for i in range(last, m.start()) if not line[i].isspace())
             last = m.end()
-        tail = line[last:]
-        ending = "\n" if tail.endswith("\n") else ""
-        parts.append(_strip_preview_tools(tail[:-1] if ending else tail, include_m61) + ending)
-        new = "".join(parts)
+        positions.extend(i for i in range(last, len(line)) if not line[i].isspace())
+        _, words = preview_words("".join(line[i] for i in positions))
+        has_m61 = include_m61 and any(letter == "M" and _PREVIEW_NUMBER.fullmatch(value)
+                                      and float(value) == 61 for letter, value, _, _ in words)
+        cuts = [(start, end) for letter, value, start, end in words
+                if letter == "T" or (has_m61 and letter == "Q")
+                or (letter == "M" and _PREVIEW_NUMBER.fullmatch(value)
+                    and (float(value) == 6 or (has_m61 and float(value) == 61)))]
+        removed = {positions[i] for start, end in cuts for i in range(start, end)}
+        new = "".join(char for i, char in enumerate(line) if i not in removed)
         changed = changed or new != line
         out.append(new)
     return "".join(out), changed

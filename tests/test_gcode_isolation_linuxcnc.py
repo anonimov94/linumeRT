@@ -76,7 +76,8 @@ def test_numer_t_ze_zrodla_bez_dzialajacego_linuxcnc(program):
 
 
 @pytest.mark.parametrize("word, tool", [("T1M6", 1), ("N10T1 M6", 1),
-    ("T+1 M6", 1), ("T1 2 M6", 12), ("N10M61Q4", 4)])
+    ("T+1 M6", 1), ("T1 2 M6", 12), ("N10M61Q4", 4),
+    ("T(keep)1M6", 1), ("M61(keep)Q4", 4)])
 def test_zwarte_zmiany_t_w_rzeczywistym_interpreterze(program, word, tool):
     path = program(f"G21\nG0 X0\n{word}\nG1 X1 F100\nM2\n")
     assert int(parse_rs274(path).tool[-1]) == tool
