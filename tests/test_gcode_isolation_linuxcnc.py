@@ -48,7 +48,7 @@ def program(tmp_path, monkeypatch):
 @pytest.mark.parametrize("word", ["T1", "T1 M6", *CRASHING])
 def test_parse_rs274_przezywa_awarie_interpretera(program, word):
     file = program(f"G21\n{word}\nG1 X5 F100\nG40\nM2\n")
-    if word in CRASHING:
+    if word in CRASHING and word != "M61 Q1":
         with pytest.raises(InterpreterUnavailable, match="kodem -11"):
             parse_rs274(file)
         assert load_path(file).source == "subset"
@@ -73,6 +73,20 @@ def test_numer_t_ze_zrodla_bez_dzialajacego_linuxcnc(program):
     moves = parse_rs274(program("G21\nT1 M6\nG1 X1 F100\nT7\nG1 X2\nM6\nG1 X3\nM2\n"))
     assert moves.source == "rs274" and moves.notes == ()
     assert [int(t) for t in moves.tool] == [1, 1, 7]
+
+
+@pytest.mark.parametrize("word, tool", [("T1M6", 1), ("N10T1 M6", 1),
+    ("T+1 M6", 1), ("T1 2 M6", 12), ("N10M61Q4", 4)])
+def test_zwarte_zmiany_t_w_rzeczywistym_interpreterze(program, word, tool):
+    path = program(f"G21\nG0 X0\n{word}\nG1 X1 F100\nM2\n")
+    assert int(parse_rs274(path).tool[-1]) == tool
+
+
+def test_pominieta_galaz_nie_daje_falszywego_t_ani_fallbacku(program):
+    path = program("G21\nG0 X0\nT1 M6\no100 if [0]\nT7 M6\no100 endif\nG1 X1 F100\nM2\n")
+    for load in (parse_rs274, load_path):
+        with pytest.raises(ValueError, match="O-word"):
+            load(path)
 
 
 @pytest.mark.parametrize("load", [parse_rs274, load_ngc])

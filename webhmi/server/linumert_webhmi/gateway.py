@@ -289,6 +289,8 @@ class Gateway:
             else:
                 self._stop_axis(c.axis)
         elif name == "work_zero":
+            if self._jog_retry:
+                raise CommandError("zero detalu: niepotwierdzone zatrzymanie JOG")
             if self._jog:
                 raise CommandError("zero detalu: najpierw zatrzymaj JOG")
             b.work_zero(c.axis)
@@ -296,6 +298,8 @@ class Gateway:
             if c.name is None:
                 raise CommandError("program: brak nazwy pliku")
             self._stop_all_jog()
+            if self._jog_retry:
+                raise CommandError("program: niepotwierdzone zatrzymanie JOG")
             b.open_program(c.name)
         elif name == "reset":
             self._alarms.reset()

@@ -1806,3 +1806,10 @@ Pełny RIP musi ponownie potwierdzić wynik; nie scalać na czerwonym CI.
 - Naprawione: JOG po bazowaniu w teleop (joint jog odrzucany przy `HOME_SEQUENCE < 0`); E-STOP z API w konfiguracji Plant bez ekranu wracał do ESTOP_RESET — `user-enable-out` szeregowo przed zatrzaskiem (PROPOZYCJA w DECYZJE); alarm warunkowy rósł co odczyt.
 - Testy: `make lint test` 1920 PASS; linuxcnc 174 PASS, 7 porażek identycznych na `main` (środowisko), kalibracja sondy osobno PASS.
 - Otwarte: przegląd podobieństwa ekranów (G2 w plan.json nieoznaczone), watchdog HAL klienta web, sonda w GUI. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## Poprawki po przeglądzie #206 i #209 — 2026-11-05 · Codex
+- Model-Author: Codex. Domknięcie zgłoszonych usterek, bez zmiany statusu całej bramki G2.
+- Brama i klient blokują zero detalu oraz wczytanie programu, dopóki zatrzymanie JOG nie zostanie potwierdzone; testy obejmują błąd STOP i ponowne odblokowanie.
+- Odczyt narzędzi rozpoznaje zwarte słowa, numery linii, znak plus i odstępy wewnątrz liczby; T/M6 oraz M61 Q są usuwane tylko poza komentarzami i nazwami parametrów.
+- Analiza ścieżki jawnie odmawia przy obliczanych numerach narzędzi i przepływie O-word ze zmianami narzędzi: nie przypisuje narzędzia z niewykonanej gałęzi i nie przechodzi cicho na parser podzbioru. Obsługa takich programów wymaga śledzenia rzeczywiście wykonanych zmian; pozostaje ograniczeniem funkcji.
+- Testy regresji obejmują rzeczywisty gcode.parse bez maszyny (prywatny HOME) oraz blokady backendu i klienta. Wyniki pełnej regresji i SHA w PR. Autokontrola, bez niezależnego przeglądu. NIEZWERYFIKOWANE NA SPRZĘCIE.

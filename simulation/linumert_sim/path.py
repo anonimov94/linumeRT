@@ -30,6 +30,7 @@ from pathlib import Path
 
 import numpy as np
 from linumert.programs.linuxcnc_check import InterpreterUnavailable, run_parse_worker
+from linumert.programs.toolpath import preview_words
 
 __all__ = ["InterpreterUnavailable"]  # publiczne także stąd, jak przed procesem potomnym
 
@@ -173,13 +174,7 @@ PLANE_AXES = {1: (0, 1, 2), 2: (2, 0, 1), 3: (1, 2, 0)}   # G17 XY, G18 ZX, G19 
 # --------------------------------------------------------------------------- rs274 (LinuxCNC)
 
 _TOOL_COMMENT = re.compile(r"\([^)]*\)|;.*$")
-_TOOL_NUMBER = re.compile(r"(?<![A-Za-z0-9.#<_])[Tt]\s*(\d+)(?![\d.])")
-_TOOL_EXPRESSION = re.compile(r"(?<![A-Za-z0-9.#<_])[Tt]\s*[#\[]")
-_TOOL_CHANGE = re.compile(r"(?<![A-Za-z0-9.])[Mm]\s*0*6(?!\d)")
-_TOOL_SET = re.compile(r"(?<![A-Za-z0-9.])[Mm]\s*61\s*[Qq]\s*(\d+)(?![\d.])")
-_SUB_CALL = re.compile(r"\bcall\b", re.IGNORECASE)
-TOOL_UNKNOWN_NOTE = ("Numer narzędzia z wyrażenia T albo z podprogramu nie jest znany: "
-                     "symulacja przyjmuje ostatni T z programu głównego.")
+_TOOL_FLOW = re.compile(r"^\s*(?:/\s*)?(?:N\s*\d+\s*)?O\s*(?:<|\d)", re.IGNORECASE)
 
 
 def tool_changes(text: str) -> tuple[list[tuple[int, int]], list[str]]:
@@ -187,22 +182,52 @@ def tool_changes(text: str) -> tuple[list[tuple[int, int]], list[str]]:
 
     `gcode.parse` nie podaje numeru T: `SELECT_TOOL` jest tam puste, `change_tool` dostaje
     indeks tablicy, a przy braku tablicy słowo T kończy proces. Stąd odczyt ze źródła.
+    Przepływ O-word ze zmianą narzędzia i obliczane T/M/Q są jawnie odrzucane: porządek
+    linii źródła nie dowodzi wykonania zmiany. ValueError nie uruchamia parsera zapasowego.
     """
     changes: list[tuple[int, int]] = []
     pending = 0
-    unknown = False
+    control_flow = False
     for number, line in enumerate(text.splitlines(), 1):
         code = _TOOL_COMMENT.sub("", line)
-        unknown = unknown or bool(_TOOL_EXPRESSION.search(code) or _SUB_CALL.search(code))
-        selected = _TOOL_NUMBER.search(code)
-        if selected:
-            pending = int(selected.group(1))
-        forced = _TOOL_SET.search(code)
-        if forced:
-            changes.append((number, int(forced.group(1))))
-        elif _TOOL_CHANGE.search(code):
+        control_flow = control_flow or bool(_TOOL_FLOW.match(code))
+        _, tokens = preview_words(code)
+        try:
+            mvalues = [float(value) for letter, value, _, _ in tokens if letter == "M"]
+        except ValueError as exc:
+            raise ValueError(f"Linia {number}: M z wyrażenia nie jest obsługiwane "
+                             "w analizie narzędzi.") from exc
+        if any(not value.is_integer() or value < 0 for value in mvalues):
+            raise ValueError(f"Linia {number}: analiza wymaga całkowitych kodów M >= 0.")
+        mcodes = set(mvalues)
+        if len(mcodes) != len(mvalues):
+            raise ValueError(f"Linia {number}: powtórzony kod M.")
+        words = {}
+        for letter, value, _, _ in tokens:
+            if letter not in "TQ" or (letter == "Q" and 61 not in mcodes):
+                continue
+            if letter in words:
+                raise ValueError(f"Linia {number}: powtórzone słowo {letter}.")
+            try:
+                words[letter] = float(value)
+            except ValueError as exc:
+                raise ValueError(f"Linia {number}: numer narzędzia z wyrażenia nie jest "
+                                 "obsługiwany w analizie ścieżki.") from exc
+        if "T" in words:
+            if not words["T"].is_integer() or words["T"] < 0:
+                raise ValueError(f"Linia {number}: wymagany całkowity numer narzędzia >= 0.")
+            pending = int(words["T"])
+        if 61 in mcodes:
+            q = words.get("Q", -1.0)
+            if not q.is_integer() or q < 0:
+                raise ValueError(f"Linia {number}: M61 wymaga całkowitego Q >= 0.")
+            changes.append((number, int(q)))
+        elif 6 in mcodes:
             changes.append((number, pending))
-    return changes, [TOOL_UNKNOWN_NOTE] if unknown else []
+    if control_flow and (changes or re.search(r"\bcall\b", text, re.IGNORECASE)):
+        raise ValueError("Zmiany narzędzi w programie z przepływem O-word wymagają analizy "
+                         "wykonania; symulacja nie może zgadywać numeru narzędzia.")
+    return changes, []
 
 
 class PathCanon:

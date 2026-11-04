@@ -3,7 +3,8 @@
 SPDX-License-Identifier: GPL-2.0-or-later
 Model-Author: Claude · 2026-11-01
 
-Słowa T/M6 są zawsze wycinane, bo numer narzędzia pochodzi z tekstu (`tool_changes`).
+Słowa T/M6 i M61 Q są wycinane, bo numer narzędzia pochodzi z tekstu (`tool_changes`).
+Nieobsługiwana analiza zmian narzędzi to błąd programu, bez przejścia na parser podzbioru.
 Wynik: plik `.npz`; kod `WORKER_PROGRAM_ERROR` = błąd programu (`run_parse_worker`).
 NIEZWERYFIKOWANE NA SPRZĘCIE.
 """
@@ -28,8 +29,12 @@ def main(argv: list[str]) -> int:
 
     path = Path(source)
     text = path.read_text(encoding="utf-8", errors="replace")
-    changes, notes = tool_changes(text)
-    stripped, _ = strip_tool_words(text)
+    try:
+        changes, notes = tool_changes(text)
+    except ValueError as exc:
+        print(exc, file=sys.stderr)
+        return WORKER_PROGRAM_ERROR
+    stripped, _ = strip_tool_words(text, include_m61=True)
     tool_data_available()  # mapuje tablicę dla G43 Hn i G41 Dn, gdy LinuxCNC działa
     canon = PathCanon(tool_changes=changes)
     for note in notes:
