@@ -525,3 +525,15 @@ W beta/ usługa zamienia dokładnie tę linię na `[AXIS_Z]MAX_LIMIT` aktywnej k
 generatorze (nie obejmuje zapisanych `.lnx`), `#<_ini[...]>` (analiza offline nie zna INI),
 `soft_limits` Z do 0 (krańcówka jest na -0,5). Na `main` problem nadal istnieje. Właściciel może
 wybrać inne rozwiązanie. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## PROPOZYCJA: cisza łącza LRT-NET liczona w czasie rzeczywistym — 2026-11-03
+
+Model-Author: Claude. `lrt_net.connected` opadało po `timeout-cycles` (20) **cyklach** bez odpowiedzi.
+W uspace bez RT (WSL, CI) wątek servo bywa wstrzymany na 19–79 ms, a `rtapi_app` nadrabia zaległe
+okresy seriami bez przerw (`Posix::wait` nie śpi, gdy termin minął). Plant nie zdąży odpowiedzieć
+na ramki wysłane co kilka µs, więc seria wyglądała jak 20 ms ciszy → fałszywy E-STOP w trakcie G38.2
+(rzadkie czerwone próby testów sondy). Teraz cisza to czas rzeczywisty (`rtapi_get_time`) od ostatniej
+odpowiedzi; próg bez zmian: `timeout-cycles × okres` (20 ms przy 1 ms). Przy równych cyklach działanie
+identyczne; prawdziwa cisza Plant ≥ 20 ms nadal otwiera łańcuch E-STOP (test `test_plant_stall_drops_link`).
+Odrzucone: większe `timeout-cycles` (luzuje próg bezpieczeństwa), ponawianie testów (ukrywa przyczynę),
+priorytet RT w WSL (brak uprawnień). Właściciel może wybrać inaczej. NIEZWERYFIKOWANE NA SPRZĘCIE.
