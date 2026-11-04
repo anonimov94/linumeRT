@@ -196,6 +196,11 @@ def test_probe_refused_while_jogging_unhomed_or_with_bad_fields(tmp_path):  # RE
         gateway.execute(Command(cmd="probe", axis="Z", direction=-1, probe_distance=20,
                                 probe_value=0))
     gateway.execute(Command(cmd="jog_stop"))
+    gateway._jog_retry.add("X")  # stop niepotwierdzony (#212): sonda czeka na potwierdzenie
+    with pytest.raises(CommandError, match="niepotwierdzone"):
+        gateway.execute(Command(cmd="probe", axis="Z", direction=-1, probe_distance=20,
+                                probe_value=0))
+    gateway._jog_retry.clear()
     with pytest.raises(CommandError, match="direction"):
         gateway.execute(Command(cmd="probe", axis="Z", probe_distance=20, probe_value=0))
     with pytest.raises(CommandError, match="atrapa"):  # atrapa uczciwie: brak wejścia sondy

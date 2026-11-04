@@ -47,6 +47,7 @@ test("probe needs ON, homed, idle, no jog and not AUTO", () => {
   assert.equal(can("probe", state({ all_homed: false })), false);
   assert.equal(can("probe", state({ interp_state: "reading" })), false);
   assert.equal(can("probe", state({ jog_active: ["X"] })), false);
+  assert.equal(can("probe", state({ jog_active: [], jog_stop_pending: ["X"] })), false);
   assert.equal(can("probe", state({ task_state: "off" })), false);
 });
 test("MANUAL and idle required for home and jog", () => {

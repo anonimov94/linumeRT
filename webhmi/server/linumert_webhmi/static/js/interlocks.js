@@ -62,6 +62,7 @@ export function allowed(state, link) {
     : deny("Program nie jest wstrzymany");
   result.override = machineOn ? permit() : deny(common);
   const jogging = Array.isArray(state.jog_active) && state.jog_active.length > 0;
+  const pendingStop = Array.isArray(state.jog_stop_pending) && state.jog_stop_pending.length > 0;
   result.work_zero = !machineOn ? deny(common) : mode !== "manual"
     ? deny(modeReason("manual")) : !idle ? deny(needsIdle)
       : !homed ? deny("Wymagane bazowanie wszystkich osi")
@@ -69,7 +70,8 @@ export function allowed(state, link) {
   // Sonda: makro przez MDI (przełącza tryb sama), więc tryb MANUAL albo MDI.
   result.probe = !machineOn ? deny(common) : mode === "auto" ? deny("Sonda w trybie AUTO niedostępna")
     : !idle ? deny(needsIdle) : !homed ? deny("Wymagane bazowanie wszystkich osi")
-      : jogging ? deny("Najpierw zatrzymaj JOG") : permit();
+      : pendingStop ? deny("Niepotwierdzone zatrzymanie JOG")
+        : jogging ? deny("Najpierw zatrzymaj JOG") : permit();
   const programs = Array.isArray(state.programs) ? state.programs : [];
   result.open = !machineOn ? deny(common) : !idle ? deny(needsIdle)
     : !homed ? deny("Wymagane bazowanie wszystkich osi")
