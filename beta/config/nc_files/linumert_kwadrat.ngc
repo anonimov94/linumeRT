@@ -1,0 +1,18 @@
+( linumeRT · program testowy 1: kontur kwadratu 100 x 100 mm, frez T1 )
+( SPDX-License-Identifier: GPL-2.0-or-later )
+;@STOCK BOX X150 Y150 Z30 ORIGIN=TOP_FRONT_LEFT OFFSET=G54 MAT="aluminium"
+G21 G90 G17 G40 G49 G80
+T1 M6
+G43 H1
+S12000 M3
+G0 Z10
+G0 X25 Y25
+G1 Z-1 F300
+G1 X125 F800
+G1 Y125
+G1 X25
+G1 Y25
+G0 Z10
+M5
+G53 G0 Z0
+M2

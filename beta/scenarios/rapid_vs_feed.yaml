@@ -1,0 +1,16 @@
+# linumeRT · scenariusz Plant (sesja 024). Model-Author: Claude.
+name: rapid_vs_feed
+description: "Odcinek X 60 mm posuwem 600 mm/min i powrót G0 (max_velocity osi); błąd nadążania rośnie z prędkością."
+requirements: [REQ-VD-01]
+machine: ../../config/machines/mill_servo_table.yaml
+program: programs/rapid_vs_feed.ngc
+master: both
+duration: 9.0
+steps:
+  - {at: 0.0, action: enable}
+  - {at: 0.05, action: program}
+expect:
+  - completed: true
+  - no_alarm: true
+  - max_following_error: {axis: X, mm: 0.3}   # G0 200 mm/s; LinuxCNC: opóźnienie jednego cyklu servo
+  - position: {axis: X, value: 0.0, tol: 0.01, relative: true}

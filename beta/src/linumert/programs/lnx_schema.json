@@ -1,0 +1,248 @@
+{
+  "$defs": {
+    "Step": {
+      "additionalProperties": false,
+      "description": "Krok programu: generator w konkretnej wersji i jego parametry.",
+      "properties": {
+        "generator": {
+          "maxLength": 40,
+          "minLength": 1,
+          "title": "Generator",
+          "type": "string"
+        },
+        "version": {
+          "minimum": 1,
+          "title": "Version",
+          "type": "integer"
+        },
+        "params": {
+          "additionalProperties": true,
+          "title": "Params",
+          "type": "object"
+        },
+        "enabled": {
+          "default": true,
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "comment": {
+          "anyOf": [
+            {
+              "maxLength": 200,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Comment"
+        }
+      },
+      "required": [
+        "generator",
+        "version"
+      ],
+      "title": "Step",
+      "type": "object"
+    },
+    "Stock": {
+      "additionalProperties": false,
+      "description": "Przygotówka: prostopadłościan (BOX: x, y, z) albo walec (CYL: d, h). Wymiary w mm.",
+      "properties": {
+        "shape": {
+          "enum": [
+            "BOX",
+            "CYL"
+          ],
+          "title": "Shape",
+          "type": "string"
+        },
+        "x": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "X"
+        },
+        "y": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Y"
+        },
+        "z": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Z"
+        },
+        "d": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "D"
+        },
+        "h": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "H"
+        },
+        "origin": {
+          "default": "TOP_FRONT_LEFT",
+          "enum": [
+            "TOP_FRONT_LEFT",
+            "TOP_FRONT_RIGHT",
+            "TOP_BACK_LEFT",
+            "TOP_BACK_RIGHT",
+            "TOP_CENTER",
+            "BOTTOM_FRONT_LEFT",
+            "BOTTOM_FRONT_RIGHT",
+            "BOTTOM_BACK_LEFT",
+            "BOTTOM_BACK_RIGHT",
+            "BOTTOM_CENTER"
+          ],
+          "title": "Origin",
+          "type": "string"
+        },
+        "offset": {
+          "default": "G54",
+          "enum": [
+            "G54",
+            "G55",
+            "G56",
+            "G57",
+            "G58",
+            "G59",
+            "G59.1",
+            "G59.2",
+            "G59.3"
+          ],
+          "title": "Offset",
+          "type": "string"
+        },
+        "top": {
+          "default": 0.0,
+          "minimum": 0,
+          "title": "Top",
+          "type": "number"
+        },
+        "material": {
+          "anyOf": [
+            {
+              "maxLength": 60,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Material"
+        }
+      },
+      "required": [
+        "shape"
+      ],
+      "title": "Stock",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": 1,
+      "default": 1,
+      "title": "Schema Version",
+      "type": "integer"
+    },
+    "name": {
+      "maxLength": 80,
+      "minLength": 1,
+      "title": "Name",
+      "type": "string"
+    },
+    "units": {
+      "default": "mm",
+      "enum": [
+        "mm",
+        "inch"
+      ],
+      "title": "Units",
+      "type": "string"
+    },
+    "comment": {
+      "anyOf": [
+        {
+          "maxLength": 500,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Comment"
+    },
+    "stock": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Stock"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "steps": {
+      "items": {
+        "$ref": "#/$defs/Step"
+      },
+      "title": "Steps",
+      "type": "array"
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "title": "linumeRT .lnx (program dialogowy)",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

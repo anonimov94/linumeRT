@@ -1,0 +1,663 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/anonimov94/linumeRT/plant/library/drives/drive_template",
+  "title": "Szablon napędu wirtualnego linumeRT",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]{1,47}$"
+    },
+    "version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "based_on": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[a-z][a-z0-9_]{1,47}$"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "description": {
+      "type": "string",
+      "minLength": 1
+    },
+    "value_source": {
+      "type": "string",
+      "minLength": 1
+    },
+    "type": {
+      "enum": [
+        "servo_csp",
+        "stepper_open",
+        "servo_stepper",
+        "rotary_geared",
+        "spindle_vfd"
+      ]
+    },
+    "live": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "motor.rotor_inertia",
+          "electrical.supply_voltage",
+          "limits.torque_limit_permille",
+          "mechanics.load",
+          "mechanics.j_screw",
+          "mechanics.friction_coulomb",
+          "mechanics.friction_static",
+          "mechanics.friction_viscous",
+          "mechanics.backlash"
+        ]
+      },
+      "uniqueItems": true
+    },
+    "motor": {
+      "type": "object",
+      "properties": {
+        "rated_torque": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1000,
+          "description": "moment znamionowy (krokowiec: moment trzymania) [N·m]"
+        },
+        "peak_torque": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 5000,
+          "description": "moment szczytowy (>= znamionowy) [N·m]"
+        },
+        "peak_time_s": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 60,
+          "description": "czas pracy ze szczytem (ochrona I2t); 0 = bez ochrony [s]"
+        },
+        "rotor_inertia": {
+          "type": "number",
+          "minimum": 1e-08,
+          "maximum": 10,
+          "description": "moment bezwładności wirnika [kg·m²]",
+          "x-live": true
+        },
+        "torque_constant": {
+          "type": "number",
+          "minimum": 0.001,
+          "maximum": 100,
+          "description": "stała momentu [N·m/A]"
+        },
+        "rated_current": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 500,
+          "description": "prąd znamionowy [A]"
+        },
+        "peak_current": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 2000,
+          "description": "prąd szczytowy (>= znamionowy) [A]"
+        },
+        "encoder_counts_per_rev": {
+          "type": "integer",
+          "minimum": 16,
+          "maximum": 100000000,
+          "description": "rozdzielczość enkodera (krokowiec bez sprzężenia: mikrokroki na obrót) [imp/obr]"
+        },
+        "encoder_noise_counts": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1000,
+          "description": "szum enkodera, odch. std. [imp]"
+        },
+        "torque_curve": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 16,
+          "items": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": {
+              "type": "number",
+              "minimum": 0
+            }
+          },
+          "description": "krzywa moment–prędkość: [[omega, moment], ...], 2..16 punktów, od omega = 0 [rad/s → N·m]"
+        },
+        "brake_present": {
+          "type": "boolean",
+          "description": "hamulec postojowy (model: sesja 014+)"
+        },
+        "brake_release_ms": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 5000,
+          "description": "czas zwolnienia hamulca [ms]"
+        },
+        "brake_engage_ms": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 5000,
+          "description": "czas zadziałania hamulca [ms]"
+        }
+      },
+      "required": [
+        "rated_torque",
+        "peak_torque",
+        "peak_time_s",
+        "rotor_inertia",
+        "torque_constant",
+        "rated_current",
+        "peak_current",
+        "encoder_counts_per_rev",
+        "encoder_noise_counts",
+        "torque_curve",
+        "brake_present",
+        "brake_release_ms",
+        "brake_engage_ms"
+      ],
+      "additionalProperties": false
+    },
+    "electrical": {
+      "type": "object",
+      "properties": {
+        "nominal_voltage": {
+          "type": "number",
+          "minimum": 5,
+          "maximum": 1000,
+          "description": "napięcie znamionowe zasilania [V]"
+        },
+        "supply_voltage": {
+          "type": "number",
+          "minimum": 5,
+          "maximum": 1500,
+          "description": "napięcie bieżące (0,1..1,5 × znamionowe); skaluje krzywą momentu [V]",
+          "x-live": true
+        }
+      },
+      "required": [
+        "nominal_voltage",
+        "supply_voltage"
+      ],
+      "additionalProperties": false
+    },
+    "controller": {
+      "type": "object",
+      "properties": {
+        "kp_pos": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 5000,
+          "description": "wzmocnienie położenia [1/s]"
+        },
+        "kv": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "wzmocnienie prędkości [N·m·s/rad]"
+        },
+        "ti": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 10,
+          "description": "czas całkowania prędkości; 0 = bez całki [s]"
+        },
+        "kff_vel": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 2,
+          "description": "udział sprzężenia w przód od prędkości"
+        },
+        "kff_acc": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 2,
+          "description": "udział sprzężenia w przód od przyspieszenia"
+        },
+        "inertia_est": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 10,
+          "description": "estymata J dla FF przyspieszenia [kg·m²]"
+        },
+        "vel_filter_hz": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 5000,
+          "description": "filtr prędkości mierzonej [Hz]"
+        },
+        "ff_filter_hz": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 5000,
+          "description": "filtr pochodnych pozycji zadanej [Hz]"
+        },
+        "max_speed": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 5000,
+          "description": "ograniczenie prędkości zadanej [rad/s]"
+        }
+      },
+      "required": [
+        "kp_pos",
+        "kv",
+        "ti",
+        "kff_vel",
+        "kff_acc",
+        "inertia_est",
+        "vel_filter_hz",
+        "ff_filter_hz",
+        "max_speed"
+      ],
+      "additionalProperties": false
+    },
+    "limits": {
+      "type": "object",
+      "properties": {
+        "torque_limit_permille": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10000,
+          "description": "domyślna wartość 6072h (promile znamionowego) [‰]",
+          "x-live": true
+        },
+        "following_window": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 4294967295,
+          "description": "okno błędu nadążania 6065h [imp]"
+        },
+        "following_window_ms": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10000,
+          "description": "czas okna 6066h [ms]"
+        },
+        "quick_stop_decel": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 4294967295,
+          "description": "hamowanie quick stop 6085h [imp/s²]"
+        },
+        "standstill_speed": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 10,
+          "description": "próg zatrzymania [rad/s]"
+        },
+        "boot_time_s": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 30,
+          "description": "czas rozruchu napędu [s]"
+        }
+      },
+      "required": [
+        "torque_limit_permille",
+        "following_window",
+        "following_window_ms",
+        "quick_stop_decel",
+        "standstill_speed",
+        "boot_time_s"
+      ],
+      "additionalProperties": false
+    },
+    "reactions": {
+      "type": "object",
+      "properties": {
+        "quick_stop_option": {
+          "enum": [
+            1,
+            2
+          ],
+          "description": "605Ah: 1 = wyłącz napęd, 2 = rampa i wyłączenie"
+        },
+        "fault_reaction_option": {
+          "enum": [
+            0,
+            2
+          ],
+          "description": "605Eh: 0 = wyłącz napęd, 2 = rampa quick stop"
+        },
+        "brake_on_fault": {
+          "type": "boolean",
+          "description": "załącz hamulec po awarii"
+        }
+      },
+      "required": [
+        "quick_stop_option",
+        "fault_reaction_option",
+        "brake_on_fault"
+      ],
+      "additionalProperties": false
+    },
+    "cia402": {
+      "type": "object",
+      "properties": {
+        "objects": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "603Fh",
+              "6040h",
+              "6041h",
+              "6060h",
+              "6061h",
+              "6064h",
+              "607Ah",
+              "6065h",
+              "6072h",
+              "6098h",
+              "6099h",
+              "609Ah",
+              "605Ah",
+              "605Eh",
+              "6066h",
+              "606Ch",
+              "6077h",
+              "6085h",
+              "60B1h",
+              "60B2h"
+            ]
+          },
+          "contains": {
+            "enum": [
+              "603Fh",
+              "6040h",
+              "6041h",
+              "6060h",
+              "6061h",
+              "6064h",
+              "607Ah",
+              "6065h",
+              "6072h",
+              "6098h",
+              "6099h",
+              "609Ah"
+            ]
+          },
+          "uniqueItems": true,
+          "description": "obsługiwane obiekty CiA 402 (podzbiór wymagany)"
+        },
+        "homing_method": {
+          "type": "integer",
+          "minimum": -128,
+          "maximum": 127,
+          "description": "6098h"
+        },
+        "homing_speed_switch": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295,
+          "description": "6099h:1 [imp/s]"
+        },
+        "homing_speed_zero": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295,
+          "description": "6099h:2 [imp/s]"
+        },
+        "homing_accel": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295,
+          "description": "609Ah [imp/s²]"
+        }
+      },
+      "required": [
+        "objects",
+        "homing_method",
+        "homing_speed_switch",
+        "homing_speed_zero",
+        "homing_accel"
+      ],
+      "additionalProperties": false
+    },
+    "mechanics": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "enum": [
+            "linear",
+            "rotary"
+          ],
+          "description": "oś liniowa (load w kg, ratio w m/rad) albo obrotowa (load w kg·m², ratio rad/rad)"
+        },
+        "load": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1000000.0,
+          "description": "masa albo moment bezwładności obciążenia [kg | kg·m²]",
+          "x-live": true
+        },
+        "ratio": {
+          "type": "number",
+          "minimum": 1e-07,
+          "maximum": 1000,
+          "description": "przemieszczenie obciążenia na rad wału [m/rad | rad/rad]"
+        },
+        "j_screw": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 10,
+          "description": "śruba/sprzęgło/przekładnia po stronie silnika [kg·m²]",
+          "x-live": true
+        },
+        "friction_coulomb": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1000,
+          "description": "tarcie suche na wale [N·m]",
+          "x-live": true
+        },
+        "friction_static": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1000,
+          "description": "tarcie statyczne (>= Coulomba) [N·m]",
+          "x-live": true
+        },
+        "friction_viscous": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1000,
+          "description": "tarcie lepkie [N·m·s/rad]",
+          "x-live": true
+        },
+        "backlash": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 0.1,
+          "description": "luz całkowity [m | rad]",
+          "x-live": true
+        },
+        "contact_stiffness": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 10000000.0,
+          "description": "sztywność połączenia na wale; 0 = domyślna rdzenia [N·m/rad]"
+        },
+        "gravity_force": {
+          "type": "number",
+          "minimum": -1000000.0,
+          "maximum": 1000000.0,
+          "description": "stała siła zewnętrzna na obciążenie [N | N·m]"
+        }
+      },
+      "required": [
+        "kind",
+        "load",
+        "ratio",
+        "j_screw",
+        "friction_coulomb",
+        "friction_static",
+        "friction_viscous",
+        "backlash",
+        "contact_stiffness",
+        "gravity_force"
+      ],
+      "additionalProperties": false
+    },
+    "stepper": {
+      "type": "object",
+      "properties": {
+        "full_steps_per_rev": {
+          "type": "integer",
+          "minimum": 4,
+          "maximum": 1000,
+          "description": "pełne kroki na obrót (wielokrotność 4)"
+        },
+        "damping_ratio": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 2,
+          "description": "względne tłumienie wirnika"
+        }
+      },
+      "required": [
+        "full_steps_per_rev",
+        "damping_ratio"
+      ],
+      "additionalProperties": false
+    },
+    "real": {
+      "type": "object",
+      "required": [
+        "driver"
+      ],
+      "additionalProperties": false,
+      "description": "Napęd rzeczywisty (REQ-VD-06): sterownik LinuxCNC i jego parametry.",
+      "properties": {
+        "driver": {
+          "enum": [
+            "stepgen",
+            "ethercat_cia402",
+            "vfd_modbus",
+            "pwm"
+          ]
+        },
+        "timing_ns": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "steplen",
+            "stepspace",
+            "dirsetup",
+            "dirhold"
+          ],
+          "properties": {
+            "steplen": {
+              "type": "integer",
+              "minimum": 100,
+              "maximum": 1000000
+            },
+            "stepspace": {
+              "type": "integer",
+              "minimum": 100,
+              "maximum": 1000000
+            },
+            "dirsetup": {
+              "type": "integer",
+              "minimum": 100,
+              "maximum": 1000000
+            },
+            "dirhold": {
+              "type": "integer",
+              "minimum": 100,
+              "maximum": 1000000
+            }
+          }
+        },
+        "pdo": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "6040h",
+              "6041h",
+              "607Ah",
+              "6064h",
+              "6060h",
+              "6061h",
+              "603Fh",
+              "606Ch",
+              "6077h",
+              "60FDh"
+            ]
+          },
+          "uniqueItems": true
+        },
+        "vfd": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "protocol",
+            "baud",
+            "address"
+          ],
+          "properties": {
+            "protocol": {
+              "enum": [
+                "hy_vfd",
+                "mb2hal"
+              ]
+            },
+            "baud": {
+              "enum": [
+                4800,
+                9600,
+                19200,
+                38400,
+                57600,
+                115200
+              ]
+            },
+            "address": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 247
+            }
+          }
+        },
+        "pwm": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "frequency_hz"
+          ],
+          "properties": {
+            "frequency_hz": {
+              "type": "integer",
+              "minimum": 10,
+              "maximum": 100000
+            }
+          }
+        }
+      }
+    }
+  },
+  "required": [
+    "id",
+    "version",
+    "based_on",
+    "name",
+    "description",
+    "value_source",
+    "type",
+    "live",
+    "motor",
+    "electrical",
+    "controller",
+    "limits",
+    "reactions",
+    "cia402",
+    "mechanics"
+  ],
+  "additionalProperties": false
+}

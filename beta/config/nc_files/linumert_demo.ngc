@@ -1,0 +1,95 @@
+( linumeRT · program demonstracyjny symulacji: planowanie, kieszeń, rowek kulowy, wiercenie, frez lewy )
+( SPDX-License-Identifier: GPL-2.0-or-later )
+( Przygotówka 150 x 150 x 30 na stole, zero G54 = lewy przedni róg wierzchu )
+;@STOCK BOX X150 Y150 Z30 ORIGIN=TOP_FRONT_LEFT OFFSET=G54 MAT="aluminium"
+G21 G90 G17 G40 G49 G80 G54 G94
+( 1. planowanie głowicą 50 mm, 0,5 mm )
+G53 G0 Z0
+T5 M6
+G43 H5
+S6000 M3
+G0 Z10
+G0 X-30 Y15
+G1 Z-0.5 F400
+G1 X180 F1200
+G1 Y55
+G1 X-30
+G1 Y95
+G1 X180
+G1 Y135
+G1 X-30
+G0 Z10
+( 2. kieszeń 70 x 50, głębokość 6 mm w trzech warstwach, frez 10 mm )
+G53 G0 Z0
+T2 M6
+G43 H2
+S12000 M3
+G0 X45 Y55
+G0 Z2
+#<z> = -0.5
+o100 while [#<z> GT -6]
+  #<z> = [#<z> - 2]
+  G1 Z#<z> F300
+  #<y> = 55
+  o110 while [#<y> LT 95]
+    G1 X105 Y#<y> F900
+    #<y> = [#<y> + 7]
+    G1 Y#<y>
+    G1 X45
+    #<y> = [#<y> + 7]
+    G1 Y#<y>
+  o110 endwhile
+  G1 X45 Y55
+  G1 X105
+  G1 Y95
+  G1 X45
+  G1 Y55
+o100 endwhile
+G0 Z10
+( 3. rowek frezem kulowym 8 mm )
+G53 G0 Z0
+T6 M6
+G43 H6
+S15000 M3
+G0 X20 Y25
+G0 Z2
+G1 Z-3 F200
+G1 X130 F700
+G0 Z10
+( 4. fazowanie krawędzi kieszeni fazownikiem 90° )
+G53 G0 Z0
+T4 M6
+G43 H4
+S10000 M3
+G0 X40 Y50
+G0 Z2
+G1 Z-2 F200
+G1 X110 F600
+G1 Y100
+G1 X40
+G1 Y50
+G0 Z10
+( 5. wiercenie 4 otworów 5 mm, cykl G83 )
+G53 G0 Z0
+T3 M6
+G43 H3
+S5000 M3
+G0 Z10
+G98 G83 X20 Y120 Z-15 R2 Q3 F150
+X130
+Y75
+X20
+G80
+( 6. frez lewy 8 mm, M4: rowek przy tylnej krawędzi )
+G53 G0 Z0
+T11 M6
+G43 H11
+S9000 M4
+G0 X30 Y138
+G0 Z2
+G1 Z-1.5 F250
+G1 X120 F800
+G0 Z10
+M5
+G53 G0 Z0
+M2
