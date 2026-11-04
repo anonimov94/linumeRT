@@ -37,7 +37,7 @@
     },
     {
       "id": "M2",
-      "name": "Ekran linumeRT na bazie QtDragon",
+      "name": "Ekran linumeRT (WebHMI; QtDragon awaryjny)",
       "proto": "v0.1 — obsługa ręczna",
       "goal": "Własny system projektowy i kompozycja ekranu, tryby, JOG/MPG, MDI, AUTO, narzędzia, zerowanie i sonda, zmiana narzędzia, alarmy, role, PL/EN.",
       "gate": "G2: prototyp v0.1 przechodzi zestaw scenariuszy operatora na Plant; przegląd podobieństwa ekranów wykonany.",

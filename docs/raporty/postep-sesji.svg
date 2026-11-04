@@ -21,7 +21,7 @@
 <rect x="682" y="300" width="370.00" height="14" rx="7" fill="#2dd4bf"/>
 <text x="1144" y="315" text-anchor="end" font-size="18">18 / 18</text>
 <text x="56" y="360" font-size="18" font-weight="700">M2</text>
-<text x="108" y="360" font-size="17" fill="#9aa7b4">Ekran linumeRT na bazie QtDragon</text>
+<text x="108" y="360" font-size="17" fill="#9aa7b4">Ekran linumeRT (WebHMI; QtDragon awaryjny)</text>
 <rect x="682" y="345" width="370" height="14" rx="7" fill="#26303a"/>
 <rect x="682" y="345" width="92.50" height="14" rx="7" fill="#2dd4bf"/>
 <text x="1144" y="360" text-anchor="end" font-size="18">3 / 12</text>

@@ -140,7 +140,7 @@ Dodatkowo ukończono **21/43 rozszerzeń**. Wśród sesji: 30 częściowych i 15
 |---|---|---:|---:|---:|
 | M0 | Fundament, prawo, środowisko | 8/8 | 1/2 | 1 |
 | M1 | Wirtualna obrabiarka Plant | 18/18 | 3/5 | 3 |
-| M2 | Ekran linumeRT na bazie QtDragon | 3/12 | 6/25 | 27 |
+| M2 | Ekran linumeRT (WebHMI; QtDragon awaryjny) | 3/12 | 6/25 | 27 |
 | M3 | Programowanie dialogowe | 7/12 | 5/7 | 8 |
 | M4 | Symulacja i kolizje | 3/10 | 4/10 | 14 |
 | M5 | Konfiguracja maszyn hobbystów | 0/12 | 5/10 | 12 |
