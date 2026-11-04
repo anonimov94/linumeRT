@@ -26,6 +26,14 @@ SHIFT = 20.0
 TOL = 0.01                    # mm, kryterium sesji po kalibracji
 
 DRIVER = r"""
+ech = linuxcnc.error_channel()
+def errors():
+    found = []
+    for _ in range(5):
+        err = ech.poll()
+        if err:
+            found.append(str(err[1]))
+    return found
 mdi("G21 G90 G49 G54")
 def probe(axis, sign, repeats):
     # szybki F100, odjazd 1 mm, dokładne przejazdy F10 (repeats razy)
@@ -37,6 +45,13 @@ def probe(axis, sign, repeats):
     for _ in range(repeats):
         mdi("G91 G38.2 %s%s2 F10" % (axis, d))
         s.poll()
+        if not s.probe_tripped:
+            print("PROBE vel=%.4f pos=%s estop=%d task=%d err=%s" % (
+                s.current_vel, list(s.actual_position[:3]), s.estop, s.task_state, errors()),
+                flush=True)
+            time.sleep(5); s.poll()                       # czy sonda zadziałała później?
+            print("PROBE later tripped=%d state=%d interp=%d" % (
+                s.probe_tripped, s.state, s.interp_state), flush=True)
         assert s.probe_tripped, "sonda nie zadziałała"
         fine.append(s.probed_position["XYZ".index(axis)])
         mdi("G91 G1 %s%s1 F300" % (axis, back))
