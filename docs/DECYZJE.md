@@ -572,3 +572,13 @@ Ekran: `btn_goto_sensor_clicked` QtDragon też jechał `G53 G0 Z0` i po odrzucen
 wysokości; nadpisanie w `linumert_handler.py` używa MAX_LIMIT i przerywa dojazd. To poprawka błędu
 sterowania, dozwolona mimo zamrożenia Qt. Właściciel może wybrać inne rozwiązanie.
 NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## PROPOZYCJA: E-STOP z LinuxCNC w łańcuchu konfiguracji Plant — 2026-11-03
+
+Model-Author: Claude. W konfiguracji Plant uruchamianej bez ekranu Qt (`HMI_ESTOP_BYPASS`, testy, WebHMI)
+`STATE_ESTOP` z API wracał od razu do `ESTOP_RESET`: obejście grzyba HMI trzymało łańcuch zamknięty,
+a zatrzask nie miał wejścia od LinuxCNC. Generator Plant (`render_plant_hal`) i
+`config/plant/linumert_plant_xyz` dodają `estop_chain_sw`: `linumert.io.user-enable`
+(`iocontrol.0.user-enable-out`) szeregowo przed `estop_latch.ok-in`. Ten człon tylko odbiera
+zezwolenie (D35); reset nadal wyłącznie przez `iocontrol.0.user-request-enable` → `estop_latch.reset`.
+To przeniesienie poprawki z bety (2026-11-01). Konfiguracja sprzętowa bez zmian. NIEZWERYFIKOWANE NA SPRZĘCIE.

@@ -17,13 +17,20 @@ NIEZWERYFIKOWANE NA SPRZĘCIE. Celowany odbiór LinuxCNC sim: test_webhmi_live_l
 from __future__ import annotations
 
 import math
+import os
 import time
 from collections.abc import Callable
+from pathlib import Path
 from typing import Any, Protocol
 
 from linumert.cnc import FakeMachine, MachineSnapshot, Mode
 from linumert.cnc.linuxcnc_reader import LinuxCNCReader
 from linumert.cnc.model import AXIS_LETTERS
+
+from .schema import PROGRAM_NAME
+
+MAX_PROGRAMS = 200
+DEFAULT_PROGRAMS = Path("~/linuxcnc/nc_files")  # CLAUDE.md §9; INI ma pierwszeństwo
 
 
 class CommandError(Exception):
@@ -47,6 +54,46 @@ def _increment_target(snap: MachineSnapshot, axis: str, speed: float,
     return target
 
 
+def _ready_for_setup(snap: MachineSnapshot, what: str) -> None:
+    """Zero detalu i wczytanie programu: ON, bez ruchu, wszystkie osie zbazowane."""
+    if snap.task_state.value != "on":
+        raise CommandError(f"{what}: maszyna nie jest w stanie ON")
+    if snap.interp_state.value != "idle":
+        raise CommandError(f"{what}: wymagany brak ruchu (interpreter IDLE)")
+    if not snap.all_homed:
+        raise CommandError(f"{what}: wymagane bazowanie wszystkich osi")
+
+
+def _zero_axes(snap: MachineSnapshot, axis: str | None) -> tuple[str, ...]:
+    names = snap.axis_names
+    if axis is None:
+        return tuple(n for n in names if n in "XYZ")
+    if axis.upper() not in names:
+        raise CommandError(f"zero detalu: nieznana oś {axis!r}")
+    return (axis.upper(),)
+
+
+def list_programs(directory: Path | None) -> tuple[str, ...]:
+    """Pliki programów w katalogu (bez podkatalogów), posortowane; brak katalogu = pusto."""
+    if directory is None:
+        return ()
+    try:
+        names = sorted(e.name for e in os.scandir(directory)
+                       if e.is_file() and PROGRAM_NAME.fullmatch(e.name))
+    except OSError:
+        return ()
+    return tuple(names[:MAX_PROGRAMS])
+
+
+def program_path(directory: Path | None, name: str) -> Path:
+    """Ścieżka programu z katalogu programów; nazwa spoza listy jest odrzucana."""
+    if directory is None:
+        raise CommandError("program: brak katalogu programów ([DISPLAY]PROGRAM_PREFIX)")
+    if name not in list_programs(directory):
+        raise CommandError(f"program: brak pliku {name!r} w katalogu programów")
+    return Path(directory) / name
+
+
 class MachineBackend(Protocol):
     def snapshot(self) -> MachineSnapshot: ...
     def estop(self) -> None: ...
@@ -64,6 +111,9 @@ class MachineBackend(Protocol):
     def jog(self, axis: str, speed: float) -> None: ...
     def jog_increment(self, axis: str, speed: float, distance: float) -> None: ...
     def jog_stop(self, axis: str | None) -> None: ...
+    def work_zero(self, axis: str | None) -> None: ...
+    def programs(self) -> tuple[str, ...]: ...
+    def open_program(self, name: str) -> None: ...
     def tick(self) -> None: ...
 
 
@@ -71,8 +121,10 @@ class FakeBackend:
     """Atrapa napędzana zegarem ściennym; ``tick`` przesuwa czas o rzeczywiste ``dt``."""
 
     def __init__(self, machine: FakeMachine | None = None,
-                 clock: Callable[[], float] = time.monotonic):
+                 clock: Callable[[], float] = time.monotonic,
+                 programs_dir: Path | None = None):
         self.machine = machine or FakeMachine(rapid_speed=200.0)
+        self.programs_dir = programs_dir
         self._clock = clock
         self._last = clock()
         self._increments: dict[str, tuple[float, float]] = {}
@@ -98,7 +150,10 @@ class FakeBackend:
             raise CommandError(errors[-1] if errors else "polecenie odrzucone")
 
     def snapshot(self) -> MachineSnapshot:
-        return self.machine.snapshot()
+        # Jak kanał błędów LinuxCNC: każdy komunikat trafia do jednej migawki.
+        snap = self.machine.snapshot()
+        self.machine.clear_errors()
+        return snap
 
     def estop(self) -> None:
         self.machine.estop()
@@ -151,6 +206,27 @@ class FakeBackend:
             self._increments.pop(axis.upper(), None)
         self.machine.jog_stop(axis)
 
+    def work_zero(self, axis: str | None) -> None:
+        snap = self.machine.snapshot()
+        _ready_for_setup(snap, "zero detalu")
+        if snap.mode is not Mode.MANUAL:
+            raise CommandError("zero detalu: wymagany tryb MANUAL")
+        positions = {a.name: a.position for a in snap.axes}
+        self.machine.set_work_offset(snap.work_offset_name, **{
+            name: positions[name] for name in _zero_axes(snap, axis)})
+
+    def programs(self) -> tuple[str, ...]:
+        return list_programs(self.programs_dir)
+
+    def open_program(self, name: str) -> None:
+        _ready_for_setup(self.machine.snapshot(), "wczytanie programu")
+        path = program_path(self.programs_dir, name)
+        try:
+            lines = path.read_text(encoding="utf-8").splitlines()
+        except (OSError, UnicodeDecodeError) as error:
+            raise CommandError(f"program: nie można odczytać {name!r}") from error
+        self._need(self.machine.load_program(lines, str(path)))
+
 
 class LinuxCNCBackend:
     """Polecenia przez ``linuxcnc.command``; odczyt przez ``LinuxCNCReader`` (tylko odczyt)."""
@@ -158,7 +234,8 @@ class LinuxCNCBackend:
     WAIT_TIMEOUT_S = 2.0
 
     def __init__(self, module: Any = None, reader: LinuxCNCReader | None = None,
-                 command: Any = None):
+                 command: Any = None, programs_dir: Path | None = None):
+        self._programs_dir = programs_dir
         self._module = module
         self._reader = reader or LinuxCNCReader(module=module)
         self._command = command
@@ -195,14 +272,16 @@ class LinuxCNCBackend:
         return joints[letter]
 
     def _jog_target(self, axis: str) -> tuple[bool, int]:
-        """(tryb jointa, numer) dla ``cmd.jog``. Jeden joint portalu rozjechałby bramę, więc
-        oś portalową jogujemy tylko po bazowaniu, w teleop, numerem osi z dziewięciu liter."""
+        """(tryb jointa, numer) dla ``cmd.jog``. Po bazowaniu zawsze teleop, numerem osi z
+        dziewięciu liter: LinuxCNC 2.9 odmawia jogu jointa z ``HOME_SEQUENCE`` < 0 („home_sequence
+        is synchronized”, każdy joint konfiguracji Plant). Przed bazowaniem tylko oś z jednym
+        jointem; jeden joint portalu rozjechałby bramę."""
         joints = self._joints_of(axis)
+        if self._recent().all_homed:
+            return False, AXIS_LETTERS.index(axis.upper())
         if len(joints) == 1:
             return True, joints[0]
-        if not self._recent().all_homed:
-            raise CommandError(f"jog osi portalowej {axis.upper()} wymaga bazowania")
-        return False, AXIS_LETTERS.index(axis.upper())
+        raise CommandError(f"jog osi portalowej {axis.upper()} wymaga bazowania")
 
     def _send_jog(self, joint_mode: bool, jog_type: Any, number: int, *values: float) -> None:
         cmd = self._cmd()
@@ -307,8 +386,8 @@ class LinuxCNCBackend:
         joints = self._reader.joint_map(names)  # stop bez warunków: także przy niepełnej mapie
         for name in (axis.upper(),) if axis else names:
             if name in names:
-                if len(joints[name]) > 1:
-                    cmd.jog(lc.JOG_STOP, False, AXIS_LETTERS.index(name))
+                # Ruch po bazowaniu jest w teleop (numer osi), przed nim w jointach: stop obu.
+                cmd.jog(lc.JOG_STOP, False, AXIS_LETTERS.index(name))
                 for joint in joints[name]:
                     cmd.jog(lc.JOG_STOP, True, joint)
 
@@ -325,3 +404,58 @@ class LinuxCNCBackend:
         _increment_target(self._recent(), axis, speed, distance, scale)
         self._send_jog(joint_mode, self._lc().JOG_INCREMENT, number, speed * scale,
                        distance * scale)
+
+    def _wait_idle(self, timeout: float) -> None:
+        """Czeka, aż interpreter wróci do IDLE (po MDI); czyta stat bez kanału błędów."""
+        lc, stat = self._lc(), self._reader._stat
+        deadline = time.monotonic() + timeout
+        while True:
+            stat.poll()
+            if stat.interp_state == lc.INTERP_IDLE:
+                return
+            if time.monotonic() >= deadline:
+                raise CommandError("LinuxCNC nie zakończył polecenia MDI w 2 s")
+            time.sleep(0.01)
+
+    def work_zero(self, axis: str | None) -> None:
+        """Bieżąca pozycja staje się zerem aktywnego układu detalu (G10 L20 P0)."""
+        snap = self._recent()
+        _ready_for_setup(snap, "zero detalu")
+        if snap.mode is not Mode.MANUAL:
+            raise CommandError("zero detalu: wymagany tryb MANUAL")
+        words = " ".join(f"{name}0" for name in _zero_axes(snap, axis))
+        lc, cmd = self._lc(), self._cmd()
+        cmd.mode(lc.MODE_MDI)
+        self._wait(cmd)
+        try:
+            cmd.mdi(f"G10 L20 P0 {words}")
+            self._wait(cmd)
+            self._wait_idle(self.WAIT_TIMEOUT_S)
+        finally:  # operator wraca do MANUAL, w którym kliknął
+            cmd.mode(lc.MODE_MANUAL)
+            self._wait(cmd)
+
+    def _program_dir(self) -> Path | None:
+        if self._programs_dir is None:
+            stat = self._reader._stat
+            ini_file = getattr(stat, "ini_filename", "") if stat is not None else ""
+            if not ini_file:
+                return None  # stat jeszcze nieodczytany; kolejna próba przy następnym odczycie
+            factory = getattr(self._lc(), "ini", None)
+            prefix = factory(ini_file).find("DISPLAY", "PROGRAM_PREFIX") if factory else None
+            base = Path(prefix).expanduser() if prefix else DEFAULT_PROGRAMS.expanduser()
+            self._programs_dir = base if base.is_absolute() else (
+                Path(ini_file).parent / base).resolve()
+        return self._programs_dir
+
+    def programs(self) -> tuple[str, ...]:
+        return list_programs(self._program_dir())
+
+    def open_program(self, name: str) -> None:
+        _ready_for_setup(self._recent(), "wczytanie programu")
+        path = program_path(self._program_dir(), name)
+        lc, cmd = self._lc(), self._cmd()
+        cmd.mode(lc.MODE_AUTO)
+        self._wait(cmd)
+        cmd.program_open(str(path))
+        self._wait(cmd)

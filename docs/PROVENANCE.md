@@ -604,3 +604,24 @@ na tej samej licencji. Bez nowych bibliotek, grafik i innych zasobów produktu.
 - `docs/raporty/G2/JOG_1280_2026-10-28.png` — Codex, 2026-10-28; własny zrzut
   powłoki linumeRT z tests/test_machine_page_layout.py, Qt offscreen, atrapa CNC.
   GPL-2.0-or-later; dowód widoczności przycisków XYZ w sesji 028.
+
+### G2: scenariusz operatora WebHMI na LinuxCNC + Plant — 2026-11-03
+
+Model-Author: Claude. Autor: Claude; źródło: własne zrzuty klienta linumeRT WebHMI
+w przeglądarce aplikacji Claude na Windows, brama z LinuxCNCBackend, LinuxCNC 2.9 i Plant
+w WSL, bez retuszu. Licencja: GPL-2.0-or-later. Zakres: dokumentacja odbioru G2
+(`docs/raporty/G2/G2_WEBHMI_2026-11-03.md`); bez zasobów zewnętrznych.
+Program `config/sim/nc_files/linumert_g2_odbior.ngc`: własny, GPL-2.0-or-later.
+
+- `docs/raporty/G2/G2_WEBHMI_2026-11-03/1a_estop.jpg`
+- `docs/raporty/G2/G2_WEBHMI_2026-11-03/1b_power_on_reset.jpg`
+- `docs/raporty/G2/G2_WEBHMI_2026-11-03/2_bazowanie.jpg`
+- `docs/raporty/G2/G2_WEBHMI_2026-11-03/3_jog_przyrost.jpg`
+- `docs/raporty/G2/G2_WEBHMI_2026-11-03/4_zero_detalu.jpg`
+- `docs/raporty/G2/G2_WEBHMI_2026-11-03/5_program.jpg`
+- `docs/raporty/G2/G2_WEBHMI_2026-11-03/6a_auto_w_ruchu.jpg`
+- `docs/raporty/G2/G2_WEBHMI_2026-11-03/6b_auto_koniec.jpg`
+- `docs/raporty/G2/G2_WEBHMI_2026-11-03/7a_alarm_mdi.jpg`
+- `docs/raporty/G2/G2_WEBHMI_2026-11-03/7b_reset.jpg`
+- `docs/raporty/G2/G2_WEBHMI_2026-11-03/7c_estop_reset_zostaje.jpg`
+- `docs/raporty/G2/G2_WEBHMI_2026-11-03/7d_hal_reset_on_reset.jpg`

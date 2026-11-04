@@ -36,6 +36,13 @@ Incremental jog: Model-Author: Codex
       Połącz z bramą w trybie symulacji. Panel nie jest układem bezpieczeństwa.
     </div>
 
+    <section class="alarm-strip" aria-labelledby="alarmTitle">
+      <strong id="alarmTitle">ALARMY</strong>
+      <ol id="alarmRows" class="alarm-rows"><li class="alarm-none">Brak aktywnych alarmów.</li></ol>
+      <button data-cmd="reset" id="alarmReset" disabled>Reset</button>
+      <span class="hint">Reset kasuje alarmy, których przyczyna ustała. E-STOP potwierdza się zatrzaskiem w HAL, nie z tego ekranu.</span>
+    </section>
+
     <main class="layout">
       <section class="panel readout" aria-labelledby="droTitle">
         <div class="panel-heading">
@@ -119,6 +126,18 @@ Incremental jog: Model-Author: Codex
           <button data-mode="mdi" disabled>MDI</button>
           <button data-mode="auto" disabled>AUTO</button>
           <button data-cmd="home" disabled>Bazowanie ALL</button>
+        </div>
+        <div class="command-group">
+          <span class="group-title">ZERO DETALU (G10 L20, AKTYWNY UKŁAD)</span>
+          <button data-cmd="work_zero" data-axis="X" disabled>X = 0</button>
+          <button data-cmd="work_zero" data-axis="Y" disabled>Y = 0</button>
+          <button data-cmd="work_zero" data-axis="Z" disabled>Z = 0</button>
+          <button data-cmd="work_zero" disabled>XYZ = 0</button>
+        </div>
+        <div class="command-group program-open">
+          <label for="programSelect" class="group-title">PROGRAM (KATALOG PROGRAM_PREFIX)</label>
+          <select id="programSelect" aria-label="Plik programu" disabled><option value="">— brak plików —</option></select>
+          <button type="button" id="programOpen" disabled>Wczytaj</button>
         </div>
         <form id="mdiForm" class="mdi-form">
           <label for="mdiText">POLECENIE MDI (MAKS. 200 ZNAKÓW)</label>

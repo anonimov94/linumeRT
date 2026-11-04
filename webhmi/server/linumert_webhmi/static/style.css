@@ -59,3 +59,9 @@ footer{margin:20px 0;justify-content:space-between;flex-wrap:wrap;font-size:10px
 
 /* Incremental jog selector. Model-Author: Codex. */
 .jog-controls select{background:#071620;color:inherit;border:1px solid var(--edge);border-radius:4px;padding:9px;min-height:44px}
+
+/* G2: alarmy z Resetem, zero detalu, wczytanie programu. Model-Author: Claude. */
+.alarm-strip{display:flex;align-items:center;flex-wrap:wrap;gap:12px;margin:12px 0;padding:10px 16px;border:1px solid var(--edge);background:var(--panel)}
+.alarm-strip>strong{font-size:11px;letter-spacing:.18em;color:var(--muted)}.alarm-strip.active{border-color:#b8484b}.alarm-strip.active>strong{color:#ff9c95}
+.alarm-rows{list-style:none;margin:0;padding:0;flex:1 1 360px;font-family:ui-monospace,Consolas,monospace;font-size:12px}.alarm-rows li{padding:3px 0;color:#f7b6a4}.alarm-rows li strong{color:#ff777b;margin-right:6px}.alarm-rows .alarm-none{color:var(--muted)}
+.program-open{flex-wrap:wrap}.program-open select{background:#071620;color:inherit;border:1px solid var(--edge);border-radius:4px;padding:9px;min-height:44px;max-width:100%}

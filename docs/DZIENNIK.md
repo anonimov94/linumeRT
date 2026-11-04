@@ -1799,3 +1799,10 @@ Pełny RIP musi ponownie potwierdzić wynik; nie scalać na czerwonym CI.
 - Ograniczenie: bez działającego LinuxCNC `load_ngc` zwraca teraz błąd zamiast podglądu dla programów z `G43 Hn` (dawniej SIGSEGV).
 - Testy: `tests/test_gcode_isolation_linuxcnc.py` (LinuxCNC 2.9 + Plant, 27 PASS), `tests/test_safe_z_tool_numbers.py`. `make lint test` w kopii tar z NTFS: 1888 PASS, 10 FAIL (dowiązania i launcher), te same 10 na `main` bez poprawek; ruff, roadmapa i REQ 22/22 PASS.
 - Nierozwiązane, także na `main` bez poprawek: 4 testy ekranu w WSL (`test_hmi_shell_gui` x3, `test_hmi_runtime_linuxcnc`, samotest nie kończy się w 300 s) oraz 3 testy programów bez M2, gdy moduł `gcode` jest dostępny (`test_sim_path`, `test_sim_worker` x2). Autokontrola, bez niezależnego przeglądu. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## Organizacja — G2: scenariusz operatora w WebHMI na LinuxCNC + Plant · 2026-11-03 · Claude
+- Model-Author: Claude. WebHMI: zero detalu (`G10 L20`), lista i wczytanie programu z `PROGRAM_PREFIX`, pasek alarmów z Resetem D37 (E-1000/E-1100/E-1200, brama nie kasuje E-STOP). Gałąź zawiera #205.
+- 7 kroków (zasilanie po E-STOP, bazowanie, JOG, zero detalu, program, AUTO, alarm i Reset) kliknięte w przeglądarce na LinuxCNC 2.9 + Plant; zrzuty i wartości w `docs/raporty/G2/G2_WEBHMI_2026-11-03.md`. Ten sam scenariusz: `tests/test_g2_webhmi_linuxcnc.py`.
+- Naprawione: JOG po bazowaniu w teleop (joint jog odrzucany przy `HOME_SEQUENCE < 0`); E-STOP z API w konfiguracji Plant bez ekranu wracał do ESTOP_RESET — `user-enable-out` szeregowo przed zatrzaskiem (PROPOZYCJA w DECYZJE); alarm warunkowy rósł co odczyt.
+- Testy: `make lint test` 1920 PASS; linuxcnc 174 PASS, 7 porażek identycznych na `main` (środowisko), kalibracja sondy osobno PASS.
+- Otwarte: przegląd podobieństwa ekranów (G2 w plan.json nieoznaczone), watchdog HAL klienta web, sonda w GUI. NIEZWERYFIKOWANE NA SPRZĘCIE.
