@@ -11,6 +11,22 @@ export function createConnection(handlers) {
   let serial = 0;
   let openedAt = 0;
   const pending = new Map();
+  // Sygnał życia karty dla watchdog HAL (brama z --hal): bez niego "heartbeat" gaśnie po 1 s.
+  // Przeglądarka dławi zegary ukrytej karty; wtedy watchdog może otworzyć E-STOP (fail-safe).
+  const ALIVE_MS = 250;
+  let aliveTimer = null;
+  function startAlive(socket) {
+    stopAlive();
+    aliveTimer = setInterval(() => {
+      if (ws === socket && authenticated && socket.readyState === WebSocket.OPEN) {
+        try { socket.send('{"alive":1}'); } catch (_) { /* zamknięcie obsłuży "close" */ }
+      }
+    }, ALIVE_MS);
+  }
+  function stopAlive() {
+    if (aliveTimer !== null) clearInterval(aliveTimer);
+    aliveTimer = null;
+  }
 
   const ready = () => authenticated && ws !== null && ws.readyState === WebSocket.OPEN;
   const isOpening = () => ws !== null && ws.readyState < WebSocket.CLOSING;
@@ -38,6 +54,7 @@ export function createConnection(handlers) {
     const old = ws;
     ws = null;
     authenticated = false;
+    stopAlive();
     if (old && old.readyState < WebSocket.CLOSING) old.close(1000, "client disconnect");
     publish("ROZŁĄCZONO");
     notifyDisconnect(reason);
@@ -78,6 +95,7 @@ export function createConnection(handlers) {
         }
         if (!authenticated) {
           authenticated = true;
+          startAlive(next);
           publish("ONLINE", true);
         }
         handlers.onState(data.state, data.version);
@@ -95,6 +113,7 @@ export function createConnection(handlers) {
       if (ws !== next) return;
       ws = null;
       authenticated = false;
+      stopAlive();
       publish("ROZŁĄCZONO (" + event.code + ")");
       notifyDisconnect("Utrata WebSocket (" + event.code + ")");
     });

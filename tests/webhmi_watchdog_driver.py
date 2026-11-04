@@ -4,7 +4,8 @@
 Model-Author: Claude · 2026-11-04. Uruchamia go ``tests/test_webhmi_watchdog_linuxcnc.py``
 w środowisku RIP (``@POSTGUI@`` podmienia test). Brama działa w tym procesie (``--hal`` bez
 uvicorn): piny ``linumert.hmi-*``, ``halcmd -f`` pliku postgui WebHMI, sesja przeglądarki
-symulowana wywołaniami ``touch``. Wynik: linia ``RESULT {json}``. NIEZWERYFIKOWANE NA SPRZĘCIE.
+przez WebSocket aplikacji (``{"alive":1}`` jak klient ``connection.js``).
+Wynik: linia ``RESULT {json}``. NIEZWERYFIKOWANE NA SPRZĘCIE.
 """
 
 import json
@@ -14,10 +15,13 @@ import threading
 import time
 
 import linuxcnc
-from linumert_webhmi import Gateway
+from linumert_webhmi import Gateway, create_app
 from linumert_webhmi.backend import CommandError, LinuxCNCBackend
 from linumert_webhmi.hal_link import open_hal
 from linumert_webhmi.schema import Command
+from starlette.testclient import TestClient
+
+TOKEN = "webhmi-watchdog-acceptance"
 
 for _ in range(240):  # NML bywa niegotowy; poll() mapuje narzędzia (~/.tool.mmap)
     try:
@@ -35,19 +39,27 @@ out["postgui_rc"] = post.returncode
 out["postgui_err"] = post.stderr[-500:]
 gateway = Gateway(LinuxCNCBackend(module=linuxcnc), hal_pins=pins)
 gateway.start()
-gateway.client_connected("s1")
+# Karta przeglądarki przez prawdziwą aplikację: WebSocket, token i {"alive":1} co 100 ms,
+# dopóki "żyje" (milczenie przy otwartym gnieździe = zawieszona karta).
+client = TestClient(create_app(gateway, TOKEN), base_url="http://127.0.0.1:8765")
 alive = threading.Event()
 alive.set()
+opened = threading.Event()
 
 
-def browser():  # karta przeglądarki: wiadomość co 100 ms, dopóki "żyje"
-    while True:
-        if alive.is_set():
-            gateway.touch("s1")
-        time.sleep(0.1)
+def browser():
+    with client.websocket_connect("/ws", headers={"host": "127.0.0.1:8765"}) as ws:
+        ws.send_json({"auth": TOKEN})
+        ws.receive_json()
+        opened.set()
+        while True:
+            if alive.is_set():
+                ws.send_text('{"alive":1}')
+            time.sleep(0.1)
 
 
 threading.Thread(target=browser, daemon=True).start()
+opened.wait(10)
 
 
 def halget(name):
@@ -70,7 +82,7 @@ def wait_task(target, timeout):
 
 def command(**kw):
     try:
-        gateway.execute(Command(**kw), "s1")
+        gateway.execute(Command(**kw))  # polecenia REST; życie karty tylko z WebSocket
         return "ok"
     except CommandError as error:
         return str(error)

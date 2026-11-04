@@ -35,6 +35,7 @@ from .schema import SCHEMA_VERSION, Command
 
 PUSH_HZ = 30.0
 KEEPALIVE_S = 0.2
+ALIVE = {"alive": 1}  # wiadomość podtrzymania z klienta (co 250 ms), zasila heartbeat
 AUTH_TIMEOUT_S = 3.0
 MAX_MESSAGE_BYTES = 2048
 MAX_CLIENTS = 4
@@ -173,6 +174,9 @@ async def _serve(socket: WebSocket, gateway: Gateway, session: str) -> None:
             msg_id = None
             try:
                 data = json.loads(text)
+                if data == ALIVE:  # sygnał życia karty: tylko odświeżenie sesji, bez odpowiedzi
+                    gateway.touch(session)
+                    continue
                 msg_id = data.get("id") if isinstance(data, dict) else None
                 command = Command.model_validate(data)
                 await asyncio.to_thread(gateway.execute, command, session)
