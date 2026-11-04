@@ -10,6 +10,7 @@ podmiana kopii i diff (procedura w UPSTREAM.md).
 """
 
 import importlib.util
+import math
 import os
 import sys
 
@@ -132,6 +133,21 @@ class HandlerClass(NumericKeyboardMixin, _upstream.HandlerClass):
             return
         scale = 1 if _upstream.INFO.MACHINE_IS_METRIC or not linear else 25.4
         _upstream.ACTION.JOG(joint, direction if state else 0, 10 / scale, 0)
+
+    def btn_goto_sensor_clicked(self):
+        # Upstream: G53 G0 Z0, a potem XY bez sprawdzenia wyniku. Przy MAX_LIMIT < 0 LinuxCNC
+        # odrzuca wycofanie i narzędzie jechałoby w XY na bieżącej wysokości.
+        info = _upstream.INFO
+        convert = (info.convert_machine_to_metric if _upstream.STATUS.is_metric_mode()
+                   else info.convert_machine_to_imperial)
+        x = convert(float(self.w.lineEdit_sensor_x.text()))
+        y = convert(float(self.w.lineEdit_sensor_y.text()))
+        z = convert(float(info.get_error_safe_setting("AXIS_Z", "MAX_LIMIT", "0")))
+        _upstream.ACTION.CALL_MDI("G90")
+        if _upstream.ACTION.CALL_MDI_WAIT(f"G53 G0 Z{math.floor(z * 10000) / 10000:.4f}") != 0:
+            self.add_status("Nie wycofano osi Z: dojazd do czujnika przerwany", _upstream.WARNING)
+            return
+        _upstream.ACTION.CALL_MDI_WAIT(f"G53 G0 X{x:3.4f} Y{y:3.4f}", 10)
 
     def on_keycall_ESTOP(self, event, state, shift, cntrl):
         # F1: wciśnięcie grzyba HMI (zwolnienie tylko świadomie, przyciskiem grzyba)

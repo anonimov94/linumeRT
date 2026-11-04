@@ -557,4 +557,18 @@ poprawki błędów blokujących, bez nowych funkcji i skórek. D36 dotyczy WebHM
 **PROPOZYCJA — odłożone do przekroczenia G2:** 063 (EtherCAT), 067 (kreator), 068 (latencja),
 071 (strojenie), 073–076 (wtyczki i społeczność), 5 osi z 065, karuzela/parasol z 066, materiał
 2.5D, widok 3D i STL (055, 057, 059), CAM relief/tekst. Statusy w `plan.json` bez zmian.
+
+## PROPOZYCJA: wycofanie Z generatorów CAM na main — 2026-11-01
+
+Model-Author: Claude. Generatory piszą `G53 G0 Z0`, a przykładowe machine.yaml mają `soft_limits` Z
+do -1, więc LinuxCNC odrzuca taki ruch („would exceed Z's positive limit”). Generator nie zna maszyny,
+dlatego zamianę robi warstwa wyżej: `compile_program(..., safe_z=)` podmienia dokładnie tę linię,
+a ekran cykli podaje `limits.safe_z_from_ini` (`[AXIS_Z]MAX_LIMIT`, w jednostkach programu, zaokrąglone
+w dół). Bez `safe_z` tekst się nie zmienia (testy golden). Maszyna z limitem 0 dostaje ten sam program.
+Odrzucone: pole w każdym generatorze (nie obejmuje zapisanych `.lnx`), `#<_ini[...]>` (analiza offline
+nie zna INI), `soft_limits` Z do 0 (krańcówka jest na -0,5), `positions.safe_z` (nie ma go w INI, które
+ekran czyta; do rozważenia, jeśli wycofanie ma mieć zapas poniżej limitu).
+Ekran: `btn_goto_sensor_clicked` QtDragon też jechał `G53 G0 Z0` i po odrzuceniu ruszał w XY na bieżącej
+wysokości; nadpisanie w `linumert_handler.py` używa MAX_LIMIT i przerywa dojazd. To poprawka błędu
+sterowania, dozwolona mimo zamrożenia Qt. Właściciel może wybrać inne rozwiązanie.
 NIEZWERYFIKOWANE NA SPRZĘCIE.

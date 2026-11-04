@@ -23,7 +23,9 @@ Model-Author: Claude · sesja 005 · 2026-10-18
 
 Znane zachowanie upstream poprawione w `linumert_handler.py` (bez zmiany kopii): QtDragon 2.9.10 zgłasza
 „Hard limits tripped” przy każdym sygnale `hard-limits-tripped` (także `tripped=False` na starcie) i przy
-bazowaniu na krańcówce wspólnej z czujnikiem bazowania.
+bazowaniu na krańcówce wspólnej z czujnikiem bazowania. Dojazd do czujnika (`btn_goto_sensor_clicked`)
+jedzie `G53 G0 Z0` i nie sprawdza wyniku przed ruchem XY: nasza wersja używa `[AXIS_Z]MAX_LIMIT` i przerywa
+ruch, gdy wycofanie się nie uda.
 | `linumert_ABOUT` | `qtdragon_ABOUT` | bez zmian |
 | `UPSTREAM_version.txt` | `version.txt` | bez zmian |
 | `images/*.png` | `images/*.png` | bez zmian; usunięty nieużywany `linuxcnc-wizard.gif` |
