@@ -1780,3 +1780,11 @@ Pełny RIP musi ponownie potwierdzić wynik; nie scalać na czerwonym CI.
 - Przyczyna: wątek servo bez RT bywa wstrzymany, uspace nadrabia cykle serią bez przerw, a `lrt_net` liczył ciszę w cyklach. Poprawka: cisza w czasie rzeczywistym, próg 20 ms bez zmian (PROPOZYCJA w DECYZJE). Wstrzymanie mastera na 60 ms (SIGSTOP): stary komponent → E-STOP i czerwony test, nowy → zielony; wstrzymanie Plant na 60 ms → E-STOP jak dotąd.
 - Diagnostyka zostaje: wynik `wait()` i znacznik czasu MDI w kierowcy, komunikaty kanału błędów przy chybionej sondzie, zatrzaski łańcucha E-STOP i okres servo w `plant_session`, wyjście Plant w `linuxcnc.log`, licznik przerw obsługi ramek i pauz GC w Plant.
 - Testy: `test_master_stall_does_not_drop_link`, `test_plant_stall_drops_link` (REQ-QA-03). Wynik powtórzeń w PR. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## Portal: czytnik stanu i WebHMI, jointy osi · 2026-11-01 · Claude
+- Model-Author: Claude. Przeniesienie na main błędu z odbioru bety (4d8397d): na XYYZ oś Z czytała joint 2, więc niezbazowany Z dawał all_homed=true.
+- Czytnik: `joint_map` z `[JOINT_n]AXIS`; niepełna mapa, nieczytelny INI i `stat.joints == 0` nie ukrywają niezbazowanego jointa.
+- WebHMI miało ten sam błąd w poleceniach ruchu (home/jog Z na Y2, jog Y na samym Y1, stop Z bez Z). Naprawione; oś portalowa joguje tylko po bazowaniu, w teleop.
+- `machine.estop` na main: `cmd.state(STATE_ESTOP)`, prawdziwe API; `command.estop` nie istnieje w LinuxCNC 2.9 i main go nie woła.
+- LinuxCNC 2.9 + Plant, mill_servo_table: 4 nowe testy PASS, z reader i webhmi_live razem 7 PASS. `make lint test`: 1903 PASS, 15 SKIP, REQ 22/22.
+- Otwarte: ekran Qt, jog przed bazowaniem i `_homed` na portalu (`docs/NASTEPNA_SESJA.md`). NIEZWERYFIKOWANE NA SPRZĘCIE.
