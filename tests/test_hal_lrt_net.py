@@ -9,6 +9,10 @@ RIP tylko na czas testu. Nie uruchamiaj równolegle z innym LinuxCNC ani serwere
 
 from __future__ import annotations
 
+import os
+import signal
+import subprocess
+import time
 from pathlib import Path
 
 import pytest
@@ -107,3 +111,59 @@ def test_lrt_net_without_plant_is_disconnected(rip, modules):
     (modules / "test.hal").write_text(_script(enable=False), encoding="utf-8")
     run = rip_run(rip, "halrun -f test.hal", modules)
     assert _values(run.stdout) == ["FALSE"], run.stdout + run.stderr
+
+
+# Zatrzask (estop_latch) pamięta każde opadnięcie `connected` po starcie.
+LINK_LATCH = f"""loadrt threads name1=servo period1=1000000
+loadrt lrt_net personality={AXES} ip=127.0.0.1 port={PORT}
+loadrt estop_latch names=link
+addf lrt-net.0 servo
+addf link servo
+net up lrt-net.0.connected => link.ok-in
+start
+loadusr -w sleep 0.5
+setp link.reset 1
+loadusr -w sleep 0.05
+setp link.reset 0
+loadusr -w sleep 2.5
+getp link.fault-out
+stop
+"""
+STALL = 0.06  # [s] wstrzymanie procesu: 60 okresów, 3× próg 20 ms
+
+
+def _link_dropped(rip, work: Path, pid_of_victim) -> str:
+    """Uruchamia LINK_LATCH, w trakcie wstrzymuje proces na STALL; zwraca link.fault-out."""
+    (work / "link.hal").write_text(LINK_LATCH, encoding="utf-8")
+    run = subprocess.Popen(["bash", "-c", f"source '{rip}/scripts/rip-environment' >/dev/null "
+                            "&& halrun -f link.hal"], cwd=work, stdout=subprocess.PIPE,
+                           stderr=subprocess.STDOUT, text=True)
+    time.sleep(1.5)                                   # po resecie zatrzasku, łącze zestawione
+    pid = pid_of_victim()
+    os.kill(pid, signal.SIGSTOP)
+    time.sleep(STALL)
+    os.kill(pid, signal.SIGCONT)
+    out, _ = run.communicate(timeout=60)
+    vals = _values(out)
+    assert len(vals) == 1, out
+    return vals[0]
+
+
+def _rtapi_app() -> int:
+    pids = subprocess.run(["pgrep", "-x", "rtapi_app"], capture_output=True,
+                          text=True).stdout.split()
+    assert len(pids) == 1, f"oczekiwany jeden rtapi_app, są: {pids}"
+    return int(pids[0])
+
+
+# REQ-QA-03
+def test_master_stall_does_not_drop_link(rip, modules, plant):
+    # uspace bez RT: po wstrzymaniu wątku servo zaległe cykle idą serią bez przerw; Plant nie
+    # zdąży odpowiedzieć na ramki co kilka µs, ale nie milczał (2026-11-03, sondowanie z Plant).
+    assert _link_dropped(rip, modules, _rtapi_app) == "FALSE"
+
+
+# REQ-QA-03
+def test_plant_stall_drops_link(rip, modules, plant):
+    # Ten sam próg dla prawdziwej ciszy Plant: 60 ms bez odpowiedzi → connected = 0.
+    assert _link_dropped(rip, modules, lambda: plant.pid) == "TRUE"
