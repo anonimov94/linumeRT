@@ -303,6 +303,15 @@ def number_lines(text: str) -> str:
     return "\n".join(out) + "\n"
 
 
+def safe_z_from_ini(path: Path | str) -> float | None:
+    """Najwyższe dozwolone Z maszyny [mm] (`[AXIS_Z]MAX_LIMIT`); None bez INI albo bez tej osi."""
+    try:
+        limit = limits_from_ini(path).get("Z")
+    except (OSError, ValueError, configparser.Error):
+        return None
+    return limit[1] if limit else None
+
+
 def check_ngc(ngc: Path | str, ini: Path | str, var: Path | str | None = None,
               root: Path | str | None = None, timeout: float = 20.0) -> list[Violation]:
     return analyze_ngc(ngc, ini, var, root, timeout).violations

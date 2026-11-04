@@ -15,11 +15,13 @@ nie zawiesza ekranu). Ścieżki z ustawień albo zmiennej `LINUXCNC_DIR` (CLAUDE
 
 from __future__ import annotations
 
+import importlib.util
 import os
 import re
 import shlex
 import shutil
 import subprocess
+import sys
 import tempfile
 from dataclasses import dataclass
 from pathlib import Path
@@ -28,6 +30,8 @@ from ._interpreter_process import InterpreterOutputLimit, run_bounded
 
 _CANON = re.compile(r"^\s*\d+ N[.\d]+\s")
 _MENU = ("enter a number:", "1 = ", "2 = ", "3 = ", "4 = ", "5 = ", "enter choice")
+PARSE_TIMEOUT = 60.0        # [s] analiza jednego programu w procesie potomnym
+WORKER_PROGRAM_ERROR = 3    # kod wyjścia procesu potomnego: interpreter odrzucił program
 
 
 class InterpreterUnavailable(RuntimeError):
@@ -84,6 +88,24 @@ def _with_machine_remaps(config: str, machine_ini: Path) -> str:
     return config if count else config + "\n[RS274NGC]\n" + "\n".join(extra) + "\n"
 
 
+def _machine_tool_table(machine_ini: Path) -> Path | None:
+    """``[EMCIO]TOOL_TABLE`` maszyny: długości z przykładowego sim.tbl dają fałszywe granice."""
+    import configparser
+
+    ini = configparser.RawConfigParser(strict=False)
+    if not ini.read(machine_ini, encoding="utf-8"):
+        return None
+    name = ini.get("EMCIO", "TOOL_TABLE", fallback="").strip()
+    table = machine_ini.resolve().parent / name if name else None
+    return table if table is not None and table.is_file() else None
+
+
+def _without_sample_tool_change(config: str) -> str:
+    """Ruchy zmiany narzędzia z przykładowego INI nie należą do maszyny (remap M6 je określa)."""
+    return re.sub(r"(?im)^[ \t]*TOOL_CHANGE_(QUILL_UP|POSITION|WITH_SPINDLE_ON)[ \t]*=.*(?:\n|$)",
+                  "", config)
+
+
 def run_interpreter(ngc: Path | str, root: Path | str | None = None,
                     timeout: float = 20.0,
                     parameters_from: Path | str | None = None,
@@ -115,13 +137,14 @@ def run_interpreter(ngc: Path | str, root: Path | str | None = None,
                 config += "\n[RS274NGC]\nPARAMETER_FILE = analysis.var\n"
             if machine_ini is not None:  # remapy i podprogramy maszyny (np. M6 → G43)
                 config = _with_machine_remaps(config, Path(machine_ini))
+                config = _without_sample_tool_change(config)
             if linear_units:  # parametry z .var są w jednostkach maszyny, nie domyślnych (cale)
                 config = re.sub(r"(?im)^([ \t]*LINEAR_UNITS[ \t]*=).*$",
                                 rf"\g<1> {linear_units}", config)
             ini = private / "analysis.ini"
             ini.write_text(config)
-            options = ["-i", str(ini),
-                       "-t", str((sim / "sim.tbl").resolve())]
+            table = _machine_tool_table(Path(machine_ini)) if machine_ini is not None else None
+            options = ["-i", str(ini), "-t", str((table or sim / "sim.tbl").resolve())]
             if (sim / "sim.var").exists():
                 shutil.copyfile(sim / "sim.var", parameters)
         if parameters_from is not None and Path(parameters_from).is_file():
@@ -129,6 +152,46 @@ def run_interpreter(ngc: Path | str, root: Path | str | None = None,
         options += ["-v", str(parameters), "-n", "0", str(ngc)]
         command = " ".join(prefix + ["exec rs274 " + shlex.join(options)])
         return run_bounded(["bash", "-c", command], cwd=directory, env=env, timeout=timeout)
+
+
+def run_parse_worker(module: str, path: Path, unitcode: str, initcode: str, target: Path,
+                     *package_roots: Path) -> None:
+    """`python -m module` z `gcode.parse`: awaria interpretera nie dotyka procesu wywołującego.
+
+    Bez zmapowanej tablicy narzędzi LinuxCNC 2.9 kończy `gcode.parse` sygnałem SIGSEGV przy m.in.
+    `T`, `M6`, `G43 Hn`, `G41 Dn`, `G10 L1`, `G10 L10`, `M61`, a pętla w programie nie ma końca
+    (`check_abort` nie ma czego sprawdzać). Brak modułu `gcode` albo awaria:
+    InterpreterUnavailable. Błąd programu albo przekroczony limit analizy: ValueError.
+    INI maszyny nie wpływa na wynik (REMAP, SUBROUTINE_PATH względem cwd).
+    """
+    if importlib.util.find_spec("gcode") is None:
+        raise InterpreterUnavailable("Brak modułu gcode z LinuxCNC 2.9.")
+    env = os.environ.copy()
+    env.pop("INI_FILE_NAME", None)
+    roots = [str(Path(__file__).resolve().parents[2]), *map(str, package_roots)]
+    env["PYTHONPATH"] = os.pathsep.join(filter(None, [*roots, env.get("PYTHONPATH")]))
+    # -P: katalog programu (cwd podprogramów) nie trafia na ścieżkę importu Pythona.
+    command = [sys.executable, "-P", "-m", module, str(path), unitcode, initcode, str(target),
+               str(PARSE_TIMEOUT)]
+    try:
+        run = run_bounded(command, cwd=path.parent, env=env, timeout=PARSE_TIMEOUT)
+    except subprocess.TimeoutExpired as exc:
+        raise ValueError("Przekroczony czas analizy programu (pętla bez końca?).") from exc
+    except InterpreterOutputLimit as exc:
+        raise ValueError(str(exc)) from exc
+    lines = run.stderr.strip().splitlines()
+    if run.returncode == WORKER_PROGRAM_ERROR:
+        raise ValueError(lines[-1] if lines else "Interpreter odrzucił program.")
+    if run.returncode:
+        raise InterpreterUnavailable(f"Interpreter LinuxCNC zakończył się kodem {run.returncode}.")
+
+
+def limit_worker_lifetime(timeout: str) -> None:
+    """Proces potomny kończy się sam, gdy rodzica zabito wcześniej (np. limit czasu ekranu)."""
+    import math
+    import signal
+
+    signal.alarm(math.ceil(float(timeout)))
 
 
 def check_with_linuxcnc(ngc: Path | str, root: Path | str | None = None,
