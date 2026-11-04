@@ -24,6 +24,7 @@ Ten moduł działa poza RT (CLAUDE.md §5).
 from __future__ import annotations
 
 import contextlib
+import gc
 import hashlib
 import logging
 import random
@@ -70,6 +71,9 @@ DT_MIN, DT_MAX = 100_000, 10_000_000  # [ns], docs/PLANT.md §3 reguła 3
 # docs/raporty/plant_substeps.md); cel 607Ah jest interpolowany, więc wynik nie zależy od n ≥ 2.
 DEFAULT_SUBSTEPS = 4
 JITTER_WINDOW = 100
+# Opóźnienie obsługi ramki względem czasu ramek, od którego Plant zapisuje komunikat [ms]:
+# master lrt_net zrywa łączność po 20 cyklach bez odpowiedzi (20 ms przy cyklu 1 ms).
+STALL_NOTE_MS = 10.0
 MODES = ("lockstep", "realtime")
 PANEL_PORT = 8080
 
@@ -191,6 +195,9 @@ class Stats:
     lost: int = 0
     late: int = 0
     steps: int = 0
+    stalls: int = 0             # ramki obsłużone ≥ STALL_NOTE_MS później niż wynika z czasu ramek
+    stall_max_ms: float = 0.0   # największe takie opóźnienie [ms]
+    gc_max_ms: float = 0.0      # najdłuższe odśmiecanie Pythona (watch_gc) [ms]
     _gaps: deque = field(default_factory=lambda: deque(maxlen=JITTER_WINDOW), repr=False)
 
     @property
@@ -199,7 +206,8 @@ class Stats:
         return int(sum(self._gaps) / len(self._gaps) / 1000) if self._gaps else 0
 
     def reset(self) -> None:
-        self.received = self.rejected = self.lost = self.late = 0
+        self.received = self.rejected = self.lost = self.late = self.stalls = 0
+        self.stall_max_ms = 0.0
         self._gaps.clear()
 
 
@@ -285,6 +293,22 @@ class PlantServer:
         if estop is None or estop.input not in self.machine.model.inputs:
             return None
         return self.machine.model.inputs[estop.input], estop.contact == "NC"
+
+    def watch_gc(self) -> None:
+        """Mierzy pauzy odśmiecania Pythona (wstrzymują pętlę ramek); długie → komunikat."""
+        start = [0]
+
+        def hook(phase: str, info: dict) -> None:
+            if phase == "start":
+                start[0] = time.perf_counter_ns()
+                return
+            ms = (time.perf_counter_ns() - start[0]) / 1e6
+            self.stats.gc_max_ms = max(self.stats.gc_max_ms, ms)
+            if ms >= STALL_NOTE_MS / 2:
+                self._note(f"odśmiecanie Pythona (generacja {info['generation']}) "
+                           f"wstrzymało Plant na {ms:.0f} ms")
+
+        gc.callbacks.append(hook)
 
     def _note(self, text: str) -> None:
         self.messages.append(text)
@@ -445,6 +469,16 @@ class PlantServer:
                 if gap / 1e6 > self.cfg.watchdog_ms:
                     self.trip_watchdog(gap / 1e6)
                 self.stats._gaps.append(abs(gap - self.cfg.cycle_ns))
+            if self._last_wall is not None and self._last_time is not None:
+                # Zegar ścienny uciekł czasowi ramek: wstrzymany Plant (ramki czekały w gnieździe,
+                # master liczy cykle bez odpowiedzi) albo wstrzymany master (bez ramek).
+                lag = ((wall - self._last_wall) - (cmd.time_ns - self._last_time)) / 1e6
+                self.stats.stall_max_ms = max(self.stats.stall_max_ms, lag)
+                if lag >= STALL_NOTE_MS:
+                    self.stats.stalls += 1
+                    if self.stats.stalls <= 20:
+                        self._note(f"ramka {cmd.seq}: przerwa obsługi dłuższa o {lag:.0f} ms "
+                                   "niż czas ramek (wstrzymany Plant albo master)")
             dt_ns = self.cfg.cycle_ns if self._last_time is None else cmd.time_ns - self._last_time
             dt_ns = min(max(dt_ns, DT_MIN), DT_MAX)
             self._last_seq, self._last_time, self._last_rx = cmd.seq, cmd.time_ns, rx
