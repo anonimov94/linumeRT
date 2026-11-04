@@ -226,3 +226,10 @@ def test_websocket_alive_message_refreshes_session_without_reply(client, gateway
                 replies.append(message)
     assert [m["id"] for m in replies] == [3]  # alive bez odpowiedzi
     assert len(calls) >= 3 and calls[0] == calls[1] != "local"
+
+
+def test_static_files_are_revalidated(client):  # REQ-QA-03
+    """Bez pamięci podręcznej bez sprawdzenia: stary JS bez sygnału życia dałby E-STOP."""
+    response = client.get("/js/connection.js")
+    assert response.status_code == 200
+    assert response.headers["cache-control"] == "no-cache"

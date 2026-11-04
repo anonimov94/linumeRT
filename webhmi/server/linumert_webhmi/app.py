@@ -53,6 +53,14 @@ def create_app(gateway: Gateway, token: str, extra_hosts: tuple[str, ...] = ()) 
         raise ValueError("token bramy: co najmniej 16 znaków")
     allowed_hosts = set(LOOPBACK_HOSTS) | set(extra_hosts)
     app = FastAPI(title="linumeRT web-hmi", docs_url=None, redoc_url=None, openapi_url=None)
+
+    @app.middleware("http")
+    async def no_cache(request: Request, call_next):
+        # Klient po aktualizacji bramy: przeglądarka zawsze sprawdza pliki (ETag), inaczej stary
+        # moduł JS bez sygnału życia karty od razu otwiera łańcuch E-STOP przez watchdog HAL.
+        response = await call_next(request)
+        response.headers.setdefault("Cache-Control", "no-cache")
+        return response
     app.state.gateway = gateway
     sockets = {"count": 0, "pending": 0}
 

@@ -11,7 +11,12 @@ from __future__ import annotations
 import pytest
 from linumert.cnc import FakeMachine
 from linumert_webhmi.backend import CommandError, FakeBackend
-from linumert_webhmi.gateway import ESTOP_RESET_DELAY_S, HEARTBEAT_S, Gateway
+from linumert_webhmi.gateway import (
+    ALARM_RESET_DELAY_S,
+    ESTOP_RESET_DELAY_S,
+    HEARTBEAT_S,
+    Gateway,
+)
 from linumert_webhmi.hal_link import ARM_DELAY_S, PINS, PULSE_S, HalPins
 from linumert_webhmi.schema import Command
 
@@ -108,6 +113,9 @@ def test_double_reset_acknowledges_estop_through_hal():  # REQ-QA-03
     assert gateway.snapshot()[1]["task_state"] == "estop"  # reset dopiero po impulsie
     run(gateway, clock, ESTOP_RESET_DELAY_S, session="s1")
     assert gateway.snapshot()[1]["task_state"] == "estop_reset"
+    assert any(a["code"] == "E-1100" for a in gateway.snapshot()[1]["alarms"])
+    run(gateway, clock, ALARM_RESET_DELAY_S + 0.05, session="s1")
+    assert gateway.snapshot()[1]["alarms"] == []  # jak Qt: alarm E-STOP skasowany po resecie
 
 
 def test_double_reset_outside_estop_sends_no_ack():  # REQ-QA-03
