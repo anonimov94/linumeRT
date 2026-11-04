@@ -28,14 +28,15 @@ RETRACT = 2.0
 
 DRIVER = r"""
 out = {"on": on, "homed": homed}
-mdi("G21 G90 G49 G54 G10 L2 P1 X0 Y0 Z0 R0")
+mdi("G21 G90 G94 G49 G54 G10 L2 P1 X0 Y0 Z0 R0")
+mdi("F777")                                  # makro ma przywrócić F wywołującego
 mdi("G53 G0 Z-5")
 mdi("G53 G0 X300 Y400")
 mdi("@CALL_Z@", timeout=180)
 s.poll()
 out["z"] = {"offset": list(s.g5x_offset[:3]), "tripped": s.probe_tripped,
             "probed": list(s.probed_position[:3]), "actual": list(s.actual_position[:3]),
-            "gcodes": [g for g in s.gcodes if g > 0]}
+            "gcodes": [g for g in s.gcodes if g > 0], "feed": s.settings[1]}
 mdi("G53 G0 Z-5")
 mdi("G53 G0 X200 Y400")
 mdi("G53 G0 Z-40")
@@ -62,20 +63,32 @@ s.poll()
 out["g55"] = list(s.g5x_offset[:3])
 mdi("G54")
 mdi("G53 G0 Z-5")
-# Zly argument (kierunek 2): makro odmawia przed ruchem, offset i pozycja bez zmian.
-s.poll()
-before_off, before_pos = list(s.g5x_offset[:3]), list(s.actual_position[:3])
+# Odmowy przed ruchem: zły argument albo tryb posuwu inny niż G94; offset i pozycja bez zmian.
 ech = linuxcnc.error_channel()
-mdi("o<lrt_probe> call [2] [2] [10] [100] [1] [0] [2]", timeout=30)
-s.poll()
-errors = []
-for _ in range(5):
-    err = ech.poll()
-    if err:
-        errors.append(str(err[1]))
-out["bad_arg_errors"] = errors
-out["bad_arg"] = {"offset_same": before_off == list(s.g5x_offset[:3]),
-                  "moved": max(abs(a - b) for a, b in zip(before_pos, s.actual_position[:3]))}
+while ech.poll():
+    pass
+def refused(call, setup=None):
+    if setup:
+        mdi(setup)
+    s.poll()
+    before_off, before_pos = list(s.g5x_offset[:3]), list(s.actual_position[:3])
+    mdi(call, timeout=30)
+    s.poll()
+    errors = []
+    for _ in range(5):
+        err = ech.poll()
+        if err:
+            errors.append(str(err[1]))
+    mdi("G21 G90 G94")
+    return {"errors": errors, "offset_same": before_off == list(s.g5x_offset[:3]),
+            "moved": max(abs(a - b) for a, b in zip(before_pos, s.actual_position[:3]))}
+out["refused"] = {
+    "kierunek": refused("o<lrt_probe> call [2] [2] [10] [100] [1] [0] [2]"),
+    "os musi": refused("o<lrt_probe> call [0.5] [-1] [10] [100] [1] [0] [2]"),
+    "P musi": refused("o<lrt_probe> call [2] [-1] [10] [100] [1.5] [0] [2]"),
+    "G94 (G93)": refused("@CALL_Z@", setup="G93"),
+    "G94 (G95)": refused("@CALL_Z@", setup="G95"),
+}
 out["estop"] = s.estop
 print("RESULT " + json.dumps(out))
 """
@@ -127,8 +140,11 @@ def test_lrt_probe_sets_work_offset_on_plant(tmp_path) -> None:
     # P=2 przy aktywnym G54: G55 dostaje offset, aktywny układ zostaje G54 (index 1).
     assert result["active_after_p2"] == 1, result
     assert result["g55"][2] == pytest.approx(top_z - Z_VALUE, abs=ABS_TOL), result
-    # Odmowa to komunikat interpretera (abort), nie E-STOP: maszyna zostaje włączona.
-    assert any("kierunek" in e for e in result["bad_arg_errors"]), result
-    assert result["bad_arg"]["offset_same"] and result["bad_arg"]["moved"] < 1e-3, result
+    # F wywołującego przywrócone po sondowaniu (G38.2 używa posuwu z argumentu).
+    assert z["feed"] == pytest.approx(777), z
+    # Odmowa to komunikat interpretera (abort) przed ruchem, nie E-STOP: maszyna zostaje włączona.
+    for key, case in result["refused"].items():
+        assert any(key.split(" (")[0] in e for e in case["errors"]), (key, case)
+        assert case["offset_same"] and case["moved"] < 1e-3, (key, case)
     # Drugie sondowanie nie zmieniło Z zapisanego przez pierwsze.
     assert x["offset"][2] == pytest.approx(z["offset"][2], abs=1e-6), (z, x)
