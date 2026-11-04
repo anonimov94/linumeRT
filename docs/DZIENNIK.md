@@ -1795,3 +1795,9 @@ Pełny RIP musi ponownie potwierdzić wynik; nie scalać na czerwonym CI.
 - Naprawione: JOG po bazowaniu w teleop (joint jog odrzucany przy `HOME_SEQUENCE < 0`); E-STOP z API w konfiguracji Plant bez ekranu wracał do ESTOP_RESET — `user-enable-out` szeregowo przed zatrzaskiem (PROPOZYCJA w DECYZJE); alarm warunkowy rósł co odczyt.
 - Testy: `make lint test` 1920 PASS; linuxcnc 174 PASS, 7 porażek identycznych na `main` (środowisko), kalibracja sondy osobno PASS.
 - Otwarte: przegląd podobieństwa ekranów (G2 w plan.json nieoznaczone), watchdog HAL klienta web, sonda w GUI. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## G2 — watchdog HAL i podwójny Reset w WebHMI · 2026-11-04 · Claude
+- Model-Author: Claude. Brama `--hal`: piny `linumert.hmi-*` jak Qt, `hmi-heartbeat` tylko przy żywej karcie (`{"alive":1}` co 250 ms) i działającym obiegu; podwójny Reset = `hmi-ack` + uzbrojenie + `ESTOP_RESET`; bez `--hal` odmowa (PROPOZYCJA w DECYZJE).
+- Kliknięte w przeglądarce na LinuxCNC 2.9 + Plant z łańcuchem HMI bez obejścia: E-STOP → podwójny Reset → ON; zawieszona karta → E-STOP po 3,1 s. Zrzuty: `docs/raporty/G2/WEBHMI_WATCHDOG_2026-11-04.md`.
+- Odbiór w GUI wykrył 3 błędy niewidoczne w testach logiki (brak sygnału życia w kliencie, stary JS z pamięci podręcznej, E-1100 po resecie); poprawione, test na LinuxCNC idzie przez WebSocket.
+- Testy: `test_webhmi_watchdog_linuxcnc` PASS (~20 s), `test_webhmi_hal_link` i `test_webhmi_app`. Otwarte: ukryta karta, start bramy z `[DISPLAY]`. NIEZWERYFIKOWANE NA SPRZĘCIE.
