@@ -1,0 +1,16 @@
+# linumeRT · scenariusz macierzy maszyn (sesja 024, job CI plant-matrix, REQ-QA-02).
+# tools/run_scenario.py --matrix uruchamia go na każdej config/machines/*.yaml (--machine).
+name: matrix_smoke
+description: "Włączenie i krótki ruch pierwszej osi na dowolnej maszynie z config/machines."
+requirements: [REQ-QA-02]
+machine: ../../config/machines/mill_servo_table.yaml
+timing: {substeps: 10}
+duration: 1.0
+steps:
+  - {at: 0.0, action: enable}
+  - {at: 0.05, action: move, X: 2, feed: 600}
+expect:
+  - no_alarm: true
+  - event: {name: CRASH, present: false}
+  - event: {name: COVER_CRASH, present: false}
+  - position: {axis: X, value: 2.0, tol: 0.05}

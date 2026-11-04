@@ -1,0 +1,19 @@
+( linumeRT: program pokrywa )
+( zrodlo: pokrywa.lnx, schemat .lnx 1 )
+( płyta testowa [sesja 039] )
+;@STOCK BOX X120 Y80 Z30 ORIGIN=TOP_FRONT_LEFT OFFSET=G54 TOP=1 MAT="aluminium"
+G21
+( krok 1: test_coolant v1 )
+M8
+( krok 2: test_drill v1 - otwór A )
+G0 Z2
+G98 G81 X10 Y12.5 Z-8 R2 F100
+G80
+( krok 3: test_drill v2 )
+G0 Z2
+G98 G73 X0 Y40 Z-20.25 R2 Q2.5 F80
+G80
+( krok 4 pominiety: test_drill v1 )
+( krok 5: test_coolant v1 )
+M9
+M2

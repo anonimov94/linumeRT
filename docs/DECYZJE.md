@@ -508,3 +508,20 @@ GUI ani nowych prac wizualnych. To jawna zmiana bieżącego priorytetu względem
 Wybrana porcja backendu: 066, niespójność pozycji magazynu pomiędzy Plant a generowanym
 makrem M6 oraz kontrola geometrii przed eksportem. Korzystamy z istniejącego modelu
 magazynu i jednego machine.yaml. Pełny ATC i wcześniejsze bramki pozostają otwarte.
+
+## Kontynuacja beta bez GUI — 2026-10-29
+
+Model-Author: Codex. Właściciel wskazał jawnie checkout linumeRT-beta i kontynuację
+według AGENTS.md. Zakres bieżącej porcji: zgodność ochrony transportów REST/WS
+w beta/, powiązana z 028/029. Nie wznawiamy prac wizualnych ani edycji lite.
+Odbiory LinuxCNC/Plant i wcześniejsze bramki pozostają otwarte.
+
+## PROPOZYCJA: bezpieczna wysokość Z generatorów CAM — 2026-11-01
+
+Model-Author: Claude. Generatory piszą `G53 G0 Z0`, a wszystkie przykładowe machine.yaml mają
+`soft_limits` Z do -1, więc LinuxCNC odrzuca każdy taki program. Generator nie zna maszyny.
+W beta/ usługa zamienia dokładnie tę linię na `[AXIS_Z]MAX_LIMIT` aktywnej konfiguracji
+(`MachineService.localize_gcode`) przy `cam.generate` i kompilacji `.lnx`. Odrzucone: pole w każdym
+generatorze (nie obejmuje zapisanych `.lnx`), `#<_ini[...]>` (analiza offline nie zna INI),
+`soft_limits` Z do 0 (krańcówka jest na -0,5). Na `main` problem nadal istnieje. Właściciel może
+wybrać inne rozwiązanie. NIEZWERYFIKOWANE NA SPRZĘCIE.

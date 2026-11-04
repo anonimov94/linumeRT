@@ -1,0 +1,94 @@
+# Szablon napędu wirtualnego linumeRT: Wrzeciono 2,2 kW z falownikiem.
+# Wartości przykładowe — typowe dla klasy napędu, zaokrąglone; NIE pochodzą z dokumentacji
+# żadnego producenta (docs/PROVENANCE.md). NIEZWERYFIKOWANE NA SPRZĘCIE.
+# Wszystkie pola są jawne; format i zakresy: plant/library/drives/README.md.
+# Model-Author: Claude · sesja 013
+id: spindle_vfd_22kw
+version: 1
+based_on: null
+name: "Wrzeciono 2,2 kW z falownikiem"
+description: "Wrzeciono 2,2 kW (do 24000 obr/min) z falownikiem; model momentowy bez dynamiki falownika (przybliżenie)."
+value_source: "przykładowe wartości typowe dla wrzeciona 2,2 kW z falownikiem; zaokrąglone, nie pochodzą z karty katalogowej żadnego producenta"
+type: spindle_vfd
+
+# Parametry zmieniane w locie (REQ-VD-04); pozostałe wymagają przeładowania modelu.
+live:
+  - motor.rotor_inertia
+  - mechanics.load
+  - mechanics.friction_coulomb
+  - mechanics.friction_static
+  - mechanics.friction_viscous
+  - limits.torque_limit_permille
+  - electrical.supply_voltage
+
+motor:
+  rated_torque: 1.75           # [N·m] moment znamionowy
+  peak_torque: 2.6            # [N·m]
+  peak_time_s: 5.0            # [s] czas pracy ze szczytem (I2t); 0 = bez ochrony
+  rotor_inertia: 6.0000e-04       # [kg·m²]
+  torque_constant: 0.175      # [N·m/A] = moment znamionowy / prąd znamionowy
+  rated_current: 10.0         # [A]
+  peak_current: 15.0          # [A]
+  encoder_counts_per_rev: 4096   # [imp/obr]
+  encoder_noise_counts: 0.0
+  # Krzywa moment–prędkość: [omega rad/s, moment N·m]; poniżej pierwszego punktu stała, powyżej ostatniego 0.
+  torque_curve: [[0.0, 2.6], [300.0, 2.6], [1257.0, 1.75], [1800.0, 1.22], [2513.0, 0.875], [2600.0, 0.0]]
+  brake_present: false
+  brake_release_ms: 0.0
+  brake_engage_ms: 0.0
+
+electrical:
+  nominal_voltage: 400.0       # [V]
+  supply_voltage: 400.0        # [V] bieżące; skaluje krzywą momentu (live)
+
+# Regulatory: kv, ti, kp_pos i inertia_est dobrane jak lrt_drive_tune_servo() dla pasma 150 rad/s
+# przy kroku 1 ms i bezwładności zastępczej 8.0000e-04 kg·m² (J wirnika + J śruby + load·ratio²).
+controller:
+  kp_pos: 30.0
+  kv: 0.12
+  ti: 0.026667
+  kff_vel: 1.0
+  kff_acc: 1.0
+  inertia_est: 8.0000e-04
+  vel_filter_hz: 400.0
+  ff_filter_hz: 300.0
+  max_speed: 2600.0
+
+limits:
+  torque_limit_permille: 1485   # 6072h [‰ znamionowego]
+  following_window: 20480       # 6065h [imp]
+  following_window_ms: 100
+  quick_stop_decel: 409600      # 6085h [imp/s²]
+  standstill_speed: 0.5
+  boot_time_s: 2.0
+
+reactions:
+  quick_stop_option: 2     # 605Ah: 1 = wyłącz napęd, 2 = rampa i wyłączenie
+  fault_reaction_option: 0  # 605Eh: 0 = wyłącz napęd, 2 = rampa quick stop
+  brake_on_fault: false
+
+cia402:
+  objects: ["603Fh", "6040h", "6041h", "605Ah", "605Eh", "6060h", "6061h", "6064h", "6065h", "6066h", "606Ch", "6072h", "6077h", "607Ah", "6085h", "6098h", "6099h", "609Ah", "60B1h", "60B2h"]
+  homing_method: 35        # 6098h (sekwencje bazowania: sesja 015)
+  homing_speed_switch: 4096
+  homing_speed_zero: 1024
+  homing_accel: 409600
+
+# Mechanika domyślna; maszyna może ją nadpisać w instancji (overrides).
+mechanics:
+  kind: rotary
+  load: 2.0000e-04            # [kg·m²] moment bezwładności obciążenia
+  ratio: 1.0          # [rad/rad]
+  j_screw: 0.0       # [kg·m²]
+  friction_coulomb: 0.01    # [N·m]
+  friction_static: 0.015     # [N·m]
+  friction_viscous: 2.0000e-04  # [N·m·s/rad]
+  backlash: 0.0      # [rad]
+  contact_stiffness: 0.0   # [N·m/rad] na wale
+  gravity_force: 0.0
+
+# Napęd rzeczywisty (REQ-VD-06, sesja 061): falownik po RS485 (Modbus RTU, poza RT).
+# NIEZWERYFIKOWANE NA SPRZĘCIE.
+real:
+  driver: vfd_modbus
+  vfd: {protocol: hy_vfd, baud: 19200, address: 1}

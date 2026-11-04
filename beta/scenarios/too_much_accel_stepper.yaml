@@ -1,0 +1,13 @@
+# linumeRT · scenariusz Plant (sesja 024). Model-Author: Claude.
+name: too_much_accel_stepper
+description: "Krokowiec bez sprzężenia z przyspieszeniem ponad moment silnika (zła konfiguracja INI) gubi kroki."
+requirements: [REQ-VD-01]
+machine: ../../config/machines/router_gantry_steppers.yaml
+timing: {substeps: 10}
+duration: 1.5
+steps:
+  - {at: 0.0, action: enable}
+  - {at: 0.05, action: move, X: 80, feed: 12000, accel: 40000}
+expect:
+  - lost_steps: {axis: X, min: 1}
+  - no_alarm: true

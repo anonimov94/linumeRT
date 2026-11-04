@@ -1,0 +1,16 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+# Model-Author: Codex. Deklaracja do uzupełnienia, NIE konfiguracja startowa CNC.
+# NIEZWERYFIKOWANE NA SPRZĘCIE. Nie zawiera połączeń HAL ani zezwoleń napędów.
+[LINUMERT]
+MACHINE_PROFILE = hardware
+VIRTUAL_MODE = 0
+HMI_ESTOP_BYPASS = 0
+
+[SAFETY]
+# Puste pola celowo blokują kontrolę deklaracji. Dobór pinów należy do projektu maszyny.
+ESTOP_MONITOR_PIN =
+PC_HEARTBEAT_OUTPUT_PIN =
+PC_WATCHDOG_MONITOR_PIN =
+EXTERNAL_PC_WATCHDOG = 1
+PHYSICAL_RESET = 1
+AUTOMATIC_RESTART = 0

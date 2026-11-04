@@ -1735,6 +1735,36 @@ Pełny RIP musi ponownie potwierdzić wynik; nie scalać na czerwonym CI.
 - Zrzut docs/raporty/G2/JOG_1280_2026-10-28.png: rzeczywiste Qt offscreen, atrapa CNC, 1280×768; wszystkie przyciski XYZ widoczne.
 - Pełny odbiór GUI/LinuxCNC i pozostałe przewijanie strony nadal otwarte. NIEZWERYFIKOWANE NA SPRZĘCIE.
 
+## Beta — kontrola połączeń WebSocket · 2026-10-29 · Codex
+- Model-Author: Codex. Kontynuacja wskazanej przez właściciela beta, rozszerzenie 028/029 BETA-WS-GUARD; bez GUI i bez globalnego LOCK.
+- Odtworzone 4 FAIL: obcy Host i Origin spoza listy były akceptowane przez WS z tokenem i bez. Middleware HTTP nie obejmuje handshake WS.
+- Dodano sprawdzenie wspólnej polityki przed accept/sesją; odmowa 4403, błędny token nadal 4401; dozwolony Origin przechodzi.
+- 30 testów REST/WS PASS, lint i check_no_gui PASS; pełna regresja beta: 907 testów PASS w Debian12/Python3.11; CI beta python i plant-core PASS dla 3b5bf78. Autokontrola tej poprawki, bez deklaracji przeglądu całego PR #202.
+- Odbiór LinuxCNC/Plant i sprzętu nadal otwarty. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## Beta — odbiór operacji maszyny na LinuxCNC + Plant · 2026-11-01 · Claude
+- Model-Author: Claude. Dokończony odbiór makr M6/sondy Codex (commit c680ada) i nowy odbiór domeny machine przez kontrakt: `beta/integration/`, marker `linuxcnc`, krok w CI.
+- Błędy niewidoczne na atrapie, naprawione: `machine.estop` i `estop_reset` wołały nieistniejące `command.estop`; `home axis=Z` na portalu bazował Y2; czytnik brał `homed` i `limit` z numeru osi, więc niezbazowany Z dawał `all_homed=true`; `jog_increment` nie miał kierunku ujemnego; `set_work_offset` zawsze odmawiał; `power_on` w E-STOP zwracał ok; komunikaty LinuxCNC ginęły przy pierwszej migawce.
+- Konfiguracje bez ekranu: E-STOP z API zatrzaskuje się przez `user-enable-out` (plant, sim); symulacja wcześniej nie mogła zejść z E-STOP. Konfiguracja sprzętowa bez zmian (D35).
+- Wynik: 3 testy `linuxcnc` PASS na LinuxCNC 2.9 + Plant (WSL Debian12), 923 testy bety PASS, ruff i check_no_gui PASS. Przegląd drugiego modelu nadal otwarty. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## Beta — odbiór serwera REST/WebSocket na LinuxCNC + Plant · 2026-11-01 · Claude
+- Model-Author: Claude. `beta/integration/test_server_linuxcnc.py`: prawdziwy `linumertd` i klient jak GUI. Deadman: pojedynczy jog stoi po 0,26 s, odświeżanie co 100 ms trzyma ruch, zamknięcie i zerwanie gniazda zatrzymują oś, E-STOP w trakcie jogu działa.
+- Naprawione: odczyty stanu zużywały limiter poleceń i odbierały tokeny jogowi; odświeżanie jogu zalewało komunikatami o zmianie trybu; zmiany bazy narzędzi nie docierały do tabeli LinuxCNC (M6 brał starą długość); README podawało nieistniejące `--ini`.
+- Wynik: 4 testy `linuxcnc` PASS, 928 testów bety PASS, ruff i check_no_gui PASS. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## Beta — odbiór ścieżki CAM na LinuxCNC + Plant · 2026-11-01 · Claude
+- Model-Author: Claude. `cam.generate` → `program.check` → `estimate` → `toolpath` → `sim.run` → przebieg: czas 34,05 s przy szacunku 39,2 s, X/Y high 32/22, Z −2, wrzeciono 6000, usunięte 1184 mm³ przy oczekiwanych 1200 mm³ (siatka wokseli).
+- Naprawione: `G53 G0 Z0` z generatorów przekraczało `[AXIS_Z]MAX_LIMIT` maszyny (teraz limit z aktywnego INI, PROPOZYCJA w DECYZJE); `program.check` porównywał granice z `DEFAULT_LIMITS` i liczył Z na długościach z `sim.tbl` oraz ruchu zmiany narzędzia z przykładowego INI; `sim.run` pod rs274 zawsze dawał 0 mm³, bo `gcode.parse` nie podaje numeru T i wszystko szło na T0.
+- Awaria odkryta przy diagnozie: bez działającego LinuxCNC `gcode.parse` kończy proces (SIGSEGV) przy `T`, `M6`, `G43 Hn`, `G41 Dn`, `G10 L1/L10`, `M61`, a pętla bez końca wieszała serwer. `parse_rs274` działa teraz w procesie potomnym z limitem czasu; po awarii zostaje `source: subset`.
+- Otwarte: `load_ngc` w `linumert/programs/toolpath.py` usuwa tylko T/M6, więc `G43 H1` nadal może zabić proces wywołujący. Ten sam kod jest na `main`. Odbiór na `main` i przegląd drugiego modelu nadal otwarte.
+- Wynik: 12 testów `linuxcnc` PASS, 933 testy bety PASS, ruff i check_no_gui PASS. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## Beta — odchudzenie kodu · 2026-11-02 · Claude
+- Model-Author: Claude. Polecenie właściciela: bez GUI i bez zbędnego kodu. Usunięto moduły bez użytkownika w kontrakcie, serwerze, CLI, rejestrze generatorów i workerze rs274: `src/` 26 437 → 24 220 linii (w tym 2 750 z usuniętych plików), testy 933 → 864. Wykaz i kryterium: `beta/PROVENANCE.md` §5a.
+- Kontrakt bez zmian: 85 operacji, 12 domen, `contract cmp=0`. Beta nadal ma 24 tys. linii kodu; dalsze cięcie wymaga decyzji, które operacje wyrzucić z kontraktu.
+- Wynik: 864 testy PASS, 7 testów ścieżki rs274 PASS na LinuxCNC 2.9, ruff i check_no_gui PASS. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
 ## Portal: czytnik stanu i WebHMI, jointy osi · 2026-11-01 · Claude
 - Model-Author: Claude. Przeniesienie na main błędu z odbioru bety (4d8397d): na XYYZ oś Z czytała joint 2, więc niezbazowany Z dawał all_homed=true.
 - Czytnik: `joint_map` z `[JOINT_n]AXIS`; niepełna mapa, nieczytelny INI i `stat.joints == 0` nie ukrywają niezbazowanego jointa.

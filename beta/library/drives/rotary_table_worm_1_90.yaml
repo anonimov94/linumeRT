@@ -1,0 +1,97 @@
+# Szablon napędu wirtualnego linumeRT: Stół obrotowy ze ślimakiem 1:90.
+# Wartości przykładowe — typowe dla klasy napędu, zaokrąglone; NIE pochodzą z dokumentacji
+# żadnego producenta (docs/PROVENANCE.md). NIEZWERYFIKOWANE NA SPRZĘCIE.
+# Wszystkie pola są jawne; format i zakresy: plant/library/drives/README.md.
+# Model-Author: Claude · sesja 013
+id: rotary_table_worm_1_90
+version: 1
+based_on: null
+name: "Stół obrotowy ze ślimakiem 1:90"
+description: "Stół obrotowy: serwo 200 W i przekładnia ślimakowa 1:90; load to moment bezwładności stołu z przedmiotem [kg·m²]."
+value_source: "przykładowe wartości typowe dla stołu obrotowego 1:90 z serwem 200 W; zaokrąglone, nie pochodzą z karty katalogowej żadnego producenta"
+type: rotary_geared
+
+# Parametry zmieniane w locie (REQ-VD-04); pozostałe wymagają przeładowania modelu.
+live:
+  - motor.rotor_inertia
+  - mechanics.load
+  - mechanics.j_screw
+  - mechanics.friction_coulomb
+  - mechanics.friction_static
+  - mechanics.friction_viscous
+  - mechanics.backlash
+  - limits.torque_limit_permille
+  - electrical.supply_voltage
+
+motor:
+  rated_torque: 0.64           # [N·m] moment znamionowy
+  peak_torque: 1.9            # [N·m]
+  peak_time_s: 1.0            # [s] czas pracy ze szczytem (I2t); 0 = bez ochrony
+  rotor_inertia: 1.6000e-05       # [kg·m²]
+  torque_constant: 0.4      # [N·m/A] = moment znamionowy / prąd znamionowy
+  rated_current: 1.6         # [A]
+  peak_current: 4.8          # [A]
+  encoder_counts_per_rev: 131072   # [imp/obr]
+  encoder_noise_counts: 0.0
+  # Krzywa moment–prędkość: [omega rad/s, moment N·m]; poniżej pierwszego punktu stała, powyżej ostatniego 0.
+  torque_curve: [[0.0, 1.9], [150.0, 1.9], [314.0, 0.64], [400.0, 0.3]]
+  brake_present: false
+  brake_release_ms: 0.0
+  brake_engage_ms: 0.0
+
+electrical:
+  nominal_voltage: 230.0       # [V]
+  supply_voltage: 230.0        # [V] bieżące; skaluje krzywą momentu (live)
+
+# Regulatory: kv, ti, kp_pos i inertia_est dobrane jak lrt_drive_tune_servo() dla pasma 150 rad/s
+# przy kroku 1 ms i bezwładności zastępczej 8.2728e-05 kg·m² (J wirnika + J śruby + load·ratio²).
+controller:
+  kp_pos: 30.0
+  kv: 0.012409
+  ti: 0.026667
+  kff_vel: 1.0
+  kff_acc: 1.0
+  inertia_est: 8.2730e-05
+  vel_filter_hz: 400.0
+  ff_filter_hz: 300.0
+  max_speed: 400.0
+
+limits:
+  torque_limit_permille: 2968   # 6072h [‰ znamionowego]
+  following_window: 3640       # 6065h [imp]
+  following_window_ms: 20
+  quick_stop_decel: 26214400      # 6085h [imp/s²]
+  standstill_speed: 0.1
+  boot_time_s: 1.0
+
+reactions:
+  quick_stop_option: 2     # 605Ah: 1 = wyłącz napęd, 2 = rampa i wyłączenie
+  fault_reaction_option: 0  # 605Eh: 0 = wyłącz napęd, 2 = rampa quick stop
+  brake_on_fault: false
+
+cia402:
+  objects: ["603Fh", "6040h", "6041h", "605Ah", "605Eh", "6060h", "6061h", "6064h", "6065h", "6066h", "606Ch", "6072h", "6077h", "607Ah", "6085h", "6098h", "6099h", "609Ah", "60B1h", "60B2h"]
+  homing_method: 35        # 6098h (sekwencje bazowania: sesja 015)
+  homing_speed_switch: 131072
+  homing_speed_zero: 32768
+  homing_accel: 26214400
+
+# Mechanika domyślna; maszyna może ją nadpisać w instancji (overrides).
+mechanics:
+  kind: rotary
+  load: 0.5            # [kg·m²] moment bezwładności obciążenia
+  ratio: 0.0111111          # [rad/rad]
+  j_screw: 5.0000e-06       # [kg·m²]
+  friction_coulomb: 0.06    # [N·m]
+  friction_static: 0.08     # [N·m]
+  friction_viscous: 8.0000e-04  # [N·m·s/rad]
+  backlash: 3.0000e-04      # [rad]
+  contact_stiffness: 1500.0   # [N·m/rad] na wale
+  gravity_force: 0.0
+
+# Napęd rzeczywisty (REQ-VD-06, sesja 061): sterownik LinuxCNC; skala impulsów na mm/° wynika
+# z motor.encoder_counts_per_rev i mechanics.ratio. Czasy impulsów przykładowe dla typowych
+# sterowników krokowych. NIEZWERYFIKOWANE NA SPRZĘCIE.
+real:
+  driver: stepgen
+  timing_ns: {steplen: 5000, stepspace: 5000, dirsetup: 20000, dirhold: 20000}

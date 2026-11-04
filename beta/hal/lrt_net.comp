@@ -1,0 +1,236 @@
+// SPDX-License-Identifier: GPL-2.0-or-later
+// linumeRT - master LRT-NET v1 dla LinuxCNC uspace (docs/PLANT.md §3, docs/HAL_KONTRAKT.md).
+// Model-Author: Claude · sesja 017
+//
+// Jedna instancja = jedno polaczenie UDP z wirtualna obrabiarka Plant. Osie: personality (1-8),
+// w kolejnosci napedow z machine.yaml bez wrzeciona (gantry = dwie osie).
+//   loadrt lrt_net personality=3 ip=127.0.0.1 port=47700
+//   addf lrt-net.0 servo-thread
+// Cykl (funkcja `_`, watek servo): (1) nieblokujacy odbior wszystkich czekajacych odpowiedzi,
+// uzycie najnowszej (zwykle na ramke z poprzedniego cyklu), (2) piny z odpowiedzi, (3) wyslanie
+// ramki z biezacymi pinami. Wzorzec jak hm2_eth w uspace (gniazdo otwierane przy ladowaniu,
+// w RT tylko send/recv z MSG_DONTWAIT); kod wlasny.
+// Zasady RT (CLAUDE.md §5): bez alokacji, bez blokujacego I/O, bez logowania w cyklu.
+// NIEZWERYFIKOWANE NA SPRZECIE (Plant to model).
+component lrt_net "linumeRT: master LRT-NET (UDP) do wirtualnej obrabiarki Plant";
+
+pin in  u32   axis.#.controlword[8 : personality] "slowo sterujace 6040h (z lrt_cia402)";
+pin in  s32   axis.#.mode[8 : personality] = 8 "tryb pracy 6060h (8 = CSP, 6 = bazowanie)";
+pin in  float axis.#.pos-cmd[8 : personality] "pozycja zadana [jedn. osi] (joint.N.motor-pos-cmd)";
+pin in  float axis.#.scale[8 : personality] = 1000.0 "impulsy na jednostke osi (SCALE z INI)";
+pin out u32   axis.#.statusword[8 : personality] "slowo stanu 6041h";
+pin out s32   axis.#.mode-display[8 : personality] "tryb pracy 6061h";
+pin out float axis.#.pos-fb[8 : personality] "pozycja rzeczywista [jedn. osi] (joint.N.motor-pos-fb)";
+pin out s32   axis.#.counts[8 : personality] "pozycja rzeczywista 6064h [impulsy]";
+pin out float axis.#.ferror[8 : personality] "blad nadazania napedu [jedn. osi]";
+pin out float axis.#.torque[8 : personality] "moment 6077h [promile znamionowego]";
+pin out u32   axis.#.error-code[8 : personality] "kod bledu 603Fh";
+
+pin in  bit   dout-##[32] "wyjscia cyfrowe do Plant";
+pin out bit   din-##[32] "wejscia cyfrowe z Plant: stan elektryczny (1 = obwod zamkniety; NC w spoczynku = 1)";
+pin in  float spindle-speed-cmd "wrzeciono zadane [obr/min] (LRT-NET v1: nieuzywane przez Plant)";
+pin out float spindle-speed-fb "wrzeciono rzeczywiste [obr/min]";
+
+pin out bit   drive-fault "Plant: fault ktoregos napedu (flaga ramki)";
+pin out bit   estop-open "Plant: petla E-STOP otwarta (flaga ramki)";
+pin out bit   connected "odpowiedz Plant w ostatnich timeout-cycles cyklach";
+pin in  u32   timeout-cycles = 20 "cykle bez odpowiedzi, po ktorych connected = 0";
+pin in  bit   reset-stats "zbocze: zeruj liczniki tu i w Plant";
+pin out u32   sent "ramki wyslane";
+pin out u32   received "odpowiedzi przyjete";
+pin out u32   missed "cykle bez nowej odpowiedzi";
+pin out u32   bad-frames "odpowiedzi odrzucone (CRC, dlugosc, liczba osi)";
+pin out u32   send-errors "bledy wysylania";
+pin out u32   plant-lost "Plant: ramki utracone";
+pin out u32   plant-late "Plant: ramki spoznione";
+pin out u32   plant-jitter-us "Plant: jitter odbioru [us]";
+pin out u32   reply-age "roznica numerow: wyslana - ostatnia odpowiedz (1 = poprzedni cykl)";
+
+variable uint32_t frame_seq;
+variable uint64_t frame_time;
+variable uint32_t reply_seq;
+variable uint32_t silent;
+variable int have_reply;
+variable int prev_reset;
+variable int last_mode[8];
+
+option extra_setup yes;
+option extra_cleanup yes;
+
+function _ "odbior odpowiedzi, piny, wyslanie ramki";
+license "GPL-2.0-or-later";
+author "linumeRT";
+;;
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <unistd.h>
+
+#include "lrt_net_proto.h"
+
+static char *ip = "127.0.0.1";
+RTAPI_MP_STRING(ip, "adres IPv4 Plant");
+static int port = LRT_NET_PORT;
+RTAPI_MP_INT(port, "port UDP Plant");
+
+static int sock = -1;
+
+EXTRA_SETUP() {
+    struct sockaddr_in addr;
+    int n = personality;
+
+    if (extra_arg != 0) {
+        rtapi_print_msg(RTAPI_MSG_ERR, "lrt_net: tylko jedna instancja (count=1)\n");
+        return -EINVAL;
+    }
+    if (n < 1 || n > LRT_NET_MAX_AXES) {
+        rtapi_print_msg(RTAPI_MSG_ERR, "lrt_net: personality = liczba osi 1-%d\n",
+                        LRT_NET_MAX_AXES);
+        return -EINVAL;
+    }
+    memset(&addr, 0, sizeof addr);
+    addr.sin_family = AF_INET;
+    addr.sin_port = htons((uint16_t)port);
+    if (inet_pton(AF_INET, ip, &addr.sin_addr) != 1) {
+        rtapi_print_msg(RTAPI_MSG_ERR, "lrt_net: zly adres ip=%s\n", ip);
+        return -EINVAL;
+    }
+    sock = socket(AF_INET, SOCK_DGRAM, 0);
+    if (sock < 0) {
+        rtapi_print_msg(RTAPI_MSG_ERR, "lrt_net: socket: %d\n", errno);
+        return -errno;
+    }
+    // connect(): odbior tylko od Plant i send() bez adresu; gniazdo nieblokujace
+    if (connect(sock, (struct sockaddr *)&addr, sizeof addr) != 0 ||
+        fcntl(sock, F_SETFL, fcntl(sock, F_GETFL, 0) | O_NONBLOCK) != 0) {
+        int err = errno;
+        rtapi_print_msg(RTAPI_MSG_ERR, "lrt_net: connect/fcntl %s:%d: %d\n", ip, port, err);
+        close(sock);
+        sock = -1;
+        return -err;
+    }
+    frame_seq = 1;
+    frame_time = 0;
+    for (n = 0; n < LRT_NET_MAX_AXES; n++) {
+        last_mode[n] = 8;
+    }
+    n = personality;
+    rtapi_print_msg(RTAPI_MSG_INFO, "lrt_net: %d osi, Plant %s:%d\n", n, ip, port);
+    return 0;
+}
+
+EXTRA_CLEANUP() {
+    if (sock >= 0) {
+        close(sock);
+        sock = -1;
+    }
+}
+
+static int32_t to_counts(double units, double scale)
+{
+    double c = units * scale;
+    if (c >= 2147483647.0) {
+        return 2147483647;
+    }
+    if (c <= -2147483648.0) {
+        return (int32_t)-2147483647 - 1;
+    }
+    return (int32_t)(c >= 0.0 ? c + 0.5 : c - 0.5);
+}
+
+FUNCTION(_) {
+    static uint8_t rx[LRT_NET_MAX_FRAME + 16];
+    static uint8_t tx[LRT_NET_MAX_FRAME];
+    static lrt_net_reply rep;
+    static lrt_net_command cmd;
+    int n = personality;
+    int i, got = 0;
+    ssize_t len;
+
+    if (sock < 0) {
+        return;
+    }
+    // (1) odbior: przyjmij najnowsza poprawna odpowiedz (nowsza niz poprzednio przyjeta)
+    while ((len = recv(sock, rx, sizeof rx, MSG_DONTWAIT)) > 0) {
+        lrt_net_reply r;
+        if (lrt_net_decode_reply(rx, (int)len, n, &r) != LRT_NET_OK) {
+            bad_frames++;
+            continue;
+        }
+        if (have_reply && lrt_net_seq_delta(r.seq, reply_seq) <= 0) {
+            continue;  // stara albo powtorzona
+        }
+        rep = r;
+        reply_seq = r.seq;
+        have_reply = 1;
+        got = 1;
+    }
+    // (2) piny z odpowiedzi
+    if (got) {
+        received++;
+        silent = 0;
+        for (i = 0; i < n; i++) {
+            double s = axis_scale(i) != 0.0 ? axis_scale(i) : 1.0;
+            axis_statusword(i) = rep.axes[i].statusword;
+            axis_mode_display(i) = rep.axes[i].mode_display;
+            axis_counts(i) = rep.axes[i].actual_pos;
+            axis_pos_fb(i) = rep.axes[i].actual_pos / s;
+            axis_ferror(i) = rep.axes[i].following_error / s;
+            axis_torque(i) = rep.axes[i].torque;
+            axis_error_code(i) = rep.axes[i].error_code;
+        }
+        for (i = 0; i < 32; i++) {
+            din(i) = (rep.digital_in >> i) & 1u;
+        }
+        spindle_speed_fb = rep.spindle_actual;
+        drive_fault = (rep.flags & LRT_NET_FLAG_DRIVE_FAULT) != 0;
+        estop_open = (rep.flags & LRT_NET_FLAG_ESTOP_OPEN) != 0;
+        plant_lost = rep.frames_lost;
+        plant_late = rep.frames_late;
+        plant_jitter_us = rep.jitter_us;
+    } else {
+        missed++;
+        if (silent < 0xFFFFFFFFu) {
+            silent++;
+        }
+    }
+    connected = have_reply && silent < timeout_cycles;
+    reply_age = have_reply ? frame_seq - reply_seq : 0;
+
+    // (3) ramka z biezacymi pinami
+    cmd.seq = frame_seq;
+    cmd.time_ns = frame_time;
+    cmd.n_axes = (uint8_t)n;
+    cmd.flags = (reset_stats && !prev_reset) ? LRT_NET_FLAG_RESET_STATS : 0;
+    if (cmd.flags) {
+        sent = received = missed = bad_frames = send_errors = 0;
+    }
+    prev_reset = reset_stats;
+    for (i = 0; i < n; i++) {
+        cmd.axes[i].controlword = (uint16_t)axis_controlword(i);
+        // 0 = brak trybu (np. pierwszy cykl, zanim lrt_cia402 ustawi mode): ostatni poprawny
+        if (axis_mode(i) != 0) {
+            last_mode[i] = axis_mode(i);
+        }
+        cmd.axes[i].mode = (int8_t)last_mode[i];
+        cmd.axes[i].target_pos = to_counts(axis_pos_cmd(i), axis_scale(i));
+    }
+    cmd.digital_out = 0;
+    for (i = 0; i < 32; i++) {
+        if (dout(i)) {
+            cmd.digital_out |= 1u << i;
+        }
+    }
+    cmd.spindle_cmd = (float)spindle_speed_cmd;
+    len = lrt_net_encode_command(&cmd, tx);
+    if (len > 0 && send(sock, tx, (size_t)len, MSG_DONTWAIT) == len) {
+        sent++;
+    } else {
+        send_errors++;
+    }
+    frame_seq++;
+    frame_time += (uint64_t)period;
+}
