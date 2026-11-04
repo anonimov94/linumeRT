@@ -172,3 +172,37 @@ def test_linuxcnc_open_program_in_auto_from_program_dir(tmp_path):
                        ("wait_complete", 2.0)]
     with pytest.raises(CommandError, match="brak pliku"):
         b.open_program("inny.ngc")
+
+
+def test_probe_calls_lrt_probe_macro_in_active_offset():  # REQ-QA-03
+    """Sonda w WebHMI = jedno MDI ``o<lrt_probe> call`` w aktywnym układzie (makro z #204)."""
+    b, c = lc_backend()
+    gateway = Gateway(b)
+    c.calls.clear()
+    gateway.execute(Command(cmd="probe", axis="Z", direction=-1, probe_distance=20,
+                            probe_value=0))
+    assert c.calls[-1] == ("mdi", "o<lrt_probe> call [2] [-1] [20] [100] [1] [0] [2]")
+    assert ("mode", 80) in c.calls  # MODE_MDI atrapy
+
+
+def test_probe_refused_while_jogging_unhomed_or_with_bad_fields(tmp_path):  # REQ-QA-03
+    gateway, machine, clock = make(tmp_path, homed=False)
+    with pytest.raises(CommandError, match="bazowanie"):
+        gateway.execute(Command(cmd="probe", axis="Z", direction=-1, probe_distance=20,
+                                probe_value=0))
+    gateway, machine, clock = make(tmp_path)
+    gateway.execute(Command(cmd="jog", axis="X", speed=1.0))
+    with pytest.raises(CommandError, match="JOG"):
+        gateway.execute(Command(cmd="probe", axis="Z", direction=-1, probe_distance=20,
+                                probe_value=0))
+    gateway.execute(Command(cmd="jog_stop"))
+    with pytest.raises(CommandError, match="direction"):
+        gateway.execute(Command(cmd="probe", axis="Z", probe_distance=20, probe_value=0))
+    with pytest.raises(CommandError, match="atrapa"):  # atrapa uczciwie: brak wejścia sondy
+        gateway.execute(Command(cmd="probe", axis="Z", direction=-1, probe_distance=20,
+                                probe_value=0))
+    for bad in ({"direction": 2}, {"probe_distance": 0}, {"probe_distance": 101},
+                {"probe_value": float("nan")}):
+        with pytest.raises(ValidationError):
+            Command(**{"cmd": "probe", "axis": "Z", "direction": -1, "probe_distance": 20,
+                       "probe_value": 0, **bad})

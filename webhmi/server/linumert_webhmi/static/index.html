@@ -134,6 +134,18 @@ Incremental jog: Model-Author: Codex
           <button data-cmd="work_zero" data-axis="Z" disabled>Z = 0</button>
           <button data-cmd="work_zero" disabled>XYZ = 0</button>
         </div>
+        <div class="command-group probe-group">
+          <span class="group-title">SONDA (o&lt;lrt_probe&gt;, AKTYWNY UKŁAD, F100 MM/MIN, ODJAZD 2 MM)</span>
+          <select id="probeAxis" aria-label="Oś sondowania" disabled>
+            <option value="Z" selected>Z</option><option value="X">X</option><option value="Y">Y</option>
+          </select>
+          <select id="probeDirection" aria-label="Kierunek ruchu sondy" disabled>
+            <option value="-1" selected>w stronę −</option><option value="1">w stronę +</option>
+          </select>
+          <label>Droga [mm] <input id="probeDistance" type="number" min="1" max="100" step="1" value="20" disabled></label>
+          <label>Styk = [mm] <input id="probeValue" type="number" min="-10000" max="10000" step="0.001" value="0" disabled></label>
+          <button type="button" id="probeRun" disabled>Sonduj</button>
+        </div>
         <div class="command-group program-open">
           <label for="programSelect" class="group-title">PROGRAM (KATALOG PROGRAM_PREFIX)</label>
           <select id="programSelect" aria-label="Plik programu" disabled><option value="">— brak plików —</option></select>

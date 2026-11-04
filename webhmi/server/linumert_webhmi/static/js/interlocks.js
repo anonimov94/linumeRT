@@ -17,7 +17,7 @@ export function allowed(state, link) {
   const ruleKeys = [
     "power_on", "power_off", "home", "jog", "mdi", "run",
     "pause", "resume", "override", "mode:manual", "mode:mdi", "mode:auto",
-    "work_zero", "open", "reset",
+    "work_zero", "open", "reset", "probe",
   ];
   const rejectAll = (reason) => {
     for (const key of ruleKeys) result[key] = deny(reason);
@@ -66,6 +66,10 @@ export function allowed(state, link) {
     ? deny(modeReason("manual")) : !idle ? deny(needsIdle)
       : !homed ? deny("Wymagane bazowanie wszystkich osi")
         : jogging ? deny("Najpierw zatrzymaj JOG") : permit();
+  // Sonda: makro przez MDI (przełącza tryb sama), więc tryb MANUAL albo MDI.
+  result.probe = !machineOn ? deny(common) : mode === "auto" ? deny("Sonda w trybie AUTO niedostępna")
+    : !idle ? deny(needsIdle) : !homed ? deny("Wymagane bazowanie wszystkich osi")
+      : jogging ? deny("Najpierw zatrzymaj JOG") : permit();
   const programs = Array.isArray(state.programs) ? state.programs : [];
   result.open = !machineOn ? deny(common) : !idle ? deny(needsIdle)
     : !homed ? deny("Wymagane bazowanie wszystkich osi")
