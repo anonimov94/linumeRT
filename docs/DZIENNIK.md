@@ -1735,6 +1735,15 @@ Pełny RIP musi ponownie potwierdzić wynik; nie scalać na czerwonym CI.
 - Zrzut docs/raporty/G2/JOG_1280_2026-10-28.png: rzeczywiste Qt offscreen, atrapa CNC, 1280×768; wszystkie przyciski XYZ widoczne.
 - Pełny odbiór GUI/LinuxCNC i pozostałe przewijanie strony nadal otwarte. NIEZWERYFIKOWANE NA SPRZĘCIE.
 
+## 033 — makro sondowania o<lrt_probe> na LinuxCNC + Plant · 2026-10-28 · Claude
+- Model-Author: Claude. Kontynuacja #202 (bliźniak bez GUI, operacja offset.probe_run): makro sprawdzone w prawdziwym interpreterze, nie tylko jako tekst.
+- `core/linumert/programs/probe_macro.py` + `config/{sim,plant}/.../macros/lrt_probe.ngc`: jedno MDI `o<lrt_probe> call [oś] [kierunek] [droga] [posuw] [P] [wartość] [odjazd]` — G38.2, G10 L20 względem punktu styku (`#<_x> - #5061 + wartość`), odjazd, przywrócenie G90/G91 wywołującego.
+- LinuxCNC 2.9 RIP + wygenerowany Plant (mill_servo_table, cel sondy z machine.yaml): offset G54 Z −35,0119 mm (oczekiwane −35), X 253,0168 mm (oczekiwane 253); błąd = luz modelu napędu, jak w teście 033 (−0,011/+0,016). Offset równy punktowi styku − wartość z dokładnością 1e-4 mm (hamowanie za stykiem nie wpływa), odjazd ≈ 2 mm, G91 przywrócony.
+- Generator konfiguracji w main jeszcze nie dokłada makra (robi to bliźniak #202); harness testów kopiuje `config/sim/linumert_xyz/macros`. NIEZWERYFIKOWANE NA SPRZĘCIE.
+- 2026-11-03: makro odmawia `(abort)` przy złych argumentach, G20 i aktywnym G92; w MDI to tylko komunikat interpretera, bez E-STOP (test czyta kanał błędów). Powtarzalność w WSL (12 rdzeni): 7/7 PASS bez obciążenia, 1/1 przy 6 rdzeniach zajętych; przy 12/12 kierowca przekracza 300 s (lockstep Plant), a nie asercję. Wyniki deterministyczne (seed 5): Z −0,0119, X +0,0168 mm; najmniejszy margines ma `moved` przy odmowie (0,4–0,5 µm przy progu 1 µm). Progi bez zmian.
+- `tests/plant_session.py` zapisuje `linuxcnc.log` i stan `lrt-net.0` w katalogu testu, a przy przekroczeniu czasu dokłada je do komunikatu. W jednym przebiegu padł `test_probe_calibration_linuxcnc` („sonda nie zadziałała”, ściana X max) przy zdrowym łączu (connected, bez estop-open, 0 utraconych przez Plant) — hipoteza utraty LRT-NET tam odpada; podejrzany wyścig `mdi()` w kierowcy, do osobnej diagnozy.
+- 2026-11-04, przegląd Codex `e2c1c10` (REQUEST_CHANGES): makro odmawia też przy osi spoza {0,1,2} (np. 0,5 dawało gałąź Z), P niecałkowitym i trybie posuwu innym niż G94 (G93/G95 zmieniają znaczenie F); po sondowaniu wraca F wywołującego. Test LinuxCNC sprawdza 5 odmów (komunikat, offset bez zmian, ruch ≤ 0,3 µm) i F=777 po makrze; 2/2 PASS, 105 s. Odmowa w teście czeka na komunikat, bo po `(abort)` stan to RCS_ERROR i `mdi()` czekało do limitu.
+
 ## Beta — kontrola połączeń WebSocket · 2026-10-29 · Codex
 - Model-Author: Codex. Kontynuacja wskazanej przez właściciela beta, rozszerzenie 028/029 BETA-WS-GUARD; bez GUI i bez globalnego LOCK.
 - Odtworzone 4 FAIL: obcy Host i Origin spoza listy były akceptowane przez WS z tokenem i bez. Middleware HTTP nie obejmuje handshake WS.
