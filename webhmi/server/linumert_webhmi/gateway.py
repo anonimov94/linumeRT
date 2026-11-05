@@ -34,6 +34,8 @@ from .backend import CommandError, MachineBackend
 from .hal_link import HalPins
 from .schema import Command, snapshot_to_dict
 
+PROBE_FEED_MM_MIN = 100.0  # posuw próby sondy (G94)
+PROBE_RETRACT_MM = 2.0  # odjazd po styku
 STOP_COMMANDS = frozenset({"estop", "stop", "pause", "jog_stop", "power_off"})
 LOCAL_SESSION = "local"  # polecenia z REST (bez sesji WebSocket)
 POLL_HZ = 50.0
@@ -336,6 +338,17 @@ class Gateway:
                 raise CommandError("program: brak nazwy pliku")
             self._stop_all_jog()
             b.open_program(c.name)
+        elif name == "probe":
+            if c.axis not in ("X", "Y", "Z") or c.direction is None:
+                raise CommandError("sonda: wymagane axis X/Y/Z i direction ±1")
+            if c.probe_distance is None or c.probe_value is None:
+                raise CommandError("sonda: wymagane probe_distance i probe_value")
+            if self._jog_retry:
+                raise CommandError("sonda: niepotwierdzone zatrzymanie JOG")
+            if self._jog:
+                raise CommandError("sonda: najpierw zatrzymaj JOG")
+            b.probe(c.axis, c.direction, c.probe_distance, PROBE_FEED_MM_MIN, c.probe_value,
+                    PROBE_RETRACT_MM)
         elif name == "reset":
             if c.double:
                 self._acknowledge_estop()

@@ -40,6 +40,16 @@ test("power on hint in ESTOP depends on HAL pins of the gateway", () => {
   assert.match(reason(state({ task_state: "estop", hmi_hal: false })), /poza bramą/);
   assert.match(reason(state({ task_state: "estop" })), /poza bramą/);
 });
+test("probe needs ON, homed, idle, no jog and not AUTO", () => {
+  assert.equal(can("probe"), true);
+  assert.equal(can("probe", state({ mode: "mdi" })), true);
+  assert.equal(can("probe", state({ mode: "auto" })), false);
+  assert.equal(can("probe", state({ all_homed: false })), false);
+  assert.equal(can("probe", state({ interp_state: "reading" })), false);
+  assert.equal(can("probe", state({ jog_active: ["X"] })), false);
+  assert.equal(can("probe", state({ jog_active: [], jog_stop_pending: ["X"] })), false);
+  assert.equal(can("probe", state({ task_state: "off" })), false);
+});
 test("MANUAL and idle required for home and jog", () => {
   assert.equal(can("home"), true);
   assert.equal(can("jog"), true);

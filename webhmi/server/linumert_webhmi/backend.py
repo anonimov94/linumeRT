@@ -26,6 +26,7 @@ from typing import Any, Protocol
 from linumert.cnc import FakeMachine, MachineSnapshot, Mode
 from linumert.cnc.linuxcnc_reader import LinuxCNCReader
 from linumert.cnc.model import AXIS_LETTERS
+from linumert.programs.probe_macro import WORK_OFFSETS, probe_call
 
 from .schema import PROGRAM_NAME
 
@@ -62,6 +63,13 @@ def _ready_for_setup(snap: MachineSnapshot, what: str) -> None:
         raise CommandError(f"{what}: wymagany brak ruchu (interpreter IDLE)")
     if not snap.all_homed:
         raise CommandError(f"{what}: wymagane bazowanie wszystkich osi")
+
+
+def _probe_offset(snap: MachineSnapshot) -> str:
+    """Aktywny układ detalu dla G10 L20 P w makrze sondy (G54..G59.3)."""
+    if snap.work_offset_name not in WORK_OFFSETS:
+        raise CommandError(f"sonda: nieobsługiwany układ {snap.work_offset_name!r}")
+    return snap.work_offset_name
 
 
 def _zero_axes(snap: MachineSnapshot, axis: str | None) -> tuple[str, ...]:
@@ -113,6 +121,8 @@ class MachineBackend(Protocol):
     def jog_increment(self, axis: str, speed: float, distance: float) -> None: ...
     def jog_stop(self, axis: str | None) -> None: ...
     def work_zero(self, axis: str | None) -> None: ...
+    def probe(self, axis: str, direction: int, distance: float, feed: float, value: float,
+              retract: float) -> None: ...
     def programs(self) -> tuple[str, ...]: ...
     def open_program(self, name: str) -> None: ...
     def tick(self) -> None: ...
@@ -218,6 +228,13 @@ class FakeBackend:
         positions = {a.name: a.position for a in snap.axes}
         self.machine.set_work_offset(snap.work_offset_name, **{
             name: positions[name] for name in _zero_axes(snap, axis)})
+
+    def probe(self, axis: str, direction: int, distance: float, feed: float, value: float,
+              retract: float) -> None:
+        snap = self.machine.snapshot()
+        _ready_for_setup(snap, "sonda")
+        _probe_offset(snap)
+        raise CommandError("sonda: atrapa nie ma wejścia sondy (tylko LinuxCNC)")
 
     def programs(self) -> tuple[str, ...]:
         return list_programs(self.programs_dir)
@@ -456,6 +473,12 @@ class LinuxCNCBackend:
             self._programs_dir = base if base.is_absolute() else (
                 Path(ini_file).parent / base).resolve()
         return self._programs_dir
+
+    def probe(self, axis: str, direction: int, distance: float, feed: float, value: float,
+              retract: float) -> None:
+        snap = self._recent()
+        _ready_for_setup(snap, "sonda")
+        self.mdi(probe_call(axis, direction, distance, feed, _probe_offset(snap), value, retract))
 
     def programs(self) -> tuple[str, ...]:
         return list_programs(self._program_dir())

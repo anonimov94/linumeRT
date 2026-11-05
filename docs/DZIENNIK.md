@@ -1812,3 +1812,8 @@ Pełny RIP musi ponownie potwierdzić wynik; nie scalać na czerwonym CI.
 - Kliknięte w przeglądarce na LinuxCNC 2.9 + Plant z łańcuchem HMI bez obejścia: E-STOP → podwójny Reset → ON; zawieszona karta → E-STOP po 3,1 s. Zrzuty: `docs/raporty/G2/WEBHMI_WATCHDOG_2026-11-04.md`.
 - Odbiór w GUI wykrył 3 błędy niewidoczne w testach logiki (brak sygnału życia w kliencie, stary JS z pamięci podręcznej, E-1100 po resecie); poprawione, test na LinuxCNC idzie przez WebSocket.
 - Testy: `test_webhmi_watchdog_linuxcnc` PASS (~20 s), `test_webhmi_hal_link` i `test_webhmi_app`. Otwarte: ukryta karta, start bramy z `[DISPLAY]`. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## G2 — sonda w WebHMI · 2026-11-05 · Claude
+- Model-Author: Claude. Panel SONDA w WebHMI: polecenie `probe` → `o<lrt_probe>` (#204) jednym MDI w aktywnym układzie (F100, odjazd 2 mm); blokady jak zero detalu, bez wymogu MANUAL.
+- Kliknięte w przeglądarce na LinuxCNC 2.9 + Plant: Z robocze 6,9936 po styku na 5 + odjazd 2; chybienie (droga 1 mm) = E-1000 z komunikatem LinuxCNC, offset bez zmian. Zrzuty: `docs/raporty/G2/WEBHMI_SONDA_2026-11-05.md`.
+- Testy: `test_webhmi_probe_linuxcnc` PASS (offset −35,012 przy −35 ± 0,02), unit 130 PASS, JS 41 PASS. Otwarte: X/Y kliknięte tylko testem logiki, kalibracja sondy w GUI. NIEZWERYFIKOWANE NA SPRZĘCIE.
