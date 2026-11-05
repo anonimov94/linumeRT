@@ -24,6 +24,14 @@ class PrepareRequest(BaseModel):
     offset: str = "G54"
 
 
+class PreflightRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid", strict=True)
+    job_id: str = Field(pattern=r"^[0-9a-f]{64}$")
+    start_mm: tuple[Annotated[float, Field(allow_inf_nan=False)],
+                    Annotated[float, Field(allow_inf_nan=False)],
+                    Annotated[float, Field(allow_inf_nan=False)]] = Field(strict=False)
+
+
 def register_jobs(app: FastAPI, service: JobService | None,
                   need_token: Callable[[Request], None]) -> None:
     def enabled(request: Request) -> JobService:
@@ -57,3 +65,8 @@ def register_jobs(app: FastAPI, service: JobService | None,
         data = run(lambda: active.archive(name))
         return Response(data, media_type="application/zip", headers={
             "Content-Disposition": f'attachment; filename="{name}.zip"'})
+
+    @app.post("/api/jobs/{name}/preflight")
+    def preflight(request: Request, name: str, payload: PreflightRequest) -> dict:
+        active = enabled(request)
+        return run(lambda: active.preflight(name, payload.start_mm, payload.job_id))

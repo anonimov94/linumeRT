@@ -152,3 +152,36 @@ z limitem wycofania Z wybranej maszyny i kontrolą narzędzi bez zapisu bazy.
 Prepare zbiera przyczyny z całego programu przed generowaniem i publikacją pakietu.
 Dane odbioru Claude z #218 są w `tests/test_prepare_acceptance.py`: jawne zero detalu,
 schemat linumert.job v1, te same przypadki błędów, bez pomijania braku implementacji.
+
+## Pierwsza porcja kontroli poziomu 2
+
+WebHMI po przygotowaniu udostępnia „Sprawdź interpreter i ślad toru” oraz raport JSON.
+Operator podaje założoną początkową pozycję nosa wrzeciona w mm układu maszyny,
+z T0, G49 i G92=0. Kontrola działa offline; nie odczytuje ani nie zmienia położenia CNC.
+Ten sam backend jest dostępny w CLI:
+
+```sh
+linumert preflight /dane/zadania/detal-001 --start 50 50 -5 --out /dane/preflight-001.json
+```
+
+Wymagane LinuxCNC `rs274` w PATH lub `LINUXCNC_DIR` wskazujące budowę RIP.
+Pakiet jest sprawdzany przez SHA-256 oraz ponowną kompilację zapisanych wejść,
+zanim jego program trafi do interpretera. Interpreter dostaje prywatne HOME/TMPDIR,
+tabelę narzędzi i G54–G59 pakietu oraz wygenerowaną konfigurację offline sim.
+Ta porcja obsługuje XYZ/ręczną zmianę narzędzi; nie kwalifikuje remapu sprzętowego M6.
+Syntetyczny ruch N0 inicjalizuje wyłącznie interpreter; numery N1… zachowują linie programu.
+
+Raport `linumert.job.preflight` v1 wiąże job_id, założenia, wynik interpretera,
+ślad kanoniczny i wykryte przekroczenia z linią/osią. `partial` oznacza częściową
+kontrolę, `rejected` odrzucenie, `unavailable` brak interpretera, `incomplete` limit
+czasu/danych. CLI zwraca 0 tylko dla poprawnie ukończonej **częściowej** kontroli,
+2 dla pozostałych wyników/błędu. Żaden wynik tej porcji nie nadaje `verified`.
+Materiał/kolizje oraz pełna precyzja limitów pozostają pending: tekstowy ślad rs274
+zaokrągla do czterech miejsc w jednostkach programu. Nie używamy go do pozytywnego
+odbioru granicy osi ani kontraktu 0,000001 mm. Wykryte przekroczenie jest powodem
+odrzucenia; brak przekroczeń nie jest pełnym odbiorem toru.
+
+Manifest i dziewięć plików przygotowania pozostają niezmienione. Brama zapisuje
+raporty osobno w `jobs-dir/.preflight/`; CLI odmawia istniejącego raportu oraz
+zapisu wewnątrz pakietu. JSON pobrany z GUI zawiera ten sam wynik co zapis bramy.
+Dowody i granice: [odbiór częściowej kontroli](raporty/VERTICAL_PREFLIGHT_2026-11-05.md).

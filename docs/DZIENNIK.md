@@ -1875,3 +1875,15 @@ Pełny RIP musi ponownie potwierdzić wynik; nie scalać na czerwonym CI.
 - Model-Author: Codex. Kod 43851b8: WebHMI kliknięte po integracji; podgląd G53 Z-1 i pobranie ZIP. CLI, GUI i ZIP mają 9 identycznych plików (ID jak w raporcie).
 - Natywny klon: 2036 PASS, 15 skip, 213 linuxcnc deselected, 184 subtesty PASS; jedna znana porażka Qt odtworzona wcześniej na main. Lint, C i REQ 22/22 PASS.
 - Dowód/zrzut w raporcie VERTICAL_PREPARE_2026-11-05.md. Własna atrapa zatrzymana; to nie jest wykonanie pakietu LinuxCNC ani kwalifikacja sprzętu. Końcowe CI #219 wymagane.
+
+## VERTICAL-PREPARE — scalenie do pełnego main · 2026-11-05 · Codex
+
+- Model-Author: Codex. #219 scalony jako 619fe95: ci 42033344446 i pełny LinuxCNC RIP smoke 42033344066 success; #220 z dowodami jako 64b3d1b.
+- Historia #216/#217/#218 zawarta w main. #218 zamknięty jako zawarty; jego dane Claude i aktywne testy pozostają. Pełny projekt, WebHMI i QtVCP fallback zachowane.
+- Rozpoczęcie VERTICAL-VERIFY na własnej gałęzi od main. Integralność/interpreter/limity to pierwsza porcja, bez deklaracji pełnego odbioru materiału/kolizji ani poziomów 3–4.
+
+## VERTICAL-VERIFY — częściowa kontrola pakietu i WebHMI · 2026-11-05 · Codex
+
+- Model-Author: Codex. PR #221: jeden backend CLI/API/WebHMI, kontrola snapshotu i ponowna kompilacja przed izolowanym rs274 z tabelą/G54–G59. Jawne założenia początku/T0/G92, linie programu zachowane.
+- 131 testów zakresu i 7 subtestów PASS; 4 rzeczywiste rs274 (G54/G55/przekroczenie X/długość T1) PASS; 40 JS i pełny lint PASS. GUI kliknięte, zapis/pobranie JSON zgodne, przekroczenie X odrzucone.
+- Ślad rs274 zaokrąglony do 4 miejsc: brak verified i brak PASS pełnym limitom. Materiał/kolizje/obciążenia oraz poziomy 3–4 otwarte. Dowody i zrzuty w VERTICAL_PREFLIGHT_2026-11-05.md; CI/scalenie wymagane.

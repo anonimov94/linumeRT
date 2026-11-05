@@ -45,6 +45,7 @@ class JobService:
         self.jobs_dir = Path(jobs_dir).resolve()
         self.library_dir = library_dir
         self._preparing = threading.Lock()
+        self._checking = threading.Lock()
 
     def _machine(self):
         from linumert.machine.drives.machine_drives import load_machine_drives
@@ -103,6 +104,23 @@ class JobService:
         manifest, files = job.read(self._target(name))
         return {"name": name, "manifest": manifest, "report": json.loads(files["prepare.json"]),
                 "gcode": files["program.ngc"], "setup": json.loads(files["setup.json"])}
+
+    def preflight(self, name: str, start_mm: tuple[float, float, float],
+                  expected_job_id: str) -> dict:
+        from .job_check import check, save
+
+        if not self._checking.acquire(blocking=False):
+            raise ValueError("Trwa kontrola innego zadania; spróbuj ponownie")
+        try:
+            report = check(self._target(name), start_mm, expected_job_id=expected_job_id)
+            reports = self.jobs_dir / ".preflight"
+            if reports.is_symlink():
+                raise ValueError("Katalog raportów nie może być dowiązaniem")
+            reports.mkdir(exist_ok=True)
+            save(report, reports / f"{report['job_id']}-{report['report_id']}.json")
+            return report
+        finally:
+            self._checking.release()
 
     def archive(self, name: str) -> bytes:
         manifest, files = job.read(self._target(name))
