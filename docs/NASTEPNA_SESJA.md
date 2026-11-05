@@ -15,6 +15,18 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · 2026-11-05. **#222/#223/#224 scalone do main:**
+main c0b42c4 zawiera C, dokładne limity i materiał zadania po końcowym CI/LinuxCNC success.
+#224 runtime9b8db72:2097 PASS/1 znany Qt FAIL w klonie,19 real RIP PASS,65 regresji PASS,
+wheel rzeczywistym rs274/SDK/materiałem C poza źródłami PASS. GUI kliknięte:2861,832031mm³,
+107,958839s dolnego czasu; JSON identyczny z zapisem/CLI poza elapsed/id. Pełny przepływ
+mediana Python7,2761s/C4,2322s, wszystkie4 pary wyników materiału dokładnie zgodne.
+Nowa własna gałąź `codex/job-material-proof-20261105` dodaje wyłącznie dowody i2 testy
+API/CLI oraz rzeczywistej kieszeni z helisą (5 przypadków materiału PASS), bez zmiany runtime.
+Brama8789 zatrzymana. Następny ograniczony zakres: formalny verified dla kompletnej
+diagnostyki przy jawnych założeniach, potem związanie pakietu/początku/T0 z instancją
+sim/Plant, telemetria i raport. Obecny wynik pozostaje partial; poziomy3–4 nieodebrane.
+
 Model-Author: Codex · 2026-11-05. **Materiał zadania w pełnym projekcie:**
 #222 scalony jako534a5ab po końcowym Python/LinuxCNC/ISO success. #223 baza main,
 headc3a1007;2075 PASS/1 znany Qt FAIL w klonie, wheel poza checkoutem PASS,

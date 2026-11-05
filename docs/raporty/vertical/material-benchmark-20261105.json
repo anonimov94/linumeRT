@@ -1,0 +1,119 @@
+{
+  "schema": "linumert.job.preflight.benchmark",
+  "source_head": "9b8db72",
+  "platform": "Linux-6.18.54.1-microsoft-standard-WSL2-x86_64-with-glibc2.36",
+  "python": "3.11.2 (main, May 12 2026, 05:17:27) [GCC 12.2.0]",
+  "command": "python -m linumert.cli preflight JOB --start 200 200 -5 --out NEW_JSON",
+  "notes": [
+    "actual rs274 + precise gcode SDK + material worker + report save",
+    "one warmup per backend, three measured repetitions, alternating Python/C",
+    "WSL2 Debian12; source on /mnt/c; no CPU isolation; not a hardware timing guarantee"
+  ],
+  "runs": [
+    {
+      "warmup": true,
+      "iteration": 0,
+      "backend": "Python",
+      "wall_seconds": 7.643058126000142,
+      "report_elapsed_seconds": 6.26151,
+      "removed_mm3": 2861.832031,
+      "time_lower_bound_s": 107.958839,
+      "motions": 81,
+      "samples": 4981
+    },
+    {
+      "warmup": true,
+      "iteration": 0,
+      "backend": "C",
+      "wall_seconds": 3.950087918999998,
+      "report_elapsed_seconds": 2.794947,
+      "removed_mm3": 2861.832031,
+      "time_lower_bound_s": 107.958839,
+      "motions": 81,
+      "samples": 4981
+    },
+    {
+      "warmup": false,
+      "iteration": 1,
+      "backend": "Python",
+      "wall_seconds": 7.173168591000376,
+      "report_elapsed_seconds": 5.967164,
+      "removed_mm3": 2861.832031,
+      "time_lower_bound_s": 107.958839,
+      "motions": 81,
+      "samples": 4981
+    },
+    {
+      "warmup": false,
+      "iteration": 1,
+      "backend": "C",
+      "wall_seconds": 4.074431963999814,
+      "report_elapsed_seconds": 2.907244,
+      "removed_mm3": 2861.832031,
+      "time_lower_bound_s": 107.958839,
+      "motions": 81,
+      "samples": 4981
+    },
+    {
+      "warmup": false,
+      "iteration": 2,
+      "backend": "Python",
+      "wall_seconds": 7.276106639999853,
+      "report_elapsed_seconds": 6.106131,
+      "removed_mm3": 2861.832031,
+      "time_lower_bound_s": 107.958839,
+      "motions": 81,
+      "samples": 4981
+    },
+    {
+      "warmup": false,
+      "iteration": 2,
+      "backend": "C",
+      "wall_seconds": 4.413899090000086,
+      "report_elapsed_seconds": 3.246253,
+      "removed_mm3": 2861.832031,
+      "time_lower_bound_s": 107.958839,
+      "motions": 81,
+      "samples": 4981
+    },
+    {
+      "warmup": false,
+      "iteration": 3,
+      "backend": "Python",
+      "wall_seconds": 7.91955029699966,
+      "report_elapsed_seconds": 6.447621,
+      "removed_mm3": 2861.832031,
+      "time_lower_bound_s": 107.958839,
+      "motions": 81,
+      "samples": 4981
+    },
+    {
+      "warmup": false,
+      "iteration": 3,
+      "backend": "C",
+      "wall_seconds": 4.232203190000291,
+      "report_elapsed_seconds": 2.961401,
+      "removed_mm3": 2861.832031,
+      "time_lower_bound_s": 107.958839,
+      "motions": 81,
+      "samples": 4981
+    }
+  ],
+  "summary": {
+    "Python": {
+      "minimum_seconds": 7.173168591000376,
+      "median_seconds": 7.276106639999853
+    },
+    "C": {
+      "minimum_seconds": 4.074431963999814,
+      "median_seconds": 4.232203190000291
+    }
+  },
+  "material_results_equal_except_backend": true,
+  "job_id": "95bf2c0bc88fb59abaa1cdea747ddfdbfc58bc042701d4fe0beed5fbb8a1316e",
+  "library_sha256": {
+    "core/native/build/liblinumert_native.so": "1c42ffe0d9b60d0eecce44761d8e8bff40f7d40739ca06b338da0c342f48af6c",
+    "core/native/build/liblinumert_tooldata.so": "927454edb6664e0f01129a3dae2b61fb9d1f6474552948e280a19352613f956f",
+    "/home/codex/.cache/linuxcnc-2.9/lib/python/gcode.so": "ee813b494c829221c2e5b17b82789906622abbfa570043ee4c64c7b53ef192c1"
+  }
+}

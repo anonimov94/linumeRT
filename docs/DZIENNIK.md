@@ -1921,3 +1921,15 @@ obwiednie brył/stref. Braki geometrii/napędów, timeout i urwany JSON nie daj�
 19 rzeczywistych testów offline RIP PASS (16 wcześniejszych +3 materiału),65 regresji PASS,
 lint całego drzewa PASS. GUI i końcowy pomiar/testy pozostają w toku; wynik częściowy nie
 uprawnia do wykonania. Szczegóły i granice: raport VERTICAL_MATERIAL_2026-11-05.md.
+
+## 2026-11-05 — odbiór i scalenie diagnostyki zadania
+
+Model-Author: Codex. #223 scalony e794c7b, #224 c0b42c4 po zielonym CI i LinuxCNC.
+Runtime9b8db72:2097 PASS/1 znany Qt FAIL w klonie; Plant/native C i192 Python z C PASS,
+19 rzeczywistych offline RIP i65 regresji PASS; REQ22/22 i wheel PASS. Także zainstalowany
+wheel wykonał pełny rs274/SDK/materiał C/raport poza checkoutem. WebHMI kliknięte, raport
+pobrany i zgodny z zapisem/CLI poza elapsed/id. 2861,832031mm³ i107,958839s dolnego czasu.
+Pomiar całego CLI po rozgrzaniu:3 powtórzenia, mediana Python7,2761s/C4,2322s; kompletne
+wyniki materiału wszystkich4 par dokładnie zgodne poza etykietą backendu. Brama8789 zatrzymana.
+Osobny commit dowodów dodaje zrzut, surowy pomiar i2 testy API/CLI oraz helisy (5 przypadków
+materiału PASS); nie zmienia runtime. Formalne verified, wykonanie i raport pozostają otwarte.

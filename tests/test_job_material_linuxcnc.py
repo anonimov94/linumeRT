@@ -10,8 +10,15 @@ from pathlib import Path
 
 import pytest
 from job_support import inputs
+from linumert.cli import main
+from linumert.cnc import FakeMachine
 from linumert.programs import job
+from linumert.programs.lnx import parse_lnx, save_lnx
+from linumert.programs.prepare import JobService
+from linumert.tools.db import ToolDB
 from linumert_sim.job_preflight import check
+from linumert_webhmi import FakeBackend, Gateway, create_app
+from starlette.testclient import TestClient
 from test_job_material import complete_inputs
 from test_job_trace_linuxcnc import runtime as runtime
 
@@ -89,3 +96,54 @@ def test_declared_fixture_collision_reports_executed_source_line(runtime, tmp_pa
     assert any(e["code"] == "K-304" and e["stop"] for e in hits)
     assert json.loads((package / "machine.yaml").read_text())["collision_bodies"][-1][
         "name"] == "imadlo"
+
+
+def test_api_cli_persist_same_diagnostic_without_changing_cnc(runtime, tmp_path, monkeypatch):
+    rip, bridge = runtime
+    monkeypatch.setenv("LINUXCNC_DIR", str(rip))
+    monkeypatch.setenv("LINUMERT_TOOL_DATA_LIB", str(bridge))
+    source = tmp_path / "input"
+    source.mkdir()
+    program, config, _, tools = complete_inputs()
+    save_lnx(program, source / "part.lnx")
+    (source / "machine.yaml").write_text(job.json_text(config.model_dump(mode="json")))
+    with ToolDB(source / "tools.db") as database:
+        for tool in tools.values():
+            database.add(tool)
+    service = JobService(source, source / "machine.yaml", source / "tools.db", tmp_path / "jobs")
+    prepared = service.prepare("part.lnx", "part", (200, 200, -80))
+    archive = service.archive("part")
+    gateway = Gateway(FakeBackend(FakeMachine()))
+    state = gateway.snapshot()
+    token = "job-material-api-test"
+    client = TestClient(create_app(gateway, token, jobs=service), base_url="http://127.0.0.1")
+    response = client.post("/api/jobs/part/preflight", headers={"X-Linumert-Token": token},
+        json={"job_id": prepared["manifest"]["job_id"], "start_mm": [200, 200, -5]})
+    assert response.status_code == 200, response.text
+    result = response.json()
+    assert result["status"] == "partial" and result["checks"]["material"] == "passed"
+    saved, = (service.jobs_dir / ".preflight").glob("*.json")
+    assert json.loads(saved.read_text()) == result
+    output = tmp_path / "cli-report.json"
+    assert main(["preflight", str(service.jobs_dir / "part"), "--start", "200", "200", "-5",
+                 "--out", str(output)]) == 0
+    def same(row):
+        return {k: v for k, v in row.items() if k not in ("elapsed_seconds", "report_id")}
+    assert same(result) == same(json.loads(output.read_text()))
+    assert service.archive("part") == archive and gateway.snapshot() == state
+
+
+def test_executed_circular_pocket_and_helical_entry_feed_same_material_model(runtime, tmp_path):
+    rip, bridge = runtime
+    program, config, drives, tools = complete_inputs()
+    raw = program.model_dump(mode="json")
+    raw["steps"][3] = {"generator": "pocket_circle", "version": 2, "params": {
+        "cx": 30, "cy": 20, "diameter": 20, "z_top": -1, "depth": 2,
+        "tool_d": 6, "entry": "helix"}}
+    package = tmp_path / "job"
+    job.publish(job.render(parse_lnx(raw), config, drives, tools, (200, 200, -80)), package)
+    result = check(package, (200, 200, -5), root=rip, trace_library=bridge)
+    assert result["status"] == "partial", result["messages"]
+    arcs = [m for m in result["precise_trace"]["motions"] if m["name"] == "ARC_FEED"]
+    assert arcs and result["material_diagnostic"]["removed_mm3"] > 1000
+    assert not result["material_diagnostic"]["events"]
