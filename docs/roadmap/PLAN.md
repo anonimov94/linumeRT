@@ -578,7 +578,7 @@ Bramka automatyczna: `open`; odbiór stanowiska osobno.
 
 Pozostaje: Pulpit (MPG, przyciski) i E-STOP rzeczywisty w sekcji hardware. Raport konkursu 03.
 
-Źródła: [plant/server/linumert_plant/drive_real.py](../../plant/server/linumert_plant/drive_real.py), [core/linumert/machine/schema.py](../../core/linumert/machine/schema.py), [plant/library/drives/README.md](../../plant/library/drives/README.md), [tests/test_drive_real.py](../../tests/test_drive_real.py), [docs/DZIENNIK.md](../DZIENNIK.md), [prompts/sesja-061.md](../../prompts/sesja-061.md).
+Źródła: [plant/server/linumert_plant/drive_real.py](../../plant/server/linumert_plant/drive_real.py), [core/linumert/machine/schema.py](../../core/linumert/machine/schema.py), [core/linumert/machine/drives/templates/README.md](../../core/linumert/machine/drives/templates/README.md), [tests/test_drive_real.py](../../tests/test_drive_real.py), [docs/DZIENNIK.md](../DZIENNIK.md), [prompts/sesja-061.md](../../prompts/sesja-061.md).
 
 ### 062 — Generator INI/HAL: sim, Plant, step/dir
 

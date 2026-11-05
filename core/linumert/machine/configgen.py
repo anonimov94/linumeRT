@@ -53,6 +53,7 @@ class Options:
     tool_table: str = "../../sim/linumert_xyz/tool.tbl"
     postgui: str = "../../sim/linumert_xyz/linumert_postgui.hal"
     subroutine_path: str = "macros"
+    display: str = "qtvcp linumert"  # linumert-headless: backend bez GUI (linumert-lite)
     atc: bool = False     # remap M6 na makro ATC wygenerowane z sekcji toolchanger (rack_linear)
     extra: dict[str, Any] = field(default_factory=dict)
 
@@ -167,7 +168,7 @@ def render_ini(cfg: MachineConfig, js: list[Joint], target: str, opt: Options,
         "",
         "[EMC]", "VERSION = 1.1", f"MACHINE = linumeRT {title} {cfg.machine.name}",
         "DEBUG = 0x00000000", "",
-        "[DISPLAY]", "DISPLAY = qtvcp linumert", f"TITLE = linumeRT {title} {coords}",
+        "[DISPLAY]", f"DISPLAY = {opt.display}", f"TITLE = linumeRT {title} {coords}",
         "PREFERENCE_FILE_PATH = WORKINGFOLDER/linumert.pref",
         "MAX_FEED_OVERRIDE = 1.2", "MIN_SPINDLE_0_OVERRIDE = 0.5", "MAX_SPINDLE_0_OVERRIDE = 1.2",
         f"DEFAULT_SPINDLE_0_SPEED = {_g(round(sp.max_rpm * 0.75))}",

@@ -944,7 +944,7 @@
       "evidence": [
         "plant/server/linumert_plant/drive_real.py",
         "core/linumert/machine/schema.py",
-        "plant/library/drives/README.md",
+        "core/linumert/machine/drives/templates/README.md",
         "tests/test_drive_real.py",
         "docs/DZIENNIK.md"
       ]

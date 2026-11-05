@@ -19,6 +19,10 @@ def test_backend_dependency_boundaries():
                                   ("simulation/linumert_sim", {"linumert_plant"})):
         for path in (ROOT / directory).rglob("*.py"):
             blocked = UI_IMPORTS | forbidden
+            presentation = (path.is_relative_to(ROOT / "plant/server/linumert_plant/panel")
+                            or path == ROOT / "simulation/linumert_sim/render_view.py")
+            if presentation:
+                blocked = forbidden  # warstwy prezentacji pełnej edycji (panel Plant, widok 3D)
             if path == ROOT / "core/linumert/cli.py":
                 blocked = UI_IMPORTS  # composition root may invoke either independent service
             tree = ast.parse(path.read_text(encoding="utf-8"))
