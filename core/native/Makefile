@@ -20,11 +20,23 @@ SRC := relief.c zmap.c
 OBJ := $(SRC:%.c=$(BUILD)/%.o)
 PIC_OBJ := $(SRC:%.c=$(BUILD)/pic/%.o)
 
-.PHONY: all shared test test-san clean
+.PHONY: all shared test test-san clean linuxcnc-tooldata
 
 all: shared
 
 shared: $(BUILD)/liblinumert_native.so
+
+# Optional LinuxCNC 2.9 C++ bridge, not linked into the C11 math library.
+# Private tooldata headers are in the RIP source tree, not the installed public SDK.
+CXX ?= c++
+LINUXCNC_DIR ?=
+linuxcnc-tooldata: | $(BUILD)
+	@test -f "$(LINUXCNC_DIR)/src/emc/tooldata/tooldata.hh" || \
+		(echo 'Set LINUXCNC_DIR to the LinuxCNC 2.9 RIP source/build' >&2; exit 1)
+	$(CXX) -O2 -std=c++17 -Wall -Wextra -Wpedantic -Werror -fPIC -shared \
+		-isystem "$(LINUXCNC_DIR)/include" -isystem "$(LINUXCNC_DIR)/src/emc/tooldata" \
+		linuxcnc_tooldata.cc -L"$(LINUXCNC_DIR)/lib" \
+		-Wl,-rpath,"$(LINUXCNC_DIR)/lib" -ltooldata -o $(BUILD)/liblinumert_tooldata.so
 
 $(BUILD) $(BUILD)/pic:
 	mkdir -p $@

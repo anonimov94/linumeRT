@@ -1899,3 +1899,9 @@ Pełny RIP musi ponownie potwierdzić wynik; nie scalać na czerwonym CI.
 
 - Model-Author: Codex. Pełny klon 51de699: 2070 PASS, 2 FAIL (znany Qt oraz systemowy Python bez pytest w zagnieżdżonym make test-c). Lint/C/REQ PASS przed pełną regresją.
 - Test test-c wskazuje teraz sys.executable bieżącego pytest; ten sam cel i wszystkie jego kontrole PASS (39 s), bez instalacji globalnej i bez zmiany algorytmów. Końcowe CI nowego SHA wymagane.
+
+## VERTICAL-VERIFY — dokładne callbacki i prywatne tooldata · 2026-11-05 · Codex
+
+- Model-Author: Codex. Gałąź codex/job-trace-20261105 nad #222: opcjonalny adapter C++17 libtooldata i izolowany gcode.parse, bez usuwania T/M6/G43 i bez NML/HAL. Pierwsza porcja backendu; podpięcie do preflight i GUI w toku.
+- 6 rzeczywistych testów RIP PASS: detal 82 ruchy, linie/T/RPM, cale i korekcja 40,1234 mm, wykonywane warunkowo T1/T7, błędy/EOF/pętla, odmowa cudzej lub istniejącej .tool.mmap. Lint PASS.
+- API podglądu LinuxCNC dopuszcza ruch przy F0: adapter jawnie odrzuca takie zdarzenie; autorytatywna semantyka nadal wymaga wcześniejszego rs274. Dokładny tor nie zastępuje tego odbioru ani materiału/kolizji.

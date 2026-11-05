@@ -121,7 +121,7 @@ def check_canon(text: str, limits: dict[str, tuple[float, float]]) -> list[Viola
 
 def _arc_candidates(
     start: tuple[float, ...], vals: list[float], plane: tuple[int, int, int],
-    xy_rot: float = 0.0,
+    xy_rot: float = 0.0, *, strict: bool = False,
 ) -> list[tuple[float, ...]]:
     """Ekstrema osi w zakresie łuku i jego koniec, w kolejności przejścia."""
     first, second, spiral = plane
@@ -134,8 +134,11 @@ def _arc_candidates(
     radius = math.hypot(start[first] - center_first, start[second] - center_second)
     end_radius = math.hypot(endpoint[first] - center_first, endpoint[second] - center_second)
     # Niepełny/niepoprawny zapis kanoniczny: zachowaj dotychczasową kontrolę końca.
-    if (rotation == 0 or radius < EPS
-            or not math.isclose(radius, end_radius, rel_tol=1e-4, abs_tol=EPS)):
+    valid_radius = math.isclose(radius, end_radius,
+                                rel_tol=0 if strict else 1e-4, abs_tol=EPS)
+    if rotation == 0 or radius < EPS or not valid_radius:
+        if strict:
+            raise ValueError("Niepełny lub niekołowy łuk: pełna kontrola limitów niemożliwa")
         return [endpoint]
 
     start_angle = math.atan2(start[second] - center_second, start[first] - center_first)
@@ -191,7 +194,8 @@ def _arc_candidates(
     return interior + [endpoint]
 
 
-def analyze_canon(text: str, limits: dict[str, tuple[float, float]]) -> LimitReport:
+def analyze_canon(text: str, limits: dict[str, tuple[float, float]], *,
+                  strict: bool = False) -> LimitReport:
     """Pierwsze przekroczenie każdej osi i strony limitu; `count` liczy sprawdzone punkty."""
     cuts_without_tlo = False
     found: list[Violation] = []
@@ -276,7 +280,10 @@ def analyze_canon(text: str, limits: dict[str, tuple[float, float]]) -> LimitRep
             continue
         if name == "ARC_FEED":
             vals = _floats(args)
-            candidates = _arc_candidates(position, vals, plane, xy_rot)
+            try:
+                candidates = _arc_candidates(position, vals, plane, xy_rot, strict=strict)
+            except ValueError as error:
+                raise ValueError(f"linia {line}: {error}") from error
             pos = candidates[-1]
         elif name in ("STRAIGHT_TRAVERSE", "STRAIGHT_FEED"):
             pos = _six(_floats(args)[:6])

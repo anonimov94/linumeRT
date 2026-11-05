@@ -678,3 +678,13 @@ referencje Python i narzędzia pomiarowe z gałęzi `claude/natywne-przyspieszen
 GPL-2.0-or-later. Codex — integracja do pełnego projektu, kontrola eksportów,
 porównanie bajtowe, raport NATIVE_INTEGRATION_2026-11-05.md i własne pomiary
 `docs/raporty/native-integration/bench_{python,native}.json`. Bez nowych zależności.
+
+### Precyzyjny tor i prywatna tabela LinuxCNC — 2026-11-05
+
+Model-Author: Codex. Własny adapter `core/native/linuxcnc_tooldata.cc`, proces
+`core/linumert/programs/_job_trace_worker.py`, orkiestracja job_trace.py i testy;
+GPL-2.0-or-later. Wywołania API na podstawie lokalnego źródła LinuxCNC 2.9:
+src/emc/tooldata/tooldata.hh, tooldata_mmap.cc oraz src/emc/rs274ngc/gcodemodule.cc
+(LinuxCNC, GPL-2.0-or-later); bez kopiowania implementacji interpretera/plenera.
+Łączenie z libtooldata i gcode tej samej budowy RIP, prywatny HOME/cwd. C++17
+dotyczy tylko tego opcjonalnego adaptera SDK; dotychczasowe kernele pozostają C11.
