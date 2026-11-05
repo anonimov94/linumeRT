@@ -1,7 +1,7 @@
-# plant/library/drives
+# Wspólne szablony napędów
 
 Szablony napędów wirtualnych (kopiowalne). **Każdy wirtualny napęd w maszynie jest instancją szablonu
-stąd** (CLAUDE.md §5a). Model-Author: Claude · sesja 013 (REQ-VD-01…05).
+stąd** (model wspólny dla Plant i konfiguratora). Model-Author: Claude · sesja 013 (REQ-VD-01…05).
 
 ## Biblioteka startowa (REQ-VD-05)
 

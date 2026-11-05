@@ -63,14 +63,13 @@ def joint_drives(cfg: MachineConfig) -> list[tuple[Axis, str]]:
 
 
 def plant_scales(cfg: MachineConfig) -> dict[str, float]:
-    """Impulsy na mm/° napędów z modelu Plant (ten sam rachunek co wirtualna obrabiarka)."""
-    # plant/server na PYTHONPATH; rozwiązanie napędów z biblioteki szablonów (REQ-VD-02)
-    from linumert_plant.build_machine import build_model
-    from linumert_plant.drive_library import load_library
-    from linumert_plant.machine_drives import resolve_machine_drives
+    """Impulsy na mm/° napędów osi; ten sam rachunek co Plant, bez importu Plant (REQ-VD-02)."""
+    from .drives.drive_library import load_library
+    from .drives.drive_real import counts_per_unit
+    from .drives.machine_drives import resolve_machine_drives
 
     drives = resolve_machine_drives(cfg, load_library())
-    return dict(build_model(cfg, drives).counts_per_unit)
+    return {name: counts_per_unit(drives[name].params) for _, name in joint_drives(cfg)}
 
 
 def joints(cfg: MachineConfig, scales: dict[str, float]) -> list[Joint]:

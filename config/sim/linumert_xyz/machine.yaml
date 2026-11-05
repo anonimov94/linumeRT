@@ -1,5 +1,5 @@
 # Model maszyny symulatora linumeRT XYZ (config/sim/linumert_xyz): zakresy jak w INI, napędy
-# z plant/library/drives, bryły kolizyjne do symulacji materiału i kolizji w HMI.
+# z core/linumert/machine/drives/templates, bryły kolizyjne do symulacji materiału i kolizji w HMI.
 # Stół: blat Z -180 (układ maszyny, wierzchołek narzędzia), przygotówka 150 × 150 × 30 stoi na
 # blacie, zero G54 = lewy przedni róg wierzchu przygotówki (X100 Y100 Z-150, linumert.var.default).
 # Wartości przykładowe — NIEZWERYFIKOWANE NA SPRZĘCIE. Model-Author: Claude · 2026-10-19.
