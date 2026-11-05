@@ -23,6 +23,12 @@ TOKEN = "job-preflight-test-token"
 HEADERS = {"X-Linumert-Token": TOKEN}
 
 
+@pytest.fixture(autouse=True)
+def standalone_only(monkeypatch, tmp_path):
+    """This module exercises the partial fallback independently of local builds."""
+    monkeypatch.setenv("LINUMERT_TOOL_DATA_LIB", str(tmp_path / "not-built.so"))
+
+
 def canon(*calls):
     return "\n".join(f"{i+1} N{i} {call}" for i, call in enumerate(calls)) + "\n"
 
@@ -156,6 +162,17 @@ def test_cli_preserves_bundle_and_existing_report(package, monkeypatch, tmp_path
     assert main(args) == 2 and target.read_bytes() == before
     args[-1] = str(package / "extra.json")
     assert main(args) == 2 and not (package / "extra.json").exists()
+
+
+def test_disagreement_between_interfaces_cannot_pass_limits(package, monkeypatch):
+    fake(monkeypatch)
+    monkeypatch.setattr(job_check.job_trace, "capture", lambda *a, **k: {
+        "canonical": GOOD.replace("STRAIGHT_FEED(10, 10", "STRAIGHT_FEED(11, 10")})
+    result = job_check.check(package, START)
+    assert result["status"] == "incomplete"
+    assert result["checks"]["interpreter"] == "passed"
+    assert result["checks"]["motion_limits"] == "incomplete"
+    assert "coordinate_resolution_mm" not in result
 
 
 def test_api_auth_snapshot_report_storage_and_no_cnc_effect(tmp_path, monkeypatch):

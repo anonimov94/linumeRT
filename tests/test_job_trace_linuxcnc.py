@@ -4,16 +4,21 @@ SPDX-License-Identifier: GPL-2.0-or-later
 Model-Author: Codex
 """
 
+import json
 import os
 import subprocess
 import sys
 from pathlib import Path
 
 import pytest
-from job_support import inputs
-from linumert.programs import job
+from job_support import inputs, write_inputs
+from linumert.cnc import FakeMachine
+from linumert.programs import job, job_check
 from linumert.programs.job_trace import capture
 from linumert.programs.limits import analyze_canon
+from linumert.programs.prepare import JobService
+from linumert_webhmi import FakeBackend, Gateway, create_app
+from starlette.testclient import TestClient
 
 pytestmark = pytest.mark.linuxcnc
 ROOT = Path(__file__).resolve().parents[1]
@@ -121,3 +126,70 @@ def test_bridge_refuses_nonprivate_home_or_an_existing_mapping(runtime, tmp_path
                            capture_output=True, text=True, timeout=10, check=True)
     assert int(done.stdout) < 0
     assert sentinel.read_bytes() == b"do not truncate"
+
+
+@pytest.mark.parametrize("origin,failed", [
+    ((50, 50, -80), False), ((539.00004, 50, -80), True),
+    ((538.99996, 50, -80), False),
+])
+def test_preflight_uses_unrounded_limits_including_near_boundary(runtime, tmp_path, origin, failed):
+    program, machine, drives, tools = inputs()
+    package = tmp_path / "job"
+    job.publish(job.render(program, machine, drives, tools, origin), package)
+    before = {p.name: p.read_bytes() for p in package.iterdir()}
+    rip, bridge = runtime
+    result = job_check.check(package, (50, 50, -5), root=rip, trace_library=bridge)
+    assert result["checks"]["interpreter"] == "passed", result["messages"]
+    assert result["checks"]["motion_limits"] == ("failed" if failed else "passed"), result
+    assert result["status"] == ("rejected" if failed else "partial")
+    assert result["checks"]["material"] == "pending"
+    assert result["coordinate_resolution_mm"] == 1e-6
+    assert job_check.ROUNDING_NOTE not in result["limitations"]
+    if failed:
+        violation = next(v for v in result["violations"] if v["axis"] == "X")
+        assert violation["line"] == 20
+        assert violation["value"] == pytest.approx(599.00004, abs=1e-9)
+    assert {p.name: p.read_bytes() for p in package.iterdir()} == before
+
+
+def test_arc_interior_is_checked_on_precise_callbacks(runtime):
+    text = "G21 G90 G17 G94\nT1 M6\nG43 H1\nG0 X0 Y1 Z0\nG3 X0 Y-1 I0 J-1 F100\nM2\n"
+    trace = run(runtime, text, origin=(1.5, 50, -80))
+    result = analyze_canon(trace["canonical"], LIMITS, strict=True)
+    assert [(v.line, v.axis, v.side) for v in result.violations] == [(5, "X", "min")]
+    assert result.violations[0].value == pytest.approx(0.5, abs=1e-9)
+
+
+def test_g55_preflight_uses_the_same_offset_in_both_interfaces(runtime, tmp_path):
+    program, machine, drives, tools = inputs()
+    program.steps[0].params["offset"] = "G55"
+    package = tmp_path / "job"
+    job.publish(job.render(program, machine, drives, tools, (50, 50, -80), "G55"), package)
+    rip, bridge = runtime
+    result = job_check.check(package, (50, 50, -5), root=rip, trace_library=bridge)
+    assert result["checks"]["motion_limits"] == "passed", result["messages"]
+
+
+def test_api_persists_precise_result_preserving_package_and_cnc(runtime, tmp_path, monkeypatch):
+    rip, bridge = runtime
+    monkeypatch.setenv("LINUXCNC_DIR", str(rip))
+    monkeypatch.setenv("LINUMERT_TOOL_DATA_LIB", str(bridge))
+    source, db, machine = write_inputs(tmp_path / "input")
+    service = JobService(source.parent, machine, db, tmp_path / "jobs")
+    prepared = service.prepare(source.name, "part", (50, 50, -80))
+    archive = service.archive("part")
+    gateway = Gateway(FakeBackend(FakeMachine()))
+    state = gateway.snapshot()
+    token = "precise-linuxcnc-api-test"
+    client = TestClient(create_app(gateway, token, jobs=service), base_url="http://127.0.0.1")
+    response = client.post("/api/jobs/part/preflight", headers={"X-Linumert-Token": token},
+        json={"job_id": prepared["manifest"]["job_id"], "start_mm": [50, 50, -5]})
+    assert response.status_code == 200, response.text
+    result = response.json()
+    assert result["status"] == "partial" and result["checks"]["motion_limits"] == "passed"
+    assert result["checks"]["material"] == "pending"
+    assert result["checks"]["execution"] == "not_started"
+    assert len(result["precise_trace"]["motions"]) == 82
+    saved, = (service.jobs_dir / ".preflight").glob("*.json")
+    assert json.loads(saved.read_text()) == result
+    assert service.archive("part") == archive and gateway.snapshot() == state

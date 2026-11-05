@@ -688,3 +688,7 @@ src/emc/tooldata/tooldata.hh, tooldata_mmap.cc oraz src/emc/rs274ngc/gcodemodule
 (LinuxCNC, GPL-2.0-or-later); bez kopiowania implementacji interpretera/plenera.
 Łączenie z libtooldata i gcode tej samej budowy RIP, prywatny HOME/cwd. C++17
 dotyczy tylko tego opcjonalnego adaptera SDK; dotychczasowe kernele pozostają C11.
+
+Własny zrzut WebHMI po dokładnej kontroli, bez retuszu: Codex, 2026-11-05,
+GPL-2.0-or-later. `docs/raporty/vertical/precise-limits-20261105.jpg`;
+brama fake, rzeczywiste interpretery offline RIP, bez zasobów zewnętrznych.

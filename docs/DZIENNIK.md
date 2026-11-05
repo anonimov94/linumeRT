@@ -1905,3 +1905,9 @@ Pełny RIP musi ponownie potwierdzić wynik; nie scalać na czerwonym CI.
 - Model-Author: Codex. Gałąź codex/job-trace-20261105 nad #222: opcjonalny adapter C++17 libtooldata i izolowany gcode.parse, bez usuwania T/M6/G43 i bez NML/HAL. Pierwsza porcja backendu; podpięcie do preflight i GUI w toku.
 - 6 rzeczywistych testów RIP PASS: detal 82 ruchy, linie/T/RPM, cale i korekcja 40,1234 mm, wykonywane warunkowo T1/T7, błędy/EOF/pętla, odmowa cudzej lub istniejącej .tool.mmap. Lint PASS.
 - API podglądu LinuxCNC dopuszcza ruch przy F0: adapter jawnie odrzuca takie zdarzenie; autorytatywna semantyka nadal wymaga wcześniejszego rs274. Dokładny tor nie zastępuje tego odbioru ani materiału/kolizji.
+
+## VERTICAL-VERIFY — dokładne limity w CLI/API/WebHMI · 2026-11-05 · Codex
+
+- Model-Author: Codex. #221 scalony do main 353a472 po zielonym CI 42050601102 i LinuxCNC 42050601111; #222 head78dbf4d czeka na końcowe LinuxCNC (python/ISO success).
+- #223: zgodność ruchów rs274 i dokładnego gcode.parse, analityczne limity z double/mm, jawna odmowa niepełnego łuku i F0. Materiał nadal pending, bez verified.
+- 16 testów real RIP i 170 regresji PASS; GUI kliknięte, raport pobrany/zapisany identyczny, CLI zgodny poza elapsed/id. Dowody w VERTICAL_LIMITS_2026-11-05.md; własna brama zatrzymana. CI/scalenie wymagane.

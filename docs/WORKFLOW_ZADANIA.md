@@ -176,12 +176,42 @@ Raport `linumert.job.preflight` v1 wiąże job_id, założenia, wynik interprete
 kontrolę, `rejected` odrzucenie, `unavailable` brak interpretera, `incomplete` limit
 czasu/danych. CLI zwraca 0 tylko dla poprawnie ukończonej **częściowej** kontroli,
 2 dla pozostałych wyników/błędu. Żaden wynik tej porcji nie nadaje `verified`.
-Materiał/kolizje oraz pełna precyzja limitów pozostają pending: tekstowy ślad rs274
-zaokrągla do czterech miejsc w jednostkach programu. Nie używamy go do pozytywnego
-odbioru granicy osi ani kontraktu 0,000001 mm. Wykryte przekroczenie jest powodem
-odrzucenia; brak przekroczeń nie jest pełnym odbiorem toru.
+Materiał/kolizje pozostają pending. Sam tekstowy ślad rs274 zaokrągla do czterech
+miejsc w jednostkach programu, więc bez adaptera poniżej nie zalicza pełnych limitów.
+Wykryte przekroczenie jest powodem odrzucenia; brak przekroczeń nie zastępuje dokładnego toru.
 
 Manifest i dziewięć plików przygotowania pozostają niezmienione. Brama zapisuje
 raporty osobno w `jobs-dir/.preflight/`; CLI odmawia istniejącego raportu oraz
 zapisu wewnątrz pakietu. JSON pobrany z GUI zawiera ten sam wynik co zapis bramy.
 Dowody i granice: [odbiór częściowej kontroli](raporty/VERTICAL_PREFLIGHT_2026-11-05.md).
+
+## Dokładny tor i limity poziomu 2
+
+Opcjonalny adapter C++17 używa API tooldata **tej samej budowy LinuxCNC 2.9 RIP** co
+moduł gcode. Budowa jest jawna, poza importem i poza RT:
+
+```sh
+make -C core/native linuxcnc-tooldata LINUXCNC_DIR=/sciezka/linuxcnc-2.9
+export LINUXCNC_DIR=/sciezka/linuxcnc-2.9
+# Inny plik opcjonalnie: export LINUMERT_TOOL_DATA_LIB=/sciezka/liblinumert_tooldata.so
+```
+
+Po budowie te same CLI/API/WebHMI automatycznie korzystają z prywatnego gcode.parse,
+z oryginalnym programem i rzeczywistymi T/M6/G43. Interpreter nie korzysta z NML/HAL
+ani mapy narzędzi działającej maszyny. Adapter odmawia istniejącej .tool.mmap oraz
+nieprywatnego HOME/cwd; moduł gcode musi pochodzić ze wskazanej budowy RIP.
+Aktualny adapter SDK wymaga źródeł RIP (tooldata.hh nie jest publicznym nagłówkiem
+instalowanego SDK); brak adaptera zachowuje jawny wynik częściowy z limitami pending.
+
+Semantyka programu nadal wymaga rs274: gcode.parse jest interfejsem podglądu i m.in.
+dopuszcza F0. Odbiornik odrzuca ruch roboczy bez dodatniego posuwu. Oba interfejsy
+muszą dać tę samą kolejność, rodzaje, linie i współrzędne ruchów (uwzględniając tylko
+zaokrąglenie tekstu rs274 przy porównaniu). Limity są następnie liczone z nieobciętych
+wartości double w mm, z dokładnością obliczeń 0,000001 mm i ekstremami łuków.
+Niepełny/niekołowy łuk daje incomplete, zamiast kontroli samych końców.
+
+Poprawny tor dostaje `motion_limits: passed`; materiał nadal pending i całość partial.
+Brak zgodności, błąd lub niepełny tor nie daje PASS. Raport zawiera dodatkowo precise_trace
+i coordinate_resolution_mm. Przekroczenia mniejsze od rozdzielczości prezentacji
+mają dopisek w komunikacie, dokładne wartości pozostają w JSON.
+Dowody: [dokładne limity](raporty/VERTICAL_LIMITS_2026-11-05.md).

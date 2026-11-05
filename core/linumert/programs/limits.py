@@ -48,8 +48,10 @@ class Violation:
         more = f" (i {self.count - 1} kolejnych ruchów)" if self.count > 1 else ""
         unit = "°" if self.axis in ROTARY else "mm"
         precision = 3 if self.axis in ROTARY else 4
+        fine = (" (przekroczenie <0,0001 mm; dokładne wartości w raporcie)"
+                if self.axis not in ROTARY and 0 < abs(self.value - self.limit) < 0.0001 else "")
         return (f"linia {self.line}: oś {self.axis} do {self.value:.{precision}f} {unit} "
-                f"przekracza {kind} limit {self.limit:.{precision}f} {unit}{more}")
+                f"przekracza {kind} limit {self.limit:.{precision}f} {unit}{more}{fine}")
 
 
 @dataclass(frozen=True)

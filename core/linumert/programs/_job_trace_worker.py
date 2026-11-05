@@ -175,6 +175,8 @@ def main(argv):
     os.nice(10)  # Diagnostic work stays outside the control/GUI scheduling priority.
     import gcode  # type: ignore[import-not-found]
 
+    if not Path(gcode.__file__).resolve().is_relative_to(Path(data["module_root"])):
+        raise RuntimeError("Moduł gcode nie pochodzi ze wskazanej budowy LinuxCNC RIP")
     table = Tools(data["library"], data["table"])
     try:
         canon = Canon(table, data["parameters"])

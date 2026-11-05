@@ -44,6 +44,8 @@ def test_real_interpreter_uses_selected_offset_tool_table_and_source_lines(
     sentinel = live / ".tool.mmap"
     sentinel.write_bytes(b"live controller mapping must remain unchanged")
     monkeypatch.setenv("HOME", str(live))
+    # Preserve this module's explicit standalone/rounded diagnostic scope.
+    monkeypatch.setenv("LINUMERT_TOOL_DATA_LIB", str(tmp_path / "not-built.so"))
     report = job_check.check(package, (50, 50, -5), root=root)
     assert report["checks"]["interpreter"] == "passed", report["messages"]
     assert report["interpreter"]["completed"]

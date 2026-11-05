@@ -15,6 +15,16 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · 2026-11-05. **#221 w main, #223 dokładne limity:**
+#221 scalony 353a472 po CI 42050601102 i LinuxCNC 42050601111 success.
+#222 head78dbf4d: python/ISO success, LinuxCNC 42056543775 w toku; baza już main.
+Własna gałąź `codex/job-trace-20261105` (#223): dokładne callbacki + C++ SDK,
+podpięte do CLI/API/WebHMI. 16 real RIP i 170 regresji PASS; GUI kliknięte,
+JSON zgodny z zapisem i CLI (poza elapsed/id). Raport VERTICAL_LIMITS_2026-11-05.md.
+Brama8788 zatrzymana. Kontrola nadal partial: materiał/kolizje/obciążenia otwarte.
+SDK budowane jawnie; następny zakres to diagnostyka z tego samego toru i snapshotów,
+bez fallbacku parsera subset lub domyślnego walca/oprawki jako pełnego odbioru.
+
 Model-Author: Codex · 2026-11-05. **Integracja istniejącego C, PR #222:**
 `codex/native-main-20261105` nad #221, merge historii 0bd1f04. Konflikt DECYZJE:
 zachowano oba dopisane wpisy. make test-c: 7 core/native C + Plant PASS, 189 Python z C PASS;

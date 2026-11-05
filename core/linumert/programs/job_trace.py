@@ -9,6 +9,7 @@ from __future__ import annotations
 import json
 import math
 import os
+import re
 import shlex
 import subprocess
 import sys
@@ -20,6 +21,7 @@ from .linuxcnc_check import InterpreterUnavailable, find_linuxcnc
 
 DEFAULT_LIBRARY = (Path(__file__).resolve().parents[3] / "core/native/build"
                    / "liblinumert_tooldata.so")
+CALL = re.compile(r"^\s*\d+ N([.\d]+)\s+([A-Z0-9_]+)\((.*)\)\s*$")
 
 
 def capture(program: str, table: str, origin_mm, offset: str, start_mm, *,
@@ -44,6 +46,9 @@ def capture(program: str, table: str, origin_mm, offset: str, start_mm, *,
                                      "(make -C core/native linuxcnc-tooldata LINUXCNC_DIR=...)")
     library = library.resolve()
     prefix, _ = find_linuxcnc(root)
+    rip = root or os.environ.get("LINUXCNC_DIR")
+    if not prefix or rip is None:
+        raise InterpreterUnavailable("Dokładny tor wymaga wskazania zgodnej budowy LinuxCNC RIP")
     with tempfile.TemporaryDirectory(prefix="linumert-job-trace-") as temporary:
         private = Path(temporary)
         path = private / "program.ngc"
@@ -56,6 +61,7 @@ def capture(program: str, table: str, origin_mm, offset: str, start_mm, *,
             return " ".join(f"{a}{v:.17g}" for a, v in zip("XYZ", values, strict=True))
         data = {"program": str(path), "table": str(tool_table), "library": str(library),
                 "parameters": str(parameters), "timeout": timeout,
+                "module_root": str(Path(rip).resolve()),
                 "initcodes": ["G21 G94 F0", "G90 G49 G92.1",
                               f"G10 L2 P{OFFSETS.index(offset) + 1} {xyz(origin_mm)}",
                               offset, "G53 G0 " + xyz(start_mm)]}
@@ -82,3 +88,43 @@ def capture(program: str, table: str, origin_mm, offset: str, start_mm, *,
                 or trace.get("completed") is not True):
             raise ValueError("Niekompletny wynik dokładnego interpretera")
         return trace
+
+
+def compare_motion(rounded: str, precise: str) -> None:
+    """Require the same executed motion in standalone and preview interfaces.
+
+    Tolerances describe only the standalone text's four-decimal serialization.
+    Full limit calculations use the unrounded callback values, not this tolerance.
+    """
+    def motions(text, quantized):
+        scale = 1.0
+        out = []
+        for line in text.splitlines():
+            match = CALL.match(line)
+            if match is None:
+                continue
+            number, name, arguments = match.groups()
+            if name == "USE_LENGTH_UNITS":
+                scale = 25.4 if "INCHES" in arguments else 1.0
+            if name not in ("STRAIGHT_TRAVERSE", "STRAIGHT_FEED", "ARC_FEED"):
+                continue
+            if not number.isdigit():
+                raise ValueError("Ruch bez linii źródłowej: nie można uzgodnić interpreterów")
+            values = [float(v) for v in re.split(r"[,\s]+", arguments.strip()) if v]
+            axes = {0, 1, 2} if name != "ARC_FEED" else {0, 1, 2, 3, 5}
+            count = 6 if name != "ARC_FEED" else 9
+            if len(values) < count:
+                raise ValueError("Niepełna pozycja w śladzie interpretera")
+            values = [v * scale if i in axes else v for i, v in enumerate(values[:count])]
+            eps = [(0.00005001 * scale if i in axes else 0.00005001)
+                   if quantized else 0 for i in range(count)]
+            out.append((int(number), name, values, eps))
+        return out
+
+    a, b = motions(rounded, True), motions(precise, False)
+    if not a or len(a) != len(b):
+        raise ValueError("Niezgodna liczba ruchów między interfejsami LinuxCNC")
+    for actual, exact in zip(a, b, strict=True):
+        if actual[:2] != exact[:2] or any(
+                abs(x - y) > eps for x, y, eps in zip(actual[2], exact[2], actual[3], strict=True)):
+            raise ValueError(f"linia {actual[0]}: niezgodny tor między interfejsami LinuxCNC")
