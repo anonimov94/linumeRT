@@ -26,6 +26,9 @@ Boundary tests in `tests/test_architecture.py` enforce these rules.
 `linumert-lite` is a compatibility alias for the same CLI, not a separate product.
 `linumert-job`: preparation of an immutable job bundle, shared with WebHMI.
 `linumert-webhmi`: the developing operator screen; QtVCP remains the fallback.
+`linumert-job-instance`: private evidence/config/HOME, Plant + LinuxCNC with WebHMI/HAL.
+It starts the processes in E-STOP without Reset/ON/homing. The job Start gate remains
+closed until live machine, tools and start-position checks are implemented.
 `linumert-plant`: drive library, machine build, headless UDP serve.
 `linumert-headless`: read-only LinuxCNC DISPLAY process for sim/Plant.
 It never resets E-STOP, enables motion or emits a safety heartbeat.

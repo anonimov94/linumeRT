@@ -15,6 +15,7 @@ import signal
 import socket
 import subprocess
 import sys
+import tempfile
 import time
 from pathlib import Path
 
@@ -37,7 +38,7 @@ def _display(port, token):
             or not all(c.isascii() and (c.isalnum() or c in "_-") for c in token)):
         raise ValueError("Token instancji: co najmniej 16 znaków ASCII, cyfr, _ lub -")
     return ("DISPLAY = linumert-webhmi --linuxcnc --hal --postgui instance_postgui.hal "
-            f"--instance ../instance.json --port {port} --token {token}")
+            f"--instance ../instance.json --port {port} --token={token}")
 
 
 def prepare(source: Path, out: Path, *, port=8765, token=None) -> dict:
@@ -105,7 +106,11 @@ class Instance:
             if any((config / Path(*relative.parts[:i])).is_symlink()
                    for i in range(1, len(relative.parts) + 1)):
                 raise ValueError("Dowiązanie w konfiguracji instancji")
-            if job.digest((config / name).read_bytes()) != digest:
+            data = (config / name).read_bytes()
+            # LinuxCNC rewrites the private parameter file before DISPLAY starts.
+            # Its frozen initial bytes remain in evidence; live offsets/G92 must
+            # be checked separately before any future Start authorization.
+            if name != "linumert.var" and job.digest(data) != digest:
                 raise ValueError(f"Zmieniona konfiguracja instancji: {name}")
 
     def status(self):
@@ -115,17 +120,46 @@ class Instance:
 
 
 def _stop(proc):
-    """Only the process group created here; no global LinuxCNC cleanup."""
+    """Let LinuxCNC's parent perform its shutdown; force only our own group."""
     if proc.poll() is None:
         try:
-            os.killpg(proc.pid, signal.SIGTERM)
+            proc.terminate()
         except ProcessLookupError:
             return
         try:
-            proc.wait(timeout=10)
+            proc.wait(timeout=20)
         except subprocess.TimeoutExpired:
             os.killpg(proc.pid, signal.SIGKILL)
             proc.wait(timeout=5)
+
+
+def _signal_owned(work: Path, sig, *, display_only=False):
+    """Signal only inherited per-instance markers; pidfds prevent PID reuse races."""
+    marker = os.fsencode(f"LINUMERT_JOB_WORKSPACE={work}")
+    count = 0
+    for path in Path("/proc").iterdir():
+        if not path.name.isdecimal():
+            continue
+        try:
+            if path.stat().st_uid != os.getuid():
+                continue
+            fd = os.pidfd_open(int(path.name))
+        except (ProcessLookupError, FileNotFoundError, PermissionError):
+            continue
+        try:
+            if marker not in (path / "environ").read_bytes().split(b"\0"):
+                continue
+            argv = (path / "cmdline").read_bytes().split(b"\0")
+            if display_only and not any(Path(os.fsdecode(v)).name == "linumert-webhmi"
+                                        for v in argv[:2]):
+                continue
+            signal.pidfd_send_signal(fd, sig)
+            count += 1
+        except (ProcessLookupError, FileNotFoundError, PermissionError):
+            pass
+        finally:
+            os.close(fd)
+    return count
 
 
 def main(argv=None):
@@ -133,9 +167,12 @@ def main(argv=None):
     parser.add_argument("configuration", type=Path)
     parser.add_argument("--out", type=Path, required=True, help="nowy prywatny katalog instancji")
     parser.add_argument("--port", type=int, default=8765)
+    parser.add_argument("--token", default=os.environ.get("LINUMERT_WEBHMI_TOKEN"))
     args = parser.parse_args(argv)
     children, streams = [], []
     previous_term = None
+    home_alias = None
+    work = None
     try:
         if sys.platform != "linux":
             raise ValueError("Instancja LinuxCNC wymaga Linuksa")
@@ -154,10 +191,15 @@ def main(argv=None):
                 [(int(plant[-1]), socket.SOCK_DGRAM)] if plant else [])]:
             with socket.socket(socket.AF_INET, kind) as probe:
                 probe.bind(("127.0.0.1", port))
-        record = prepare(args.configuration, args.out, port=args.port)
+        record = prepare(args.configuration, args.out, port=args.port, token=args.token)
         work = args.out.resolve()
         config = work / "config"
-        env = {**os.environ, "HOME": str(work / "home")}
+        # rtapi_app uses HOME in an AF_UNIX path (maximum108 bytes on Linux).
+        # Keep the persistent private HOME, address it through a short owned alias.
+        home_alias = tempfile.TemporaryDirectory(prefix="lrt-home-")
+        short_home = Path(home_alias.name) / "h"
+        short_home.symlink_to(work / "home", target_is_directory=True)
+        env = {**os.environ, "HOME": str(short_home), "LINUMERT_JOB_WORKSPACE": str(work)}
         manifest, _ = job_execution.read(work / "evidence")
         plant = manifest["launch"]["plant"]
         def terminate(_signal, _frame):
@@ -184,12 +226,26 @@ def main(argv=None):
     except KeyboardInterrupt:
         return 130
     finally:
+        # bash waits for DISPLAY before running its Cleanup trap. Close that
+        # owned process first, so LinuxCNC can stop its detached NML/RT daemons.
+        if work is not None:
+            _signal_owned(work, signal.SIGTERM, display_only=True)
         for proc in reversed(children):
             _stop(proc)
+        if work is not None:
+            deadline = time.monotonic() + 2
+            while _signal_owned(work, signal.SIGTERM) and time.monotonic() < deadline:
+                time.sleep(.05)
+            for _ in range(20):
+                if not _signal_owned(work, signal.SIGKILL):
+                    break
+                time.sleep(.05)
         for stream in streams:
             stream.close()
         if previous_term is not None:
             signal.signal(signal.SIGTERM, previous_term)
+        if home_alias is not None:
+            home_alias.cleanup()
 
 
 if __name__ == "__main__":

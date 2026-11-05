@@ -714,3 +714,12 @@ Własny zrzut WebHMI bez retuszu: Codex, 2026-11-05, GPL-2.0-or-later.
 `docs/raporty/vertical/execution-config-20261105.jpg`: własna brama fake8791,
 rzeczywisty interpreter i diagnostyka offline, pobranie pochodnej konfiguracji
 LinuxCNC/Plant. Bez uruchomienia kontrolera i bez grafiki zewnętrznej.
+
+### Odbiór prywatnej instancji — 2026-11-05
+
+Własny zrzut bez retuszu: Codex, 2026-11-05, GPL-2.0-or-later.
+`docs/raporty/vertical/instance-20261105.jpg`: rzeczywisty LinuxCNC RIP + Plant,
+WebHMI8792 z HAL, E-STOP bez automatycznego Reset/ON/bazowania. Widoczne zadanie
+i zamknięty Start przed kontrolą żywego stanu. Bez zasobów graficznych zewnętrznych.
+`docs/raporty/vertical/instance-boot-20261105.json`: własny odczyt NML/WebHMI
+tego samego rozruchu; Codex, ta sama data i licencja; bez tokenu.

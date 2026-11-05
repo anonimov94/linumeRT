@@ -1981,3 +1981,11 @@ DISPLAY WebHMI z HAL bez bypassu, jawny status i zamknięta bramka Start/wznowie
 35 pierwszych testów instancji/bramy/architektury i41JS PASS. Rozruch/GUI/CI wymagane.
 #225/#226 zakończyły CI failure; lokalnie G2 i trace na227edcacf3:2PASS bez zmian progów.
 #227 skierowany na main, obejmuje225/226. Nie scalono go jeszcze i nie pominięto kontroli.
+
+## 2026-11-05 — odbiór prywatnego LinuxCNC/Plant i WebHMI
+
+Model-Author: Codex. Rzeczywisty rozruch ujawnił .var przed DISPLAY, długi HOME i token od --;
+poprawione wraz z kolejnością zamknięcia i własnością daemonów (marker/pidfd). Test RIP PASS:
+E-STOP, brak bazowania, Start409, dowody zachowane i brak pozostawionych procesów przed cleanupem.
+37 testów zakresu,41JS PASS. GUI8792 z faktycznego ZIP227 kliknięte; zrzut i surowy stan/provenance
+zapisane. Instancja zakończona, moduły przywrócone, lease zwolniony. Wykonanie/telemetria i CI otwarte.

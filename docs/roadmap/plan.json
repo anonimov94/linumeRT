@@ -2144,7 +2144,7 @@
         "061"
       ],
       "status": "in_progress",
-      "progress": "Pierwsza porcja na codex/job-execution-config-20261105 nad #226: run-config i ZIP WebHMI/API z verified, ten sam snapshot programu/narzędzi/offsetu i własna biblioteka zamrożonych napędów. Konfiguracja configured, bez zgody na ruch i bez startu procesów.37 testów zakresu i65 regresji PASS;2 rzeczywiste rs274 konsumują eksport sim/Plant i odtwarzają zweryfikowany tor. GUI, pełna regresja i CI tej porcji jeszcze wymagane; nie zalicza wykonania ani G2. #227: kliknięty ZIP poprawiony68c6362 (native YAML),26 zasobów CLI/GUI identycznych bajtowo, publiczny loader i C Plant --run PASS.17 testów eksportu i rzeczywisty G55 PASS. Klon6058529:2126 PASS/1 znany Qt FAIL; lint/C/REQ22/22 PASS. Brama8791 zatrzymana. To konfiguracja, nie wykonanie kontrolera; końcowe CI wymagane. Kolejna porcja codex/job-instance-20261105: prywatne evidence/config/HOME, własne procesy i WebHMI/HAL bez bypassu. Start zamknięty do kontroli live.35 pierwszych testów i41JS PASS; realny rozruch/GUI/CI otwarte.",
+      "progress": "Pierwsza porcja na codex/job-execution-config-20261105 nad #226: run-config i ZIP WebHMI/API z verified, ten sam snapshot programu/narzędzi/offsetu i własna biblioteka zamrożonych napędów. Konfiguracja configured, bez zgody na ruch i bez startu procesów.37 testów zakresu i65 regresji PASS;2 rzeczywiste rs274 konsumują eksport sim/Plant i odtwarzają zweryfikowany tor. GUI, pełna regresja i CI tej porcji jeszcze wymagane; nie zalicza wykonania ani G2. #227: kliknięty ZIP poprawiony68c6362 (native YAML),26 zasobów CLI/GUI identycznych bajtowo, publiczny loader i C Plant --run PASS.17 testów eksportu i rzeczywisty G55 PASS. Klon6058529:2126 PASS/1 znany Qt FAIL; lint/C/REQ22/22 PASS. Brama8791 zatrzymana. To konfiguracja, nie wykonanie kontrolera; końcowe CI wymagane. Kolejna porcja codex/job-instance-20261105: prywatne evidence/config/HOME, własne procesy i WebHMI/HAL bez bypassu. Start zamknięty do kontroli live.35 pierwszych testów i41JS PASS; realny rozruch/GUI/CI otwarte. #228: rzeczywisty rozruch Plant/LinuxCNC/WebHMI HAL PASS w E-STOP, Start409 i zamknięcie bez pozostawionych procesów. Poprawione .var/HOME/token i własność daemonów.37 testów zakresu/41JS PASS, GUI8792 odebrane z ZIP227, dowody zapisane. Lease zwolniony; wykonanie nadal otwarte.",
       "remaining": [
         "Końcowe CI i scalenie #227 do main (zawiera225/226); prywatna instancja w osobnej porcji, jej rozruch/GUI/CI oraz rzeczywiste wykonanie/telemetria pozostają otwarte.",
         "Zależność: pozytywny VERTICAL-VERIFY i niezmieniony manifest pakietu.",
@@ -2163,7 +2163,9 @@
         "https://github.com/anonimov94/linumeRT/pull/227",
         "webhmi/server/linumert_webhmi/job_instance.py",
         "tests/test_job_instance.py",
-        "docs/raporty/VERTICAL_INSTANCE_2026-11-05.md"
+        "docs/raporty/VERTICAL_INSTANCE_2026-11-05.md",
+        "tests/test_job_instance_linuxcnc.py",
+        "https://github.com/anonimov94/linumeRT/pull/228"
       ]
     },
     {

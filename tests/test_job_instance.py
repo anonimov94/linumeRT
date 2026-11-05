@@ -6,13 +6,16 @@ Model-Author: Codex
 
 import json
 import os
+import signal
+import subprocess
+import sys
 from pathlib import Path
 
 import pytest
 from linumert.programs import job, job_execution
 from linumert_webhmi import Command, FakeBackend, Gateway, create_app
 from linumert_webhmi.backend import CommandError
-from linumert_webhmi.job_instance import Instance, prepare
+from linumert_webhmi.job_instance import Instance, _signal_owned, prepare
 from starlette.testclient import TestClient
 from test_job_execution import package as package
 
@@ -38,6 +41,10 @@ def test_private_copy_preserves_evidence_tools_and_closed_safety(configuration, 
         assert (out / "evidence" / name).read_bytes() == data
         assert (configuration / name).read_bytes() == data
     assert (out / "config/tool.tbl").read_bytes() == original[Path("tool.tbl")]
+    (out / "config/linumert.var").write_text("5220 1\n5221 999\n")
+    # Runtime parameters can change; that never opens the pending live-state gate.
+    assert not Instance(out / "instance.json", ini).status()["can_start"]
+    assert (out / "evidence/linumert.var").read_bytes() == original[Path("linumert.var")]
     if os.name != "nt":
         assert out.stat().st_mode & 0o777 == 0o700
     with pytest.raises(FileExistsError):
@@ -71,6 +78,23 @@ def test_instance_rejects_other_ini(configuration, tmp_path):
     prepare(configuration, out)
     with pytest.raises(ValueError, match="Obca konfiguracja"):
         Instance(out / "instance.json", configuration / "mill_servo_table.ini")
+
+
+@pytest.mark.skipif(sys.platform != "linux", reason="Linux pidfd process ownership")
+def test_shutdown_marker_preserves_an_unrelated_process(tmp_path):
+    children = []
+    try:
+        for path in (tmp_path / "owned", tmp_path / "unrelated"):
+            children.append(subprocess.Popen([sys.executable, "-c", "import time; time.sleep(30)"],
+                env={**os.environ, "LINUMERT_JOB_WORKSPACE": str(path)}))
+        _signal_owned(tmp_path / "owned", signal.SIGTERM)
+        children[0].wait(timeout=3)
+        assert children[1].poll() is None
+    finally:
+        for proc in children:
+            if proc.poll() is None:
+                proc.terminate()
+            proc.wait(timeout=3)
 
 
 def test_bound_gateway_api_and_websocket_refuse_start_without_machine_side_effects(
