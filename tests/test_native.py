@@ -120,17 +120,20 @@ def test_zmap_cut_identical_to_python(lib, cutter, below):
     points = [(rng.uniform(-5, 45), rng.uniform(-5, 35), rng.uniform(-12, 3)) for _ in range(30)]
     points[10] = points[9]                                    # przejazd zerowy
     points[20] = (points[19][0], points[19][1], -cutter.stickout - 2)  # oprawka w materiale
+    seen: set[str] = set()
     for p0, p1 in zip(points[:-1], points[1:], strict=True):
         with native.override(None):
             a = ref.cut(cutter, p0, p1, spindle)
         with native.override(lib):
             b = fast.cut(cutter, p0, p1, spindle)
+        seen |= a.parts
         assert b.parts == a.parts
         assert b.contact_at == a.contact_at
         assert b.removed == pytest.approx(a.removed, rel=1e-6, abs=1e-9)
         assert fast.version == ref.version
     np.testing.assert_array_equal(fast.h, ref.h)
     assert ref.volume() < StockMap("CYL", 0, 0, 40, 30, -10, 0, cell=0.5).volume()
+    assert seen, "dane testu muszą dać kontakt części nietnącej z materiałem"
 
 
 def _program():

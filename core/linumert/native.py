@@ -155,6 +155,7 @@ class ZmapGrid:
             raise ValueError("mapa wysokości: kształt (ny, nx) zgodny z xs, ys")
         self.lib, self.h, self.xs, self.ys = lib, h, xs, ys
         self.ptrs = (_ptr(h, np.float32, True), _ptr(xs, np.float64), _ptr(ys, np.float64))
+        self.parts: dict[tuple, tuple] = {}     # tablice C części nietnących wg (r, z od)
 
     def valid_for(self, lib, h, xs, ys) -> bool:
         return self.lib is lib and self.h is h and self.xs is xs and self.ys is ys
@@ -167,8 +168,15 @@ def zmap_cut(grid: ZmapGrid, x0: float, y0: float, cell: float, z_bottom: float,
     """(objętość [mm³], maska części w materiale, pierwszy kontakt) — jak `StockMap.cut`."""
     if len(parts) > MAX_PARTS:
         raise ValueError(f"najwyżej {MAX_PARTS} części nietnących")
-    radii = (ctypes.c_double * max(len(parts), 1))(*[p[0] for p in parts])
-    z_from = (ctypes.c_double * max(len(parts), 1))(*[p[1] for p in parts])
+    key = tuple(parts)
+    arrays = grid.parts.get(key)
+    if arrays is None:
+        if len(grid.parts) > 64:
+            grid.parts.clear()
+        arrays = grid.parts[key] = (
+            (ctypes.c_double * max(len(parts), 1))(*[p[0] for p in parts]),
+            (ctypes.c_double * max(len(parts), 1))(*[p[1] for p in parts]))
+    radii, z_from = arrays
     a = (ctypes.c_double * 3)(*p0)
     b = (ctypes.c_double * 3)(*p1)
     out = CCutResult()

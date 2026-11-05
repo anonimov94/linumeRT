@@ -65,7 +65,8 @@ static double lower(const lrt_cutter *c, double r)
 static void stamp(float *h, long nx, long ny, const double *xs, const double *ys, double x0,
                   double y0, double cell, float zb, const lrt_cutter *cutter,
                   const double *part_r, const double *part_z, int n_parts, double reach,
-                  double x, double y, double z, double eps, int scan_top, lrt_cut_result *out)
+                  double x, double y, double z, double eps, int scan_top, uint32_t active,
+                  lrt_cut_result *out)
 {
     long ix0 = itrunc((x - reach - x0) / cell), ix1 = itrunc((x + reach - x0) / cell) + 1;
     long iy0 = itrunc((y - reach - y0) / cell), iy1 = itrunc((y + reach - y0) / cell) + 1;
@@ -91,6 +92,8 @@ static void stamp(float *h, long nx, long ny, const double *xs, const double *ys
     /* czesci nietnace najpierw: material nad ostrzem w ich promieniu = kontakt. Najpierw warunek
      * wysokosci (tani), potem odleglosc; pudelko promienia z zapasem komorki, wynik jak w oknie. */
     for (int p = 0; p < n_parts; p++) {
+        if (!((active >> p) & 1u))
+            continue;   /* czesc ponad materialem w calym przejezdzie */
         const double level = z + part_z[p] + eps;
         long bx0, bx1, by0, by1;
         box(x, part_r[p], x0, cell, ix0, ix1, &bx0, &bx1);
@@ -181,6 +184,7 @@ int lrt_zmap_cut(float *h, int32_t nx, int32_t ny, const double *xs, const doubl
     out->contact_at[0] = out->contact_at[1] = out->contact_at[2] = 0.0;
     const float zb = (float)z_bottom;
     int scan_top = 0;
+    uint32_t active = n_parts == 32 ? 0xFFFFFFFFu : (((uint32_t)1 << n_parts) - 1u);
     for (int k = 0; k < n_parts; k++)
         scan_top |= !(part_z[k] >= 0);
     /* Caly przejazd nad materialem: maksimum w obwiedni wszystkich okien (z zapasem komorki)
@@ -196,8 +200,14 @@ int lrt_zmap_cut(float *h, int32_t nx, int32_t ny, const double *xs, const doubl
             for (long ix = ax0; ix < ax1; ix++)
                 if (h[iy * nx + ix] > top)
                     top = h[iy * nx + ix];
-        if ((double)top <= fmin(p0[2], p1[2]) + eps - 1e-9)
+        const double zmin = fmin(p0[2], p1[2]);
+        if ((double)top <= zmin + eps - 1e-9)
             return LRT_NATIVE_OK;
+        /* czesc, ktorej dolna krawedz w calym przejezdzie lezy ponad obwiednia materialu, nie
+         * dotknie go w zadnej probce (zapas 1e-9 mm na zaokraglenia z probek) */
+        for (int k = 0; k < n_parts; k++)
+            if ((double)top <= zmin + part_z[k] + eps - 1e-9)
+                active &= ~((uint32_t)1 << k);
     }
     for (int32_t i = first; i <= n; i++) {
         const double t = (double)i / (double)n;
@@ -205,7 +215,7 @@ int lrt_zmap_cut(float *h, int32_t nx, int32_t ny, const double *xs, const doubl
         const double y = p0[1] + (p1[1] - p0[1]) * t;
         const double z = p0[2] + (p1[2] - p0[2]) * t;
         stamp(h, nx, ny, xs, ys, x0, y0, cell, zb, cutter, part_r, part_z, n_parts, reach, x, y,
-              z, eps, scan_top, out);
+              z, eps, scan_top, active, out);
     }
     return LRT_NATIVE_OK;
 }

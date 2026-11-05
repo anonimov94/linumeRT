@@ -3,7 +3,7 @@
 #
 #   make shared   - buduje build/liblinumert_native.so (wiazanie ctypes: core/linumert/native.py)
 #   make test     - testy C (build/test_native)
-#   make test-san - te same testy z ASan/UBSan w build-san
+#   make test-san - te same testy z ASan/UBSan w build-san (bez losowania adresow, gdy mozna)
 #   make clean
 #
 # -ffp-contract=off: bez fuzji mnozenia z dodawaniem (FMA), zeby kolejnosc i zaokraglenia byly
@@ -47,10 +47,16 @@ $(BUILD)/test_native: tests/test_native.c lrt_native.h ../../plant/core/tests/lr
 		$(BUILD)/liblinumert_native.a $(LDLIBS) -o $@
 
 test: $(BUILD)/test_native
-	./$(BUILD)/test_native
+	$(RUN) ./$(BUILD)/test_native
+
+# ASan z GCC 12 na jadrach z wysokim vm.mmap_rnd_bits (np. WSL 6.x) potrafi zapetlic sie przy
+# starcie na "AddressSanitizer:DEADLYSIGNAL" (ok. 1/3 uruchomien w WSL linumeRT-Debian12,
+# 2026-11-05). Bez losowania adresow (setarch -R) blad nie wystepuje; gdy setarch nie dziala,
+# test uruchamia sie zwyczajnie.
+SAN_RUN = $(shell setarch $$(uname -m) -R true >/dev/null 2>&1 && echo "setarch $$(uname -m) -R")
 
 test-san:
-	$(MAKE) BUILD=build-san SAN="-g -fsanitize=address,undefined -fno-sanitize-recover=all -fno-omit-frame-pointer" test
+	$(MAKE) BUILD=build-san RUN="$(SAN_RUN)" SAN="-g -fsanitize=address,undefined -fno-sanitize-recover=all -fno-omit-frame-pointer" test
 
 clean:
 	rm -rf $(BUILD) build-san
