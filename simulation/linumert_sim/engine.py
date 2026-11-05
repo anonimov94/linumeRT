@@ -87,7 +87,7 @@ class Event:
 
     def to_dict(self) -> dict:
         return {"code": self.code, "kind": self.kind, "line": self.line, "tool": self.tool,
-                "pos": [round(v, 3) for v in self.pos], "pair": list(self.pair or ()),
+                "pos": [round(v, 4) for v in self.pos], "pair": list(self.pair or ()),
                 "text": self.text(), "stop": self.stop}
 
 
@@ -144,6 +144,17 @@ class SimEngine:
     def set_machine(self, machine: Machine) -> None:
         self.machine = machine
         self._active.clear()
+
+    def begin_segment(self, state: Sample) -> None:
+        """Offline boundary state at the existing nose, without a physical sweep.
+
+        RPM, tool and rapid/feed state apply to the incoming segment. Live input
+        remains untouched; it continues to infer boundaries from actual samples.
+        """
+        if self._prev is not None and (
+                math.dist(self._prev.nose, state.nose) > 1e-6 or state.t < self._prev.t - 1e-9):
+            raise ValueError("Początek odcinka diagnostyki zmienił pozycję lub cofnął czas")
+        self._prev = state
 
     # ---- krok ----------------------------------------------------------------------------
     def step(self, s: Sample) -> list[Event]:
