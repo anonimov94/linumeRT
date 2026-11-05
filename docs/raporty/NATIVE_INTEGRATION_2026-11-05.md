@@ -22,6 +22,11 @@ Odbiór w WSL Debian 12:
 - `make -C core/native test-san`: 7 PASS, ASan+UBSan, setarch x86_64 -R.
 - Po kontroli eksportów i dodaniu porównań bajtowych: 22 testy native/architektury PASS.
 - Brak odbioru całego zadania verify/run/report ani sprzętu; końcowe CI wymagane.
+- Pełny natywny klon 51de699: 2070 PASS, 15 skip, 217 linuxcnc deselected,
+  184 subtesty PASS; dwie porażki: znana Qt (100 zamiast85) oraz harness
+  `test_make_test_c_target_runs_core_tests` wybierający systemowy Python bez pytest.
+  Harness wskazuje teraz `sys.executable`; ten sam zagnieżdżony cel PASS (39 s).
+  Nie deklarujemy pełnego zielonego odbioru Qt ani ponownego pełnego przebiegu po tej zmianie.
 
 ## Pomiar Python i C po integracji
 

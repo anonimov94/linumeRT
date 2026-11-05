@@ -1894,3 +1894,8 @@ Pełny RIP musi ponownie potwierdzić wynik; nie scalać na czerwonym CI.
 - #222: połączona historia Claude 0bd1f04, bez dublowania kernela. Zachowane decyzje obu gałęzi i pełny projekt; C11 poza RT, Python referencją/fallbackiem.
 - 7 C + Plant i 189 testów z C PASS; 7 ASan/UBSan PASS; 22 native/architektury PASS po dodaniu porównania bajtów i obsługi brakujących eksportów.
 - Pomiar i surowe dane Python/C w NATIVE_INTEGRATION_2026-11-05.md; subset pozostaje diagnostyką, nie odbiorem całego verify. CI/scalenie wymagane.
+
+## Integracja C — środowisko zagnieżdżonego test-c · 2026-11-05 · Codex
+
+- Model-Author: Codex. Pełny klon 51de699: 2070 PASS, 2 FAIL (znany Qt oraz systemowy Python bez pytest w zagnieżdżonym make test-c). Lint/C/REQ PASS przed pełną regresją.
+- Test test-c wskazuje teraz sys.executable bieżącego pytest; ten sam cel i wszystkie jego kontrole PASS (39 s), bez instalacji globalnej i bez zmiany algorytmów. Końcowe CI nowego SHA wymagane.
