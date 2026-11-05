@@ -151,6 +151,10 @@ def run(ini, joint_count, output):
         wait(lambda: control.model.phase == "retracted", control=control)
         wait(lambda z_before=z_before: abs(feedback_z() - z_before - height) < 0.005,
              control=control)
+        # tick() writes the last target asynchronously; the servo thread may not
+        # have consumed it yet. Keep the exact count check, after its HAL ack.
+        wait(lambda: abs(hal.get_value("axis.z.eoffset-request") - height) < 1e-6,
+             control=control)
         assert abs(hal.get_value("axis.z.eoffset-request") - height) < 1e-6
         assert max(abs(a - b) for a, b in zip(position(), before, strict=True)) < 1e-6, (
             "planner changed", before, position())

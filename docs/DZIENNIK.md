@@ -1820,3 +1820,31 @@ Pełny RIP musi ponownie potwierdzić wynik; nie scalać na czerwonym CI.
 - WebHMI jest klientem operatora; odbiór lite nie jest odbiorem main. Wcześniejsze bramki pozostają otwarte.
 - Uwzględniono otwarte #211/#212/#213, gałąź natywną i przenoszenie napędów; cudze checkouty bez zmian.
 - Autokontrola dokumentacji, bez niezależnego przeglądu. Cztery poziomy nie są jeszcze implementacją ani odbiorem sprzętu.
+
+## VERTICAL-PREPARE — odczyt narzędzi bez zmian bazy · 2026-11-05 · Codex
+
+- Model-Author: Codex. ToolDB readonly=True używa SQLite mode=ro; brak pliku i nieaktualny schemat są odrzucane bez tworzenia/migracji.
+- Testy: 43 PASS, 1 linuxcnc deselected; kontrola historii, zachowania bajtów i odmowy zapisu. Domyślny tryb ToolDB pozostaje bez zmian.
+- To pomocniczy krok 032/039 dla pakietu prepare; nie zalicza gotowej funkcji operatora ani poziomu 1. Następne: snapshot pakietu i WebHMI.
+- Autokontrola, bez niezależnego przeglądu.
+
+## VERTICAL-PREPARE — rdzeń pakietu · 2026-11-05 · Codex
+
+- Model-Author: Codex. Deterministyczny pakiet v1 z manifestem, źródłem, maszyną, napędami, narzędziami i ustawieniem detalu; początkowy zakres CAM 2D.
+- 14 testów PASS: błędne wejścia, integralność, awaria publikacji, wyścig zapisów i zachowanie istniejącego pakietu. Ruff PASS.
+- `prepared` nie zalicza interpretera/limitów/materiału. WebHMI i odbiór operatora w następnym kroku; poziom 1 pozostaje otwarty.
+- Autokontrola, bez niezależnego przeglądu.
+
+## VERTICAL-PREPARE — CLI/API i użyteczny widok WebHMI · 2026-11-05 · Codex
+
+- Model-Author: Codex. Wspólny adapter przygotowania, odczyt bazy bez zmian, token/Host, formularz zadania, raport i eksport ZIP w pełnym projekcie.
+- 26 testów pakietu/adaptera, 35 regresji aplikacji/zasobów i 40 testów JS PASS; 4 pominięcia Node w WSL, sprawdzone osobno na Windows.
+- Kliknięte przygotowanie, pobranie ZIP, odmowa nadpisania i niezgodny układ; raport docs/raporty/VERTICAL_PREPARE_2026-11-05.md.
+- Jedna aktywna maszyna/baza, CAM 2D; interpreter/limity/materiał oczekują. Autokontrola, bez niezależnego przeglądu; CI/scalenie w toku.
+
+## VERTICAL-PREPARE — regresja i synchronizacja testu HAL · 2026-11-05 · Codex
+
+- Model-Author: Codex. Natywny klon/venv/Qt: 1971 PASS, 15 skip, 213 linuxcnc deselected, 184 subtesty PASS; błąd pola Qt odtworzony na czystym main w tej samej kolejności (683 PASS/1 FAIL).
+- CI #215: 212 LinuxCNC PASS, 1 FAIL w sprawdzeniu eoffset-request po pauzie. Lokalnie 2 przypadki sim/Plant PASS przed zmianą; źródło wyścigu pozostaje wnioskiem z asynchronicznego zapisu HAL.
+- Test czeka teraz na tę samą dokładną wartość żądania (1e-6, dotychczasowy timeout), zachowując pozostałe asercje i kod produkcyjny. Po zmianie 2 przypadki na RIP sim/Plant PASS (140 s).
+- To synchronizacja starego testu, nie odbiór wykonania pakietu zadania. Autokontrola; końcowe CI/scalenie nadal wymagane.

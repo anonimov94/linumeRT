@@ -24,6 +24,7 @@ Incremental jog: Model-Author: Codex
         </div>
       </div>
       <div class="connection">
+        <a class="job-link" href="#jobPanel">Zadanie CAM</a>
         <span id="connectionStatus" class="status-tag offline" role="status">ROZŁĄCZONO</span>
         <label for="token">TOKEN BRAMY</label>
         <input id="token" type="password" autocomplete="off" spellcheck="false" placeholder="Token sesji" aria-label="Token dostępu WebHMI">
@@ -151,6 +152,38 @@ Incremental jog: Model-Author: Codex
           <button data-cmd="pause" disabled>PAUSE</button>
           <button data-cmd="resume" disabled>RESUME</button>
           <button data-cmd="stop" class="danger-outline" disabled>STOP</button>
+        </div>
+      </section>
+
+      <section class="panel job-panel" id="jobPanel" aria-labelledby="jobTitle">
+        <div class="panel-heading">
+          <div><div class="eyebrow">06 / ZADANIE CAM</div><h2 id="jobTitle">Przygotowanie zadania</h2></div>
+          <span class="small-tag">POZIOM 1 / 4</span>
+        </div>
+        <p class="job-hint">Planowanie, kieszenie i otwory z programu .lnx. Pakiet zawiera program, narzędzia i ustawienie detalu.</p>
+        <p class="job-hint" id="jobContext">Połącz z bramą, aby odczytać konfigurację zadania.</p>
+        <form id="jobForm" class="job-form">
+          <fieldset id="jobFields" disabled>
+            <div class="job-inputs">
+              <label>Program .lnx<select id="jobSource" required><option value="">— wybierz program —</option></select></label>
+              <label>Nazwa nowego pakietu<input id="jobName" required maxlength="64" pattern="[A-Za-z0-9][A-Za-z0-9_-]{0,63}" placeholder="np. detal-001"></label>
+              <label>Układ detalu<select id="jobOffset"><option>G54</option><option>G55</option><option>G56</option><option>G57</option><option>G58</option><option>G59</option></select></label>
+            </div>
+            <p class="job-hint">Zero detalu w układzie maszyny [mm], przed korekcją długości narzędzia:</p>
+            <div class="job-inputs job-origin">
+              <label>X [mm]<input id="jobX" type="number" step="0.0001" required placeholder="0.0000"></label>
+              <label>Y [mm]<input id="jobY" type="number" step="0.0001" required placeholder="0.0000"></label>
+              <label>Z [mm]<input id="jobZ" type="number" step="0.0001" required placeholder="0.0000"></label>
+            </div>
+            <button type="submit" class="primary" id="jobPrepare">Przygotuj pakiet</button>
+          </fieldset>
+        </form>
+        <p id="jobStatus" class="job-status" role="status" aria-live="polite">Weryfikacja toru i wykonanie to kolejne poziomy.</p>
+        <div id="jobResult" class="job-result" hidden>
+          <dl id="jobChecks" class="job-checks"></dl>
+          <p class="job-hint">Identyfikator pakietu: <code id="jobId"></code></p>
+          <button type="button" id="jobDownload" disabled>Pobierz pakiet ZIP</button>
+          <details><summary>Podgląd G-code</summary><pre id="jobCode"></pre></details>
         </div>
       </section>
 

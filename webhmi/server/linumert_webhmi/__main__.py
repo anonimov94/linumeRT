@@ -15,6 +15,8 @@ import time
 from pathlib import Path
 
 from linumert.cnc import FakeMachine, Mode
+from linumert.machine.schema import MachineConfigError
+from linumert.programs.prepare import JobService
 
 from .app import create_app
 from .backend import FakeBackend, LinuxCNCBackend
@@ -47,10 +49,28 @@ def main(argv: list[str] | None = None) -> int:
                         help="katalog programów (domyślnie [DISPLAY]PROGRAM_PREFIX z INI)")
     parser.add_argument("--hal", action="store_true",
                         help="piny HAL linumert.hmi-* (grzyb, sygnał życia, potwierdzenie E-STOP)")
+    parser.add_argument("--job-sources", type=Path, help="katalog źródeł .lnx do przygotowania")
+    parser.add_argument("--job-machine", type=Path, help="aktywne machine.yaml do przygotowania")
+    parser.add_argument("--job-tools", type=Path, help="istniejąca baza narzędzi SQLite")
+    parser.add_argument("--jobs-dir", type=Path, help="katalog nowych pakietów zadań")
+    parser.add_argument("--drive-library", type=Path, help="biblioteka szablonów napędów")
     parser.add_argument("--postgui", type=Path, default=None,
                         help="plik HAL wykonany po utworzeniu pinów (np. "
                              "config/hal/linumert_webhmi_postgui.hal); wymaga --hal")
     args = parser.parse_args(argv)
+    options = (args.job_sources, args.job_machine, args.job_tools, args.jobs_dir)
+    if (any(options) and not all(options)) or (args.drive_library and not all(options)):
+        print("Odmowa: podaj razem --job-sources, --job-machine, --job-tools i --jobs-dir.",
+              file=sys.stderr)
+        return 2
+    jobs = None
+    if all(options):
+        try:
+            jobs = JobService(*options, library_dir=args.drive_library)
+            jobs.context()
+        except (OSError, ValueError, MachineConfigError) as error:
+            print(f"Odmowa konfiguracji zadań: {error}", file=sys.stderr)
+            return 2
     if args.postgui and not args.hal:
         print("Odmowa: --postgui wymaga --hal.", file=sys.stderr)
         return 2
@@ -82,7 +102,7 @@ def main(argv: list[str] | None = None) -> int:
     gateway = Gateway(backend, hal_pins=pins)
     gateway.start()
     extra = (args.host,) if args.allow_remote else ()
-    app = create_app(gateway, token, extra_hosts=extra)
+    app = create_app(gateway, token, extra_hosts=extra, jobs=jobs)
     print(f"web-hmi: http://{args.host}:{args.port}/  token: {token}")
     try:
         uvicorn.run(app, host=args.host, port=args.port, log_level="warning",
