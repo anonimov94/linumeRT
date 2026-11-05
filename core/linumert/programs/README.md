@@ -20,4 +20,5 @@ i snapshot napędów/narzędzi; `publish()` odmawia nadpisania, `read()` kontrol
 Początkowy zakres: header/tool_change/face_mill/pocket_rect/pocket_circle/drill_holes/program_end.
 Układ G54–G59 i jego zero są zapisane w mm układu maszyny, przed korekcją długości.
 Przygotowanie nie zalicza interpretera, limitów ruchu ani materiału: raport ma `pending`.
-To rdzeń planowanego widoku WebHMI, jeszcze nie odbiór operatora (VERTICAL-PREPARE).
+`prepare.py` jest wspólnym adapterem CLI (`linumert-job`) i WebHMI. Konfiguracja wejść,
+zakres i odbiór operatora: `docs/WORKFLOW_ZADANIA.md`, VERTICAL-PREPARE w rejestrze.

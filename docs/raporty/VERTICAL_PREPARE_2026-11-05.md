@@ -27,8 +27,9 @@ Kliknięte i zaobserwowane:
 7. Przywrócenie G54 i nowej nazwy `detal-odbior-final`: poprawny pakiet o tym samym ID
    `6f7086f6d990b4c5e69398e2e8df5e47ee27326fdd5d1fd9c54c2e759bea9c67`.
 
-Zrzut widoku i odczyt wyniku utrwalone w narzędziu odbioru tej sesji. To odbiór
-przygotowania na atrapie, nie dowód wykonania LinuxCNC/Plant ani kwalifikacji sprzętu.
+![Pakiet przygotowany w pełnym WebHMI](vertical/prepare-webhmi-20261105.jpg)
+
+To odbiór przygotowania na atrapie, nie dowód wykonania LinuxCNC/Plant ani kwalifikacji sprzętu.
 
 ## Testy i granice
 
@@ -37,6 +38,10 @@ przygotowania na atrapie, nie dowód wykonania LinuxCNC/Plant ani kwalifikacji s
 publikacja bez nadpisania również przy wyścigu i awarii. Test porównuje stan maszyny
 przed i po przygotowaniu. Regresja aplikacji i zasobów WebHMI: 35 PASS, 4 pominięte
 bez Node w WSL; osobno 40 testów JS na Node Windows PASS oraz kontrola składni modułów.
+
+Wheel zbudowany standardowo przez `pip wheel . --no-deps`; rozpakowany i uruchomiony
+poza checkoutem, z `python -S`, bez importu pakietu edytowalnego. Entry point CLI,
+zasoby widoku i przygotowanie pakietu z jawną biblioteką napędów PASS; identyczne ID.
 
 Pakiet jest `prepared`, nie `verified`. Model i napędy są rozwiązywane wspólną logiką
 Plant; nie interpretujemy toru własnym uproszczonym parserem. Interpreter, granice

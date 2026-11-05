@@ -636,3 +636,10 @@ bez retuszu. Licencja: GPL-2.0-or-later. Zakres: dokumentacja odbioru
 - `docs/raporty/G2/WEBHMI_WATCHDOG_2026-11-04/1_start_estop.jpg`
 - `docs/raporty/G2/WEBHMI_WATCHDOG_2026-11-04/2_podwojny_reset_on.jpg`
 - `docs/raporty/G2/WEBHMI_WATCHDOG_2026-11-04/3_cicha_karta_estop.jpg`
+
+### Przygotowanie zadania w WebHMI — 2026-11-05
+
+Model-Author: Codex. Autor: Codex; źródło: własny zrzut pełnego linumeRT WebHMI
+w przeglądarce aplikacji, brama testowa `--fake` w WSL Debian 12. Bez retuszu,
+bez zasobów zewnętrznych; GPL-2.0-or-later. Zakres: dokumentacja odbioru przygotowania.
+Plik: `docs/raporty/vertical/prepare-webhmi-20261105.jpg`.
