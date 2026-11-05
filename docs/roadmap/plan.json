@@ -2061,35 +2061,67 @@
     {
       "id": "VERTICAL-PREPARE",
       "title": "Zadanie obróbkowe: przygotowanie wspólnego pakietu w WebHMI",
-      "parents": ["028", "029", "032", "039", "040", "041", "043", "062"],
-      "status": "in_progress",
-      "progress": "Pełny projekt: PR #219 łączy #216/#217/#218, wspólne prepare CLI/API/WebHMI i napędy w core. 24 aktywne przypadki odbioru Claude uzgodnione z kontraktem main; 107 testów integracji, 69 CLI/pakietu/konfiguracji, wheel, lint, C i REQ PASS. WebHMI po integracji kliknięte; CLI, katalog GUI i pobrany ZIP mają 9 identycznych plików. Pełna regresja: 2036 PASS, jedna znana porażka Qt jak na main. Końcowe CI i scalenie wymagane; poziomy 2–4 otwarte.",
-      "remaining": [
-        "Końcowe CI #219; scalenie kodu i dowodów do main oraz domknięcie zawartych PR.",
-        "Rozszerzenie wyboru wielu maszyn/baz w GUI i zakresu CAM poza pierwszą porcję, jeśli potrzebne do dalszego odbioru.",
-        "Uzgodnienie kernela C z claude/natywne-przyspieszenia przed pomiarem całego przepływu w poziomie 2."
+      "parents": [
+        "028",
+        "029",
+        "032",
+        "039",
+        "040",
+        "041",
+        "043",
+        "062"
       ],
-      "evidence": ["docs/WORKFLOW_ZADANIA.md", "core/linumert/tools/db.py", "tests/test_tools_db.py", "core/linumert/programs/job.py", "core/linumert/programs/prepare.py", "webhmi/server/linumert_webhmi/jobs.py", "tests/test_job_bundle.py", "tests/test_job_prepare.py", "tests/test_prepare_acceptance.py", "tools/check_wheel.py", "docs/raporty/VERTICAL_PREPARE_2026-11-05.md"]
+      "status": "done",
+      "progress": "Pierwsza porcja pełnego projektu scalona do main: #217/#219 (619fe95), dowody #220 (64b3d1b). Jeden backend CLI/API/WebHMI; 24 aktywne przypadki odbioru, 9 identycznych plików CLI/GUI/ZIP, wheel i wymagane CI success (42033344446, 42033344066). Znana porażka starego Qt w lokalnej regresji odtworzona na bazowym main; dowody i ograniczenia w raporcie. Zakres: jedna skonfigurowana maszyna/baza i detal CAM 2D.",
+      "remaining": [],
+      "evidence": [
+        "docs/WORKFLOW_ZADANIA.md",
+        "core/linumert/tools/db.py",
+        "tests/test_tools_db.py",
+        "core/linumert/programs/job.py",
+        "core/linumert/programs/prepare.py",
+        "webhmi/server/linumert_webhmi/jobs.py",
+        "tests/test_job_bundle.py",
+        "tests/test_job_prepare.py",
+        "tests/test_prepare_acceptance.py",
+        "tools/check_wheel.py",
+        "docs/raporty/VERTICAL_PREPARE_2026-11-05.md",
+        "https://github.com/anonimov94/linumeRT/pull/219",
+        "https://github.com/anonimov94/linumeRT/pull/220"
+      ]
     },
     {
       "id": "VERTICAL-VERIFY",
       "title": "Zadanie obróbkowe: interpreter, limity i diagnostyka obróbki",
-      "parents": ["044", "049", "051", "052", "055"],
-      "status": "planned",
-      "progress": "Drugi poziom zleconego przepływu. Specyfikacja wiąże integralność pakietu, izolowany rs274, limity osi i symulację materiału; implementacja i odbiór pozostają otwarte.",
+      "parents": [
+        "044",
+        "049",
+        "051",
+        "052",
+        "055"
+      ],
+      "status": "in_progress",
+      "progress": "Prepare scalone do pełnego main. Rozpoczęcie porcji integralność/interpreter/limity na codex/job-verify-20261105; materiał/kolizje i pomiar Python/C nadal otwarte.",
       "remaining": [
-        "Zależność: odebrany pakiet VERTICAL-PREPARE.",
         "Izolowany rs274 z tabelą narzędzi, ustawieniem detalu i konfiguracją tego pakietu.",
         "Pełny tor, ekstrema łuków, G5x/G92 i korekcja długości; odrzucenie niepełnej interpretacji.",
         "Materiał/kolizje/obciążenia, raport z linią i przyczyną oraz widok wyników w WebHMI.",
         "Odbiór poprawnego detalu i przypadków błędnych; pomiar pełnego przepływu Python/C."
       ],
-      "evidence": ["docs/WORKFLOW_ZADANIA.md"]
+      "evidence": [
+        "docs/WORKFLOW_ZADANIA.md"
+      ]
     },
     {
       "id": "VERTICAL-RUN",
       "title": "Zadanie obróbkowe: wykonanie i telemetria przez WebHMI w sim/Plant",
-      "parents": ["028", "029", "049", "053", "061"],
+      "parents": [
+        "028",
+        "029",
+        "049",
+        "053",
+        "061"
+      ],
       "status": "planned",
       "progress": "Trzeci poziom zleconego przepływu. Wykorzystuje istniejące sterowanie WebHMI i kontrakty HAL; dokument nie zalicza G2 ani odbioru LinuxCNC/Plant.",
       "remaining": [
@@ -2099,12 +2131,20 @@
         "Telemetria rzeczywistego LinuxCNC sim/Plant; jawne źródło i niepełne dane.",
         "Odbiór automatyczny i kliknięty przebieg WebHMI; kwalifikacja sprzętu pozostaje osobna."
       ],
-      "evidence": ["docs/WORKFLOW_ZADANIA.md"]
+      "evidence": [
+        "docs/WORKFLOW_ZADANIA.md"
+      ]
     },
     {
       "id": "VERTICAL-REPORT",
       "title": "Zadanie obróbkowe: raport przewidywania i rzeczywistego wykonania",
-      "parents": ["024", "049", "052", "053", "068"],
+      "parents": [
+        "024",
+        "049",
+        "052",
+        "053",
+        "068"
+      ],
       "status": "planned",
       "progress": "Czwarty poziom zleconego przepływu. Specyfikacja wymaga raportu powiązanego z manifestem, kontrolami i przebiegiem; brak danych nie może dawać PASS.",
       "remaining": [
@@ -2114,7 +2154,9 @@
         "Wykrycie znanych wymuszeń i zachowanie kontraktu precyzji projektu.",
         "Detal przechodzący poziomy 1–4 i odczyt pakietu/raportu bez aktywnej maszyny."
       ],
-      "evidence": ["docs/WORKFLOW_ZADANIA.md"]
+      "evidence": [
+        "docs/WORKFLOW_ZADANIA.md"
+      ]
     }
   ]
 }

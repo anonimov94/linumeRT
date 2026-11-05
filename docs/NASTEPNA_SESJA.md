@@ -15,6 +15,13 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · 2026-11-05. **Integracja zakończona, początek VERTICAL-VERIFY:**
+#219 scalony jako 619fe95 po zielonym CI 42033344446 i LinuxCNC 42033344066;
+#220 (dowody) jako 64b3d1b. #216 zawarty, #218 zamknięty jako zawarty z adaptacją kontraktu.
+Własny checkout vertical: `codex/job-verify-20261105` od main 64b3d1b.
+Pierwsza porcja poziomu 2: integralność, izolowany interpreter i limity; materiał/kolizje
+oraz poziomy 3–4 nadal otwarte. Nie przejmować #211/#212/#213 ani cudzych procesów.
+
 Model-Author: Codex · 2026-11-05. **Dowody odbioru integracji:**
 `codex/vertical-proof-20261105` to wyłącznie dokumentacja nad kodem #219 (`43851b8`).
 Połączone CLI/WebHMI/ZIP: dziewięć identycznych plików; 2036 testów natywnych PASS,

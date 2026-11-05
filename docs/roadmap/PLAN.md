@@ -155,8 +155,8 @@ Nie są kolejnym harmonogramem. Ich status dotyczy tylko wskazanego kroku.
 | WEBHMI-POC | 028, 029, 055 | HTML/WebGL: integracja strony z bramą LinuxCNC | częściowe |
 | CAM-2D-TEXT-STL | 040, 043, 045, 046 | Strategie CAM 2D, napisy i przekroje STL | ukończone |
 | BETA-WS-GUARD | 028, 029 | Beta bez GUI: kontrola Host/Origin WebSocket | ukończone |
-| VERTICAL-PREPARE | 028, 029, 032, 039, 040, 041, 043, 062 | Zadanie obróbkowe: przygotowanie wspólnego pakietu w WebHMI | w toku |
-| VERTICAL-VERIFY | 044, 049, 051, 052, 055 | Zadanie obróbkowe: interpreter, limity i diagnostyka obróbki | planowane |
+| VERTICAL-PREPARE | 028, 029, 032, 039, 040, 041, 043, 062 | Zadanie obróbkowe: przygotowanie wspólnego pakietu w WebHMI | ukończone |
+| VERTICAL-VERIFY | 044, 049, 051, 052, 055 | Zadanie obróbkowe: interpreter, limity i diagnostyka obróbki | w toku |
 | VERTICAL-RUN | 028, 029, 049, 053, 061 | Zadanie obróbkowe: wykonanie i telemetria przez WebHMI w sim/Plant | planowane |
 | VERTICAL-REPORT | 024, 049, 052, 053, 068 | Zadanie obróbkowe: raport przewidywania i rzeczywistego wykonania | planowane |
 
@@ -1054,17 +1054,15 @@ Pozostaje: Odbiór rzeczywistej przeglądarki: DRO, scena WebGL ≤30 FPS, jog i
 
 ### VERTICAL-PREPARE — Zadanie obróbkowe: przygotowanie wspólnego pakietu w WebHMI
 
-**w toku**. Pełny projekt: PR #219 łączy #216/#217/#218, wspólne prepare CLI/API/WebHMI i napędy w core. 24 aktywne przypadki odbioru Claude uzgodnione z kontraktem main; 107 testów integracji, 69 CLI/pakietu/konfiguracji, wheel, lint, C i REQ PASS. WebHMI po integracji kliknięte; CLI, katalog GUI i pobrany ZIP mają 9 identycznych plików. Pełna regresja: 2036 PASS, jedna znana porażka Qt jak na main. Końcowe CI i scalenie wymagane; poziomy 2–4 otwarte.
+**ukończone**. Pierwsza porcja pełnego projektu scalona do main: #217/#219 (619fe95), dowody #220 (64b3d1b). Jeden backend CLI/API/WebHMI; 24 aktywne przypadki odbioru, 9 identycznych plików CLI/GUI/ZIP, wheel i wymagane CI success (42033344446, 42033344066). Znana porażka starego Qt w lokalnej regresji odtworzona na bazowym main; dowody i ograniczenia w raporcie. Zakres: jedna skonfigurowana maszyna/baza i detal CAM 2D.
 
-Pozostaje: Końcowe CI #219; scalenie kodu i dowodów do main oraz domknięcie zawartych PR. Rozszerzenie wyboru wielu maszyn/baz w GUI i zakresu CAM poza pierwszą porcję, jeśli potrzebne do dalszego odbioru. Uzgodnienie kernela C z claude/natywne-przyspieszenia przed pomiarem całego przepływu w poziomie 2.
-
-Źródła: [docs/WORKFLOW_ZADANIA.md](../WORKFLOW_ZADANIA.md), [core/linumert/tools/db.py](../../core/linumert/tools/db.py), [tests/test_tools_db.py](../../tests/test_tools_db.py), [core/linumert/programs/job.py](../../core/linumert/programs/job.py), [core/linumert/programs/prepare.py](../../core/linumert/programs/prepare.py), [webhmi/server/linumert_webhmi/jobs.py](../../webhmi/server/linumert_webhmi/jobs.py), [tests/test_job_bundle.py](../../tests/test_job_bundle.py), [tests/test_job_prepare.py](../../tests/test_job_prepare.py), [tests/test_prepare_acceptance.py](../../tests/test_prepare_acceptance.py), [tools/check_wheel.py](../../tools/check_wheel.py), [docs/raporty/VERTICAL_PREPARE_2026-11-05.md](../raporty/VERTICAL_PREPARE_2026-11-05.md).
+Źródła: [docs/WORKFLOW_ZADANIA.md](../WORKFLOW_ZADANIA.md), [core/linumert/tools/db.py](../../core/linumert/tools/db.py), [tests/test_tools_db.py](../../tests/test_tools_db.py), [core/linumert/programs/job.py](../../core/linumert/programs/job.py), [core/linumert/programs/prepare.py](../../core/linumert/programs/prepare.py), [webhmi/server/linumert_webhmi/jobs.py](../../webhmi/server/linumert_webhmi/jobs.py), [tests/test_job_bundle.py](../../tests/test_job_bundle.py), [tests/test_job_prepare.py](../../tests/test_job_prepare.py), [tests/test_prepare_acceptance.py](../../tests/test_prepare_acceptance.py), [tools/check_wheel.py](../../tools/check_wheel.py), [docs/raporty/VERTICAL_PREPARE_2026-11-05.md](../raporty/VERTICAL_PREPARE_2026-11-05.md), [PR](https://github.com/anonimov94/linumeRT/pull/219), [PR](https://github.com/anonimov94/linumeRT/pull/220).
 
 ### VERTICAL-VERIFY — Zadanie obróbkowe: interpreter, limity i diagnostyka obróbki
 
-**planowane**. Drugi poziom zleconego przepływu. Specyfikacja wiąże integralność pakietu, izolowany rs274, limity osi i symulację materiału; implementacja i odbiór pozostają otwarte.
+**w toku**. Prepare scalone do pełnego main. Rozpoczęcie porcji integralność/interpreter/limity na codex/job-verify-20261105; materiał/kolizje i pomiar Python/C nadal otwarte.
 
-Pozostaje: Zależność: odebrany pakiet VERTICAL-PREPARE. Izolowany rs274 z tabelą narzędzi, ustawieniem detalu i konfiguracją tego pakietu. Pełny tor, ekstrema łuków, G5x/G92 i korekcja długości; odrzucenie niepełnej interpretacji. Materiał/kolizje/obciążenia, raport z linią i przyczyną oraz widok wyników w WebHMI. Odbiór poprawnego detalu i przypadków błędnych; pomiar pełnego przepływu Python/C.
+Pozostaje: Izolowany rs274 z tabelą narzędzi, ustawieniem detalu i konfiguracją tego pakietu. Pełny tor, ekstrema łuków, G5x/G92 i korekcja długości; odrzucenie niepełnej interpretacji. Materiał/kolizje/obciążenia, raport z linią i przyczyną oraz widok wyników w WebHMI. Odbiór poprawnego detalu i przypadków błędnych; pomiar pełnego przepływu Python/C.
 
 Źródła: [docs/WORKFLOW_ZADANIA.md](../WORKFLOW_ZADANIA.md).
 
