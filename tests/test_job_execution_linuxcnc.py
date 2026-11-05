@@ -26,11 +26,14 @@ def _linuxcnc_cleanup():
     yield
 
 
-@pytest.mark.parametrize("target", ["sim", "plant"])
+@pytest.mark.parametrize("target,offset", [("sim", "G54"), ("plant", "G54"), ("plant", "G55")])
 def test_actual_rs274_consumes_same_verified_tools_frames_and_motion(
-        runtime, tmp_path, monkeypatch, target):
+        runtime, tmp_path, monkeypatch, target, offset):
     rip, bridge = runtime
-    package = job.publish(job.render(*complete_inputs(), (200, 200, -80)), tmp_path / "job")
+    program, config, drives, tools = complete_inputs()
+    program.steps[0].params["offset"] = offset
+    package = job.publish(job.render(program, config, drives, tools, (200, 200, -80), offset),
+                          tmp_path / "job")
     report = verify(package, (200, 200, -5), root=rip, trace_library=bridge)
     assert report["status"] == "verified", report["messages"]
     verification = tmp_path / "verification.json"

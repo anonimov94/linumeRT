@@ -32,7 +32,7 @@ HMI_ESTOP_BYPASS=0. CLI wymaga jawnego --test-mode dla testowego bypassu; API ni
 tego pola. Oryginalny model jest zachowany, pochodny cel symulacyjny nie ma konfiguracji
 połączenia sprzętowego. Nie jest to zmiana zasad bezpieczeństwa.
 
-## Checkpoint
+## Odbiór porcji
 
 37 testów eksportu/werdyktu/architektury/konfiguracji PASS; następnie65 regresji CLI,
 przygotowania i API PASS (zakresy częściowo wspólne). ZIP API zgodny z backendem, token/Host
@@ -41,7 +41,34 @@ Dwa rzeczywiste testy rs274 PASS: sim i Plant konsumują wyeksportowane narzędz
 INI/remap i odtwarzają ten sam zweryfikowany tor. To test interpretera offline, nie start
 kontrolera ani wykonanie programu w Plant. Lint całego drzewa PASS.
 
-Pozostają kliknięty odbiór pobrania WebHMI, pełna regresja, końcowe CI i scalenie tej porcji.
+Próba publicznym loaderem Plant wykryła zapis małych liczb JSON typu3e-05 jako tekst YAML1.1.
+Poprawka68c6362 zapisuje szablony przez safe_dump, zachowując liczby i wszystkie parametry.
+Testy korzystają teraz z publicznego load_machine_drives, nie z json.loads jako zastępstwa
+loadera. Po poprawce17 testów eksportu PASS, w tym G55 już w startup code i pliku parametrów;
+dodatkowy rzeczywisty test rs274 G55 PASS. Nie przełącza początku konfiguracji na domyślny G54.
+
+Kliknięty odbiór WebHMI na własnej bramie fake8791: prepare → verify → pobranie konfiguracji
+LinuxCNC + Plant. Poprawiony `execution-fixed-plant.zip` zawiera26 zasobów identycznych
+bajtowo z rzeczywistym CLI run-config. Publiczny loader i rdzeń C Plant budują maszynę
+z faktycznie pobranego ZIP (`machine build ... --dir drive_library --run` PASS).
+To nadal budowa wirtualnego modelu, nie uruchomienie LinuxCNC lub programu.
+
+![Pobranie konfiguracji symulacji](vertical/execution-config-20261105.jpg)
+
+Job_id `95bf2c0bc88fb59abaa1cdea747ddfdbfc58bc042701d4fe0beed5fbb8a1316e`;
+verification_id `f6bf9edd09bca992b4713a73b2293fb6d37d8b1259ac726d6d3a4b3cacacb26f`;
+execution_id `a034404861204810262976262f99f451a01316e2520235222a83f8c84c894328`.
+Źródło odbioru68c6362; zmiana startup G55 nie zmienia tych zasobów G54.
+Brama8791 zatrzymana po sprawdzeniu PID/modułu/portu/cwd. Nie uruchamiano kontrolera
+i nie zajmowano współdzielonej blokady LinuxCNC.
+
+Pełny natywny klon6058529:2126 PASS,15 skip,240 linuxcnc deselected,184 subtesty PASS;
+1 znana porażka starego Qt cleanText100/85, odtworzona wcześniej na main.
+Nie deklarujemy całej lokalnej regresji bez porażek. W tym klonie make lint test-c i REQ22/22
+PASS; początkowy brak wygenerowanego prompts/README.md został poprawiony przez6058529.
+Późniejszy serializer/G55 sprawdzono17 testami zakresu, rzeczywistym G55 i publicznym Plant C.
+Końcowe CI i scalenie porcji pozostają wymagane.
+
 Dalszy poziom3: prywatna robocza kopia konfiguracji (LinuxCNC zapisuje .var/logi), start
 instancji, sprawdzenie jej konfiguracji/tabeli/początku/T0 i istniejących blokad gotowości,
 następnie jawny Start oraz telemetria, pauza/wznowienie/Stop/awarie. Kontrola eksportu nie

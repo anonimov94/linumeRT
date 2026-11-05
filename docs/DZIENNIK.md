@@ -1962,3 +1962,14 @@ biblioteki i bez nowych domyślnych wartości. Manifest+regeneracja, atomowy now
 bez nadpisywania. Bypass domyślnie0; API nie przyjmuje test-mode. Brak startu procesów/CNC.
 37 testów zakresu i65 regresji PASS;2 real rs274 eksportu sim/Plant odtwarzają ten sam
 zweryfikowany tor. Lint PASS. GUI/pełna regresja/CI oraz rzeczywiste wykonanie pozostają otwarte.
+
+## 2026-11-05 — odbiór poprawionej konfiguracji CLI/GUI/Plant
+
+Model-Author: Codex.6058529 uzupełnia pominięty wygenerowany indeks roadmapy. Próba publicznym
+loaderem Plant wykryła zapis liczb3e-05 jako tekst YAML1.1;68c6362 zapisuje prawdziwy YAML,
+a test używa publicznego loadera. Poprawiony ZIP execution-fixed-plant.zip pobrany z WebHMI:
+26 identycznych bajtowo zasobów CLI/GUI, publiczny loader i model C Plant --run PASS.
+Zrzut/provenance zapisane; brama8791 zatrzymana. StartupG55 i rzeczywisty rs274G55 PASS,
+17 testów eksportu PASS. Klon6058529:2126 PASS/1 znany Qt FAIL,15skip/240deselected,
+184subtesty;lint/C/REQ22/22 PASS. Nie jest to wykonanie kontrolera ani programu.
+Końcowe CI227 oraz225/226 w toku; następny zakres to prywatna instancja i live binding.

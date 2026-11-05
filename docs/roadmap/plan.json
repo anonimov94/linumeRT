@@ -2144,9 +2144,9 @@
         "061"
       ],
       "status": "in_progress",
-      "progress": "Pierwsza porcja na codex/job-execution-config-20261105 nad #226: run-config i ZIP WebHMI/API z verified, ten sam snapshot programu/narzędzi/offsetu i własna biblioteka zamrożonych napędów. Konfiguracja configured, bez zgody na ruch i bez startu procesów.37 testów zakresu i65 regresji PASS;2 rzeczywiste rs274 konsumują eksport sim/Plant i odtwarzają zweryfikowany tor. GUI, pełna regresja i CI tej porcji jeszcze wymagane; nie zalicza wykonania ani G2.",
+      "progress": "Pierwsza porcja na codex/job-execution-config-20261105 nad #226: run-config i ZIP WebHMI/API z verified, ten sam snapshot programu/narzędzi/offsetu i własna biblioteka zamrożonych napędów. Konfiguracja configured, bez zgody na ruch i bez startu procesów.37 testów zakresu i65 regresji PASS;2 rzeczywiste rs274 konsumują eksport sim/Plant i odtwarzają zweryfikowany tor. GUI, pełna regresja i CI tej porcji jeszcze wymagane; nie zalicza wykonania ani G2. #227: kliknięty ZIP poprawiony68c6362 (native YAML),26 zasobów CLI/GUI identycznych bajtowo, publiczny loader i C Plant --run PASS.17 testów eksportu i rzeczywisty G55 PASS. Klon6058529:2126 PASS/1 znany Qt FAIL; lint/C/REQ22/22 PASS. Brama8791 zatrzymana. To konfiguracja, nie wykonanie kontrolera; końcowe CI wymagane.",
       "remaining": [
-        "Odbiór GUI, pełna regresja, CI i scalenie porcji konfiguracji wykonawczej.",
+        "Końcowe CI i scalenie #227 po #225/#226; GUI i konfiguracja są odebrane. Prywatna instancja i rzeczywiste wykonanie/telemetria nadal otwarte.",
         "Zależność: pozytywny VERTICAL-VERIFY i niezmieniony manifest pakietu.",
         "Powiązanie instancji, programu, konfiguracji i narzędzi; bramki gotowości bez niejawnego zezwolenia na ruch.",
         "Start, postęp, pauza/wznowienie, przerwanie, E-STOP i utrata klienta z rozróżnialnymi wynikami.",
@@ -2159,7 +2159,8 @@
         "core/linumert/programs/job_verification.py",
         "tests/test_job_execution.py",
         "tests/test_job_execution_linuxcnc.py",
-        "docs/raporty/VERTICAL_EXECUTION_CONFIG_2026-11-05.md"
+        "docs/raporty/VERTICAL_EXECUTION_CONFIG_2026-11-05.md",
+        "https://github.com/anonimov94/linumeRT/pull/227"
       ]
     },
     {

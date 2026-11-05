@@ -98,6 +98,10 @@ def render(path, verification: dict, target: str, *, test_mode=False, port=47700
     files = render_lite(derived, target, test_mode=test_mode, scales=scales)
     ini = f"{derived.machine.name}.ini"
     _relative(ini)
+    startup_frame = "G43H0 G54 "
+    if files[ini].count(startup_frame) != 1:
+        raise ValueError("Nieznany początkowy układ detalu konfiguracji LinuxCNC")
+    files[ini] = files[ini].replace(startup_frame, f"G43H0 {setup['offset']} ", 1)
     if target == "plant":
         files[ini] = files[ini].replace("PORT = 47700\n", f"PORT = {port}\n")
     files["tool.tbl"] = source["tool.tbl"]

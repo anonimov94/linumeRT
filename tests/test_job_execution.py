@@ -120,6 +120,20 @@ def test_hardware_refused_bypass_explicit_and_port_bound(package):
     assert "127.0.0.1" in metadata["launch"]["plant"]
 
 
+def test_nondefault_frame_is_already_selected_at_controller_startup(tmp_path):
+    program, config, drives, tools = complete_inputs()
+    program.steps[0].params["offset"] = "G55"
+    source = job.publish(job.render(program, config, drives, tools, (200, 200, -80), "G55"),
+                         tmp_path / "job")
+    manifest, data = job.read(source)
+    report = report_fixture(manifest, json.loads(data["setup.json"]))
+    files = job_execution.render(source, report, "plant")
+    metadata = json.loads(files["execution.json"])
+    assert "G43H0 G55 " in files[metadata["ini"]]
+    assert "5220 2\n" in files["linumert.var"]
+    assert "5241 200\n" in files["linumert.var"] and "5243 -80\n" in files["linumert.var"]
+
+
 def test_resigned_foreign_hal_is_not_a_generated_configuration(package, tmp_path):
     source, report = package
     files = job_execution.render(source, report, "sim")

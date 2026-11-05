@@ -15,6 +15,17 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · 2026-11-05. **PR #227 — konfiguracja odebrana w GUI:**
+cb8516c →6058529 (brakujący wygenerowany prompts/README) →68c6362 (native YAML liczb
+wykładniczych, publiczny loader Plant). Poprawiony ZIP `execution-fixed-plant.zip`:
+26 zasobów identycznych CLI/GUI, publiczny loader i C Plant --run PASS. Stary pierwszy
+ZIP `execution-ui-plant.zip` ma błędny zapis YAML i nie jest odbiorem. Zrzut z poprawki,
+provenance zapisane. Dodatkowo startup G55 i rzeczywisty rs274 G55 PASS;17 testów eksportu PASS.
+Pełny klon6058529:2126 PASS/1 znany Qt FAIL,15skip,240linuxcnc deselected,184subtesty;
+lint/C/REQ22/22 PASS. Brama8791 zatrzymana; brak kontrolera/lease. Dane do przyszłego
+runtime: `build/vertical-execution/download-fixed/execution-fixed-plant` (poprawiony eksport).
+#225/#226 czekają końcowego LinuxCNC, Python success. #227 baza226; retarget dopiero po scaleniach.
+
 Model-Author: Codex · 2026-11-05. **Pierwsza porcja poziomu3:**
 Własna gałąź `codex/job-execution-config-20261105` nad #226b601654. run-config oraz ZIP
 API/WebHMI wiążą verified z oryginalnym pakietem, odrębną zamrożoną biblioteką napędów,

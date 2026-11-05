@@ -707,3 +707,10 @@ Własny zrzut WebHMI bez retuszu: Codex, 2026-11-05, GPL-2.0-or-later.
 `docs/raporty/vertical/verified-20261105.jpg`: własna brama fake8790,
 rzeczywisty rs274/SDK i diagnostyka materiału; dodatni werdykt offline,
 wykonanie nieuruchomione. Bez zasobów graficznych zewnętrznych.
+
+### Odbiór konfiguracji wykonawczej — 2026-11-05
+
+Własny zrzut WebHMI bez retuszu: Codex, 2026-11-05, GPL-2.0-or-later.
+`docs/raporty/vertical/execution-config-20261105.jpg`: własna brama fake8791,
+rzeczywisty interpreter i diagnostyka offline, pobranie pochodnej konfiguracji
+LinuxCNC/Plant. Bez uruchomienia kontrolera i bez grafiki zewnętrznej.
