@@ -64,3 +64,13 @@ def test_headless_refuses_hardware_before_importing_linuxcnc(tmp_path, capsys):
     ini.write_text("[LINUMERT]\nMACHINE_PROFILE = hardware\n", encoding="utf-8")
     assert display(["-ini", str(ini)]) == 2
     assert "sim/plant" in capsys.readouterr().err
+
+
+def test_compile_missing_tool_database_preserves_output(tmp_path, capsys):
+    source, output, database = (tmp_path / n for n in ("part.lnx", "part.ngc", "missing.sqlite"))
+    save_lnx(LnxProgram(name="test"), source)
+    output.write_bytes(b"operator program\n")
+    assert main(["compile", str(source), "--out", str(output), "--tools", str(database)]) == 2
+    error = capsys.readouterr().err
+    assert "Błąd:" in error and "Traceback" not in error
+    assert not database.exists() and output.read_bytes() == b"operator program\n"

@@ -1,5 +1,10 @@
 # Weryfikacja linumeRT lite — 2026-10-28
 
+Zapis historyczny dawnego checkoutu. Obecnie obowiązuje jeden pełny projekt i
+`docs/WORKFLOW_ZADANIA.md`; wyniki poniżej nie zastępują odbioru pełnego main/WebHMI.
+Aktualny wheel zachowuje WebHMI i panel Plant, a test `tools/check_wheel.py` sprawdza
+wspólne prepare oraz zasoby ekranów. Nie jest to plan dalszej osobnej edycji lite.
+
 Model-Author: Codex. Autokontrola, bez niezależnego przeglądu.
 Baza pełnej edycji: a593d6d4c55f503fbaf4c607099f2d89c61cc670.
 Środowisko: Debian 12 / WSL, Python 3.11, osobny venv;

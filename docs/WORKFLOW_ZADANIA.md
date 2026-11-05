@@ -136,7 +136,7 @@ Domyślna biblioteka napędów pochodzi z pakietu `linumert.machine.drives`;
 Ta sama logika bez uruchamiania GUI/bramy (standardowe zależności rdzenia):
 
 ```sh
-linumert-job /dane/programy-lnx/detal.lnx --machine /dane/machine.yaml \
+linumert prepare /dane/programy-lnx/detal.lnx --machine /dane/machine.yaml \
   --tools /dane/tools.db --out /dane/zadania/detal-001 \
   --origin 50 50 -80 --offset G54 --drive-library /dane/biblioteka-napedow
 ```
@@ -145,3 +145,10 @@ Nazwa pakietu: litery ASCII/cyfry/`_`/`-`, 1–64 znaki, początek litera/cyfra.
 Zero detalu podaje się w mm układu maszyny przed korekcją długości narzędzia.
 Zakres i dowody tej porcji: [odbiór prepare](raporty/VERTICAL_PREPARE_2026-11-05.md).
 Przygotowanie nie ustawia G54 w sterowaniu i nie uruchamia programu.
+
+`linumert-job` oraz `linumert-lite prepare` wywołują tę samą implementację.
+`linumert compile --machine ... --tools ...` korzysta z tego samego kompilatora,
+z limitem wycofania Z wybranej maszyny i kontrolą narzędzi bez zapisu bazy.
+Prepare zbiera przyczyny z całego programu przed generowaniem i publikacją pakietu.
+Dane odbioru Claude z #218 są w `tests/test_prepare_acceptance.py`: jawne zero detalu,
+schemat linumert.job v1, te same przypadki błędów, bez pomijania braku implementacji.

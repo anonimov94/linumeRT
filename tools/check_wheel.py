@@ -16,11 +16,12 @@ def main() -> None:
     wheel = Path(sys.argv[1]).resolve(strict=True)
     with zipfile.ZipFile(wheel) as archive:
         names = archive.namelist()
-        forbidden = ("linumert_webhmi/", "screens/", "linumert_plant/panel/")
-        assert not any(name.startswith(forbidden) for name in names)
+        for name in ("linumert_webhmi/static/index.html", "linumert_webhmi/static/js/jobs.js",
+                     "linumert_plant/panel/static/index.html"):
+            assert name in names, name
         assert any(name.endswith("templates/servo_400w.yaml") for name in names)
         assert "linumert/machine/resources/lrt_m6.ngc" in names
-    with tempfile.TemporaryDirectory(prefix="linumert-lite-wheel-") as directory:
+    with tempfile.TemporaryDirectory(prefix="linumert-wheel-") as directory:
         work = Path(directory)
         site = work / "site"
         subprocess.run([sys.executable, "-m", "pip", "install", "--no-deps", "--target",
@@ -34,6 +35,9 @@ from linumert.cli import main, registry
 from linumert.machine.drives.drive_library import load_library
 from linumert.machine.schema import parse_machine
 from linumert.machine.lite_config import render_lite
+from importlib.metadata import distribution
+assert {'linumert', 'linumert-job', 'linumert-webhmi', 'linumert-lite'} <= {
+    e.name for e in distribution('linumert').entry_points}
 assert len(load_library()) >= 7
 assert registry().get('pocket_rect', 1) and registry().get('pocket_rect', 2)
 machine = json.loads(sys.argv[2])
@@ -46,6 +50,24 @@ pathlib.Path('part.lnx').write_text(json.dumps({'name': 'wheel', 'steps': [
     {'generator': 'drill_holes', 'version': 1, 'params': {'depth': 2}}]}))
 assert main(['compile', 'part.lnx', '--out', 'part.ngc']) == 0
 assert pathlib.Path('part.ngc').read_text().endswith('M2\\n')
+from linumert.tools.db import Tool, ToolDB
+with ToolDB('tools.sqlite') as database:
+    database.add(Tool(1, 1, type='drill_118', offsets={'Z': 40},
+                      params={'d': 3, 'l': 40, 'flute_length': 20}))
+pathlib.Path('job.lnx').write_text(json.dumps({'name': 'wheel job', 'steps': [
+    {'generator': 'header', 'version': 1},
+    {'generator': 'tool_change', 'version': 1, 'params': {'tool': 1, 'rpm': 3000}},
+    {'generator': 'drill_holes', 'version': 1, 'params': {'depth': 2}},
+    {'generator': 'program_end', 'version': 1}]}))
+args = ['job.lnx', '--machine', 'machine.yaml', '--tools', 'tools.sqlite',
+        '--origin', '50', '50', '-80', '--out']
+assert main(['prepare', *args, 'job']) == 0
+from linumert.programs.prepare import main as prepare_alias
+assert prepare_alias([*args, 'job-alias']) == 0
+manifest = json.loads(pathlib.Path('job/manifest.json').read_text())
+assert manifest == json.loads(pathlib.Path('job-alias/manifest.json').read_text())
+assert manifest['format'] == 'linumert.job'
+assert json.loads(pathlib.Path('job/prepare.json').read_text())['checks']['interpreter']=='pending'
 pathlib.Path('cut.ngc').write_text('G21 G90\\nG0 X0 Y0 Z5\\nG1 X10 F600\\nM2\\n')
 assert main(['simulate', 'cut.ngc', '--out', 'report.json']) == 0
 assert json.loads(pathlib.Path('report.json').read_text())['segments'] > 0
@@ -54,7 +76,7 @@ assert plant(['drive', 'list']) == 0
 if sys.argv[3]:
     os.environ['LINUMERT_PLANT_LIB'] = sys.argv[3]
     assert plant(['machine', 'build', 'machine.yaml', '--run']) == 0
-print('Installed wheel: CAM, simulation, templates, config resources, Plant CLI PASS')
+print('Installed wheel: CAM, prepare, WebHMI assets, templates, config, Plant CLI PASS')
 '''
         import yaml
 

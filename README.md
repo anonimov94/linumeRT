@@ -6,8 +6,10 @@
 
 ### Sterowanie CNC · wirtualna obrabiarka · programowanie obróbki
 
-Otwarte środowisko operatora oparte na **LinuxCNC 2.9**, **QtVCP** i **Debianie 12**.
+Otwarte środowisko operatora oparte na **LinuxCNC 2.9**, **WebHMI** i **Debianie 12**.
 Własny interfejs, podgląd detalu i ścieżki oraz Plant — model maszyny do badania jej zachowania.
+QtVCP pozostaje ekranem awaryjnym. Wspólny backend CLI `linumert` i WebHMI tworzą jeden projekt;
+[przygotowanie zadania i dalsze poziomy](docs/WORKFLOW_ZADANIA.md).
 
 [**Pobierz ISO Live**](https://github.com/anonimov94/linumeRT/releases) · [**Uruchom projekt**](#uruchomienie-na-linuxie) · [**Kamienie milowe**](#kamienie-milowe) · [**Dokumentacja**](docs/README.md)
 

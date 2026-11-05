@@ -18,6 +18,7 @@ from pathlib import Path
 from linumert.generators import basic, drilling, pockets, surfacing
 from linumert.generators.base import Issue
 from linumert.generators.registry import GeneratorRegistry
+from linumert.generators.tooling import check_steps
 from linumert.machine.schema import MachineConfig
 from linumert.tools.db import Tool
 from linumert.tools.tbl import format_tbl
@@ -51,6 +52,7 @@ def registry() -> GeneratorRegistry:
 
 def _steps(program, reg):
     budget = 0.0
+    checked, issues = [], []
     if len(program.steps) > 1000:
         raise ValueError("Zadanie przekracza limit 1000 kroków przygotowania")
     for number, step in enumerate(program.steps, 1):
@@ -58,13 +60,16 @@ def _steps(program, reg):
             continue
         generator = reg.get(step.generator, step.version)
         if generator is None:
-            raise CompileError([Issue("P-5011", {"step": number, "name": step.generator,
-                                                 "version": step.version})])
+            problem = Issue("P-5011", {"step": number, "name": step.generator,
+                                       "version": step.version})
+            issues.append(f"{problem.code}: {problem.message()}")
+            continue
         values, problems = generator.normalize(step.params, number)
         if not problems:
             problems = generator.check(values, number)
         if problems:
-            raise CompileError(problems)
+            issues += [f"{p.code}: {p.message()}" for p in problems]
+            continue
         if step.generator in CUTTING and "tool_d" in values:
             span = max(abs(values.get("x1", 0) - values.get("x0", 0)),
                        abs(values.get("y1", 0) - values.get("y0", 0)),
@@ -74,10 +79,13 @@ def _steps(program, reg):
                 1 + span / (values["tool_d"] * values["stepover"] / 100)) * 32
         if step.generator == "drill_holes":
             budget += (len(values["points"].split(";")) if values["pattern"] == "list"
-                       else values["count"] * values["rows"])
+                       else 1 if values["pattern"] == "single"
+                       else values["count"] * (values["rows"] if values["pattern"] == "grid"
+                                               else 1))
         if not math.isfinite(budget) or budget > 100_000:
             raise ValueError(f"krok {number}: przekroczony budżet przygotowania ścieżki")
-        yield number, step.generator, values
+        checked.append((number, step.generator, values))
+    return checked, issues
 
 
 def render(program: LnxProgram, machine: MachineConfig, drives: dict, tools: dict[int, Tool],
@@ -112,37 +120,43 @@ def render(program: LnxProgram, machine: MachineConfig, drives: dict, tools: dic
     reg = registry()
     current = None
     used = set()
-    issues = []
-    for number, name, values in _steps(program, reg):
+    checked, issues = _steps(program, reg)
+    for number, name, values in checked:
         if name == "header":
             expected = "G21" if program.units == "mm" else "G20"
             if values["units"] != expected or values["offset"] != offset:
-                issues.append(f"krok {number}: jednostki lub układ nagłówka "
-                              "nie odpowiadają zadaniu")
+                issues.append(f"krok {number}: nagłówek {values['units']} / {values['offset']} "
+                              f"nie odpowiada jednostkom {program.units} i układowi {offset}")
         elif name == "tool_change":
             current = values["tool"]
             used.add(current)
-            if current not in tools:
-                issues.append(f"krok {number}: brak narzędzia T{current} w bazie")
             rpm = values["rpm"]
             if rpm > machine.spindle.max_rpm or 0 < rpm < machine.spindle.min_rpm:
-                issues.append(f"krok {number}: obroty S{rpm:g} poza zakresem wrzeciona maszyny")
+                issues.append(f"krok {number}: obroty S{rpm:g} poza zakresem wrzeciona maszyny "
+                              f"{machine.spindle.min_rpm:g}–{machine.spindle.max_rpm:g}")
         elif name in CUTTING and current is None:
             issues.append(f"krok {number}: obróbka wymaga wcześniejszego wyboru narzędzia")
     selected = [tools[n] for n in sorted(used) if n in tools]
+    valid_tools = {}
     for tool in selected:
         validation = tool.validate()
         if validation:
-            issues += [issue.message() for issue in validation]
+            issues += [f"{issue.code}: {issue.message()}" for issue in validation]
             continue
+        valid_tools[tool.number] = tool
         if tool.type in (None, "special_stl") or not (tool.tool_diameter() or 0) > 0:
             issues.append(f"T{tool.number}: wymagany znany profil i dodatnia średnica narzędzia")
         if tool.offsets.get("Z", 0) <= 0:
             issues.append(f"T{tool.number}: wymagany dodatni wymiar Z od nosa do końca narzędzia")
+    issues += [f"{issue.code}: {issue.message()}"
+               for issue in check_steps(checked, valid_tools.get, program.units)]
     if issues:
         raise ValueError("; ".join(issues))
-    gcode = compile_program(program, reg, source="program.lnx", tools=tools.get,
-                            safe_z=axes["Z"].soft_limits[1])
+    try:
+        gcode = compile_program(program, reg, source="program.lnx", tools=tools.get,
+                                safe_z=axes["Z"].soft_limits[1])
+    except CompileError as exc:
+        raise ValueError("; ".join(f"{i.code}: {i.message()}" for i in exc.issues)) from None
     syntax = check(gcode)
     if syntax:
         raise ValueError("; ".join(p.message() for p in syntax))

@@ -15,7 +15,7 @@ RESOURCES = Path(__file__).with_name("resources")
 def render_lite(cfg: MachineConfig, target: str, *, test_mode: bool = False) -> dict[str, str]:
     """Self contained sim/Plant export. Never generates a hardware target."""
     if target not in ("sim", "plant"):
-        raise ValueError("Lite eksportuje wyłącznie konfiguracje sim i plant")
+        raise ValueError("Eksport bez ekranu obsługuje wyłącznie konfiguracje sim i plant")
     opt = Options(hal_dir="hal", program_prefix="nc_files", tool_table="tool.tbl", postgui="",
                   display="linumert-headless")
     files = render(cfg, target, opt)

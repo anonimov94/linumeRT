@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import sqlite3
 import sys
 from pathlib import Path
 
@@ -35,12 +36,19 @@ def _tool(text: str) -> tuple[int, float, float]:
 
 
 def main(argv: list[str] | None = None) -> int:
+    from .programs.prepare import add_arguments
+    from .programs.prepare import run as prepare
+
     parser = argparse.ArgumentParser(prog="linumert", description="linumeRT — CLI backendu")
     commands = parser.add_subparsers(dest="command", required=True)
     commands.add_parser("generators", help="dostępne generatory CAM 2D")
     compile_cmd = commands.add_parser("compile", help=".lnx → G-code; zapis atomowy")
     compile_cmd.add_argument("program", type=Path)
     compile_cmd.add_argument("--out", type=Path)
+    compile_cmd.add_argument("--machine", type=Path, help="model maszyny dla wycofania G53 Z")
+    compile_cmd.add_argument("--tools", type=Path, help="baza do kontroli narzędzi (odczyt)")
+    compile_cmd.add_argument("--drive-library", type=Path)
+    add_arguments(commands.add_parser("prepare", help="kompletny pakiet zadania, bez ruchu"))
     machine = commands.add_parser("machine", help="walidacja maszyny i skale napędów")
     machine.add_argument("path", type=Path)
     config = commands.add_parser("config", help="eksport konfiguracji LinuxCNC sim/Plant")
@@ -62,8 +70,22 @@ def main(argv: list[str] | None = None) -> int:
                 print(f"{name} v{reg.latest(name).version}")
         elif args.command == "compile":
             from .programs.compiler import compile_file
+            from .tools.db import ToolDB
 
-            print(compile_file(args.program, args.out, registry=registry()))
+            safe_z, tools = None, None
+            if args.machine:
+                from .machine.drives.machine_drives import load_machine_drives
+
+                cfg, _ = load_machine_drives(args.machine, args.drive_library)
+                z = next((a for a in cfg.axes if a.letter == "Z"), None)
+                safe_z = z.soft_limits[1] if z is not None else None
+            if args.tools:
+                with ToolDB(args.tools, readonly=True) as database:
+                    tools = {t.number: t for t in database.tools()}
+            print(compile_file(args.program, args.out, registry=registry(), safe_z=safe_z,
+                               tools=tools.get if tools is not None else None))
+        elif args.command == "prepare":
+            return prepare(args)
         elif args.command == "machine":
             from .machine.drives.drive_real import counts_per_unit
             from .machine.drives.machine_drives import load_machine_drives
@@ -95,7 +117,7 @@ def main(argv: list[str] | None = None) -> int:
                 atomic_write(args.out, text)
             else:
                 print(text, end="")
-    except (OSError, ValueError, RuntimeError, MachineConfigError) as exc:
+    except (OSError, ValueError, RuntimeError, sqlite3.Error, MachineConfigError) as exc:
         print(f"Błąd: {exc}", file=sys.stderr)
         return 2
     return 0

@@ -20,7 +20,7 @@ def main(argv: list[str] | None = None) -> int:
         with open(args.ini, encoding="utf-8") as stream:
             config.read_file(stream)
         if config.get("LINUMERT", "MACHINE_PROFILE", fallback="") not in ("sim", "plant"):
-            raise ValueError("lite DISPLAY obsługuje wyłącznie sim/plant")
+            raise ValueError("DISPLAY bez okna obsługuje wyłącznie sim/plant")
         import linuxcnc
 
         state = linuxcnc.stat()

@@ -117,8 +117,7 @@ class JobService:
         return data.getvalue()
 
 
-def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Przygotuj pakiet zadania linumeRT (bez ruchu)")
+def add_arguments(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("program", type=Path)
     parser.add_argument("--machine", type=Path, required=True)
     parser.add_argument("--tools", type=Path, required=True)
@@ -127,7 +126,9 @@ def main(argv: list[str] | None = None) -> int:
                         help="zero detalu w mm układu maszyny, przed korekcją długości")
     parser.add_argument("--offset", choices=job.OFFSETS, default="G54")
     parser.add_argument("--drive-library", type=Path, default=None)
-    args = parser.parse_args(argv)
+
+
+def run(args: argparse.Namespace) -> int:
     try:
         service = JobService(args.program.parent, args.machine, args.tools,
                              args.out.parent, args.drive_library)
@@ -138,6 +139,12 @@ def main(argv: list[str] | None = None) -> int:
     print(job.json_text({"name": result["name"], "job_id": result["manifest"]["job_id"],
                          "status": result["report"]["status"]}), end="")
     return 0
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description="Przygotuj pakiet zadania linumeRT (bez ruchu)")
+    add_arguments(parser)
+    return run(parser.parse_args(argv))
 
 
 if __name__ == "__main__":

@@ -1862,3 +1862,10 @@ Pełny RIP musi ponownie potwierdzić wynik; nie scalać na czerwonym CI.
 - Odczyt maszyny prepare przechodzi na `linumert.machine.drives`; granice importów pozostają egzekwowane. `linumert` to nazwa głównego CLI, `linumert-lite` pozostaje aliasem zgodności.
 - Rozwiązano konflikty wpisów i generowanych widoków, usunięto nieaktualną instrukcję osobnego produktu lite z ARCHITECTURE.md.
 - 107 testów napędów/CLI/konfiguracji/przygotowania PASS; autokontrola. To integracja w gałęzi do main, nie deklaracja scalenia ani zakończenia czterech poziomów.
+
+## Wspólne prepare i dane odbioru #218 · 2026-11-05 · Codex
+
+- Model-Author: Codex. `linumert prepare`, alias zgodności i `linumert-job` używają wspólnego adaptera WebHMI. Walidacja zbiera kody/przyczyny z całego programu; compile może czytać tę samą maszynę i bazę bez zmian danych.
+- Dane i przypadki Claude z #218 zachowane; adapter wymaga jawnego zera detalu i schematu linumert.job v1. 24 testy odbioru aktywne, bez skipu braku prepare; razem 69 testów CLI/pakietu/konfiguracji PASS, Ruff PASS.
+- Wheel poza repo: prepare i alias dają identyczny manifest; zachowane WebHMI/panel Plant oraz szablony. Naprawiono historyczny test wheel odrzucający UI pełnego projektu; dołączony do CI obok odbioru WebHMI.
+- Autokontrola integracji, bez deklaracji niezależnego przeglądu zmienionego kontraktu. Dalsze CI i odbiór integracji nadal wymagane.

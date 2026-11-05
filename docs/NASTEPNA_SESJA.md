@@ -15,11 +15,13 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
-Model-Author: Codex · 2026-11-05. **Bieżąca integracja #216/#217:**
+Model-Author: Codex · 2026-11-05. **Bieżąca integracja #216/#217/#218, PR #219:**
 `codex/vertical-integration-20261105` w checkoutcie vertical. Wspólne napędy z #216,
 prepare z #217, canonical import core → core, nazwa CLI `linumert` z aliasem zgodności.
-107 testów integracji PASS. Następny krok: podpiąć prepare do głównego CLI i uzgodnić
-dane odbioru #218 z kontraktem WORKFLOW_ZADANIA.md; jeden backend dla CLI/WebHMI.
+107 testów integracji i 69 CLI/pakietu/konfiguracji (w tym 24 odbioru) PASS.
+Prepare jest podpięte do głównego CLI; dane #218 uzgodnione z WORKFLOW_ZADANIA.md,
+bez skipów, jeden backend dla CLI/WebHMI. Wheel sprawdzony poza checkoutem z UI i szablonami.
+Następne: kliknięcie po integracji, pełna regresja/CI #219 i scalenie, potem poziom 2.
 Nie jest to scalenie tych PR ani odbiór poziomów 2–4. #217 nadal przechodzi swoje CI.
 
 Model-Author: Codex · 2026-11-05. **Stan zatrzymania VERTICAL-PREPARE:**
