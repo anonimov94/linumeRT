@@ -692,3 +692,11 @@ dotyczy tylko tego opcjonalnego adaptera SDK; dotychczasowe kernele pozostają C
 Własny zrzut WebHMI po dokładnej kontroli, bez retuszu: Codex, 2026-11-05,
 GPL-2.0-or-later. `docs/raporty/vertical/precise-limits-20261105.jpg`;
 brama fake, rzeczywiste interpretery offline RIP, bez zasobów zewnętrznych.
+
+### Odbiór materiału zadania — 2026-11-05
+
+Własny zrzut WebHMI bez retuszu: Codex, 2026-11-05, GPL-2.0-or-later.
+`docs/raporty/vertical/material-20261105.jpg`: własna brama fake8789,
+rzeczywisty rs274/SDK i diagnostyka materiału, bez grafiki zewnętrznej.
+Surowe pomiary `docs/raporty/vertical/material-benchmark-20261105.json`:
+własne uruchomienia CLI w WSL2, Codex, ta sama data i licencja.
