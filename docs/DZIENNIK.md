@@ -1812,3 +1812,8 @@ Pełny RIP musi ponownie potwierdzić wynik; nie scalać na czerwonym CI.
 - Kliknięte w przeglądarce na LinuxCNC 2.9 + Plant z łańcuchem HMI bez obejścia: E-STOP → podwójny Reset → ON; zawieszona karta → E-STOP po 3,1 s. Zrzuty: `docs/raporty/G2/WEBHMI_WATCHDOG_2026-11-04.md`.
 - Odbiór w GUI wykrył 3 błędy niewidoczne w testach logiki (brak sygnału życia w kliencie, stary JS z pamięci podręcznej, E-1100 po resecie); poprawione, test na LinuxCNC idzie przez WebSocket.
 - Testy: `test_webhmi_watchdog_linuxcnc` PASS (~20 s), `test_webhmi_hal_link` i `test_webhmi_app`. Otwarte: ukryta karta, start bramy z `[DISPLAY]`. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## Program dialogowy: numer O i komentarz każdej operacji · 2026-11-05 · Claude
+- Model-Author: Claude. Polecenie właściciela: każda operacja z `.lnx` ma własny blok `oN if [1]` … `oN endif` (N = krok × 100) i komentarz `( OP N [oN]: rodzaj | T D S | F FZ | Z )`. Powtórzone numery O w generatorach odrzuca P-5013. PROPOZYCJA w DECYZJE.
+- Złote kopie: różnią się tylko dodanymi liniami (sprawdzone). LinuxCNC 2.9 + Plant: `tests/test_op_blocks_linuxcnc.py` (cały program w AUTO i start od linii wewnątrz `o300`: wierci tylko otwór operacji 3, bez błędów); akceptacja Plant z `test_gcode_isolation_linuxcnc` (M6 w bloku O) PASS.
+- Otwarte: numer operacji w WebHMI, notatka narzędzia dla `o<lrt_*> call` po #212. NIEZWERYFIKOWANE NA SPRZĘCIE.
