@@ -2063,9 +2063,9 @@
       "title": "Zadanie obróbkowe: przygotowanie wspólnego pakietu w WebHMI",
       "parents": ["028", "029", "032", "039", "040", "041", "043", "062"],
       "status": "in_progress",
-      "progress": "Pełny projekt: pakiet SHA-256, ToolDB readonly, wspólny prepare CLI/API i użyteczny widok WebHMI z ZIP. PR #219 łączy #216/#217/#218: canonical napędy w core, nazwa linumert z aliasem zgodności, 24 aktywne przypadki odbioru Claude uzgodnione z kontraktem main. 107 testów integracji, 69 CLI/pakietu/konfiguracji oraz wheel poza repo PASS. Detal kliknięty przed integracją; końcowy odbiór i CI w toku. Nie zalicza poziomów 2–4.",
+      "progress": "Pełny projekt: PR #219 łączy #216/#217/#218, wspólne prepare CLI/API/WebHMI i napędy w core. 24 aktywne przypadki odbioru Claude uzgodnione z kontraktem main; 107 testów integracji, 69 CLI/pakietu/konfiguracji, wheel, lint, C i REQ PASS. WebHMI po integracji kliknięte; CLI, katalog GUI i pobrany ZIP mają 9 identycznych plików. Pełna regresja: 2036 PASS, jedna znana porażka Qt jak na main. Końcowe CI i scalenie wymagane; poziomy 2–4 otwarte.",
       "remaining": [
-        "Odbiór po integracji, szersza regresja i CI #219; scalenie gotowych porcji do main i domknięcie zawartych PR.",
+        "Końcowe CI #219; scalenie kodu i dowodów do main oraz domknięcie zawartych PR.",
         "Rozszerzenie wyboru wielu maszyn/baz w GUI i zakresu CAM poza pierwszą porcję, jeśli potrzebne do dalszego odbioru.",
         "Uzgodnienie kernela C z claude/natywne-przyspieszenia przed pomiarem całego przepływu w poziomie 2."
       ],
