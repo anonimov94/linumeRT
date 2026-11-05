@@ -643,3 +643,14 @@ Model-Author: Codex. Autor: Codex; źródło: własny zrzut pełnego linumeRT We
 w przeglądarce aplikacji, brama testowa `--fake` w WSL Debian 12. Bez retuszu,
 bez zasobów zewnętrznych; GPL-2.0-or-later. Zakres: dokumentacja odbioru przygotowania.
 Plik: `docs/raporty/vertical/prepare-webhmi-20261105.jpg`.
+
+### Backend lite scalony do main — 2026-11-05
+
+Model-Author: Codex (kod lite, 2026-10-28, gałąź `codex/lite-backend`), scalenie: Claude.
+Własny kod GPL-2.0-or-later: CLI `linumert-lite`, `cnc/headless.py`, `machine/lite_config.py`
+z zasobami, `tools/console*`, `tools/terminal3d.py`, `tools/terminal_keys.py`,
+`tools/ConsoleDensity.cs`, `tools/check_wheel.py`, testy lite. Napędy przeniesione z Plant do
+`core/linumert/machine/drives/` bez zmiany autorstwa algorytmów. Bez nowych bibliotek i zasobów
+graficznych. Raster Braille: numeracja punktów wg standardu Unicode U+2800–U+28FF
+(https://www.unicode.org/charts/PDF/U2800.pdf, bez dołączania tabeli). Adapter konsoli HD
+korzysta z Win32 Console API (https://learn.microsoft.com/en-us/windows/console/setcurrentconsolefontex).

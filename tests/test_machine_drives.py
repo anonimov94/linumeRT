@@ -104,7 +104,7 @@ def test_python_m_plant_drive_clone(tmp_path: Path, library: dict[str, dict]) ->
     # REQ-VD-03: `python -m plant drive clone` z katalogu głównego (szablon i instancja)
     lib = tmp_path / "lib"
     lib.mkdir()
-    src = ROOT / "plant" / "library" / "drives" / "servo_400w.yaml"
+    src = ROOT / "core" / "linumert" / "machine" / "drives" / "templates" / "servo_400w.yaml"
     (lib / src.name).write_text(src.read_text(encoding="utf-8"), encoding="utf-8")
 
     def run(*args: str) -> subprocess.CompletedProcess[str]:

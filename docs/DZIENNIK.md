@@ -1848,3 +1848,17 @@ Pełny RIP musi ponownie potwierdzić wynik; nie scalać na czerwonym CI.
 - CI #215: 212 LinuxCNC PASS, 1 FAIL w sprawdzeniu eoffset-request po pauzie. Lokalnie 2 przypadki sim/Plant PASS przed zmianą; źródło wyścigu pozostaje wnioskiem z asynchronicznego zapisu HAL.
 - Test czeka teraz na tę samą dokładną wartość żądania (1e-6, dotychczasowy timeout), zachowując pozostałe asercje i kod produkcyjny. Po zmianie 2 przypadki na RIP sim/Plant PASS (140 s).
 - To synchronizacja starego testu, nie odbiór wykonania pakietu zadania. Autokontrola; końcowe CI/scalenie nadal wymagane.
+
+## Scalenie lite do main · 2026-11-05 · Claude
+- Model-Author: Claude. Polecenie właściciela: jeden projekt w main (DECYZJE 2026-11-05). Backend lite (Codex, PR #203) dodany bez usuwania GUI, WebHMI, panelu Plant, sprzętu ani ATC.
+- Napędy i szablony w `core/linumert/machine/drives/`; rdzeń nie importuje Plant (`tests/test_architecture.py`), `linumert_plant.drive_*` jako aliasy. `plant_scales` liczy skale bez modelu Plant, test równości z Plant na 5 maszynach.
+- Nowe polecenia: `linumert-lite` (generators/compile/machine/config/simulate), `linumert-headless`, `linumert-plant`; podgląd telemetrii w konsoli (`tools/console*`).
+- Testy (WSL, klon gałęzi): `make lint` OK, pytest 1984 PASS / 15 skip, check_requirements 22/22. LinuxCNC nie uruchamiano: DISPLAY domyślnie bez zmian, eksport lite = headless.
+- Nie przeniesiono: niezacommitowanej pracy Codex w `linumeRT-lite` (kompilator `.lnx`, kernel C materiału, roadmapa `LITE_VERTICAL.md`) — Codex dokłada ją na main. Otwarte: ujednolicenie `beta/` z `core/`. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## Jeden backend przygotowania — integracja #216/#217 · 2026-11-05 · Codex
+
+- Model-Author: Codex. Własna gałąź integracyjna łączy ekstrakcję napędów Claude i prepare WebHMI/CLI; cudze checkouty bez zmian.
+- Odczyt maszyny prepare przechodzi na `linumert.machine.drives`; granice importów pozostają egzekwowane. `linumert` to nazwa głównego CLI, `linumert-lite` pozostaje aliasem zgodności.
+- Rozwiązano konflikty wpisów i generowanych widoków, usunięto nieaktualną instrukcję osobnego produktu lite z ARCHITECTURE.md.
+- 107 testów napędów/CLI/konfiguracji/przygotowania PASS; autokontrola. To integracja w gałęzi do main, nie deklaracja scalenia ani zakończenia czterech poziomów.

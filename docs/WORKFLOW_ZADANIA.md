@@ -130,7 +130,8 @@ W trybie testowym `--fake` zastępuje `--linuxcnc --hal --postgui ...`.
 Cztery opcje `--job-*`/`--jobs-dir` są podawane razem. Maszyna i baza są aktywnymi
 wejściami skonfigurowanymi dla tej bramy; ekran pokazuje ich nazwy. Bez konfiguracji
 widok uczciwie zgłasza niedostępność. `.lnx` nie trafia do listy wykonywalnych programów CNC.
-Biblioteka napędów poza checkoutem wymaga jawnego `--drive-library`.
+Domyślna biblioteka napędów pochodzi z pakietu `linumert.machine.drives`;
+`--drive-library` pozwala wybrać inny katalog również poza checkoutem.
 
 Ta sama logika bez uruchamiania GUI/bramy (standardowe zależności rdzenia):
 

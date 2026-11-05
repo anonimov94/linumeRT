@@ -47,8 +47,7 @@ class JobService:
         self._preparing = threading.Lock()
 
     def _machine(self):
-        # Composition boundary: reuse the full project's resolver, not a second model.
-        from linumert_plant.machine_drives import load_machine_drives
+        from linumert.machine.drives.machine_drives import load_machine_drives
 
         return load_machine_drives(self.machine, self.library_dir)
 

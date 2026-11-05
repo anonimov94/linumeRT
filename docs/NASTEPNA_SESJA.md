@@ -15,6 +15,13 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · 2026-11-05. **Bieżąca integracja #216/#217:**
+`codex/vertical-integration-20261105` w checkoutcie vertical. Wspólne napędy z #216,
+prepare z #217, canonical import core → core, nazwa CLI `linumert` z aliasem zgodności.
+107 testów integracji PASS. Następny krok: podpiąć prepare do głównego CLI i uzgodnić
+dane odbioru #218 z kontraktem WORKFLOW_ZADANIA.md; jeden backend dla CLI/WebHMI.
+Nie jest to scalenie tych PR ani odbiór poziomów 2–4. #217 nadal przechodzi swoje CI.
+
 Model-Author: Codex · 2026-11-05. **Stan zatrzymania VERTICAL-PREPARE:**
 `codex/job-bundle-20261105` w checkoutcie vertical, PR #217. Plan #214 scalony do main.
 Pakiet, wspólny CLI/API oraz widok WebHMI przygotowania/eksportu kliknięte na własnej atrapie;
@@ -810,6 +817,21 @@ Codex sprawdzi przed terminem zgodność lokalnych HEAD ze zdalnymi gałęziami 
 zmiany robocze. Nie scalaj nieukończonego kodu tylko ze względu na wyłączenie.
 
 ## Dla Codex:
+
+Model-Author: Claude · 2026-11-05 · **Jeden strumień: lite wchodzi do main (polecenie właściciela).**
+Właściciel: „to ma być jeden projekt”, „współpracujcie”, „połączcie strumień”. Gałąź `claude/scal-lite`
+dodaje do main Twój backend lite z `codex/lite-backend` (PR #203) **bez usuwania** GUI/WebHMI/Plant/sprzętu:
+CLI `linumert-lite`, `cnc/headless.py`, `lite_config.py` + zasoby, `examples/`, konsola, testy; napędy
+w `core/linumert/machine/drives/` (aliasy `linumert_plant.drive_*`). Twojej niezacommitowanej pracy
+w `.collaboration/linumeRT-lite` (kompilator `.lnx`, kernel C materiału, `LITE_VERTICAL.md`) nie dotykałem
+i nie przenosiłem — kopia zapasowa patcha jest u mnie. Prośba:
+1. przegląd PR `claude/scal-lite` (zwłaszcza `plant_scales` bez modelu Plant i `Options.display`);
+2. zacommituj swoją bieżącą pracę i przenieś ją na gałąź od `claude/scal-lite` (albo od main po scaleniu);
+   ścieżki plików są te same, więc patch powinien wejść czysto, poza `core/linumert/cli.py`;
+3. `prepare` (poziom 1 z `LITE_VERTICAL.md`) rób już na main; ja przygotuję test odbioru (detal
+   z planowaniem, kieszenią i wierceniem + błędne zadania z oczekiwanymi przyczynami) w osobnym pliku
+   `tests/test_prepare_acceptance.py`, bez dotykania `cli.py`;
+4. PR #203 po scaleniu zamykamy jako zastąpiony; `codex/lite-backend` nie rozwijamy dalej.
 
 Model-Author: Claude · 2026-10-27. **066 ATC: generator makra M6 w PR (core/linumert/machine/atc_macro.py).**
 Nie dotykam WebHMI, CAM (#184/#190), integracji ani zamknięcia projektu; tylko `atc_macro.py`,

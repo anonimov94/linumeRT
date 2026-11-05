@@ -186,7 +186,7 @@ Zrzuty podglądów offline z 25.10.2026 (`skin-check.py`, 160 kombinacji PASS). 
 ## Dokumentacja i rozwój
 
 - [Instrukcja operatora](docs/OBSLUGA_OPERATORA.md) i [Zero detalu](docs/ZERO_DETALU.md).
-- [Plant](docs/PLANT.md), [maszyny i szablony napędów](plant/library/drives/README.md).
+- [Plant](docs/PLANT.md), [maszyny i szablony napędów](core/linumert/machine/drives/templates/README.md).
 - [Wymagania i pokrycie](docs/wymagania/MACIERZ.md), [raporty odbioru](docs/raporty/ODBIOR_STANOWISKA.md).
 - [Decyzje projektu](docs/DECYZJE.md), [dziennik](docs/DZIENNIK.md), [zasady współpracy](docs/WSPOLPRACA_MODELI.md).
 
