@@ -175,14 +175,15 @@ def test_disagreement_between_interfaces_cannot_pass_limits(package, monkeypatch
     assert "coordinate_resolution_mm" not in result
 
 
-def test_api_auth_snapshot_report_storage_and_no_cnc_effect(tmp_path, monkeypatch):
+@pytest.mark.parametrize("mode,verdict", [("preflight", "partial"), ("verify", "incomplete")])
+def test_api_auth_snapshot_report_storage_and_no_cnc_effect(tmp_path, monkeypatch, mode, verdict):
     source, db, machine = write_inputs(tmp_path / "input")
     service = JobService(source.parent, machine, db, tmp_path / "jobs")
     prepared = service.prepare(source.name, "part", (50, 50, -80))
     gateway = Gateway(FakeBackend(FakeMachine()))
     client = TestClient(create_app(gateway, TOKEN, jobs=service), base_url="http://127.0.0.1")
     payload = {"job_id": prepared["manifest"]["job_id"], "start_mm": list(START)}
-    endpoint = "/api/jobs/part/preflight"
+    endpoint = f"/api/jobs/part/{mode}"
     fake(monkeypatch)
     before = service.archive("part")
     state = gateway.snapshot()
@@ -195,7 +196,7 @@ def test_api_auth_snapshot_report_storage_and_no_cnc_effect(tmp_path, monkeypatc
     result = client.post(endpoint, json=payload, headers=HEADERS)
     assert result.status_code == 200, result.text
     report = result.json()
-    assert report["status"] == "partial" and report["job_id"] == payload["job_id"]
+    assert report["status"] == verdict and report["job_id"] == payload["job_id"]
     saved, = (service.jobs_dir / ".preflight").glob("*.json")
     assert json.loads(saved.read_text()) == report
     assert service.archive("part") == before and gateway.snapshot() == state

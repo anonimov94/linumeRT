@@ -2101,9 +2101,9 @@
         "055"
       ],
       "status": "in_progress",
-      "progress": "Pełny projekt mainc0b42c4: #221/#222/#223/#224 scalone po końcowym CI/LinuxCNC (C także ISO) success. Dokładny rs274/SDK, limity i diagnostyka materiału/brył/obciążeń z frozen job. #224:2097 PASS/1 znany Qt FAIL w klonie,19 real RIP i65 regresji PASS; rzeczywisty wheel PASS. WebHMI kliknięte, JSON/CLI zgodne;2861,832031mm³ i107,958839s dolnego czasu. Pełny przepływ3 powtórzenia: mediana Python7,2761s/C4,2322s; wyniki materiału identyczne. Osobny commit dowodów dodaje2 testy API/CLI i helisy (5 przypadków materiału PASS), bez zmiany runtime. Status całości nadal partial; brak zgody na wykonanie.",
+      "progress": "Pełny projekt mainc0b42c4: #221/#222/#223/#224 scalone po końcowym CI/LinuxCNC (C także ISO) success. Dokładny rs274/SDK, limity i diagnostyka materiału/brył/obciążeń z frozen job. #224:2097 PASS/1 znany Qt FAIL w klonie,19 real RIP i65 regresji PASS; rzeczywisty wheel PASS. WebHMI kliknięte, JSON/CLI zgodne;2861,832031mm³ i107,958839s dolnego czasu. Pełny przepływ3 powtórzenia: mediana Python7,2761s/C4,2322s; wyniki materiału identyczne. Osobny commit dowodów dodaje2 testy API/CLI i helisy (5 przypadków materiału PASS), bez zmiany runtime. Status całości nadal partial; brak zgody na wykonanie. Kolejna porcja na codex/job-verified-20261105: formalny verify i WebHMI,12 testów bramek,3 real RIP oraz rzeczywisty CLI/API verified PASS; GUI/pełna regresja/CI w toku. Dowody #225 head6fa342f oczekują końcowego CI.",
       "remaining": [
-        "Scalenie dodatkowych dowodów i testów odbioru; formalny status verified dla kompletnej diagnostyki przy jawnych założeniach i zakresie modelu.",
+        "Scalenie #225 oraz porcji formalnego verify po klikniętym GUI, pełnej regresji i końcowym CI.",
         "Powiązanie pakietu, początku/T0 i zamrożonych zasobów z instancją wykonawczą sim/Plant przed startem.",
         "Poziomy3–4: wykonanie/telemetria i porównanie z przewidywaniem; kwalifikacja sprzętu pozostaje osobna."
       ],
@@ -2125,7 +2125,11 @@
         "simulation/linumert_sim/job_path.py",
         "tests/test_job_material_linuxcnc.py",
         "docs/raporty/vertical/material-benchmark-20261105.json",
-        "https://github.com/anonimov94/linumeRT/pull/224"
+        "https://github.com/anonimov94/linumeRT/pull/224",
+        "simulation/linumert_sim/job_verify.py",
+        "tests/test_job_verify.py",
+        "docs/raporty/VERTICAL_VERIFIED_2026-11-05.md",
+        "https://github.com/anonimov94/linumeRT/pull/225"
       ]
     },
     {

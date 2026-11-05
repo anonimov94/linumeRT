@@ -158,7 +158,7 @@ Incremental jog: Model-Author: Codex
       <section class="panel job-panel" id="jobPanel" aria-labelledby="jobTitle">
         <div class="panel-heading">
           <div><div class="eyebrow">06 / ZADANIE CAM</div><h2 id="jobTitle">Przygotowanie zadania</h2></div>
-          <span class="small-tag">PRZYGOTOWANIE / KONTROLA CZĘŚCIOWA</span>
+          <span class="small-tag">PRZYGOTOWANIE / WERYFIKACJA OFFLINE</span>
         </div>
         <p class="job-hint">Planowanie, kieszenie i otwory z programu .lnx. Pakiet zawiera program, narzędzia i ustawienie detalu.</p>
         <p class="job-hint" id="jobContext">Połącz z bramą, aby odczytać konfigurację zadania.</p>
@@ -180,6 +180,7 @@ Incremental jog: Model-Author: Codex
         </form>
         <p id="jobStatus" class="job-status" role="status" aria-live="polite">Weryfikacja toru i wykonanie to kolejne poziomy.</p>
         <div id="jobResult" class="job-result" hidden>
+          <h3>Kontrole przygotowania</h3>
           <dl id="jobChecks" class="job-checks"></dl>
           <p class="job-hint">Identyfikator pakietu: <code id="jobId"></code></p>
           <button type="button" id="jobDownload" disabled>Pobierz pakiet ZIP</button>
@@ -192,10 +193,11 @@ Incremental jog: Model-Author: Codex
                 <label>Początek Y [mm]<input id="jobStartY" type="number" step="0.0001" required></label>
                 <label>Początek Z [mm]<input id="jobStartZ" type="number" step="0.0001" required></label>
               </div>
-              <button type="submit" id="jobPreflight">Sprawdź interpreter i ślad toru</button>
+              <button type="submit" id="jobPreflight">Zweryfikuj zadanie offline</button>
             </fieldset>
           </form>
           <div id="jobPreflightResult" hidden>
+            <h3>Wynik weryfikacji offline</h3>
             <p id="jobPreflightSummary" class="job-status" role="status" aria-live="polite"></p>
             <dl id="jobPreflightChecks" class="job-checks"></dl>
             <ul id="jobPreflightMessages"></ul>

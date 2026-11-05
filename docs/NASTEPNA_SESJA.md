@@ -15,6 +15,14 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · 2026-11-05. **Formalny wynik offline:**
+Własna gałąź `codex/job-verified-20261105` nad dowodami #225 (6fa342f; CI w toku).
+Dodano CLI verify/API/WebHMI z nowym raportem verificationv1. Verified wymaga wszystkich
+kontroli passed po świeżym rs274/SDK/materiale; wykonanie not_started i autoryzacja false.
+12 testów bramek, regresje CLI/API,3 real RIP i rzeczywisty CLI/API verified PASS.
+GUI/pełna regresja/CI i scalenie jeszcze wymagane. Mainc0b42c4 nadal ma partial z #224.
+Nie przeskakiwać powiązania live konfiguracji/narzędzi/początku/T0 przed poziomem3.
+
 Model-Author: Codex · 2026-11-05. **#222/#223/#224 scalone do main:**
 main c0b42c4 zawiera C, dokładne limity i materiał zadania po końcowym CI/LinuxCNC success.
 #224 runtime9b8db72:2097 PASS/1 znany Qt FAIL w klonie,19 real RIP PASS,65 regresji PASS,

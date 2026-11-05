@@ -72,3 +72,10 @@ def register_jobs(app: FastAPI, service: JobService | None,
 
         active = enabled(request)
         return run(lambda: active.preflight(name, payload.start_mm, payload.job_id, checker=check))
+
+    @app.post("/api/jobs/{name}/verify")
+    def verify_job(request: Request, name: str, payload: PreflightRequest) -> dict:
+        from linumert_sim.job_verify import verify
+
+        active = enabled(request)
+        return run(lambda: active.preflight(name, payload.start_mm, payload.job_id, checker=verify))

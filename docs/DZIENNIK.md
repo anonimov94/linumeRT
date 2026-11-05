@@ -1933,3 +1933,12 @@ Pomiar całego CLI po rozgrzaniu:3 powtórzenia, mediana Python7,2761s/C4,2322s;
 wyniki materiału wszystkich4 par dokładnie zgodne poza etykietą backendu. Brama8789 zatrzymana.
 Osobny commit dowodów dodaje zrzut, surowy pomiar i2 testy API/CLI oraz helisy (5 przypadków
 materiału PASS); nie zmienia runtime. Formalne verified, wykonanie i raport pozostają otwarte.
+
+## 2026-11-05 — formalny werdykt offline, checkpoint
+
+Model-Author: Codex. Po mainc0b42c4 i dowodach #225 dodano CLI verify/API/WebHMI.
+Nowy raport verificationv1 wymaga wszystkich kontroli passed po świeżym interpreterze,
+SDK i materiale. Zachowuje założenia i ograniczenia; autoryzacja wykonania false,
+execution not_started. Preflight pozostaje częściową diagnostyką.12 testów bramek i
+regresje CLI/API/static PASS;3 real RIP (verified/incomplete/rejected) i rzeczywisty
+CLI/API verified bez zmiany pakietu/CNC PASS. GUI/pełna regresja/CI nadal w toku.
