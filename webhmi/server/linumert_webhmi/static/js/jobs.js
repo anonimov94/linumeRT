@@ -186,7 +186,14 @@ export function createJobs(request) {
     finally { busy = false; controls(); }
   });
   controls();
-  return { setOnline(value) {
+  return { update(state) {
+    const instance = state?.execution;
+    $("jobInstance").hidden = !instance;
+    if (instance) {
+      $("jobInstanceIdentity").textContent = "Zadanie " + instance.job_id + " · " + instance.target;
+      $("jobInstanceStatus").textContent = instance.reason;
+    }
+  }, setOnline(value) {
     online = value;
     controls();
     if (online) refresh();

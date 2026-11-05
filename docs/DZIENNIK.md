@@ -1973,3 +1973,11 @@ Zrzut/provenance zapisane; brama8791 zatrzymana. StartupG55 i rzeczywisty rs274G
 17 testów eksportu PASS. Klon6058529:2126 PASS/1 znany Qt FAIL,15skip/240deselected,
 184subtesty;lint/C/REQ22/22 PASS. Nie jest to wykonanie kontrolera ani programu.
 Końcowe CI227 oraz225/226 w toku; następny zakres to prywatna instancja i live binding.
+
+## 2026-11-05 — prywatna instancja zadania, pierwszy checkpoint
+
+Model-Author: Codex. VERTICAL-RUN: odrębne evidence/config/HOME, własne procesy Plant/LinuxCNC,
+DISPLAY WebHMI z HAL bez bypassu, jawny status i zamknięta bramka Start/wznowienia.
+35 pierwszych testów instancji/bramy/architektury i41JS PASS. Rozruch/GUI/CI wymagane.
+#225/#226 zakończyły CI failure; lokalnie G2 i trace na227edcacf3:2PASS bez zmian progów.
+#227 skierowany na main, obejmuje225/226. Nie scalono go jeszcze i nie pominięto kontroli.

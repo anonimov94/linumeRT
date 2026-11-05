@@ -60,6 +60,9 @@ export function allowed(state, link) {
     : deny("Brak wykonywanego programu");
   result.resume = !machineOn ? deny(common) : paused ? permit()
     : deny("Program nie jest wstrzymany");
+  if (state.execution && state.execution.can_start !== true) {
+    result.run = result.resume = deny(state.execution.reason || "Instancja zadania niegotowa");
+  }
   result.override = machineOn ? permit() : deny(common);
   const jogging = Array.isArray(state.jog_active) && state.jog_active.length > 0;
   result.work_zero = !machineOn ? deny(common) : mode !== "manual"
