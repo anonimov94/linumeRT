@@ -15,6 +15,15 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · 2026-11-05. **Pierwsza porcja poziomu3:**
+Własna gałąź `codex/job-execution-config-20261105` nad #226b601654. run-config oraz ZIP
+API/WebHMI wiążą verified z oryginalnym pakietem, odrębną zamrożoną biblioteką napędów,
+narzędziami i układem detalu. Wspólny kontrakt raportu w core (bez importu symulacji).
+37 testów zakresu i65 regresji PASS;2 real rs274 konsumują eksport sim/Plant i odtwarzają
+ten sam tor. Nie uruchomiono kontrolera; configured nie jest zgodą na ruch. GUI/pełna
+regresja/CI pozostają otwarte. Raport VERTICAL_EXECUTION_CONFIG_2026-11-05.md.
+#225821971e i #226b601654: Python CI success, LinuxCNC w toku. Nie restartować ich bez powodu.
+
 Model-Author: Codex · 2026-11-05. **PR #226 verify odebrany w GUI:**
 Runtime ebca978, merge5beb4be dopisuje metadatafix z #225. CLI/API oraz kliknięte GUI8790:
 status verified, wszystkie kontrole passed, execution not_started/autoryzacja false;

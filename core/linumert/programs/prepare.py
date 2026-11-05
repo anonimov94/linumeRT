@@ -135,6 +135,33 @@ class JobService:
                 archive.writestr(entry, text.encode("utf-8"))
         return data.getvalue()
 
+    def execution_archive(self, name: str, job_id: str, verification_id: str, target: str) -> bytes:
+        from .job_execution import render
+
+        if not all(re.fullmatch(r"[0-9a-f]{64}", key) for key in (job_id, verification_id)):
+            raise ValueError("Nieprawidłowy identyfikator zadania lub weryfikacji")
+        if not self._checking.acquire(blocking=False):
+            raise ValueError("Trwa kontrola zadania; spróbuj ponownie")
+        try:
+            report_path = self.jobs_dir / ".preflight" / f"{job_id}-{verification_id}.json"
+            if report_path.parent.is_symlink() or report_path.is_symlink():
+                raise ValueError("Raport weryfikacji nie może być dowiązaniem")
+            report = json.loads(report_path.read_text(encoding="utf-8"))
+            if report.get("report_id") != verification_id:
+                raise ValueError("Raport weryfikacji zmienił identyfikator")
+            files = render(self._target(name), report, target, expected_job_id=job_id)
+            data = io.BytesIO()
+            with zipfile.ZipFile(data, "w", compression=zipfile.ZIP_DEFLATED) as archive:
+                for filename, text in sorted(files.items()):
+                    entry = zipfile.ZipInfo(f"{name}-{target}/{filename}",
+                                            date_time=(1980, 1, 1, 0, 0, 0))
+                    entry.compress_type = zipfile.ZIP_DEFLATED
+                    entry.external_attr = 0o100644 << 16
+                    archive.writestr(entry, text.encode("utf-8"))
+            return data.getvalue()
+        finally:
+            self._checking.release()
+
 
 def add_arguments(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("program", type=Path)

@@ -2143,9 +2143,10 @@
         "053",
         "061"
       ],
-      "status": "planned",
-      "progress": "Trzeci poziom zleconego przepływu. Wykorzystuje istniejące sterowanie WebHMI i kontrakty HAL; dokument nie zalicza G2 ani odbioru LinuxCNC/Plant.",
+      "status": "in_progress",
+      "progress": "Pierwsza porcja na codex/job-execution-config-20261105 nad #226: run-config i ZIP WebHMI/API z verified, ten sam snapshot programu/narzędzi/offsetu i własna biblioteka zamrożonych napędów. Konfiguracja configured, bez zgody na ruch i bez startu procesów.37 testów zakresu i65 regresji PASS;2 rzeczywiste rs274 konsumują eksport sim/Plant i odtwarzają zweryfikowany tor. GUI, pełna regresja i CI tej porcji jeszcze wymagane; nie zalicza wykonania ani G2.",
       "remaining": [
+        "Odbiór GUI, pełna regresja, CI i scalenie porcji konfiguracji wykonawczej.",
         "Zależność: pozytywny VERTICAL-VERIFY i niezmieniony manifest pakietu.",
         "Powiązanie instancji, programu, konfiguracji i narzędzi; bramki gotowości bez niejawnego zezwolenia na ruch.",
         "Start, postęp, pauza/wznowienie, przerwanie, E-STOP i utrata klienta z rozróżnialnymi wynikami.",
@@ -2153,7 +2154,12 @@
         "Odbiór automatyczny i kliknięty przebieg WebHMI; kwalifikacja sprzętu pozostaje osobna."
       ],
       "evidence": [
-        "docs/WORKFLOW_ZADANIA.md"
+        "docs/WORKFLOW_ZADANIA.md",
+        "core/linumert/programs/job_execution.py",
+        "core/linumert/programs/job_verification.py",
+        "tests/test_job_execution.py",
+        "tests/test_job_execution_linuxcnc.py",
+        "docs/raporty/VERTICAL_EXECUTION_CONFIG_2026-11-05.md"
       ]
     },
     {

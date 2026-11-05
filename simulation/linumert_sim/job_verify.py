@@ -5,11 +5,9 @@ Model-Author: Codex
 """
 
 from linumert.programs import job
+from linumert.programs.job_verification import FORMAT, REQUIRED
 
 from .job_preflight import check
-
-FORMAT = "linumert.job.verification"
-REQUIRED = ("integrity", "interpreter", "motion_limits", "material", "collisions", "loads")
 
 
 def verify(path, start_mm, **options):

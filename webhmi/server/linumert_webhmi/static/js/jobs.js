@@ -28,6 +28,7 @@ export function createJobs(request) {
     $("jobDownload").disabled = !online || busy || !prepared;
     $("jobPreflightFields").disabled = !online || busy || !prepared;
     $("jobCheckDownload").disabled = !checked;
+    $("jobExecutionFields").disabled = !online || busy || checked?.status !== "verified";
   }
   function status(text, error = false) {
     $("jobStatus").textContent = text;
@@ -159,6 +160,20 @@ export function createJobs(request) {
   $("jobCheckDownload").addEventListener("click", () => {
     if (checked) download(new Blob([JSON.stringify(checked, null, 2) + "\n"],
       { type: "application/json" }), prepared + "-preflight.json");
+  });
+  $("jobExecutionDownload").addEventListener("click", async () => {
+    if (!online || busy || !prepared || checked?.status !== "verified") return;
+    busy = true;
+    controls();
+    const target = $("jobExecutionTarget").value;
+    try {
+      const result = await response("/api/jobs/" + encodeURIComponent(prepared) + "/execution-config",
+        { method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ job_id: jobId, verification_id: checked.report_id, target }) });
+      download(await result.blob(), prepared + "-" + target + ".zip");
+      status("Konfiguracja symulacji pobrana. Uruchomienie i powiązanie z maszyną to kolejny krok.");
+    } catch (error) { status(error.message, true); }
+    finally { busy = false; controls(); }
   });
   $("jobDownload").addEventListener("click", async () => {
     if (!prepared || busy || !online) return;

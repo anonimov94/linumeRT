@@ -1952,3 +1952,13 @@ brama zatrzymana. Runtimeebca978;5beb4be zawiera poprawkę metadanych821971e z #
 Pierwszy CI dowodów wykrył brak provenance materiałowego zrzutu; wymagany wpis dodany,
 test zasobów PASS. Lokalny pełny IP9PASS/1FAIL wyłącznie przez ignorowany binarny ASan
 build-san, nie plik z Git. #225/#226 i pełna regresja natywna nadal w toku; nie omijać bramek.
+
+## 2026-11-05 — konfiguracja wykonawcza zweryfikowanego zadania, checkpoint
+
+Model-Author: Codex. Dodano run-config i ZIP API/WebHMI z raportu verified zapisanego
+przez bramę. Oryginalny pakiet, raport, tabela i program są powiązane z pochodną maszyną
+sim/Plant, układem detalu oraz biblioteką dokładnych snapshotów napędów. Bez odczytu bieżącej
+biblioteki i bez nowych domyślnych wartości. Manifest+regeneracja, atomowy nowy katalog,
+bez nadpisywania. Bypass domyślnie0; API nie przyjmuje test-mode. Brak startu procesów/CNC.
+37 testów zakresu i65 regresji PASS;2 real rs274 eksportu sim/Plant odtwarzają ten sam
+zweryfikowany tor. Lint PASS. GUI/pełna regresja/CI oraz rzeczywiste wykonanie pozostają otwarte.

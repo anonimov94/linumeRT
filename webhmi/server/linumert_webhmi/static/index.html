@@ -203,6 +203,15 @@ Incremental jog: Model-Author: Codex
             <ul id="jobPreflightMessages"></ul>
             <p id="jobCheckScope" class="job-hint">Materiał, kolizje i pełna precyzja toru oczekują. Wynik częściowy nie dopuszcza zadania do wykonania.</p>
             <button type="button" id="jobCheckDownload" disabled>Pobierz raport JSON</button>
+            <div class="job-form"><fieldset id="jobExecutionFields" disabled>
+              <div class="job-inputs"><label>Środowisko symulacji<select id="jobExecutionTarget">
+                <option value="plant">LinuxCNC + Plant</option>
+                <option value="sim">LinuxCNC sim</option>
+              </select></label></div>
+              <button type="button" id="jobExecutionDownload">Pobierz konfigurację symulacji</button>
+              <p class="job-hint">Program, narzędzia i napędy pochodzą z tego zadania.
+                Pobranie konfiguracji nie uruchamia symulatora ani programu.</p>
+            </fieldset></div>
           </div>
         </div>
       </section>

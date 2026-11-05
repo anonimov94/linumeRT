@@ -22,7 +22,7 @@ Boundary tests in `tests/test_architecture.py` enforce these rules.
 
 ## Entry points
 
-`linumert`: prepare, preflight, verify, compile, generators, machine, config, simulate.
+`linumert`: prepare, preflight, verify, run-config, compile, generators, machine, config, simulate.
 `linumert-lite` is a compatibility alias for the same CLI, not a separate product.
 `linumert-job`: preparation of an immutable job bundle, shared with WebHMI.
 `linumert-webhmi`: the developing operator screen; QtVCP remains the fallback.

@@ -12,13 +12,14 @@ from .schema import MachineConfig
 RESOURCES = Path(__file__).with_name("resources")
 
 
-def render_lite(cfg: MachineConfig, target: str, *, test_mode: bool = False) -> dict[str, str]:
+def render_lite(cfg: MachineConfig, target: str, *, test_mode: bool = False,
+                scales: dict[str, float] | None = None) -> dict[str, str]:
     """Self contained sim/Plant export. Never generates a hardware target."""
     if target not in ("sim", "plant"):
         raise ValueError("Eksport bez ekranu obsługuje wyłącznie konfiguracje sim i plant")
     opt = Options(hal_dir="hal", program_prefix="nc_files", tool_table="tool.tbl", postgui="",
                   display="linumert-headless")
-    files = render(cfg, target, opt)
+    files = render(cfg, target, opt, scales=scales)
     name = f"{cfg.machine.name}.ini"
     if test_mode:
         files[name] = files[name].replace("HMI_ESTOP_BYPASS = 0", "HMI_ESTOP_BYPASS = 1")

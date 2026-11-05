@@ -6,7 +6,7 @@ Model-Author: Codex
 
 import sqlite3
 from collections.abc import Callable
-from typing import Annotated
+from typing import Annotated, Literal
 
 from fastapi import FastAPI, HTTPException, Request, Response
 from linumert.machine.schema import MachineConfigError
@@ -30,6 +30,13 @@ class PreflightRequest(BaseModel):
     start_mm: tuple[Annotated[float, Field(allow_inf_nan=False)],
                     Annotated[float, Field(allow_inf_nan=False)],
                     Annotated[float, Field(allow_inf_nan=False)]] = Field(strict=False)
+
+
+class ExecutionConfigRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid", strict=True)
+    job_id: str = Field(pattern=r"^[0-9a-f]{64}$")
+    verification_id: str = Field(pattern=r"^[0-9a-f]{64}$")
+    target: Literal["sim", "plant"]
 
 
 def register_jobs(app: FastAPI, service: JobService | None,
@@ -79,3 +86,11 @@ def register_jobs(app: FastAPI, service: JobService | None,
 
         active = enabled(request)
         return run(lambda: active.preflight(name, payload.start_mm, payload.job_id, checker=verify))
+
+    @app.post("/api/jobs/{name}/execution-config")
+    def execution_config(request: Request, name: str, payload: ExecutionConfigRequest) -> Response:
+        active = enabled(request)
+        data = run(lambda: active.execution_archive(name, payload.job_id,
+                                                    payload.verification_id, payload.target))
+        return Response(data, media_type="application/zip", headers={
+            "Content-Disposition": f'attachment; filename="{name}-{payload.target}.zip"'})

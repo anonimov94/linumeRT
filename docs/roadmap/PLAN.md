@@ -157,7 +157,7 @@ Nie są kolejnym harmonogramem. Ich status dotyczy tylko wskazanego kroku.
 | BETA-WS-GUARD | 028, 029 | Beta bez GUI: kontrola Host/Origin WebSocket | ukończone |
 | VERTICAL-PREPARE | 028, 029, 032, 039, 040, 041, 043, 062 | Zadanie obróbkowe: przygotowanie wspólnego pakietu w WebHMI | ukończone |
 | VERTICAL-VERIFY | 044, 049, 051, 052, 055 | Zadanie obróbkowe: interpreter, limity i diagnostyka obróbki | w toku |
-| VERTICAL-RUN | 028, 029, 049, 053, 061 | Zadanie obróbkowe: wykonanie i telemetria przez WebHMI w sim/Plant | planowane |
+| VERTICAL-RUN | 028, 029, 049, 053, 061 | Zadanie obróbkowe: wykonanie i telemetria przez WebHMI w sim/Plant | w toku |
 | VERTICAL-REPORT | 024, 049, 052, 053, 068 | Zadanie obróbkowe: raport przewidywania i rzeczywistego wykonania | planowane |
 
 ## Postęp, pozostały zakres i dowody
@@ -1068,11 +1068,11 @@ Pozostaje: Końcowe CI i scalenie kolejno #225 (head821971e) oraz #226 po pełne
 
 ### VERTICAL-RUN — Zadanie obróbkowe: wykonanie i telemetria przez WebHMI w sim/Plant
 
-**planowane**. Trzeci poziom zleconego przepływu. Wykorzystuje istniejące sterowanie WebHMI i kontrakty HAL; dokument nie zalicza G2 ani odbioru LinuxCNC/Plant.
+**w toku**. Pierwsza porcja na codex/job-execution-config-20261105 nad #226: run-config i ZIP WebHMI/API z verified, ten sam snapshot programu/narzędzi/offsetu i własna biblioteka zamrożonych napędów. Konfiguracja configured, bez zgody na ruch i bez startu procesów.37 testów zakresu i65 regresji PASS;2 rzeczywiste rs274 konsumują eksport sim/Plant i odtwarzają zweryfikowany tor. GUI, pełna regresja i CI tej porcji jeszcze wymagane; nie zalicza wykonania ani G2.
 
-Pozostaje: Zależność: pozytywny VERTICAL-VERIFY i niezmieniony manifest pakietu. Powiązanie instancji, programu, konfiguracji i narzędzi; bramki gotowości bez niejawnego zezwolenia na ruch. Start, postęp, pauza/wznowienie, przerwanie, E-STOP i utrata klienta z rozróżnialnymi wynikami. Telemetria rzeczywistego LinuxCNC sim/Plant; jawne źródło i niepełne dane. Odbiór automatyczny i kliknięty przebieg WebHMI; kwalifikacja sprzętu pozostaje osobna.
+Pozostaje: Odbiór GUI, pełna regresja, CI i scalenie porcji konfiguracji wykonawczej. Zależność: pozytywny VERTICAL-VERIFY i niezmieniony manifest pakietu. Powiązanie instancji, programu, konfiguracji i narzędzi; bramki gotowości bez niejawnego zezwolenia na ruch. Start, postęp, pauza/wznowienie, przerwanie, E-STOP i utrata klienta z rozróżnialnymi wynikami. Telemetria rzeczywistego LinuxCNC sim/Plant; jawne źródło i niepełne dane. Odbiór automatyczny i kliknięty przebieg WebHMI; kwalifikacja sprzętu pozostaje osobna.
 
-Źródła: [docs/WORKFLOW_ZADANIA.md](../WORKFLOW_ZADANIA.md).
+Źródła: [docs/WORKFLOW_ZADANIA.md](../WORKFLOW_ZADANIA.md), [core/linumert/programs/job_execution.py](../../core/linumert/programs/job_execution.py), [core/linumert/programs/job_verification.py](../../core/linumert/programs/job_verification.py), [tests/test_job_execution.py](../../tests/test_job_execution.py), [tests/test_job_execution_linuxcnc.py](../../tests/test_job_execution_linuxcnc.py), [docs/raporty/VERTICAL_EXECUTION_CONFIG_2026-11-05.md](../raporty/VERTICAL_EXECUTION_CONFIG_2026-11-05.md).
 
 ### VERTICAL-REPORT — Zadanie obróbkowe: raport przewidywania i rzeczywistego wykonania
 

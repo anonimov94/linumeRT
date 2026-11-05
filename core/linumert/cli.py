@@ -57,6 +57,14 @@ def main(argv: list[str] | None = None) -> int:
                                metavar=("X", "Y", "Z"),
                                help="założona pozycja nosa wrzeciona [mm], T0 i G92=0")
         preflight.add_argument("--out", type=Path, required=True, help="nowy plik raportu JSON")
+    execution = commands.add_parser("run-config",
+                                    help="konfiguracja sim/Plant z verified, bez startu")
+    execution.add_argument("job", type=Path)
+    execution.add_argument("--verification", type=Path, required=True)
+    execution.add_argument("--target", choices=("sim", "plant"), required=True)
+    execution.add_argument("--out", type=Path, required=True, help="nowy katalog konfiguracji")
+    execution.add_argument("--plant-port", type=int, default=47700)
+    execution.add_argument("--test-mode", action="store_true", help="jawny bypass HMI w symulacji")
     machine = commands.add_parser("machine", help="walidacja maszyny i skale napędów")
     machine.add_argument("path", type=Path)
     config = commands.add_parser("config", help="eksport konfiguracji LinuxCNC sim/Plant")
@@ -109,6 +117,19 @@ def main(argv: list[str] | None = None) -> int:
             print(json.dumps({k: result[k] for k in ("job_id", "report_id", "status", "checks")},
                              ensure_ascii=False, indent=2))
             return 0 if result["status"] in ("partial", "verified") else 2
+        elif args.command == "run-config":
+            from .programs import job_execution
+
+            if args.out.resolve().is_relative_to(args.job.resolve()):
+                raise ValueError("Konfigurację zapisz poza niezmiennym pakietem zadania")
+            report = json.loads(args.verification.read_text(encoding="utf-8"))
+            files = job_execution.render(args.job, report, args.target,
+                                         test_mode=args.test_mode, port=args.plant_port)
+            job_execution.publish(files, args.out)
+            identity = json.loads(files["execution.json"])
+            keys = ("execution_id", "job_id", "target", "status")
+            print(json.dumps({k: identity[k] for k in keys},
+                             ensure_ascii=False, indent=2))
         elif args.command == "machine":
             from .machine.drives.drive_real import counts_per_unit
             from .machine.drives.machine_drives import load_machine_drives
