@@ -2101,11 +2101,11 @@
         "055"
       ],
       "status": "in_progress",
-      "progress": "PR #221: pierwsza porcja CLI/API/WebHMI z SHA-256, ponowną kompilacją snapshotu, izolowanym rs274 i tabelą/G54–G59. 131 testów zakresu, 4 rzeczywiste rs274 i 40 JS PASS; GUI kliknięte, pobrany JSON zgodny z zapisem, przekroczenie X odrzucone. Ślad jest zaokrąglony, więc nigdy verified/PASS pełnych limitów. CI i scalenie porcji wymagane. PR #222 integruje istniejące C 0bd1f04: 189 testów z C, 7 C/ASan/UBSan i 22 native/architektury PASS; pomiar subset Python/C zapisany, pełny tor nadal otwarty. Head #221 5841f37 zawiera poprawkę sprzątania testów, końcowe CI trwa.",
+      "progress": "Częściowa kontrola #221 scalona do main 353a472 po CI/LinuxCNC success. #222 head78dbf4d integruje istniejące C: testy i Python/ISO CI PASS, końcowe LinuxCNC w toku. #223: dokładne callbacki ze współdzieloną prywatną tabelą C++ SDK, zgodność z rs274 i analityczne limity. 16 rzeczywistych RIP i 170 regresji PASS; GUI kliknięte, JSON/CLI zgodne. Materiał/kolizje/obciążenia i cała weryfikacja nadal otwarte; SDK jawne/opcjonalne, bez niego limity pending.",
       "remaining": [
-        "Pełna precyzja toru i limitów zamiast zaokrąglonego śladu rs274; ekstrema łuków, G5x/G92, długości i powiązanie początku/T0 z wykonaniem.",
-        "Materiał/kolizje/obciążenia z tego samego toru; raport z linią i przyczyną w WebHMI.",
-        "Odbiór całego poprawnego detalu i przypadków błędnych; uzgodnienie gałęzi claude/natywne-przyspieszenia i pomiar pełnego przepływu Python/C."
+        "Końcowe CI i scalenie porcji #222/#223; powiązanie założeń początku/T0 z wykonaniem.",
+        "Materiał/kolizje/obciążenia z tego samego dokładnego toru i snapshotu narzędzi/napędów; raport z linią i przyczyną w WebHMI.",
+        "Odbiór całego poprawnego detalu i przypadków błędnych; pomiar pełnego przepływu Python/C (obecny pomiar subset pozostaje osobno)."
       ],
       "evidence": [
         "docs/WORKFLOW_ZADANIA.md",
@@ -2115,7 +2115,11 @@
         "docs/raporty/VERTICAL_PREFLIGHT_2026-11-05.md",
         "https://github.com/anonimov94/linumeRT/pull/221",
         "docs/raporty/NATIVE_INTEGRATION_2026-11-05.md",
-        "https://github.com/anonimov94/linumeRT/pull/222"
+        "https://github.com/anonimov94/linumeRT/pull/222",
+        "core/linumert/programs/job_trace.py",
+        "tests/test_job_trace_linuxcnc.py",
+        "docs/raporty/VERTICAL_LIMITS_2026-11-05.md",
+        "https://github.com/anonimov94/linumeRT/pull/223"
       ]
     },
     {

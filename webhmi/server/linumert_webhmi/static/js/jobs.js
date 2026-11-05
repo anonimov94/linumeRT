@@ -130,6 +130,9 @@ export function createJobs(request) {
         rejected: "Zadanie odrzucone przez kontrolę.", unavailable: "Interpreter LinuxCNC niedostępny.",
         incomplete: "Kontrola przerwana — wynik niepełny." }[result.status] || "Wynik niepełny.";
       $("jobPreflightSummary").textContent = summary;
+      $("jobCheckScope").textContent = result.checks.motion_limits === "passed"
+        ? "Limity osi sprawdzone na dokładnym torze LinuxCNC. Materiał i kolizje oczekują. Wynik częściowy nie dopuszcza wykonania."
+        : "Materiał, kolizje i pełna precyzja toru oczekują. Wynik częściowy nie dopuszcza zadania do wykonania.";
       showChecks("jobPreflightChecks", result.checks);
       $("jobPreflightMessages").replaceChildren();
       for (const message of result.messages) {

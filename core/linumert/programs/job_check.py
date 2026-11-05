@@ -3,9 +3,9 @@
 SPDX-License-Identifier: GPL-2.0-or-later
 Model-Author: Codex
 
-The standalone interpreter's canonical text rounds coordinates to four decimals.
-It can expose violations, but cannot establish the complete precision/material
-contract. Even a clean run remains partial. No subset-interpreter fallback.
+The standalone text rounds coordinates. An optional isolated callback adapter
+supplies full precision only after agreement with the standalone interpreter.
+Material remains pending, so even a clean run is partial. No subset fallback.
 """
 
 from __future__ import annotations
@@ -24,13 +24,15 @@ from linumert.machine.lite_config import render_lite
 from linumert.machine.schema import MachineConfig
 from linumert.tools.db import Tool
 
-from . import job
+from . import job, job_trace
 from ._interpreter_process import InterpreterOutputLimit
 from .limits import analyze_canon, number_lines
 from .linuxcnc_check import InterpreterUnavailable, interpreter_result, run_interpreter
 from .lnx import parse_lnx
 
 FORMAT = "linumert.job.preflight"
+ROUNDING_NOTE = ("Ślad rs274 zaokrągla do 4 miejsc w jednostkach programu; "
+                 "brak przekroczeń nie potwierdza pełnej kontroli limitów.")
 CALL = re.compile(r"^\s*\d+ N[.\d]+\s+([A-Z0-9_]+)\(")
 # Scope of the compiled 3-axis CAM job, not a general canonical-motion decoder.
 KNOWN_CALLS = set("""
@@ -67,7 +69,7 @@ def _snapshot(path: Path, expected_job_id: str | None):
 
 def check(path: Path | str, start_mm: tuple[float, float, float], *,
           expected_job_id: str | None = None, root: Path | str | None = None,
-          timeout: float = 20.0) -> dict:
+          timeout: float = 20.0, trace_library: Path | str | None = None) -> dict:
     """Same snapshot for syntax, offsets, tools and trace-limit diagnostics.
 
     start_mm is the assumed machine position of the spindle nose before the
@@ -91,8 +93,7 @@ def check(path: Path | str, start_mm: tuple[float, float, float], *,
                               "target": "offline_sim", "offset": setup},
               "messages": [], "violations": [], "canonical_trace": "",
               "limitations": ["Materiał, kolizje i obciążenia nie są jeszcze sprawdzane.",
-                 "Ślad rs274 zaokrągla do 4 miejsc w jednostkach programu; "
-                 "brak przekroczeń nie potwierdza pełnej kontroli limitów.",
+                 ROUNDING_NOTE,
                  "Założona pozycja początkowa i T0 wymagają osobnego powiązania z wykonaniem."]}
     for axis, value in zip("XYZ", start_mm, strict=True):
         lo, hi = limits[axis]
@@ -103,7 +104,7 @@ def check(path: Path | str, start_mm: tuple[float, float, float], *,
         report["status"] = "rejected"
         report["checks"]["motion_limits"] = "failed"
     else:
-        _interpret(report, files, machine, setup, start_mm, limits, root, timeout)
+        _interpret(report, files, machine, setup, start_mm, limits, root, timeout, trace_library)
     # Re-read before publishing a result: a concurrently changed bundle must not
     # acquire a fresh positive integrity check, even if rs274 used private copies.
     current, _ = job.read(path)
@@ -114,7 +115,7 @@ def check(path: Path | str, start_mm: tuple[float, float, float], *,
     return report
 
 
-def _interpret(report, files, machine, setup, start, limits, root, timeout):
+def _interpret(report, files, machine, setup, start, limits, root, timeout, trace_library):
     try:
         with tempfile.TemporaryDirectory(prefix="linumert-job-check-") as temporary:
             stage = Path(temporary)
@@ -151,7 +152,28 @@ def _interpret(report, files, machine, setup, start, limits, root, timeout):
         if unknown:
             report["messages"].append("Nieobsługiwane wywołania śladu: " + ", ".join(unknown))
             return
-        trace = analyze_canon(run.stdout, limits)
+        exact = False
+        canonical = run.stdout
+        try:
+            captured = job_trace.capture(files["program.ngc"], files["tool.tbl"],
+                setup["origin_mm"], setup["offset"], start, root=root,
+                library=trace_library, timeout=timeout)
+            job_trace.compare_motion(run.stdout, captured["canonical"])
+            # Refuse incomplete/noncircular arcs rather than checking endpoints only.
+            trace = analyze_canon(captured["canonical"], limits, strict=True)
+            canonical = captured["canonical"]
+            report["precise_trace"] = captured
+            report["coordinate_resolution_mm"] = 1e-6
+            report["limitations"].remove(ROUNDING_NOTE)
+            exact = True
+        except InterpreterUnavailable as error:
+            report["messages"].append(str(error))
+            trace = analyze_canon(canonical, limits)
+        except ValueError as error:
+            report["status"] = "incomplete"
+            report["checks"]["motion_limits"] = "incomplete"
+            report["messages"].append(str(error))
+            return
         report["violations"] = [asdict(v) for v in trace.violations]
         report["messages"].extend(v.message() for v in trace.violations)
         if trace.cuts_without_tlo:
@@ -160,8 +182,13 @@ def _interpret(report, files, machine, setup, start, limits, root, timeout):
             report["status"] = "rejected"
             report["checks"]["motion_limits"] = "failed"
         else:
-            report["messages"].append("Interpreter zakończył program. W zaokrąglonym śladzie "
-                                      "nie wykryto przekroczeń; pełna weryfikacja oczekuje.")
+            if exact:
+                report["checks"]["motion_limits"] = "passed"
+                report["messages"].append("Limity osi sprawdzone na pełnej precyzji toru LinuxCNC. "
+                                          "Materiał i kolizje oczekują.")
+            else:
+                report["messages"].append("Interpreter zakończył program. W zaokrąglonym śladzie "
+                                          "nie wykryto przekroczeń; pełna weryfikacja oczekuje.")
     except InterpreterUnavailable as exc:
         report["status"] = "unavailable"
         report["checks"]["interpreter"] = "unavailable"
