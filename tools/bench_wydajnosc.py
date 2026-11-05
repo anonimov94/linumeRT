@@ -6,6 +6,7 @@ Model-Author: Claude · 2026-11-05
     PYTHONPATH=core:simulation:plant/server:webhmi/server python tools/bench_wydajnosc.py
     LINUMERT_NATIVE=0 ... python tools/bench_wydajnosc.py      # wymuszona ścieżka Pythona
     ... python tools/bench_wydajnosc.py --profile               # cProfile najwolniejszych zadań
+    python tools/bench_wydajnosc.py --compare przed.json po.json  # tabela przed/po
 
 Programy: `config/sim/nc_files/linumert_*.ngc` (rs274, gdy moduł `gcode` jest dostępny,
 inaczej podzbiór) oraz programy z generatorów (kieszeń + planowanie + kreskowanie, płaskorzeźba
@@ -210,11 +211,15 @@ def run(repeat: int, profile: bool) -> dict:
             except Exception as error:  # noqa: BLE001 - program poza podzbiorem: pomijamy
                 add("ścieżka load_path", name, math.nan, f"błąd: {error}")
                 continue
-            add(f"ścieżka load_path ({ml.source})", name, t, f"{len(ml)} odcinków")
+            fallback = prefer == "auto" and ml.source == "subset" and gcode_available()
+            add(f"ścieżka load_path ({ml.source})", name, t, f"{len(ml)} odcinków"
+                + (" (podzbiór po awarii procesu rs274: T/M6 bez działającego LinuxCNC)"
+                   if fallback else ""))
             if name.startswith("gen_"):
                 t, _ = best(lambda text=text: parse_subset(text), repeat)
                 add("ścieżka parse_subset", name, t)
-            job = OfflineJob(program=text, tools=tools.get(name, TOOLS_DEMO), source=prefer)
+            # symulacja ze źródłem, które zadziałało: bez kosztu nieudanej próby rs274
+            job = OfflineJob(program=text, tools=tools.get(name, TOOLS_DEMO), source=ml.source)
             t, res = best(lambda job=job: simulate(job), repeat)
             add("symulacja offline simulate", name, t,
                 f"{res['segments']} odc., usunięto {res['removed_mm3']} mm³, "
@@ -317,12 +322,45 @@ def markdown(result: dict) -> str:
     return "\n".join(out) + "\n"
 
 
+def compare(paths: list[Path]) -> str:
+    """Tabela z kilku pomiarów `--json` (kolumny w kolejności plików, przyspieszenie: 1. / ost.)."""
+    results = [json.loads(p.read_text(encoding="utf-8")) for p in paths]
+    names = [p.stem.removeprefix("bench_") for p in paths]
+    keys: list[tuple[str, str]] = []
+    for result in results:
+        for r in result["rows"]:
+            key = (r["area"].split(" (")[0], r["data"])
+            if key not in keys:
+                keys.append(key)
+    out = [" · ".join(f"{n}: {r['native']}, {r['date']}" for n, r in zip(names, results,
+                                                                        strict=True)), "",
+           "| Obszar | Dane | " + " | ".join(f"{n} [ms]" for n in names) + " | × |",
+           "|---|---|" + "---:|" * (len(names) + 1)]
+    for key in keys:
+        cells = []
+        for result in results:
+            ms = next((r["ms"] for r in result["rows"]
+                       if (r["area"].split(" (")[0], r["data"]) == key), math.nan)
+            cells.append(ms)
+        first, last = cells[0], cells[-1]
+        ratio = f"{first / last:.1f}" if math.isfinite(first) and math.isfinite(last) \
+            and last > 0 else "—"
+        text = ["—" if not math.isfinite(c) else f"{c:.1f}" for c in cells]
+        out.append(f"| {key[0]} | {key[1]} | " + " | ".join(text) + f" | {ratio} |")
+    return "\n".join(out) + "\n"
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--repeat", type=int, default=3)
     parser.add_argument("--profile", action="store_true")
     parser.add_argument("--json", type=Path)
+    parser.add_argument("--compare", type=Path, nargs="+",
+                        help="pliki --json do zestawienia (bez nowego pomiaru)")
     args = parser.parse_args(argv)
+    if args.compare:
+        sys.stdout.write(compare(args.compare))
+        return 0
     result = run(max(1, args.repeat), args.profile)
     if args.json:
         args.json.write_text(json.dumps(result, ensure_ascii=False, indent=1), encoding="utf-8")

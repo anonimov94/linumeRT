@@ -594,3 +594,31 @@ zawęża dotychczasową zasadę „brama nie zwalnia E-STOP”: bez `--hal` bram
 Ukryta karta jest dławiona przez przeglądarkę i może dać E-STOP — przyjęte jako fail-safe;
 właściciel może wybrać inaczej (np. dłuższy limit albo ostrzeżenie zamiast E-STOP).
 Odbiór: `docs/raporty/G2/WEBHMI_WATCHDOG_2026-11-04.md`. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## PROPOZYCJA: natywne przyspieszenia poza RT (C11 + ctypes) — 2026-11-05
+
+Model-Author: Claude. Pomiar `docs/raporty/WYDAJNOSC_2026-11-05.md` wskazał dwie pętle za wolne
+w Pythonie: materiał symulacji (`StockMap.cut`, 0,2–4 s na program) i płaskorzeźbę z STL
+(`plan_relief`, 24 s). Rozwiązanie i dylematy:
+- **Język i wiązanie:** C11 bez zależności w `core/native/` (jak `plant/core`), ctypes w
+  `linumert.native`. Odrzucone: C++/pybind11, cffi, Cython, numba (nowe zależności i kompilacja
+  przy instalacji pakietu).
+- **Kiedy biblioteka działa:** gdy istnieje `core/native/build/liblinumert_native.so`
+  (`make native`, `make test-c`, hook obrazu ISO) albo `LINUMERT_NATIVE_LIB`. Import nie buduje
+  biblioteki, wheel jej nie zawiera; bez niej ścieżka Pythona (wolniej, ten sam wynik).
+  `LINUMERT_NATIVE=0` wyłącza. Do decyzji właściciela: budowa w maszynie wirtualnej VM-A
+  (`tools/vm/post-install-ctl.sh` nie instaluje dziś `gcc`).
+- **Zgodność wyników:** C wykonuje te same działania w tej samej kolejności co numpy
+  (`-ffp-contract=off`), więc mapa materiału i wysokości frezu są identyczne bitowo. Jedyna
+  tolerancja: suma objętości (numpy float32, C double), błąd względny ≤ 1e-6. Koszt: zmiana wzoru
+  w dwóch miejscach; `tests/test_native.py` wykrywa rozbieżność.
+- **Wektoryzacja przed C:** płaskorzeźba ma też wersję numpy porcjami (`ball_tip_heights`, zapas
+  bez biblioteki, ok. 20×). Materiału numpy nie przyspiesza: każda próbka obniża mapę przed
+  następną, a okna mają kilkaset komórek.
+- **Testy:** `make test` liczy ścieżką Pythona (conftest ustawia `LINUMERT_NATIVE=0`), test
+  porównawczy buduje bibliotekę do katalogu tymczasowego; `make test-c` uruchamia testy C oraz
+  testy symulacji i CAM z `LINUMERT_NATIVE=1`.
+- **Bez zmian (świadomie):** `parse_subset`/`MoveListBuilder` w `path.py` i `make_move`
+  w `toolpath.py` (ok. 0,6 s na 32 tys. linii) czekają na scalenie PR #212, który zmienia te pliki;
+  `gcode.parse` to LinuxCNC; brama WebHMI (43 µs/obieg) i ramka Plant (113 µs) mieszczą się w
+  budżecie. Właściciel może wybrać inaczej. NIEZWERYFIKOWANE NA SPRZĘCIE.
