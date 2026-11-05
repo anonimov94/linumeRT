@@ -17,6 +17,8 @@ import os
 import tempfile
 from pathlib import Path, PurePosixPath
 
+import yaml
+
 from linumert.machine.configgen import joint_drives
 from linumert.machine.drives.drive_real import counts_per_unit
 from linumert.machine.drives.drive_template import validate_template
@@ -103,7 +105,10 @@ def render(path, verification: dict, target: str, *, test_mode=False, port=47700
     files.pop("nc_files/.keep", None)
     files["nc_files/program.ngc"] = source["program.ngc"]
     files["machine.yaml"] = job.json_text(derived.model_dump(mode="json"))
-    files.update({f"drive_library/{key}.yaml": job.json_text(value)
+    # PyYAML's 1.1 resolver treats JSON's 3e-05 as a string. Native YAML emits
+    # 3.0e-05, preserving the strict drive loader's numeric type and exact value.
+    files.update({f"drive_library/{key}.yaml": yaml.safe_dump(value, sort_keys=True,
+                                                           allow_unicode=True, width=100)
                   for key, value in library.items()})
     files.update({f"job/{name}": text for name, text in source.items()})
     files["job/manifest.json"] = job.json_text(manifest)

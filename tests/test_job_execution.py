@@ -12,6 +12,8 @@ import zipfile
 import pytest
 from job_support import write_inputs
 from linumert.cnc import FakeMachine
+from linumert.machine.drives.drive_library import load_library
+from linumert.machine.drives.machine_drives import load_machine_drives
 from linumert.programs import job, job_execution, job_verification
 from linumert.programs.job_check import save
 from linumert.programs.prepare import JobService
@@ -54,8 +56,10 @@ def test_export_uses_frozen_drives_tools_offsets_and_program(
         package, tmp_path, monkeypatch, target):
     source, report = package
     before = {p.name: p.read_bytes() for p in source.iterdir()}
-    monkeypatch.setattr("linumert.machine.drives.machine_drives.load_library",
-                        lambda *a, **k: pytest.fail("mutable drive library lookup"))
+    def only_frozen_library(directory=None):
+        assert directory is not None, "mutable drive library lookup"
+        return load_library(directory)
+    monkeypatch.setattr("linumert.machine.drives.machine_drives.load_library", only_frozen_library)
     files = job_execution.render(source, report, target)
     out = job_execution.publish(files, tmp_path / "execution")
     manifest, data = job_execution.read(out)
@@ -66,10 +70,7 @@ def test_export_uses_frozen_drives_tools_offsets_and_program(
     assert data["tool.tbl"] == (source / "tool.tbl").read_text()
     assert "5221 200\n" in data["linumert.var"] and "5223 -80\n" in data["linumert.var"]
     assert "job/program.lnx" in data and "verification.json" in data
-    config = job_execution.MachineConfig.model_validate_json(data["machine.yaml"])
-    library = {json.loads(text)["id"]: json.loads(text) for name, text in data.items()
-               if name.startswith("drive_library/")}
-    instances = job_execution.resolve_machine_drives(config, library)
+    config, instances = load_machine_drives(out / "machine.yaml", out / "drive_library")
     original = json.loads((source / "drives.json").read_text())
     for name, instance in instances.items():
         parameters = copy.deepcopy(instance.params)
