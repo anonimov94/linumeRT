@@ -132,18 +132,18 @@ W ekranie: **Start → potwierdzenie E-STOP → Włącz → Bazuj wszystkie**. D
 <!-- MILESTONES:START -->
 <!-- Generowane przez tools/roadmap.py z plan.json. -->
 
-Stan rejestru: **2026-10-29 · 39/84 ukończonych sesji**.
+Stan rejestru: **2026-11-05 · 39/84 ukończonych sesji**.
 
-Dodatkowo ukończono **21/43 rozszerzeń**. Wśród sesji: 30 częściowych i 15 planowanych. Rozszerzenia liczymy osobno, bez zwiększania licznika 84 sesji.
+Dodatkowo ukończono **21/47 rozszerzeń**. Wśród sesji: 30 częściowych i 15 planowanych. Rozszerzenia liczymy osobno, bez zwiększania licznika 84 sesji.
 
 | Kamień | Zakres | Sesje ukończone | Rozszerzenia ukończone | Rekordy z otwartymi kryteriami |
 |---|---|---:|---:|---:|
 | M0 | Fundament, prawo, środowisko | 8/8 | 1/2 | 1 |
-| M1 | Wirtualna obrabiarka Plant | 18/18 | 3/5 | 3 |
-| M2 | Ekran linumeRT (WebHMI; QtDragon awaryjny) | 3/12 | 6/25 | 27 |
-| M3 | Programowanie dialogowe | 7/12 | 5/7 | 8 |
-| M4 | Symulacja i kolizje | 3/10 | 4/10 | 14 |
-| M5 | Konfiguracja maszyn hobbystów | 0/12 | 5/10 | 12 |
+| M1 | Wirtualna obrabiarka Plant | 18/18 | 3/6 | 4 |
+| M2 | Ekran linumeRT (WebHMI; QtDragon awaryjny) | 3/12 | 6/27 | 29 |
+| M3 | Programowanie dialogowe | 7/12 | 5/11 | 12 |
+| M4 | Symulacja i kolizje | 3/10 | 4/13 | 17 |
+| M5 | Konfiguracja maszyn hobbystów | 0/12 | 5/13 | 15 |
 | M6 | Wtyczki, instalator, alfa | 0/12 | 5/8 | 9 |
 
 Licznik sesji nie oznacza zaliczenia bramki, odbioru stanowiska ani sprzętu. Otwarte kryteria obejmują sesje i powiązane rozszerzenia; jedno rozszerzenie może dotyczyć kilku kamieni.

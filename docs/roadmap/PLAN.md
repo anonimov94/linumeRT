@@ -1,7 +1,7 @@
 <!-- Generowane przez python3 tools/roadmap.py; edytuj docs/roadmap/plan.json. -->
 # Wspólny plan linumeRT
 
-Pierwotny plan: **84 sesje M0–M6**, commit `796c6a2`. Stan na 2026-10-29: planowane: 15; w toku: 0; częściowe: 30; do odbioru: 0; ukończone: 39; zablokowane: 0.
+Pierwotny plan: **84 sesje M0–M6**, commit `796c6a2`. Stan na 2026-11-05: planowane: 15; w toku: 0; częściowe: 30; do odbioru: 0; ukończone: 39; zablokowane: 0.
 
 Zakończenie części implementacji nie oznacza odbioru całej funkcji ani sprzętu.
 
@@ -155,6 +155,10 @@ Nie są kolejnym harmonogramem. Ich status dotyczy tylko wskazanego kroku.
 | WEBHMI-POC | 028, 029, 055 | HTML/WebGL: integracja strony z bramą LinuxCNC | częściowe |
 | CAM-2D-TEXT-STL | 040, 043, 045, 046 | Strategie CAM 2D, napisy i przekroje STL | ukończone |
 | BETA-WS-GUARD | 028, 029 | Beta bez GUI: kontrola Host/Origin WebSocket | ukończone |
+| VERTICAL-PREPARE | 028, 029, 032, 039, 040, 041, 043, 062 | Zadanie obróbkowe: przygotowanie wspólnego pakietu w WebHMI | planowane |
+| VERTICAL-VERIFY | 044, 049, 051, 052, 055 | Zadanie obróbkowe: interpreter, limity i diagnostyka obróbki | planowane |
+| VERTICAL-RUN | 028, 029, 049, 053, 061 | Zadanie obróbkowe: wykonanie i telemetria przez WebHMI w sim/Plant | planowane |
+| VERTICAL-REPORT | 024, 049, 052, 053, 068 | Zadanie obróbkowe: raport przewidywania i rzeczywistego wykonania | planowane |
 
 ## Postęp, pozostały zakres i dowody
 
@@ -1047,4 +1051,36 @@ Pozostaje: Odbiór rzeczywistej przeglądarki: DRO, scena WebGL ≤30 FPS, jog i
 **ukończone**. 2026-10-29 Codex: na jawne polecenie kontynuacji beta odtworzono cztery przypadki obejścia Host/Origin w WebSocket (z tokenem i bez). Handshake sprawdza tę samą politykę co REST przed accept i utworzeniem sesji; odmowa 4403. 30 testów transportów oraz lint i check_no_gui PASS. To zamknięcie poprawki transportu, nie całego PR beta ani odbioru LinuxCNC/Plant. Pełna regresja Debian12/Python3.11: 907 testów PASS; CI beta python i plant-core PASS dla 3b5bf78.
 
 Źródła: [beta/tests/test_transport_ws.py](../../beta/tests/test_transport_ws.py), [beta/src/linumert_headless/transport/rest.py](../../beta/src/linumert_headless/transport/rest.py), [PR](https://github.com/anonimov94/linumeRT/pull/202).
+
+### VERTICAL-PREPARE — Zadanie obróbkowe: przygotowanie wspólnego pakietu w WebHMI
+
+**planowane**. Polecenie właściciela 2026-11-05: cztery poziomy w głównym linumeRT i scalenie ukończonych porcji do main. Kontrakt prepare zapisany; dotychczasowe wyniki lite nie stanowią odbioru pełnej edycji. WebHMI i adapter CLI korzystają ze wspólnego backendu.
+
+Pozostaje: Odczyt istniejącej bazy narzędzi bez zapisu/migracji i kontrakt pakietu z SHA-256. Walidacja programu, maszyny/napędów, narzędzi, jednostek i jawnego ustawienia detalu. Minimalny użyteczny widok Zadanie w WebHMI oraz API/CLI nad tą samą logiką. Odbiór detalu planowanie + kieszeń + wiercenie, deterministyczność i zachowanie źródeł przy błędzie. Uzgodnienie helperów/napędów z claude/scal-lite i kernela C z claude/natywne-przyspieszenia.
+
+Źródła: [docs/WORKFLOW_ZADANIA.md](../WORKFLOW_ZADANIA.md).
+
+### VERTICAL-VERIFY — Zadanie obróbkowe: interpreter, limity i diagnostyka obróbki
+
+**planowane**. Drugi poziom zleconego przepływu. Specyfikacja wiąże integralność pakietu, izolowany rs274, limity osi i symulację materiału; implementacja i odbiór pozostają otwarte.
+
+Pozostaje: Zależność: odebrany pakiet VERTICAL-PREPARE. Izolowany rs274 z tabelą narzędzi, ustawieniem detalu i konfiguracją tego pakietu. Pełny tor, ekstrema łuków, G5x/G92 i korekcja długości; odrzucenie niepełnej interpretacji. Materiał/kolizje/obciążenia, raport z linią i przyczyną oraz widok wyników w WebHMI. Odbiór poprawnego detalu i przypadków błędnych; pomiar pełnego przepływu Python/C.
+
+Źródła: [docs/WORKFLOW_ZADANIA.md](../WORKFLOW_ZADANIA.md).
+
+### VERTICAL-RUN — Zadanie obróbkowe: wykonanie i telemetria przez WebHMI w sim/Plant
+
+**planowane**. Trzeci poziom zleconego przepływu. Wykorzystuje istniejące sterowanie WebHMI i kontrakty HAL; dokument nie zalicza G2 ani odbioru LinuxCNC/Plant.
+
+Pozostaje: Zależność: pozytywny VERTICAL-VERIFY i niezmieniony manifest pakietu. Powiązanie instancji, programu, konfiguracji i narzędzi; bramki gotowości bez niejawnego zezwolenia na ruch. Start, postęp, pauza/wznowienie, przerwanie, E-STOP i utrata klienta z rozróżnialnymi wynikami. Telemetria rzeczywistego LinuxCNC sim/Plant; jawne źródło i niepełne dane. Odbiór automatyczny i kliknięty przebieg WebHMI; kwalifikacja sprzętu pozostaje osobna.
+
+Źródła: [docs/WORKFLOW_ZADANIA.md](../WORKFLOW_ZADANIA.md).
+
+### VERTICAL-REPORT — Zadanie obróbkowe: raport przewidywania i rzeczywistego wykonania
+
+**planowane**. Czwarty poziom zleconego przepływu. Specyfikacja wymaga raportu powiązanego z manifestem, kontrolami i przebiegiem; brak danych nie może dawać PASS.
+
+Pozostaje: Zależność: przebieg VERTICAL-RUN z telemetrią i wynikiem zakończenia. Uzgodnienie jednostek i czasu, tor zadany/rzeczywisty, błąd max/RMS osi, alarmy i czas. Rozróżnienie zakończenia, przerwania, awarii i niepełnych danych; raport JSON i widok WebHMI. Wykrycie znanych wymuszeń i zachowanie kontraktu precyzji projektu. Detal przechodzący poziomy 1–4 i odczyt pakietu/raportu bez aktywnej maszyny.
+
+Źródła: [docs/WORKFLOW_ZADANIA.md](../WORKFLOW_ZADANIA.md).
 
