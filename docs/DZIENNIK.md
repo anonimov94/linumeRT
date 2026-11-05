@@ -1911,3 +1911,13 @@ Pełny RIP musi ponownie potwierdzić wynik; nie scalać na czerwonym CI.
 - Model-Author: Codex. #221 scalony do main 353a472 po zielonym CI 42050601102 i LinuxCNC 42050601111; #222 head78dbf4d czeka na końcowe LinuxCNC (python/ISO success).
 - #223: zgodność ruchów rs274 i dokładnego gcode.parse, analityczne limity z double/mm, jawna odmowa niepełnego łuku i F0. Materiał nadal pending, bez verified.
 - 16 testów real RIP i 170 regresji PASS; GUI kliknięte, raport pobrany/zapisany identyczny, CLI zgodny poza elapsed/id. Dowody w VERTICAL_LIMITS_2026-11-05.md; własna brama zatrzymana. CI/scalenie wymagane.
+
+## 2026-11-05 — diagnostyka materiału z dokładnego toru LinuxCNC, checkpoint
+
+Model-Author: Codex. Pełny projekt: #222 scalony do main534a5ab po CI/LinuxCNC/ISO success.
+Na własnej gałęzi material nad #223 dodano kompozycję CLI/API z osobnym procesem nice10,
+zamrożone modele bez odczytu bieżącej biblioteki, materiał2.5D i konserwatywne ciągłe
+obwiednie brył/stref. Braki geometrii/napędów, timeout i urwany JSON nie dają PASS.
+19 rzeczywistych testów offline RIP PASS (16 wcześniejszych +3 materiału),65 regresji PASS,
+lint całego drzewa PASS. GUI i końcowy pomiar/testy pozostają w toku; wynik częściowy nie
+uprawnia do wykonania. Szczegóły i granice: raport VERTICAL_MATERIAL_2026-11-05.md.

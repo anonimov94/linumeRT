@@ -15,6 +15,16 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · 2026-11-05. **Materiał zadania w pełnym projekcie:**
+#222 scalony jako534a5ab po końcowym Python/LinuxCNC/ISO success. #223 baza main,
+headc3a1007;2075 PASS/1 znany Qt FAIL w klonie, wheel poza checkoutem PASS,
+LinuxCNC42063597532 nadal w toku. Nowa własna gałąź `codex/job-material-20261105`
+nad #223: dokładny tor → prywatny proces nice10 → zamrożona maszyna/napędy/narzędzia,
+materiał2.5D, ciągłe konserwatywne obwiednie brył, obciążenia i raport w CLI/API/WebHMI.
+Pierwsze3 real RIP i61 regresji PASS. Dalsze testy i kliknięty odbiór GUI w toku;
+wynik nadal partial/incomplete/rejected, bez zgody na wykonanie. Raport:
+VERTICAL_MATERIAL_2026-11-05.md. Nie przejmować cudzych kontrolerów i cleanup globalnego.
+
 Model-Author: Codex · 2026-11-05. **#221 w main, #223 dokładne limity:**
 #221 scalony 353a472 po CI 42050601102 i LinuxCNC 42050601111 success.
 #222 head78dbf4d: python/ISO success, LinuxCNC 42056543775 w toku; baza już main.

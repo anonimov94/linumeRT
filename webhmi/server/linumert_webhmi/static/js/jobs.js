@@ -6,7 +6,8 @@ Model-Author: Codex
 
 const labels = { machine_model: "Model maszyny", program_and_tools: "Program i narzędzia",
   units_and_setup: "Jednostki i ustawienie detalu", interpreter: "Interpreter LinuxCNC",
-  motion_limits: "Limity ruchu", material: "Materiał i kolizje", execution: "Wykonanie",
+  motion_limits: "Limity ruchu", material: "Materiał", collisions: "Bryły i strefy",
+  loads: "Obciążenia", execution: "Wykonanie",
   integrity: "Integralność pakietu" };
 const verdicts = { passed: "Poprawne", pending: "Oczekuje na weryfikację",
   not_started: "Nie rozpoczęto", failed: "Odrzucone", unavailable: "Niedostępne",
@@ -130,9 +131,15 @@ export function createJobs(request) {
         rejected: "Zadanie odrzucone przez kontrolę.", unavailable: "Interpreter LinuxCNC niedostępny.",
         incomplete: "Kontrola przerwana — wynik niepełny." }[result.status] || "Wynik niepełny.";
       $("jobPreflightSummary").textContent = summary;
-      $("jobCheckScope").textContent = result.checks.motion_limits === "passed"
-        ? "Limity osi sprawdzone na dokładnym torze LinuxCNC. Materiał i kolizje oczekują. Wynik częściowy nie dopuszcza wykonania."
-        : "Materiał, kolizje i pełna precyzja toru oczekują. Wynik częściowy nie dopuszcza zadania do wykonania.";
+      const diagnostic = result.material_diagnostic;
+      $("jobCheckScope").textContent = diagnostic
+        ? "Dokładny tor LinuxCNC; diagnostyka materiału 2.5D i zadeklarowanych brył. " +
+          "Usunięty materiał: " + diagnostic.removed_mm3.toFixed(1) + " mm³. " +
+          "Czas ruchów od " + diagnostic.time_lower_bound_s.toFixed(1) + " s. " +
+          "Wynik częściowy nie dopuszcza wykonania. Szczegóły i ograniczenia w raporcie JSON."
+        : result.checks.motion_limits === "passed"
+          ? "Limity osi sprawdzone na dokładnym torze LinuxCNC. Diagnostyka materiału nieukończona. Wynik częściowy nie dopuszcza wykonania."
+          : "Materiał, kolizje i pełna precyzja toru oczekują. Wynik częściowy nie dopuszcza zadania do wykonania.";
       showChecks("jobPreflightChecks", result.checks);
       $("jobPreflightMessages").replaceChildren();
       for (const message of result.messages) {

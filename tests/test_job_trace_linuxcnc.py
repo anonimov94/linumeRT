@@ -186,8 +186,8 @@ def test_api_persists_precise_result_preserving_package_and_cnc(runtime, tmp_pat
         json={"job_id": prepared["manifest"]["job_id"], "start_mm": [50, 50, -5]})
     assert response.status_code == 200, response.text
     result = response.json()
-    assert result["status"] == "partial" and result["checks"]["motion_limits"] == "passed"
-    assert result["checks"]["material"] == "pending"
+    assert result["status"] == "incomplete" and result["checks"]["motion_limits"] == "passed"
+    assert result["checks"]["material"] == "incomplete"  # this fixture lacks holder geometry
     assert result["checks"]["execution"] == "not_started"
     assert len(result["precise_trace"]["motions"]) == 82
     saved, = (service.jobs_dir / ".preflight").glob("*.json")

@@ -93,7 +93,9 @@ def main(argv: list[str] | None = None) -> int:
         elif args.command == "prepare":
             return prepare(args)
         elif args.command == "preflight":
-            from .programs.job_check import check, save
+            from linumert_sim.job_preflight import check
+
+            from .programs.job_check import save
 
             if args.out.exists() or args.out.is_symlink():
                 raise ValueError("Plik raportu już istnieje")
