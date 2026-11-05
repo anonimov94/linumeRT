@@ -77,6 +77,9 @@ def load_library(path: Path | str) -> ctypes.CDLL:
         lib = ctypes.CDLL(str(path))
     except OSError as error:
         raise NativeUnavailable(f"nie można załadować {path}: {error}") from error
+    for symbol in ("lrt_native_abi", "lrt_zmap_cut", "lrt_relief_heights"):
+        if not hasattr(lib, symbol):
+            raise NativeUnavailable(f"{path}: brak wymaganego symbolu {symbol}")
     vp, i32, d = ctypes.c_void_p, ctypes.c_int32, ctypes.c_double
     lib.lrt_native_abi.argtypes, lib.lrt_native_abi.restype = [], ctypes.c_int
     if lib.lrt_native_abi() != ABI:

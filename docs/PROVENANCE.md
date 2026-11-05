@@ -670,3 +670,11 @@ zewnętrznych. GPL-2.0-or-later. Zakres: VERTICAL-VERIFY, dokumentacja wyniku
 częściowego i odrzucenia przekroczenia, bez kwalifikacji materiału ani sprzętu.
 Pliki: `docs/raporty/vertical/preflight-webhmi-20261105.jpg`,
 `docs/raporty/vertical/preflight-limit-20261105.jpg`.
+
+### Natywne obliczenia i pomiar po integracji — 2026-11-05
+
+Model-Author: Claude — własne C11 `core/native/`, ctypes `core/linumert/native.py`,
+referencje Python i narzędzia pomiarowe z gałęzi `claude/natywne-przyspieszenia` 0bd1f04;
+GPL-2.0-or-later. Codex — integracja do pełnego projektu, kontrola eksportów,
+porównanie bajtowe, raport NATIVE_INTEGRATION_2026-11-05.md i własne pomiary
+`docs/raporty/native-integration/bench_{python,native}.json`. Bez nowych zależności.

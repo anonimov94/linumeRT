@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import math
 import os
+import subprocess
 from dataclasses import replace
 from pathlib import Path
 
@@ -73,7 +74,9 @@ def test_relief_heights_identical_to_reference(lib, radius):
     xy = np.column_stack((rng.uniform(-4, 14, 400), rng.uniform(-4, 14, 400)))
     reference = np.array([ball_tip_height(tris, x, y, radius) for x, y in xy])
     assert np.isinf(reference).any() and np.isfinite(reference).any()
-    np.testing.assert_array_equal(native.relief_heights(lib, tris, xy, radius), reference)
+    result = native.relief_heights(lib, tris, xy, radius)
+    np.testing.assert_array_equal(result, reference)
+    assert result.tobytes() == reference.tobytes()
     np.testing.assert_array_equal(ball_tip_heights(tris, xy, radius), reference)
 
 
@@ -132,6 +135,7 @@ def test_zmap_cut_identical_to_python(lib, cutter, below):
         assert b.removed == pytest.approx(a.removed, rel=1e-6, abs=1e-9)
         assert fast.version == ref.version
     np.testing.assert_array_equal(fast.h, ref.h)
+    assert fast.h.tobytes() == ref.h.tobytes()
     assert ref.volume() < StockMap("CYL", 0, 0, 40, 30, -10, 0, cell=0.5).volume()
     assert seen, "dane testu muszą dać kontakt części nietnącej z materiałem"
 
@@ -181,3 +185,16 @@ def test_switch_and_missing_library(monkeypatch, tmp_path):
     path = plan_relief(Mesh(wave(n=3, size=2.0)), replace(ReliefSettings(), sample_step=0.5,
                                                           stepover=0.5, safe_z=5.0))
     assert path.rows
+
+
+def test_incomplete_shared_library_falls_back_instead_of_crashing(lib, monkeypatch, tmp_path):
+    """A stale/incorrect native file can load but lack required exports."""
+    incomplete = tmp_path / "incomplete.so"
+    subprocess.run(["cc", "-shared", "-fPIC", "-x", "c", "-", "-o", str(incomplete)],
+                   input="int lrt_native_abi(void) { return 1; }\n", text=True,
+                   capture_output=True, check=True, timeout=30)
+    monkeypatch.setattr(native, "_state", native._UNSET)
+    monkeypatch.setenv("LINUMERT_NATIVE", "1")
+    monkeypatch.setenv("LINUMERT_NATIVE_LIB", str(incomplete))
+    assert native.library() is None
+    assert "lrt_zmap_cut" in native.reason()

@@ -21,7 +21,10 @@ obliczeń na PC, nie sterowania maszyną).
 - Symulacja offline (`linumert_sim.offline.simulate`) mierzona ze źródłem ścieżki, które
   zadziałało (bez kosztu nieudanej próby rs274); czas obejmuje odczyt ścieżki.
 
-{{TABELA}}
+Porównanie po integracji do pełnego projektu, wraz z surowymi danymi i ograniczeniami:
+[NATIVE_INTEGRATION_2026-11-05.md](NATIVE_INTEGRATION_2026-11-05.md).
+Opis historycznej metody powyżej pochodzi od Claude; nowy pomiar Codex porównuje
+Python/C na aktualnym kodzie, nie odtwarza kolumny „przed” z main 91af65b.
 
 ## Co spowalniało (pomiar przed zmianą)
 
@@ -63,7 +66,8 @@ Poniżej progu 100 ms na typowym programie albo poza naszym kodem (bez zmian):
    (numpy sumuje float32 parami, C w double) — błąd względny ≤ 1e-6, jawny w
    `tests/test_native.py`. Zdarzenia K-3xx i czasy symulacji identyczne.
 
-{{PROFIL}}
+Profilowanie można odtworzyć opcją `--profile` skryptu. W tym raporcie nie dołączono
+surowego profilu historycznego; opis funkcji powyżej zachowuje pierwotną analizę Claude.
 
 ## Testy
 
@@ -73,4 +77,5 @@ Poniżej progu 100 ms na typowym programie albo poza naszym kodem (bez zmian):
   program płaskorzeźby, 6 typów narzędzi na mapie walcowej z wrzecionem, 2 symulacje offline).
 - `make test-c`: testy C Plant i `core/native` oraz testy symulacji i CAM z `LINUMERT_NATIVE=1`.
 
-{{WYNIK}}
+Wyniki po integracji: [odbiór i pomiar](NATIVE_INTEGRATION_2026-11-05.md).
+Nie zaliczają pełnej weryfikacji pakietu ani kwalifikacji sprzętu.

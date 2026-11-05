@@ -15,6 +15,15 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · 2026-11-05. **Integracja istniejącego C, PR #222:**
+`codex/native-main-20261105` nad #221, merge historii 0bd1f04. Konflikt DECYZJE:
+zachowano oba dopisane wpisy. make test-c: 7 core/native C + Plant PASS, 189 Python z C PASS;
+7 ASan/UBSan PASS. Wzmocnione porównanie bajtowe i fallback brakujących eksportów: 22 PASS.
+Pomiar Python/C (subset, nie pełny verify) i surowe dane w NATIVE_INTEGRATION_2026-11-05.md.
+#221: 2050 PASS i jedna znana porażka Qt jak na main; po poprawce własności sprzątania
+testów offline nowy head 5841f37 i nowe CI. Nie scalać starego 05c85cb zamiast końcowej poprawki.
+CI i scalenia #221/#222 wymagane; tor z pełną precyzją to następna porcja, nie obecny odbiór.
+
 Model-Author: Codex · 2026-11-05. **PR #221 — pierwsza porcja VERTICAL-VERIFY:**
 `linumert preflight`, API i WebHMI używają jednego backendu z rs274, SHA-256 i ponowną
 kompilacją snapshotu. Tabela/G54–G59 i założony początek w prywatnym interpreterze.
