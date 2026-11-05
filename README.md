@@ -6,8 +6,10 @@
 
 ### Sterowanie CNC · wirtualna obrabiarka · programowanie obróbki
 
-Otwarte środowisko operatora oparte na **LinuxCNC 2.9**, **QtVCP** i **Debianie 12**.
+Otwarte środowisko operatora oparte na **LinuxCNC 2.9**, **WebHMI** i **Debianie 12**.
 Własny interfejs, podgląd detalu i ścieżki oraz Plant — model maszyny do badania jej zachowania.
+QtVCP pozostaje ekranem awaryjnym. Wspólny backend CLI `linumert` i WebHMI tworzą jeden projekt;
+[przygotowanie zadania i dalsze poziomy](docs/WORKFLOW_ZADANIA.md).
 
 [**Pobierz ISO Live**](https://github.com/anonimov94/linumeRT/releases) · [**Uruchom projekt**](#uruchomienie-na-linuxie) · [**Kamienie milowe**](#kamienie-milowe) · [**Dokumentacja**](docs/README.md)
 
@@ -186,7 +188,7 @@ Zrzuty podglądów offline z 25.10.2026 (`skin-check.py`, 160 kombinacji PASS). 
 ## Dokumentacja i rozwój
 
 - [Instrukcja operatora](docs/OBSLUGA_OPERATORA.md) i [Zero detalu](docs/ZERO_DETALU.md).
-- [Plant](docs/PLANT.md), [maszyny i szablony napędów](plant/library/drives/README.md).
+- [Plant](docs/PLANT.md), [maszyny i szablony napędów](core/linumert/machine/drives/templates/README.md).
 - [Wymagania i pokrycie](docs/wymagania/MACIERZ.md), [raporty odbioru](docs/raporty/ODBIOR_STANOWISKA.md).
 - [Decyzje projektu](docs/DECYZJE.md), [dziennik](docs/DZIENNIK.md), [zasady współpracy](docs/WSPOLPRACA_MODELI.md).
 

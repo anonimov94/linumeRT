@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "name": "Lite demo",
+  "units": "mm",
+  "steps": [
+    {"generator": "header", "version": 1, "params": {"title": "Lite demo"}},
+    {"generator": "tool_change", "version": 1, "params": {"tool": 1, "rpm": 12000}},
+    {"generator": "face_mill", "version": 1, "params": {"x0": 5, "y0": 5, "x1": 35, "y1": 25, "depth": 1, "tool_d": 6, "step_down": 1}},
+    {"generator": "drill_holes", "version": 1, "params": {"x": 20, "y": 15, "depth": 2}},
+    {"generator": "program_end", "version": 1, "params": {}}
+  ]
+}

@@ -6,9 +6,9 @@ Model-Author: Codex
 
 from pathlib import Path
 
+from linumert.machine.drives.machine_drives import load_machine_drives
 from linumert.programs.lnx import parse_lnx, save_lnx
 from linumert.tools.db import Tool, ToolDB
-from linumert_plant.machine_drives import load_machine_drives
 
 ROOT = Path(__file__).resolve().parents[1]
 

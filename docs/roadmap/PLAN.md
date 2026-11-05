@@ -582,7 +582,7 @@ Bramka automatyczna: `open`; odbiór stanowiska osobno.
 
 Pozostaje: Pulpit (MPG, przyciski) i E-STOP rzeczywisty w sekcji hardware. Raport konkursu 03.
 
-Źródła: [plant/server/linumert_plant/drive_real.py](../../plant/server/linumert_plant/drive_real.py), [core/linumert/machine/schema.py](../../core/linumert/machine/schema.py), [plant/library/drives/README.md](../../plant/library/drives/README.md), [tests/test_drive_real.py](../../tests/test_drive_real.py), [docs/DZIENNIK.md](../DZIENNIK.md), [prompts/sesja-061.md](../../prompts/sesja-061.md).
+Źródła: [plant/server/linumert_plant/drive_real.py](../../plant/server/linumert_plant/drive_real.py), [core/linumert/machine/schema.py](../../core/linumert/machine/schema.py), [core/linumert/machine/drives/templates/README.md](../../core/linumert/machine/drives/templates/README.md), [tests/test_drive_real.py](../../tests/test_drive_real.py), [docs/DZIENNIK.md](../DZIENNIK.md), [prompts/sesja-061.md](../../prompts/sesja-061.md).
 
 ### 062 — Generator INI/HAL: sim, Plant, step/dir
 
@@ -1054,11 +1054,11 @@ Pozostaje: Odbiór rzeczywistej przeglądarki: DRO, scena WebGL ≤30 FPS, jog i
 
 ### VERTICAL-PREPARE — Zadanie obróbkowe: przygotowanie wspólnego pakietu w WebHMI
 
-**w toku**. Pełny projekt: pakiet SHA-256, ToolDB readonly, wspólny CLI/API i użyteczny widok WebHMI z eksportem ZIP. Detal planowanie/kieszeń/wiercenie kliknięty na własnej atrapie; 26 testów pakietu/adaptera i 40 JS PASS. Pierwsza porcja z jedną aktywną maszyną/bazą; szersza regresja, CI i scalenie #215/#217 w toku. Nie zalicza poziomów 2–4 ani odbioru LinuxCNC/Plant.
+**w toku**. Pełny projekt: pakiet SHA-256, ToolDB readonly, wspólny prepare CLI/API i użyteczny widok WebHMI z ZIP. PR #219 łączy #216/#217/#218: canonical napędy w core, nazwa linumert z aliasem zgodności, 24 aktywne przypadki odbioru Claude uzgodnione z kontraktem main. 107 testów integracji, 69 CLI/pakietu/konfiguracji oraz wheel poza repo PASS. Detal kliknięty przed integracją; końcowy odbiór i CI w toku. Nie zalicza poziomów 2–4.
 
-Pozostaje: Szersza regresja i CI gotowej porcji; scalenie zależności #215 oraz #217 do main. Rozszerzenie wyboru wielu maszyn/baz w GUI i zakresu CAM poza pierwszą porcję, jeśli potrzebne do dalszego odbioru. Uzgodnienie helperów/napędów z claude/scal-lite i kernela C z claude/natywne-przyspieszenia.
+Pozostaje: Odbiór po integracji, szersza regresja i CI #219; scalenie gotowych porcji do main i domknięcie zawartych PR. Rozszerzenie wyboru wielu maszyn/baz w GUI i zakresu CAM poza pierwszą porcję, jeśli potrzebne do dalszego odbioru. Uzgodnienie kernela C z claude/natywne-przyspieszenia przed pomiarem całego przepływu w poziomie 2.
 
-Źródła: [docs/WORKFLOW_ZADANIA.md](../WORKFLOW_ZADANIA.md), [core/linumert/tools/db.py](../../core/linumert/tools/db.py), [tests/test_tools_db.py](../../tests/test_tools_db.py), [core/linumert/programs/job.py](../../core/linumert/programs/job.py), [core/linumert/programs/prepare.py](../../core/linumert/programs/prepare.py), [webhmi/server/linumert_webhmi/jobs.py](../../webhmi/server/linumert_webhmi/jobs.py), [tests/test_job_bundle.py](../../tests/test_job_bundle.py), [tests/test_job_prepare.py](../../tests/test_job_prepare.py), [docs/raporty/VERTICAL_PREPARE_2026-11-05.md](../raporty/VERTICAL_PREPARE_2026-11-05.md).
+Źródła: [docs/WORKFLOW_ZADANIA.md](../WORKFLOW_ZADANIA.md), [core/linumert/tools/db.py](../../core/linumert/tools/db.py), [tests/test_tools_db.py](../../tests/test_tools_db.py), [core/linumert/programs/job.py](../../core/linumert/programs/job.py), [core/linumert/programs/prepare.py](../../core/linumert/programs/prepare.py), [webhmi/server/linumert_webhmi/jobs.py](../../webhmi/server/linumert_webhmi/jobs.py), [tests/test_job_bundle.py](../../tests/test_job_bundle.py), [tests/test_job_prepare.py](../../tests/test_job_prepare.py), [tests/test_prepare_acceptance.py](../../tests/test_prepare_acceptance.py), [tools/check_wheel.py](../../tools/check_wheel.py), [docs/raporty/VERTICAL_PREPARE_2026-11-05.md](../raporty/VERTICAL_PREPARE_2026-11-05.md).
 
 ### VERTICAL-VERIFY — Zadanie obróbkowe: interpreter, limity i diagnostyka obróbki
 
