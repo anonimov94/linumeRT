@@ -1827,3 +1827,10 @@ Pełny RIP musi ponownie potwierdzić wynik; nie scalać na czerwonym CI.
 - Testy: 43 PASS, 1 linuxcnc deselected; kontrola historii, zachowania bajtów i odmowy zapisu. Domyślny tryb ToolDB pozostaje bez zmian.
 - To pomocniczy krok 032/039 dla pakietu prepare; nie zalicza gotowej funkcji operatora ani poziomu 1. Następne: snapshot pakietu i WebHMI.
 - Autokontrola, bez niezależnego przeglądu.
+
+## VERTICAL-PREPARE — rdzeń pakietu · 2026-11-05 · Codex
+
+- Model-Author: Codex. Deterministyczny pakiet v1 z manifestem, źródłem, maszyną, napędami, narzędziami i ustawieniem detalu; początkowy zakres CAM 2D.
+- 14 testów PASS: błędne wejścia, integralność, awaria publikacji, wyścig zapisów i zachowanie istniejącego pakietu. Ruff PASS.
+- `prepared` nie zalicza interpretera/limitów/materiału. WebHMI i odbiór operatora w następnym kroku; poziom 1 pozostaje otwarty.
+- Autokontrola, bez niezależnego przeglądu.
