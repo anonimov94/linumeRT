@@ -42,7 +42,7 @@ Ekran nie jest funkcją bezpieczeństwa; E-STOP to obwód sprzętowy.
   wygaśnięciu, po rozłączeniu sesji właściciela, po `estop`/`stop`/`power_off`/zmianie trybu i po
   błędzie odczytu stanu; nieudany stop jest ponawiany w każdym obiegu (50 Hz). Wygaszanie idzie
   przed odczytem stanu. **Gdy proces bramy padnie albo zawiesi się backend, ciągły jog w LinuxCNC trwa
-  dalej** — przed sprzętem wymagane jest wiązanie z `watchdog` HAL (E-STOP po utracie bramy).
+  dalej**, chyba że brama działa z `--hal`: wtedy `watchdog` HAL daje E-STOP po utracie bramy (niżej).
 - **Token** w nagłówku (REST) lub pierwszej wiadomości (WS), nigdy w URL; porównanie w stałym czasie,
   typ sprawdzany. Token wypisywany jest na stdout przy starcie (uwaga na logi usługi; `--token`/zmienna
   środowiskowa pozwalają go podać z zewnątrz).
@@ -58,12 +58,25 @@ Ekran nie jest funkcją bezpieczeństwa; E-STOP to obwód sprzętowy.
   Brak poprawnej skali blokuje jog liniowy. `wait_complete` -1 (timeout) i `RCS_ERROR`
   zgłaszane operatorowi. Maszyny z innym
   układem przegubów (np. gantry z dwoma przegubami na oś) wymagają jawnego mapowania — jeszcze nie ma.
-Sygnał życia do `watchdog` HAL (D35, `linumert.hmi-wd-enable`) **nie jest jeszcze podpięty**:
-brama wystawia `heartbeat` w stanie, wiązanie z HAL to następny krok.
+**Watchdog HAL (D35) i podwójny Reset (D37)** — `python -m linumert_webhmi --linuxcnc --hal
+--postgui config/hal/linumert_webhmi_postgui.hal`:
+- Brama tworzy komponent `linumert` z pinami `hmi-estop-ok`, `hmi-heartbeat`, `hmi-wd-enable`,
+  `hmi-ack` (te same co ekran Qt); postgui WebHMI łączy je z łańcuchem `linumert_hmi_estop.hal`.
+- Karta przeglądarki wysyła `{"alive":1}` co 250 ms. `hmi-heartbeat` przełącza się w każdym obiegu
+  bramy (50 Hz) tylko, gdy któraś karta odezwała się w ciągu 1 s. Zamknięta, zawieszona albo
+  zdławiona (ukryta) karta, zawieszona brama lub odczyt maszyny → brak zboczy → E-STOP po
+  `[LINUMERT]HMI_HEARTBEAT_TIMEOUT` (na Plant: karta ~3,1 s, brama ~2,0 s).
+- Reset raz: alarmy, których przyczyna ustała. Dwa razy w 600 ms: impuls `hmi-ack`, ponowne
+  uzbrojenie watchdoga, `ESTOP_RESET` po 0,3 s, Reset alarmów po 0,7 s. Otwarty obwód safety
+  i reset z innego procesu bez potwierdzenia nie zamykają łańcucha (test na Plant).
+- Bez `--hal` brama nadal nie zwalnia E-STOP (podwójny Reset odrzucony).
+- Pliki klienta z `Cache-Control: no-cache`: po aktualizacji bramy stary JS bez `alive` dałby E-STOP.
+- Odbiór: `docs/raporty/G2/WEBHMI_WATCHDOG_2026-11-04.md`. Ukryta karta i uruchomienie
+  bramy z `[DISPLAY]` jeszcze otwarte. NIEZWERYFIKOWANE NA SPRZĘCIE.
 
 ## Testy
 ```bash
-python -m pytest tests/test_webhmi_gateway.py tests/test_webhmi_app.py tests/test_webhmi_linuxcnc_backend.py
+python -m pytest tests/test_webhmi_gateway.py tests/test_webhmi_app.py tests/test_webhmi_linuxcnc_backend.py tests/test_webhmi_hal_link.py
 ```
 Testy podstawowe bez LinuxCNC używają atrapy i sztucznego modułu. Odbiór rzeczywistego
 LinuxCNC sim: `python -m pytest tests/test_webhmi_live_linuxcnc.py -m linuxcnc`. Sprawdza

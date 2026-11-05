@@ -80,6 +80,7 @@ class Command(BaseModel):
     speed: float | None = None  # mm/s ze znakiem (jog)
     distance: float | None = Field(default=None, gt=0, le=1, allow_inf_nan=False)
     name: str | None = Field(default=None, max_length=104)  # plik programu (open)
+    double: bool = False  # reset: podwójny Reset = potwierdzenie E-STOP (D37), tylko z --hal
 
     @field_validator("name")
     @classmethod

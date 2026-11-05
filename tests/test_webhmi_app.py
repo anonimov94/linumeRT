@@ -207,3 +207,29 @@ def test_odd_origins_are_rejected(client, origin):
 def test_loopback_origins_are_accepted(client, origin):
     with connect(client, origin=origin) as ws:
         assert hello(ws)["type"] == "state"
+
+
+def test_websocket_alive_message_refreshes_session_without_reply(client, gateway):  # REQ-QA-03
+    """``{"alive":1}`` z karty (co 250 ms) odświeża sesję dla ``heartbeat``; brak ack i błędu."""
+    calls = []
+    original = gateway.touch
+    gateway.touch = lambda session="local": (calls.append(session), original(session))
+    with connect(client) as ws:
+        hello(ws)
+        ws.send_text('{"alive":1}')
+        ws.send_text('{"alive":1}')
+        ws.send_json({"id": 3, "cmd": "jog_stop"})
+        replies = []
+        while not any(m.get("id") == 3 for m in replies):
+            message = ws.receive_json()
+            if message["type"] in ("ack", "error"):
+                replies.append(message)
+    assert [m["id"] for m in replies] == [3]  # alive bez odpowiedzi
+    assert len(calls) >= 3 and calls[0] == calls[1] != "local"
+
+
+def test_static_files_are_revalidated(client):  # REQ-QA-03
+    """Bez pamięci podręcznej bez sprawdzenia: stary JS bez sygnału życia dałby E-STOP."""
+    response = client.get("/js/connection.js")
+    assert response.status_code == 200
+    assert response.headers["cache-control"] == "no-cache"

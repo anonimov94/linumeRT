@@ -9,7 +9,9 @@ from __future__ import annotations
 import argparse
 import os
 import secrets
+import subprocess
 import sys
+import time
 from pathlib import Path
 
 from linumert.cnc import FakeMachine, Mode
@@ -43,7 +45,18 @@ def main(argv: list[str] | None = None) -> int:
                         help="pozwól na adres inny niż loopback (tylko zaufana sieć)")
     parser.add_argument("--programs", type=Path, default=None,
                         help="katalog programów (domyślnie [DISPLAY]PROGRAM_PREFIX z INI)")
+    parser.add_argument("--hal", action="store_true",
+                        help="piny HAL linumert.hmi-* (grzyb, sygnał życia, potwierdzenie E-STOP)")
+    parser.add_argument("--postgui", type=Path, default=None,
+                        help="plik HAL wykonany po utworzeniu pinów (np. "
+                             "config/hal/linumert_webhmi_postgui.hal); wymaga --hal")
     args = parser.parse_args(argv)
+    if args.postgui and not args.hal:
+        print("Odmowa: --postgui wymaga --hal.", file=sys.stderr)
+        return 2
+    if args.hal and args.fake:
+        print("Odmowa: --hal tylko z --linuxcnc.", file=sys.stderr)
+        return 2
     if args.host not in ("127.0.0.1", "localhost", "::1") and not args.allow_remote:
         print("Odmowa: adres inny niż loopback wymaga --allow-remote.", file=sys.stderr)
         return 2
@@ -55,7 +68,18 @@ def main(argv: list[str] | None = None) -> int:
     token = args.token or secrets.token_urlsafe(24)
     backend = (FakeBackend(_demo_machine(), programs_dir=args.programs) if args.fake
                else LinuxCNCBackend(programs_dir=args.programs))
-    gateway = Gateway(backend)
+    pins = None
+    if args.hal:
+        from .hal_link import open_hal
+
+        pins, _component = open_hal(time.monotonic())  # komponent żyje do końca procesu
+        if args.postgui:
+            done = subprocess.run(["halcmd", "-f", str(args.postgui)], check=False)
+            if done.returncode:
+                print(f"Odmowa: halcmd -f {args.postgui} zakończył się kodem "
+                      f"{done.returncode}", file=sys.stderr)
+                return 2
+    gateway = Gateway(backend, hal_pins=pins)
     gateway.start()
     extra = (args.host,) if args.allow_remote else ()
     app = create_app(gateway, token, extra_hosts=extra)

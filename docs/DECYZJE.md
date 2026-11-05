@@ -582,3 +582,15 @@ a zatrzask nie miał wejścia od LinuxCNC. Generator Plant (`render_plant_hal`) 
 (`iocontrol.0.user-enable-out`) szeregowo przed `estop_latch.ok-in`. Ten człon tylko odbiera
 zezwolenie (D35); reset nadal wyłącznie przez `iocontrol.0.user-request-enable` → `estop_latch.reset`.
 To przeniesienie poprawki z bety (2026-11-01). Konfiguracja sprzętowa bez zmian. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## PROPOZYCJA: WebHMI w łańcuchu E-STOP przez watchdog HAL — 2026-11-04
+
+Model-Author: Claude. Brama WebHMI z `--hal` tworzy te same piny `linumert.hmi-*` co ekran Qt
+i dołącza do łańcucha D35 (`config/hal/linumert_webhmi_postgui.hal`). Sygnał życia: karta
+przeglądarki wysyła `{"alive":1}` co 250 ms, brama przełącza `hmi-heartbeat` tylko przy żywej
+karcie i działającym obiegu. Podwójny Reset (D37) w WebHMI = impuls `hmi-ack`, ponowne uzbrojenie
+watchdoga i `ESTOP_RESET`; zatrzask HAL nadal odrzuca reset przy otwartym obwodzie safety. To
+zawęża dotychczasową zasadę „brama nie zwalnia E-STOP”: bez `--hal` brama dalej odmawia.
+Ukryta karta jest dławiona przez przeglądarkę i może dać E-STOP — przyjęte jako fail-safe;
+właściciel może wybrać inaczej (np. dłuższy limit albo ostrzeżenie zamiast E-STOP).
+Odbiór: `docs/raporty/G2/WEBHMI_WATCHDOG_2026-11-04.md`. NIEZWERYFIKOWANE NA SPRZĘCIE.
