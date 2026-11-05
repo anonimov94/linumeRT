@@ -141,12 +141,12 @@ Operation enabled; Fault, Quick stop active; kasowanie faultu zboczem bitu 7 `co
 6098h, 6099h, 609Ah. Mapowanie błędów napędu na katalog alarmów: nadążanie → E-4201,
 przeciążenie → E-4202, nadprąd → E-4203, ogólny fault → E-4200 (`alarms/catalog.yaml`).
 
-**Szablon i instancja (REQ-VD-01, REQ-VD-02):** szablon `plant/library/drives/<id>.yaml`
+**Szablon i instancja (REQ-VD-01, REQ-VD-02):** szablon `core/linumert/machine/drives/templates/<id>.yaml`
 (wersjonowany polem `version`); instancja w maszynie to `template` + `overrides`, walidowane
 zakresami szablonu (sesja 013).
 
 ```yaml
-# plant/library/drives/servo_400w.yaml (wartości przykładowe, typowe)
+# core/linumert/machine/drives/templates/servo_400w.yaml (wartości przykładowe, typowe)
 id: servo_400w
 version: 1
 based_on: null

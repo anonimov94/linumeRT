@@ -1812,3 +1812,10 @@ Pełny RIP musi ponownie potwierdzić wynik; nie scalać na czerwonym CI.
 - Kliknięte w przeglądarce na LinuxCNC 2.9 + Plant z łańcuchem HMI bez obejścia: E-STOP → podwójny Reset → ON; zawieszona karta → E-STOP po 3,1 s. Zrzuty: `docs/raporty/G2/WEBHMI_WATCHDOG_2026-11-04.md`.
 - Odbiór w GUI wykrył 3 błędy niewidoczne w testach logiki (brak sygnału życia w kliencie, stary JS z pamięci podręcznej, E-1100 po resecie); poprawione, test na LinuxCNC idzie przez WebSocket.
 - Testy: `test_webhmi_watchdog_linuxcnc` PASS (~20 s), `test_webhmi_hal_link` i `test_webhmi_app`. Otwarte: ukryta karta, start bramy z `[DISPLAY]`. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## Scalenie lite do main · 2026-11-05 · Claude
+- Model-Author: Claude. Polecenie właściciela: jeden projekt w main (DECYZJE 2026-11-05). Backend lite (Codex, PR #203) dodany bez usuwania GUI, WebHMI, panelu Plant, sprzętu ani ATC.
+- Napędy i szablony w `core/linumert/machine/drives/`; rdzeń nie importuje Plant (`tests/test_architecture.py`), `linumert_plant.drive_*` jako aliasy. `plant_scales` liczy skale bez modelu Plant, test równości z Plant na 5 maszynach.
+- Nowe polecenia: `linumert-lite` (generators/compile/machine/config/simulate), `linumert-headless`, `linumert-plant`; podgląd telemetrii w konsoli (`tools/console*`).
+- Testy (WSL, klon gałęzi): `make lint` OK, pytest 1984 PASS / 15 skip, check_requirements 22/22. LinuxCNC nie uruchamiano: DISPLAY domyślnie bez zmian, eksport lite = headless.
+- Nie przeniesiono: niezacommitowanej pracy Codex w `linumeRT-lite` (kompilator `.lnx`, kernel C materiału, roadmapa `LITE_VERTICAL.md`) — Codex dokłada ją na main. Otwarte: ujednolicenie `beta/` z `core/`. NIEZWERYFIKOWANE NA SPRZĘCIE.

@@ -791,6 +791,21 @@ zmiany robocze. Nie scalaj nieukończonego kodu tylko ze względu na wyłączeni
 
 ## Dla Codex:
 
+Model-Author: Claude · 2026-11-05 · **Jeden strumień: lite wchodzi do main (polecenie właściciela).**
+Właściciel: „to ma być jeden projekt”, „współpracujcie”, „połączcie strumień”. Gałąź `claude/scal-lite`
+dodaje do main Twój backend lite z `codex/lite-backend` (PR #203) **bez usuwania** GUI/WebHMI/Plant/sprzętu:
+CLI `linumert-lite`, `cnc/headless.py`, `lite_config.py` + zasoby, `examples/`, konsola, testy; napędy
+w `core/linumert/machine/drives/` (aliasy `linumert_plant.drive_*`). Twojej niezacommitowanej pracy
+w `.collaboration/linumeRT-lite` (kompilator `.lnx`, kernel C materiału, `LITE_VERTICAL.md`) nie dotykałem
+i nie przenosiłem — kopia zapasowa patcha jest u mnie. Prośba:
+1. przegląd PR `claude/scal-lite` (zwłaszcza `plant_scales` bez modelu Plant i `Options.display`);
+2. zacommituj swoją bieżącą pracę i przenieś ją na gałąź od `claude/scal-lite` (albo od main po scaleniu);
+   ścieżki plików są te same, więc patch powinien wejść czysto, poza `core/linumert/cli.py`;
+3. `prepare` (poziom 1 z `LITE_VERTICAL.md`) rób już na main; ja przygotuję test odbioru (detal
+   z planowaniem, kieszenią i wierceniem + błędne zadania z oczekiwanymi przyczynami) w osobnym pliku
+   `tests/test_prepare_acceptance.py`, bez dotykania `cli.py`;
+4. PR #203 po scaleniu zamykamy jako zastąpiony; `codex/lite-backend` nie rozwijamy dalej.
+
 Model-Author: Claude · 2026-10-27. **066 ATC: generator makra M6 w PR (core/linumert/machine/atc_macro.py).**
 Nie dotykam WebHMI, CAM (#184/#190), integracji ani zamknięcia projektu; tylko `atc_macro.py`,
 `tests/test_atc_macro.py`, wpis 066 w plan.json/DZIENNIK. Konflikt możliwy wyłącznie w plan.json/DZIENNIK

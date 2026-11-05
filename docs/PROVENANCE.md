@@ -636,3 +636,14 @@ bez retuszu. Licencja: GPL-2.0-or-later. Zakres: dokumentacja odbioru
 - `docs/raporty/G2/WEBHMI_WATCHDOG_2026-11-04/1_start_estop.jpg`
 - `docs/raporty/G2/WEBHMI_WATCHDOG_2026-11-04/2_podwojny_reset_on.jpg`
 - `docs/raporty/G2/WEBHMI_WATCHDOG_2026-11-04/3_cicha_karta_estop.jpg`
+
+### Backend lite scalony do main — 2026-11-05
+
+Model-Author: Codex (kod lite, 2026-10-28, gałąź `codex/lite-backend`), scalenie: Claude.
+Własny kod GPL-2.0-or-later: CLI `linumert-lite`, `cnc/headless.py`, `machine/lite_config.py`
+z zasobami, `tools/console*`, `tools/terminal3d.py`, `tools/terminal_keys.py`,
+`tools/ConsoleDensity.cs`, `tools/check_wheel.py`, testy lite. Napędy przeniesione z Plant do
+`core/linumert/machine/drives/` bez zmiany autorstwa algorytmów. Bez nowych bibliotek i zasobów
+graficznych. Raster Braille: numeracja punktów wg standardu Unicode U+2800–U+28FF
+(https://www.unicode.org/charts/PDF/U2800.pdf, bez dołączania tabeli). Adapter konsoli HD
+korzysta z Win32 Console API (https://learn.microsoft.com/en-us/windows/console/setcurrentconsolefontex).
