@@ -72,14 +72,14 @@ def _program() -> str:
     return compile_program(LnxProgram(name="operacje", steps=steps), registry, safe_z=-5.0)
 
 
-def test_program_text_has_unique_operation_blocks():  # REQ-QA-03
+def test_program_text_has_unique_operation_blocks():
     lines = _program().splitlines()
     opened = [line for line in lines if line.endswith(" if [1]")]
     assert opened == ["o100 if [1]", "o200 if [1]", "o300 if [1]", "o400 if [1]"]
     assert all(lines.count(o.replace(" if [1]", " endif")) == 1 for o in opened)
 
 
-def test_operation_blocks_run_in_auto_and_from_line_inside_block(tmp_path):  # REQ-QA-02
+def test_operation_blocks_run_in_auto_and_from_line_inside_block(tmp_path):
     text = _program()
     lines = text.splitlines()
     start = lines.index("o300 if [1]") + 2  # pierwsza linia wewnątrz bloku operacji 3 (od 1)
