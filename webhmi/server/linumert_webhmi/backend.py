@@ -97,6 +97,7 @@ def program_path(directory: Path | None, name: str) -> Path:
 class MachineBackend(Protocol):
     def snapshot(self) -> MachineSnapshot: ...
     def estop(self) -> None: ...
+    def estop_reset(self) -> None: ...
     def power_on(self) -> None: ...
     def power_off(self) -> None: ...
     def set_mode(self, mode: Mode) -> None: ...
@@ -157,6 +158,9 @@ class FakeBackend:
 
     def estop(self) -> None:
         self.machine.estop()
+
+    def estop_reset(self) -> None:
+        self.machine.estop_reset()
 
     def power_on(self) -> None:
         self._need(self.machine.power_on())
@@ -309,6 +313,11 @@ class LinuxCNCBackend:
 
     def estop(self) -> None:
         self._cmd().state(self._lc().STATE_ESTOP)
+
+    def estop_reset(self) -> None:
+        # Tylko po potwierdzeniu w HAL (podwójny Reset, D37): zatrzask E-STOP w HAL nadal
+        # odrzuci reset, gdy obwód safety albo łańcuch HMI jest otwarty.
+        self._cmd().state(self._lc().STATE_ESTOP_RESET)
 
     def power_on(self) -> None:
         lc, cmd = self._lc(), self._cmd()

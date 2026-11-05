@@ -35,6 +35,7 @@ from .schema import SCHEMA_VERSION, Command
 
 PUSH_HZ = 30.0
 KEEPALIVE_S = 0.2
+ALIVE = {"alive": 1}  # wiadomość podtrzymania z klienta (co 250 ms), zasila heartbeat
 AUTH_TIMEOUT_S = 3.0
 MAX_MESSAGE_BYTES = 2048
 MAX_CLIENTS = 4
@@ -52,6 +53,14 @@ def create_app(gateway: Gateway, token: str, extra_hosts: tuple[str, ...] = ()) 
         raise ValueError("token bramy: co najmniej 16 znaków")
     allowed_hosts = set(LOOPBACK_HOSTS) | set(extra_hosts)
     app = FastAPI(title="linumeRT web-hmi", docs_url=None, redoc_url=None, openapi_url=None)
+
+    @app.middleware("http")
+    async def no_cache(request: Request, call_next):
+        # Klient po aktualizacji bramy: przeglądarka zawsze sprawdza pliki (ETag), inaczej stary
+        # moduł JS bez sygnału życia karty od razu otwiera łańcuch E-STOP przez watchdog HAL.
+        response = await call_next(request)
+        response.headers.setdefault("Cache-Control", "no-cache")
+        return response
     app.state.gateway = gateway
     sockets = {"count": 0, "pending": 0}
 
@@ -173,6 +182,9 @@ async def _serve(socket: WebSocket, gateway: Gateway, session: str) -> None:
             msg_id = None
             try:
                 data = json.loads(text)
+                if data == ALIVE:  # sygnał życia karty: tylko odświeżenie sesji, bez odpowiedzi
+                    gateway.touch(session)
+                    continue
                 msg_id = data.get("id") if isinstance(data, dict) else None
                 command = Command.model_validate(data)
                 await asyncio.to_thread(gateway.execute, command, session)

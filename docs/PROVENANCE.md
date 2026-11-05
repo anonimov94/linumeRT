@@ -625,3 +625,14 @@ Program `config/sim/nc_files/linumert_g2_odbior.ngc`: własny, GPL-2.0-or-later.
 - `docs/raporty/G2/G2_WEBHMI_2026-11-03/7b_reset.jpg`
 - `docs/raporty/G2/G2_WEBHMI_2026-11-03/7c_estop_reset_zostaje.jpg`
 - `docs/raporty/G2/G2_WEBHMI_2026-11-03/7d_hal_reset_on_reset.jpg`
+
+### G2: watchdog HAL i podwójny Reset w WebHMI — 2026-11-04
+
+Model-Author: Claude. Autor: Claude; źródło: własne zrzuty klienta linumeRT WebHMI
+w przeglądarce aplikacji Claude na Windows, brama z pinami HAL, LinuxCNC 2.9 i Plant w WSL,
+bez retuszu. Licencja: GPL-2.0-or-later. Zakres: dokumentacja odbioru
+(`docs/raporty/G2/WEBHMI_WATCHDOG_2026-11-04.md`); bez zasobów zewnętrznych.
+
+- `docs/raporty/G2/WEBHMI_WATCHDOG_2026-11-04/1_start_estop.jpg`
+- `docs/raporty/G2/WEBHMI_WATCHDOG_2026-11-04/2_podwojny_reset_on.jpg`
+- `docs/raporty/G2/WEBHMI_WATCHDOG_2026-11-04/3_cicha_karta_estop.jpg`

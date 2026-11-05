@@ -43,6 +43,12 @@ test("power on only from OFF or ESTOP_RESET (not ESTOP)", () => {
   assert.equal(can("power_off", state({ task_state: "on" })), true);
   assert.equal(can("power_off", state({ task_state: "off" })), false);
 });
+test("power on hint in ESTOP depends on HAL pins of the gateway", () => {
+  const reason = (s) => allowed(s, link).power_on.reason;
+  assert.match(reason(state({ task_state: "estop", hmi_hal: true })), /podwójny Reset/);
+  assert.match(reason(state({ task_state: "estop", hmi_hal: false })), /poza bramą/);
+  assert.match(reason(state({ task_state: "estop" })), /poza bramą/);
+});
 test("MANUAL and idle required for home and jog", () => {
   assert.equal(can("home"), true);
   assert.equal(can("jog"), true);

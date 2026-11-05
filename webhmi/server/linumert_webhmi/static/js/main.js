@@ -15,6 +15,7 @@ import { createLog } from "./log.js";
 const $ = (id) => document.getElementById(id);
 const FRESH_MS = 500;
 const LOST_MS = 2000;
+const DOUBLE_RESET_MS = 600;
 const controls = [...document.querySelectorAll("[data-cmd], [data-mode]")];
 let state = null;
 let receivedAt = 0;
@@ -24,6 +25,7 @@ let jog;
 let dro;
 const journal = createLog();
 let stateReceipts = [];
+let lastReset = 0;
 let lastAckMs = null;
 let telemetryWasFresh = false;
 let previousLinkStatus = "";
@@ -165,6 +167,11 @@ const connection = createConnection({
     version = nextVersion;
     dro.render(state, version);
     renderAlarms(state.alarms);
+    $("alarmResetHint").textContent = state.hmi_hal === true
+      ? "Reset raz: alarmy, których przyczyna ustała. Dwa razy szybko: potwierdzenie E-STOP " +
+        "w zatrzasku HAL — otwarty obwód safety nadal blokuje maszynę."
+      : "Reset kasuje alarmy, których przyczyna ustała. E-STOP potwierdza się zatrzaskiem w " +
+        "HAL, nie z tego ekranu.";
     renderPrograms(state.programs);
     jog.onState(state);
     updateControls();
@@ -239,6 +246,12 @@ for (const button of controls) {
     const command = button.dataset.mode
       ? { cmd: "mode", mode: button.dataset.mode }
       : { cmd: button.dataset.cmd };
+    if (command.cmd === "reset") {
+      // D37: drugi Reset w ciągu DOUBLE_RESET_MS potwierdza E-STOP w zatrzasku HAL (brama z --hal).
+      const now = Date.now();
+      if (now - lastReset <= DOUBLE_RESET_MS) command.double = true;
+      lastReset = command.double ? 0 : now;
+    }
     if (button.dataset.axis) command.axis = button.dataset.axis;
     execute(command);
   });

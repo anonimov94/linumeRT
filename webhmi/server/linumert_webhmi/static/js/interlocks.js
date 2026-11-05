@@ -39,7 +39,9 @@ export function allowed(state, link) {
   const modeReason = (target) => "Wymagany tryb " + target.toUpperCase();
 
   result.power_on = task === "estop_reset" || task === "off"
-    ? permit() : deny(task === "estop" ? "Najpierw sprzętowy reset E-STOP poza bramą"
+    ? permit() : deny(task === "estop"
+      ? (state.hmi_hal === true ? "Najpierw podwójny Reset (potwierdzenie E-STOP)"
+        : "Najpierw sprzętowy reset E-STOP poza bramą")
       : "Zasilanie jest już włączone lub stan nieznany");
   result.power_off = machineOn ? permit() : deny(common);
   result.home = !machineOn ? deny(common) : mode !== "manual"

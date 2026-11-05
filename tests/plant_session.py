@@ -85,10 +85,12 @@ c.teleop_enable(1); c.wait_complete()
 
 def run_generated_plant(tmp_path: Path, machine: Path, driver_body: str, *, port: int,
                         timeout: float = 300, copy_macros: bool = True,
-                        prelude: str = DRIVER_PRELUDE) -> tuple[dict, str, Path]:
+                        prelude: str = DRIVER_PRELUDE,
+                        hmi_bypass: bool = True) -> tuple[dict, str, Path]:
     """Zwraca (wynik kierowcy, log LinuxCNC, katalog konfiguracji). Pomija test, gdy zajęte.
 
     ``prelude=""`` oddaje włączenie i bazowanie kierowcy (odbiór G2 robi je przez WebHMI).
+    ``hmi_bypass=False`` zostawia łańcuch HMI (D35) aktywny: piny dostarcza kierowca (WebHMI --hal).
     """
     root = rip.rip_root()
     if rip.leftovers():
@@ -119,7 +121,8 @@ def run_generated_plant(tmp_path: Path, machine: Path, driver_body: str, *, port
     # Bez ekranu: zastępczy DISPLAY i jawne obejście grzyba HMI (tylko w teście bez ekranu).
     text = text.replace("DISPLAY = qtvcp linumert", "DISPLAY = linumert_bez_ekranu")
     text = text.replace("DISPLAY = linumert_headless", "DISPLAY = linumert_bez_ekranu")
-    text = text.replace("HMI_ESTOP_BYPASS = 0", "HMI_ESTOP_BYPASS = 1")
+    if hmi_bypass:
+        text = text.replace("HMI_ESTOP_BYPASS = 0", "HMI_ESTOP_BYPASS = 1")
     # Katalog tymczasowy: ścieżki względne z repozytorium zamieniamy na bezwzględne.
     text = text.replace("../../hal/", f"{ROOT / 'config/hal'}/")
     text = text.replace("../../sim/", f"{ROOT / 'config/sim'}/")

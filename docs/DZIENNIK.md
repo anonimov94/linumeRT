@@ -1814,3 +1814,11 @@ Pełny RIP musi ponownie potwierdzić wynik; nie scalać na czerwonym CI.
 - Analiza ścieżki jawnie odmawia przy obliczanych numerach narzędzi i przepływie O-word ze zmianami narzędzi: nie przypisuje narzędzia z niewykonanej gałęzi i nie przechodzi cicho na parser podzbioru. Obsługa takich programów wymaga śledzenia rzeczywiście wykonanych zmian; pozostaje ograniczeniem funkcji.
 - Testy regresji obejmują rzeczywisty gcode.parse bez maszyny (prywatny HOME) oraz blokady backendu i klienta. Wyniki pełnej regresji i SHA w PR. Autokontrola, bez niezależnego przeglądu. NIEZWERYFIKOWANE NA SPRZĘCIE.
 - Uzupełnienie po niezależnym przeglądzie Claude: odmowa całego przepływu O-word wycofana przed scaleniem. Kopia dla interpretera dostaje neutralne komentarze przy słowach T/M6/M61; PathCanon zmienia narzędzie tylko po markerze linii rzeczywiście wykonanej. Pominięte if nie zmienia T, zaś while/repeat i lokalne podprogramy mogą wykonywać zmiany narzędzi. Zewnętrzny call z nieznaną treścią daje notatkę o niepewnym T, bez odmowy samego call.
+
+## G2 — watchdog HAL i podwójny Reset w WebHMI · 2026-11-04 · Claude
+- Model-Author: Claude. Brama `--hal`: piny `linumert.hmi-*` jak Qt, `hmi-heartbeat` tylko przy żywej karcie (`{"alive":1}` co 250 ms) i działającym obiegu; podwójny Reset = `hmi-ack` + uzbrojenie + `ESTOP_RESET`; bez `--hal` odmowa (PROPOZYCJA w DECYZJE).
+- Kliknięte w przeglądarce na LinuxCNC 2.9 + Plant z łańcuchem HMI bez obejścia: E-STOP → podwójny Reset → ON; zawieszona karta → E-STOP po 3,1 s. Zrzuty: `docs/raporty/G2/WEBHMI_WATCHDOG_2026-11-04.md`.
+- Odbiór w GUI wykrył 3 błędy niewidoczne w testach logiki (brak sygnału życia w kliencie, stary JS z pamięci podręcznej, E-1100 po resecie); poprawione, test na LinuxCNC idzie przez WebSocket.
+- Testy: `test_webhmi_watchdog_linuxcnc` PASS (~20 s), `test_webhmi_hal_link` i `test_webhmi_app`. Otwarte: ukryta karta, start bramy z `[DISPLAY]`. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+- Codex, poprawka #210 w tym samym domknięciu: nowe E-STOP, Zasilanie OFF lub STOP anulują stary timer resetu, impuls ack i zaplanowane ponowne uzbrojenie watchdoga. Świeże potwierdzenie nadal działa; regresje zegara obejmują trzy polecenia.
