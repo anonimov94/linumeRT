@@ -654,3 +654,10 @@ z zasobami, `tools/console*`, `tools/terminal3d.py`, `tools/terminal_keys.py`,
 graficznych. Raster Braille: numeracja punktów wg standardu Unicode U+2800–U+28FF
 (https://www.unicode.org/charts/PDF/U2800.pdf, bez dołączania tabeli). Adapter konsoli HD
 korzysta z Win32 Console API (https://learn.microsoft.com/en-us/windows/console/setcurrentconsolefontex).
+
+### Odbiór połączenia CLI i WebHMI — 2026-11-05
+
+Model-Author: Codex. Autor: Codex; własny zrzut pełnego WebHMI z bramą `--fake`
+w WSL Debian 12 po integracji strumieni; bez retuszu. GPL-2.0-or-later.
+Plik: `docs/raporty/vertical/prepare-integrated-20261105.jpg`. Zakres: dowód odbioru
+przygotowania i eksportu pakietu, bez kwalifikacji sprzętu.

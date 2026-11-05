@@ -57,6 +57,34 @@ pierwotnej porażki; wyścig jest wnioskiem z asynchronicznego zapisu HAL. Te te
 nie zastępują przyszłego odbioru wykonania pakietu przez WebHMI.
 
 Pakiet jest `prepared`, nie `verified`. Model i napędy są rozwiązywane wspólną logiką
-Plant; nie interpretujemy toru własnym uproszczonym parserem. Interpreter, granice
+core używaną także przez Plant; nie interpretujemy toru własnym uproszczonym parserem. Interpreter, granice
 ruchu, materiał i kolizje należą do VERTICAL-VERIFY. Wybór wielu konfiguracji maszyny
 i baz narzędzi z GUI pozostaje poza tą pierwszą porcją. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## Odbiór po połączeniu strumieni #216/#217/#218
+
+Kod `43851b8`, PR #219. Jeden `JobService`, wspólny model napędów w core i CLI
+`linumert prepare`; `linumert-job` i `linumert-lite prepare` są adapterami zgodności.
+Dane Claude z #218 zachowane; 24 aktywne testy (bez skipu braku implementacji)
+korzystają z jawnego zera detalu oraz schematu pakietu głównego projektu.
+
+Własna brama `--fake`, port 8786, ta sama maszyna, baza, program oraz zero detalu.
+Kliknięte: przygotowanie `unified-prepare`, rozwinięcie G-code (m.in. `G53 G0 Z-1`),
+pobranie `unified-prepare.zip`. Następnie rzeczywisty CLI przygotował `cli-unified`.
+Porównanie wszystkich dziewięciu plików CLI, katalogu WebHMI i pobranego ZIP:
+**identyczne bajty**, ten sam identyfikator `6f7086f6d990b4c5e69398e2e8df5e47ee27326fdd5d1fd9c54c2e759bea9c67`.
+Po próbie własna brama zatrzymana.
+
+![Odbiór połączonego CLI i WebHMI](vertical/prepare-integrated-20261105.jpg)
+
+Walidacja: 107 testów integracyjnych, 69 testów CLI/pakietu/konfiguracji (w tym 24
+odbioru), wheel poza repo, lint, roadmapa, REQ 22/22 i testy C Plant PASS.
+Pełny natywny klon z Qt: **2036 PASS**, 15 skip, 213 linuxcnc deselected, 184 subtesty PASS;
+ta sama jedna porażka starego testu pola Qt opisana wyżej i odtworzona na main.
+To nie jest pełny zielony odbiór Qt ani wykonanie pakietu w LinuxCNC. Końcowe
+kontrole LinuxCNC dla PR #219 pozostają warunkiem scalenia.
+
+Historyczny `tools/check_wheel.py` zabraniał zasobów GUI; teraz sprawdza obecność
+WebHMI i panelu Plant oraz prepare z zapakowanymi napędami. Działa w CI obok
+dotychczasowego `tools/ci/check_webhmi_wheel.py`. Przeniesienie napędów nie usuwa
+ekranów ani możliwości pełnej edycji.

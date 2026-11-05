@@ -1869,3 +1869,9 @@ Pełny RIP musi ponownie potwierdzić wynik; nie scalać na czerwonym CI.
 - Dane i przypadki Claude z #218 zachowane; adapter wymaga jawnego zera detalu i schematu linumert.job v1. 24 testy odbioru aktywne, bez skipu braku prepare; razem 69 testów CLI/pakietu/konfiguracji PASS, Ruff PASS.
 - Wheel poza repo: prepare i alias dają identyczny manifest; zachowane WebHMI/panel Plant oraz szablony. Naprawiono historyczny test wheel odrzucający UI pełnego projektu; dołączony do CI obok odbioru WebHMI.
 - Autokontrola integracji, bez deklaracji niezależnego przeglądu zmienionego kontraktu. Dalsze CI i odbiór integracji nadal wymagane.
+
+## Odbiór zintegrowanego prepare · 2026-11-05 · Codex
+
+- Model-Author: Codex. Kod 43851b8: WebHMI kliknięte po integracji; podgląd G53 Z-1 i pobranie ZIP. CLI, GUI i ZIP mają 9 identycznych plików (ID jak w raporcie).
+- Natywny klon: 2036 PASS, 15 skip, 213 linuxcnc deselected, 184 subtesty PASS; jedna znana porażka Qt odtworzona wcześniej na main. Lint, C i REQ 22/22 PASS.
+- Dowód/zrzut w raporcie VERTICAL_PREPARE_2026-11-05.md. Własna atrapa zatrzymana; to nie jest wykonanie pakietu LinuxCNC ani kwalifikacja sprzętu. Końcowe CI #219 wymagane.
