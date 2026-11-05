@@ -2062,16 +2062,16 @@
       "id": "VERTICAL-PREPARE",
       "title": "Zadanie obróbkowe: przygotowanie wspólnego pakietu w WebHMI",
       "parents": ["028", "029", "032", "039", "040", "041", "043", "062"],
-      "status": "planned",
-      "progress": "Polecenie właściciela 2026-11-05: cztery poziomy w głównym linumeRT i scalenie ukończonych porcji do main. Kontrakt prepare zapisany; dotychczasowe wyniki lite nie stanowią odbioru pełnej edycji. WebHMI i adapter CLI korzystają ze wspólnego backendu.",
+      "status": "in_progress",
+      "progress": "Polecenie właściciela 2026-11-05: cztery poziomy w głównym linumeRT, ukończone porcje do main. Kontrakt prepare zapisany. Pierwszy pomocniczy krok: ToolDB readonly=True nie tworzy bazy, nie migruje i odrzuca zapis; 43 testy narzędzi PASS. Pakiet, API i WebHMI nadal do wykonania; odbiór lite nie jest odbiorem pełnej edycji.",
       "remaining": [
-        "Odczyt istniejącej bazy narzędzi bez zapisu/migracji i kontrakt pakietu z SHA-256.",
+        "Kontrakt pakietu z SHA-256 i integracja odczytu narzędzi bez zapisu/migracji.",
         "Walidacja programu, maszyny/napędów, narzędzi, jednostek i jawnego ustawienia detalu.",
         "Minimalny użyteczny widok Zadanie w WebHMI oraz API/CLI nad tą samą logiką.",
         "Odbiór detalu planowanie + kieszeń + wiercenie, deterministyczność i zachowanie źródeł przy błędzie.",
         "Uzgodnienie helperów/napędów z claude/scal-lite i kernela C z claude/natywne-przyspieszenia."
       ],
-      "evidence": ["docs/WORKFLOW_ZADANIA.md"]
+      "evidence": ["docs/WORKFLOW_ZADANIA.md", "core/linumert/tools/db.py", "tests/test_tools_db.py"]
     },
     {
       "id": "VERTICAL-VERIFY",

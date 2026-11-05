@@ -155,7 +155,7 @@ Nie są kolejnym harmonogramem. Ich status dotyczy tylko wskazanego kroku.
 | WEBHMI-POC | 028, 029, 055 | HTML/WebGL: integracja strony z bramą LinuxCNC | częściowe |
 | CAM-2D-TEXT-STL | 040, 043, 045, 046 | Strategie CAM 2D, napisy i przekroje STL | ukończone |
 | BETA-WS-GUARD | 028, 029 | Beta bez GUI: kontrola Host/Origin WebSocket | ukończone |
-| VERTICAL-PREPARE | 028, 029, 032, 039, 040, 041, 043, 062 | Zadanie obróbkowe: przygotowanie wspólnego pakietu w WebHMI | planowane |
+| VERTICAL-PREPARE | 028, 029, 032, 039, 040, 041, 043, 062 | Zadanie obróbkowe: przygotowanie wspólnego pakietu w WebHMI | w toku |
 | VERTICAL-VERIFY | 044, 049, 051, 052, 055 | Zadanie obróbkowe: interpreter, limity i diagnostyka obróbki | planowane |
 | VERTICAL-RUN | 028, 029, 049, 053, 061 | Zadanie obróbkowe: wykonanie i telemetria przez WebHMI w sim/Plant | planowane |
 | VERTICAL-REPORT | 024, 049, 052, 053, 068 | Zadanie obróbkowe: raport przewidywania i rzeczywistego wykonania | planowane |
@@ -1054,11 +1054,11 @@ Pozostaje: Odbiór rzeczywistej przeglądarki: DRO, scena WebGL ≤30 FPS, jog i
 
 ### VERTICAL-PREPARE — Zadanie obróbkowe: przygotowanie wspólnego pakietu w WebHMI
 
-**planowane**. Polecenie właściciela 2026-11-05: cztery poziomy w głównym linumeRT i scalenie ukończonych porcji do main. Kontrakt prepare zapisany; dotychczasowe wyniki lite nie stanowią odbioru pełnej edycji. WebHMI i adapter CLI korzystają ze wspólnego backendu.
+**w toku**. Polecenie właściciela 2026-11-05: cztery poziomy w głównym linumeRT, ukończone porcje do main. Kontrakt prepare zapisany. Pierwszy pomocniczy krok: ToolDB readonly=True nie tworzy bazy, nie migruje i odrzuca zapis; 43 testy narzędzi PASS. Pakiet, API i WebHMI nadal do wykonania; odbiór lite nie jest odbiorem pełnej edycji.
 
-Pozostaje: Odczyt istniejącej bazy narzędzi bez zapisu/migracji i kontrakt pakietu z SHA-256. Walidacja programu, maszyny/napędów, narzędzi, jednostek i jawnego ustawienia detalu. Minimalny użyteczny widok Zadanie w WebHMI oraz API/CLI nad tą samą logiką. Odbiór detalu planowanie + kieszeń + wiercenie, deterministyczność i zachowanie źródeł przy błędzie. Uzgodnienie helperów/napędów z claude/scal-lite i kernela C z claude/natywne-przyspieszenia.
+Pozostaje: Kontrakt pakietu z SHA-256 i integracja odczytu narzędzi bez zapisu/migracji. Walidacja programu, maszyny/napędów, narzędzi, jednostek i jawnego ustawienia detalu. Minimalny użyteczny widok Zadanie w WebHMI oraz API/CLI nad tą samą logiką. Odbiór detalu planowanie + kieszeń + wiercenie, deterministyczność i zachowanie źródeł przy błędzie. Uzgodnienie helperów/napędów z claude/scal-lite i kernela C z claude/natywne-przyspieszenia.
 
-Źródła: [docs/WORKFLOW_ZADANIA.md](../WORKFLOW_ZADANIA.md).
+Źródła: [docs/WORKFLOW_ZADANIA.md](../WORKFLOW_ZADANIA.md), [core/linumert/tools/db.py](../../core/linumert/tools/db.py), [tests/test_tools_db.py](../../tests/test_tools_db.py).
 
 ### VERTICAL-VERIFY — Zadanie obróbkowe: interpreter, limity i diagnostyka obróbki
 

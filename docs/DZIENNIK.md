@@ -1820,3 +1820,10 @@ Pełny RIP musi ponownie potwierdzić wynik; nie scalać na czerwonym CI.
 - WebHMI jest klientem operatora; odbiór lite nie jest odbiorem main. Wcześniejsze bramki pozostają otwarte.
 - Uwzględniono otwarte #211/#212/#213, gałąź natywną i przenoszenie napędów; cudze checkouty bez zmian.
 - Autokontrola dokumentacji, bez niezależnego przeglądu. Cztery poziomy nie są jeszcze implementacją ani odbiorem sprzętu.
+
+## VERTICAL-PREPARE — odczyt narzędzi bez zmian bazy · 2026-11-05 · Codex
+
+- Model-Author: Codex. ToolDB readonly=True używa SQLite mode=ro; brak pliku i nieaktualny schemat są odrzucane bez tworzenia/migracji.
+- Testy: 43 PASS, 1 linuxcnc deselected; kontrola historii, zachowania bajtów i odmowy zapisu. Domyślny tryb ToolDB pozostaje bez zmian.
+- To pomocniczy krok 032/039 dla pakietu prepare; nie zalicza gotowej funkcji operatora ani poziomu 1. Następne: snapshot pakietu i WebHMI.
+- Autokontrola, bez niezależnego przeglądu.

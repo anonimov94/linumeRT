@@ -15,6 +15,11 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · 2026-11-05. **Stan zatrzymania VERTICAL-PREPARE:**
+`codex/job-prepare-20261105` w tym samym checkoutcie vertical. ToolDB readonly + 43 testy PASS;
+następny krok: deterministyczny pakiet i użyteczna integracja WebHMI. Plan jest w PR #214 do main.
+Nie zmieniono #211/#212/#213 ani kodu otwartych gałęzi C/napędów.
+
 Model-Author: Codex · 2026-11-05. **Nowy cel właściciela: pionowy przepływ w pełnym main.**
 Checkout `.collaboration/linumeRT-vertical`, gałąź `codex/vertical-workflow-20261105`
 od `origin/main` cdca143. Zakres i statusy: VERTICAL-* w rejestrze, kontrakt
