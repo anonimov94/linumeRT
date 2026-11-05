@@ -594,3 +594,19 @@ zawęża dotychczasową zasadę „brama nie zwalnia E-STOP”: bez `--hal` bram
 Ukryta karta jest dławiona przez przeglądarkę i może dać E-STOP — przyjęte jako fail-safe;
 właściciel może wybrać inaczej (np. dłuższy limit albo ostrzeżenie zamiast E-STOP).
 Odbiór: `docs/raporty/G2/WEBHMI_WATCHDOG_2026-11-04.md`. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## DECYZJA właściciela: jeden projekt, wszystko w main — 2026-11-05
+
+Model-Author: Claude. Polecenie właściciela: „to ma być jeden projekt, chcę wszystko poscalać do main”.
+Edycja lite (`codex/lite-backend`, PR #203) przestaje być osobną gałęzią rozwoju; jej backend trafia
+do main **dodatkowo**, bez usuwania GUI, WebHMI, panelu Plant, konfiguracji sprzętowej ani ATC.
+- Szablony i moduły napędów (`drive_library`, `drive_real`, `drive_template`, `machine_drives`)
+  przeniesione z Plant do `core/linumert/machine/drives/` (szablony w `templates/`), aby rdzeń
+  nie importował Plant (CLAUDE.md §3 i §5a zaktualizowane w tym samym commicie).
+  `linumert_plant.drive_*` zostają jako aliasy zgodności wstecznej.
+- Polecenie `linumert-lite` (CLI backendu), `linumert-headless` (DISPLAY bez okna) i
+  `linumert-plant` są wspólnymi punktami wejścia main. Eksport `linumert-lite config` daje sim/Plant
+  z DISPLAY headless; pełna edycja dalej generuje `qtvcp linumert` i cel `hardware`.
+- Dalsze etapy z `docs/roadmap/LITE_VERTICAL.md` (prepare → verify → run → report) powstają na main.
+- Kopia `beta/` (PR #202, scalona 2026-11-02) jest nadal osobnym drzewem kodu; jej ujednolicenie
+  z `core/` to osobny krok. NIEZWERYFIKOWANE NA SPRZĘCIE.
