@@ -20,6 +20,11 @@ Model-Author: Codex · 2026-11-05. **Stan zatrzymania VERTICAL-PREPARE:**
 Pakiet, wspólny CLI/API oraz widok WebHMI przygotowania/eksportu kliknięte na własnej atrapie;
 26 testów pakietu/adaptera PASS, 40 JS PASS. Dowody i granice: raport VERTICAL_PREPARE_2026-11-05.
 Następne: szersza regresja/CI, scalenie zależności #215 i #217; potem interpreter/limity poziomu 2.
+Pełna regresja natywna: 1971 PASS/1 FAIL (ten sam błąd Qt na main); szczegóły w PR i raporcie.
+CI #215: 212 LinuxCNC PASS/1 FAIL (żądanie HAL po pauzie). W #217 dodane oczekiwanie
+na tę samą wartość; 2 przypadki RIP sim/Plant lokalnie PASS przed i po zmianie.
+Nie pomijać końcowego CI. #217 zawiera kod #215, więc po jego scaleniu zamknąć nadmiarowy #215,
+jeśli wcześniejszy PR nie został scalony osobno. Zasób LinuxCNC po własnych próbach zwolniony.
 Nie zmieniono #211/#212/#213 ani kodu otwartych gałęzi C/napędów.
 
 Model-Author: Codex · 2026-11-05. **Nowy cel właściciela: pionowy przepływ w pełnym main.**

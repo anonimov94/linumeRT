@@ -43,6 +43,19 @@ Wheel zbudowany standardowo przez `pip wheel . --no-deps`; rozpakowany i uruchom
 poza checkoutem, z `python -S`, bez importu pakietu edytowalnego. Entry point CLI,
 zasoby widoku i przygotowanie pakietu z jawną biblioteką napędów PASS; identyczne ID.
 
+Szersza regresja w natywnym klonie WSL z własnym venv i systemowym Qt: 1971 PASS,
+15 skip, 213 linuxcnc deselected, 184 subtesty PASS. Jedna porażka starego testu Qt
+`test_production_overrides_accept_typed_values_without_refresh_erasing_draft` odtworzona
+na main b2c3a82 przy tej samej kolejności (683 PASS/1 FAIL); sam plik przechodzi
+osobno na obu bazach (56 PASS/1 skip). Nie zaliczamy pełnego zielonego odbioru Qt.
+
+CI #215: 212 testów LinuxCNC PASS i jedna porażka asercji żądania HAL w starym
+teście powrotu po pauzie. Dodano ograniczone czasowo oczekiwanie na tę samą dokładną
+wartość przed asercją, bez zmiany tolerancji ani kodu produkcyjnego. Własny RIP:
+2 przypadki sim/Plant PASS przed i po zmianie (po 140 s). Lokalnie nie odtworzono
+pierwotnej porażki; wyścig jest wnioskiem z asynchronicznego zapisu HAL. Te testy
+nie zastępują przyszłego odbioru wykonania pakietu przez WebHMI.
+
 Pakiet jest `prepared`, nie `verified`. Model i napędy są rozwiązywane wspólną logiką
 Plant; nie interpretujemy toru własnym uproszczonym parserem. Interpreter, granice
 ruchu, materiał i kolizje należą do VERTICAL-VERIFY. Wybór wielu konfiguracji maszyny

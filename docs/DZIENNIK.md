@@ -1841,3 +1841,10 @@ Pełny RIP musi ponownie potwierdzić wynik; nie scalać na czerwonym CI.
 - 26 testów pakietu/adaptera, 35 regresji aplikacji/zasobów i 40 testów JS PASS; 4 pominięcia Node w WSL, sprawdzone osobno na Windows.
 - Kliknięte przygotowanie, pobranie ZIP, odmowa nadpisania i niezgodny układ; raport docs/raporty/VERTICAL_PREPARE_2026-11-05.md.
 - Jedna aktywna maszyna/baza, CAM 2D; interpreter/limity/materiał oczekują. Autokontrola, bez niezależnego przeglądu; CI/scalenie w toku.
+
+## VERTICAL-PREPARE — regresja i synchronizacja testu HAL · 2026-11-05 · Codex
+
+- Model-Author: Codex. Natywny klon/venv/Qt: 1971 PASS, 15 skip, 213 linuxcnc deselected, 184 subtesty PASS; błąd pola Qt odtworzony na czystym main w tej samej kolejności (683 PASS/1 FAIL).
+- CI #215: 212 LinuxCNC PASS, 1 FAIL w sprawdzeniu eoffset-request po pauzie. Lokalnie 2 przypadki sim/Plant PASS przed zmianą; źródło wyścigu pozostaje wnioskiem z asynchronicznego zapisu HAL.
+- Test czeka teraz na tę samą dokładną wartość żądania (1e-6, dotychczasowy timeout), zachowując pozostałe asercje i kod produkcyjny. Po zmianie 2 przypadki na RIP sim/Plant PASS (140 s).
+- To synchronizacja starego testu, nie odbiór wykonania pakietu zadania. Autokontrola; końcowe CI/scalenie nadal wymagane.
