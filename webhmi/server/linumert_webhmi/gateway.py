@@ -260,15 +260,19 @@ class Gateway:
         b = self.backend
         name = c.cmd
         if name == "estop":
-            self._cancel_estop_reset()
             self._stop_all_jog()
-            b.estop()
+            try:
+                b.estop()
+            finally:  # błąd zapisu pinów HAL nie może zablokować wysłania zatrzymania
+                self._cancel_estop_reset()
         elif name == "power_on":
             b.power_on()
         elif name == "power_off":
-            self._cancel_estop_reset()
             self._stop_all_jog()
-            b.power_off()
+            try:
+                b.power_off()
+            finally:
+                self._cancel_estop_reset()
         elif name == "mode":
             if c.mode is None:
                 raise CommandError("tryb: brak parametru mode")
@@ -287,9 +291,11 @@ class Gateway:
         elif name == "resume":
             b.resume()
         elif name == "stop":
-            self._cancel_estop_reset()
             self._stop_all_jog()
-            b.stop()
+            try:
+                b.stop()
+            finally:
+                self._cancel_estop_reset()
         elif name == "override":
             if c.feed is None and c.rapid is None and c.spindle is None:
                 raise CommandError("override: podaj feed, rapid lub spindle")

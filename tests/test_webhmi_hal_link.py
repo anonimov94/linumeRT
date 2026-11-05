@@ -169,6 +169,21 @@ def test_stop_without_pending_reset_does_not_disarm_watchdog():  # REQ-QA-03
     assert pins.value[PINS["wd"]] is True
 
 
+@pytest.mark.parametrize("command", ["estop", "power_off", "stop"])
+def test_failed_hal_write_does_not_block_stop_delivery(command):  # REQ-QA-03
+    gateway, clock, pins = make()
+    gateway.execute(Command(cmd="reset", double=True))
+    calls = []
+    setattr(gateway.backend, command, lambda: calls.append(command))
+    def broken_write(name, value):
+        raise RuntimeError("HAL write failed")
+    gateway._hal._write = broken_write
+    with pytest.raises(RuntimeError, match="HAL write failed"):
+        gateway.execute(Command(cmd=command))
+    assert calls == [command]
+    assert gateway._estop_reset_at is None
+
+
 def test_refused_estop_reset_becomes_alarm():  # REQ-QA-03
     class Refusing(FakeBackend):
         def estop_reset(self) -> None:
