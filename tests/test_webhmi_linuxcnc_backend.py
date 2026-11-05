@@ -66,9 +66,23 @@ def test_power_on_requires_external_estop_reset():
     assert c2.calls == [("state", 70)]
 
 
-def test_gateway_backend_has_no_estop_reset_method():
-    b, _ = backend()
-    assert not hasattr(b, "estop_reset")
+def test_estop_reset_only_through_hal_acknowledge():  # REQ-QA-03
+    """Reset E-STOP tylko po potwierdzeniu w zatrzasku HAL (podwójny Reset z --hal, D37).
+
+    Bez pinów HAL brama odmawia, a backend nie wysyła ``STATE_ESTOP_RESET``.
+    """
+    from linumert_webhmi.gateway import Gateway
+    from linumert_webhmi.schema import Command
+
+    b, c = backend(task_state=1)
+    gateway = Gateway(b)
+    c.calls.clear()
+    with pytest.raises(CommandError, match="--hal"):
+        gateway.execute(Command(cmd="reset", double=True))
+    gateway.execute(Command(cmd="reset"))
+    assert ("state", 2) not in c.calls
+    b.estop_reset()  # samo wywołanie backendu: jedno polecenie LinuxCNC, bez obejść
+    assert c.calls[-1] == ("state", 2)
 
 
 def test_mdi_run_pause_resume_stop():

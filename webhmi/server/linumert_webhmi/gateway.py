@@ -8,10 +8,12 @@ Brama działa poza RT (zwykły wątek Pythona), jak panel Plant. Trzy zasady bez
   i należy do jednej sesji (inna sesja go nie odświeży). Po wygaśnięciu, po rozłączeniu sesji
   właściciela albo po ``estop`` brama wysyła stop jogu i ponawia go, dopóki się nie powiedzie.
   To nie jest funkcja bezpieczeństwa: ciągły jog w LinuxCNC trwa dalej, gdy proces bramy padnie;
-  dlatego przed sprzętem wymagane jest wiązanie ``heartbeat`` z ``watchdog`` HAL (E-STOP).
-- **Brak zwolnienia E-STOP:** brama nie ma polecenia resetu E-STOP (CLAUDE.md §6, D35/D37).
-  ``reset`` to pojedynczy Reset z D37: kasuje alarmy, których przyczyna ustała; alarm E-STOP
-  (E-1100) i krańcówki (E-1200) wracają, dopóki przyczyna trwa. Zatrzasku E-STOP nie dotyka.
+  z ``hal_pins`` (``--hal``) brak sygnału życia otwiera łańcuch E-STOP przez ``watchdog`` HAL
+  (``hal_link.py``).
+- **E-STOP tylko przez zatrzask HAL:** ``reset`` to pojedynczy Reset z D37: kasuje alarmy, których
+  przyczyna ustała; alarm E-STOP (E-1100) i krańcówki (E-1200) wracają, dopóki przyczyna trwa.
+  Podwójny Reset (``double``) potwierdza E-STOP w zatrzasku HAL (impuls ``hmi-ack``) i żąda
+  ``ESTOP_RESET`` — wyłącznie z ``hal_pins``; bez nich brama E-STOP nie zwalnia (CLAUDE.md §6).
 - **Limit poleceń:** wiadra tokenów, żeby błąd lub atak z przeglądarki nie zalał LinuxCNC; polecenia
   zatrzymujące (``estop``, ``stop``, ``pause``, ``jog_stop``, ``power_off``, ``jog`` z prędkością 0)
   limitera nie podlegają.
@@ -29,6 +31,7 @@ from linumert.alarms.manager import AlarmManager
 from linumert.cnc import MachineSnapshot, Mode
 
 from .backend import CommandError, MachineBackend
+from .hal_link import HalPins
 from .schema import Command, snapshot_to_dict
 
 STOP_COMMANDS = frozenset({"estop", "stop", "pause", "jog_stop", "power_off"})
@@ -36,6 +39,8 @@ LOCAL_SESSION = "local"  # polecenia z REST (bez sesji WebSocket)
 POLL_HZ = 50.0
 JOG_HOLD_S = 0.4  # klient odświeża jog co ~100-150 ms
 HEARTBEAT_S = 1.0  # tyle życia przeglądarki uznajemy za "ekran żyje"
+ESTOP_RESET_DELAY_S = 0.3  # po impulsie ack, jak ekran Qt (zatrzask zdąży się ustawić)
+ALARM_RESET_DELAY_S = 0.7  # po ESTOP_RESET: pojedynczy Reset alarmów (ekran Qt: 700 ms)
 PROGRAMS_S = 2.0  # odświeżanie listy programów
 MAX_ALARMS = 20  # tyle aktywnych alarmów idzie do przeglądarki (najnowsze)
 
@@ -59,8 +64,12 @@ class RateLimiter:
 
 class Gateway:
     def __init__(self, backend: MachineBackend, clock: Callable[[], float] = time.monotonic,
-                 jog_hold_s: float = JOG_HOLD_S, command_rate: float = 60.0):
+                 jog_hold_s: float = JOG_HOLD_S, command_rate: float = 60.0,
+                 hal_pins: HalPins | None = None):
         self.backend = backend
+        self._hal = hal_pins
+        self._estop_reset_at: float | None = None
+        self._alarm_reset_at: float | None = None
         self._clock = clock
         self._hold = jog_hold_s
         self._lock = threading.RLock()
@@ -110,8 +119,12 @@ class Gateway:
             for axis in [a for a, (_, until) in self._jog.items() if now >= until]:
                 self._stop_axis(axis)
             self._retry_stops()
+            self._pending_estop_reset(now)
             self.backend.tick()
             snap = self.backend.snapshot()
+            if self._alarm_reset_at is not None and now >= self._alarm_reset_at:
+                self._alarm_reset_at = None
+                self._alarms.reset()  # przed zgłoszeniem: trwający E-STOP wraca w tym obiegu
             self._raise_alarms(snap)
             if now - self._programs_at >= PROGRAMS_S:
                 self._programs, self._programs_at = self.backend.programs(), now
@@ -120,6 +133,10 @@ class Gateway:
             state["programs"] = list(self._programs)
             state["heartbeat"] = any(now - seen <= HEARTBEAT_S
                                      for seen in self._sessions.values())
+            state["hmi_hal"] = self._hal is not None
+            if self._hal is not None:
+                # Po odczycie stanu: zawieszony odczyt maszyny też gasi sygnał życia.
+                self._hal.tick(now, state["heartbeat"])
             state["jog_active"] = sorted(self._jog)
             state["jog_stop_pending"] = sorted(self._jog_retry)
             state.pop("gateway_error", None)
@@ -171,6 +188,28 @@ class Gateway:
     def snapshot(self) -> tuple[int, dict]:
         with self._lock:
             return self._version, dict(self._state)
+
+    # ---- potwierdzenie E-STOP (podwójny Reset, D37) ------------------------------
+    def _acknowledge_estop(self) -> None:
+        if self._hal is None:
+            raise CommandError("podwójny Reset: brama bez pinów HAL (--hal) nie potwierdza "
+                               "E-STOP; reset zatrzasku poza bramą")
+        if self._state.get("task_state") != "estop":
+            return  # nie ma czego potwierdzać; pojedynczy Reset alarmów niżej
+        now = self._clock()
+        self._hal.acknowledge(now)
+        self._estop_reset_at = now + ESTOP_RESET_DELAY_S
+
+    def _pending_estop_reset(self, now: float) -> None:
+        if self._estop_reset_at is None or now < self._estop_reset_at:
+            return
+        self._estop_reset_at = None
+        try:
+            self.backend.estop_reset()
+        except Exception as error:  # noqa: BLE001 - odmowa resetu to komunikat, nie awaria wątku
+            self._alarms.raise_alarm("E-1000", message=f"potwierdzenie E-STOP: {error}")
+            return
+        self._alarm_reset_at = now + ALARM_RESET_DELAY_S
 
     # ---- polecenia ------------------------------------------------------------
     def _stop_axis(self, axis: str) -> None:
@@ -298,5 +337,7 @@ class Gateway:
             self._stop_all_jog()
             b.open_program(c.name)
         elif name == "reset":
+            if c.double:
+                self._acknowledge_estop()
             self._alarms.reset()
             self.step()  # trwające przyczyny wracają od razu, nie po kolejnym obiegu
