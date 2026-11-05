@@ -47,8 +47,9 @@ class Violation:
         kind = "dolny" if self.side == "min" else "górny"
         more = f" (i {self.count - 1} kolejnych ruchów)" if self.count > 1 else ""
         unit = "°" if self.axis in ROTARY else "mm"
-        return (f"linia {self.line}: oś {self.axis} do {self.value:.3f} {unit} przekracza "
-                f"{kind} limit {self.limit:.3f} {unit}{more}")
+        precision = 3 if self.axis in ROTARY else 4
+        return (f"linia {self.line}: oś {self.axis} do {self.value:.{precision}f} {unit} "
+                f"przekracza {kind} limit {self.limit:.{precision}f} {unit}{more}")
 
 
 @dataclass(frozen=True)

@@ -1060,11 +1060,11 @@ Pozostaje: Odbiór rzeczywistej przeglądarki: DRO, scena WebGL ≤30 FPS, jog i
 
 ### VERTICAL-VERIFY — Zadanie obróbkowe: interpreter, limity i diagnostyka obróbki
 
-**w toku**. Prepare scalone do pełnego main. Rozpoczęcie porcji integralność/interpreter/limity na codex/job-verify-20261105; materiał/kolizje i pomiar Python/C nadal otwarte.
+**w toku**. PR #221: pierwsza porcja CLI/API/WebHMI z SHA-256, ponowną kompilacją snapshotu, izolowanym rs274 i tabelą/G54–G59. 131 testów zakresu, 4 rzeczywiste rs274 i 40 JS PASS; GUI kliknięte, pobrany JSON zgodny z zapisem, przekroczenie X odrzucone. Ślad jest zaokrąglony, więc nigdy verified/PASS pełnych limitów. CI i scalenie porcji wymagane.
 
-Pozostaje: Izolowany rs274 z tabelą narzędzi, ustawieniem detalu i konfiguracją tego pakietu. Pełny tor, ekstrema łuków, G5x/G92 i korekcja długości; odrzucenie niepełnej interpretacji. Materiał/kolizje/obciążenia, raport z linią i przyczyną oraz widok wyników w WebHMI. Odbiór poprawnego detalu i przypadków błędnych; pomiar pełnego przepływu Python/C.
+Pozostaje: Pełna precyzja toru i limitów zamiast zaokrąglonego śladu rs274; ekstrema łuków, G5x/G92, długości i powiązanie początku/T0 z wykonaniem. Materiał/kolizje/obciążenia z tego samego toru; raport z linią i przyczyną w WebHMI. Odbiór całego poprawnego detalu i przypadków błędnych; uzgodnienie gałęzi claude/natywne-przyspieszenia i pomiar pełnego przepływu Python/C.
 
-Źródła: [docs/WORKFLOW_ZADANIA.md](../WORKFLOW_ZADANIA.md).
+Źródła: [docs/WORKFLOW_ZADANIA.md](../WORKFLOW_ZADANIA.md), [core/linumert/programs/job_check.py](../../core/linumert/programs/job_check.py), [tests/test_job_check.py](../../tests/test_job_check.py), [tests/test_job_check_linuxcnc.py](../../tests/test_job_check_linuxcnc.py), [docs/raporty/VERTICAL_PREFLIGHT_2026-11-05.md](../raporty/VERTICAL_PREFLIGHT_2026-11-05.md), [PR](https://github.com/anonimov94/linumeRT/pull/221).
 
 ### VERTICAL-RUN — Zadanie obróbkowe: wykonanie i telemetria przez WebHMI w sim/Plant
 

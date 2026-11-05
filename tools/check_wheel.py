@@ -68,6 +68,13 @@ manifest = json.loads(pathlib.Path('job/manifest.json').read_text())
 assert manifest == json.loads(pathlib.Path('job-alias/manifest.json').read_text())
 assert manifest['format'] == 'linumert.job'
 assert json.loads(pathlib.Path('job/prepare.json').read_text())['checks']['interpreter']=='pending'
+before = {p.name: p.read_bytes() for p in pathlib.Path('job').iterdir()}
+os.environ['LINUXCNC_DIR'] = str(pathlib.Path('missing-rip').resolve())
+assert main(['preflight', 'job', '--start', '50', '50', '-5', '--out', 'preflight.json']) == 2
+report = json.loads(pathlib.Path('preflight.json').read_text())
+assert report['job_id'] == manifest['job_id'] and report['status'] == 'unavailable'
+assert report['checks']['motion_limits'] == report['checks']['material'] == 'pending'
+assert {p.name: p.read_bytes() for p in pathlib.Path('job').iterdir()} == before
 pathlib.Path('cut.ngc').write_text('G21 G90\\nG0 X0 Y0 Z5\\nG1 X10 F600\\nM2\\n')
 assert main(['simulate', 'cut.ngc', '--out', 'report.json']) == 0
 assert json.loads(pathlib.Path('report.json').read_text())['segments'] > 0
@@ -76,7 +83,7 @@ assert plant(['drive', 'list']) == 0
 if sys.argv[3]:
     os.environ['LINUMERT_PLANT_LIB'] = sys.argv[3]
     assert plant(['machine', 'build', 'machine.yaml', '--run']) == 0
-print('Installed wheel: CAM, prepare, WebHMI assets, templates, config, Plant CLI PASS')
+print('Installed wheel: CAM, prepare, partial preflight, WebHMI, templates, config, Plant CLI PASS')
 '''
         import yaml
 

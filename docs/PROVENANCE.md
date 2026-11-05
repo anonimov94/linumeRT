@@ -661,3 +661,12 @@ Model-Author: Codex. Autor: Codex; własny zrzut pełnego WebHMI z bramą `--fak
 w WSL Debian 12 po integracji strumieni; bez retuszu. GPL-2.0-or-later.
 Plik: `docs/raporty/vertical/prepare-integrated-20261105.jpg`. Zakres: dowód odbioru
 przygotowania i eksportu pakietu, bez kwalifikacji sprzętu.
+
+### Częściowa kontrola zadania w WebHMI — 2026-11-05
+
+Model-Author: Codex. Własny kod kontroli i testów oraz własne zrzuty WebHMI
+z bramą `--fake` i rzeczywistym izolowanym rs274 w WSL; bez retuszu i zasobów
+zewnętrznych. GPL-2.0-or-later. Zakres: VERTICAL-VERIFY, dokumentacja wyniku
+częściowego i odrzucenia przekroczenia, bez kwalifikacji materiału ani sprzętu.
+Pliki: `docs/raporty/vertical/preflight-webhmi-20261105.jpg`,
+`docs/raporty/vertical/preflight-limit-20261105.jpg`.

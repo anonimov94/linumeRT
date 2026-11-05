@@ -15,6 +15,15 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · 2026-11-05. **PR #221 — pierwsza porcja VERTICAL-VERIFY:**
+`linumert preflight`, API i WebHMI używają jednego backendu z rs274, SHA-256 i ponowną
+kompilacją snapshotu. Tabela/G54–G59 i założony początek w prywatnym interpreterze.
+131 testów zakresu + 4 rzeczywiste rs274 + 40 JS PASS; GUI kliknięte, JSON pobrany,
+przekroczenie X odrzucone. Raport VERTICAL_PREFLIGHT_2026-11-05.md.
+Ślad tekstowy jest zaokrąglony: wynik zawsze partial/rejected/unavailable/incomplete,
+nigdy verified. Pełna precyzja, materiał/kolizje, Python/C i poziomy 3–4 otwarte.
+Końcowe CI i scalenie tej porcji nadal wymagane. Własna brama po odbiorze zatrzymana.
+
 Model-Author: Codex · 2026-11-05. **Integracja zakończona, początek VERTICAL-VERIFY:**
 #219 scalony jako 619fe95 po zielonym CI 42033344446 i LinuxCNC 42033344066;
 #220 (dowody) jako 64b3d1b. #216 zawarty, #218 zamknięty jako zawarty z adaptacją kontraktu.
