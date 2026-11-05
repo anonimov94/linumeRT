@@ -42,6 +42,19 @@ def kc_for(material: str | None) -> float:
     return KC.get((material or "").strip().lower(), DEFAULT_KC)
 
 
+_CATALOG = None
+
+
+def _catalog():
+    """Katalog alarmów wczytany raz na proces (parsowanie YAML trwało dłużej niż cały krok)."""
+    global _CATALOG
+    if _CATALOG is None:
+        from linumert.alarms.catalog import load_catalog
+
+        _CATALOG = load_catalog()
+    return _CATALOG
+
+
 @dataclass
 class Sample:
     t: float                                   # [s]
@@ -68,9 +81,7 @@ class Event:
 
     def text(self) -> str:
         try:
-            from linumert.alarms.catalog import load_catalog
-
-            return load_catalog().format(self.code, "pl", **self.params)
+            return _catalog().format(self.code, "pl", **self.params)
         except Exception:  # noqa: BLE001 - katalog niedostępny: sam kod i parametry
             return f"{self.code} {self.params}"
 

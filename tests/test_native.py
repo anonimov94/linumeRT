@@ -109,11 +109,14 @@ def _maps():
     return a, b
 
 
+@pytest.mark.parametrize("below", [False, True], ids=["czesci-nad", "czesc-pod-ostrzem"])
 @pytest.mark.parametrize("cutter", CUTTERS, ids=lambda c: c.kind)
-def test_zmap_cut_identical_to_python(lib, cutter):
+def test_zmap_cut_identical_to_python(lib, cutter, below):
     ref, fast = _maps()
     rng = np.random.default_rng(cutter.number)
     spindle = [("wrzeciono", 30.0, cutter.gauge, cutter.gauge + 80)]
+    if below:   # część od z < 0: C przegląda całe okno jak Python (wczesne wyjście)
+        spindle.append(("kolnierz", 2.0, -1.0, 5.0))
     points = [(rng.uniform(-5, 45), rng.uniform(-5, 35), rng.uniform(-12, 3)) for _ in range(30)]
     points[10] = points[9]                                    # przejazd zerowy
     points[20] = (points[19][0], points[19][1], -cutter.stickout - 2)  # oprawka w materiale
