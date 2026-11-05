@@ -1942,3 +1942,13 @@ SDK i materiale. Zachowuje założenia i ograniczenia; autoryzacja wykonania fal
 execution not_started. Preflight pozostaje częściową diagnostyką.12 testów bramek i
 regresje CLI/API/static PASS;3 real RIP (verified/incomplete/rejected) i rzeczywisty
 CLI/API verified bez zmiany pakietu/CNC PASS. GUI/pełna regresja/CI nadal w toku.
+
+## 2026-11-05 — kliknięty odbiór verified
+
+Model-Author: Codex. Własna brama fake8790 z rzeczywistym rs274/SDK/materiałem C:
+prepare → verify daje verified, wszystkie kontrole passed, execution not_started i brak
+zgody na wykonanie. Cały wynik CLI/GUI zgodny poza elapsed/id. Zrzut i provenance zapisane,
+brama zatrzymana. Runtimeebca978;5beb4be zawiera poprawkę metadanych821971e z #225.
+Pierwszy CI dowodów wykrył brak provenance materiałowego zrzutu; wymagany wpis dodany,
+test zasobów PASS. Lokalny pełny IP9PASS/1FAIL wyłącznie przez ignorowany binarny ASan
+build-san, nie plik z Git. #225/#226 i pełna regresja natywna nadal w toku; nie omijać bramek.

@@ -15,6 +15,16 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · 2026-11-05. **PR #226 verify odebrany w GUI:**
+Runtime ebca978, merge5beb4be dopisuje metadatafix z #225. CLI/API oraz kliknięte GUI8790:
+status verified, wszystkie kontrole passed, execution not_started/autoryzacja false;
+cały CLI/GUI JSON zgodny poza elapsed/id. Zrzut verified-20261105.jpg z provenance.
+Brama8790 zatrzymana. Pełny klon `/tmp/linumert-verified-226-pj6XlY` (ebca) ma sesję32489
+w toku; źródła tego klonu nie obejmują jeszcze poprawki provenance821971e, więc ewentualną
+porażkę testu zasobów odróżnić od runtime i sprawdzić docelowy metadatapatch w czystym klonie.
+#225 nowy head821971e po CI failure brakującego wpisu; nie scalać starego6fa342f.
+#225 i #226 czekają końcowych CI; scalić kolejno, retarget #226 na main po #225.
+
 Model-Author: Codex · 2026-11-05. **Formalny wynik offline:**
 Własna gałąź `codex/job-verified-20261105` nad dowodami #225 (6fa342f; CI w toku).
 Dodano CLI verify/API/WebHMI z nowym raportem verificationv1. Verified wymaga wszystkich
