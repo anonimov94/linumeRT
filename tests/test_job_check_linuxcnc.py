@@ -14,6 +14,16 @@ from linumert.programs import job, job_check
 pytestmark = pytest.mark.linuxcnc
 
 
+@pytest.fixture(autouse=True)
+def _linuxcnc_cleanup():
+    """Override controller-global cleanup: these tests own private rs274 processes only.
+
+    run_interpreter/run_bounded reap their own process groups. The conftest cleanup
+    belongs to tests which start a controller and must never run for this module.
+    """
+    yield
+
+
 @pytest.mark.parametrize("offset,origin,zlength,rejected", [
     ("G54", (50, 50, -80), 40, False), ("G55", (50, 50, -80), 40, False),
     ("G54", (590, 50, -80), 40, True), ("G54", (50, 50, -80), 100, True),
