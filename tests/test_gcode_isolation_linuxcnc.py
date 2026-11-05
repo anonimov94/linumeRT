@@ -86,8 +86,28 @@ def test_zwarte_zmiany_t_w_rzeczywistym_interpreterze(program, word, tool):
 def test_pominieta_galaz_nie_daje_falszywego_t_ani_fallbacku(program):
     path = program("G21\nG0 X0\nT1 M6\no100 if [0]\nT7 M6\no100 endif\nG1 X1 F100\nM2\n")
     for load in (parse_rs274, load_path):
-        with pytest.raises(ValueError, match="O-word"):
-            load(path)
+        moves = load(path)
+        assert moves.source == "rs274" and int(moves.tool[-1]) == 1
+
+
+def test_petla_wykonuje_tylko_rzeczywiste_zmiany_t(program):
+    path = program("G21\nG0 X0\nT1 M6\n#1=0\no100 while [#1 LT 3]\n"
+                   "o101 if [#1 EQ 1]\nT7 M6\no101 endif\n"
+                   "G1 X[#1+1] F100\n#1=[#1+1]\no100 endwhile\nM2\n")
+    assert list(parse_rs274(path).tool) == [0, 1, 7, 7]
+
+
+def test_repeat_z_narzedziem_nie_jest_falszywym_wyrazeniem_t(program):
+    path = program("G21 G91\nG0 X0\nT1 M6\no100 repeat [2]\nG1 X1 F100\n"
+                   "o100 endrepeat\nM2\n")
+    assert list(parse_rs274(path).tool) == [0, 1, 1]
+
+
+def test_lokalny_podprogram_zmienia_t_dopiero_po_call(program):
+    path = program("o<swap> sub\nT7 M6\no<swap> endsub\nG21\nG0 X0\n"
+                   "T1 M6\nG1 X1 F100\no<swap> call\nG1 X2\nM2\n")
+    moves = parse_rs274(path)
+    assert list(moves.tool) == [0, 1, 7] and moves.notes == ()
 
 
 @pytest.mark.parametrize("load", [parse_rs274, load_ngc])

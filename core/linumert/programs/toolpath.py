@@ -320,6 +320,7 @@ class PreviewCanon:
 TOOL_MMAP = ".tool.mmap"
 _COMMENT = re.compile(r"\([^)]*\)|;.*$")
 _PREVIEW_NUMBER = re.compile(r"[-+]?(?:\d+\.?\d*|\.\d+)")
+_PREVIEW_OWORD = re.compile(r"^/?(?:N\d+)?O(?:<[^>]+>|\d+)[A-Z]+", re.IGNORECASE)
 TOOL_SKIPPED_NOTE = "Zmiany narzędzi (T, M6) pominięte w podglądzie: LinuxCNC nie działa."
 
 
@@ -330,6 +331,8 @@ def preview_words(code: str) -> tuple[str, list[tuple[str, str, int, int]]]:
     nazwach nie są poleceniami. To odczyt słów, nie zastępczy interpreter wyrażeń.
     """
     code = "".join(code.split())
+    if _PREVIEW_OWORD.match(code):
+        return code, []  # np. końcowe T w REPEAT[3] nie jest słowem wyboru narzędzia
     words = []
 
     def end_value(at: int) -> int:

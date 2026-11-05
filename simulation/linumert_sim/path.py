@@ -174,7 +174,9 @@ PLANE_AXES = {1: (0, 1, 2), 2: (2, 0, 1), 3: (1, 2, 0)}   # G17 XY, G18 ZX, G19 
 # --------------------------------------------------------------------------- rs274 (LinuxCNC)
 
 _TOOL_COMMENT = re.compile(r"\([^)]*\)|;.*$")
-_TOOL_FLOW = re.compile(r"^/?(?:N\d+)?O(?:<[^>]+>|\d+)([A-Z]+)", re.IGNORECASE)
+_TOOL_FLOW = re.compile(r"^/?(?:N\d+)?O(<[^>]+>|\d+)([A-Z]+)", re.IGNORECASE)
+TOOL_EVENT_MARKER = "linumert-preview-tool-event"
+TOOL_UNKNOWN_NOTE = "Zewnętrzny podprogram może zmienić narzędzie: numer T po call jest niepewny."
 
 
 def tool_changes(text: str) -> tuple[list[tuple[int, int]], list[str]]:
@@ -182,19 +184,20 @@ def tool_changes(text: str) -> tuple[list[tuple[int, int]], list[str]]:
 
     `gcode.parse` nie podaje numeru T: `SELECT_TOOL` jest tam puste, `change_tool` dostaje
     indeks tablicy, a przy braku tablicy słowo T kończy proces. Stąd odczyt ze źródła.
-    Przepływ O-word ze zmianą narzędzia i obliczane T/M/Q są jawnie odrzucane: porządek
-    linii źródła nie dowodzi wykonania zmiany. ValueError nie uruchamia parsera zapasowego.
+    To kandydaci ze źródła, nie historia wykonania. PathCanon stosuje zdarzenia tylko na
+    wykonanych liniach, oznaczonych komentarzem w kopii dla interpretera.
     """
     changes: list[tuple[int, int]] = []
     pending = 0
-    control_flow = False
-    sub_call = False
+    definitions, calls = set(), set()
     for number, line in enumerate(text.splitlines(), 1):
         code = _TOOL_COMMENT.sub("", line)
         compact, tokens = preview_words(code)
         flow = _TOOL_FLOW.match(compact)
-        control_flow = control_flow or bool(flow)
-        sub_call = sub_call or bool(flow and flow[1].lower() == "call")
+        if flow and flow[2].lower() == "sub":
+            definitions.add(flow[1].lower())
+        if flow and flow[2].lower() == "call":
+            calls.add(flow[1].lower())
         try:
             mvalues = [float(value) for letter, value, _, _ in tokens if letter == "M"]
         except ValueError as exc:
@@ -227,10 +230,26 @@ def tool_changes(text: str) -> tuple[list[tuple[int, int]], list[str]]:
             changes.append((number, int(q)))
         elif 6 in mcodes:
             changes.append((number, pending))
-    if control_flow and (changes or sub_call):
-        raise ValueError("Zmiany narzędzi w programie z przepływem O-word wymagają analizy "
-                         "wykonania; symulacja nie może zgadywać numeru narzędzia.")
-    return changes, []
+    return changes, [TOOL_UNKNOWN_NOTE] if changes and calls - definitions else []
+
+
+def preview_tool_events(text: str) -> dict[int, dict]:
+    """Zdarzenia źródła. Marker wywołuje je tylko, jeśli interpreter wykona daną linię."""
+    events = {}
+    for line, source in enumerate(text.splitlines(), 1):
+        _, tokens = preview_words(_TOOL_COMMENT.sub("", source))
+        words = {letter: value for letter, value, _, _ in tokens if letter in "TQ"}
+        mcodes = {float(value) for letter, value, _, _ in tokens if letter == "M"}
+        event = {}
+        if "T" in words:
+            event["select"] = int(float(words["T"]))
+        if 61 in mcodes:
+            event["set"] = int(float(words["Q"]))
+        elif 6 in mcodes:
+            event["change"] = True
+        if event:
+            events[line] = event
+    return events
 
 
 class PathCanon:
@@ -238,20 +257,23 @@ class PathCanon:
 
     Interpreter podaje współrzędne w calach (jednostki wewnętrzne), bez G5x/G92; offsety
     trafiają do `set_g5x_offset`/`set_g92_offset` i są tylko zapamiętywane (`offset`).
-    Narzędzie ruchu wynika z numeru linii i `tool_changes`.
+    Narzędzie ruchu zmienia się po markerze rzeczywiście wykonanej linii wyboru/zmiany T.
     """
 
     # gcodemodule czyta ten atrybut jako tekst; bez niego __getattr__ zwraca funkcję
     # i parse() kończy się TypeError. parse_rs274 ustawia plik w katalogu tymczasowym.
     parameter_file = ""
 
-    def __init__(self, axis_mask: int = 0x7, tool_changes: Sequence[tuple[int, int]] = ()):
+    def __init__(self, axis_mask: int = 0x7, tool_changes: Sequence[tuple[int, int]] = (),
+                 tool_events: dict[int, dict] | None = None):
         self.out = MoveListBuilder()
         self.lineno = 0
         self.pos: np.ndarray | None = None
         self.feed = 0.0
         self.plane = 1
         self.tool = 0
+        self.pending_tool = 0
+        self._tool_events = tool_events
         self._change_lines = [line for line, _ in tool_changes]
         self._change_tools = [tool for _, tool in tool_changes]
         self.rpm = 0.0
@@ -281,12 +303,24 @@ class PathCanon:
     # --- stan ---
     def next_line(self, state):
         self.lineno = int(state.sequence_number)
-        index = bisect.bisect_right(self._change_lines, self.lineno)
-        self.tool = self._change_tools[index - 1] if index else 0
+        if self._tool_events is None:
+            index = bisect.bisect_right(self._change_lines, self.lineno)
+            self.tool = self._change_tools[index - 1] if index else 0
         # Stan modalny wrzeciona (M3/M4/M5) i S z interpretera; gcodemodule nie woła
         # osobnych metod wrzeciona.
         direction = {3: 1.0, 4: -1.0}.get(int(getattr(state, "spindle", 5)), 0.0)
         self.rpm = direction * float(getattr(state, "speed", 0.0))
+
+    def comment(self, text):
+        if text != TOOL_EVENT_MARKER or self._tool_events is None:
+            return
+        event = self._tool_events.get(self.lineno, {})
+        if "select" in event:
+            self.pending_tool = event["select"]
+        if "set" in event:
+            self.tool = event["set"]
+        elif event.get("change"):
+            self.tool = self.pending_tool
 
     def set_plane(self, plane):
         self.plane = plane

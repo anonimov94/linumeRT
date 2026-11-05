@@ -180,3 +180,5 @@ def test_tool_words_split_by_comments_and_named_parameters():
     text = "T(keep)1M6\nM61(keep)Q4\n#<_T1M6>=1\n"
     assert strip_tool_words(text, include_m61=True) == (
         "(keep)\n(keep)\n#<_T1M6>=1\n", True)
+    assert strip_tool_words("O100REPEAT[3]\nO100ENDREPEAT\n") == (
+        "O100REPEAT[3]\nO100ENDREPEAT\n", False)
