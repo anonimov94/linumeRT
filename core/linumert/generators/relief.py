@@ -77,6 +77,93 @@ def ball_tip_height(triangles: np.ndarray, x: float, y: float, radius: float) ->
     return best
 
 
+def ball_tip_heights(triangles: np.ndarray, xy: np.ndarray, radius: float) -> np.ndarray:
+    """`ball_tip_height` dla wielu punktów naraz (numpy, te same działania na parach
+    punkt × trójkąt). Model-Author: Claude · 2026-11-05.
+
+    Wynik identyczny z wersją punktową; ta zostaje referencją w testach. Punkty liczone
+    porcjami po 256 (sąsiednie w wierszu), z kandydatami z obwiedni porcji.
+    """
+    t = np.asarray(triangles, dtype=float)
+    pts = np.asarray(xy, dtype=float).reshape(-1, 2)
+    out = np.full(len(pts), -math.inf)
+    if not len(t) or not len(pts):
+        return out
+    r2 = radius**2
+    touch = -1e-10 * max(1, radius**2)
+    low, high = t[:, :, :2].min(axis=1), t[:, :, :2].max(axis=1)
+    order = np.lexsort((pts[:, 0], pts[:, 1]))     # sąsiednie punkty = wspólni kandydaci
+    start = 0
+    while start < len(order):
+        stop = min(start + 256, len(order))
+        idx = order[start:stop]
+        start = stop
+        p = pts[idx]
+        win_lo, win_hi = p.min(axis=0) - radius - 1e-9, p.max(axis=0) + radius + 1e-9
+        cand = np.flatnonzero(np.all((low <= win_hi) & (high >= win_lo), axis=1))
+        if not len(cand):
+            continue
+        tc, lo, hi = t[cand], low[cand], high[cand]
+        x, y = p[:, 0, None], p[:, 1, None]
+        mask = ((lo[None, :, 0] <= x + radius + 1e-9) & (lo[None, :, 1] <= y + radius + 1e-9)
+                & (hi[None, :, 0] >= x - radius - 1e-9) & (hi[None, :, 1] >= y - radius - 1e-9))
+        best = np.full(len(p), -math.inf)
+        for index in range(3):
+            a, b = tc[:, index], tc[:, (index + 1) % 3]
+            d = b - a
+            length2 = d[:, 0] ** 2 + d[:, 1] ** 2
+            nonvertical = length2 > 0
+            denominator = np.where(nonvertical, length2, 1)
+            projection = ((x - a[:, 0]) * d[:, 0] + (y - a[:, 1]) * d[:, 1]) / denominator
+            distance2 = ((a[:, 0] + projection * d[:, 0] - x) ** 2
+                         + (a[:, 1] + projection * d[:, 1] - y) ** 2)
+            available = np.maximum(0, r2 - distance2)
+            offset = d[:, 2] * np.sqrt(available / (denominator + d[:, 2] ** 2))
+            parameter = np.clip(projection + offset / np.sqrt(denominator), 0, 1)
+            parameter = np.where(nonvertical, parameter, (d[:, 2] > 0).astype(float))
+            c0 = a[:, 0] + parameter * d[:, 0]
+            c1 = a[:, 1] + parameter * d[:, 1]
+            c2 = a[:, 2] + parameter * d[:, 2]
+            inside = r2 - ((c0 - x) ** 2 + (c1 - y) ** 2)
+            heights = c2 + np.sqrt(np.maximum(0, inside)) - radius
+            ok = mask & (inside >= touch)
+            best = np.maximum(best, np.max(np.where(ok, heights, -math.inf), axis=1))
+        normal = np.cross(tc[:, 1] - tc[:, 0], tc[:, 2] - tc[:, 0])
+        keep = normal[:, 2] != 0
+        if np.any(keep):
+            tk, nk = tc[keep], normal[keep]
+            offset = (-radius * nk[:, :2] * np.sign(nk[:, 2, None])
+                      / np.linalg.norm(nk, axis=1)[:, None])
+            q0 = x + offset[:, 0] - tk[:, 0, 0]
+            q1 = y + offset[:, 1] - tk[:, 0, 1]
+            ea, eb = tk[:, 1, :2] - tk[:, 0, :2], tk[:, 2, :2] - tk[:, 0, :2]
+            determinant = ea[:, 0] * eb[:, 1] - ea[:, 1] * eb[:, 0]
+            u = (q0 * eb[:, 1] - q1 * eb[:, 0]) / determinant
+            v = (ea[:, 0] * q1 - ea[:, 1] * q0) / determinant
+            inside = mask[:, keep] & (u >= -1e-10) & (v >= -1e-10) & (u + v <= 1 + 1e-10)
+            surface = (tk[:, 0, 2] + u * (tk[:, 1, 2] - tk[:, 0, 2])
+                       + v * (tk[:, 2, 2] - tk[:, 0, 2]))
+            heights = surface + np.sqrt(np.maximum(0, r2 - (offset[:, 0] ** 2
+                                                            + offset[:, 1] ** 2)))
+            interior = np.max(np.where(inside, heights, -math.inf), axis=1) - radius
+            best = np.maximum(best, interior)
+        out[idx] = best
+    return out
+
+
+def _grid_heights(t: np.ndarray, xs: np.ndarray, ys: np.ndarray, radius: float) -> np.ndarray:
+    """Wysokości (len(ys), len(xs)): biblioteka C, gdy jest, inaczej numpy porcjami."""
+    from linumert import native
+
+    xy = np.column_stack((np.tile(xs, len(ys)), np.repeat(ys, len(xs))))
+    lib = native.library()
+    if lib is not None:
+        heights = native.relief_heights(lib, t, xy, radius)
+    else:
+        heights = ball_tip_heights(t, xy, radius)
+    return heights.reshape(len(ys), len(xs))
+
+
 @dataclass(frozen=True)
 class ReliefSettings:
     tool_diameter: float = 3.0
@@ -148,13 +235,17 @@ def plan_relief(mesh: Mesh, settings: ReliefSettings | None = None) -> ReliefPat
     radius = s.tool_diameter / 2
     if round(s.safe_z, 4) <= math.ceil((high[2] + margin) * 10000) / 10000:
         raise ValueError("Bezpieczna Z musi być ponad STL i naddatkiem próbkowania.")
+    # Wysokość kuli w punkcie = ball_tip_height(t, x, y, radius + margin) (biblioteka C albo
+    # numpy porcjami; obie z tym samym wynikiem co wersja punktowa).
+    grid = _grid_heights(t, xs, ys, radius + margin)
     rows = []
     for index, y in enumerate(ys):
         row = []
-        for x in xs if index % 2 == 0 else xs[::-1]:
-            height = ball_tip_height(t, float(x), float(y), radius + margin) + margin
+        columns = range(len(xs)) if index % 2 == 0 else range(len(xs) - 1, -1, -1)
+        for j in columns:
+            height = float(grid[index, j]) + margin
             z = math.ceil(max(float(low[2]), height) * 10000) / 10000
-            row.append((float(x), float(y), z))
+            row.append((float(xs[j]), float(y), z))
         rows.append(tuple(row))
     return ReliefPath(tuple(rows), s)
 

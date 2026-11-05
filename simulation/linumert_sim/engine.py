@@ -98,7 +98,11 @@ class SimEngine:
         self.tools: dict[int, Cutter] = {}
         self.load = Load()
         self._prev: Sample | None = None
-        self._window: collections.deque[tuple[float, float, float]] = collections.deque()
+        # okno mocy skrawania: czasy, objętości i kroki w osobnych kolejkach, bo sum()
+        # po kolejce liczb jest szybsze niż po generatorze, a daje tę samą sumę
+        self._window: collections.deque[float] = collections.deque()
+        self._window_v: collections.deque[float] = collections.deque()
+        self._window_d: collections.deque[float] = collections.deque()
         self._active: set[tuple] = set()       # bieżące pary kolizji (zdarzenie na wejściu)
         self._warned: set[tuple] = set()
         self._idle = 0                         # próbki bez kontaktu z materiałem (histereza)
@@ -116,6 +120,8 @@ class SimEngine:
         self.path.clear()
         self._active.clear()
         self._window.clear()
+        self._window_v.clear()
+        self._window_d.clear()
         self._prev = None
         self._idle = 0
         self.load = Load()
@@ -243,11 +249,15 @@ class SimEngine:
     def _loads(self, cutter: Cutter | None, s: Sample, prev: Sample | None, tip, removed: float,
                events: list[Event]) -> None:
         dt = min(max(s.t - prev.t, 0.0), 1.0) if prev is not None else 0.0
-        self._window.append((s.t, removed, dt))
-        while self._window and s.t - self._window[0][0] > LOAD_WINDOW:
+        self._window.append(s.t)
+        self._window_v.append(removed)
+        self._window_d.append(dt)
+        while self._window and s.t - self._window[0] > LOAD_WINDOW:
             self._window.popleft()
-        span = sum(d for _t, _v, d in self._window)
-        mrr = sum(v for _t, v, _d in self._window) / span if span > 1e-3 else 0.0
+            self._window_v.popleft()
+            self._window_d.popleft()
+        span = sum(self._window_d)
+        mrr = sum(self._window_v) / span if span > 1e-3 else 0.0
         load = Load(mrr=mrr)
         if cutter is not None and abs(s.rpm) >= MIN_RPM and mrr > 0:
             omega = abs(s.rpm) * 2 * math.pi / 60
