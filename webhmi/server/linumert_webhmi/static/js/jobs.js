@@ -1,0 +1,111 @@
+/*
+SPDX-License-Identifier: GPL-2.0-or-later
+Model-Author: Codex
+*/
+"use strict";
+
+const labels = { machine_model: "Model maszyny", program_and_tools: "Program i narzędzia",
+  units_and_setup: "Jednostki i ustawienie detalu", interpreter: "Interpreter LinuxCNC",
+  motion_limits: "Limity ruchu", material: "Materiał i kolizje", execution: "Wykonanie" };
+const verdicts = { passed: "Poprawne", pending: "Oczekuje na weryfikację",
+  not_started: "Nie rozpoczęto" };
+
+export function createJobs(request) {
+  const $ = (id) => document.getElementById(id);
+  let online = false;
+  let available = false;
+  let busy = false;
+  let prepared = null;
+  let generation = 0;
+
+  function controls() {
+    $("jobFields").disabled = !online || !available || busy;
+    $("jobDownload").disabled = !online || busy || !prepared;
+  }
+  function status(text, error = false) {
+    $("jobStatus").textContent = text;
+    $("jobStatus").className = "job-status" + (error ? " error" : "");
+  }
+  async function response(path, options) {
+    const result = await request(path, options);
+    if (!result.ok) {
+      const error = await result.json();
+      throw new Error(typeof error.detail === "string" ? error.detail : "Niepoprawne dane zadania.");
+    }
+    return result;
+  }
+  async function refresh() {
+    const current = ++generation;
+    try {
+      const context = await (await response("/api/jobs/context")).json();
+      if (current !== generation || !online) return;
+      available = context.available;
+      $("jobContext").textContent = available
+        ? "Aktywna maszyna: " + context.machine + " · Baza narzędzi: " + context.tools
+        : context.reason;
+      const selected = $("jobSource").value;
+      $("jobSource").replaceChildren(new Option("— wybierz program —", ""));
+      for (const name of context.programs || []) $("jobSource").add(new Option(name, name));
+      $("jobSource").value = selected;
+      if (available && !context.programs.length) status("Brak plików .lnx w katalogu źródeł.");
+    } catch (error) {
+      if (current === generation) { available = false; status(error.message, true); }
+    }
+    controls();
+  }
+  $("jobForm").addEventListener("submit", async (event) => {
+    event.preventDefault();
+    if (!online || !available || busy || !$("jobForm").reportValidity()) return;
+    const origin = ["jobX", "jobY", "jobZ"].map((id) => Number($(id).value));
+    if (!origin.every(Number.isFinite)) { status("Wpisz trzy skończone współrzędne.", true); return; }
+    busy = true;
+    prepared = null;
+    $("jobResult").hidden = true;
+    controls();
+    status("Przygotowywanie pakietu…");
+    try {
+      const payload = { program: $("jobSource").value, name: $("jobName").value,
+        origin, offset: $("jobOffset").value };
+      const result = await (await response("/api/jobs/prepare", { method: "POST",
+        headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) })).json();
+      prepared = result.name;
+      $("jobCode").textContent = result.gcode;
+      $("jobId").textContent = result.manifest.job_id;
+      $("jobChecks").replaceChildren();
+      for (const [key, verdict] of Object.entries(result.report.checks)) {
+        const row = document.createElement("div");
+        const title = document.createElement("dt");
+        const value = document.createElement("dd");
+        title.textContent = labels[key] || key;
+        value.textContent = verdicts[verdict] || verdict;
+        row.append(title, value);
+        $("jobChecks").appendChild(row);
+      }
+      $("jobResult").hidden = false;
+      status("Pakiet „" + result.name + "” przygotowany. Weryfikacja toru oczekuje.");
+    } catch (error) { status(error.message, true); }
+    finally { busy = false; controls(); }
+  });
+  $("jobDownload").addEventListener("click", async () => {
+    if (!prepared || busy || !online) return;
+    busy = true;
+    controls();
+    try {
+      const result = await response("/api/jobs/" + encodeURIComponent(prepared) + "/archive");
+      const url = URL.createObjectURL(await result.blob());
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = prepared + ".zip";
+      link.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    } catch (error) { status(error.message, true); }
+    finally { busy = false; controls(); }
+  });
+  controls();
+  return { setOnline(value) {
+    online = value;
+    controls();
+    if (online) refresh();
+    else { ++generation; available = false; controls(); }
+  } };
+}

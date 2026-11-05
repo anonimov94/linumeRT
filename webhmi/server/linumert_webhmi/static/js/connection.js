@@ -122,6 +122,14 @@ export function createConnection(handlers) {
     });
     return true;
   }
-  return { connect, close, send, ready, isOpening, ageFromOpen: () => Date.now() - openedAt,
+  async function request(path, options = {}) {
+    if (!ready()) throw new Error("Połącz z bramą przed przygotowaniem zadania.");
+    const url = new URL(path, window.location.href);
+    if (url.origin !== window.location.origin) throw new Error("Niedozwolony adres bramy.");
+    const headers = new Headers(options.headers);
+    headers.set("X-Linumert-Token", token);
+    return fetch(url.href, { ...options, headers, cache: "no-store" });
+  }
+  return { connect, close, send, ready, request, isOpening, ageFromOpen: () => Date.now() - openedAt,
     hasToken: () => token.length >= 16 };
 }

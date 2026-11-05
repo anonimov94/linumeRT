@@ -1834,3 +1834,10 @@ Pełny RIP musi ponownie potwierdzić wynik; nie scalać na czerwonym CI.
 - 14 testów PASS: błędne wejścia, integralność, awaria publikacji, wyścig zapisów i zachowanie istniejącego pakietu. Ruff PASS.
 - `prepared` nie zalicza interpretera/limitów/materiału. WebHMI i odbiór operatora w następnym kroku; poziom 1 pozostaje otwarty.
 - Autokontrola, bez niezależnego przeglądu.
+
+## VERTICAL-PREPARE — CLI/API i użyteczny widok WebHMI · 2026-11-05 · Codex
+
+- Model-Author: Codex. Wspólny adapter przygotowania, odczyt bazy bez zmian, token/Host, formularz zadania, raport i eksport ZIP w pełnym projekcie.
+- 26 testów pakietu/adaptera, 35 regresji aplikacji/zasobów i 40 testów JS PASS; 4 pominięcia Node w WSL, sprawdzone osobno na Windows.
+- Kliknięte przygotowanie, pobranie ZIP, odmowa nadpisania i niezgodny układ; raport docs/raporty/VERTICAL_PREPARE_2026-11-05.md.
+- Jedna aktywna maszyna/baza, CAM 2D; interpreter/limity/materiał oczekują. Autokontrola, bez niezależnego przeglądu; CI/scalenie w toku.

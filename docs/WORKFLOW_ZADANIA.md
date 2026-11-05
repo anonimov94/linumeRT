@@ -114,3 +114,33 @@ Przed przeniesieniem kernela C uzgadniamy go z istniejącą gałęzią
 Otwarte #211/#212/#213 oraz przenoszenie wspólnych napędów z `claude/scal-lite`
 uwzględniamy przy doborze plików i baz; ich zakończenia nie deklarujemy tym dokumentem.
 Każda ukończona porcja: testy, odbiór operatora jeśli dotyczy, dokumentacja, PR i merge commit do main.
+
+## Uruchomienie pierwszej porcji prepare
+
+Brama pełnego projektu (zainstalowana grupa `panel`):
+
+```sh
+linumert-webhmi --linuxcnc --hal --postgui config/hal/linumert_webhmi_postgui.hal \
+  --job-sources /dane/programy-lnx --job-machine /dane/machine.yaml \
+  --job-tools /dane/tools.db --jobs-dir /dane/zadania \
+  --drive-library /dane/biblioteka-napedow
+```
+
+W trybie testowym `--fake` zastępuje `--linuxcnc --hal --postgui ...`.
+Cztery opcje `--job-*`/`--jobs-dir` są podawane razem. Maszyna i baza są aktywnymi
+wejściami skonfigurowanymi dla tej bramy; ekran pokazuje ich nazwy. Bez konfiguracji
+widok uczciwie zgłasza niedostępność. `.lnx` nie trafia do listy wykonywalnych programów CNC.
+Biblioteka napędów poza checkoutem wymaga jawnego `--drive-library`.
+
+Ta sama logika bez uruchamiania GUI/bramy (standardowe zależności rdzenia):
+
+```sh
+linumert-job /dane/programy-lnx/detal.lnx --machine /dane/machine.yaml \
+  --tools /dane/tools.db --out /dane/zadania/detal-001 \
+  --origin 50 50 -80 --offset G54 --drive-library /dane/biblioteka-napedow
+```
+
+Nazwa pakietu: litery ASCII/cyfry/`_`/`-`, 1–64 znaki, początek litera/cyfra.
+Zero detalu podaje się w mm układu maszyny przed korekcją długości narzędzia.
+Zakres i dowody tej porcji: [odbiór prepare](raporty/VERTICAL_PREPARE_2026-11-05.md).
+Przygotowanie nie ustawia G54 w sterowaniu i nie uruchamia programu.

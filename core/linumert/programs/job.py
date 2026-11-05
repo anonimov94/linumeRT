@@ -24,7 +24,7 @@ from linumert.tools.tbl import format_tbl
 
 from .compiler import CompileError, compile_program
 from .lexer import check
-from .lnx import LnxProgram, dump_lnx
+from .lnx import LnxProgram, dump_lnx, parse_lnx
 
 FORMAT = "linumert.job"
 VERSION = 1
@@ -81,13 +81,16 @@ def _steps(program, reg):
 
 
 def render(program: LnxProgram, machine: MachineConfig, drives: dict, tools: dict[int, Tool],
-           origin: tuple[float, float, float], offset: str = "G54") -> dict[str, str]:
+           origin: tuple[float, float, float], offset: str = "G54", *,
+           source_text: str | None = None) -> dict[str, str]:
     """Validated machine/drives + tool snapshot → immutable package contents.
 
     The caller resolves drive templates using the machine model's public resolver.
     Origin is the selected work coordinate zero in machine mm, before tool offset.
     This stage deliberately does not claim an interpreted motion-limit check.
     """
+    if source_text is not None and parse_lnx(json.loads(source_text)) != program:
+        raise ValueError("Snapshot źródła nie odpowiada kompilowanemu programowi")
     if offset not in OFFSETS or len(origin) != 3 or not all(
             not isinstance(v, bool) and math.isfinite(v) for v in origin):
         raise ValueError("Ustawienie detalu: wymagane G54–G59 i trzy skończone współrzędne mm")
@@ -148,7 +151,8 @@ def render(program: LnxProgram, machine: MachineConfig, drives: dict, tools: dic
         "machine_model": "passed", "program_and_tools": "passed", "units_and_setup": "passed",
         "interpreter": "pending", "motion_limits": "pending", "material": "pending",
         "execution": "not_started"}, "tool_numbers": sorted(used)}
-    files = {"program.lnx": dump_lnx(program), "program.ngc": gcode,
+    files = {"program.lnx": source_text if source_text is not None else dump_lnx(program),
+             "program.ngc": gcode,
              "machine.yaml": json_text(machine.model_dump(mode="json")),
              "drives.json": json_text(drives),
              "tools.json": json_text([asdict(t) for t in selected]),

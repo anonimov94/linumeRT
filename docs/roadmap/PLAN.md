@@ -1054,11 +1054,11 @@ Pozostaje: Odbiór rzeczywistej przeglądarki: DRO, scena WebGL ≤30 FPS, jog i
 
 ### VERTICAL-PREPARE — Zadanie obróbkowe: przygotowanie wspólnego pakietu w WebHMI
 
-**w toku**. Polecenie właściciela 2026-11-05: cztery poziomy w głównym linumeRT, ukończone porcje do main. Kontrakt prepare zapisany. Pierwszy pomocniczy krok: ToolDB readonly=True nie tworzy bazy, nie migruje i odrzuca zapis; 43 testy narzędzi PASS. Pakiet, API i WebHMI nadal do wykonania; odbiór lite nie jest odbiorem pełnej edycji.
+**w toku**. Pełny projekt: pakiet SHA-256, ToolDB readonly, wspólny CLI/API i użyteczny widok WebHMI z eksportem ZIP. Detal planowanie/kieszeń/wiercenie kliknięty na własnej atrapie; 26 testów pakietu/adaptera i 40 JS PASS. Pierwsza porcja z jedną aktywną maszyną/bazą; szersza regresja, CI i scalenie #215/#217 w toku. Nie zalicza poziomów 2–4 ani odbioru LinuxCNC/Plant.
 
-Pozostaje: Kontrakt pakietu z SHA-256 i integracja odczytu narzędzi bez zapisu/migracji. Walidacja programu, maszyny/napędów, narzędzi, jednostek i jawnego ustawienia detalu. Minimalny użyteczny widok Zadanie w WebHMI oraz API/CLI nad tą samą logiką. Odbiór detalu planowanie + kieszeń + wiercenie, deterministyczność i zachowanie źródeł przy błędzie. Uzgodnienie helperów/napędów z claude/scal-lite i kernela C z claude/natywne-przyspieszenia.
+Pozostaje: Szersza regresja i CI gotowej porcji; scalenie zależności #215 oraz #217 do main. Rozszerzenie wyboru wielu maszyn/baz w GUI i zakresu CAM poza pierwszą porcję, jeśli potrzebne do dalszego odbioru. Uzgodnienie helperów/napędów z claude/scal-lite i kernela C z claude/natywne-przyspieszenia.
 
-Źródła: [docs/WORKFLOW_ZADANIA.md](../WORKFLOW_ZADANIA.md), [core/linumert/tools/db.py](../../core/linumert/tools/db.py), [tests/test_tools_db.py](../../tests/test_tools_db.py).
+Źródła: [docs/WORKFLOW_ZADANIA.md](../WORKFLOW_ZADANIA.md), [core/linumert/tools/db.py](../../core/linumert/tools/db.py), [tests/test_tools_db.py](../../tests/test_tools_db.py), [core/linumert/programs/job.py](../../core/linumert/programs/job.py), [core/linumert/programs/prepare.py](../../core/linumert/programs/prepare.py), [webhmi/server/linumert_webhmi/jobs.py](../../webhmi/server/linumert_webhmi/jobs.py), [tests/test_job_bundle.py](../../tests/test_job_bundle.py), [tests/test_job_prepare.py](../../tests/test_job_prepare.py), [docs/raporty/VERTICAL_PREPARE_2026-11-05.md](../raporty/VERTICAL_PREPARE_2026-11-05.md).
 
 ### VERTICAL-VERIFY — Zadanie obróbkowe: interpreter, limity i diagnostyka obróbki
 
