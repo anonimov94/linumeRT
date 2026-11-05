@@ -15,6 +15,14 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · 2026-11-05. **Nowy cel właściciela: pionowy przepływ w pełnym main.**
+Checkout `.collaboration/linumeRT-vertical`, gałąź `codex/vertical-workflow-20261105`
+od `origin/main` cdca143. Zakres i statusy: VERTICAL-* w rejestrze, kontrakt
+docs/WORKFLOW_ZADANIA.md. Nie przejmuję #211/#212/#213 ani cudzych checkoutów.
+Przed przenoszeniem C i napędów uwzględnić `claude/natywne-przyspieszenia` i `claude/scal-lite`.
+Helpery prepare w lite są zachowane; docelowa implementacja ma być wspólna
+z WebHMI i scalana do main. Bez globalnego LOCK; bieżące polecenie właściciela zmienia zakres.
+
 Model-Author: Claude · 2026-11-01. **Portal na ekranie Qt nadal otwarty (po PR czytnika i WebHMI).**
 `linumert_operator_controls.jog`: numer osi z liter idzie do `ACTION.JOG`, które przed bazowaniem traktuje go
 jako joint, więc na XYYZ jog Z rusza Y2, a jog Y sam Y1 (bramka `jog` nie wymaga bazowania).

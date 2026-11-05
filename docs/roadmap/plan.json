@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated": "2026-10-29",
+  "updated": "2026-11-05",
   "model_author": "Codex",
   "original_count": 84,
   "origin_commit": "796c6a2",
@@ -2057,6 +2057,66 @@
         "beta/src/linumert_headless/transport/rest.py",
         "https://github.com/anonimov94/linumeRT/pull/202"
       ]
+    },
+    {
+      "id": "VERTICAL-PREPARE",
+      "title": "Zadanie obróbkowe: przygotowanie wspólnego pakietu w WebHMI",
+      "parents": ["028", "029", "032", "039", "040", "041", "043", "062"],
+      "status": "planned",
+      "progress": "Polecenie właściciela 2026-11-05: cztery poziomy w głównym linumeRT i scalenie ukończonych porcji do main. Kontrakt prepare zapisany; dotychczasowe wyniki lite nie stanowią odbioru pełnej edycji. WebHMI i adapter CLI korzystają ze wspólnego backendu.",
+      "remaining": [
+        "Odczyt istniejącej bazy narzędzi bez zapisu/migracji i kontrakt pakietu z SHA-256.",
+        "Walidacja programu, maszyny/napędów, narzędzi, jednostek i jawnego ustawienia detalu.",
+        "Minimalny użyteczny widok Zadanie w WebHMI oraz API/CLI nad tą samą logiką.",
+        "Odbiór detalu planowanie + kieszeń + wiercenie, deterministyczność i zachowanie źródeł przy błędzie.",
+        "Uzgodnienie helperów/napędów z claude/scal-lite i kernela C z claude/natywne-przyspieszenia."
+      ],
+      "evidence": ["docs/WORKFLOW_ZADANIA.md"]
+    },
+    {
+      "id": "VERTICAL-VERIFY",
+      "title": "Zadanie obróbkowe: interpreter, limity i diagnostyka obróbki",
+      "parents": ["044", "049", "051", "052", "055"],
+      "status": "planned",
+      "progress": "Drugi poziom zleconego przepływu. Specyfikacja wiąże integralność pakietu, izolowany rs274, limity osi i symulację materiału; implementacja i odbiór pozostają otwarte.",
+      "remaining": [
+        "Zależność: odebrany pakiet VERTICAL-PREPARE.",
+        "Izolowany rs274 z tabelą narzędzi, ustawieniem detalu i konfiguracją tego pakietu.",
+        "Pełny tor, ekstrema łuków, G5x/G92 i korekcja długości; odrzucenie niepełnej interpretacji.",
+        "Materiał/kolizje/obciążenia, raport z linią i przyczyną oraz widok wyników w WebHMI.",
+        "Odbiór poprawnego detalu i przypadków błędnych; pomiar pełnego przepływu Python/C."
+      ],
+      "evidence": ["docs/WORKFLOW_ZADANIA.md"]
+    },
+    {
+      "id": "VERTICAL-RUN",
+      "title": "Zadanie obróbkowe: wykonanie i telemetria przez WebHMI w sim/Plant",
+      "parents": ["028", "029", "049", "053", "061"],
+      "status": "planned",
+      "progress": "Trzeci poziom zleconego przepływu. Wykorzystuje istniejące sterowanie WebHMI i kontrakty HAL; dokument nie zalicza G2 ani odbioru LinuxCNC/Plant.",
+      "remaining": [
+        "Zależność: pozytywny VERTICAL-VERIFY i niezmieniony manifest pakietu.",
+        "Powiązanie instancji, programu, konfiguracji i narzędzi; bramki gotowości bez niejawnego zezwolenia na ruch.",
+        "Start, postęp, pauza/wznowienie, przerwanie, E-STOP i utrata klienta z rozróżnialnymi wynikami.",
+        "Telemetria rzeczywistego LinuxCNC sim/Plant; jawne źródło i niepełne dane.",
+        "Odbiór automatyczny i kliknięty przebieg WebHMI; kwalifikacja sprzętu pozostaje osobna."
+      ],
+      "evidence": ["docs/WORKFLOW_ZADANIA.md"]
+    },
+    {
+      "id": "VERTICAL-REPORT",
+      "title": "Zadanie obróbkowe: raport przewidywania i rzeczywistego wykonania",
+      "parents": ["024", "049", "052", "053", "068"],
+      "status": "planned",
+      "progress": "Czwarty poziom zleconego przepływu. Specyfikacja wymaga raportu powiązanego z manifestem, kontrolami i przebiegiem; brak danych nie może dawać PASS.",
+      "remaining": [
+        "Zależność: przebieg VERTICAL-RUN z telemetrią i wynikiem zakończenia.",
+        "Uzgodnienie jednostek i czasu, tor zadany/rzeczywisty, błąd max/RMS osi, alarmy i czas.",
+        "Rozróżnienie zakończenia, przerwania, awarii i niepełnych danych; raport JSON i widok WebHMI.",
+        "Wykrycie znanych wymuszeń i zachowanie kontraktu precyzji projektu.",
+        "Detal przechodzący poziomy 1–4 i odczyt pakietu/raportu bez aktywnej maszyny."
+      ],
+      "evidence": ["docs/WORKFLOW_ZADANIA.md"]
     }
   ]
 }

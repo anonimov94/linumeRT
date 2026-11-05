@@ -583,6 +583,18 @@ a zatrzask nie miał wejścia od LinuxCNC. Generator Plant (`render_plant_hal`) 
 zezwolenie (D35); reset nadal wyłącznie przez `iocontrol.0.user-request-enable` → `estop_latch.reset`.
 To przeniesienie poprawki z bety (2026-11-01). Konfiguracja sprzętowa bez zmian. NIEZWERYFIKOWANE NA SPRZĘCIE.
 
+## Rozwój pionowy pełnego linumeRT i cel main — polecenie właściciela 2026-11-05
+
+Model-Author: Codex. Właściciel zlecił rozwinąć prepare → verify → run → report
+i zapisać to jako cel, następnie doprecyzował: „to nie ma byc lite to ma byc scalone
+do main glownego projektu linumert”. Zakres dotyczy pełnego linumeRT i WebHMI,
+z PR/merge do main dla ukończonych porcji. Zastępuje to wybór osobnej edycji lite.
+Kontrakt: docs/WORKFLOW_ZADANIA.md; statusy i powiązania z pierwotnymi sesjami
+w czterech rozszerzeniach VERTICAL-* wspólnego rejestru. To jawna zmiana bieżącego zakresu;
+wcześniejsze bramki, odbiór operatora oraz hardware nie są automatycznie zaliczone.
+Zmiany z lite integrujemy selektywnie, zachowując funkcje pełnej edycji
+i uwzględniając istniejące prace natywne, napędy oraz otwarte PR.
+
 ## PROPOZYCJA: WebHMI w łańcuchu E-STOP przez watchdog HAL — 2026-11-04
 
 Model-Author: Claude. Brama WebHMI z `--hal` tworzy te same piny `linumert.hmi-*` co ekran Qt

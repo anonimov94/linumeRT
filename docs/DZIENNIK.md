@@ -1812,3 +1812,11 @@ Pełny RIP musi ponownie potwierdzić wynik; nie scalać na czerwonym CI.
 - Kliknięte w przeglądarce na LinuxCNC 2.9 + Plant z łańcuchem HMI bez obejścia: E-STOP → podwójny Reset → ON; zawieszona karta → E-STOP po 3,1 s. Zrzuty: `docs/raporty/G2/WEBHMI_WATCHDOG_2026-11-04.md`.
 - Odbiór w GUI wykrył 3 błędy niewidoczne w testach logiki (brak sygnału życia w kliencie, stary JS z pamięci podręcznej, E-1100 po resecie); poprawione, test na LinuxCNC idzie przez WebSocket.
 - Testy: `test_webhmi_watchdog_linuxcnc` PASS (~20 s), `test_webhmi_hal_link` i `test_webhmi_app`. Otwarte: ukryta karta, start bramy z `[DISPLAY]`. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## Cel pionowy pełnego linumeRT — 2026-11-05 · Codex
+
+- Model-Author: Codex. Polecenie właściciela: prepare → verify → run → report w pełnym projekcie, ukończone porcje do main.
+- Kontrakt w docs/WORKFLOW_ZADANIA.md; cztery rozszerzenia VERTICAL-* we wspólnym rejestrze i generowane widoki.
+- WebHMI jest klientem operatora; odbiór lite nie jest odbiorem main. Wcześniejsze bramki pozostają otwarte.
+- Uwzględniono otwarte #211/#212/#213, gałąź natywną i przenoszenie napędów; cudze checkouty bez zmian.
+- Autokontrola dokumentacji, bez niezależnego przeglądu. Cztery poziomy nie są jeszcze implementacją ani odbiorem sprzętu.
