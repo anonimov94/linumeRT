@@ -1887,3 +1887,15 @@ Pełny RIP musi ponownie potwierdzić wynik; nie scalać na czerwonym CI.
 - Model-Author: Codex. PR #221: jeden backend CLI/API/WebHMI, kontrola snapshotu i ponowna kompilacja przed izolowanym rs274 z tabelą/G54–G59. Jawne założenia początku/T0/G92, linie programu zachowane.
 - 131 testów zakresu i 7 subtestów PASS; 4 rzeczywiste rs274 (G54/G55/przekroczenie X/długość T1) PASS; 40 JS i pełny lint PASS. GUI kliknięte, zapis/pobranie JSON zgodne, przekroczenie X odrzucone.
 - Ślad rs274 zaokrąglony do 4 miejsc: brak verified i brak PASS pełnym limitom. Materiał/kolizje/obciążenia oraz poziomy 3–4 otwarte. Dowody i zrzuty w VERTICAL_PREFLIGHT_2026-11-05.md; CI/scalenie wymagane.
+
+## VERTICAL-VERIFY — integracja istniejącego C i własność testów · 2026-11-05 · Codex
+
+- Model-Author: Codex. #221: pełny klon 2050 PASS/1 znana porażka Qt jak na main. Nowe testy offline odłączone od globalnego sprzątania kontrolera (5841f37); ich rs274 ma własny proces group/HOME. Nowe CI wymagane.
+- #222: połączona historia Claude 0bd1f04, bez dublowania kernela. Zachowane decyzje obu gałęzi i pełny projekt; C11 poza RT, Python referencją/fallbackiem.
+- 7 C + Plant i 189 testów z C PASS; 7 ASan/UBSan PASS; 22 native/architektury PASS po dodaniu porównania bajtów i obsługi brakujących eksportów.
+- Pomiar i surowe dane Python/C w NATIVE_INTEGRATION_2026-11-05.md; subset pozostaje diagnostyką, nie odbiorem całego verify. CI/scalenie wymagane.
+
+## Integracja C — środowisko zagnieżdżonego test-c · 2026-11-05 · Codex
+
+- Model-Author: Codex. Pełny klon 51de699: 2070 PASS, 2 FAIL (znany Qt oraz systemowy Python bez pytest w zagnieżdżonym make test-c). Lint/C/REQ PASS przed pełną regresją.
+- Test test-c wskazuje teraz sys.executable bieżącego pytest; ten sam cel i wszystkie jego kontrole PASS (39 s), bez instalacji globalnej i bez zmiany algorytmów. Końcowe CI nowego SHA wymagane.

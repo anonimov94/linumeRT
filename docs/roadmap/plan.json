@@ -2101,7 +2101,7 @@
         "055"
       ],
       "status": "in_progress",
-      "progress": "PR #221: pierwsza porcja CLI/API/WebHMI z SHA-256, ponowną kompilacją snapshotu, izolowanym rs274 i tabelą/G54–G59. 131 testów zakresu, 4 rzeczywiste rs274 i 40 JS PASS; GUI kliknięte, pobrany JSON zgodny z zapisem, przekroczenie X odrzucone. Ślad jest zaokrąglony, więc nigdy verified/PASS pełnych limitów. CI i scalenie porcji wymagane.",
+      "progress": "PR #221: pierwsza porcja CLI/API/WebHMI z SHA-256, ponowną kompilacją snapshotu, izolowanym rs274 i tabelą/G54–G59. 131 testów zakresu, 4 rzeczywiste rs274 i 40 JS PASS; GUI kliknięte, pobrany JSON zgodny z zapisem, przekroczenie X odrzucone. Ślad jest zaokrąglony, więc nigdy verified/PASS pełnych limitów. CI i scalenie porcji wymagane. PR #222 integruje istniejące C 0bd1f04: 189 testów z C, 7 C/ASan/UBSan i 22 native/architektury PASS; pomiar subset Python/C zapisany, pełny tor nadal otwarty. Head #221 5841f37 zawiera poprawkę sprzątania testów, końcowe CI trwa.",
       "remaining": [
         "Pełna precyzja toru i limitów zamiast zaokrąglonego śladu rs274; ekstrema łuków, G5x/G92, długości i powiązanie początku/T0 z wykonaniem.",
         "Materiał/kolizje/obciążenia z tego samego toru; raport z linią i przyczyną w WebHMI.",
@@ -2113,7 +2113,9 @@
         "tests/test_job_check.py",
         "tests/test_job_check_linuxcnc.py",
         "docs/raporty/VERTICAL_PREFLIGHT_2026-11-05.md",
-        "https://github.com/anonimov94/linumeRT/pull/221"
+        "https://github.com/anonimov94/linumeRT/pull/221",
+        "docs/raporty/NATIVE_INTEGRATION_2026-11-05.md",
+        "https://github.com/anonimov94/linumeRT/pull/222"
       ]
     },
     {

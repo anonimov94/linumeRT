@@ -1,6 +1,11 @@
+import os
 from pathlib import Path
 
 import pytest
+
+# Ścieżka referencyjna Pythona w całym przebiegu, chyba że wywołujący ustawił inaczej
+# (`make test-c`: LINUMERT_NATIVE=1). Porównanie obu ścieżek: tests/test_native.py.
+os.environ.setdefault("LINUMERT_NATIVE", "0")
 
 REPO = Path(__file__).resolve().parent.parent
 
