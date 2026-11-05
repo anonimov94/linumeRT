@@ -14,6 +14,15 @@ const state = (changes = {}) => ({
 const link = { connected: true, fresh: true };
 const can = (key, s = state(), l = link) => allowed(s, l)[key].ok;
 
+test("zero and open wait for jog stop confirmation", () => {
+  const pending = state({ programs: ["part.ngc"], jog_active: [], jog_stop_pending: ["X"] });
+  for (const key of ["work_zero", "open"]) {
+    assert.equal(can(key, pending), false);
+    assert.match(allowed(pending, link)[key].reason, /Niepotwierdzone/);
+    assert.equal(can(key, { ...pending, jog_stop_pending: [] }), true);
+  }
+});
+
 test("STOP / ESTOP remain available with stale telemetry but not with lost link", () => {
   for (const key of ["stop", "estop", "jog_stop"]) {
     assert.equal(can(key, null, { connected: true, fresh: false }), true);

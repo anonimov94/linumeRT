@@ -172,3 +172,13 @@ def test_strip_tool_words_keeps_lines_and_comments():
     assert changed
     assert out.splitlines() == ["  (T2 M6 zostaje)", "G1 X1 ; T3", "G43 H1", "M60  ", " "]
     assert strip_tool_words("G0 X1\nM61\n") == ("G0 X1\nM61\n", False)
+
+
+def test_tool_words_split_by_comments_and_named_parameters():
+    from linumert.programs.toolpath import strip_tool_words
+
+    text = "T(keep)1M6\nM61(keep)Q4\n#<_T1M6>=1\n"
+    assert strip_tool_words(text, include_m61=True) == (
+        "(keep)\n(keep)\n#<_T1M6>=1\n", True)
+    assert strip_tool_words("O100REPEAT[3]\nO100ENDREPEAT\n") == (
+        "O100REPEAT[3]\nO100ENDREPEAT\n", False)
