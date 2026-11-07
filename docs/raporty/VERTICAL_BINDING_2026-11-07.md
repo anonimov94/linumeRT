@@ -131,8 +131,25 @@ CI LinuxCNC42378074910 próba1:244PASS/1FAIL, jedynie stary D38 sim
 test_retract_returns_to_compensated_path. Sterownik, rdzeń i panel D38 mają identyczne
 bloby na maincd8ed66 i90e8100; wariant Plant oraz wszystkie4 nowe testy zadania PASS.
 Odmowa dotyczyła request1,001001192mm przy nominalnym1,001mm i progu1e-6mm.
-Ten sam D38 sim lokalnie PASS67,06s bez zmiany kodu/progów. Ponowiono wyłącznie
-nieudany job (próba2,128518681208); wynik oczekiwany przed scaleniem. Beta API w próbie1
-było pominięte wskutek tego błędu, więc nie zaliczamy go z pierwszej próby.
+Ten sam D38 sim lokalnie PASS67,06s bez zmiany kodu/progów. Ponowiony wyłącznie
+nieudany job (próba2,128518681208) ponownie244PASS/1FAIL, request1,001001019mm.
+Beta API w obu próbach pominięte wskutek tego błędu, bez deklarowania zaliczenia.
+Próba2 przekroczyła także60min całego jobu przy nieudanym wysyłaniu artefaktów.
 Lokalny pełny7eb41ab:2182PASS/1FAIL wyłącznie ścieżka provenance nowego zrzutu;
 poprawkaf02698d:10IP PASS i REQ22/22. CI dokumentacjif02698d42380002073 success.
+
+## Usunięcie blokady D38 — końcowy test f936f19
+
+Model-Author: Codex. Zmiana wyłącznie w teście i budżecie workflow; Qt i model niezmienione.
+LinuxCNC sumuje skalowane przyrosty impulsów; po wyłączeniu simple_tp jego zadanie
+śledzi zachowaną pozycję, podczas gdy pin request może jeszcze pokazywać starsze żądanie.
+Dlatego test sprawdza przyrost od eoffset sprzed uzbrojenia, dokładnie1001 impulsów
+i niezmienione1e-6mm błędu przyrostu. Pierwsza pauza wymusza2e-6mm żądania;
+rzeczywista reszta przekracza1e-6mm, więc poprzednie sprawdzenie absolutne jej nie zalicza.
+Wyniki zawierają oba początkowe odczyty oraz licznik przed/po. Wszystkie5 kombinacji
+G40/G41/G42 w mm/calach: sim i Plant2PASS140,58s. Pierwsze poprawki fixture fd94e08/
+7d643e8 nie przeszły obu wariantów; zachowane w historii, nie są dowodem odbioru.
+Budżet całego CI90min, bez pomijania przypadków i bez zmiany timeoutów testów.
+Świeże pełne CI42417145984 i LinuxCNC42417145941 na f936f19 wymagane przed scaleniem.
+Niezależna kontrola7 archiwów: SHA256 archiwum i oryginałów, ID, liczby próbek oraz
+trzy końcowe błędy w zaakceptowanych przebiegach zgodne z indeksem.

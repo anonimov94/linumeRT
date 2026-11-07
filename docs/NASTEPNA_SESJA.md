@@ -15,6 +15,13 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · 2026-11-07. **Końcowy head229 f936f19:** stary D38 sim+Plant
+2PASS140,58s z wymuszoną resztą2e-6mm, dokładnie1001 impulsów i progiem1e-6mm.
+Bazą jest pozycja eoffset sprzed uzbrojenia (request bywa starszy). Qt/model bez zmian.
+Siedem archiwów ponownie zweryfikowanych; cztery regresje zadania na f936f19 w toku.
+CI42417145984/42417145941 przed scaleniem229;230 obejmuje aktualne testy i dowody.
+231 zachowany jako szkic; nie rozwijać raportu przy domykaniu etapu wykonania.
+
 Model-Author: Codex · 2026-11-07. **Stan zatrzymania domknięcia229:** CI90e8100
 dwukrotnie244PASS/1FAIL w starym D38 sim: absolutny request zakładał zerową resztę.
 Test mierzy teraz przyrost z dokładnie1001 impulsów, próg1e-6 zachowany; wymusza2e-6

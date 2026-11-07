@@ -2031,3 +2031,12 @@ absolutny request z wysokością mimo dozwolonej małej reszty po powrocie. Test
 1e-6mm dla przyrostu i wymaga dokładnie1001 impulsów; wymuszenie2e-6mm sprawdza regresję.
 Produkcyjne Qt/model i tolerancje niezmienione. Budżet całego CI90min po przekroczeniu60min;
 wszystkie przypadki i timeouty testów zachowane. Odbiór obu wariantów RIP/CI wymagany.
+
+## VERTICAL-RUN — regresja reszty HAL odebrana · 2026-11-07
+
+Model-Author: Codex. f936f19: D38 sim+Plant2PASS140,58s, wszystkie5 trybów mm/cale,
+dokładnie1001 impulsów i1e-6mm przyrostu od zachowanej pozycji sprzed uzbrojenia.
+Pin request po wyłączeniu może być starszy niż pozycja simple_tp; oba odczyty logowane.
+Wymuszenie2e-6mm sprawdza regresję; Qt/model i tolerancje produkcyjne bez zmian.
+Ponowna kontrola7 archiwów: wszystkie hashe/ID/próbki i zaakceptowane końcowe błędy zgodne.
+CI42417145984/42417145941 dokładnego headu wymagane przed scaleniem229/230.
