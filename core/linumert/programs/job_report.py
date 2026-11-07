@@ -83,11 +83,21 @@ def load(source):
             need(isinstance(report[key], str) and len(report[key]) == size)
             need(all(c in "0123456789abcdef" for c in report[key]))
         need(report["status"] in ("observational", "incomplete"))
+        need(report["target"] in ("sim", "plant"))
+        verification, timing = report["verification"], report["time"]
+        need(verification["status"] == "verified" and isinstance(verification["checks"], dict))
+        need(isinstance(verification["assumptions"], dict))
+        for key in ("elapsed_s", "paused_observed_s", "unpaused_elapsed_s",
+                    "predicted_lower_bound_s",
+                    "excess_over_lower_bound_s", "excess_over_lower_bound_percent"):
+            need(timing[key] is None or _number(timing[key]))
+        need(type(timing["comparison_available"]) is bool)
         quality, axes = report["quality"], report["axes"]
         need(isinstance(quality["issues"], list) and all(
             isinstance(s, str) for s in quality["issues"]))
         need(quality["servo_trace"] is False and report["hardware_qualification"] is False)
         need(type(quality["samples"]) is int and quality["samples"] >= 0)
+        need(_number(quality["max_gap_s"]) and quality["max_gap_s"] >= 0)
         need(set(axes) == set("XYZ"))
         for stats in axes.values():
             for key in ("following_error", "actual_minus_commanded"):
@@ -101,6 +111,12 @@ def load(source):
             need(_positions(row["axes"], axes))
         need(all(isinstance(report[key], list) for key in
                    ("events", "alarms", "controller_errors")))
+        for alarm in report["alarms"] + report["controller_errors"]:
+            need(isinstance(alarm, dict) and isinstance(alarm["text"], str))
+            need(alarm.get("observed_at_s") is None or _number(alarm["observed_at_s"]))
+        for event in report["events"]:
+            need(isinstance(event, dict) and isinstance(event["event"], str)
+                 and _number(event["t"]))
         need(report["positioning"]["status"] in ("passed", "failed", "unavailable"))
         if report["positioning"]["status"] == "passed":
             need(not quality["issues"] and report["status"] == "observational")
@@ -112,6 +128,13 @@ def load(source):
                        for row in report["ending_samples"] for v in row["axes"].values()))
             need(_number(report["time"]["elapsed_s"]))
         need(report["positioning"]["tolerance_mm"] == .001)
+        last3 = report["positioning"]["last3_max_abs_mm"]
+        need(isinstance(last3, dict))
+        if len(report["ending_samples"]) == 3:
+            need(set(last3) == set(axes))
+            need(all(_number(last3[a]) and abs(last3[a] - max(abs(r["axes"][a]["actual"]
+                - r["axes"][a]["commanded"]) for r in report["ending_samples"])) < 1e-6
+                for a in axes))
     except (KeyError, TypeError, AttributeError):
         raise ValueError("Niepełny lub niespójny raport przebiegu") from None
     return report
@@ -175,6 +198,8 @@ def build(run: Path, execution: Path) -> dict:
                 if not isinstance(row, dict) or not _number(row.get("t")) or row["t"] < 0:
                     raise ValueError("Nieprawidłowy czas")
                 if "event" in row:
+                    if not isinstance(row["event"], str):
+                        raise ValueError("Nieprawidłowe zdarzenie")
                     if len(events) < 10000:
                         events.append(row)
                     else:
@@ -301,7 +326,10 @@ def build(run: Path, execution: Path) -> dict:
         "axis_error_definition": "following_error = commanded minus actual Cartesian position; "
                                  "raw joint ferror_current is not recorded",
         "positioning": {"status": positioning,
-                        "scope": "last3 settled NML observations only", "tolerance_mm": .001},
+                        "scope": "last3 settled NML observations only", "tolerance_mm": .001,
+                        "last3_max_abs_mm": {a: max(abs(r["axes"][a]["actual"]
+                            - r["axes"][a]["commanded"]) for r in tail) for a in axes}
+                            if len(tail) == 3 else {}},
         "ending_samples": list(tail),
         "trajectory": trajectory, "trajectory_stride": stride, "events": events,
         "alarms": list(alarms.values()), "controller_errors": list(controller_errors.values()),

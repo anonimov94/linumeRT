@@ -15,6 +15,11 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · 2026-11-08.7 rzeczywistych archiwów: niezależne max/math.fsum RMS
+zgodne; zachowano oryginalne konfiguracje sim/Plant i przenośny raport z hashami.
+30 testów raportu PASS. Różnica osi NML pozostaje jawna; następne surowy joint FERR,
+rzeczywisty zapis tego kanału i kliknięty odbiór raportu. Bez duplikacji planera/RT.
+
 Model-Author: Codex · 2026-11-08. Raport ma wykresy pozycji/błędu z zachowanych punktów,
 wybór XYZ, maksimum pełnego zapisu oraz alarmy/czas/kontrole.31 Python PASS/4skip;
 składnia JS PASS (Node Windows). Przed odbiorem: rzeczywiste raporty, GUI i pełne CI.

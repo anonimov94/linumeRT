@@ -96,7 +96,8 @@ export function createJobs(request) {
           value = document.createElement("dd");
         title.textContent = "Oś " + axis + " · błąd zadana − rzeczywista [mm]";
         value.textContent = "max " + num(values.following_error.max_abs_mm) +
-          " · RMS " + num(values.following_error.rms_mm);
+          " · RMS " + num(values.following_error.rms_mm) +
+          " · końcowe 3 max " + num(result.positioning.last3_max_abs_mm?.[axis]);
         row.append(title, value); $("jobRunMetrics").append(row);
       }
       showChecks("jobReportChecks", result.verification.checks);
