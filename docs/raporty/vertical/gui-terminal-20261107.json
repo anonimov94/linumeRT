@@ -1,0 +1,152 @@
+{
+  "schema": 1,
+  "task_state": "on",
+  "mode": "auto",
+  "interp_state": "idle",
+  "axes": [
+    {
+      "name": "X",
+      "position": 245.0,
+      "work_position": 45.0,
+      "following_error": 0.0,
+      "homed": true,
+      "soft_min": 1.0,
+      "soft_max": 599.0,
+      "limit_hit": false
+    },
+    {
+      "name": "Y",
+      "position": 230.0,
+      "work_position": 30.0,
+      "following_error": 0.0,
+      "homed": true,
+      "soft_min": 1.0,
+      "soft_max": 899.0,
+      "limit_hit": false
+    },
+    {
+      "name": "Z",
+      "position": -1.0,
+      "work_position": 79.0,
+      "following_error": 0.0,
+      "homed": true,
+      "soft_min": -119.0,
+      "soft_max": -1.0,
+      "limit_hit": false
+    }
+  ],
+  "all_homed": true,
+  "line": 105,
+  "program": "/tmp/linumert-229-gui-2d55bd8f/config/nc_files/program.ngc",
+  "feed_override": 1.0,
+  "rapid_override": 1.0,
+  "spindle_override": 1.0,
+  "spindle_speed": 0.0,
+  "spindle_direction": 0,
+  "tool": 2,
+  "work_offset": "G54",
+  "gcodes": [
+    "G1",
+    "G17",
+    "G40",
+    "G21",
+    "G90",
+    "G94",
+    "G54",
+    "G43",
+    "G98",
+    "G64",
+    "G97",
+    "G91.1",
+    "G8"
+  ],
+  "mcodes": [
+    "M2",
+    "M5",
+    "M9",
+    "M48",
+    "M53",
+    "M0"
+  ],
+  "errors": [],
+  "execution": {
+    "execution_id": "a034404861204810262976262f99f451a01316e2520235222a83f8c84c894328",
+    "job_id": "95bf2c0bc88fb59abaa1cdea747ddfdbfc58bc042701d4fe0beed5fbb8a1316e",
+    "target": "plant",
+    "status": "instance_loaded",
+    "can_start": false,
+    "can_resume": false,
+    "reason": "Start zablokowany: Ustaw początkowe położenie nosa wrzeciona zgodne z weryfikacją [mm]: X 200.0000, Y 200.0000, Z -5.0000",
+    "resume_reason": "Brak niezmienionego, ustalonego stanu wstrzymanego zadania",
+    "execution_authorization": false,
+    "checks": {
+      "controller": {
+        "status": "passed",
+        "reason": "Wymagana konfiguracja tej instancji"
+      },
+      "program": {
+        "status": "passed",
+        "reason": "Wczytaj program tego zadania"
+      },
+      "units": {
+        "status": "passed",
+        "reason": "Jednostki maszyny muszą być milimetrami"
+      },
+      "tool_table": {
+        "status": "passed",
+        "reason": "Załadowana tabela narzędzi musi odpowiadać zadaniu"
+      },
+      "machine_ready": {
+        "status": "passed",
+        "reason": "Wymagane ON, AUTO, bazowanie i zatrzymany ruch"
+      },
+      "start_position": {
+        "status": "failed",
+        "reason": "Ustaw początkowe położenie nosa wrzeciona zgodne z weryfikacją [mm]: X 200.0000, Y 200.0000, Z -5.0000"
+      },
+      "initial_tool": {
+        "status": "failed",
+        "reason": "Początek wymaga T0 i zerowej korekcji narzędzia"
+      },
+      "work_setup": {
+        "status": "passed",
+        "reason": "Wymagany układ detalu zadania, G92=0 i obrót XY=0"
+      },
+      "hal": {
+        "status": "passed",
+        "reason": "Wymagane gotowe napędy i łańcuch HMI/HAL oraz zgodne skale"
+      },
+      "limits": {
+        "status": "passed",
+        "reason": "Limity sterowania zgodne z maszyną zadania"
+      },
+      "freshness": {
+        "status": "passed",
+        "reason": "Aktualny odczyt sterowania"
+      },
+      "hmi": {
+        "status": "passed",
+        "reason": "Wymagane żywe połączenie WebHMI i HAL"
+      },
+      "alarms": {
+        "status": "passed",
+        "reason": "Brak aktywnych alarmów"
+      }
+    },
+    "run": {
+      "run_id": "43b2143406cc477aa155ad12f236b6a8",
+      "phase": "completed_observed",
+      "samples": 6895,
+      "elapsed_s": 148.2799294160002,
+      "line": 105
+    }
+  },
+  "alarms": [],
+  "programs": [
+    "program.ngc"
+  ],
+  "heartbeat": true,
+  "hmi_hal": true,
+  "jog_active": [],
+  "jog_stop_pending": []
+}

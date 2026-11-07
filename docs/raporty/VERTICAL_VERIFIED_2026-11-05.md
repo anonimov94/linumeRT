@@ -44,3 +44,9 @@ wpisu zrzutu materiału w PROVENANCE; poprawka821971e jest zawarta w tej gałęz
 test zasobów lokalnie PASS; cała kontrola IP lokalnie9 PASS/1 FAIL wyłącznie z powodu
 ignorowanego binarnego artefaktu ASan w build-san (poza Git); czysty klon nie ma tego pliku.
 Nie jest to powód omijania CI. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+Aktualizacja2026-11-07, Model-Author: Codex: całość zawarta w #227, scalonym do main63254c9
+po końcowym ci42090379375 i LinuxCNC42090379317 success dla dokładnego edcacf3.
+Następny maincd8ed66 (#228) dodaje odebrany prywatny rozruch; jego head211160e ma2134
+lokalne testy i końcowy Python/LinuxCNC success. Weryfikacja offline odebrana; powiązanie
+przed Start i poziomy3–4 pozostają odrębnym niezakończonym zakresem.

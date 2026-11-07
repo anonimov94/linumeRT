@@ -136,15 +136,15 @@ W ekranie: **Start → potwierdzenie E-STOP → Włącz → Bazuj wszystkie**. D
 
 Stan rejestru: **2026-11-05 · 39/84 ukończonych sesji**.
 
-Dodatkowo ukończono **22/47 rozszerzeń**. Wśród sesji: 30 częściowych i 15 planowanych. Rozszerzenia liczymy osobno, bez zwiększania licznika 84 sesji.
+Dodatkowo ukończono **23/47 rozszerzeń**. Wśród sesji: 30 częściowych i 15 planowanych. Rozszerzenia liczymy osobno, bez zwiększania licznika 84 sesji.
 
 | Kamień | Zakres | Sesje ukończone | Rozszerzenia ukończone | Rekordy z otwartymi kryteriami |
 |---|---|---:|---:|---:|
 | M0 | Fundament, prawo, środowisko | 8/8 | 1/2 | 1 |
 | M1 | Wirtualna obrabiarka Plant | 18/18 | 3/6 | 4 |
 | M2 | Ekran linumeRT (WebHMI; QtDragon awaryjny) | 3/12 | 7/27 | 28 |
-| M3 | Programowanie dialogowe | 7/12 | 6/11 | 11 |
-| M4 | Symulacja i kolizje | 3/10 | 4/13 | 17 |
+| M3 | Programowanie dialogowe | 7/12 | 7/11 | 10 |
+| M4 | Symulacja i kolizje | 3/10 | 5/13 | 16 |
 | M5 | Konfiguracja maszyn hobbystów | 0/12 | 6/13 | 14 |
 | M6 | Wtyczki, instalator, alfa | 0/12 | 5/8 | 9 |
 

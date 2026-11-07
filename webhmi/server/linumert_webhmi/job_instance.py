@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import os
 import secrets
 import shutil
@@ -19,7 +20,11 @@ import tempfile
 import time
 from pathlib import Path
 
-from linumert.programs import job, job_execution
+from linumert.machine.configgen import joint_drives
+from linumert.machine.schema import MachineConfig
+from linumert.programs import job, job_binding, job_execution
+
+from .job_run import RunLog
 
 FORMAT = "linumert.job.instance"
 POSTGUI = """# WebHMI D35; Model-Author: Codex. No reset or enable command.
@@ -79,9 +84,14 @@ def prepare(source: Path, out: Path, *, port=8765, token=None) -> dict:
 
 
 class Instance:
-    """Read-only identity shown by the operator screen. Live Start gate remains closed."""
+    """Bound identity and Start/resume conditions; Gateway owns command dispatch."""
 
-    def __init__(self, path: Path, ini: Path):
+    def __init__(self, path: Path, ini: Path, *, clock=time.monotonic):
+        self.clock = clock
+        self.run = None
+        self._snapshot = None
+        self._live = {}
+        self._files_checked_at = None
         self.path = path.resolve()
         self.root = self.path.parent
         self.record = json.loads(self.path.read_text(encoding="utf-8"))
@@ -89,6 +99,24 @@ class Instance:
         if record.get("format") != FORMAT or record.get("version") != 1:
             raise ValueError("Nieprawidłowy manifest instancji")
         original, files = job_execution.read(self.root / "evidence")
+        self._files = files
+        self._checks = {}
+        self._evidence = {**files, "execution.json": job.json_text(original)}
+        config_model = MachineConfig.model_validate_json(files["machine.yaml"])
+        self._limits = {a.letter: list(a.soft_limits) for a in config_model.axes}
+        self.hal_expectations = {"linumert.hmi.estop-ok": True, "lrt_hmi_bypass.in1": False,
+                                 "motion.motion-enabled": True}
+        for index, (_, name) in enumerate(joint_drives(config_model)):
+            self.hal_expectations[f"joint.{index}.amp-enable-out"] = True
+            if original["target"] == "plant":
+                self.hal_expectations[f"lrt-cia402.{index}.enabled"] = True
+                self.hal_expectations[f"lrt-net.0.axis.{index}.scale"] = float(
+                    f"{original['joint_scales'][name]:.6f}")
+            else:
+                self.hal_expectations[f"sim_j{index}.gain"] = 1.0
+        if original["target"] == "plant":
+            self.hal_expectations.update({"lrt-net.0.connected": True,
+                                          "lrt-net.0.plant-lost": False})
         if any(record.get(k) != original[k] for k in
                ("execution_id", "job_id", "verification_id", "target", "ini")):
             raise ValueError("Instancja nie odpowiada niezmiennej konfiguracji zadania")
@@ -98,6 +126,7 @@ class Instance:
         expected = {**files, "instance_postgui.hal": POSTGUI}
         expected[original["ini"]] = files[original["ini"]].replace(
             "DISPLAY = linumert-headless\n", _display(record["port"], record["token"]) + "\n", 1)
+        self._expected_config = expected
         if record["config_hashes"] != {name: job.digest(text.encode())
                                        for name, text in expected.items()}:
             raise ValueError("Konfiguracja robocza nie odpowiada pakietowi zadania")
@@ -113,10 +142,111 @@ class Instance:
             if name != "linumert.var" and job.digest(data) != digest:
                 raise ValueError(f"Zmieniona konfiguracja instancji: {name}")
 
+    def observe(self, snapshot, live, *, hmi=False, alarms=()):
+        self._snapshot, self._live = snapshot, live or {}
+        self._checks = job_binding.inspect(snapshot, live,
+            ini=self.root / "config" / self.record["ini"],
+            program=self.root / "config/nc_files/program.ngc", table=self._files["tool.tbl"],
+            setup=json.loads(self._files["job/setup.json"]),
+            start=json.loads(self._files["verification.json"])["assumptions"]["start_mm"])
+        live = live or {}
+        hal = live.get("hal")
+        matched = isinstance(hal, dict) and all(
+            (type(hal.get(pin)) in (bool, int) and hal[pin] == wanted) if type(wanted) is bool
+            else (isinstance(hal.get(pin), (int, float)) and not isinstance(hal[pin], bool)
+                  and math.isfinite(hal[pin]) and abs(hal[pin] - wanted) <= 1e-6)
+            for pin, wanted in self.hal_expectations.items())
+        self._checks["hal"] = {"status": "unavailable" if hal is None else
+                               "passed" if matched else "failed",
+            "reason": "Wymagane gotowe napędy i łańcuch HMI/HAL oraz zgodne skale"}
+        limits = set(snapshot.axis_names) == set(self._limits) and all(
+            abs(a.soft_min - self._limits[a.name][0]) <= 1e-6
+            and abs(a.soft_max - self._limits[a.name][1]) <= 1e-6 for a in snapshot.axes)
+        self._checks["limits"] = {"status": "passed" if limits else "failed",
+                                  "reason": "Limity sterowania zgodne z maszyną zadania"}
+        self._checks["freshness"] = {"status": "passed" if snapshot.is_fresh(self.clock())
+                                     else "failed", "reason": "Aktualny odczyt sterowania"}
+        self._checks["hmi"] = {"status": "passed" if hmi and live.get("hmi_alive") is True
+                              else "failed", "reason": "Wymagane żywe połączenie WebHMI i HAL"}
+        self._checks["alarms"] = {"status": "failed" if alarms else "passed",
+                                 "reason": "Brak aktywnych alarmów"}
+        if self.run and self.run.active:
+            self.run.sample(snapshot, self._live, alarms)
+
+    def validate_files(self):
+        """Compare approved bytes again before Start; no recompilation in the poll loop."""
+        roots = (("evidence", self._evidence), ("config", self._expected_config))
+        for directory, expected in roots:
+            root = self.root / directory
+            for name, text in expected.items():
+                if directory == "config" and name == "linumert.var":
+                    continue  # current offsets must pass the separate NML comparison
+                parts = job_execution._relative(name).parts
+                if root.is_symlink() or any((root / Path(*parts[:i])).is_symlink()
+                                           for i in range(1, len(parts) + 1)):
+                    raise ValueError("Zmieniona ścieżka pliku zadania")
+                if (root / name).read_bytes() != text.encode():
+                    raise ValueError(f"Zmieniony plik zadania: {directory}/{name}")
+        if self.path.is_symlink() or self.path.read_bytes() != job.json_text(self.record).encode():
+            raise ValueError("Zmieniony manifest instancji")
+        self._files_checked_at = self.clock()
+
+    def can_start(self):
+        return (not (self.run and (self.run.active or self.run.needs_abort)) and bool(self._checks)
+                and all(c["status"] == "passed" for c in self._checks.values()))
+
+    def can_resume(self):
+        if not self.run or self.run.phase != "paused" or self.run.resume_requested:
+            return False
+        snap, live = self._snapshot, self._live
+        # LinuxCNC stat.file may still name the last M6 remap after it returned.
+        # Start bound the main program; resume must retain the paused filename,
+        # and that file must be one of this job's immutable G-code resources.
+        excluded = {"machine_ready", "start_position", "initial_tool", "program"}
+        approved_file = any(job_binding._path(snap.program_file, self.root / "config" / name)
+                            for name in self._expected_config if name.endswith(".ngc"))
+        return (not self.run.stop_requested and self.run.pause_context is not None
+                and approved_file
+                and all(v["status"] == "passed" for k, v in self._checks.items()
+                        if k not in excluded)
+                and snap.task_state.value == "on" and snap.mode.value == "auto"
+                and snap.interp_state.value == "paused" and snap.all_homed
+                and self.run.paused_settled(snap, live)
+                and job_binding.same_context(self.run.pause_context, self.run.context(snap, live))
+                and all(abs(a.following_error) < .001 for a in snap.axes))
+
+    def begin(self, from_line):
+        if from_line != 1:
+            raise ValueError("Zadanie wymaga Start od pierwszej linii")
+        if (self._files_checked_at is None or self.clock() - self._files_checked_at > .5
+                or not self.can_start()):
+            reasons = [v["reason"] for v in self._checks.values() if v["status"] != "passed"]
+            raise ValueError("Start zablokowany: " + (reasons[0] if reasons else "brak gotowości"))
+        self.run = RunLog(self.root, self.record, clock=self.clock)
+        self._files_checked_at = None
+        self.run.sample(self._snapshot, self._live, ())
+
+    def command(self, name):
+        if self.run and self.run.active:
+            self.run.command(name)
+
+    def fail(self, phase="fault"):
+        if self.run and self.run.active:
+            self.run.finish(phase)
+
     def status(self):
+        ready, resume = self.can_start(), self.can_resume()
+        reasons = [v["reason"] for v in self._checks.values() if v["status"] != "passed"]
+        reason = ("Gotowe do Start zadania" if ready else
+                  "Start zablokowany: " + (reasons[0] if reasons else PENDING))
+        if self.run and self.run.active:
+            reason = "Zadanie w toku; kolejny Start zablokowany."
+        resume_reason = "Brak niezmienionego, ustalonego stanu wstrzymanego zadania"
         return {**{k: self.record[k] for k in ("execution_id", "job_id", "target")},
-                "status": "instance_loaded", "can_start": False, "reason": PENDING,
-                "execution_authorization": False}
+                "status": "instance_loaded", "can_start": ready, "can_resume": resume,
+                "reason": reason, "resume_reason": resume_reason,
+                "execution_authorization": False, "checks": self._checks,
+                "run": self.run.status() if self.run else None}
 
 
 def _stop(proc):
@@ -162,6 +292,13 @@ def _signal_owned(work: Path, sig, *, display_only=False):
     return count
 
 
+def _check_port(port, kind):
+    with socket.socket(socket.AF_INET, kind) as probe:
+        if kind == socket.SOCK_STREAM:
+            probe.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        probe.bind(("127.0.0.1", port))
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("configuration", type=Path)
@@ -189,8 +326,7 @@ def main(argv=None):
         plant = manifest["launch"]["plant"]
         for port, kind in [(args.port, socket.SOCK_STREAM), *(
                 [(int(plant[-1]), socket.SOCK_DGRAM)] if plant else [])]:
-            with socket.socket(socket.AF_INET, kind) as probe:
-                probe.bind(("127.0.0.1", port))
+            _check_port(port, kind)
         record = prepare(args.configuration, args.out, port=args.port, token=args.token)
         work = args.out.resolve()
         config = work / "config"
@@ -215,7 +351,7 @@ def main(argv=None):
                                              stderr=subprocess.STDOUT, start_new_session=True))
         print(f"WebHMI: http://127.0.0.1:{args.port}/ · instancja {work}", flush=True)
         print(f"token: {record['token']}", flush=True)
-        print("Brak automatycznego Reset/ON/bazowania. Start zadania pozostaje zablokowany.",
+        print("Brak automatycznego Reset/ON/bazowania. Start wymaga zgodnych kontroli i operatora.",
               flush=True)
         while all(p.poll() is None for p in children):
             time.sleep(0.1)

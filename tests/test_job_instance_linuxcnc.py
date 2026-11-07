@@ -43,7 +43,10 @@ def test_private_instance_boots_estop_and_stops_only_its_processes(configuration
                             headers={"X-Linumert-Token": record["token"]})
                         with urllib.request.urlopen(req, timeout=1) as response:
                             state = json.load(response)["state"]
-                        break
+                        if (state["task_state"] == "estop" and not state["all_homed"]
+                                and state["execution"]["checks"]["controller"]["status"]
+                                == "passed"):
+                            break
                     except (OSError, ValueError):
                         time.sleep(.1)
                 else:
@@ -51,6 +54,12 @@ def test_private_instance_boots_estop_and_stops_only_its_processes(configuration
                 assert state["task_state"] == "estop" and not state["all_homed"], state
                 assert state["hmi_hal"] and not state["execution"]["can_start"]
                 assert state["execution"]["job_id"] == record["job_id"]
+                checks = state["execution"]["checks"]
+                for key in ("controller", "units", "tool_table", "initial_tool", "work_setup"):
+                    assert checks[key]["status"] == "passed", checks
+                assert checks["program"]["status"] == checks["machine_ready"]["status"] == "failed"
+                assert checks["hal"]["status"] == "failed", checks
+                assert checks["limits"]["status"] == "passed", checks
                 req = urllib.request.Request("http://127.0.0.1:8793/api/command", method="POST",
                     data=b'{"cmd":"run"}', headers={"X-Linumert-Token": record["token"],
                                                    "Content-Type": "application/json"})
