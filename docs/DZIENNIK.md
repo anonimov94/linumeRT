@@ -2023,3 +2023,11 @@ archiwa/hashe/zrzut zachowane, własne procesy zakończone i lease zwolniony.
 Pełny7d6238d:2181PASS, REQ22/22. CI90Python/C/wheel/Plant success; końcowy LinuxCNC
 w toku, scalenie229 wymagane. Pole błędu osi pochodzi z różnicy współrzędnych NML;
 nie jest surowym joint.ferror_current ani kwalifikacją sprzętu.
+
+## VERTICAL-RUN — usunięcie blokady starego testu D38 · 2026-11-07
+
+Model-Author: Codex. CI42378074910 dwukrotnie244PASS/1FAIL: D38 sim porównywał
+absolutny request z wysokością mimo dozwolonej małej reszty po powrocie. Test zachowuje
+1e-6mm dla przyrostu i wymaga dokładnie1001 impulsów; wymuszenie2e-6mm sprawdza regresję.
+Produkcyjne Qt/model i tolerancje niezmienione. Budżet całego CI90min po przekroczeniu60min;
+wszystkie przypadki i timeouty testów zachowane. Odbiór obu wariantów RIP/CI wymagany.

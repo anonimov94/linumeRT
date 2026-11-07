@@ -15,6 +15,15 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · 2026-11-07. **Stan zatrzymania domknięcia229:** CI90e8100
+dwukrotnie244PASS/1FAIL w starym D38 sim: absolutny request zakładał zerową resztę.
+Test mierzy teraz przyrost z dokładnie1001 impulsów, próg1e-6 zachowany; wymusza2e-6
+reszty w pierwszej pauzie. Budżet CI90min po przekroczeniu60min; bez pomijania testów.
+Lint PASS. Test7d643e8: Plant PASS, sim FAIL w następnej pauzie; wyłączony simple_tp
+śledzi pozycję, a request pozostaje stary. Bazą przyrostu jest więc odczyt eoffset
+sprzed uzbrojenia, nie poprzedni request. Oba warianty RIP/CI wymagane.
+230 zachowuje dowody,231 pozostaje szkicem; polecenie właściciela: domknąć etap.
+
 Model-Author: Codex · 2026-11-07. Zamykanie etapu: sim bez Plant także Start/pauza/
 wznowienie/Stop PASS8,16s, archiwum zachowane, brak procesów/lease. CI90LinuxCNC
 244PASS/1FAIL stary D38sim, lokalne odtworzenie PASS67,06s bez zmian. Próba2 job128518681208

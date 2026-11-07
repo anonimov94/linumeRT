@@ -33,9 +33,9 @@ jobs:
     defaults:
       run:
         shell: bash
-    # The full serial suite now exceeds 35 minutes (probe calibration alone ~7 min).
-    # Keep all checks and per-test limits; allow the complete run to report failures.
-    timeout-minutes: 60
+    # The full serial suite plus setup now exceeds 60 minutes (run 42378074910).
+    # Keep every check and per-test limit; leave time for Beta and evidence upload.
+    timeout-minutes: 90
     steps:
       # Git przed checkoutem: bez niego actions/checkout pobiera archiwum bez .git i krok
       # `git diff --check` w runnerze kończy się błędem (run 39121565345).
