@@ -15,6 +15,13 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · 2026-11-07. **Stan zatrzymania domknięcia229:** CI90e8100
+dwukrotnie244PASS/1FAIL w starym D38 sim: absolutny request zakładał zerową resztę.
+Test mierzy teraz przyrost z dokładnie1001 impulsów, próg1e-6 zachowany; wymusza2e-6
+reszty w pierwszej pauzie. Budżet CI90min po przekroczeniu60min; bez pomijania testów.
+Lint przed checkpointem; oba warianty RIP i końcowe CI przed scaleniem wymagane.
+230 zachowuje dowody,231 pozostaje szkicem; polecenie właściciela: domknąć etap.
+
 Model-Author: Codex · 2026-11-07. Analiza raw po zakończeniu: ostatni błąd Z około
 0,03mm, więc stary completed_observed oznacza tylko koniec interpretera. Dodano settling
 do3 zgodnych odczytów <0,001mm i settle_timeout5s;28 testów PASS. Odbiór RIP/GUI wymagany.
