@@ -76,7 +76,8 @@ def test_completion_requires_observed_execution_and_settled_done(run):
 def test_pause_receipt_is_independent_and_failed_resume_times_out(run):
     log, clock = run
     sample(log)
-    _, live = sample(log, InterpState.PAUSED, tool_table=[{"id": 1}])
+    for _ in range(3):
+        _, live = sample(log, InterpState.PAUSED, tool_table=[{"id": 1}], inpos=False)
     live["tool_table"][0]["id"] = 999
     assert log.pause_context["tool_table"] == [{"id": 1}]
     log.command("resume")
@@ -108,3 +109,23 @@ def test_client_loss_is_only_terminal_after_controller_estop_is_observed(run):
     assert log.active and log.client_loss_at == 0
     log.sample(replace(snap, task_state=TaskState.ESTOP), live, [])
     assert log.phase == "client_lost"
+
+
+def test_pause_receipt_waits_for_stable_command_and_settled_feedback(run):
+    log, _ = run
+    snap, live = sample(log)
+    snap = replace(snap, interp_state=InterpState.PAUSED)
+    live["inpos"] = False
+    bad = replace(snap, axes=(replace(snap.axes[0], position=1.00101),))
+    for _ in range(5):
+        log.sample(bad, live, [])
+    assert log.pause_context is None
+    for _ in range(2):
+        log.sample(snap, live, [])
+    assert log.pause_context is None
+    moved = replace(snap, axes=(replace(snap.axes[0], commanded=2, position=2.0003),))
+    log.sample(moved, live, [])
+    assert log.pause_context is None
+    for _ in range(2):
+        log.sample(moved, live, [])
+    assert log.pause_context["commanded"] == {"X": 2}

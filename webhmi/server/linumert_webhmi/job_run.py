@@ -6,11 +6,13 @@ Model-Author: Codex
 
 import copy
 import json
+import math
 import time
 import uuid
 from datetime import UTC, datetime
 
 from linumert.programs.job import json_text
+from linumert.programs.job_binding import same_context
 
 TERMINAL = {"completed_observed", "aborted", "estop", "fault", "start_timeout",
             "resume_timeout", "unavailable", "client_lost"}
@@ -36,6 +38,8 @@ class RunLog:
         self.alarms = {}
         self.client_loss_at = None
         self.pause_context = None
+        self._pause_candidate = None
+        self._pause_samples = 0
         self.identity = {"format": "linumert.job.run", "version": 1, "run_id": self.run_id,
             **{k: identity[k] for k in ("job_id", "execution_id", "verification_id", "target")},
             "started_at": datetime.now(UTC).isoformat(), "source": "linuxcnc.stat",
@@ -100,6 +104,7 @@ class RunLog:
             self.phase = "stopping" if self.stop_requested else "running"
             self.quiet = 0
             self.pause_context = None
+            self._pause_candidate, self._pause_samples = None, 0
             self.resume_requested = False
         elif interp == "paused":
             self.seen_running = True
@@ -107,10 +112,17 @@ class RunLog:
             if self.resume_requested and self.clock() - self.resume_at > 5:
                 self.finish("resume_timeout")
                 return
-            if (self.pause_context is None and live.get("inpos") is True
-                    and isinstance(live.get("current_vel"), (int, float))
-                    and abs(live["current_vel"]) < 1e-4):
-                self.pause_context = copy.deepcopy(self.context(snap, live))
+            if self.pause_context is None:
+                context = self.context(snap, live)
+                # LinuxCNC inpos stays false when a paused motion queue is pending.
+                # Require a stable commanded context and settled feedback instead.
+                settled = self.paused_settled(snap, live)
+                self._pause_samples = (self._pause_samples + 1 if settled
+                    and same_context(context, self._pause_candidate) else 1 if settled else 0)
+                self._pause_candidate = copy.deepcopy(context)
+                if self._pause_samples >= 3:
+                    self.pause_context = copy.deepcopy(context)
+                    self.event("pause_settled", context=self.pause_context)
         elif interp == "idle" and (self.stop_requested or self.seen_running):
             quiet = (live.get("inpos") is True and live.get("task_done") is True
                      and isinstance(live.get("current_vel"), (int, float))
@@ -120,6 +132,16 @@ class RunLog:
                 self.finish("aborted" if self.stop_requested else "completed_observed")
         elif elapsed > 5:
             self.finish("start_timeout")
+
+    @staticmethod
+    def paused_settled(snap, live):
+        velocity = live.get("current_vel")
+        return (isinstance(velocity, (int, float)) and not isinstance(velocity, bool)
+                and math.isfinite(velocity) and abs(velocity) < 1e-4 and bool(snap.axes)
+                and all(math.isfinite(a.position) and math.isfinite(a.commanded)
+                        and abs(a.position - a.commanded) < .001
+                        and math.isfinite(a.following_error) and abs(a.following_error) < .001
+                        for a in snap.axes))
 
     def finish(self, phase):
         if not self.active:

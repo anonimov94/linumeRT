@@ -15,6 +15,10 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · 2026-11-07. Dalszy realny odbiór: LinuxCNC PAUSED z kolejką
+utrzymuje inpos=false. Stan pauzy wymaga trzech zgodnych kontekstów, v=0 i błędów osi
+<0,001mm; osobne zdarzenie pause_settled. Start/zakończenie zachowują wymóg inpos.
+
 Model-Author: Codex · 2026-11-07. b3b9692: rzeczywisty Start i pauza PASS;
 wznowienie odrzucone przez stat.file wskazujący zakończony remap M6. Korekta
 zachowuje kontekst pauzy i dopuszcza tylko zamrożone zasoby G-code; obcy plik odrzucony.

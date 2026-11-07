@@ -211,9 +211,7 @@ class Instance:
                         if k not in excluded)
                 and snap.task_state.value == "on" and snap.mode.value == "auto"
                 and snap.interp_state.value == "paused" and snap.all_homed
-                and live.get("inpos") is True
-                and isinstance(live.get("current_vel"), (int, float))
-                and abs(live["current_vel"]) < 1e-4
+                and self.run.paused_settled(snap, live)
                 and job_binding.same_context(self.run.pause_context, self.run.context(snap, live))
                 and all(abs(a.following_error) < .001 for a in snap.axes))
 

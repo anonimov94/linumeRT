@@ -47,3 +47,9 @@ zostało bezpiecznie odrzucone, bo stat.file zachował nazwę remapu M6 po jego 
 Korekta dopuszcza przy wznowieniu wyłącznie zapamiętany plik G-code należący do
 niezmiennych zasobów tej instancji; Start nadal wymaga głównego program.ngc.
 Nieznany plik pozostaje odrzucony. Testy obejmują oba zaakceptowane konteksty i obcy plik.
+
+Kolejna rzeczywista pauza wykazała, że LinuxCNC utrzymuje inpos=false przy pozostającej
+kolejce ruchu mimo zerowej prędkości i ustalonego położenia. Wznowienie wymaga teraz
+trzech kolejnych zgodnych kontekstów zadanych, zerowej prędkości i błędu każdej osi
+ściśle poniżej0,001mm, zarówno actual-commanded, jak i following_error. Start i odbiór
+zakończenia nadal wymagają inpos. Kontekst pauzy zapisuje się jako osobne zdarzenie.

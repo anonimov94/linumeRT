@@ -122,7 +122,9 @@ def test_resume_uses_paused_tool_and_pose_instead_of_initial_t0(ready, change, f
     backend.snapshot = lambda: paused
     backend.resume = lambda: calls.append(("resume",))
     live["tool_offset"][2] = 40
-    gateway.step()
+    live["inpos"] = False  # paused LinuxCNC retains the pending motion queue
+    for _ in range(3):
+        gateway.step()
     assert instance.can_resume() == (file != "unapproved.ngc")
     assert not instance.can_start()
     if change or file == "unapproved.ngc":
