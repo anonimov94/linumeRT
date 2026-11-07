@@ -118,6 +118,27 @@ class MachineBackend(Protocol):
     def tick(self) -> None: ...
 
 
+class ReportBackend:
+    """Offline observations only: no controller module, command transport or virtual motion."""
+
+    read_only = True
+
+    def __init__(self, report):
+        self.report = report
+
+    def snapshot(self):
+        return MachineSnapshot(timestamp=time.monotonic())
+
+    def tick(self):
+        pass
+
+    def programs(self):
+        return ()
+
+    def jog_stop(self, axis=None):
+        pass  # no command transport exists in this backend
+
+
 class FakeBackend:
     """Atrapa napędzana zegarem ściennym; ``tick`` przesuwa czas o rzeczywiste ``dt``."""
 
@@ -320,6 +341,13 @@ class LinuxCNCBackend:
         out["ini"] = getattr(stat, "ini_filename", None)
         out["motion_line"] = getattr(stat, "motion_line", None)
         out["task_done"] = getattr(stat, "state", None) == getattr(self._lc(), "RCS_DONE", object())
+        joints = getattr(stat, "joint", None)
+        count = getattr(stat, "joints", 0)
+        # stat.joint exposes all sixteen slots, including unconfigured joints.
+        active = joints is not None and type(count) is int and 1 <= count <= len(joints)
+        out["joint_following_errors"] = None if not active else {
+            "units": "mm" if getattr(stat, "linear_units", None) == 1 else None,
+            "values": [joint.get("ferror_current") for joint in joints[:count]]}
         table = getattr(stat, "tool_table", None)
         out["tool_table"] = None if table is None else [
             {"id": row.id, "offsets": [getattr(row, a + "offset") for a in "xyzabcuvw"],

@@ -26,6 +26,10 @@ export function allowed(state, link) {
   if (!connected) return rejectAll("Brak połączenia z bramą");
   if (!fresh) return rejectAll("Telemetria nieaktualna (> 500 ms)");
   if (!state || state.schema !== 1) return rejectAll("Brak poprawnej migawki stanu");
+  if (state.read_only === true) {
+    for (const key of Object.keys(result)) result[key] = deny("Przegląd raportów offline");
+    return rejectAll("Przegląd raportów offline");
+  }
   if (state.gateway_error) return rejectAll("Błąd odczytu stanu bramy");
   const { task_state: task, mode, interp_state: interp } = state;
   const machineOn = task === "on";

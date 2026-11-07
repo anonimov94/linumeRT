@@ -179,7 +179,9 @@ const connection = createConnection({
     renderPrograms(state.programs);
     jog.onState(state);
     updateControls();
-    if (Array.isArray(state.jog_stop_pending) && state.jog_stop_pending.length) {
+    if (state.read_only === true) {
+      banner("Przeglądanie raportów offline. Sterowanie maszyną jest niedostępne.");
+    } else if (Array.isArray(state.jog_stop_pending) && state.jog_stop_pending.length) {
       banner("UWAGA: brama zgłasza zatrzymanie JOG oczekujące na potwierdzenie.");
     } else if (state.gateway_error) {
       banner("Błąd odczytu bramy. Sterowanie ruchem zablokowane.");

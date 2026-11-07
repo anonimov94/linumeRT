@@ -2187,17 +2187,18 @@
         "068"
       ],
       "status": "in_progress",
-      "progress": "Pierwszy checkpoint zapisany oddzielnie w draft PR231 (989a087): wspólny backend offline CLI/API i minimalny widok WebHMI,9 testów raportu/CLI/API PASS oraz46 regresji PASS/4skip. GUI raportu, rzeczywiste dane, pełna regresja i odbiór poziomu4 pozostają otwarte. Właściciel polecił teraz domknąć etap wykonania do main; raport zachowany do kolejnego etapu.",
+      "progress": "Poziom4 pełnego main nad zamkniętym RUN. PR231: wspólny raport CLI/API, przenośny JSON z kontrolą SHA i dowodami pozycji, WebHMI --report bez kontrolera/atrapy i z odmową komend. Wykresy XYZ bez interpolacji, maksima/RMS z pełnego zapisu, piki i alarmy z czasem/linią, pauzy i porównanie z dolną granicą modelu.7 archiwów rzeczywistych: niezależne max/math.fsum RMS zgodne, zachowane dokładne konfiguracje i portable JSON. Osobny kanał surowego joint.ferror_current i statystyki przegubów; różnica osi NML pozostaje odrębna, legacy bez raw FERR oznaczone unavailable.91 szybkich regresji PASS,42 JS PASS. Rzeczywisty dodatni zapis raw FERR, kliknięty odbiór GUI, pełna regresja/CI i scalenie nadal wymagane.",
       "remaining": [
-        "Zależność: przebieg VERTICAL-RUN z telemetrią i wynikiem zakończenia.",
-        "Uzgodnienie jednostek i czasu, tor zadany/rzeczywisty, błąd max/RMS osi, alarmy i czas.",
-        "Rozróżnienie zakończenia, przerwania, awarii i niepełnych danych; raport JSON i widok WebHMI.",
-        "Wykrycie znanych wymuszeń i zachowanie kontraktu precyzji projektu.",
-        "Detal przechodzący poziomy 1–4 i odczyt pakietu/raportu bez aktywnej maszyny."
+        "Rzeczywisty pełny przebieg i przerwania ze źródłem raw joint FERR; niezależne porównanie statystyk i CLI/API.",
+        "Kliknięty odbiór wykresów, alarmów oraz eksportu/ponownego odczytu JSON bez kontrolera; dowody i provenance.",
+        "Pełna regresja, exact-head CI i scalenie kodu/dowodów do main; końcowy audyt całego przepływu1–4."
       ],
       "evidence": [
         "docs/WORKFLOW_ZADANIA.md",
-        "https://github.com/anonimov94/linumeRT/pull/231"
+        "https://github.com/anonimov94/linumeRT/pull/231",
+        "core/linumert/programs/job_report.py",
+        "tests/test_job_report.py",
+        "docs/raporty/VERTICAL_REPORT_2026-11-07.md"
       ]
     }
   ]

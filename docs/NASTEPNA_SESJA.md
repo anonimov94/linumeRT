@@ -15,6 +15,47 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · 2026-11-08.3 RIP przerwań z raportem/raw FERR PASS56,43s.
+Pełny verified Plant d96a200:112,616904s, max gap0,027075s, raport observational/pozycja
+passed/raw4 available. Pierwszy112,706333s wykrył lukę0,111433s i pozostaje incomplete.
+Sim Stop zapisany; sterownik odbioru błędnie oczekiwał3 jointów, frozen ma4 — dane do
+niezależnego audytu, bez ponawiania ruchu. Mapowanie raportu używa wspólnego joint_drives;
+34 testy PASS. Własne CNC zakończone, moduły przywrócone, lease wolny. Dalej GUI/CI.
+
+Model-Author: Codex · 2026-11-08. Pierwszy odbiór raw FERR: boot PASS,3 przebiegi
+wykonane, ale raport incomplete — stat.joint zawiera16 slotów. Poprawiony odczyt
+ogranicza je do stat.joints aktywnej konfiguracji; regresja obejmuje14 nieużywanych.
+RIP do ponowienia; nie zaliczamy pierwszej próby jako odbioru raportu.
+
+Model-Author: Codex · 2026-11-08. Dziennik zapisuje osobny kanał surowego FERR każdego
+przegubu z tego samego odczytu NML; raport ma jego max/RMS i końcowe3 odczyty.
+91 szybkich regresji PASS; starsze zapisy jawnie bez tego kanału. Kolejny krok:
+4 RIP z API raportu, pełny rzeczywisty program i odbiór GUI offline; przed scaleniem CI.
+
+Model-Author: Codex · 2026-11-08.7 rzeczywistych archiwów: niezależne max/math.fsum RMS
+zgodne; zachowano oryginalne konfiguracje sim/Plant i przenośny raport z hashami.
+30 testów raportu PASS. Różnica osi NML pozostaje jawna; następne surowy joint FERR,
+rzeczywisty zapis tego kanału i kliknięty odbiór raportu. Bez duplikacji planera/RT.
+
+Model-Author: Codex · 2026-11-08. Raport ma wykresy pozycji/błędu z zachowanych punktów,
+wybór XYZ, maksimum pełnego zapisu oraz alarmy/czas/kontrole.31 Python PASS/4skip;
+składnia JS PASS (Node Windows). Przed odbiorem: rzeczywiste raporty, GUI i pełne CI.
+
+Model-Author: Codex · 2026-11-08. WebHMI --report otwiera JSON bez kontrolera i atrapy,
+odmawia wszystkich komend; import/eksport zachowują oryginalne liczby i sumę SHA.
+23 Python/42 JS PASS. Widok minimalny dostępny; wykres i kliknięty odbiór jeszcze otwarte.
+
+Model-Author: Codex · 2026-11-08. Checkpoint raportu: przenośny JSON sprawdza własną
+sumę SHA i dowody końcowej pozycji; można go odczytać po usunięciu testowych źródeł.
+21 testów PASS, limity metadanych i zakaz zapisu do źródeł. Integracja GUI nadal w toku.
+
+Model-Author: Codex · 2026-11-08. **Wznowienie celu, VERTICAL-REPORT w PR231:**
+po zamknięciu RUN pracujemy nad poziomem4 pełnego main. Odczyt7 oryginalnych archiwów
+PASS; raport rozróżnia legacy i3 przyjęte ustalenia. Dodano piki błędu/alarmy z czasem
+i linią, luki na końcach zapisu, jawne jednostki/kontrole i porównanie czasu bez pauz.
+15 testów raportu PASS. Następne: wykres/ponowny odczyt bez kontrolera, odbiór GUI,
+rzeczywiste dane i pełna regresja/CI; PR pozostaje draft. Bez zmian sterowania/Qt/HAL.
+
 Model-Author: Codex · 2026-11-07. **VERTICAL-RUN zamknięty, pełne main:**
 #229 scalony ff0a9f9ca1d3adc80fb9cd1b8e086ed368538aca. Dokładny f936f19 ma success
 ci42417145984 oraz LinuxCNC42417145941:245 RIP i12 Beta PASS; D38 sim/Plant PASS.
@@ -45,6 +86,11 @@ wznowienie/Stop PASS8,16s, archiwum zachowane, brak procesów/lease. CI90LinuxCN
 244PASS/1FAIL stary D38sim, lokalne odtworzenie PASS67,06s bez zmian. Próba2 job128518681208
 w toku, nadal nie scalać229. IPf02610PASS/REQ22/22; dokumentacyjne CI230 success.
 Raport zapisany osobno jako draft231, nie rozwijać go podczas domykania tego etapu.
+
+Model-Author: Codex · 2026-11-07. Osobny checkpoint raportu, gałąź
+codex/job-run-report-20261107 nad dowodami wykonania: wspólny backend CLI/API i minimalny
+widok WebHMI,9 testów raportu/CLI/API PASS oraz46 regresji/4skip. Nieodebrane GUI/realne
+dane/pełna regresja; draft do dalszego etapu. Wykonanie zamknięte w229/230; szkic zachowany nad main9d58f79, bez nowego rozwoju.
 
 Model-Author: Codex · 2026-11-07. Domknięcie wykonania90e8100:4 RIP PASS59,77s;
 Stop i kliknięte GUI kończą po3 próbkach <0,001mm (max0,000608/0,000656mm), surowe

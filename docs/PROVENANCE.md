@@ -746,3 +746,16 @@ pomiary po poprawce ustalenia osi90e8100, ta sama data i licencja; bez tokenów.
 `docs/raporty/vertical/run-sim-stop-settled-20261107.tar.gz`: własny LinuxCNC sim
 bez procesu Plant, WebHMI/HAL bez bypassu, ten sam verified job; Codex, 2026-11-07,
 GPL-2.0-or-later. Manifest/próbki/wynik bez tokenu, powiązane hashami w runs-20261107.json.
+
+### Odtwarzalny raport wykonania — 2026-11-08
+
+Codex, własne konfiguracje i obliczenia z powyższych pomiarów, GPL-2.0-or-later.
+`docs/raporty/vertical/execution-plant-20261108.tar.gz` i
+`docs/raporty/vertical/execution-sim-20261108.tar.gz`: dokładne niezmienne wejścia
+wcześniej odebranego zadania (program, narzędzia, napędy, konfiguracja i weryfikacja),
+bez danych uruchomionej instancji i tokenów. Hashe w `report-acceptance-20261108.json`.
+`docs/raporty/vertical/run-report-completed-20261108.json`: przenośny raport z oryginalnego
+przebiegu GUI; ta sama licencja i data. `docs/raporty/vertical/report-acceptance-20261108.json`:
+niezależna kontrola statystyk, powiązań i końcowych błędów7 oryginalnych przebiegów.
+Wykresy `webhmi/server/linumert_webhmi/static/js/run_plot.js` są własnym SVG generowanym
+z zapisanych wartości; bez bibliotek, obrazów ani zasobów zewnętrznych.
