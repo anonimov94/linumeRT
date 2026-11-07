@@ -1997,3 +1997,11 @@ kod/dowody225/226 zawarte. Pełny klon211160e:2134 PASS/15skip/242deselected, wh
 VERTICAL-VERIFY odebrane offline w udokumentowanym zakresie; wykonanie i raport pozostają otwarte.
 Nowa gałąź live-binding porównuje NML/INI/program/RAM narzędzi/jednostki/pozę/T0/G5x/G92,
 pokazuje kontrole w WebHMI;62 testy PASS. Start nadal zamknięty przed brakującymi bramkami i odbiorem.
+
+## VERTICAL-RUN — warunkowy Start i kontekst wznowienia · 2026-11-07
+
+Model-Author: Codex. PR229: integralność plików, HAL/napędy, limity, żywy klient,
+świeży odczyt i nowe potwierdzenie sterowania przed AUTO_RUN; wznowienie porównuje
+ustalony kontekst pauzy. Dziennik zapisuje próbki przed Start i rozróżnia wyniki przerwania.
+110 testów zakresu Python i41JS PASS. Rzeczywisty dodatni przebieg i GUI wymagane;
+PR pozostaje draft. Próbki NML nie są śladem RT; poziomy3–4 nadal otwarte.

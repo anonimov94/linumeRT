@@ -120,7 +120,7 @@ def test_bound_gateway_api_and_websocket_refuse_start_without_machine_side_effec
             while reply.get("id") != 1:
                 reply = ws.receive_json()
             assert reply["type"] == "error" and "zablokowany" in reply["message"]
-    with pytest.raises(CommandError, match="zablokowany"):
+    with pytest.raises(CommandError, match="zablokowan"):
         gateway.execute(Command(cmd="resume"))
     after = backend.machine.snapshot()
     assert after.task_state == before.task_state and after.positions == before.positions

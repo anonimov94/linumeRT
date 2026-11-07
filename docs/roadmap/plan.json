@@ -2141,9 +2141,9 @@
         "061"
       ],
       "status": "in_progress",
-      "progress": "Maincd8ed66 zawiera odebrany eksport verified (#22763254c9) i prywatny rozruch z WebHMI/HAL (#228cd8ed66), po końcowych Python/LinuxCNC success. GUI/CLI26 zasobów identycznych; rzeczywisty rozruch w E-STOP, Start409, dowody zachowane i własne procesy zakończone. Pełny klon211160e:2134 PASS/15skip/242deselected, wheel/REQ22/22 PASS. Nowa porcja codex/job-live-binding-20261107: kontrole odczytanego NML i RAM narzędzi, pokazane w WebHMI;62 testy zakresu PASS. Start nadal zamknięty do kompletnej bramki i odbioru wykonania.",
+      "progress": "Maincd8ed66 zawiera odebrany eksport verified (#22763254c9) i prywatny rozruch z WebHMI/HAL (#228cd8ed66), po końcowych Python/LinuxCNC success. GUI/CLI26 zasobów identycznych; rzeczywisty rozruch w E-STOP, Start409, dowody zachowane i własne procesy zakończone. Pełny klon211160e:2134 PASS/15skip/242deselected, wheel/REQ22/22 PASS. Nowa porcja codex/job-live-binding-20261107: kontrole odczytanego NML i RAM narzędzi, pokazane w WebHMI;62 testy zakresu PASS. Start nadal zamknięty do kompletnej bramki i odbioru wykonania. PR229: warunkowy Start/wznowienie po integralności plików, HAL/napędach, limitach, żywym kliencie i nowym potwierdzeniu NML. Dziennik obserwacyjny zapisuje odrębne wyniki.110 testów Python i41JS PASS; dodatni przebieg LinuxCNC i GUI przed scaleniem pozostają wymagane.",
       "remaining": [
-        "Dokończyć i odebrać wiązanie live: statyczne pliki, HAL/napędy, świeży guard Start i warunki wznowienia; testy rzeczywistego NML i GUI.",
+        "Odebrać bramkę Start/wznowienia i dziennik na rzeczywistym LinuxCNC/Plant oraz przez GUI; PR229 pozostaje draft.",
         "Zależność: pozytywny VERTICAL-VERIFY i niezmieniony manifest pakietu.",
         "Powiązanie instancji, programu, konfiguracji i narzędzi; bramki gotowości bez niejawnego zezwolenia na ruch.",
         "Start, postęp, pauza/wznowienie, przerwanie, E-STOP i utrata klienta z rozróżnialnymi wynikami.",
@@ -2165,7 +2165,11 @@
         "https://github.com/anonimov94/linumeRT/pull/228",
         "core/linumert/programs/job_binding.py",
         "tests/test_job_binding.py",
-        "docs/raporty/VERTICAL_BINDING_2026-11-07.md"
+        "docs/raporty/VERTICAL_BINDING_2026-11-07.md",
+        "tests/test_job_start_gate.py",
+        "webhmi/server/linumert_webhmi/job_run.py",
+        "tests/test_job_run.py",
+        "https://github.com/anonimov94/linumeRT/pull/229"
       ]
     },
     {

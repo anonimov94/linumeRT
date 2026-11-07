@@ -100,3 +100,11 @@ def test_interruptions_cannot_become_completion(run, cause):
     log.sample(snap, live, [])
     assert log.phase == {"estop": "estop", "fault": "fault", "timeout": "start_timeout"}[cause]
     assert json.loads((log.path / "result.json").read_text())["status"] != "completed_observed"
+
+
+def test_client_loss_is_only_terminal_after_controller_estop_is_observed(run):
+    log, _ = run
+    snap, live = sample(log, hmi_alive=False)
+    assert log.active and log.client_loss_at == 0
+    log.sample(replace(snap, task_state=TaskState.ESTOP), live, [])
+    assert log.phase == "client_lost"

@@ -15,6 +15,12 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · 2026-11-07. Checkpoint PR229: bramka Start/wznowienia obejmuje
+integralność plików, HAL/napędy, limity, żywy klient i nowe potwierdzenie polecenia NML;
+dziennik przebiegu zapisuje obserwacje i odrębne wyniki.110 Python i41JS PASS.
+Następne: rzeczywisty dodatni Start/pauza/wznowienie/Stop i GUI; PR nadal draft,
+VERTICAL-RUN/REPORT nieodebrane. Pełny projekt, docelowa gałąź main.
+
 Model-Author: Codex · 2026-11-07. **Main i następny krok VERTICAL-RUN:**
 #227 scalony63254c9 po ci42090379375/LinuxCNC42090379317 success, zawiera225/226.
 #228 scalonycd8ed66 po ci42097349359/LinuxCNC42097349416 success dla211160e.

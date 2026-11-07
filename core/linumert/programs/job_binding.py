@@ -29,6 +29,19 @@ def _path(actual, expected):
     return isinstance(actual, str) and bool(actual) and Path(actual).resolve() == expected.resolve()
 
 
+def same_context(a, b):
+    """Compare a paused receipt without rounding its coordinates for display."""
+    if isinstance(a, bool) or isinstance(b, bool):
+        return type(a) is type(b) and a == b
+    if isinstance(a, (int, float)) and isinstance(b, (int, float)):
+        return math.isfinite(b) and _close(a, b)
+    if isinstance(a, dict) and isinstance(b, dict):
+        return a.keys() == b.keys() and all(same_context(a[k], b[k]) for k in a)
+    if isinstance(a, (list, tuple)) and isinstance(b, (list, tuple)):
+        return len(a) == len(b) and all(same_context(x, y) for x, y in zip(a, b, strict=True))
+    return type(a) is type(b) and a == b
+
+
 def _tools(text, actual):
     if not isinstance(actual, list):
         return False
@@ -54,7 +67,7 @@ def _tools(text, actual):
 
 
 def inspect(snapshot, live, *, ini, program, table, setup, start):
-    """NML fields come from the same poll as snapshot; HAL observations are separate.
+    """Pose fields use snapshot's NML poll; tooldata/HAL reads are subsequent.
 
     Actual positioning must be strictly below0.001mm. Commanded geometry and setup
     retain the calculation tolerance1e-6mm. Missing observations never pass.

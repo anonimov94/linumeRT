@@ -13,7 +13,7 @@ from datetime import UTC, datetime
 from linumert.programs.job import json_text
 
 TERMINAL = {"completed_observed", "aborted", "estop", "fault", "start_timeout",
-            "resume_timeout", "unavailable"}
+            "resume_timeout", "unavailable", "client_lost"}
 
 
 class RunLog:
@@ -34,6 +34,7 @@ class RunLog:
         self.finished = None
         self.last_line = 0
         self.alarms = {}
+        self.client_loss_at = None
         self.pause_context = None
         self.identity = {"format": "linumert.job.run", "version": 1, "run_id": self.run_id,
             **{k: identity[k] for k in ("job_id", "execution_id", "verification_id", "target")},
@@ -70,6 +71,9 @@ class RunLog:
         if not self.active:
             return
         elapsed = self.clock() - self.started
+        if live.get("hmi_alive") is False and self.client_loss_at is None:
+            self.client_loss_at = elapsed
+            self.event("client_lost_observed")
         self.samples += 1
         self.last_line = max(self.last_line, live.get("motion_line") or 0)
         for alarm in alarms:
@@ -83,11 +87,12 @@ class RunLog:
                                  "following_error": a.following_error} for a in snap.axes},
                "overrides": [snap.feed_override, snap.rapid_override, snap.spindle_override],
                "alarms": alarms, "errors": list(snap.errors)}
-        row.update({k: live.get(k) for k in ("inpos", "current_vel", "task_done", "hal")})
+        row.update({k: live.get(k) for k in
+                    ("inpos", "current_vel", "task_done", "hal", "hmi_alive")})
         self.stream.write(json.dumps(row, ensure_ascii=False, allow_nan=False) + "\n")
         interp = snap.interp_state.value
         if snap.task_state.value == "estop":
-            self.finish("estop")
+            self.finish("client_lost" if self.client_loss_at is not None else "estop")
         elif snap.errors or alarms or snap.task_state.value != "on":
             self.finish("fault")
         elif interp in ("reading", "waiting"):
@@ -102,7 +107,9 @@ class RunLog:
             if self.resume_requested and self.clock() - self.resume_at > 5:
                 self.finish("resume_timeout")
                 return
-            if self.pause_context is None and live.get("inpos") is True:
+            if (self.pause_context is None and live.get("inpos") is True
+                    and isinstance(live.get("current_vel"), (int, float))
+                    and abs(live["current_vel"]) < 1e-4):
                 self.pause_context = copy.deepcopy(self.context(snap, live))
         elif interp == "idle" and (self.stop_requested or self.seen_running):
             quiet = (live.get("inpos") is True and live.get("task_done") is True
@@ -124,6 +131,7 @@ class RunLog:
         result = {**self.identity, "status": phase, "elapsed_s": self.finished - self.started,
                   "samples": self.samples, "last_line": self.last_line,
                   "alarms": list(self.alarms.values()),
+                  "client_loss_at_s": self.client_loss_at,
                   "completion_evidence": "idle after observed running; gateway command log",
                   "servo_trace": False}
         (self.path / "result.json").write_text(json_text(result), encoding="utf-8")

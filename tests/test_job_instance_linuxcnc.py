@@ -55,6 +55,8 @@ def test_private_instance_boots_estop_and_stops_only_its_processes(configuration
                 for key in ("controller", "units", "tool_table", "initial_tool", "work_setup"):
                     assert checks[key]["status"] == "passed", checks
                 assert checks["program"]["status"] == checks["machine_ready"]["status"] == "failed"
+                assert checks["hal"]["status"] == "failed", checks
+                assert checks["limits"]["status"] == "passed", checks
                 req = urllib.request.Request("http://127.0.0.1:8793/api/command", method="POST",
                     data=b'{"cmd":"run"}', headers={"X-Linumert-Token": record["token"],
                                                    "Content-Type": "application/json"})
