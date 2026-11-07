@@ -53,3 +53,9 @@ kolejce ruchu mimo zerowej prędkości i ustalonego położenia. Wznowienie wyma
 trzech kolejnych zgodnych kontekstów zadanych, zerowej prędkości i błędu każdej osi
 ściśle poniżej0,001mm, zarówno actual-commanded, jak i following_error. Start i odbiór
 zakończenia nadal wymagają inpos. Kontekst pauzy zapisuje się jako osobne zdarzenie.
+
+Rzeczywisty4a29313: Start/pauza/wznowienie PASS; Stop zatrzymał ruch, ale stary
+ogólny jog_stop generował błędy EMC_JOG_STOP podczas AUTO i dziennik poprawnie wskazał
+fault. Backend pomija niedozwolony JOG_STOP w aktywnym AUTO; Stop nadal wysyła abort.
+90 testów backendu/bramy/bramki PASS. Sterownik testowy zakończono po obserwacji fault;
+nie jest to dodatni dowód Stop ani ukończenia programu.

@@ -439,6 +439,11 @@ class LinuxCNCBackend:
         self._send_jog(joint_mode, self._lc().JOG_CONTINUOUS, number, velocity)
 
     def jog_stop(self, axis: str | None) -> None:
+        snap = self._recent()
+        if snap.mode is Mode.AUTO and snap.interp_state.value in ("reading", "waiting", "paused"):
+            # LinuxCNC cannot jog in active AUTO and rejects JOG_STOP there.
+            # Program Stop is the independent abort(), sent by Gateway.
+            return
         lc, cmd = self._lc(), self._cmd()
         names = self._joint_axes()
         joints = self._reader.joint_map(names)  # stop bez warunków: także przy niepełnej mapie

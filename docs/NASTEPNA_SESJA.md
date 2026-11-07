@@ -15,6 +15,10 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · 2026-11-07.4a29313 rzeczywisty Start/pauza/wznowienie PASS;
+Stop fizycznie zatrzymał program, ale ogólny JOG_STOP w AUTO wywołał fault. Poprawiony
+backend zachowuje abort,90 testów PASS. Own driver zakończony, test Stop do ponowienia.
+
 Model-Author: Codex · 2026-11-07. Dalszy realny odbiór: LinuxCNC PAUSED z kolejką
 utrzymuje inpos=false. Stan pauzy wymaga trzech zgodnych kontekstów, v=0 i błędów osi
 <0,001mm; osobne zdarzenie pause_settled. Start/zakończenie zachowują wymóg inpos.

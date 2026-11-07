@@ -264,6 +264,17 @@ def test_overrides_only_send_given_values():
     assert c.calls == [("feedrate", 0.5), ("spindleoverride", 1.2)]
 
 
+@pytest.mark.parametrize("interp", ["INTERP_READING", "INTERP_WAITING", "INTERP_PAUSED"])
+def test_active_auto_stops_program_with_abort_without_illegal_jog_commands(interp):
+    b, c = backend(task_mode=2)
+    b._reader._stat.interp_state = getattr(b._lc(), interp)
+    b.snapshot()
+    b.jog_stop(None)
+    assert c.calls == []
+    b.stop()
+    assert c.calls == [("abort",)]
+
+
 def test_commands_do_not_drain_the_error_channel():
     b, c = backend(task_mode=1)
     reads = []
