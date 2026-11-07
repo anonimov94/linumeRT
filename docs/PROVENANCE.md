@@ -736,3 +736,8 @@ bez tokenów i bez zasobów zewnętrznych. Nie są atomową rejestracją cyklu s
 LinuxCNC/Plant8796 podczas pauzy, dostępne RESUME; Codex, ta sama data i licencja.
 `run-gui-completed-20261107.tar.gz` i `gui-terminal-20261107.json`: własny kliknięty
 przebieg RUN/PAUSE/RESUME, przeglądarka jako jedyne źródło heartbeat HMI; ta sama licencja.
+
+`run-settled-20261107.png`: własny zrzut końcowego wyniku WebHMI8796, bez retuszu;
+Codex, 2026-11-07, GPL-2.0-or-later. `run-gui-settled-20261107.tar.gz`,
+`run-stop-settled-20261107.tar.gz`, `gui-settled-terminal-20261107.json`: własne surowe
+pomiary po poprawce ustalenia osi90e8100, ta sama data i licencja; bez tokenów.

@@ -15,6 +15,11 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · 2026-11-07. Domknięcie wykonania90e8100:4 RIP PASS59,77s;
+Stop i kliknięte GUI kończą po3 próbkach <0,001mm (max0,000608/0,000656mm), surowe
+archiwa/hashe/zrzut zachowane. Brak własnych procesów, lease zwolniony. Pełny7d6238d
+2181PASS/REQ22/22; CI90Python/C/wheel/Plant success, LinuxCNC w toku. Czeka scalenie229.
+
 Model-Author: Codex · 2026-11-07. Analiza raw po zakończeniu: ostatni błąd Z około
 0,03mm, więc stary completed_observed oznacza tylko koniec interpretera. Dodano settling
 do3 zgodnych odczytów <0,001mm i settle_timeout5s;28 testów PASS. Odbiór RIP/GUI wymagany.

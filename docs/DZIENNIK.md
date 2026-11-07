@@ -2014,3 +2014,12 @@ GUI8796 RUN/PAUSE/RESUME zakończony148,28s/6895próbek wraz z pauzą operatora.
 Oryginalne manifesty/JSONL/wyniki z hashami, zrzut i surowy stan zachowane; własne procesy
 zakończone, moduły przywrócone. Pełna regresja i końcowe CI229 przed scaleniem wymagane.
 Raport porównawczy/luki telemetrii pozostają otwarte; bez twierdzenia o pełnym śladzie RT.
+
+## VERTICAL-RUN — ustalenie osi i domknięcie porcji · 2026-11-07
+
+Model-Author: Codex.90e8100:4 RIP PASS59,77s; po Stop oraz klikniętym pełnym GUI
+wszystkie osie mają3 końcowe odczyty <0,001mm, max0,000608/0,000656mm. Surowe
+archiwa/hashe/zrzut zachowane, własne procesy zakończone i lease zwolniony.
+Pełny7d6238d:2181PASS, REQ22/22. CI90Python/C/wheel/Plant success; końcowy LinuxCNC
+w toku, scalenie229 wymagane. Pole błędu osi pochodzi z różnicy współrzędnych NML;
+nie jest surowym joint.ferror_current ani kwalifikacją sprzętu.
