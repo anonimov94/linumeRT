@@ -15,6 +15,11 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · 2026-11-07. Osobny checkpoint raportu, gałąź
+codex/job-run-report-20261107 nad dowodami wykonania: wspólny backend CLI/API i minimalny
+widok WebHMI,9 testów raportu/CLI/API PASS oraz46 regresji/4skip. Nieodebrane GUI/realne
+dane/pełna regresja; draft do dalszego etapu. Właściciel: teraz domknąć wykonanie do main.
+
 Model-Author: Codex · 2026-11-07. Domknięcie wykonania90e8100:4 RIP PASS59,77s;
 Stop i kliknięte GUI kończą po3 próbkach <0,001mm (max0,000608/0,000656mm), surowe
 archiwa/hashe/zrzut zachowane. Brak własnych procesów, lease zwolniony. Pełny7d6238d

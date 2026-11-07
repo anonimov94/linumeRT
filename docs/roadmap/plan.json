@@ -2186,8 +2186,8 @@
         "053",
         "068"
       ],
-      "status": "planned",
-      "progress": "Czwarty poziom zleconego przepływu. Specyfikacja wymaga raportu powiązanego z manifestem, kontrolami i przebiegiem; brak danych nie może dawać PASS.",
+      "status": "in_progress",
+      "progress": "Osobny checkpoint na codex/job-run-report-20261107 nad dowodami wykonania: offline backend, CLI run-report, uwierzytelnione API i minimalny widok/pobranie JSON WebHMI. Hashe źródeł, obserwowane max/RMS, czas/pauza/dolna granica modelu, jawne luki i brak PASS pozycji dla starych/niepełnych danych.9 testów raportu/CLI/API i46 regresji PASS/4skip, lint/JS PASS. Kliknięty odbiór raportu i rzeczywiste dane/pełna regresja pozostają wymagane; draft, nie odbiór poziomu4. Właściciel zlecił domknięcie bieżącego wykonania do main.",
       "remaining": [
         "Zależność: przebieg VERTICAL-RUN z telemetrią i wynikiem zakończenia.",
         "Uzgodnienie jednostek i czasu, tor zadany/rzeczywisty, błąd max/RMS osi, alarmy i czas.",
@@ -2196,7 +2196,10 @@
         "Detal przechodzący poziomy 1–4 i odczyt pakietu/raportu bez aktywnej maszyny."
       ],
       "evidence": [
-        "docs/WORKFLOW_ZADANIA.md"
+        "docs/WORKFLOW_ZADANIA.md",
+        "core/linumert/programs/job_report.py",
+        "tests/test_job_report.py",
+        "docs/raporty/VERTICAL_REPORT_2026-11-07.md"
       ]
     }
   ]

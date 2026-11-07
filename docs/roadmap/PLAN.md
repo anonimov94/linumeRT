@@ -158,7 +158,7 @@ Nie są kolejnym harmonogramem. Ich status dotyczy tylko wskazanego kroku.
 | VERTICAL-PREPARE | 028, 029, 032, 039, 040, 041, 043, 062 | Zadanie obróbkowe: przygotowanie wspólnego pakietu w WebHMI | ukończone |
 | VERTICAL-VERIFY | 044, 049, 051, 052, 055 | Zadanie obróbkowe: interpreter, limity i diagnostyka obróbki | ukończone |
 | VERTICAL-RUN | 028, 029, 049, 053, 061 | Zadanie obróbkowe: wykonanie i telemetria przez WebHMI w sim/Plant | w toku |
-| VERTICAL-REPORT | 024, 049, 052, 053, 068 | Zadanie obróbkowe: raport przewidywania i rzeczywistego wykonania | planowane |
+| VERTICAL-REPORT | 024, 049, 052, 053, 068 | Zadanie obróbkowe: raport przewidywania i rzeczywistego wykonania | w toku |
 
 ## Postęp, pozostały zakres i dowody
 
@@ -1074,9 +1074,9 @@ Pozostaje: Końcowe LinuxCNC CI dokładnego90e8100, autokontrola oraz scalenie P
 
 ### VERTICAL-REPORT — Zadanie obróbkowe: raport przewidywania i rzeczywistego wykonania
 
-**planowane**. Czwarty poziom zleconego przepływu. Specyfikacja wymaga raportu powiązanego z manifestem, kontrolami i przebiegiem; brak danych nie może dawać PASS.
+**w toku**. Osobny checkpoint na codex/job-run-report-20261107 nad dowodami wykonania: offline backend, CLI run-report, uwierzytelnione API i minimalny widok/pobranie JSON WebHMI. Hashe źródeł, obserwowane max/RMS, czas/pauza/dolna granica modelu, jawne luki i brak PASS pozycji dla starych/niepełnych danych.9 testów raportu/CLI/API i46 regresji PASS/4skip, lint/JS PASS. Kliknięty odbiór raportu i rzeczywiste dane/pełna regresja pozostają wymagane; draft, nie odbiór poziomu4. Właściciel zlecił domknięcie bieżącego wykonania do main.
 
 Pozostaje: Zależność: przebieg VERTICAL-RUN z telemetrią i wynikiem zakończenia. Uzgodnienie jednostek i czasu, tor zadany/rzeczywisty, błąd max/RMS osi, alarmy i czas. Rozróżnienie zakończenia, przerwania, awarii i niepełnych danych; raport JSON i widok WebHMI. Wykrycie znanych wymuszeń i zachowanie kontraktu precyzji projektu. Detal przechodzący poziomy 1–4 i odczyt pakietu/raportu bez aktywnej maszyny.
 
-Źródła: [docs/WORKFLOW_ZADANIA.md](../WORKFLOW_ZADANIA.md).
+Źródła: [docs/WORKFLOW_ZADANIA.md](../WORKFLOW_ZADANIA.md), [core/linumert/programs/job_report.py](../../core/linumert/programs/job_report.py), [tests/test_job_report.py](../../tests/test_job_report.py), [docs/raporty/VERTICAL_REPORT_2026-11-07.md](../raporty/VERTICAL_REPORT_2026-11-07.md).
 
