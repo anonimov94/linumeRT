@@ -103,3 +103,68 @@ Nowy stan settling zbiera dalej próbki do trzech zgodnych odczytów ze stabiln�
 zadaną i błędem actual-commanded oraz following_error każdej osi <0,001mm. Brak
 ustalenia przez5s po opróżnieniu kolejki daje settle_timeout i abort.28 testów dziennika/
 bramki PASS; odbiór rzeczywisty i GUI poprawki wymagane. Wcześniejsze archiwa zachowane.
+
+## Końcowy odbiór ustalenia osi — runtime90e8100
+
+4 rzeczywiste regresje RIP PASS59,77s. Faktyczny verified ZIP227: Stop→aborted9,017242s,
+największy błąd w trzech końcowych odczytach X0,000607649mm. Kliknięte GUI8796
+RUN/PAUSE/RESUME→completed_observed126,645824s/5898próbek/linia105; największy błąd
+w trzech końcowych odczytach Z0,000655949mm. Wszystkie osie w obu przebiegach <0,001mm.
+Są to obserwacje końcowego ustalenia w NML, bez kwalifikacji sprzętu i bez twierdzenia
+o maksymalnym błędzie każdego cyklu serwa. Pole following_error to różnica zadana−
+rzeczywista z modelu AxisSnapshot, nie surowe joint.ferror_current.
+
+Oryginały: run-gui-settled-20261107.tar.gz, run-stop-settled-20261107.tar.gz,
+gui-settled-terminal-20261107.json; ID/hashe i błędy w runs-20261107.json.
+Zrzut bez retuszu run-settled-20261107.png. Hosty zamknięte, moduły przywrócone,
+brak własnych procesów i lease zwolniony. Pełna lokalna regresja7d6238d:2181PASS,
+15skip/245deselected,464,40s; REQ22/22. CI dokładnego90e8100: Python/C/wheel i macierz
+Plant success (42378074935); końcowy LinuxCNC42378074910 w toku przed scaleniem229.
+
+Końcowy wariant sim bez procesu Plant również PASS: ten sam job95bf2c0 i verification,
+executionae0ba5bdfd4aa2c6b76be8b4fd66d6a3a5ed74e6528cfa306eeb4178c222dd3f;
+Start/pauza/wznowienie/Stop→aborted8,155675s. Końcowe trzy odczyty wszystkich osi
+spełniają <0,001mm; raw w run-sim-stop-settled-20261107.tar.gz. Host zakończony,
+moduły przywrócone, lease zwolniony. Kod runtime identyczny z90e8100.
+
+CI LinuxCNC42378074910 próba1:244PASS/1FAIL, jedynie stary D38 sim
+test_retract_returns_to_compensated_path. Sterownik, rdzeń i panel D38 mają identyczne
+bloby na maincd8ed66 i90e8100; wariant Plant oraz wszystkie4 nowe testy zadania PASS.
+Odmowa dotyczyła request1,001001192mm przy nominalnym1,001mm i progu1e-6mm.
+Ten sam D38 sim lokalnie PASS67,06s bez zmiany kodu/progów. Ponowiony wyłącznie
+nieudany job (próba2,128518681208) ponownie244PASS/1FAIL, request1,001001019mm.
+Beta API w obu próbach pominięte wskutek tego błędu, bez deklarowania zaliczenia.
+Próba2 przekroczyła także60min całego jobu przy nieudanym wysyłaniu artefaktów.
+Lokalny pełny7eb41ab:2182PASS/1FAIL wyłącznie ścieżka provenance nowego zrzutu;
+poprawkaf02698d:10IP PASS i REQ22/22. CI dokumentacjif02698d42380002073 success.
+
+## Usunięcie blokady D38 — końcowy test f936f19
+
+Model-Author: Codex. Zmiana wyłącznie w teście i budżecie workflow; Qt i model niezmienione.
+LinuxCNC sumuje skalowane przyrosty impulsów; po wyłączeniu simple_tp jego zadanie
+śledzi zachowaną pozycję, podczas gdy pin request może jeszcze pokazywać starsze żądanie.
+Dlatego test sprawdza przyrost od eoffset sprzed uzbrojenia, dokładnie1001 impulsów
+i niezmienione1e-6mm błędu przyrostu. Pierwsza pauza wymusza2e-6mm żądania;
+rzeczywista reszta przekracza1e-6mm, więc poprzednie sprawdzenie absolutne jej nie zalicza.
+Wyniki zawierają oba początkowe odczyty oraz licznik przed/po. Wszystkie5 kombinacji
+G40/G41/G42 w mm/calach: sim i Plant2PASS140,58s. Pierwsze poprawki fixture fd94e08/
+7d643e8 nie przeszły obu wariantów; zachowane w historii, nie są dowodem odbioru.
+Budżet całego CI90min, bez pomijania przypadków i bez zmiany timeoutów testów.
+Świeże pełne CI42417145984 i LinuxCNC42417145941 na f936f19 wymagane przed scaleniem.
+Niezależna kontrola7 archiwów: SHA256 archiwum i oryginałów, ID, liczby próbek oraz
+trzy końcowe błędy w zaakceptowanych przebiegach zgodne z indeksem.
+
+## Domknięcie etapu w pełnym main
+
+Model-Author: Codex. PR229 scalony jako ff0a9f9ca1d3adc80fb9cd1b8e086ed368538aca.
+Dokładny head f936f19dfcc448838aa56e2d4db2795b25122d4e: [ci42417145984](https://github.com/anonimov94/linumeRT/actions/runs/42417145984)
+i [LinuxCNC42417145941](https://github.com/anonimov94/linumeRT/actions/runs/42417145941) success.
+Pierwszy:2039 Python,190 natywnych,REQ22/22, wheel i macierz Plant PASS. Drugi:
+2183 testy konfiguracji/184 podtesty,192 natywne/6 podtestów,245 LinuxCNC2605,83s
+oraz12 Beta215,14s PASS. Oba D38 i nowe scenariusze zadania PASS; artefakty/cleanup success.
+Lokalne4 regresje końcowego headu PASS58,09s po D38; brak własnych procesów, lease zwolniony.
+Main zawiera identyczne produkcyjne core/WebHMI/Plant/config/HAL/Qt/simulation jak
+odebrany runtime90e8100; późniejsza poprawka dotyczyła testu i budżetu CI. Dokumentacja
+przechodzi lint,31 kontroli planu/IP/architektury iREQ22/22. Dowody uzupełnia PR230.
+Autokontrola, bez niezależnego przeglądu. Wspólny plan oznacza wyłącznie VERTICAL-RUN
+jako done; raport porównawczy pozostaje osobnym draft PR231. NIEZWERYFIKOWANE NA SPRZĘCIE.

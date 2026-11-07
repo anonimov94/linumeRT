@@ -2140,16 +2140,9 @@
         "053",
         "061"
       ],
-      "status": "in_progress",
-      "progress": "Pełny maincd8ed66 zawiera eksport verified227 i prywatny rozruch228. PR229: integralność plików, NML/RAM/HAL/limity, żywy klient i nowe potwierdzenie Start; wznowienie zachowuje ustalony kontekst pauzy i zamrożone remapy. Runtime293af3e:4 rzeczywiste regresje RIP PASS58,34s (rozruch, Stop, E-STOP, utrata klienta). Pełny program z verified ZIP227 zakończony112,531625s/5288próbek; kliknięte GUI8796 RUN/PAUSE/RESUME zakończone148,279929s/6895próbek wraz z pauzą operatora, przeglądarka jedynym heartbeat HMI. Surowe manifesty/JSONL/wyniki, hashe i zrzut zachowane. Własne procesy zakończone. Pełna regresja/końcowe CI i scalenie229 wymagane; NML nie jest pełnym śladem serwa ani kwalifikacją sprzętu. Analiza raw: stary wynik completed_observed kończył próbki przed ustaleniem Z (około0,03mm); nie jest odbiorem pozycjonowania. Nowy stan settling wymaga3 odczytów ze stabilnym zadaniem i błędami<0,001mm lub settle_timeout po5s.28 testów zakresu PASS, rzeczywisty odbiór poprawki wymagany.",
-      "remaining": [
-        "Odebrać końcowe ustalenie osi i settle_timeout na LinuxCNC/Plant oraz w GUI, pełna regresja/CI dokładnego headu i scalenie PR229 do main.",
-        "Zależność: pozytywny VERTICAL-VERIFY i niezmieniony manifest pakietu.",
-        "Powiązanie instancji, programu, konfiguracji i narzędzi; bramki gotowości bez niejawnego zezwolenia na ruch.",
-        "Start, postęp, pauza/wznowienie, przerwanie, E-STOP i utrata klienta z rozróżnialnymi wynikami.",
-        "Telemetria rzeczywistego LinuxCNC sim/Plant; jawne źródło i niepełne dane.",
-        "Odbiór automatyczny i kliknięty przebieg WebHMI; kwalifikacja sprzętu pozostaje osobna."
-      ],
+      "status": "done",
+      "progress": "Pełne linumeRT: kod wykonania PR229 scalony do main jako ff0a9f9ca1d3adc80fb9cd1b8e086ed368538aca po końcowych success ci42417145984 i LinuxCNC42417145941 dla f936f19dfcc448838aa56e2d4db2795b25122d4e. CI:2039 Python/190 natywnych; w RIP2183 testy konfiguracji/184 podtesty,192 natywne/6 podtestów,245 LinuxCNC oraz12 Beta PASS. Frozen job jest wiązany z NML/RAM/HAL/limitami i żywym WebHMI; Start wymaga świeżego potwierdzenia, wznowienie zgodnego ustalonego kontekstu. Stop/E-STOP/utrata klienta mają odrębne wyniki, brak automatycznego Reset/ON/bazowania. Wykonanie/Stop zapisują do3 stabilnych odczytów wszystkich osi<0,001mm; settle_timeout5s. Kliknięte GUI runtime90e8100: RUN/PAUSE/RESUME→completed_observed126,645824s/5898próbek, max końcowych3 błędów0,000655949mm; Plant Stop9,017242s/max0,000607649mm; sim Stop8,155675s/błędy0. Kod produkcyjny jest identyczny z odebranym90e8100; dalsza zmiana dotyczyła testu D38 i budżetu CI. D38 sim+Plant2PASS140,58s z resztą2e-6mm,1001 impulsów i niezmienionym1e-6mm;4 końcowe regresje zadania PASS58,09s.7 archiwów zweryfikowanych po hashach/ID/próbkach. Dokumentacja i dowody PR230; lint,31 kontroli planu/IP/architektury iREQ22/22 PASS. NML jest próbkowanym źródłem; błąd osi=commanded−actual, nie surowy joint.ferror_current. Odbiór sprzętu i VERTICAL-REPORT pozostają odrębne; ten etap nie zamyka nadrzędnych sesji ani bramek.",
+      "remaining": [],
       "evidence": [
         "docs/WORKFLOW_ZADANIA.md",
         "core/linumert/programs/job_execution.py",
@@ -2173,7 +2166,14 @@
         "tests/test_job_run_linuxcnc.py",
         "docs/raporty/vertical/runs-20261107.json",
         "docs/raporty/vertical/gui-terminal-20261107.json",
-        "docs/raporty/vertical/run-paused-20261107.png"
+        "docs/raporty/vertical/run-paused-20261107.png",
+        "docs/raporty/vertical/gui-settled-terminal-20261107.json",
+        "docs/raporty/vertical/run-settled-20261107.png",
+        "tests/test_pause_retract_linuxcnc.py",
+        "https://github.com/anonimov94/linumeRT/pull/230",
+        "https://github.com/anonimov94/linumeRT/commit/ff0a9f9ca1d3adc80fb9cd1b8e086ed368538aca",
+        "https://github.com/anonimov94/linumeRT/actions/runs/42417145984",
+        "https://github.com/anonimov94/linumeRT/actions/runs/42417145941"
       ]
     },
     {
@@ -2186,8 +2186,8 @@
         "053",
         "068"
       ],
-      "status": "planned",
-      "progress": "Czwarty poziom zleconego przepływu. Specyfikacja wymaga raportu powiązanego z manifestem, kontrolami i przebiegiem; brak danych nie może dawać PASS.",
+      "status": "in_progress",
+      "progress": "Pierwszy checkpoint zapisany oddzielnie w draft PR231 (989a087): wspólny backend offline CLI/API i minimalny widok WebHMI,9 testów raportu/CLI/API PASS oraz46 regresji PASS/4skip. GUI raportu, rzeczywiste dane, pełna regresja i odbiór poziomu4 pozostają otwarte. Właściciel polecił teraz domknąć etap wykonania do main; raport zachowany do kolejnego etapu.",
       "remaining": [
         "Zależność: przebieg VERTICAL-RUN z telemetrią i wynikiem zakończenia.",
         "Uzgodnienie jednostek i czasu, tor zadany/rzeczywisty, błąd max/RMS osi, alarmy i czas.",
@@ -2196,7 +2196,8 @@
         "Detal przechodzący poziomy 1–4 i odczyt pakietu/raportu bez aktywnej maszyny."
       ],
       "evidence": [
-        "docs/WORKFLOW_ZADANIA.md"
+        "docs/WORKFLOW_ZADANIA.md",
+        "https://github.com/anonimov94/linumeRT/pull/231"
       ]
     }
   ]

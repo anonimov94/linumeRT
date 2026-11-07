@@ -15,6 +15,22 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · 2026-11-07. **VERTICAL-RUN zamknięty, pełne main:**
+#229 scalony ff0a9f9ca1d3adc80fb9cd1b8e086ed368538aca. Dokładny f936f19 ma success
+ci42417145984 oraz LinuxCNC42417145941:245 RIP i12 Beta PASS; D38 sim/Plant PASS.
+Dowody końcowego ustalenia osi, kliknięty zrzut i7 raw archiwów zachowane w #230.
+Końcowe lokalne regresje zadania4PASS58,09s, lint/31 kontroli dokumentacji/REQ22/22 PASS.
+Własne procesy zakończone i lease zwolniony. Źródła runtime main zgodne z odebranym90e8100.
+W planie RUN done; REPORT pozostaje oddzielnym draft #231, bez dalszego rozwoju w tym etapie.
+Nie zamknięto nadrzędnych bramek ani odbioru sprzętu. Starsze checkpointy poniżej są historią.
+
+Model-Author: Codex · 2026-11-07. **Końcowy head229 f936f19:** stary D38 sim+Plant
+2PASS140,58s z wymuszoną resztą2e-6mm, dokładnie1001 impulsów i progiem1e-6mm.
+Bazą jest pozycja eoffset sprzed uzbrojenia (request bywa starszy). Qt/model bez zmian.
+Siedem archiwów ponownie zweryfikowanych; cztery regresje zadania na f936f19 w toku.
+CI42417145984/42417145941 przed scaleniem229;230 obejmuje aktualne testy i dowody.
+231 zachowany jako szkic; nie rozwijać raportu przy domykaniu etapu wykonania.
+
 Model-Author: Codex · 2026-11-07. **Stan zatrzymania domknięcia229:** CI90e8100
 dwukrotnie244PASS/1FAIL w starym D38 sim: absolutny request zakładał zerową resztę.
 Test mierzy teraz przyrost z dokładnie1001 impulsów, próg1e-6 zachowany; wymusza2e-6
@@ -23,6 +39,17 @@ Lint PASS. Test7d643e8: Plant PASS, sim FAIL w następnej pauzie; wyłączony si
 śledzi pozycję, a request pozostaje stary. Bazą przyrostu jest więc odczyt eoffset
 sprzed uzbrojenia, nie poprzedni request. Oba warianty RIP/CI wymagane.
 230 zachowuje dowody,231 pozostaje szkicem; polecenie właściciela: domknąć etap.
+
+Model-Author: Codex · 2026-11-07. Zamykanie etapu: sim bez Plant także Start/pauza/
+wznowienie/Stop PASS8,16s, archiwum zachowane, brak procesów/lease. CI90LinuxCNC
+244PASS/1FAIL stary D38sim, lokalne odtworzenie PASS67,06s bez zmian. Próba2 job128518681208
+w toku, nadal nie scalać229. IPf02610PASS/REQ22/22; dokumentacyjne CI230 success.
+Raport zapisany osobno jako draft231, nie rozwijać go podczas domykania tego etapu.
+
+Model-Author: Codex · 2026-11-07. Domknięcie wykonania90e8100:4 RIP PASS59,77s;
+Stop i kliknięte GUI kończą po3 próbkach <0,001mm (max0,000608/0,000656mm), surowe
+archiwa/hashe/zrzut zachowane. Brak własnych procesów, lease zwolniony. Pełny7d6238d
+2181PASS/REQ22/22; CI90Python/C/wheel/Plant success, LinuxCNC w toku. Czeka scalenie229.
 
 Model-Author: Codex · 2026-11-07. Analiza raw po zakończeniu: ostatni błąd Z około
 0,03mm, więc stary completed_observed oznacza tylko koniec interpretera. Dodano settling
