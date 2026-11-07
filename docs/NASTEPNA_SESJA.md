@@ -15,6 +15,15 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · 2026-11-07. **Main i następny krok VERTICAL-RUN:**
+#227 scalony63254c9 po ci42090379375/LinuxCNC42090379317 success, zawiera225/226.
+#228 scalonycd8ed66 po ci42097349359/LinuxCNC42097349416 success dla211160e.
+Pełny klon211160e:2134 PASS,15skip,242deselected,454,43s; bez porażki Qt; wheel/REQ22/22 PASS.
+Własna gałąź codex/job-live-binding-20261107 od maincd8ed66. Pierwsze kontrole żywego
+NML i RAM narzędzi widoczne w WebHMI;62 testy zakresu PASS. Start nadal zamknięty:
+integralność live/HAL, świeży guard Start, wznowienie, dziennik i telemetria pozostają do wdrożenia.
+Raport VERTICAL_BINDING_2026-11-07.md. Brak własnych procesów/lease; inwentaryzacja Nov7 wolna.
+
 Model-Author: Codex · 2026-11-05. **#228 — prywatny rozruch odebrany:**
 Rzeczywisty test Plant/LinuxCNC/WebHMI/HAL PASS bez Reset/ON/bazowania, StartHTTP409,
 oryginalny .var zachowany, zamknięcie bez pozostawionych procesów przed cleanupem fixture.

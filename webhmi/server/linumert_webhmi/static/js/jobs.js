@@ -192,6 +192,17 @@ export function createJobs(request) {
     if (instance) {
       $("jobInstanceIdentity").textContent = "Zadanie " + instance.job_id + " · " + instance.target;
       $("jobInstanceStatus").textContent = instance.reason;
+      $("jobInstanceChecks").replaceChildren();
+      for (const check of Object.values(instance.checks || {})) {
+        const row = document.createElement("div");
+        const title = document.createElement("dt");
+        const verdict = document.createElement("dd");
+        title.textContent = check.reason;
+        verdict.textContent = { passed: "Spełnione", failed: "Niespełnione",
+          unavailable: "Brak odczytu" }[check.status] || check.status;
+        row.append(title, verdict);
+        $("jobInstanceChecks").appendChild(row);
+      }
     }
   }, setOnline(value) {
     online = value;

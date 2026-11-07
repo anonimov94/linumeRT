@@ -1989,3 +1989,11 @@ poprawione wraz z kolejnością zamknięcia i własnością daemonów (marker/pi
 E-STOP, brak bazowania, Start409, dowody zachowane i brak pozostawionych procesów przed cleanupem.
 37 testów zakresu,41JS PASS. GUI8792 z faktycznego ZIP227 kliknięte; zrzut i surowy stan/provenance
 zapisane. Instancja zakończona, moduły przywrócone, lease zwolniony. Wykonanie/telemetria i CI otwarte.
+
+## 2026-11-07 — scalenie227/228 i początek wiązania ze stanem NML
+
+Model-Author: Codex. #227→63254c9 i #228→cd8ed66 po końcowych Python/LinuxCNC success;
+kod/dowody225/226 zawarte. Pełny klon211160e:2134 PASS/15skip/242deselected, wheel/REQ22/22 PASS.
+VERTICAL-VERIFY odebrane offline w udokumentowanym zakresie; wykonanie i raport pozostają otwarte.
+Nowa gałąź live-binding porównuje NML/INI/program/RAM narzędzi/jednostki/pozę/T0/G5x/G92,
+pokazuje kontrole w WebHMI;62 testy PASS. Start nadal zamknięty przed brakującymi bramkami i odbiorem.

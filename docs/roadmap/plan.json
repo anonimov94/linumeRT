@@ -2100,13 +2100,9 @@
         "052",
         "055"
       ],
-      "status": "in_progress",
-      "progress": "Pełny projekt mainc0b42c4: #221/#222/#223/#224 scalone po końcowym CI/LinuxCNC (C także ISO) success. Dokładny rs274/SDK, limity i diagnostyka materiału/brył/obciążeń z frozen job. #224:2097 PASS/1 znany Qt FAIL w klonie,19 real RIP i65 regresji PASS; rzeczywisty wheel PASS. WebHMI kliknięte, JSON/CLI zgodne;2861,832031mm³ i107,958839s dolnego czasu. Pełny przepływ3 powtórzenia: mediana Python7,2761s/C4,2322s; wyniki materiału identyczne. Osobny commit dowodów dodaje2 testy API/CLI i helisy (5 przypadków materiału PASS), bez zmiany runtime. Status całości nadal partial; brak zgody na wykonanie. Kolejna porcja na codex/job-verified-20261105: formalny verify i WebHMI,12 testów bramek,3 real RIP oraz rzeczywisty CLI/API verified PASS; GUI/pełna regresja/CI w toku. Dowody #225 head6fa342f oczekują końcowego CI. #226 ebca978/5beb4be: kliknięty WebHMI verified, CLI/GUI JSON zgodny poza elapsed/id, wykonanie nieuruchomione; brama8790 zatrzymana. #225 poprawiono do821971e (brak wpisu pochodzenia zrzutu w pierwszym CI); końcowe kontrole obu PR w toku.",
-      "remaining": [
-        "Końcowe CI i scalenie kolejno #225 (head821971e) oraz #226 po pełnej regresji; GUI formalnego verified jest odebrane.",
-        "Powiązanie pakietu, początku/T0 i zamrożonych zasobów z instancją wykonawczą sim/Plant przed startem.",
-        "Poziomy3–4: wykonanie/telemetria i porównanie z przewidywaniem; kwalifikacja sprzętu pozostaje osobna."
-      ],
+      "status": "done",
+      "progress": "Pełny projekt main: dokładny interpreter rs274/SDK, limity, materiał2.5D, zadeklarowane bryły/strefy i obciążenia ze wspólnego frozen job. Formalny verified po świeżych dodatnich kontrolach, bez zgody na ruch. CLI/WebHMI/JSON odebrane; przypadki ujemne i cały Python/C porównane. #227 scalony63254c9 po końcowym ci42090379375 i LinuxCNC42090379317 success dla edcacf3, zawiera225/226; wcześniejsze porażki CI zachowane w PR. Zakres i ograniczenia w raportach. Powiązanie z żywą maszyną i wykonanie należą do VERTICAL-RUN, bez kwalifikacji sprzętu.",
+      "remaining": [],
       "evidence": [
         "docs/WORKFLOW_ZADANIA.md",
         "core/linumert/programs/job_check.py",
@@ -2130,7 +2126,8 @@
         "tests/test_job_verify.py",
         "docs/raporty/VERTICAL_VERIFIED_2026-11-05.md",
         "https://github.com/anonimov94/linumeRT/pull/225",
-        "https://github.com/anonimov94/linumeRT/pull/226"
+        "https://github.com/anonimov94/linumeRT/pull/226",
+        "https://github.com/anonimov94/linumeRT/pull/227"
       ]
     },
     {
@@ -2144,9 +2141,9 @@
         "061"
       ],
       "status": "in_progress",
-      "progress": "Pierwsza porcja na codex/job-execution-config-20261105 nad #226: run-config i ZIP WebHMI/API z verified, ten sam snapshot programu/narzędzi/offsetu i własna biblioteka zamrożonych napędów. Konfiguracja configured, bez zgody na ruch i bez startu procesów.37 testów zakresu i65 regresji PASS;2 rzeczywiste rs274 konsumują eksport sim/Plant i odtwarzają zweryfikowany tor. GUI, pełna regresja i CI tej porcji jeszcze wymagane; nie zalicza wykonania ani G2. #227: kliknięty ZIP poprawiony68c6362 (native YAML),26 zasobów CLI/GUI identycznych bajtowo, publiczny loader i C Plant --run PASS.17 testów eksportu i rzeczywisty G55 PASS. Klon6058529:2126 PASS/1 znany Qt FAIL; lint/C/REQ22/22 PASS. Brama8791 zatrzymana. To konfiguracja, nie wykonanie kontrolera; końcowe CI wymagane. Kolejna porcja codex/job-instance-20261105: prywatne evidence/config/HOME, własne procesy i WebHMI/HAL bez bypassu. Start zamknięty do kontroli live.35 pierwszych testów i41JS PASS; realny rozruch/GUI/CI otwarte. #228: rzeczywisty rozruch Plant/LinuxCNC/WebHMI HAL PASS w E-STOP, Start409 i zamknięcie bez pozostawionych procesów. Poprawione .var/HOME/token i własność daemonów.37 testów zakresu/41JS PASS, GUI8792 odebrane z ZIP227, dowody zapisane. Lease zwolniony; wykonanie nadal otwarte.",
+      "progress": "Maincd8ed66 zawiera odebrany eksport verified (#22763254c9) i prywatny rozruch z WebHMI/HAL (#228cd8ed66), po końcowych Python/LinuxCNC success. GUI/CLI26 zasobów identycznych; rzeczywisty rozruch w E-STOP, Start409, dowody zachowane i własne procesy zakończone. Pełny klon211160e:2134 PASS/15skip/242deselected, wheel/REQ22/22 PASS. Nowa porcja codex/job-live-binding-20261107: kontrole odczytanego NML i RAM narzędzi, pokazane w WebHMI;62 testy zakresu PASS. Start nadal zamknięty do kompletnej bramki i odbioru wykonania.",
       "remaining": [
-        "Końcowe CI i scalenie #227 do main (zawiera225/226); prywatna instancja w osobnej porcji, jej rozruch/GUI/CI oraz rzeczywiste wykonanie/telemetria pozostają otwarte.",
+        "Dokończyć i odebrać wiązanie live: statyczne pliki, HAL/napędy, świeży guard Start i warunki wznowienia; testy rzeczywistego NML i GUI.",
         "Zależność: pozytywny VERTICAL-VERIFY i niezmieniony manifest pakietu.",
         "Powiązanie instancji, programu, konfiguracji i narzędzi; bramki gotowości bez niejawnego zezwolenia na ruch.",
         "Start, postęp, pauza/wznowienie, przerwanie, E-STOP i utrata klienta z rozróżnialnymi wynikami.",
@@ -2165,7 +2162,10 @@
         "tests/test_job_instance.py",
         "docs/raporty/VERTICAL_INSTANCE_2026-11-05.md",
         "tests/test_job_instance_linuxcnc.py",
-        "https://github.com/anonimov94/linumeRT/pull/228"
+        "https://github.com/anonimov94/linumeRT/pull/228",
+        "core/linumert/programs/job_binding.py",
+        "tests/test_job_binding.py",
+        "docs/raporty/VERTICAL_BINDING_2026-11-07.md"
       ]
     },
     {

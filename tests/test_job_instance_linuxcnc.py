@@ -51,6 +51,10 @@ def test_private_instance_boots_estop_and_stops_only_its_processes(configuration
                 assert state["task_state"] == "estop" and not state["all_homed"], state
                 assert state["hmi_hal"] and not state["execution"]["can_start"]
                 assert state["execution"]["job_id"] == record["job_id"]
+                checks = state["execution"]["checks"]
+                for key in ("controller", "units", "tool_table", "initial_tool", "work_setup"):
+                    assert checks[key]["status"] == "passed", checks
+                assert checks["program"]["status"] == checks["machine_ready"]["status"] == "failed"
                 req = urllib.request.Request("http://127.0.0.1:8793/api/command", method="POST",
                     data=b'{"cmd":"run"}', headers={"X-Linumert-Token": record["token"],
                                                    "Content-Type": "application/json"})

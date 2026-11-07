@@ -135,6 +135,8 @@ class Gateway:
                 self._programs, self._programs_at = self.backend.programs(), now
             state = snapshot_to_dict(snap)
             if self._instance is not None:
+                self._instance.observe(snap, self.backend.binding_state()
+                                       if hasattr(self.backend, "binding_state") else None)
                 state["execution"] = self._instance.status()
             state["alarms"] = self._alarm_rows()
             state["programs"] = list(self._programs)

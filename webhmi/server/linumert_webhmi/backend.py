@@ -311,6 +311,21 @@ class LinuxCNCBackend:
         self._linear_units = float(units) if units is not None else None
         return self._last
 
+    def binding_state(self) -> dict:
+        """Read-only fields from the last poll; never consumes another error message."""
+        stat = self._reader._stat
+        names = ("linear_units", "inpos", "current_vel", "tool_offset", "g5x_index",
+                 "g5x_offset", "g92_offset", "rotation_xy")
+        out = {name: getattr(stat, name, None) for name in names}
+        out["ini"] = getattr(stat, "ini_filename", None)
+        table = getattr(stat, "tool_table", None)
+        out["tool_table"] = None if table is None else [
+            {"id": row.id, "offsets": [getattr(row, a + "offset") for a in "xyzabcuvw"],
+             **{name: getattr(row, name) for name in
+                ("diameter", "frontangle", "backangle", "orientation")}}
+            for row in table if row.id >= 0]
+        return out
+
     def estop(self) -> None:
         self._cmd().state(self._lc().STATE_ESTOP)
 

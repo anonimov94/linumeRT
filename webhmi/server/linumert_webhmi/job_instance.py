@@ -19,7 +19,7 @@ import tempfile
 import time
 from pathlib import Path
 
-from linumert.programs import job, job_execution
+from linumert.programs import job, job_binding, job_execution
 
 FORMAT = "linumert.job.instance"
 POSTGUI = """# WebHMI D35; Model-Author: Codex. No reset or enable command.
@@ -89,6 +89,8 @@ class Instance:
         if record.get("format") != FORMAT or record.get("version") != 1:
             raise ValueError("Nieprawidłowy manifest instancji")
         original, files = job_execution.read(self.root / "evidence")
+        self._files = files
+        self._checks = {}
         if any(record.get(k) != original[k] for k in
                ("execution_id", "job_id", "verification_id", "target", "ini")):
             raise ValueError("Instancja nie odpowiada niezmiennej konfiguracji zadania")
@@ -113,10 +115,17 @@ class Instance:
             if name != "linumert.var" and job.digest(data) != digest:
                 raise ValueError(f"Zmieniona konfiguracja instancji: {name}")
 
+    def observe(self, snapshot, live):
+        self._checks = job_binding.inspect(snapshot, live,
+            ini=self.root / "config" / self.record["ini"],
+            program=self.root / "config/nc_files/program.ngc", table=self._files["tool.tbl"],
+            setup=json.loads(self._files["job/setup.json"]),
+            start=json.loads(self._files["verification.json"])["assumptions"]["start_mm"])
+
     def status(self):
         return {**{k: self.record[k] for k in ("execution_id", "job_id", "target")},
                 "status": "instance_loaded", "can_start": False, "reason": PENDING,
-                "execution_authorization": False}
+                "execution_authorization": False, "checks": self._checks}
 
 
 def _stop(proc):
