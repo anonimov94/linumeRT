@@ -111,18 +111,21 @@ def test_gateway_shutdown_aborts_active_job_and_closes_incomplete_log(ready):
 
 
 @pytest.mark.parametrize("change", [False, True])
-def test_resume_uses_paused_tool_and_pose_instead_of_initial_t0(ready, change):
+@pytest.mark.parametrize("file", ["nc_files/program.ngc", "macros/lrt_m6.ngc", "unapproved.ngc"])
+def test_resume_uses_paused_tool_and_pose_instead_of_initial_t0(ready, change, file):
     gateway, instance, backend, calls, live = ready
     gateway.execute(Command(cmd="run"))
     paused = replace(backend.snapshot(), interp_state=InterpState.PAUSED, tool_number=1,
+        program_file=str(instance.root / "config" / file),
         axes=tuple(replace(a, commanded=a.commanded + 1, position=a.position + 1)
                    for a in backend.snapshot().axes))
     backend.snapshot = lambda: paused
     backend.resume = lambda: calls.append(("resume",))
     live["tool_offset"][2] = 40
     gateway.step()
-    assert instance.can_resume() and not instance.can_start()
-    if change:
+    assert instance.can_resume() == (file != "unapproved.ngc")
+    assert not instance.can_start()
+    if change or file == "unapproved.ngc":
         live["tool_offset"][2] = 40.01
         with pytest.raises(CommandError, match="zablokowane"):
             gateway.execute(Command(cmd="resume"))

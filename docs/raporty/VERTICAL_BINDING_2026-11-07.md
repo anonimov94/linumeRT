@@ -41,3 +41,9 @@ limity zgodne, HAL poprawnie niespełnione w E-STOP. Próba dodatnia wykryła pr
 ponownego użycia portu po zamknięciu HTTP (TIME_WAIT); kontrola portu z SO_REUSEADDR
 nadal odrzuca aktywny listener. Zamykanie bramy kończy aktywny dziennik jako unavailable
 i wysyła abort.48 testów związanej porcji PASS; dodatni Start nadal do odbioru.
+
+Rzeczywisty b3b9692: Start i pauza programu z odebranego ZIP zadziałały. Wznowienie
+zostało bezpiecznie odrzucone, bo stat.file zachował nazwę remapu M6 po jego powrocie.
+Korekta dopuszcza przy wznowieniu wyłącznie zapamiętany plik G-code należący do
+niezmiennych zasobów tej instancji; Start nadal wymaga głównego program.ngc.
+Nieznany plik pozostaje odrzucony. Testy obejmują oba zaakceptowane konteksty i obcy plik.

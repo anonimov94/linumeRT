@@ -15,6 +15,10 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · 2026-11-07. b3b9692: rzeczywisty Start i pauza PASS;
+wznowienie odrzucone przez stat.file wskazujący zakończony remap M6. Korekta
+zachowuje kontekst pauzy i dopuszcza tylko zamrożone zasoby G-code; obcy plik odrzucony.
+
 Model-Author: Codex · 2026-11-07. Po d4be475: rzeczywisty rozruch1PASS;
 poprawka restartu po HTTP TIME_WAIT i zamykania aktywnego dziennika,48 testów PASS.
 Dodatni test kontynuowany w osobnej instancji; lease linuxcnc Codex vertical-live-start-d4be475.

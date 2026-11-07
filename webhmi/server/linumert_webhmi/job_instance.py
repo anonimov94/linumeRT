@@ -199,8 +199,14 @@ class Instance:
         if not self.run or self.run.phase != "paused" or self.run.resume_requested:
             return False
         snap, live = self._snapshot, self._live
-        excluded = {"machine_ready", "start_position", "initial_tool"}
+        # LinuxCNC stat.file may still name the last M6 remap after it returned.
+        # Start bound the main program; resume must retain the paused filename,
+        # and that file must be one of this job's immutable G-code resources.
+        excluded = {"machine_ready", "start_position", "initial_tool", "program"}
+        approved_file = any(job_binding._path(snap.program_file, self.root / "config" / name)
+                            for name in self._expected_config if name.endswith(".ngc"))
         return (not self.run.stop_requested and self.run.pause_context is not None
+                and approved_file
                 and all(v["status"] == "passed" for k, v in self._checks.items()
                         if k not in excluded)
                 and snap.task_state.value == "on" and snap.mode.value == "auto"
