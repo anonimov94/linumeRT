@@ -103,3 +103,20 @@ Nowy stan settling zbiera dalej próbki do trzech zgodnych odczytów ze stabiln�
 zadaną i błędem actual-commanded oraz following_error każdej osi <0,001mm. Brak
 ustalenia przez5s po opróżnieniu kolejki daje settle_timeout i abort.28 testów dziennika/
 bramki PASS; odbiór rzeczywisty i GUI poprawki wymagane. Wcześniejsze archiwa zachowane.
+
+## Końcowy odbiór ustalenia osi — runtime90e8100
+
+4 rzeczywiste regresje RIP PASS59,77s. Faktyczny verified ZIP227: Stop→aborted9,017242s,
+największy błąd w trzech końcowych odczytach X0,000607649mm. Kliknięte GUI8796
+RUN/PAUSE/RESUME→completed_observed126,645824s/5898próbek/linia105; największy błąd
+w trzech końcowych odczytach Z0,000655949mm. Wszystkie osie w obu przebiegach <0,001mm.
+Są to obserwacje końcowego ustalenia w NML, bez kwalifikacji sprzętu i bez twierdzenia
+o maksymalnym błędzie każdego cyklu serwa. Pole following_error to różnica zadana−
+rzeczywista z modelu AxisSnapshot, nie surowe joint.ferror_current.
+
+Oryginały: run-gui-settled-20261107.tar.gz, run-stop-settled-20261107.tar.gz,
+gui-settled-terminal-20261107.json; ID/hashe i błędy w runs-20261107.json.
+Zrzut bez retuszu run-settled-20261107.png. Hosty zamknięte, moduły przywrócone,
+brak własnych procesów i lease zwolniony. Pełna lokalna regresja7d6238d:2181PASS,
+15skip/245deselected,464,40s; REQ22/22. CI dokładnego90e8100: Python/C/wheel i macierz
+Plant success (42378074935); końcowy LinuxCNC42378074910 w toku przed scaleniem229.
