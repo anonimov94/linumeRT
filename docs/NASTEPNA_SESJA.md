@@ -15,6 +15,11 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · 2026-11-07. Analiza raw po zakończeniu: ostatni błąd Z około
+0,03mm, więc stary completed_observed oznacza tylko koniec interpretera. Dodano settling
+do3 zgodnych odczytów <0,001mm i settle_timeout5s;28 testów PASS. Odbiór RIP/GUI wymagany.
+Pełna regresja7d6238d nadal trwa w klonie; nie zmieniać jego checkoutu przed zakończeniem.
+
 Model-Author: Codex · 2026-11-07. Runtime293af3e:4 rzeczywiste regresje RIP PASS,
 58,34s. GUI8796 RUN/PAUSE/RESUME→completed_observed148,28s/6895próbek; przeglądarka
 jedynym heartbeat HMI. Zrzut/rawstan/archiwum w raporcie; host zamknięty, moduły przywrócone.

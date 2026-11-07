@@ -94,3 +94,12 @@ Porcja gotowości/sterowania i obserwacyjnego dziennika ma odbiór operatora.
 Pełna regresja/końcowe CI i scalenie229 wymagane. Raport porównawczy poziomu4,
 obsługa ponownego odczytu oraz ocena luk telemetrii pozostają do wykonania;
 nie deklarujemy kwalifikacji sprzętu ani rejestracji wszystkich cykli serwa.
+
+Analiza końcowych surowych próbek ujawniła, że inpos/RCS_DONE nie oznacza jeszcze
+ustalonego sprzężenia zwrotnego: stare completed_observed kończyły zapis przy błędzie
+Z0,030182mm (automat) i0,033386mm (GUI), a Stop przy X0,013973mm. To prawidłowe dowody
+zakończenia interpretera/przerwania, ale NIE dodatni odbiór końcowego pozycjonowania.
+Nowy stan settling zbiera dalej próbki do trzech zgodnych odczytów ze stabilną pozycją
+zadaną i błędem actual-commanded oraz following_error każdej osi <0,001mm. Brak
+ustalenia przez5s po opróżnieniu kolejki daje settle_timeout i abort.28 testów dziennika/
+bramki PASS; odbiór rzeczywisty i GUI poprawki wymagane. Wcześniejsze archiwa zachowane.

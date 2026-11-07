@@ -152,3 +152,24 @@ def test_unconfirmed_power_loss_is_fault_and_never_automatic_continuation(run):
     clock.t = 1.1
     log.sample(snap, live, [])
     assert log.phase == "fault" and log.needs_abort
+
+
+@pytest.mark.parametrize("settles", [True, False])
+def test_completion_waits_for_feedback_below_precision_threshold_or_times_out(run, settles):
+    log, clock = run
+    snap, live = sample(log)
+    lagging = replace(snap, interp_state=InterpState.IDLE,
+                      axes=(replace(snap.axes[0], position=1.03),))
+    for _ in range(4):
+        log.sample(lagging, live, [])
+    assert log.active and log.phase == "settling"
+    if settles:
+        for _ in range(3):
+            sample(log, InterpState.IDLE)
+    else:
+        clock.t = 5.1
+        log.sample(lagging, live, [])
+    assert log.phase == ("completed_observed" if settles else "settle_timeout")
+    result = json.loads((log.path / "result.json").read_text())
+    assert result["settled_position_observed"] == settles
+    assert log.needs_abort == (not settles)

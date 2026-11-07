@@ -194,10 +194,12 @@ export function createJobs(request) {
       $("jobInstanceStatus").textContent = instance.reason;
       const run = instance.run;
       const phases = { starting: "Uruchamianie", running: "Wykonywanie", paused: "Wstrzymano",
+        settling: "Oczekiwanie na ustalenie osi",
         stopping: "Zatrzymywanie", completed_observed: "Interpreter zakończył program",
         aborted: "Przerwano przez Stop", estop: "Zatrzymanie E-STOP", fault: "Błąd przebiegu",
         client_lost: "Utrata klienta i zatrzymanie E-STOP",
         start_timeout: "Przekroczony czas startu", resume_timeout: "Przekroczony czas wznowienia",
+        settle_timeout: "Przekroczony czas ustalenia osi",
         unavailable: "Zapis lub odczyt niepełny" };
       $("jobRunStatus").textContent = run
         ? (phases[run.phase] || run.phase) + " · " + run.elapsed_s.toFixed(1) +

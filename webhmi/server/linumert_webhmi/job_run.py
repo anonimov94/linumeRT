@@ -15,7 +15,7 @@ from linumert.programs.job import json_text
 from linumert.programs.job_binding import same_context
 
 TERMINAL = {"completed_observed", "aborted", "estop", "fault", "start_timeout",
-            "resume_timeout", "unavailable", "client_lost"}
+            "resume_timeout", "settle_timeout", "unavailable", "client_lost"}
 
 
 class RunLog:
@@ -33,6 +33,8 @@ class RunLog:
         self.needs_abort = False
         self.samples = 0
         self.quiet = 0
+        self._end_at = None
+        self._end_commanded = None
         self.finished = None
         self.last_line = 0
         self.alarms = {}
@@ -123,6 +125,7 @@ class RunLog:
             self.seen_running = True
             self.phase = "stopping" if self.stop_requested else "running"
             self.quiet = 0
+            self._end_at, self._end_commanded = None, None
             self.pause_context = None
             self._pause_candidate, self._pause_samples = None, 0
             self.resume_requested = False
@@ -144,12 +147,23 @@ class RunLog:
                     self.pause_context = copy.deepcopy(context)
                     self.event("pause_settled", context=self.pause_context)
         elif interp == "idle" and (self.stop_requested or self.seen_running):
-            quiet = (live.get("inpos") is True and live.get("task_done") is True
+            queue_idle = (live.get("inpos") is True and live.get("task_done") is True
                      and isinstance(live.get("current_vel"), (int, float))
                      and abs(live["current_vel"]) < 1e-4)
-            self.quiet = self.quiet + 1 if quiet else 0
+            commanded = {a.name: a.commanded for a in snap.axes}
+            quiet = queue_idle and self.paused_settled(snap, live)
+            self.quiet = (self.quiet + 1 if quiet
+                          and same_context(commanded, self._end_commanded) else 1 if quiet else 0)
+            self._end_commanded = commanded
+            if queue_idle and self._end_at is None:
+                self._end_at = self.clock()
+                self.event("queue_idle_observed")
+            if self._end_at is not None:
+                self.phase = "stopping" if self.stop_requested else "settling"
             if self.quiet >= 3:
                 self.finish("aborted" if self.stop_requested else "completed_observed")
+            elif self._end_at is not None and self.clock() - self._end_at > 5:
+                self.finish("settle_timeout")
         elif elapsed > 5:
             self.finish("start_timeout")
 
@@ -167,7 +181,8 @@ class RunLog:
         if not self.active:
             return
         self.finished = self.clock()
-        self.needs_abort = phase in {"fault", "start_timeout", "resume_timeout", "unavailable"}
+        self.needs_abort = phase in {"fault", "start_timeout", "resume_timeout", "settle_timeout",
+                                    "unavailable"}
         self.phase = phase
         self.event("terminal", phase=phase)
         result = {**self.identity, "status": phase, "elapsed_s": self.finished - self.started,
@@ -175,6 +190,9 @@ class RunLog:
                   "alarms": list(self.alarms.values()),
                   "client_loss_at_s": self.client_loss_at,
                   "completion_evidence": "idle after observed running; gateway command log",
+                  "settled_position_observed": phase in {"completed_observed", "aborted"}
+                                               and self.quiet >= 3,
+                  "settled_tolerance_mm": .001,
                   "servo_trace": False}
         (self.path / "result.json").write_text(json_text(result), encoding="utf-8")
         self.stream.close()

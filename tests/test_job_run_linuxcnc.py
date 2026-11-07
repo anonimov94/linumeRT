@@ -21,7 +21,7 @@ from websockets.sync.client import connect
 
 pytestmark = pytest.mark.linuxcnc
 TERMINAL = {"completed_observed", "aborted", "estop", "fault", "start_timeout",
-            "resume_timeout", "unavailable", "client_lost"}
+            "resume_timeout", "settle_timeout", "unavailable", "client_lost"}
 
 
 class Operator:
@@ -153,6 +153,7 @@ def test_bound_job_pause_resume_and_distinct_interruptions(configuration, tmp_pa
                 assert result["status"] == outcome and result["job_id"] == record["job_id"]
                 assert result["samples"] > 3 and result["last_line"] > 0
                 assert not result["servo_trace"] and result["source"] == "linuxcnc.stat"
+                assert result["settled_position_observed"] == (outcome == "aborted")
                 assert not state["execution"]["can_resume"]
             finally:
                 try:
