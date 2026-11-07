@@ -387,5 +387,47 @@
       "result.json": "371fc32a67d1a1729fcb8f722d3e7f0530eef92e77a996675c68a4816d0e2697"
     },
     "process_cleanup": "own processes absent; HAL modules restored"
+  },
+  {
+    "checkpoint": "90e810017334b113c526d5d092f37042e0f2460a",
+    "acceptance": "actual LinuxCNC sim + WebHMI/HAL, no Plant process; RUN/PAUSE/RESUME/STOP",
+    "result": {
+      "alarms": [],
+      "client_loss_at_s": null,
+      "completion_evidence": "idle after observed running; gateway command log",
+      "elapsed_s": 8.155675006000003,
+      "execution_id": "ae0ba5bdfd4aa2c6b76be8b4fd66d6a3a5ed74e6528cfa306eeb4178c222dd3f",
+      "format": "linumert.job.run",
+      "job_id": "95bf2c0bc88fb59abaa1cdea747ddfdbfc58bc042701d4fe0beed5fbb8a1316e",
+      "last_line": 20,
+      "run_id": "fe7aee5d0bb94c4bb576c9004cf8b500",
+      "samples": 384,
+      "sampling": "NML poll; tooldata/HAL reads sequential, not an atomic servo trace",
+      "servo_trace": false,
+      "settled_position_observed": true,
+      "settled_tolerance_mm": 0.001,
+      "source": "linuxcnc.stat",
+      "started_at": "2026-11-07T20:41:28.984467+00:00",
+      "status": "aborted",
+      "target": "sim",
+      "verification_id": "f6bf9edd09bca992b4713a73b2293fb6d37d8b1259ac726d6d3a4b3cacacb26f",
+      "version": 1
+    },
+    "last3_max_abs_axis_error_mm": {
+      "X": 0.0,
+      "Y": 0.0,
+      "Z": 0.0
+    },
+    "max_poll_gap_s": 0.05625190499999633,
+    "axis_following_error_definition": "NML commanded minus actual Cartesian position, not raw joint ferror_current",
+    "archive": "run-sim-stop-settled-20261107.tar.gz",
+    "archive_bytes": 15544,
+    "archive_sha256": "c62b68e5c7cbc01d03e8d5af87bee2dd8620ce7063229a5143631ef42970b6dc",
+    "files": {
+      "manifest.json": "be913ea751fe7e061a3ecf035d98df3f0f4b99c6a549a4544127cc2c5e3fc90c",
+      "samples.jsonl": "18ffb578371e2cc84921cd2ed5e74bde8e8793901642ca2a00ca990c58afe503",
+      "result.json": "c22146dc4e3a86f7bb62e37c28c66a62c374b06e56765330a9a482040a33c09f"
+    },
+    "process_cleanup": "own processes absent; HAL modules restored"
   }
 ]

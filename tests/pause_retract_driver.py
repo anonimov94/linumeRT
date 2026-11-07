@@ -117,6 +117,27 @@ def run(ini, joint_count, output):
 
         wait(settled, control=control)
 
+    def seed_retained_offset():
+        # Exercise the nonzero accumulator permitted after a completed return.
+        # Only this test owns the pins; the production control timer is stopped.
+        component["retract-own"] = True
+        wait(lambda: hal.get_value("axis.z.eoffset-enable"))
+        hal.set_p("axis.z.eoffset-scale", "0.000002")
+        component["retract-target"] = 0.001
+        wait(lambda: hal.get_value("axis.z.eoffset-counts") == 1
+             and abs(hal.get_value("axis.z.eoffset-request") - 0.000002) < 1e-9)
+        # Counts are deltas multiplied by the scale in each servo cycle.
+        # Consume the decrement at zero scale to retain the tiny request.
+        hal.set_p("axis.z.eoffset-scale", "0")
+        time.sleep(0.02)
+        component["retract-target"] = 0
+        wait(lambda: hal.get_value("axis.z.eoffset-counts") == 0)
+        time.sleep(0.02)
+        hal.set_p("axis.z.eoffset-scale", "0.001")
+        component["retract-own"] = False
+        wait(lambda: not hal.get_value("axis.z.eoffset-enable"))
+        assert abs(hal.get_value("axis.z.eoffset-request") - 0.000002) < 1e-9
+
     for side, inch in ((40, False), (41, False), (42, False), (41, True), (42, True)):
         scale = 25.4 if inch else 1
         path = output / f"g{side}-{'inch' if inch else 'mm'}.ngc"
@@ -144,18 +165,31 @@ def run(ini, joint_count, output):
         wait(lambda: control.last and control.last.ready and panel.withdraw.isEnabled(),
              control=control)
         wait_for_settled_drives()
+        if side == 40:
+            seed_retained_offset()
+            wait_for_settled_drives()
         before, z_before, frame = position(), feedback_z(), control.last.frame
+        offset_before = float(hal.get_value("axis.z.eoffset"))
+        requested_before = float(hal.get_value("axis.z.eoffset-request"))
+        counts_before = int(hal.get_value("axis.z.eoffset-counts"))
+        expected_counts = counts_before + round(height / hal.get_value("axis.z.eoffset-scale"))
         assert abs(before[1] - expected_y) < 0.01, (side, before)
         panel.withdraw.click()
         assert control.model.active, control.model.message
         wait(lambda: control.model.phase == "retracted", control=control)
         wait(lambda z_before=z_before: abs(feedback_z() - z_before - height) < 0.005,
              control=control)
-        # tick() writes the last target asynchronously; the servo thread may not
-        # have consumed it yet. Keep the exact count check, after its HAL ack.
-        wait(lambda: abs(hal.get_value("axis.z.eoffset-request") - height) < 1e-6,
+        # Disabled simple_tp synchronizes its command to the retained position;
+        # eoffset-request can still show the preceding enabled-cycle command.
+        # Check the new request from that actual baseline, and exact HAL counts.
+        wait(lambda expected_counts=expected_counts, offset_before=offset_before:
+             hal.get_value("axis.z.eoffset-counts") == expected_counts
+             and abs(hal.get_value("axis.z.eoffset-request") - offset_before - height) < 1e-6,
              control=control)
-        assert abs(hal.get_value("axis.z.eoffset-request") - height) < 1e-6
+        counts_after = int(hal.get_value("axis.z.eoffset-counts"))
+        requested_after = float(hal.get_value("axis.z.eoffset-request"))
+        assert counts_after == expected_counts
+        assert abs(requested_after - offset_before - height) < 1e-6
         assert max(abs(a - b) for a, b in zip(position(), before, strict=True)) < 1e-6, (
             "planner changed", before, position())
         assert s.paused and control.last.frame == frame
@@ -182,6 +216,9 @@ def run(ini, joint_count, output):
         wait(lambda: s.interp_state == linuxcnc.INTERP_IDLE, control=control)
         assert s.task_state == linuxcnc.STATE_ON
         rows.append({"correction": side, "inch": inch, "paused": before,
+                     "offset_before": offset_before,
+                     "requested_before": requested_before, "requested_after": requested_after,
+                     "counts_before": counts_before, "counts_after": counts_after,
                      "end": position(), "offset": hal.get_value("axis.z.eoffset")})
     (output / "retract-results.json").write_text(json.dumps(rows, indent=2))
     print("D38_RESULT " + json.dumps(rows), flush=True)
