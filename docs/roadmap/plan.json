@@ -2141,9 +2141,9 @@
         "061"
       ],
       "status": "in_progress",
-      "progress": "Pełny maincd8ed66 zawiera eksport verified227 i prywatny rozruch228 po zielonych kontrolach. PR229 dodaje integralność plików, kontrole NML/RAM/HAL/limitów, żywy klient i nowe potwierdzenie przed Start; wznowienie zachowuje ustalony kontekst pauzy i zasoby remapów. Rzeczywisty bcd10d5: Start/pauza/wznowienie, Stop (aborted), pełne wykonanie112,531625s/5288próbek i utrata klienta PASS; hashe i surowe dzienniki zachowane. E-STOP ujawnił przejściowy ESTOP_RESET, poprawka ma26 testów PASS. Dodano trzy regresje RIP. GUI, końcowe testy/CI i scalenie229 pozostają wymagane; próbki NML nie są śladem serwa ani kwalifikacją sprzętu.",
+      "progress": "Pełny maincd8ed66 zawiera eksport verified227 i prywatny rozruch228. PR229: integralność plików, NML/RAM/HAL/limity, żywy klient i nowe potwierdzenie Start; wznowienie zachowuje ustalony kontekst pauzy i zamrożone remapy. Runtime293af3e:4 rzeczywiste regresje RIP PASS58,34s (rozruch, Stop, E-STOP, utrata klienta). Pełny program z verified ZIP227 zakończony112,531625s/5288próbek; kliknięte GUI8796 RUN/PAUSE/RESUME zakończone148,279929s/6895próbek wraz z pauzą operatora, przeglądarka jedynym heartbeat HMI. Surowe manifesty/JSONL/wyniki, hashe i zrzut zachowane. Własne procesy zakończone. Pełna regresja/końcowe CI i scalenie229 wymagane; NML nie jest pełnym śladem serwa ani kwalifikacją sprzętu.",
       "remaining": [
-        "Odebrać korektę E-STOP i trzy rzeczywiste regresje RIP, kliknąć przebieg w WebHMI, wykonać końcowe kontrole i scalić PR229 do main.",
+        "Pełna regresja i końcowe CI dokładnego headu, autokontrola oraz scalenie PR229 do main; dalsza ocena danych i raport zgodnie z VERTICAL-REPORT.",
         "Zależność: pozytywny VERTICAL-VERIFY i niezmieniony manifest pakietu.",
         "Powiązanie instancji, programu, konfiguracji i narzędzi; bramki gotowości bez niejawnego zezwolenia na ruch.",
         "Start, postęp, pauza/wznowienie, przerwanie, E-STOP i utrata klienta z rozróżnialnymi wynikami.",
@@ -2171,7 +2171,9 @@
         "tests/test_job_run.py",
         "https://github.com/anonimov94/linumeRT/pull/229",
         "tests/test_job_run_linuxcnc.py",
-        "docs/raporty/vertical/runs-20261107.json"
+        "docs/raporty/vertical/runs-20261107.json",
+        "docs/raporty/vertical/gui-terminal-20261107.json",
+        "docs/raporty/vertical/run-paused-20261107.png"
       ]
     },
     {

@@ -2005,3 +2005,12 @@ Model-Author: Codex. PR229: integralność plików, HAL/napędy, limity, żywy k
 ustalony kontekst pauzy. Dziennik zapisuje próbki przed Start i rozróżnia wyniki przerwania.
 110 testów zakresu Python i41JS PASS. Rzeczywisty dodatni przebieg i GUI wymagane;
 PR pozostaje draft. Próbki NML nie są śladem RT; poziomy3–4 nadal otwarte.
+
+## VERTICAL-RUN — rzeczywiste wykonanie i kliknięty odbiór · 2026-11-07
+
+Model-Author: Codex.293af3e:4 regresje RIP PASS (rozruch, Stop, E-STOP, utrata klienta).
+Rzeczywisty program z verified ZIP227 zakończony112,53s/5288próbek; osobny kliknięty
+GUI8796 RUN/PAUSE/RESUME zakończony148,28s/6895próbek wraz z pauzą operatora.
+Oryginalne manifesty/JSONL/wyniki z hashami, zrzut i surowy stan zachowane; własne procesy
+zakończone, moduły przywrócone. Pełna regresja i końcowe CI229 przed scaleniem wymagane.
+Raport porównawczy/luki telemetrii pozostają otwarte; bez twierdzenia o pełnym śladzie RT.

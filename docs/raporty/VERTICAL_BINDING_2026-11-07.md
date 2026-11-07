@@ -80,3 +80,17 @@ wyjątek zamknięcia pomijał host.terminate i zaburzał następne próby. Zawę
 testowego klienta do1s i zagwarantowano zamknięcie hosta również po błędzie klienta.
 Rozruch czeka na stan własnej instancji zamiast pierwszej dostępnej odpowiedzi NML.
 Nie jest to zielona regresja; ponowny przebieg wymagany.
+
+Końcowy runtime293af3e: rzeczywiste4 regresje RIP PASS,58,34s (rozruch oraz
+Start/pauza/wznowienie→Stop/E-STOP/utrata klienta). Izolacja i własne procesy sprawdzone.
+Kliknięte WebHMI8796: RUN, PAUSE, RESUME, potem completed_observed148,279929s/
+6895próbek/linia105. Czas obejmuje pauzę operatora. Przeglądarka była jedynym żywym
+klientem HMI; testowe ustawienie maszyny wykonano jawnie przez REST przed RUN.
+Źródło to ten sam faktycznie verified ZIP227. Zrzut run-paused-20261107.png,
+surowy stan gui-terminal-20261107.json i archiwum run-gui-completed-20261107.tar.gz
+wiążą wynik z ID zadania i przebiegu. Host zamknięty, własne procesy nie pozostały.
+
+Porcja gotowości/sterowania i obserwacyjnego dziennika ma odbiór operatora.
+Pełna regresja/końcowe CI i scalenie229 wymagane. Raport porównawczy poziomu4,
+obsługa ponownego odczytu oraz ocena luk telemetrii pozostają do wykonania;
+nie deklarujemy kwalifikacji sprzętu ani rejestracji wszystkich cykli serwa.

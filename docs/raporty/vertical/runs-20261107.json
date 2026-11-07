@@ -270,5 +270,38 @@
       "result.json": "99d1ce777fcb71c10640bc53ecf6623f1a1428fe5142c759eb73f9ba9825450d"
     },
     "process_cleanup": "own processes absent before fixture cleanup; HAL modules restored"
+  },
+  {
+    "checkpoint": "293af3e33c1e5d4adb118af3dc6a05bb924ce7d4",
+    "acceptance": "actual GUI click RUN/PAUSE/RESUME; browser sole live HMI heartbeat; explicit REST simulator setup before RUN",
+    "result": {
+      "alarms": [],
+      "client_loss_at_s": null,
+      "completion_evidence": "idle after observed running; gateway command log",
+      "elapsed_s": 148.2799294160002,
+      "execution_id": "a034404861204810262976262f99f451a01316e2520235222a83f8c84c894328",
+      "format": "linumert.job.run",
+      "job_id": "95bf2c0bc88fb59abaa1cdea747ddfdbfc58bc042701d4fe0beed5fbb8a1316e",
+      "last_line": 105,
+      "run_id": "43b2143406cc477aa155ad12f236b6a8",
+      "samples": 6895,
+      "sampling": "NML poll; tooldata/HAL reads sequential, not an atomic servo trace",
+      "servo_trace": false,
+      "source": "linuxcnc.stat",
+      "started_at": "2026-11-07T13:29:35.738589+00:00",
+      "status": "completed_observed",
+      "target": "plant",
+      "verification_id": "f6bf9edd09bca992b4713a73b2293fb6d37d8b1259ac726d6d3a4b3cacacb26f",
+      "version": 1
+    },
+    "archive": "run-gui-completed-20261107.tar.gz",
+    "archive_bytes": 329500,
+    "archive_sha256": "1379d027be827751827727e570cc4f71ff839e83e08e5cb5798044f34b90f754",
+    "files": {
+      "manifest.json": "09863e4c8432b8c8e582ffd494f93e021216600be045359db23b4a7e9819851d",
+      "samples.jsonl": "4af53bf03645eb68133806330e0988502b5b86e5b64fc33c37ae38ce86c8ae58",
+      "result.json": "a384e941e59040827009019f99a972c14d3af528ed2fd3c2641ae317defb9bb1"
+    },
+    "process_cleanup": "own processes absent before fixture cleanup; HAL modules restored"
   }
 ]

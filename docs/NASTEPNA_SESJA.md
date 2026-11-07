@@ -15,6 +15,11 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · 2026-11-07. Runtime293af3e:4 rzeczywiste regresje RIP PASS,
+58,34s. GUI8796 RUN/PAUSE/RESUME→completed_observed148,28s/6895próbek; przeglądarka
+jedynym heartbeat HMI. Zrzut/rawstan/archiwum w raporcie; host zamknięty, moduły przywrócone.
+Następne pełna regresja/CI i scalenie229; potem raport porównawczy VERTICAL-REPORT.
+
 Model-Author: Codex · 2026-11-07.49f52d8 nowe RIP4FAIL: zbyt krótki join wobec
 close_timeout klienta testowego pomijał zamknięcie hosta i zaburzał kolejne próby.
 Poprawiono finally/timeout i oczekiwanie na własny świeży rozruch; ponowić serię.
