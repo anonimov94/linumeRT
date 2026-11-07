@@ -15,6 +15,10 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · 2026-11-07. Po d4be475: rzeczywisty rozruch1PASS;
+poprawka restartu po HTTP TIME_WAIT i zamykania aktywnego dziennika,48 testów PASS.
+Dodatni test kontynuowany w osobnej instancji; lease linuxcnc Codex vertical-live-start-d4be475.
+
 Model-Author: Codex · 2026-11-07. Checkpoint PR229: bramka Start/wznowienia obejmuje
 integralność plików, HAL/napędy, limity, żywy klient i nowe potwierdzenie polecenia NML;
 dziennik przebiegu zapisuje obserwacje i odrębne wyniki.110 Python i41JS PASS.

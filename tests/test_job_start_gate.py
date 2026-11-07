@@ -99,6 +99,17 @@ def test_changed_readiness_after_echo_is_rejected_before_auto_run(ready):
     assert calls == [("confirm", {"paused": False})] and instance.run is None
 
 
+def test_gateway_shutdown_aborts_active_job_and_closes_incomplete_log(ready):
+    gateway, instance, backend, calls, _ = ready
+    backend.stop = lambda: calls.append(("stop",))
+    gateway.execute(Command(cmd="run"))
+    gateway.stop()
+    assert calls[-1] == ("stop",)
+    assert instance.run.phase == "unavailable" and instance.run.stream.closed
+    result = json.loads((instance.run.path / "result.json").read_text())
+    assert result["status"] == "unavailable"
+
+
 @pytest.mark.parametrize("change", [False, True])
 def test_resume_uses_paused_tool_and_pose_instead_of_initial_t0(ready, change):
     gateway, instance, backend, calls, live = ready

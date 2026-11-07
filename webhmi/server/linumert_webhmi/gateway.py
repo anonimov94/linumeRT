@@ -104,6 +104,13 @@ class Gateway:
             self._thread.join(timeout=2.0)
         with self._lock:
             self._stop_all_jog()
+            if self._instance and self._instance.run and self._instance.run.active:
+                try:
+                    self._instance.fail("unavailable")
+                except OSError:
+                    self._instance.run.unavailable()
+                finally:
+                    self.backend.stop()
 
     def _loop(self) -> None:
         period = 1.0 / POLL_HZ

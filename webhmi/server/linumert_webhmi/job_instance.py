@@ -288,6 +288,13 @@ def _signal_owned(work: Path, sig, *, display_only=False):
     return count
 
 
+def _check_port(port, kind):
+    with socket.socket(socket.AF_INET, kind) as probe:
+        if kind == socket.SOCK_STREAM:
+            probe.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        probe.bind(("127.0.0.1", port))
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("configuration", type=Path)
@@ -315,8 +322,7 @@ def main(argv=None):
         plant = manifest["launch"]["plant"]
         for port, kind in [(args.port, socket.SOCK_STREAM), *(
                 [(int(plant[-1]), socket.SOCK_DGRAM)] if plant else [])]:
-            with socket.socket(socket.AF_INET, kind) as probe:
-                probe.bind(("127.0.0.1", port))
+            _check_port(port, kind)
         record = prepare(args.configuration, args.out, port=args.port, token=args.token)
         work = args.out.resolve()
         config = work / "config"

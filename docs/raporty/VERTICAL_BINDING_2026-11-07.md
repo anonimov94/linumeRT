@@ -35,3 +35,9 @@ RAM narzędzi, T0 i G5x zgodne; program niewczytany i E-STOP poprawnie dają nie
 warunki, Start409. Test zakończenia nie pozostawił procesów. Lokalny kod RIP potwierdza,
 że stat.tool_table czyta tooldata po poll NML, więc nie jest to atomowa migawka całej
 maszyny ani ślad RT. Tak samo trzeba opisywać późniejszą telemetrię.
+
+Checkpoint d4be475 przeszedł rozszerzony test rzeczywistego rozruchu (1PASS):
+limity zgodne, HAL poprawnie niespełnione w E-STOP. Próba dodatnia wykryła problem
+ponownego użycia portu po zamknięciu HTTP (TIME_WAIT); kontrola portu z SO_REUSEADDR
+nadal odrzuca aktywny listener. Zamykanie bramy kończy aktywny dziennik jako unavailable
+i wysyła abort.48 testów związanej porcji PASS; dodatni Start nadal do odbioru.
