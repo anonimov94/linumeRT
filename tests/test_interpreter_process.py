@@ -120,6 +120,27 @@ class InterpreterProcessTests(unittest.TestCase):
         self.assertFalse(result.completed)
         self.assertIn("limit danych", result.messages[0])
 
+    def test_machine_table_and_units_without_installed_example_configs(self):
+        from linumert.programs.linuxcnc_check import interpreter_result, run_interpreter
+
+        table = self.base / "own.tbl"
+        table.write_text("T1 P1 Z40 D6\n")
+        machine = self.base / "machine.ini"
+        machine.write_text(f"[TRAJ]\nLINEAR_UNITS = mm\n"
+                           f"[EMCIO]\nTOOL_TABLE = {table.name}\n[RS274NGC]\n")
+        self.executable(
+            "import sys,configparser\nfrom pathlib import Path\n"
+            "args=sys.argv[1:]\n"
+            "cfg=configparser.ConfigParser()\ncfg.read(args[args.index('-i')+1])\n"
+            "assert cfg['TRAJ']['LINEAR_UNITS'] == 'mm'\n"
+            "assert Path(args[args.index('-t')+1]).read_text() == 'T1 P1 Z40 D6\\n'\n"
+            "print('    1 N..... PROGRAM_END()')\n")
+        with patch("linumert.programs.linuxcnc_check.find_linuxcnc", return_value=([], None)):
+            with patch.dict(os.environ, {"PATH": str(self.root / "bin") + ":/bin"}):
+                result = interpreter_result(run_interpreter(self.program, machine_ini=machine,
+                                                           linear_units="mm"))
+        self.assertTrue(result.ok, result.messages)
+
     def test_parameter_file_exists_before_first_save_and_ini_cannot_share_it(self):
         shared = self.base / "controller.var"
         shared.write_text("live parameters\n")

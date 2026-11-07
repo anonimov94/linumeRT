@@ -1,0 +1,175 @@
+"""Actual rs274 + private SDK trace + separate diagnostic worker, without CNC.
+
+SPDX-License-Identifier: GPL-2.0-or-later
+Model-Author: Codex
+"""
+
+import json
+import subprocess
+from pathlib import Path
+
+import pytest
+from job_support import inputs
+from linumert.cli import main
+from linumert.cnc import FakeMachine
+from linumert.programs import job
+from linumert.programs.lnx import parse_lnx, save_lnx
+from linumert.programs.prepare import JobService
+from linumert.tools.db import ToolDB
+from linumert_sim.job_preflight import check
+from linumert_sim.job_verify import verify
+from linumert_webhmi import FakeBackend, Gateway, create_app
+from starlette.testclient import TestClient
+from test_job_material import complete_inputs
+from test_job_trace_linuxcnc import runtime as runtime
+
+pytestmark = pytest.mark.linuxcnc
+
+
+@pytest.fixture(autouse=True)
+def _linuxcnc_cleanup():
+    """Only owned offline child groups; never run controller-global cleanup."""
+    yield
+
+
+def test_complete_job_uses_private_worker_and_frozen_resources(runtime, tmp_path, monkeypatch):
+    rip, bridge = runtime
+    package = tmp_path / "job"
+    job.publish(job.render(*complete_inputs(), (200, 200, -80)), package)
+    before = {p.name: p.read_bytes() for p in package.iterdir()}
+    build = tmp_path / "native"
+    subprocess.run(["make", "-C", str(Path(__file__).resolve().parents[1] / "core/native"),
+                    "shared", f"BUILD={build}"], capture_output=True, timeout=60, check=True)
+    monkeypatch.setenv("LINUMERT_NATIVE_LIB", str(build / "liblinumert_native.so"))
+    results = []
+    for backend in ("0", "1"):
+        monkeypatch.setenv("LINUMERT_NATIVE", backend)
+        result = check(package, (200, 200, -5), root=rip, trace_library=bridge)
+        assert result["checks"]["interpreter"] == "passed", result["messages"]
+        assert result["checks"]["motion_limits"] == "passed", result["messages"]
+        assert "material_diagnostic" in result, result["messages"]
+        assert result["checks"]["execution"] == "not_started"
+        results.append(result)
+    a, b = (r["material_diagnostic"] for r in results)
+    assert a["backend"] == "Python"
+    assert b["backend"] == "C" and a["worker_nice"] >= 10 and b["worker_nice"] >= 10
+    assert a["motions"] == b["motions"] == 81
+    assert a["removed_mm3"] > 100
+    assert a["removed_mm3"] == b["removed_mm3"]
+    assert a["events"] == b["events"]
+    assert a["time_lower_bound_s"] == b["time_lower_bound_s"]
+    assert {p.name: p.read_bytes() for p in package.iterdir()} == before
+    # Keep negative diagnostics visible in assertion output until the complete
+    # prepared CAM fixture itself has been accepted through this same path.
+    assert results[0]["status"] == "partial", results[0]["messages"]
+    assert all(results[0]["checks"][k] == "passed" for k in ("material", "collisions", "loads"))
+
+
+def test_missing_holder_data_is_incomplete_after_successful_interpreter(runtime, tmp_path):
+    rip, bridge = runtime
+    package = tmp_path / "job"
+    job.publish(job.render(*inputs(), (200, 200, -80)), package)
+    result = check(package, (200, 200, -5), root=rip, trace_library=bridge)
+    assert result["checks"]["interpreter"] == result["checks"]["motion_limits"] == "passed"
+    assert result["status"] == "incomplete" and result["checks"]["material"] == "incomplete"
+    assert any("T1" in text and "oprawki" in text for text in result["messages"])
+    assert "material_diagnostic" not in result
+    manifest, _ = job.read(package)
+    assert result["job_id"] == manifest["job_id"]
+    assert result["report_id"] == job.digest(job.json_text({
+        k: v for k, v in result.items() if k != "report_id"}).encode())
+
+
+def test_declared_fixture_collision_reports_executed_source_line(runtime, tmp_path):
+    rip, bridge = runtime
+    program, config, drives, tools = complete_inputs()
+    raw = config.model_dump(mode="json")
+    raw["collision_bodies"].append({"name": "imadlo", "shape": "box", "attached_to": "vise",
+        "size": [1, 40, 20], "position": [230, 220, -80]})
+    config = type(config).model_validate(raw)
+    package = tmp_path / "job"
+    job.publish(job.render(program, config, drives, tools, (200, 200, -80)), package)
+    result = check(package, (200, 200, -5), root=rip, trace_library=bridge)
+    assert result["status"] == "rejected", result["messages"]
+    assert result["checks"]["collisions"] == "failed"
+    hits = [e for e in result["material_diagnostic"]["events"] if "imadlo" in e["pair"]]
+    assert hits and all(e["line"] > 0 for e in hits)
+    assert any(e["code"] == "K-304" and e["stop"] for e in hits)
+    assert json.loads((package / "machine.yaml").read_text())["collision_bodies"][-1][
+        "name"] == "imadlo"
+
+
+@pytest.mark.parametrize("mode,verdict", [("preflight", "partial"), ("verify", "verified")])
+def test_api_cli_persist_same_diagnostic_without_changing_cnc(
+        runtime, tmp_path, monkeypatch, mode, verdict):
+    rip, bridge = runtime
+    monkeypatch.setenv("LINUXCNC_DIR", str(rip))
+    monkeypatch.setenv("LINUMERT_TOOL_DATA_LIB", str(bridge))
+    source = tmp_path / "input"
+    source.mkdir()
+    program, config, _, tools = complete_inputs()
+    save_lnx(program, source / "part.lnx")
+    (source / "machine.yaml").write_text(job.json_text(config.model_dump(mode="json")))
+    with ToolDB(source / "tools.db") as database:
+        for tool in tools.values():
+            database.add(tool)
+    service = JobService(source, source / "machine.yaml", source / "tools.db", tmp_path / "jobs")
+    prepared = service.prepare("part.lnx", "part", (200, 200, -80))
+    archive = service.archive("part")
+    gateway = Gateway(FakeBackend(FakeMachine()))
+    state = gateway.snapshot()
+    token = "job-material-api-test"
+    client = TestClient(create_app(gateway, token, jobs=service), base_url="http://127.0.0.1")
+    response = client.post(f"/api/jobs/part/{mode}", headers={"X-Linumert-Token": token},
+        json={"job_id": prepared["manifest"]["job_id"], "start_mm": [200, 200, -5]})
+    assert response.status_code == 200, response.text
+    result = response.json()
+    assert result["status"] == verdict and result["checks"]["material"] == "passed"
+    if mode == "verify":
+        assert result["verification"]["complete"]
+        assert not result["verification"]["execution_authorization"]
+    saved, = (service.jobs_dir / ".preflight").glob("*.json")
+    assert json.loads(saved.read_text()) == result
+    output = tmp_path / "cli-report.json"
+    assert main([mode, str(service.jobs_dir / "part"), "--start", "200", "200", "-5",
+                 "--out", str(output)]) == 0
+    def same(row):
+        return {k: v for k, v in row.items() if k not in ("elapsed_seconds", "report_id")}
+    assert same(result) == same(json.loads(output.read_text()))
+    assert service.archive("part") == archive and gateway.snapshot() == state
+
+
+def test_executed_circular_pocket_and_helical_entry_feed_same_material_model(runtime, tmp_path):
+    rip, bridge = runtime
+    program, config, drives, tools = complete_inputs()
+    raw = program.model_dump(mode="json")
+    raw["steps"][3] = {"generator": "pocket_circle", "version": 2, "params": {
+        "cx": 30, "cy": 20, "diameter": 20, "z_top": -1, "depth": 2,
+        "tool_d": 6, "entry": "helix"}}
+    package = tmp_path / "job"
+    job.publish(job.render(parse_lnx(raw), config, drives, tools, (200, 200, -80)), package)
+    result = check(package, (200, 200, -5), root=rip, trace_library=bridge)
+    assert result["status"] == "partial", result["messages"]
+    arcs = [m for m in result["precise_trace"]["motions"] if m["name"] == "ARC_FEED"]
+    assert arcs and result["material_diagnostic"]["removed_mm3"] > 1000
+    assert not result["material_diagnostic"]["events"]
+
+
+@pytest.mark.parametrize("case", ["complete", "holder_missing", "outside_limits"])
+def test_formal_verification_requires_complete_actual_diagnostics(runtime, tmp_path, case):
+    rip, bridge = runtime
+    program, config, drives, tools = complete_inputs()
+    origin = (200, 200, -80)
+    if case == "holder_missing":
+        tools[1].params.pop("holder_d")
+    elif case == "outside_limits":
+        origin = (550, 200, -80)
+    package = tmp_path / "job"
+    job.publish(job.render(program, config, drives, tools, origin), package)
+    result = verify(package, (200, 200, -5), root=rip, trace_library=bridge)
+    expected = {"complete": "verified", "holder_missing": "incomplete",
+                "outside_limits": "rejected"}[case]
+    assert result["status"] == expected, result["messages"]
+    assert result["verification"]["complete"] == (case == "complete")
+    assert not result["verification"]["execution_authorization"]
+    assert result["checks"]["execution"] == "not_started"

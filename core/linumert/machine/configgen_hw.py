@@ -5,7 +5,7 @@ Model-Author: Claude · 2026-10-24
 
 Dane: `machine.yaml` z `target: hardware` i sekcją `hardware:` (interfejs, kanały stepgen,
 piny fizyczne wejść/wyjść, piny kontraktu bezpieczeństwa) oraz sekcje `real:` szablonów napędów
-(sterownik, czasy impulsów, skala z mechaniki — `linumert_plant.drive_real.hardware_plan`).
+(sterownik, czasy impulsów, skala z mechaniki — `linumert.machine.drives.drive_real.hardware_plan`).
 
 Bezpieczeństwo (CLAUDE.md §6, docs/bezpieczenstwo): E-STOP i STO to obwód sprzętowy. Generator
 odmawia, gdy brak pinu monitora E-STOP, wyjścia sygnału życia PC albo wejścia potwierdzenia
@@ -40,9 +40,9 @@ class HardwareConfigError(ValueError):
 
 
 def hardware_plan(cfg: MachineConfig) -> list[dict[str, Any]]:
-    from linumert_plant.drive_library import load_library
-    from linumert_plant.drive_real import hardware_plan as plan_of
-    from linumert_plant.machine_drives import resolve_machine_drives
+    from .drives.drive_library import load_library
+    from .drives.drive_real import hardware_plan as plan_of
+    from .drives.machine_drives import resolve_machine_drives
 
     try:
         return plan_of(cfg, resolve_machine_drives(cfg, load_library()))

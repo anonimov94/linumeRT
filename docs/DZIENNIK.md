@@ -1817,3 +1817,180 @@ Pełny RIP musi ponownie potwierdzić wynik; nie scalać na czerwonym CI.
 - Model-Author: Claude. Polecenie właściciela: każda operacja z `.lnx` ma własny blok `oN if [1]` … `oN endif` (N = krok × 100) i komentarz `( OP N [oN]: rodzaj | T D S | F FZ | Z )`. Powtórzone numery O w generatorach odrzuca P-5013. PROPOZYCJA w DECYZJE.
 - Złote kopie: różnią się tylko dodanymi liniami (sprawdzone). LinuxCNC 2.9 + Plant: `tests/test_op_blocks_linuxcnc.py` (cały program w AUTO i start od linii wewnątrz `o300`: wierci tylko otwór operacji 3, bez błędów); akceptacja Plant z `test_gcode_isolation_linuxcnc` (M6 w bloku O) PASS.
 - Otwarte: numer operacji w WebHMI, notatka narzędzia dla `o<lrt_*> call` po #212. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## Cel pionowy pełnego linumeRT — 2026-11-05 · Codex
+
+- Model-Author: Codex. Polecenie właściciela: prepare → verify → run → report w pełnym projekcie, ukończone porcje do main.
+- Kontrakt w docs/WORKFLOW_ZADANIA.md; cztery rozszerzenia VERTICAL-* we wspólnym rejestrze i generowane widoki.
+- WebHMI jest klientem operatora; odbiór lite nie jest odbiorem main. Wcześniejsze bramki pozostają otwarte.
+- Uwzględniono otwarte #211/#212/#213, gałąź natywną i przenoszenie napędów; cudze checkouty bez zmian.
+- Autokontrola dokumentacji, bez niezależnego przeglądu. Cztery poziomy nie są jeszcze implementacją ani odbiorem sprzętu.
+
+## VERTICAL-PREPARE — odczyt narzędzi bez zmian bazy · 2026-11-05 · Codex
+
+- Model-Author: Codex. ToolDB readonly=True używa SQLite mode=ro; brak pliku i nieaktualny schemat są odrzucane bez tworzenia/migracji.
+- Testy: 43 PASS, 1 linuxcnc deselected; kontrola historii, zachowania bajtów i odmowy zapisu. Domyślny tryb ToolDB pozostaje bez zmian.
+- To pomocniczy krok 032/039 dla pakietu prepare; nie zalicza gotowej funkcji operatora ani poziomu 1. Następne: snapshot pakietu i WebHMI.
+- Autokontrola, bez niezależnego przeglądu.
+
+## VERTICAL-PREPARE — rdzeń pakietu · 2026-11-05 · Codex
+
+- Model-Author: Codex. Deterministyczny pakiet v1 z manifestem, źródłem, maszyną, napędami, narzędziami i ustawieniem detalu; początkowy zakres CAM 2D.
+- 14 testów PASS: błędne wejścia, integralność, awaria publikacji, wyścig zapisów i zachowanie istniejącego pakietu. Ruff PASS.
+- `prepared` nie zalicza interpretera/limitów/materiału. WebHMI i odbiór operatora w następnym kroku; poziom 1 pozostaje otwarty.
+- Autokontrola, bez niezależnego przeglądu.
+
+## VERTICAL-PREPARE — CLI/API i użyteczny widok WebHMI · 2026-11-05 · Codex
+
+- Model-Author: Codex. Wspólny adapter przygotowania, odczyt bazy bez zmian, token/Host, formularz zadania, raport i eksport ZIP w pełnym projekcie.
+- 26 testów pakietu/adaptera, 35 regresji aplikacji/zasobów i 40 testów JS PASS; 4 pominięcia Node w WSL, sprawdzone osobno na Windows.
+- Kliknięte przygotowanie, pobranie ZIP, odmowa nadpisania i niezgodny układ; raport docs/raporty/VERTICAL_PREPARE_2026-11-05.md.
+- Jedna aktywna maszyna/baza, CAM 2D; interpreter/limity/materiał oczekują. Autokontrola, bez niezależnego przeglądu; CI/scalenie w toku.
+
+## VERTICAL-PREPARE — regresja i synchronizacja testu HAL · 2026-11-05 · Codex
+
+- Model-Author: Codex. Natywny klon/venv/Qt: 1971 PASS, 15 skip, 213 linuxcnc deselected, 184 subtesty PASS; błąd pola Qt odtworzony na czystym main w tej samej kolejności (683 PASS/1 FAIL).
+- CI #215: 212 LinuxCNC PASS, 1 FAIL w sprawdzeniu eoffset-request po pauzie. Lokalnie 2 przypadki sim/Plant PASS przed zmianą; źródło wyścigu pozostaje wnioskiem z asynchronicznego zapisu HAL.
+- Test czeka teraz na tę samą dokładną wartość żądania (1e-6, dotychczasowy timeout), zachowując pozostałe asercje i kod produkcyjny. Po zmianie 2 przypadki na RIP sim/Plant PASS (140 s).
+- To synchronizacja starego testu, nie odbiór wykonania pakietu zadania. Autokontrola; końcowe CI/scalenie nadal wymagane.
+
+## Scalenie lite do main · 2026-11-05 · Claude
+- Model-Author: Claude. Polecenie właściciela: jeden projekt w main (DECYZJE 2026-11-05). Backend lite (Codex, PR #203) dodany bez usuwania GUI, WebHMI, panelu Plant, sprzętu ani ATC.
+- Napędy i szablony w `core/linumert/machine/drives/`; rdzeń nie importuje Plant (`tests/test_architecture.py`), `linumert_plant.drive_*` jako aliasy. `plant_scales` liczy skale bez modelu Plant, test równości z Plant na 5 maszynach.
+- Nowe polecenia: `linumert-lite` (generators/compile/machine/config/simulate), `linumert-headless`, `linumert-plant`; podgląd telemetrii w konsoli (`tools/console*`).
+- Testy (WSL, klon gałęzi): `make lint` OK, pytest 1984 PASS / 15 skip, check_requirements 22/22. LinuxCNC nie uruchamiano: DISPLAY domyślnie bez zmian, eksport lite = headless.
+- Nie przeniesiono: niezacommitowanej pracy Codex w `linumeRT-lite` (kompilator `.lnx`, kernel C materiału, roadmapa `LITE_VERTICAL.md`) — Codex dokłada ją na main. Otwarte: ujednolicenie `beta/` z `core/`. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## Jeden backend przygotowania — integracja #216/#217 · 2026-11-05 · Codex
+
+- Model-Author: Codex. Własna gałąź integracyjna łączy ekstrakcję napędów Claude i prepare WebHMI/CLI; cudze checkouty bez zmian.
+- Odczyt maszyny prepare przechodzi na `linumert.machine.drives`; granice importów pozostają egzekwowane. `linumert` to nazwa głównego CLI, `linumert-lite` pozostaje aliasem zgodności.
+- Rozwiązano konflikty wpisów i generowanych widoków, usunięto nieaktualną instrukcję osobnego produktu lite z ARCHITECTURE.md.
+- 107 testów napędów/CLI/konfiguracji/przygotowania PASS; autokontrola. To integracja w gałęzi do main, nie deklaracja scalenia ani zakończenia czterech poziomów.
+
+## Wspólne prepare i dane odbioru #218 · 2026-11-05 · Codex
+
+- Model-Author: Codex. `linumert prepare`, alias zgodności i `linumert-job` używają wspólnego adaptera WebHMI. Walidacja zbiera kody/przyczyny z całego programu; compile może czytać tę samą maszynę i bazę bez zmian danych.
+- Dane i przypadki Claude z #218 zachowane; adapter wymaga jawnego zera detalu i schematu linumert.job v1. 24 testy odbioru aktywne, bez skipu braku prepare; razem 69 testów CLI/pakietu/konfiguracji PASS, Ruff PASS.
+- Wheel poza repo: prepare i alias dają identyczny manifest; zachowane WebHMI/panel Plant oraz szablony. Naprawiono historyczny test wheel odrzucający UI pełnego projektu; dołączony do CI obok odbioru WebHMI.
+- Autokontrola integracji, bez deklaracji niezależnego przeglądu zmienionego kontraktu. Dalsze CI i odbiór integracji nadal wymagane.
+
+## Odbiór zintegrowanego prepare · 2026-11-05 · Codex
+
+- Model-Author: Codex. Kod 43851b8: WebHMI kliknięte po integracji; podgląd G53 Z-1 i pobranie ZIP. CLI, GUI i ZIP mają 9 identycznych plików (ID jak w raporcie).
+- Natywny klon: 2036 PASS, 15 skip, 213 linuxcnc deselected, 184 subtesty PASS; jedna znana porażka Qt odtworzona wcześniej na main. Lint, C i REQ 22/22 PASS.
+- Dowód/zrzut w raporcie VERTICAL_PREPARE_2026-11-05.md. Własna atrapa zatrzymana; to nie jest wykonanie pakietu LinuxCNC ani kwalifikacja sprzętu. Końcowe CI #219 wymagane.
+
+## VERTICAL-PREPARE — scalenie do pełnego main · 2026-11-05 · Codex
+
+- Model-Author: Codex. #219 scalony jako 619fe95: ci 42033344446 i pełny LinuxCNC RIP smoke 42033344066 success; #220 z dowodami jako 64b3d1b.
+- Historia #216/#217/#218 zawarta w main. #218 zamknięty jako zawarty; jego dane Claude i aktywne testy pozostają. Pełny projekt, WebHMI i QtVCP fallback zachowane.
+- Rozpoczęcie VERTICAL-VERIFY na własnej gałęzi od main. Integralność/interpreter/limity to pierwsza porcja, bez deklaracji pełnego odbioru materiału/kolizji ani poziomów 3–4.
+
+## VERTICAL-VERIFY — częściowa kontrola pakietu i WebHMI · 2026-11-05 · Codex
+
+- Model-Author: Codex. PR #221: jeden backend CLI/API/WebHMI, kontrola snapshotu i ponowna kompilacja przed izolowanym rs274 z tabelą/G54–G59. Jawne założenia początku/T0/G92, linie programu zachowane.
+- 131 testów zakresu i 7 subtestów PASS; 4 rzeczywiste rs274 (G54/G55/przekroczenie X/długość T1) PASS; 40 JS i pełny lint PASS. GUI kliknięte, zapis/pobranie JSON zgodne, przekroczenie X odrzucone.
+- Ślad rs274 zaokrąglony do 4 miejsc: brak verified i brak PASS pełnym limitom. Materiał/kolizje/obciążenia oraz poziomy 3–4 otwarte. Dowody i zrzuty w VERTICAL_PREFLIGHT_2026-11-05.md; CI/scalenie wymagane.
+
+## VERTICAL-VERIFY — integracja istniejącego C i własność testów · 2026-11-05 · Codex
+
+- Model-Author: Codex. #221: pełny klon 2050 PASS/1 znana porażka Qt jak na main. Nowe testy offline odłączone od globalnego sprzątania kontrolera (5841f37); ich rs274 ma własny proces group/HOME. Nowe CI wymagane.
+- #222: połączona historia Claude 0bd1f04, bez dublowania kernela. Zachowane decyzje obu gałęzi i pełny projekt; C11 poza RT, Python referencją/fallbackiem.
+- 7 C + Plant i 189 testów z C PASS; 7 ASan/UBSan PASS; 22 native/architektury PASS po dodaniu porównania bajtów i obsługi brakujących eksportów.
+- Pomiar i surowe dane Python/C w NATIVE_INTEGRATION_2026-11-05.md; subset pozostaje diagnostyką, nie odbiorem całego verify. CI/scalenie wymagane.
+
+## Integracja C — środowisko zagnieżdżonego test-c · 2026-11-05 · Codex
+
+- Model-Author: Codex. Pełny klon 51de699: 2070 PASS, 2 FAIL (znany Qt oraz systemowy Python bez pytest w zagnieżdżonym make test-c). Lint/C/REQ PASS przed pełną regresją.
+- Test test-c wskazuje teraz sys.executable bieżącego pytest; ten sam cel i wszystkie jego kontrole PASS (39 s), bez instalacji globalnej i bez zmiany algorytmów. Końcowe CI nowego SHA wymagane.
+
+## VERTICAL-VERIFY — dokładne callbacki i prywatne tooldata · 2026-11-05 · Codex
+
+- Model-Author: Codex. Gałąź codex/job-trace-20261105 nad #222: opcjonalny adapter C++17 libtooldata i izolowany gcode.parse, bez usuwania T/M6/G43 i bez NML/HAL. Pierwsza porcja backendu; podpięcie do preflight i GUI w toku.
+- 6 rzeczywistych testów RIP PASS: detal 82 ruchy, linie/T/RPM, cale i korekcja 40,1234 mm, wykonywane warunkowo T1/T7, błędy/EOF/pętla, odmowa cudzej lub istniejącej .tool.mmap. Lint PASS.
+- API podglądu LinuxCNC dopuszcza ruch przy F0: adapter jawnie odrzuca takie zdarzenie; autorytatywna semantyka nadal wymaga wcześniejszego rs274. Dokładny tor nie zastępuje tego odbioru ani materiału/kolizji.
+
+## VERTICAL-VERIFY — dokładne limity w CLI/API/WebHMI · 2026-11-05 · Codex
+
+- Model-Author: Codex. #221 scalony do main 353a472 po zielonym CI 42050601102 i LinuxCNC 42050601111; #222 head78dbf4d czeka na końcowe LinuxCNC (python/ISO success).
+- #223: zgodność ruchów rs274 i dokładnego gcode.parse, analityczne limity z double/mm, jawna odmowa niepełnego łuku i F0. Materiał nadal pending, bez verified.
+- 16 testów real RIP i 170 regresji PASS; GUI kliknięte, raport pobrany/zapisany identyczny, CLI zgodny poza elapsed/id. Dowody w VERTICAL_LIMITS_2026-11-05.md; własna brama zatrzymana. CI/scalenie wymagane.
+
+## 2026-11-05 — diagnostyka materiału z dokładnego toru LinuxCNC, checkpoint
+
+Model-Author: Codex. Pełny projekt: #222 scalony do main534a5ab po CI/LinuxCNC/ISO success.
+Na własnej gałęzi material nad #223 dodano kompozycję CLI/API z osobnym procesem nice10,
+zamrożone modele bez odczytu bieżącej biblioteki, materiał2.5D i konserwatywne ciągłe
+obwiednie brył/stref. Braki geometrii/napędów, timeout i urwany JSON nie dają PASS.
+19 rzeczywistych testów offline RIP PASS (16 wcześniejszych +3 materiału),65 regresji PASS,
+lint całego drzewa PASS. GUI i końcowy pomiar/testy pozostają w toku; wynik częściowy nie
+uprawnia do wykonania. Szczegóły i granice: raport VERTICAL_MATERIAL_2026-11-05.md.
+
+## 2026-11-05 — odbiór i scalenie diagnostyki zadania
+
+Model-Author: Codex. #223 scalony e794c7b, #224 c0b42c4 po zielonym CI i LinuxCNC.
+Runtime9b8db72:2097 PASS/1 znany Qt FAIL w klonie; Plant/native C i192 Python z C PASS,
+19 rzeczywistych offline RIP i65 regresji PASS; REQ22/22 i wheel PASS. Także zainstalowany
+wheel wykonał pełny rs274/SDK/materiał C/raport poza checkoutem. WebHMI kliknięte, raport
+pobrany i zgodny z zapisem/CLI poza elapsed/id. 2861,832031mm³ i107,958839s dolnego czasu.
+Pomiar całego CLI po rozgrzaniu:3 powtórzenia, mediana Python7,2761s/C4,2322s; kompletne
+wyniki materiału wszystkich4 par dokładnie zgodne poza etykietą backendu. Brama8789 zatrzymana.
+Osobny commit dowodów dodaje zrzut, surowy pomiar i2 testy API/CLI oraz helisy (5 przypadków
+materiału PASS); nie zmienia runtime. Formalne verified, wykonanie i raport pozostają otwarte.
+
+## 2026-11-05 — formalny werdykt offline, checkpoint
+
+Model-Author: Codex. Po mainc0b42c4 i dowodach #225 dodano CLI verify/API/WebHMI.
+Nowy raport verificationv1 wymaga wszystkich kontroli passed po świeżym interpreterze,
+SDK i materiale. Zachowuje założenia i ograniczenia; autoryzacja wykonania false,
+execution not_started. Preflight pozostaje częściową diagnostyką.12 testów bramek i
+regresje CLI/API/static PASS;3 real RIP (verified/incomplete/rejected) i rzeczywisty
+CLI/API verified bez zmiany pakietu/CNC PASS. GUI/pełna regresja/CI nadal w toku.
+
+## 2026-11-05 — kliknięty odbiór verified
+
+Model-Author: Codex. Własna brama fake8790 z rzeczywistym rs274/SDK/materiałem C:
+prepare → verify daje verified, wszystkie kontrole passed, execution not_started i brak
+zgody na wykonanie. Cały wynik CLI/GUI zgodny poza elapsed/id. Zrzut i provenance zapisane,
+brama zatrzymana. Runtimeebca978;5beb4be zawiera poprawkę metadanych821971e z #225.
+Pierwszy CI dowodów wykrył brak provenance materiałowego zrzutu; wymagany wpis dodany,
+test zasobów PASS. Lokalny pełny IP9PASS/1FAIL wyłącznie przez ignorowany binarny ASan
+build-san, nie plik z Git. #225/#226 i pełna regresja natywna nadal w toku; nie omijać bramek.
+
+## 2026-11-05 — konfiguracja wykonawcza zweryfikowanego zadania, checkpoint
+
+Model-Author: Codex. Dodano run-config i ZIP API/WebHMI z raportu verified zapisanego
+przez bramę. Oryginalny pakiet, raport, tabela i program są powiązane z pochodną maszyną
+sim/Plant, układem detalu oraz biblioteką dokładnych snapshotów napędów. Bez odczytu bieżącej
+biblioteki i bez nowych domyślnych wartości. Manifest+regeneracja, atomowy nowy katalog,
+bez nadpisywania. Bypass domyślnie0; API nie przyjmuje test-mode. Brak startu procesów/CNC.
+37 testów zakresu i65 regresji PASS;2 real rs274 eksportu sim/Plant odtwarzają ten sam
+zweryfikowany tor. Lint PASS. GUI/pełna regresja/CI oraz rzeczywiste wykonanie pozostają otwarte.
+
+## 2026-11-05 — odbiór poprawionej konfiguracji CLI/GUI/Plant
+
+Model-Author: Codex.6058529 uzupełnia pominięty wygenerowany indeks roadmapy. Próba publicznym
+loaderem Plant wykryła zapis liczb3e-05 jako tekst YAML1.1;68c6362 zapisuje prawdziwy YAML,
+a test używa publicznego loadera. Poprawiony ZIP execution-fixed-plant.zip pobrany z WebHMI:
+26 identycznych bajtowo zasobów CLI/GUI, publiczny loader i model C Plant --run PASS.
+Zrzut/provenance zapisane; brama8791 zatrzymana. StartupG55 i rzeczywisty rs274G55 PASS,
+17 testów eksportu PASS. Klon6058529:2126 PASS/1 znany Qt FAIL,15skip/240deselected,
+184subtesty;lint/C/REQ22/22 PASS. Nie jest to wykonanie kontrolera ani programu.
+Końcowe CI227 oraz225/226 w toku; następny zakres to prywatna instancja i live binding.
+
+## 2026-11-05 — prywatna instancja zadania, pierwszy checkpoint
+
+Model-Author: Codex. VERTICAL-RUN: odrębne evidence/config/HOME, własne procesy Plant/LinuxCNC,
+DISPLAY WebHMI z HAL bez bypassu, jawny status i zamknięta bramka Start/wznowienia.
+35 pierwszych testów instancji/bramy/architektury i41JS PASS. Rozruch/GUI/CI wymagane.
+#225/#226 zakończyły CI failure; lokalnie G2 i trace na227edcacf3:2PASS bez zmian progów.
+#227 skierowany na main, obejmuje225/226. Nie scalono go jeszcze i nie pominięto kontroli.
+
+## 2026-11-05 — odbiór prywatnego LinuxCNC/Plant i WebHMI
+
+Model-Author: Codex. Rzeczywisty rozruch ujawnił .var przed DISPLAY, długi HOME i token od --;
+poprawione wraz z kolejnością zamknięcia i własnością daemonów (marker/pidfd). Test RIP PASS:
+E-STOP, brak bazowania, Start409, dowody zachowane i brak pozostawionych procesów przed cleanupem.
+37 testów zakresu,41JS PASS. GUI8792 z faktycznego ZIP227 kliknięte; zrzut i surowy stan/provenance
+zapisane. Instancja zakończona, moduły przywrócone, lease zwolniony. Wykonanie/telemetria i CI otwarte.

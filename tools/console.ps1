@@ -1,0 +1,47 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+# Model-Author: Codex
+param(
+    [ValidateSet('first_motion', 'estop_mid_program')]
+    [string]$Scenario = 'first_motion',
+    [string]$Distro = 'linumeRT-Debian12',
+    [ValidateSet('auto', 'braille', 'block', 'ascii')]
+    [string]$Raster = 'auto',
+    [ValidateRange(0.05, 20)]
+    [double]$Speed = 1,
+    [ValidateRange(1, 3)]
+    [int]$Density = 2,
+    [switch]$Once
+)
+$ErrorActionPreference = 'Stop'
+$liteRoot = Split-Path -Parent $PSScriptRoot
+$mappedRoot = & wsl.exe -d $Distro -- wslpath -u $liteRoot.Replace('\', '/')
+if ($LASTEXITCODE -ne 0 -or -not $mappedRoot) {
+    throw 'Nie mozna odczytac sciezki projektu w WSL.'
+}
+$linuxRoot = ($mappedRoot | Out-String).Trim()
+& wsl.exe -d $Distro --cd $linuxRoot -- test -x .venv-linux/bin/python
+if ($LASTEXITCODE -ne 0) {
+    & wsl.exe -d $Distro --cd $linuxRoot -- python3 -m venv .venv-linux
+    if ($LASTEXITCODE -ne 0) { throw 'Nie udalo sie utworzyc venv Linux.' }
+}
+& wsl.exe -d $Distro --cd $linuxRoot -- .venv-linux/bin/python -m pip show linumert-lite *> $null
+if ($LASTEXITCODE -ne 0) {
+    & wsl.exe -d $Distro --cd $linuxRoot -- .venv-linux/bin/python -m pip install -c requirements-dev.lock -e .
+    if ($LASTEXITCODE -ne 0) { throw 'Nie udalo sie zainstalowac zaleznosci lite.' }
+}
+$demoArgs = @('tools/console_demo.py', '--scenario', $Scenario, '--raster', $Raster,
+    '--speed', $Speed.ToString([Globalization.CultureInfo]::InvariantCulture))
+if ($Once) { $demoArgs += '--once' }
+if (-not ('LiteConsoleDensity' -as [type])) {
+    Add-Type -Path (Join-Path $PSScriptRoot 'ConsoleDensity.cs')
+}
+$densitySession = [LiteConsoleDensity]::Apply($Density)
+if (-not [Console]::IsOutputRedirected) { Write-Host $densitySession.Message }
+try {
+    & wsl.exe -d $Distro --cd $linuxRoot -- .venv-linux/bin/python @demoArgs
+    $demoExit = $LASTEXITCODE
+}
+finally {
+    [LiteConsoleDensity]::Restore($densitySession)
+}
+exit $demoExit

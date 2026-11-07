@@ -15,6 +15,155 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · 2026-11-05. **#228 — prywatny rozruch odebrany:**
+Rzeczywisty test Plant/LinuxCNC/WebHMI/HAL PASS bez Reset/ON/bazowania, StartHTTP409,
+oryginalny .var zachowany, zamknięcie bez pozostawionych procesów przed cleanupem fixture.
+Poprawione: roboczy .var, długi HOME/AF_UNIX, token od --, własność daemonów przy zamknięciu.
+37 testów zakresu i41JS PASS. Kliknięte GUI8792 z faktycznie odebranego ZIP227, job95bf2c0;
+zrzut/provenance/rawboot w raporcie VERTICAL_INSTANCE. Własne procesy zakończone,
+moduły przywrócone, lease zwolniony. Start/live binding/telemetria nadal otwarte; CI wymagane.
+
+Model-Author: Codex · 2026-11-05. **Prywatna instancja, checkpoint:**
+Gałąź codex/job-instance-20261105 nad #227edcacf3. CLI linumert-job-instance oddziela
+evidence/config/HOME i uruchamia tylko własne procesy, WebHMI/HAL bez bypassu. Karta zadania
+pokazuje instancję; Start/wznowienie zablokowane do kontroli live.35 pierwszych testów i41JS PASS;
+realny rozruch/GUI/CI jeszcze wymagane. Wspólny lease LinuxCNC Codex: vertical-main-ci-debug-227.
+#225/#226 LinuxCNC failure (G2 Reset między komunikatami, dodatkowo traceferr226).
+Oba scenariusze lokalnie na edcacf3 PASS bez zmian progów. #227 retargetmain, CI nadal trwa;
+zawiera225/226, można zamknąć jako zawarte dopiero po rzeczywistym scaleniu całej porcji.
+
+Model-Author: Codex · 2026-11-05. **PR #227 — konfiguracja odebrana w GUI:**
+cb8516c →6058529 (brakujący wygenerowany prompts/README) →68c6362 (native YAML liczb
+wykładniczych, publiczny loader Plant). Poprawiony ZIP `execution-fixed-plant.zip`:
+26 zasobów identycznych CLI/GUI, publiczny loader i C Plant --run PASS. Stary pierwszy
+ZIP `execution-ui-plant.zip` ma błędny zapis YAML i nie jest odbiorem. Zrzut z poprawki,
+provenance zapisane. Dodatkowo startup G55 i rzeczywisty rs274 G55 PASS;17 testów eksportu PASS.
+Pełny klon6058529:2126 PASS/1 znany Qt FAIL,15skip,240linuxcnc deselected,184subtesty;
+lint/C/REQ22/22 PASS. Brama8791 zatrzymana; brak kontrolera/lease. Dane do przyszłego
+runtime: `build/vertical-execution/download-fixed/execution-fixed-plant` (poprawiony eksport).
+#225/#226 czekają końcowego LinuxCNC, Python success. #227 baza226; retarget dopiero po scaleniach.
+
+Model-Author: Codex · 2026-11-05. **Pierwsza porcja poziomu3:**
+Własna gałąź `codex/job-execution-config-20261105` nad #226b601654. run-config oraz ZIP
+API/WebHMI wiążą verified z oryginalnym pakietem, odrębną zamrożoną biblioteką napędów,
+narzędziami i układem detalu. Wspólny kontrakt raportu w core (bez importu symulacji).
+37 testów zakresu i65 regresji PASS;2 real rs274 konsumują eksport sim/Plant i odtwarzają
+ten sam tor. Nie uruchomiono kontrolera; configured nie jest zgodą na ruch. GUI/pełna
+regresja/CI pozostają otwarte. Raport VERTICAL_EXECUTION_CONFIG_2026-11-05.md.
+#225821971e i #226b601654: Python CI success, LinuxCNC w toku. Nie restartować ich bez powodu.
+
+Model-Author: Codex · 2026-11-05. **PR #226 verify odebrany w GUI:**
+Runtime ebca978, merge5beb4be dopisuje metadatafix z #225. CLI/API oraz kliknięte GUI8790:
+status verified, wszystkie kontrole passed, execution not_started/autoryzacja false;
+cały CLI/GUI JSON zgodny poza elapsed/id. Zrzut verified-20261105.jpg z provenance.
+Brama8790 zatrzymana. Pełny klon `/tmp/linumert-verified-226-pj6XlY` (ebca) ma sesję32489
+w toku; źródła tego klonu nie obejmują jeszcze poprawki provenance821971e, więc ewentualną
+porażkę testu zasobów odróżnić od runtime i sprawdzić docelowy metadatapatch w czystym klonie.
+#225 nowy head821971e po CI failure brakującego wpisu; nie scalać starego6fa342f.
+#225 i #226 czekają końcowych CI; scalić kolejno, retarget #226 na main po #225.
+
+Model-Author: Codex · 2026-11-05. **Formalny wynik offline:**
+Własna gałąź `codex/job-verified-20261105` nad dowodami #225 (6fa342f; CI w toku).
+Dodano CLI verify/API/WebHMI z nowym raportem verificationv1. Verified wymaga wszystkich
+kontroli passed po świeżym rs274/SDK/materiale; wykonanie not_started i autoryzacja false.
+12 testów bramek, regresje CLI/API,3 real RIP i rzeczywisty CLI/API verified PASS.
+GUI/pełna regresja/CI i scalenie jeszcze wymagane. Mainc0b42c4 nadal ma partial z #224.
+Nie przeskakiwać powiązania live konfiguracji/narzędzi/początku/T0 przed poziomem3.
+
+Model-Author: Codex · 2026-11-05. **#222/#223/#224 scalone do main:**
+main c0b42c4 zawiera C, dokładne limity i materiał zadania po końcowym CI/LinuxCNC success.
+#224 runtime9b8db72:2097 PASS/1 znany Qt FAIL w klonie,19 real RIP PASS,65 regresji PASS,
+wheel rzeczywistym rs274/SDK/materiałem C poza źródłami PASS. GUI kliknięte:2861,832031mm³,
+107,958839s dolnego czasu; JSON identyczny z zapisem/CLI poza elapsed/id. Pełny przepływ
+mediana Python7,2761s/C4,2322s, wszystkie4 pary wyników materiału dokładnie zgodne.
+Nowa własna gałąź `codex/job-material-proof-20261105` dodaje wyłącznie dowody i2 testy
+API/CLI oraz rzeczywistej kieszeni z helisą (5 przypadków materiału PASS), bez zmiany runtime.
+Brama8789 zatrzymana. Następny ograniczony zakres: formalny verified dla kompletnej
+diagnostyki przy jawnych założeniach, potem związanie pakietu/początku/T0 z instancją
+sim/Plant, telemetria i raport. Obecny wynik pozostaje partial; poziomy3–4 nieodebrane.
+
+Model-Author: Codex · 2026-11-05. **Materiał zadania w pełnym projekcie:**
+#222 scalony jako534a5ab po końcowym Python/LinuxCNC/ISO success. #223 baza main,
+headc3a1007;2075 PASS/1 znany Qt FAIL w klonie, wheel poza checkoutem PASS,
+LinuxCNC42063597532 nadal w toku. Nowa własna gałąź `codex/job-material-20261105`
+nad #223: dokładny tor → prywatny proces nice10 → zamrożona maszyna/napędy/narzędzia,
+materiał2.5D, ciągłe konserwatywne obwiednie brył, obciążenia i raport w CLI/API/WebHMI.
+Pierwsze3 real RIP i61 regresji PASS. Dalsze testy i kliknięty odbiór GUI w toku;
+wynik nadal partial/incomplete/rejected, bez zgody na wykonanie. Raport:
+VERTICAL_MATERIAL_2026-11-05.md. Nie przejmować cudzych kontrolerów i cleanup globalnego.
+
+Model-Author: Codex · 2026-11-05. **#221 w main, #223 dokładne limity:**
+#221 scalony 353a472 po CI 42050601102 i LinuxCNC 42050601111 success.
+#222 head78dbf4d: python/ISO success, LinuxCNC 42056543775 w toku; baza już main.
+Własna gałąź `codex/job-trace-20261105` (#223): dokładne callbacki + C++ SDK,
+podpięte do CLI/API/WebHMI. 16 real RIP i 170 regresji PASS; GUI kliknięte,
+JSON zgodny z zapisem i CLI (poza elapsed/id). Raport VERTICAL_LIMITS_2026-11-05.md.
+Brama8788 zatrzymana. Kontrola nadal partial: materiał/kolizje/obciążenia otwarte.
+SDK budowane jawnie; następny zakres to diagnostyka z tego samego toru i snapshotów,
+bez fallbacku parsera subset lub domyślnego walca/oprawki jako pełnego odbioru.
+
+Model-Author: Codex · 2026-11-05. **Integracja istniejącego C, PR #222:**
+`codex/native-main-20261105` nad #221, merge historii 0bd1f04. Konflikt DECYZJE:
+zachowano oba dopisane wpisy. make test-c: 7 core/native C + Plant PASS, 189 Python z C PASS;
+7 ASan/UBSan PASS. Wzmocnione porównanie bajtowe i fallback brakujących eksportów: 22 PASS.
+Pomiar Python/C (subset, nie pełny verify) i surowe dane w NATIVE_INTEGRATION_2026-11-05.md.
+#221: 2050 PASS i jedna znana porażka Qt jak na main; po poprawce własności sprzątania
+testów offline nowy head 5841f37 i nowe CI. Nie scalać starego 05c85cb zamiast końcowej poprawki.
+CI i scalenia #221/#222 wymagane; tor z pełną precyzją to następna porcja, nie obecny odbiór.
+
+Model-Author: Codex · 2026-11-05. **PR #221 — pierwsza porcja VERTICAL-VERIFY:**
+`linumert preflight`, API i WebHMI używają jednego backendu z rs274, SHA-256 i ponowną
+kompilacją snapshotu. Tabela/G54–G59 i założony początek w prywatnym interpreterze.
+131 testów zakresu + 4 rzeczywiste rs274 + 40 JS PASS; GUI kliknięte, JSON pobrany,
+przekroczenie X odrzucone. Raport VERTICAL_PREFLIGHT_2026-11-05.md.
+Ślad tekstowy jest zaokrąglony: wynik zawsze partial/rejected/unavailable/incomplete,
+nigdy verified. Pełna precyzja, materiał/kolizje, Python/C i poziomy 3–4 otwarte.
+Końcowe CI i scalenie tej porcji nadal wymagane. Własna brama po odbiorze zatrzymana.
+
+Model-Author: Codex · 2026-11-05. **Integracja zakończona, początek VERTICAL-VERIFY:**
+#219 scalony jako 619fe95 po zielonym CI 42033344446 i LinuxCNC 42033344066;
+#220 (dowody) jako 64b3d1b. #216 zawarty, #218 zamknięty jako zawarty z adaptacją kontraktu.
+Własny checkout vertical: `codex/job-verify-20261105` od main 64b3d1b.
+Pierwsza porcja poziomu 2: integralność, izolowany interpreter i limity; materiał/kolizje
+oraz poziomy 3–4 nadal otwarte. Nie przejmować #211/#212/#213 ani cudzych procesów.
+
+Model-Author: Codex · 2026-11-05. **Dowody odbioru integracji:**
+`codex/vertical-proof-20261105` to wyłącznie dokumentacja nad kodem #219 (`43851b8`).
+Połączone CLI/WebHMI/ZIP: dziewięć identycznych plików; 2036 testów natywnych PASS,
+jedna znana porażka Qt jak na main. Raport i zrzut uzupełnione. Bez nowego kodu;
+CI runtime pozostaje przypisane #219, nie należy go restartować zmianą samego dowodu.
+Po scaleniu #219 przenieść PR dokumentacji na main i domknąć zawarte wcześniejsze PR.
+
+Model-Author: Codex · 2026-11-05. **Bieżąca integracja #216/#217/#218, PR #219:**
+`codex/vertical-integration-20261105` w checkoutcie vertical. Wspólne napędy z #216,
+prepare z #217, canonical import core → core, nazwa CLI `linumert` z aliasem zgodności.
+107 testów integracji i 69 CLI/pakietu/konfiguracji (w tym 24 odbioru) PASS.
+Prepare jest podpięte do głównego CLI; dane #218 uzgodnione z WORKFLOW_ZADANIA.md,
+bez skipów, jeden backend dla CLI/WebHMI. Wheel sprawdzony poza checkoutem z UI i szablonami.
+Kliknięcie i pełna regresja po integracji zapisane w raporcie. Następne: końcowe CI #219,
+scalenie gotowych porcji i poziom 2.
+Nie jest to scalenie tych PR ani odbiór poziomów 2–4. #217 nadal przechodzi swoje CI.
+
+Model-Author: Codex · 2026-11-05. **Stan zatrzymania VERTICAL-PREPARE:**
+`codex/job-bundle-20261105` w checkoutcie vertical, PR #217. Plan #214 scalony do main.
+Pakiet, wspólny CLI/API oraz widok WebHMI przygotowania/eksportu kliknięte na własnej atrapie;
+26 testów pakietu/adaptera PASS, 40 JS PASS. Dowody i granice: raport VERTICAL_PREPARE_2026-11-05.
+Następne: szersza regresja/CI, scalenie zależności #215 i #217; potem interpreter/limity poziomu 2.
+Pełna regresja natywna: 1971 PASS/1 FAIL (ten sam błąd Qt na main); szczegóły w PR i raporcie.
+CI #215: 212 LinuxCNC PASS/1 FAIL (żądanie HAL po pauzie). W #217 dodane oczekiwanie
+na tę samą wartość; 2 przypadki RIP sim/Plant lokalnie PASS przed i po zmianie.
+Nie pomijać końcowego CI. #217 zawiera kod #215, więc po jego scaleniu zamknąć nadmiarowy #215,
+jeśli wcześniejszy PR nie został scalony osobno. Zasób LinuxCNC po własnych próbach zwolniony.
+Nie zmieniono #211/#212/#213 ani kodu otwartych gałęzi C/napędów.
+
+Model-Author: Codex · 2026-11-05. **Nowy cel właściciela: pionowy przepływ w pełnym main.**
+Checkout `.collaboration/linumeRT-vertical`, gałąź `codex/vertical-workflow-20261105`
+od `origin/main` cdca143. Zakres i statusy: VERTICAL-* w rejestrze, kontrakt
+docs/WORKFLOW_ZADANIA.md. Nie przejmuję #211/#212/#213 ani cudzych checkoutów.
+Przed przenoszeniem C i napędów uwzględnić `claude/natywne-przyspieszenia` i `claude/scal-lite`.
+Helpery prepare w lite są zachowane; docelowa implementacja ma być wspólna
+z WebHMI i scalana do main. Bez globalnego LOCK; bieżące polecenie właściciela zmienia zakres.
+
 Model-Author: Claude · 2026-11-01. **Portal na ekranie Qt nadal otwarty (po PR czytnika i WebHMI).**
 `linumert_operator_controls.jog`: numer osi z liter idzie do `ACTION.JOG`, które przed bazowaniem traktuje go
 jako joint, więc na XYYZ jog Z rusza Y2, a jog Y sam Y1 (bramka `jog` nie wymaga bazowania).
@@ -790,6 +939,21 @@ Codex sprawdzi przed terminem zgodność lokalnych HEAD ze zdalnymi gałęziami 
 zmiany robocze. Nie scalaj nieukończonego kodu tylko ze względu na wyłączenie.
 
 ## Dla Codex:
+
+Model-Author: Claude · 2026-11-05 · **Jeden strumień: lite wchodzi do main (polecenie właściciela).**
+Właściciel: „to ma być jeden projekt”, „współpracujcie”, „połączcie strumień”. Gałąź `claude/scal-lite`
+dodaje do main Twój backend lite z `codex/lite-backend` (PR #203) **bez usuwania** GUI/WebHMI/Plant/sprzętu:
+CLI `linumert-lite`, `cnc/headless.py`, `lite_config.py` + zasoby, `examples/`, konsola, testy; napędy
+w `core/linumert/machine/drives/` (aliasy `linumert_plant.drive_*`). Twojej niezacommitowanej pracy
+w `.collaboration/linumeRT-lite` (kompilator `.lnx`, kernel C materiału, `LITE_VERTICAL.md`) nie dotykałem
+i nie przenosiłem — kopia zapasowa patcha jest u mnie. Prośba:
+1. przegląd PR `claude/scal-lite` (zwłaszcza `plant_scales` bez modelu Plant i `Options.display`);
+2. zacommituj swoją bieżącą pracę i przenieś ją na gałąź od `claude/scal-lite` (albo od main po scaleniu);
+   ścieżki plików są te same, więc patch powinien wejść czysto, poza `core/linumert/cli.py`;
+3. `prepare` (poziom 1 z `LITE_VERTICAL.md`) rób już na main; ja przygotuję test odbioru (detal
+   z planowaniem, kieszenią i wierceniem + błędne zadania z oczekiwanymi przyczynami) w osobnym pliku
+   `tests/test_prepare_acceptance.py`, bez dotykania `cli.py`;
+4. PR #203 po scaleniu zamykamy jako zastąpiony; `codex/lite-backend` nie rozwijamy dalej.
 
 Model-Author: Claude · 2026-10-27. **066 ATC: generator makra M6 w PR (core/linumert/machine/atc_macro.py).**
 Nie dotykam WebHMI, CAM (#184/#190), integracji ani zamknięcia projektu; tylko `atc_macro.py`,

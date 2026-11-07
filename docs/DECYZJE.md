@@ -583,6 +583,18 @@ a zatrzask nie miał wejścia od LinuxCNC. Generator Plant (`render_plant_hal`) 
 zezwolenie (D35); reset nadal wyłącznie przez `iocontrol.0.user-request-enable` → `estop_latch.reset`.
 To przeniesienie poprawki z bety (2026-11-01). Konfiguracja sprzętowa bez zmian. NIEZWERYFIKOWANE NA SPRZĘCIE.
 
+## Rozwój pionowy pełnego linumeRT i cel main — polecenie właściciela 2026-11-05
+
+Model-Author: Codex. Właściciel zlecił rozwinąć prepare → verify → run → report
+i zapisać to jako cel, następnie doprecyzował: „to nie ma byc lite to ma byc scalone
+do main glownego projektu linumert”. Zakres dotyczy pełnego linumeRT i WebHMI,
+z PR/merge do main dla ukończonych porcji. Zastępuje to wybór osobnej edycji lite.
+Kontrakt: docs/WORKFLOW_ZADANIA.md; statusy i powiązania z pierwotnymi sesjami
+w czterech rozszerzeniach VERTICAL-* wspólnego rejestru. To jawna zmiana bieżącego zakresu;
+wcześniejsze bramki, odbiór operatora oraz hardware nie są automatycznie zaliczone.
+Zmiany z lite integrujemy selektywnie, zachowując funkcje pełnej edycji
+i uwzględniając istniejące prace natywne, napędy oraz otwarte PR.
+
 ## PROPOZYCJA: WebHMI w łańcuchu E-STOP przez watchdog HAL — 2026-11-04
 
 Model-Author: Claude. Brama WebHMI z `--hal` tworzy te same piny `linumert.hmi-*` co ekran Qt
@@ -620,3 +632,47 @@ kolejna operacja inny numer o, a w komentarzu komentarz i więcej info”.
   linii), wyłączenie notatki o nieznanym narzędziu dla `o<lrt_*> call` po scaleniu #212.
 
 NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## DECYZJA właściciela: jeden projekt, wszystko w main — 2026-11-05
+
+Model-Author: Claude. Polecenie właściciela: „to ma być jeden projekt, chcę wszystko poscalać do main”.
+Edycja lite (`codex/lite-backend`, PR #203) przestaje być osobną gałęzią rozwoju; jej backend trafia
+do main **dodatkowo**, bez usuwania GUI, WebHMI, panelu Plant, konfiguracji sprzętowej ani ATC.
+- Szablony i moduły napędów (`drive_library`, `drive_real`, `drive_template`, `machine_drives`)
+  przeniesione z Plant do `core/linumert/machine/drives/` (szablony w `templates/`), aby rdzeń
+  nie importował Plant (CLAUDE.md §3 i §5a zaktualizowane w tym samym commicie).
+  `linumert_plant.drive_*` zostają jako aliasy zgodności wstecznej.
+- Polecenie `linumert-lite` (CLI backendu), `linumert-headless` (DISPLAY bez okna) i
+  `linumert-plant` są wspólnymi punktami wejścia main. Eksport `linumert-lite config` daje sim/Plant
+  z DISPLAY headless; pełna edycja dalej generuje `qtvcp linumert` i cel `hardware`.
+- Dalsze etapy z `docs/roadmap/LITE_VERTICAL.md` (prepare → verify → run → report) powstają na main.
+- Kopia `beta/` (PR #202, scalona 2026-11-02) jest nadal osobnym drzewem kodu; jej ujednolicenie
+  z `core/` to osobny krok. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## PROPOZYCJA: natywne przyspieszenia poza RT (C11 + ctypes) — 2026-11-05
+
+Model-Author: Claude. Pomiar `docs/raporty/WYDAJNOSC_2026-11-05.md` wskazał dwie pętle za wolne
+w Pythonie: materiał symulacji (`StockMap.cut`, 0,2–4 s na program) i płaskorzeźbę z STL
+(`plan_relief`, 24 s). Rozwiązanie i dylematy:
+- **Język i wiązanie:** C11 bez zależności w `core/native/` (jak `plant/core`), ctypes w
+  `linumert.native`. Odrzucone: C++/pybind11, cffi, Cython, numba (nowe zależności i kompilacja
+  przy instalacji pakietu).
+- **Kiedy biblioteka działa:** gdy istnieje `core/native/build/liblinumert_native.so`
+  (`make native`, `make test-c`, hook obrazu ISO) albo `LINUMERT_NATIVE_LIB`. Import nie buduje
+  biblioteki, wheel jej nie zawiera; bez niej ścieżka Pythona (wolniej, ten sam wynik).
+  `LINUMERT_NATIVE=0` wyłącza. Do decyzji właściciela: budowa w maszynie wirtualnej VM-A
+  (`tools/vm/post-install-ctl.sh` nie instaluje dziś `gcc`).
+- **Zgodność wyników:** C wykonuje te same działania w tej samej kolejności co numpy
+  (`-ffp-contract=off`), więc mapa materiału i wysokości frezu są identyczne bitowo. Jedyna
+  tolerancja: suma objętości (numpy float32, C double), błąd względny ≤ 1e-6. Koszt: zmiana wzoru
+  w dwóch miejscach; `tests/test_native.py` wykrywa rozbieżność.
+- **Wektoryzacja przed C:** płaskorzeźba ma też wersję numpy porcjami (`ball_tip_heights`, zapas
+  bez biblioteki, ok. 20×). Materiału numpy nie przyspiesza: każda próbka obniża mapę przed
+  następną, a okna mają kilkaset komórek.
+- **Testy:** `make test` liczy ścieżką Pythona (conftest ustawia `LINUMERT_NATIVE=0`), test
+  porównawczy buduje bibliotekę do katalogu tymczasowego; `make test-c` uruchamia testy C oraz
+  testy symulacji i CAM z `LINUMERT_NATIVE=1`.
+- **Bez zmian (świadomie):** `parse_subset`/`MoveListBuilder` w `path.py` i `make_move`
+  w `toolpath.py` (ok. 0,6 s na 32 tys. linii) czekają na scalenie PR #212, który zmienia te pliki;
+  `gcode.parse` to LinuxCNC; brama WebHMI (43 µs/obieg) i ramka Plant (113 µs) mieszczą się w
+  budżecie. Właściciel może wybrać inaczej. NIEZWERYFIKOWANE NA SPRZĘCIE.
