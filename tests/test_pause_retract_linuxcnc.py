@@ -91,8 +91,9 @@ def test_retract_returns_to_compensated_path(tmp_path, plant, request):
     assert [(r["correction"], r["inch"]) for r in rows] == [
         (40, False), (41, False), (42, False), (41, True), (42, True)]
     assert rows[0]["requested_before"] == pytest.approx(0.000002, abs=1e-9)
+    assert 1e-6 < rows[0]["offset_before"] < RETURN_TOLERANCE_MM
     for row in rows:
         assert row["counts_after"] - row["counts_before"] == 1001, row
-        assert abs(row["requested_after"] - row["requested_before"] - 1.001) < 1e-6, row
+        assert abs(row["requested_after"] - row["offset_before"] - 1.001) < 1e-6, row
         assert row["end"][:2] == pytest.approx([250, 100], abs=0.005), row
         assert abs(row["offset"]) <= RETURN_TOLERANCE_MM, row

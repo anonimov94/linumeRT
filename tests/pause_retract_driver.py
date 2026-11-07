@@ -169,6 +169,7 @@ def run(ini, joint_count, output):
             seed_retained_offset()
             wait_for_settled_drives()
         before, z_before, frame = position(), feedback_z(), control.last.frame
+        offset_before = float(hal.get_value("axis.z.eoffset"))
         requested_before = float(hal.get_value("axis.z.eoffset-request"))
         counts_before = int(hal.get_value("axis.z.eoffset-counts"))
         expected_counts = counts_before + round(height / hal.get_value("axis.z.eoffset-scale"))
@@ -178,16 +179,17 @@ def run(ini, joint_count, output):
         wait(lambda: control.model.phase == "retracted", control=control)
         wait(lambda z_before=z_before: abs(feedback_z() - z_before - height) < 0.005,
              control=control)
-        # HAL acknowledges the asynchronous target as whole counts. The request
-        # accumulates scaled count deltas, including a retained return residual.
-        wait(lambda expected_counts=expected_counts, requested_before=requested_before:
+        # Disabled simple_tp synchronizes its command to the retained position;
+        # eoffset-request can still show the preceding enabled-cycle command.
+        # Check the new request from that actual baseline, and exact HAL counts.
+        wait(lambda expected_counts=expected_counts, offset_before=offset_before:
              hal.get_value("axis.z.eoffset-counts") == expected_counts
-             and abs(hal.get_value("axis.z.eoffset-request") - requested_before - height) < 1e-6,
+             and abs(hal.get_value("axis.z.eoffset-request") - offset_before - height) < 1e-6,
              control=control)
         counts_after = int(hal.get_value("axis.z.eoffset-counts"))
         requested_after = float(hal.get_value("axis.z.eoffset-request"))
         assert counts_after == expected_counts
-        assert abs(requested_after - requested_before - height) < 1e-6
+        assert abs(requested_after - offset_before - height) < 1e-6
         assert max(abs(a - b) for a, b in zip(position(), before, strict=True)) < 1e-6, (
             "planner changed", before, position())
         assert s.paused and control.last.frame == frame
@@ -214,6 +216,7 @@ def run(ini, joint_count, output):
         wait(lambda: s.interp_state == linuxcnc.INTERP_IDLE, control=control)
         assert s.task_state == linuxcnc.STATE_ON
         rows.append({"correction": side, "inch": inch, "paused": before,
+                     "offset_before": offset_before,
                      "requested_before": requested_before, "requested_after": requested_after,
                      "counts_before": counts_before, "counts_after": counts_after,
                      "end": position(), "offset": hal.get_value("axis.z.eoffset")})

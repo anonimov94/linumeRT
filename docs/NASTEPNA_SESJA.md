@@ -19,8 +19,9 @@ Model-Author: Codex · 2026-11-07. **Stan zatrzymania domknięcia229:** CI90e810
 dwukrotnie244PASS/1FAIL w starym D38 sim: absolutny request zakładał zerową resztę.
 Test mierzy teraz przyrost z dokładnie1001 impulsów, próg1e-6 zachowany; wymusza2e-6
 reszty w pierwszej pauzie. Budżet CI90min po przekroczeniu60min; bez pomijania testów.
-Lint PASS. Pierwszy seed2e-6 oczekiwał ruchu mniejszego od epsilon planera; poprawiony
-sprawdza akumulator request. Oba warianty RIP i końcowe CI przed scaleniem wymagane.
+Lint PASS. Test7d643e8: Plant PASS, sim FAIL w następnej pauzie; wyłączony simple_tp
+śledzi pozycję, a request pozostaje stary. Bazą przyrostu jest więc odczyt eoffset
+sprzed uzbrojenia, nie poprzedni request. Oba warianty RIP/CI wymagane.
 230 zachowuje dowody,231 pozostaje szkicem; polecenie właściciela: domknąć etap.
 
 Model-Author: Codex · 2026-11-07. Analiza raw po zakończeniu: ostatni błąd Z około
