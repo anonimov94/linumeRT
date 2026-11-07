@@ -2140,11 +2140,9 @@
         "053",
         "061"
       ],
-      "status": "in_progress",
-      "progress": "Pełne linumeRT, docelowo main. PR229 wiąże frozen job z NML/RAM/HAL/limitami i żywym WebHMI; Start wymaga świeżego potwierdzenia, wznowienie zgodnego ustalonego kontekstu. Wykonanie/Stop kończą zapis po3 stabilnych odczytach wszystkich osi<0,001mm; settle_timeout5s. Runtime90e8100:4 RIP PASS59,77s; kliknięte GUI RUN/PAUSE/RESUME→completed_observed126,645824s/5898próbek, max końcowych3 błędów0,000655949mm. Plant Stop→aborted9,017242s/max0,000607649mm; dodatkowy sim bez Plant Stop→aborted8,155675s/błędy0. Siedem surowych archiwów, hashe/ID/liczba próbek i końcowe błędy ponownie sprawdzone. NML jest próbkowanym źródłem, błąd osi=commanded−actual, bez kwalifikacji sprzętu. CI90e8100 dwukrotnie244PASS/1FAIL w starym D38sim. Poprawka testu f936f19 zachowuje1e-6mm, wymaga1001 impulsów i używa pozycji sprzed uzbrojenia; wymuszenie2e-6mm, lokalne sim+Plant2PASS140,58s. Qt/model i tolerancje bez zmian. Końcowe CI42417145984/42417145941 oraz scalenie229/230 pozostają wymagane.",
-      "remaining": [
-        "Końcowe pełne CI dokładnego f936f19 (w tym LinuxCNC i Beta), scalenie PR229 i dokumentacyjnego PR230 do main oraz zapis merge SHA."
-      ],
+      "status": "done",
+      "progress": "Pełne linumeRT: kod wykonania PR229 scalony do main jako ff0a9f9ca1d3adc80fb9cd1b8e086ed368538aca po końcowych success ci42417145984 i LinuxCNC42417145941 dla f936f19dfcc448838aa56e2d4db2795b25122d4e. CI:2039 Python/190 natywnych; w RIP2183 testy konfiguracji/184 podtesty,192 natywne/6 podtestów,245 LinuxCNC oraz12 Beta PASS. Frozen job jest wiązany z NML/RAM/HAL/limitami i żywym WebHMI; Start wymaga świeżego potwierdzenia, wznowienie zgodnego ustalonego kontekstu. Stop/E-STOP/utrata klienta mają odrębne wyniki, brak automatycznego Reset/ON/bazowania. Wykonanie/Stop zapisują do3 stabilnych odczytów wszystkich osi<0,001mm; settle_timeout5s. Kliknięte GUI runtime90e8100: RUN/PAUSE/RESUME→completed_observed126,645824s/5898próbek, max końcowych3 błędów0,000655949mm; Plant Stop9,017242s/max0,000607649mm; sim Stop8,155675s/błędy0. Kod produkcyjny jest identyczny z odebranym90e8100; dalsza zmiana dotyczyła testu D38 i budżetu CI. D38 sim+Plant2PASS140,58s z resztą2e-6mm,1001 impulsów i niezmienionym1e-6mm;4 końcowe regresje zadania PASS58,09s.7 archiwów zweryfikowanych po hashach/ID/próbkach. Dokumentacja i dowody PR230; lint,31 kontroli planu/IP/architektury iREQ22/22 PASS. NML jest próbkowanym źródłem; błąd osi=commanded−actual, nie surowy joint.ferror_current. Odbiór sprzętu i VERTICAL-REPORT pozostają odrębne; ten etap nie zamyka nadrzędnych sesji ani bramek.",
+      "remaining": [],
       "evidence": [
         "docs/WORKFLOW_ZADANIA.md",
         "core/linumert/programs/job_execution.py",
@@ -2172,7 +2170,10 @@
         "docs/raporty/vertical/gui-settled-terminal-20261107.json",
         "docs/raporty/vertical/run-settled-20261107.png",
         "tests/test_pause_retract_linuxcnc.py",
-        "https://github.com/anonimov94/linumeRT/pull/230"
+        "https://github.com/anonimov94/linumeRT/pull/230",
+        "https://github.com/anonimov94/linumeRT/commit/ff0a9f9ca1d3adc80fb9cd1b8e086ed368538aca",
+        "https://github.com/anonimov94/linumeRT/actions/runs/42417145984",
+        "https://github.com/anonimov94/linumeRT/actions/runs/42417145941"
       ]
     },
     {

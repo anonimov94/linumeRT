@@ -15,6 +15,15 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · 2026-11-07. **VERTICAL-RUN zamknięty, pełne main:**
+#229 scalony ff0a9f9ca1d3adc80fb9cd1b8e086ed368538aca. Dokładny f936f19 ma success
+ci42417145984 oraz LinuxCNC42417145941:245 RIP i12 Beta PASS; D38 sim/Plant PASS.
+Dowody końcowego ustalenia osi, kliknięty zrzut i7 raw archiwów zachowane w #230.
+Końcowe lokalne regresje zadania4PASS58,09s, lint/31 kontroli dokumentacji/REQ22/22 PASS.
+Własne procesy zakończone i lease zwolniony. Źródła runtime main zgodne z odebranym90e8100.
+W planie RUN done; REPORT pozostaje oddzielnym draft #231, bez dalszego rozwoju w tym etapie.
+Nie zamknięto nadrzędnych bramek ani odbioru sprzętu. Starsze checkpointy poniżej są historią.
+
 Model-Author: Codex · 2026-11-07. **Końcowy head229 f936f19:** stary D38 sim+Plant
 2PASS140,58s z wymuszoną resztą2e-6mm, dokładnie1001 impulsów i progiem1e-6mm.
 Bazą jest pozycja eoffset sprzed uzbrojenia (request bywa starszy). Qt/model bez zmian.

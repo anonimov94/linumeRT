@@ -2040,3 +2040,13 @@ Pin request po wyłączeniu może być starszy niż pozycja simple_tp; oba odczy
 Wymuszenie2e-6mm sprawdza regresję; Qt/model i tolerancje produkcyjne bez zmian.
 Ponowna kontrola7 archiwów: wszystkie hashe/ID/próbki i zaakceptowane końcowe błędy zgodne.
 CI42417145984/42417145941 dokładnego headu wymagane przed scaleniem229/230.
+
+## VERTICAL-RUN — etap scalony do pełnego main · 2026-11-07
+
+Model-Author: Codex. #229→ff0a9f9 po końcowych success ci42417145984/LinuxCNC42417145941
+dla f936f19:2039 Python/190 natywnych; RIP2183+184 podtesty/192 natywne+6/245 LinuxCNC
+oraz12 Beta PASS. Oba D38 i4 nowe regresje PASS; artefakty i cleanup CI success.
+Lokalne4 regresje f936f19 PASS58,09s, dokumentacja lint/31PASS/REQ22/22; raw7 archiwów zgodne.
+Plan RUN done; dowody końcowego ustalenia i zrzut w #230. REPORT zachowany jako draft #231.
+Autokontrola, bez niezależnego przeglądu. Własne procesy zakończone, lease zwolniony.
+Nie zamyka sesji nadrzędnych/bramek ani kwalifikacji sprzętu.

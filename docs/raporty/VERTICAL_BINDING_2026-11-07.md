@@ -153,3 +153,18 @@ Budżet całego CI90min, bez pomijania przypadków i bez zmiany timeoutów test�
 Świeże pełne CI42417145984 i LinuxCNC42417145941 na f936f19 wymagane przed scaleniem.
 Niezależna kontrola7 archiwów: SHA256 archiwum i oryginałów, ID, liczby próbek oraz
 trzy końcowe błędy w zaakceptowanych przebiegach zgodne z indeksem.
+
+## Domknięcie etapu w pełnym main
+
+Model-Author: Codex. PR229 scalony jako ff0a9f9ca1d3adc80fb9cd1b8e086ed368538aca.
+Dokładny head f936f19dfcc448838aa56e2d4db2795b25122d4e: [ci42417145984](https://github.com/anonimov94/linumeRT/actions/runs/42417145984)
+i [LinuxCNC42417145941](https://github.com/anonimov94/linumeRT/actions/runs/42417145941) success.
+Pierwszy:2039 Python,190 natywnych,REQ22/22, wheel i macierz Plant PASS. Drugi:
+2183 testy konfiguracji/184 podtesty,192 natywne/6 podtestów,245 LinuxCNC2605,83s
+oraz12 Beta215,14s PASS. Oba D38 i nowe scenariusze zadania PASS; artefakty/cleanup success.
+Lokalne4 regresje końcowego headu PASS58,09s po D38; brak własnych procesów, lease zwolniony.
+Main zawiera identyczne produkcyjne core/WebHMI/Plant/config/HAL/Qt/simulation jak
+odebrany runtime90e8100; późniejsza poprawka dotyczyła testu i budżetu CI. Dokumentacja
+przechodzi lint,31 kontroli planu/IP/architektury iREQ22/22. Dowody uzupełnia PR230.
+Autokontrola, bez niezależnego przeglądu. Wspólny plan oznacza wyłącznie VERTICAL-RUN
+jako done; raport porównawczy pozostaje osobnym draft PR231. NIEZWERYFIKOWANE NA SPRZĘCIE.
