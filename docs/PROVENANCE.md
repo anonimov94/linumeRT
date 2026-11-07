@@ -742,3 +742,7 @@ bez retuszu;
 Codex, 2026-11-07, GPL-2.0-or-later. `run-gui-settled-20261107.tar.gz`,
 `run-stop-settled-20261107.tar.gz`, `gui-settled-terminal-20261107.json`: własne surowe
 pomiary po poprawce ustalenia osi90e8100, ta sama data i licencja; bez tokenów.
+
+`docs/raporty/vertical/run-sim-stop-settled-20261107.tar.gz`: własny LinuxCNC sim
+bez procesu Plant, WebHMI/HAL bez bypassu, ten sam verified job; Codex, 2026-11-07,
+GPL-2.0-or-later. Manifest/próbki/wynik bez tokenu, powiązane hashami w runs-20261107.json.

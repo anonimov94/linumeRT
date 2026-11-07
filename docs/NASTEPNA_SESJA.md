@@ -15,6 +15,12 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · 2026-11-07. Zamykanie etapu: sim bez Plant także Start/pauza/
+wznowienie/Stop PASS8,16s, archiwum zachowane, brak procesów/lease. CI90LinuxCNC
+244PASS/1FAIL stary D38sim, lokalne odtworzenie PASS67,06s bez zmian. Próba2 job128518681208
+w toku, nadal nie scalać229. IPf02610PASS/REQ22/22; dokumentacyjne CI230 success.
+Raport zapisany osobno jako draft231, nie rozwijać go podczas domykania tego etapu.
+
 Model-Author: Codex · 2026-11-07. Domknięcie wykonania90e8100:4 RIP PASS59,77s;
 Stop i kliknięte GUI kończą po3 próbkach <0,001mm (max0,000608/0,000656mm), surowe
 archiwa/hashe/zrzut zachowane. Brak własnych procesów, lease zwolniony. Pełny7d6238d

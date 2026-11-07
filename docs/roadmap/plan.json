@@ -2141,7 +2141,7 @@
         "061"
       ],
       "status": "in_progress",
-      "progress": "Pełny maincd8ed66 zawiera eksport verified227 i prywatny rozruch228. PR229: integralność plików, NML/RAM/HAL/limity, żywy klient i nowe potwierdzenie Start; wznowienie zachowuje ustalony kontekst pauzy i zamrożone remapy. Runtime293af3e:4 rzeczywiste regresje RIP PASS58,34s (rozruch, Stop, E-STOP, utrata klienta). Pełny program z verified ZIP227 zakończony112,531625s/5288próbek; kliknięte GUI8796 RUN/PAUSE/RESUME zakończone148,279929s/6895próbek wraz z pauzą operatora, przeglądarka jedynym heartbeat HMI. Surowe manifesty/JSONL/wyniki, hashe i zrzut zachowane. Własne procesy zakończone. Pełna regresja/końcowe CI i scalenie229 wymagane; NML nie jest pełnym śladem serwa ani kwalifikacją sprzętu. Analiza raw: stary wynik completed_observed kończył próbki przed ustaleniem Z (około0,03mm); nie jest odbiorem pozycjonowania. Nowy stan settling wymaga3 odczytów ze stabilnym zadaniem i błędami<0,001mm lub settle_timeout po5s.28 testów zakresu PASS, rzeczywisty odbiór poprawki wymagany. Końcowy runtime90e8100 odebrany:4 RIP PASS59,77s; Stop i pełne kliknięte GUI kończą zapis dopiero po3 próbkach wszystkich osi<0,001mm (max0,000608/0,000656mm). Dowody i hashe zachowane. CI90Python/C/wheel i macierz Plant success; końcowy LinuxCNC w toku. Lokalny7d6238d:2181PASS/REQ22/22. Brak własnych procesów, lease zwolniony.",
+      "progress": "Pełny maincd8ed66 zawiera eksport verified227 i prywatny rozruch228. PR229: integralność plików, NML/RAM/HAL/limity, żywy klient i nowe potwierdzenie Start; wznowienie zachowuje ustalony kontekst pauzy i zamrożone remapy. Runtime293af3e:4 rzeczywiste regresje RIP PASS58,34s (rozruch, Stop, E-STOP, utrata klienta). Pełny program z verified ZIP227 zakończony112,531625s/5288próbek; kliknięte GUI8796 RUN/PAUSE/RESUME zakończone148,279929s/6895próbek wraz z pauzą operatora, przeglądarka jedynym heartbeat HMI. Surowe manifesty/JSONL/wyniki, hashe i zrzut zachowane. Własne procesy zakończone. Pełna regresja/końcowe CI i scalenie229 wymagane; NML nie jest pełnym śladem serwa ani kwalifikacją sprzętu. Analiza raw: stary wynik completed_observed kończył próbki przed ustaleniem Z (około0,03mm); nie jest odbiorem pozycjonowania. Nowy stan settling wymaga3 odczytów ze stabilnym zadaniem i błędami<0,001mm lub settle_timeout po5s.28 testów zakresu PASS, rzeczywisty odbiór poprawki wymagany. Końcowy runtime90e8100 odebrany:4 RIP PASS59,77s; Stop i pełne kliknięte GUI kończą zapis dopiero po3 próbkach wszystkich osi<0,001mm (max0,000608/0,000656mm). Dowody i hashe zachowane. CI90Python/C/wheel i macierz Plant success; końcowy LinuxCNC w toku. Lokalny7d6238d:2181PASS/REQ22/22. Brak własnych procesów, lease zwolniony. Dodatkowy sim bez procesu Plant także PASS: ten sam verified job, Start/pauza/wznowienie/Stop8,155675s i końcowe błędy0. CI LinuxCNC próba1:244PASS/1FAIL w niezmienionym D38sim, lokalnie ten test PASS67,06s; ponowiony tylko nieudany job, próba2 w toku. Brak własnych procesów i lease.",
       "remaining": [
         "Końcowe LinuxCNC CI dokładnego90e8100, autokontrola oraz scalenie PR229 do main; dowody końcowego ustalenia osi odebrane.",
         "Zależność: pozytywny VERTICAL-VERIFY i niezmieniony manifest pakietu.",
@@ -2186,8 +2186,8 @@
         "053",
         "068"
       ],
-      "status": "planned",
-      "progress": "Czwarty poziom zleconego przepływu. Specyfikacja wymaga raportu powiązanego z manifestem, kontrolami i przebiegiem; brak danych nie może dawać PASS.",
+      "status": "in_progress",
+      "progress": "Pierwszy checkpoint zapisany oddzielnie w draft PR231 (989a087): wspólny backend offline CLI/API i minimalny widok WebHMI,9 testów raportu/CLI/API PASS oraz46 regresji PASS/4skip. GUI raportu, rzeczywiste dane, pełna regresja i odbiór poziomu4 pozostają otwarte. Właściciel polecił teraz domknąć etap wykonania do main; raport zachowany do kolejnego etapu.",
       "remaining": [
         "Zależność: przebieg VERTICAL-RUN z telemetrią i wynikiem zakończenia.",
         "Uzgodnienie jednostek i czasu, tor zadany/rzeczywisty, błąd max/RMS osi, alarmy i czas.",
@@ -2196,7 +2196,8 @@
         "Detal przechodzący poziomy 1–4 i odczyt pakietu/raportu bez aktywnej maszyny."
       ],
       "evidence": [
-        "docs/WORKFLOW_ZADANIA.md"
+        "docs/WORKFLOW_ZADANIA.md",
+        "https://github.com/anonimov94/linumeRT/pull/231"
       ]
     }
   ]

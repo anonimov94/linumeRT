@@ -158,7 +158,7 @@ Nie są kolejnym harmonogramem. Ich status dotyczy tylko wskazanego kroku.
 | VERTICAL-PREPARE | 028, 029, 032, 039, 040, 041, 043, 062 | Zadanie obróbkowe: przygotowanie wspólnego pakietu w WebHMI | ukończone |
 | VERTICAL-VERIFY | 044, 049, 051, 052, 055 | Zadanie obróbkowe: interpreter, limity i diagnostyka obróbki | ukończone |
 | VERTICAL-RUN | 028, 029, 049, 053, 061 | Zadanie obróbkowe: wykonanie i telemetria przez WebHMI w sim/Plant | w toku |
-| VERTICAL-REPORT | 024, 049, 052, 053, 068 | Zadanie obróbkowe: raport przewidywania i rzeczywistego wykonania | planowane |
+| VERTICAL-REPORT | 024, 049, 052, 053, 068 | Zadanie obróbkowe: raport przewidywania i rzeczywistego wykonania | w toku |
 
 ## Postęp, pozostały zakres i dowody
 
@@ -1066,7 +1066,7 @@ Pozostaje: Odbiór rzeczywistej przeglądarki: DRO, scena WebGL ≤30 FPS, jog i
 
 ### VERTICAL-RUN — Zadanie obróbkowe: wykonanie i telemetria przez WebHMI w sim/Plant
 
-**w toku**. Pełny maincd8ed66 zawiera eksport verified227 i prywatny rozruch228. PR229: integralność plików, NML/RAM/HAL/limity, żywy klient i nowe potwierdzenie Start; wznowienie zachowuje ustalony kontekst pauzy i zamrożone remapy. Runtime293af3e:4 rzeczywiste regresje RIP PASS58,34s (rozruch, Stop, E-STOP, utrata klienta). Pełny program z verified ZIP227 zakończony112,531625s/5288próbek; kliknięte GUI8796 RUN/PAUSE/RESUME zakończone148,279929s/6895próbek wraz z pauzą operatora, przeglądarka jedynym heartbeat HMI. Surowe manifesty/JSONL/wyniki, hashe i zrzut zachowane. Własne procesy zakończone. Pełna regresja/końcowe CI i scalenie229 wymagane; NML nie jest pełnym śladem serwa ani kwalifikacją sprzętu. Analiza raw: stary wynik completed_observed kończył próbki przed ustaleniem Z (około0,03mm); nie jest odbiorem pozycjonowania. Nowy stan settling wymaga3 odczytów ze stabilnym zadaniem i błędami<0,001mm lub settle_timeout po5s.28 testów zakresu PASS, rzeczywisty odbiór poprawki wymagany. Końcowy runtime90e8100 odebrany:4 RIP PASS59,77s; Stop i pełne kliknięte GUI kończą zapis dopiero po3 próbkach wszystkich osi<0,001mm (max0,000608/0,000656mm). Dowody i hashe zachowane. CI90Python/C/wheel i macierz Plant success; końcowy LinuxCNC w toku. Lokalny7d6238d:2181PASS/REQ22/22. Brak własnych procesów, lease zwolniony.
+**w toku**. Pełny maincd8ed66 zawiera eksport verified227 i prywatny rozruch228. PR229: integralność plików, NML/RAM/HAL/limity, żywy klient i nowe potwierdzenie Start; wznowienie zachowuje ustalony kontekst pauzy i zamrożone remapy. Runtime293af3e:4 rzeczywiste regresje RIP PASS58,34s (rozruch, Stop, E-STOP, utrata klienta). Pełny program z verified ZIP227 zakończony112,531625s/5288próbek; kliknięte GUI8796 RUN/PAUSE/RESUME zakończone148,279929s/6895próbek wraz z pauzą operatora, przeglądarka jedynym heartbeat HMI. Surowe manifesty/JSONL/wyniki, hashe i zrzut zachowane. Własne procesy zakończone. Pełna regresja/końcowe CI i scalenie229 wymagane; NML nie jest pełnym śladem serwa ani kwalifikacją sprzętu. Analiza raw: stary wynik completed_observed kończył próbki przed ustaleniem Z (około0,03mm); nie jest odbiorem pozycjonowania. Nowy stan settling wymaga3 odczytów ze stabilnym zadaniem i błędami<0,001mm lub settle_timeout po5s.28 testów zakresu PASS, rzeczywisty odbiór poprawki wymagany. Końcowy runtime90e8100 odebrany:4 RIP PASS59,77s; Stop i pełne kliknięte GUI kończą zapis dopiero po3 próbkach wszystkich osi<0,001mm (max0,000608/0,000656mm). Dowody i hashe zachowane. CI90Python/C/wheel i macierz Plant success; końcowy LinuxCNC w toku. Lokalny7d6238d:2181PASS/REQ22/22. Brak własnych procesów, lease zwolniony. Dodatkowy sim bez procesu Plant także PASS: ten sam verified job, Start/pauza/wznowienie/Stop8,155675s i końcowe błędy0. CI LinuxCNC próba1:244PASS/1FAIL w niezmienionym D38sim, lokalnie ten test PASS67,06s; ponowiony tylko nieudany job, próba2 w toku. Brak własnych procesów i lease.
 
 Pozostaje: Końcowe LinuxCNC CI dokładnego90e8100, autokontrola oraz scalenie PR229 do main; dowody końcowego ustalenia osi odebrane. Zależność: pozytywny VERTICAL-VERIFY i niezmieniony manifest pakietu. Powiązanie instancji, programu, konfiguracji i narzędzi; bramki gotowości bez niejawnego zezwolenia na ruch. Start, postęp, pauza/wznowienie, przerwanie, E-STOP i utrata klienta z rozróżnialnymi wynikami. Telemetria rzeczywistego LinuxCNC sim/Plant; jawne źródło i niepełne dane. Odbiór automatyczny i kliknięty przebieg WebHMI; kwalifikacja sprzętu pozostaje osobna.
 
@@ -1074,9 +1074,9 @@ Pozostaje: Końcowe LinuxCNC CI dokładnego90e8100, autokontrola oraz scalenie P
 
 ### VERTICAL-REPORT — Zadanie obróbkowe: raport przewidywania i rzeczywistego wykonania
 
-**planowane**. Czwarty poziom zleconego przepływu. Specyfikacja wymaga raportu powiązanego z manifestem, kontrolami i przebiegiem; brak danych nie może dawać PASS.
+**w toku**. Pierwszy checkpoint zapisany oddzielnie w draft PR231 (989a087): wspólny backend offline CLI/API i minimalny widok WebHMI,9 testów raportu/CLI/API PASS oraz46 regresji PASS/4skip. GUI raportu, rzeczywiste dane, pełna regresja i odbiór poziomu4 pozostają otwarte. Właściciel polecił teraz domknąć etap wykonania do main; raport zachowany do kolejnego etapu.
 
 Pozostaje: Zależność: przebieg VERTICAL-RUN z telemetrią i wynikiem zakończenia. Uzgodnienie jednostek i czasu, tor zadany/rzeczywisty, błąd max/RMS osi, alarmy i czas. Rozróżnienie zakończenia, przerwania, awarii i niepełnych danych; raport JSON i widok WebHMI. Wykrycie znanych wymuszeń i zachowanie kontraktu precyzji projektu. Detal przechodzący poziomy 1–4 i odczyt pakietu/raportu bez aktywnej maszyny.
 
-Źródła: [docs/WORKFLOW_ZADANIA.md](../WORKFLOW_ZADANIA.md).
+Źródła: [docs/WORKFLOW_ZADANIA.md](../WORKFLOW_ZADANIA.md), [PR](https://github.com/anonimov94/linumeRT/pull/231).
 

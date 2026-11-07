@@ -120,3 +120,19 @@ Zrzut bez retuszu run-settled-20261107.png. Hosty zamknięte, moduły przywróco
 brak własnych procesów i lease zwolniony. Pełna lokalna regresja7d6238d:2181PASS,
 15skip/245deselected,464,40s; REQ22/22. CI dokładnego90e8100: Python/C/wheel i macierz
 Plant success (42378074935); końcowy LinuxCNC42378074910 w toku przed scaleniem229.
+
+Końcowy wariant sim bez procesu Plant również PASS: ten sam job95bf2c0 i verification,
+executionae0ba5bdfd4aa2c6b76be8b4fd66d6a3a5ed74e6528cfa306eeb4178c222dd3f;
+Start/pauza/wznowienie/Stop→aborted8,155675s. Końcowe trzy odczyty wszystkich osi
+spełniają <0,001mm; raw w run-sim-stop-settled-20261107.tar.gz. Host zakończony,
+moduły przywrócone, lease zwolniony. Kod runtime identyczny z90e8100.
+
+CI LinuxCNC42378074910 próba1:244PASS/1FAIL, jedynie stary D38 sim
+test_retract_returns_to_compensated_path. Sterownik, rdzeń i panel D38 mają identyczne
+bloby na maincd8ed66 i90e8100; wariant Plant oraz wszystkie4 nowe testy zadania PASS.
+Odmowa dotyczyła request1,001001192mm przy nominalnym1,001mm i progu1e-6mm.
+Ten sam D38 sim lokalnie PASS67,06s bez zmiany kodu/progów. Ponowiono wyłącznie
+nieudany job (próba2,128518681208); wynik oczekiwany przed scaleniem. Beta API w próbie1
+było pominięte wskutek tego błędu, więc nie zaliczamy go z pierwszej próby.
+Lokalny pełny7eb41ab:2182PASS/1FAIL wyłącznie ścieżka provenance nowego zrzutu;
+poprawkaf02698d:10IP PASS i REQ22/22. CI dokumentacjif02698d42380002073 success.
