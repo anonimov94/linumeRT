@@ -59,3 +59,17 @@ ogólny jog_stop generował błędy EMC_JOG_STOP podczas AUTO i dziennik poprawn
 fault. Backend pomija niedozwolony JOG_STOP w aktywnym AUTO; Stop nadal wysyła abort.
 90 testów backendu/bramy/bramki PASS. Sterownik testowy zakończono po obserwacji fault;
 nie jest to dodatni dowód Stop ani ukończenia programu.
+
+Checkpoint bcd10d5 na rzeczywistym LinuxCNC/Plant/WebHMI/HAL, bez bypassu:
+Stop→aborted8,144927s/381próbek; pełne wykonanie→completed_observed112,531625s/
+5288próbek; utrata żywego klienta→client_lost8,204209s/384próbki. Każdy przebieg
+zawierał Start/pauzę/wznowienie; źródłem był ten sam faktycznie zweryfikowany ZIP227.
+Własne procesy zakończone, moduły HAL przywrócone. Surowe manifesty/JSONL/wyniki w
+vertical/run-*-20261107.tar.gz; hashe, ID, kontrole gotowości i ograniczenia w
+vertical/runs-20261107.json. To próbki NML, nie dowód maksimum każdego cyklu serwa.
+
+Oddzielny E-STOP ujawnił krótkie ESTOP_RESET przed potwierdzeniem HAL; pierwszy wynik
+fault zachowano w lokalnym śladzie, bez deklarowania zaliczenia E-STOP. Poprawka
+przerywa ruch po utracie ON i czeka do1s na potwierdzenie przyczyny; brak potwierdzenia
+lub powrót ON kończy się fault, bez wznowienia.26 testów dziennika/bramki PASS.
+Dodano trzy rzeczywiste testy regresji w test_job_run_linuxcnc.py; wymagają uruchomienia.

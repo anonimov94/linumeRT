@@ -37,6 +37,8 @@ class RunLog:
         self.last_line = 0
         self.alarms = {}
         self.client_loss_at = None
+        self.power_lost_at = None
+        self.estop_at = None
         self.pause_context = None
         self._pause_candidate = None
         self._pause_samples = 0
@@ -60,6 +62,8 @@ class RunLog:
         self.event("command", command=name)
         if name == "stop":
             self.stop_requested = True
+        if name == "estop":
+            self.estop_at = self.clock()
         if name == "resume":
             self.resume_requested = True
             self.resume_at = self.clock()
@@ -97,8 +101,24 @@ class RunLog:
         interp = snap.interp_state.value
         if snap.task_state.value == "estop":
             self.finish("client_lost" if self.client_loss_at is not None else "estop")
-        elif snap.errors or alarms or snap.task_state.value != "on":
+        elif snap.errors or alarms:
             self.finish("fault")
+        elif snap.task_state.value != "on":
+            # Task can briefly report ESTOP_RESET before HAL confirms ESTOP.
+            # Abort immediately; allow up to1s to observe the terminal cause.
+            if self.power_lost_at is None:
+                self.power_lost_at = self.clock()
+                self.needs_abort = True
+                self.event("power_lost_observed")
+            self.phase = "stopping"
+            if self.clock() - self.power_lost_at > 1:
+                self.finish("fault")
+        elif self.power_lost_at is not None:
+            self.finish("fault")  # a transient loss never permits automatic continuation
+        elif self.estop_at is not None:
+            self.phase = "stopping"
+            if self.clock() - self.estop_at > 1:
+                self.finish("fault")  # requested E-STOP alone is not confirmation
         elif interp in ("reading", "waiting"):
             self.seen_running = True
             self.phase = "stopping" if self.stop_requested else "running"

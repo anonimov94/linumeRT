@@ -15,6 +15,11 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · 2026-11-07. bcd10d5 rzeczywisty Stop, pełne wykonanie112,53s/
+5288próbek i utrata klienta PASS; surowe archiwa i hashe zachowane. E-STOP wymagał
+obsługi przejściowego ESTOP_RESET;26 testów PASS. Dodano trzy regresje RIP, do odpalenia.
+Przed scaleniem nadal GUI i końcowe CI; pełny raport poziomu4 otwarty.
+
 Model-Author: Codex · 2026-11-07.4a29313 rzeczywisty Start/pauza/wznowienie PASS;
 Stop fizycznie zatrzymał program, ale ogólny JOG_STOP w AUTO wywołał fault. Poprawiony
 backend zachowuje abort,90 testów PASS. Own driver zakończony, test Stop do ponowienia.

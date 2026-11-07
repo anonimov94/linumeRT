@@ -129,3 +129,26 @@ def test_pause_receipt_waits_for_stable_command_and_settled_feedback(run):
     for _ in range(2):
         log.sample(moved, live, [])
     assert log.pause_context["commanded"] == {"X": 2}
+
+
+@pytest.mark.parametrize("client_lost", [False, True])
+def test_estop_transition_does_not_become_fault_before_hal_confirmation(run, client_lost):
+    log, clock = run
+    snap, live = sample(log, hmi_alive=not client_lost)
+    if not client_lost:
+        log.command("estop")
+    log.sample(replace(snap, task_state=TaskState.ESTOP_RESET), live, [])
+    assert log.active and log.needs_abort and log.phase == "stopping"
+    clock.t = .1
+    log.sample(replace(snap, task_state=TaskState.ESTOP), live, [])
+    assert log.phase == ("client_lost" if client_lost else "estop")
+
+
+def test_unconfirmed_power_loss_is_fault_and_never_automatic_continuation(run):
+    log, clock = run
+    snap, live = sample(log)
+    log.sample(replace(snap, task_state=TaskState.OFF), live, [])
+    assert log.active and log.needs_abort
+    clock.t = 1.1
+    log.sample(snap, live, [])
+    assert log.phase == "fault" and log.needs_abort

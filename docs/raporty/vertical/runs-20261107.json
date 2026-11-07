@@ -1,0 +1,274 @@
+[
+  {
+    "checkpoint": "bcd10d5360de5a58c74599fd5168b382790293f1",
+    "acceptance": "actual LinuxCNC RIP + frozen Plant + WebHMI/HAL; explicit operator commands",
+    "result": {
+      "alarms": [],
+      "client_loss_at_s": null,
+      "completion_evidence": "idle after observed running; gateway command log",
+      "elapsed_s": 8.144927167999981,
+      "execution_id": "a034404861204810262976262f99f451a01316e2520235222a83f8c84c894328",
+      "format": "linumert.job.run",
+      "job_id": "95bf2c0bc88fb59abaa1cdea747ddfdbfc58bc042701d4fe0beed5fbb8a1316e",
+      "last_line": 20,
+      "run_id": "c3341f6367834c2fb5490da7ea6baf5d",
+      "samples": 381,
+      "sampling": "NML poll; tooldata/HAL reads sequential, not an atomic servo trace",
+      "servo_trace": false,
+      "source": "linuxcnc.stat",
+      "started_at": "2026-11-07T13:16:32.041737+00:00",
+      "status": "aborted",
+      "target": "plant",
+      "verification_id": "f6bf9edd09bca992b4713a73b2293fb6d37d8b1259ac726d6d3a4b3cacacb26f",
+      "version": 1
+    },
+    "ready_checks": {
+      "controller": {
+        "status": "passed",
+        "reason": "Wymagana konfiguracja tej instancji"
+      },
+      "program": {
+        "status": "passed",
+        "reason": "Wczytaj program tego zadania"
+      },
+      "units": {
+        "status": "passed",
+        "reason": "Jednostki maszyny muszą być milimetrami"
+      },
+      "tool_table": {
+        "status": "passed",
+        "reason": "Załadowana tabela narzędzi musi odpowiadać zadaniu"
+      },
+      "machine_ready": {
+        "status": "passed",
+        "reason": "Wymagane ON, AUTO, bazowanie i zatrzymany ruch"
+      },
+      "start_position": {
+        "status": "passed",
+        "reason": "Ustaw początkowe położenie nosa wrzeciona zgodne z weryfikacją [mm]: X 200.0000, Y 200.0000, Z -5.0000"
+      },
+      "initial_tool": {
+        "status": "passed",
+        "reason": "Początek wymaga T0 i zerowej korekcji narzędzia"
+      },
+      "work_setup": {
+        "status": "passed",
+        "reason": "Wymagany układ detalu zadania, G92=0 i obrót XY=0"
+      },
+      "hal": {
+        "status": "passed",
+        "reason": "Wymagane gotowe napędy i łańcuch HMI/HAL oraz zgodne skale"
+      },
+      "limits": {
+        "status": "passed",
+        "reason": "Limity sterowania zgodne z maszyną zadania"
+      },
+      "freshness": {
+        "status": "passed",
+        "reason": "Aktualny odczyt sterowania"
+      },
+      "hmi": {
+        "status": "passed",
+        "reason": "Wymagane żywe połączenie WebHMI i HAL"
+      },
+      "alarms": {
+        "status": "passed",
+        "reason": "Brak aktywnych alarmów"
+      }
+    },
+    "paused_tool": 1,
+    "archive": "run-aborted-20261107.tar.gz",
+    "archive_bytes": 21431,
+    "archive_sha256": "e207b9d5ae39dc7829c398ee4f7bbcfcd56a31dccf2089cd020dfaeea8e05651",
+    "files": {
+      "manifest.json": "6c50a2c7be2a48c644bad18a35696cb230f16f525ee49d26e76f7e8210521699",
+      "samples.jsonl": "656d67ce731925074d2983d555b1166e049368bfdf40748c2d99ad51cd6e1692",
+      "result.json": "caa6f868d21e601765da8ded29a239cec5ed52a6bbecb668b2140d966382228d"
+    },
+    "process_cleanup": "own processes absent before fixture cleanup; HAL modules restored"
+  },
+  {
+    "checkpoint": "bcd10d5360de5a58c74599fd5168b382790293f1",
+    "acceptance": "actual LinuxCNC RIP + frozen Plant + WebHMI/HAL; explicit operator commands",
+    "result": {
+      "alarms": [],
+      "client_loss_at_s": null,
+      "completion_evidence": "idle after observed running; gateway command log",
+      "elapsed_s": 112.53162457400003,
+      "execution_id": "a034404861204810262976262f99f451a01316e2520235222a83f8c84c894328",
+      "format": "linumert.job.run",
+      "job_id": "95bf2c0bc88fb59abaa1cdea747ddfdbfc58bc042701d4fe0beed5fbb8a1316e",
+      "last_line": 105,
+      "run_id": "65e9262ea8a34a4eaf93fd636dae2d9c",
+      "samples": 5288,
+      "sampling": "NML poll; tooldata/HAL reads sequential, not an atomic servo trace",
+      "servo_trace": false,
+      "source": "linuxcnc.stat",
+      "started_at": "2026-11-07T13:17:28.024584+00:00",
+      "status": "completed_observed",
+      "target": "plant",
+      "verification_id": "f6bf9edd09bca992b4713a73b2293fb6d37d8b1259ac726d6d3a4b3cacacb26f",
+      "version": 1
+    },
+    "ready_checks": {
+      "controller": {
+        "status": "passed",
+        "reason": "Wymagana konfiguracja tej instancji"
+      },
+      "program": {
+        "status": "passed",
+        "reason": "Wczytaj program tego zadania"
+      },
+      "units": {
+        "status": "passed",
+        "reason": "Jednostki maszyny muszą być milimetrami"
+      },
+      "tool_table": {
+        "status": "passed",
+        "reason": "Załadowana tabela narzędzi musi odpowiadać zadaniu"
+      },
+      "machine_ready": {
+        "status": "passed",
+        "reason": "Wymagane ON, AUTO, bazowanie i zatrzymany ruch"
+      },
+      "start_position": {
+        "status": "passed",
+        "reason": "Ustaw początkowe położenie nosa wrzeciona zgodne z weryfikacją [mm]: X 200.0000, Y 200.0000, Z -5.0000"
+      },
+      "initial_tool": {
+        "status": "passed",
+        "reason": "Początek wymaga T0 i zerowej korekcji narzędzia"
+      },
+      "work_setup": {
+        "status": "passed",
+        "reason": "Wymagany układ detalu zadania, G92=0 i obrót XY=0"
+      },
+      "hal": {
+        "status": "passed",
+        "reason": "Wymagane gotowe napędy i łańcuch HMI/HAL oraz zgodne skale"
+      },
+      "limits": {
+        "status": "passed",
+        "reason": "Limity sterowania zgodne z maszyną zadania"
+      },
+      "freshness": {
+        "status": "passed",
+        "reason": "Aktualny odczyt sterowania"
+      },
+      "hmi": {
+        "status": "passed",
+        "reason": "Wymagane żywe połączenie WebHMI i HAL"
+      },
+      "alarms": {
+        "status": "passed",
+        "reason": "Brak aktywnych alarmów"
+      }
+    },
+    "paused_tool": 1,
+    "archive": "run-completed_observed-20261107.tar.gz",
+    "archive_bytes": 289894,
+    "archive_sha256": "837d90a2b32f453fb6b4614e1e63de06d4c99270d9c4e435f534119f05970e63",
+    "files": {
+      "manifest.json": "bea2c1131e5c52d6d8c138fca38255d4d12ef76d2d9167720505d91291d08aae",
+      "samples.jsonl": "b051f032e9e2fd59fe7e735c16ba0e57e0601d79a7d2b6ff9be1c90ee48c1719",
+      "result.json": "3ede7468c24d9b30d5b123c4eca97eeea9dcec1e0323479d94adb27ef631b340"
+    },
+    "process_cleanup": "own processes absent before fixture cleanup; HAL modules restored"
+  },
+  {
+    "checkpoint": "bcd10d5360de5a58c74599fd5168b382790293f1",
+    "acceptance": "actual LinuxCNC RIP + frozen Plant + WebHMI/HAL; explicit operator commands",
+    "result": {
+      "alarms": [
+        {
+          "code": "E-1100",
+          "count": 1,
+          "id": 3,
+          "observed_at_s": 8.204140753000047,
+          "text": "Stan awaryjny (E-stop) jest aktywny."
+        }
+      ],
+      "client_loss_at_s": 6.054313311999977,
+      "completion_evidence": "idle after observed running; gateway command log",
+      "elapsed_s": 8.204209292000087,
+      "execution_id": "a034404861204810262976262f99f451a01316e2520235222a83f8c84c894328",
+      "format": "linumert.job.run",
+      "job_id": "95bf2c0bc88fb59abaa1cdea747ddfdbfc58bc042701d4fe0beed5fbb8a1316e",
+      "last_line": 20,
+      "run_id": "4a121d5fbf1d4a5e8cc864e9e4fd7eae",
+      "samples": 384,
+      "sampling": "NML poll; tooldata/HAL reads sequential, not an atomic servo trace",
+      "servo_trace": false,
+      "source": "linuxcnc.stat",
+      "started_at": "2026-11-07T13:19:32.813192+00:00",
+      "status": "client_lost",
+      "target": "plant",
+      "verification_id": "f6bf9edd09bca992b4713a73b2293fb6d37d8b1259ac726d6d3a4b3cacacb26f",
+      "version": 1
+    },
+    "ready_checks": {
+      "controller": {
+        "status": "passed",
+        "reason": "Wymagana konfiguracja tej instancji"
+      },
+      "program": {
+        "status": "passed",
+        "reason": "Wczytaj program tego zadania"
+      },
+      "units": {
+        "status": "passed",
+        "reason": "Jednostki maszyny muszą być milimetrami"
+      },
+      "tool_table": {
+        "status": "passed",
+        "reason": "Załadowana tabela narzędzi musi odpowiadać zadaniu"
+      },
+      "machine_ready": {
+        "status": "passed",
+        "reason": "Wymagane ON, AUTO, bazowanie i zatrzymany ruch"
+      },
+      "start_position": {
+        "status": "passed",
+        "reason": "Ustaw początkowe położenie nosa wrzeciona zgodne z weryfikacją [mm]: X 200.0000, Y 200.0000, Z -5.0000"
+      },
+      "initial_tool": {
+        "status": "passed",
+        "reason": "Początek wymaga T0 i zerowej korekcji narzędzia"
+      },
+      "work_setup": {
+        "status": "passed",
+        "reason": "Wymagany układ detalu zadania, G92=0 i obrót XY=0"
+      },
+      "hal": {
+        "status": "passed",
+        "reason": "Wymagane gotowe napędy i łańcuch HMI/HAL oraz zgodne skale"
+      },
+      "limits": {
+        "status": "passed",
+        "reason": "Limity sterowania zgodne z maszyną zadania"
+      },
+      "freshness": {
+        "status": "passed",
+        "reason": "Aktualny odczyt sterowania"
+      },
+      "hmi": {
+        "status": "passed",
+        "reason": "Wymagane żywe połączenie WebHMI i HAL"
+      },
+      "alarms": {
+        "status": "passed",
+        "reason": "Brak aktywnych alarmów"
+      }
+    },
+    "paused_tool": 1,
+    "archive": "run-client_lost-20261107.tar.gz",
+    "archive_bytes": 21817,
+    "archive_sha256": "b7072ae16bd3135f06850f8caca333dcc9ea0622d330360667f9fa9c5249e192",
+    "files": {
+      "manifest.json": "41e2f2704a9c19949e6972c9ad4734150b1659a65cd63670a72a64c7b22f6e3a",
+      "samples.jsonl": "1dfffe298b2adfd5edd7c10cf2a5012780b6fe5936891c12db9674f90ad53f97",
+      "result.json": "99d1ce777fcb71c10640bc53ecf6623f1a1428fe5142c759eb73f9ba9825450d"
+    },
+    "process_cleanup": "own processes absent before fixture cleanup; HAL modules restored"
+  }
+]

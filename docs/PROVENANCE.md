@@ -723,3 +723,11 @@ WebHMI8792 z HAL, E-STOP bez automatycznego Reset/ON/bazowania. Widoczne zadanie
 i zamknięty Start przed kontrolą żywego stanu. Bez zasobów graficznych zewnętrznych.
 `docs/raporty/vertical/instance-boot-20261105.json`: własny odczyt NML/WebHMI
 tego samego rozruchu; Codex, ta sama data i licencja; bez tokenu.
+
+### Przebiegi rzeczywistego zadania — 2026-11-07
+
+Codex, własne pomiary LinuxCNC RIP + Plant + WebHMI/HAL, GPL-2.0-or-later.
+`docs/raporty/vertical/runs-20261107.json` oraz archiwa
+`run-aborted-20261107.tar.gz`, `run-completed_observed-20261107.tar.gz`,
+`run-client_lost-20261107.tar.gz`: oryginalne manifesty, próbki NML/JSONL i wyniki,
+bez tokenów i bez zasobów zewnętrznych. Nie są atomową rejestracją cyklu serwa.
