@@ -15,6 +15,10 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · 2026-11-08. Checkpoint raportu: przenośny JSON sprawdza własną
+sumę SHA i dowody końcowej pozycji; można go odczytać po usunięciu testowych źródeł.
+21 testów PASS, limity metadanych i zakaz zapisu do źródeł. Integracja GUI nadal w toku.
+
 Model-Author: Codex · 2026-11-08. **Wznowienie celu, VERTICAL-REPORT w PR231:**
 po zamknięciu RUN pracujemy nad poziomem4 pełnego main. Odczyt7 oryginalnych archiwów
 PASS; raport rozróżnia legacy i3 przyjęte ustalenia. Dodano piki błędu/alarmy z czasem

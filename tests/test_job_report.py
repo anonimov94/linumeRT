@@ -51,6 +51,43 @@ def test_report_uses_raw_machine_values_and_exact_source_hashes(recorded):
     assert set(report["hashes"]) == {"manifest.json", "result.json", "samples.jsonl"}
 
 
+def test_offline_report_reopens_after_original_data_are_unavailable(recorded, tmp_path):
+    from linumert.programs.job import json_text
+
+    run, execution = recorded
+    report = job_report.build(run, execution)
+    path = tmp_path / "portable.json"
+    path.write_text(json_text(report))
+    shutil.rmtree(run)
+    shutil.rmtree(execution)
+    assert job_report.load(path) == report
+
+
+@pytest.mark.parametrize("damage", ["checksum", "units", "ending", "missing", "nan"])
+def test_saved_report_rejects_damage_and_unsubstantiated_pass(recorded, damage):
+    from linumert.programs.job import digest, json_text
+
+    run, execution = recorded
+    report = job_report.build(run, execution)
+    if damage == "units":
+        report["units"]["position"] = "inch"
+    elif damage == "ending":
+        report["ending_samples"] = []
+    elif damage == "missing":
+        del report["trajectory"]
+    elif damage == "nan":
+        with pytest.raises(ValueError):
+            job_report.load(b'{"bad": NaN}')
+        return
+    else:
+        report["time"]["elapsed_s"] += 1
+    if damage != "checksum":
+        report["report_id"] = digest(json_text({k: v for k, v in report.items()
+                                              if k != "report_id"}).encode())
+    with pytest.raises(ValueError):
+        job_report.load(json_text(report).encode())
+
+
 @pytest.mark.parametrize("damage", ["truncated", "missing_result", "wrong_count", "gap",
                                     "old_completion", "unsettled"])
 def test_incomplete_or_legacy_recording_cannot_pass_positioning(recorded, damage):

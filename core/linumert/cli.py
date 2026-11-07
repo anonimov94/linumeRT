@@ -140,6 +140,8 @@ def main(argv: list[str] | None = None) -> int:
 
             if args.out.resolve().is_relative_to(args.execution.resolve()):
                 raise ValueError("Raport zapisz poza niezmienną konfiguracją")
+            if args.out.resolve().is_relative_to(args.run.resolve()):
+                raise ValueError("Raport zapisz poza źródłowym zapisem przebiegu")
             result = job_report.build(args.run, args.execution)
             save(result, args.out)
             print(json.dumps({k: result[k] for k in

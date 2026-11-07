@@ -16,6 +16,7 @@ FORMAT = "linumert.job.run_report"
 MAX_BYTES = 512 * 1024 * 1024
 MAX_LINE = 1024 * 1024
 MAX_GAP_S = .1
+MAX_REPORT_BYTES = 32 * 1024 * 1024
 
 
 def _number(value):
@@ -28,23 +29,112 @@ def _json(data):
     return json.loads(data, parse_constant=invalid)
 
 
+def _read(path, limit):
+    with path.open("rb") as stream:
+        data = stream.read(limit + 1)
+    if len(data) > limit:
+        raise ValueError("Plik raportu lub metadanych przekracza limit danych")
+    return data
+
+
+def _ending_ready(tail, axes):
+    return len(tail) == 3 and all(
+        r.get("task") == "on" and r.get("interp") == "idle"
+        and r.get("inpos") is True and r.get("task_done") is True
+        and _number(r.get("current_vel")) and abs(r["current_vel"]) < 1e-4
+        and job_binding.same_context({a: r["axes"][a]["commanded"] for a in axes},
+            {a: tail[0]["axes"][a]["commanded"] for a in axes}) for r in tail)
+
+
+def _positions(values, axes):
+    return (isinstance(values, dict) and set(values) == set(axes)
+        and all(isinstance(v, dict)
+            and all(_number(v.get(k)) for k in ("commanded", "actual", "following_error"))
+            and abs(v["following_error"] - v["commanded"] + v["actual"]) <= 1e-6
+            for v in values.values()))
+
+
+def load(source):
+    """Reopen a self-contained report, checking its checksum, shape and PASS evidence.
+
+    No raw files are opened. Source hashes identify the earlier observations;
+    this checksum verifies file consistency, not provenance or a digital signature.
+    """
+    data = source if isinstance(source, bytes) else _read(Path(source), MAX_REPORT_BYTES)
+    if len(data) > MAX_REPORT_BYTES:
+        raise ValueError("Raport przekracza limit32MiB")
+    report = _json(data)
+    if not isinstance(report, dict):
+        raise ValueError("Nieprawidłowy raport przebiegu")
+    identity = {k: v for k, v in report.items() if k != "report_id"}
+    if report.get("report_id") != job.digest(job.json_text(identity).encode()):
+        raise ValueError("Niezgodna suma kontrolna raportu")
+
+    def need(condition):
+        if not condition:
+            raise ValueError("Niepełny lub niespójny raport przebiegu")
+
+    try:
+        need(report["format"] == FORMAT and type(report["version"]) is int)
+        need(report["version"] == 1 and report["source"] == "linuxcnc.stat")
+        need(report["units"] == {"position": "mm", "time": "s"})
+        for key, size in (("job_id", 64), ("execution_id", 64), ("verification_id", 64),
+                          ("run_id", 32)):
+            need(isinstance(report[key], str) and len(report[key]) == size)
+            need(all(c in "0123456789abcdef" for c in report[key]))
+        need(report["status"] in ("observational", "incomplete"))
+        quality, axes = report["quality"], report["axes"]
+        need(isinstance(quality["issues"], list) and all(
+            isinstance(s, str) for s in quality["issues"]))
+        need(quality["servo_trace"] is False and report["hardware_qualification"] is False)
+        need(type(quality["samples"]) is int and quality["samples"] >= 0)
+        need(set(axes) == set("XYZ"))
+        for stats in axes.values():
+            for key in ("following_error", "actual_minus_commanded"):
+                for value in (stats[key]["max_abs_mm"], stats[key]["rms_mm"]):
+                    need(value is None if not quality["samples"] else
+                         _number(value) and value >= 0)
+        need(isinstance(report["trajectory"], list) and len(report["trajectory"]) <= 2001)
+        need(isinstance(report["ending_samples"], list) and len(report["ending_samples"]) <= 3)
+        for row in report["trajectory"] + report["ending_samples"]:
+            need(isinstance(row, dict) and _number(row["t"]) and row["t"] >= 0)
+            need(_positions(row["axes"], axes))
+        need(all(isinstance(report[key], list) for key in
+                   ("events", "alarms", "controller_errors")))
+        need(report["positioning"]["status"] in ("passed", "failed", "unavailable"))
+        if report["positioning"]["status"] == "passed":
+            need(not quality["issues"] and report["status"] == "observational")
+            need(quality["samples"] >= 3 and report["execution_status"] in (
+                "completed_observed", "aborted"))
+            need(_ending_ready(report["ending_samples"], axes))
+            need(all(abs(v["actual"] - v["commanded"]) < .001
+                       and abs(v["following_error"]) < .001
+                       for row in report["ending_samples"] for v in row["axes"].values()))
+            need(_number(report["time"]["elapsed_s"]))
+        need(report["positioning"]["tolerance_mm"] == .001)
+    except (KeyError, TypeError, AttributeError):
+        raise ValueError("Niepełny lub niespójny raport przebiegu") from None
+    return report
+
+
 def build(run: Path, execution: Path) -> dict:
     """Bind immutable inputs and the exact consumed bytes; report gaps without inventing data."""
     run, execution = Path(run), Path(execution)
     frozen, files = job_execution.read(execution)
-    manifest_bytes = (run / "manifest.json").read_bytes()
+    manifest_bytes = _read(run / "manifest.json", MAX_LINE)
     manifest = _json(manifest_bytes)
     if (not isinstance(manifest, dict) or manifest.get("format") != "linumert.job.run"
             or manifest.get("version") != 1
             or manifest.get("source") != "linuxcnc.stat"):
         raise ValueError("Nieobsługiwane źródło przebiegu")
-    if not isinstance(manifest.get("run_id"), str) or len(manifest["run_id"]) != 32:
+    if (not isinstance(manifest.get("run_id"), str) or len(manifest["run_id"]) != 32
+            or any(c not in "0123456789abcdef" for c in manifest["run_id"])):
         raise ValueError("Nieprawidłowy identyfikator przebiegu")
     keys = ("job_id", "execution_id", "verification_id", "target")
     if any(manifest.get(k) != frozen[k] for k in keys):
         raise ValueError("Przebieg nie odpowiada zamrożonemu zadaniu")
     issues = []
-    result_bytes = (run / "result.json").read_bytes() if (run / "result.json").exists() else b""
+    result_bytes = _read(run / "result.json", MAX_LINE) if (run / "result.json").exists() else b""
     result = _json(result_bytes) if result_bytes else {}
     if not isinstance(result, dict):
         raise ValueError("Nieprawidłowy wynik przebiegu")
@@ -166,12 +256,7 @@ def build(run: Path, execution: Path) -> dict:
             values[key] = {"max_abs_mm": maximum if samples else None,
                            "rms_mm": math.sqrt(squares / samples) if samples else None,
                            "peak": peak}
-    ending_ready = (len(tail) == 3 and all(
-        r.get("task") == "on" and r.get("interp") == "idle"
-        and r.get("inpos") is True and r.get("task_done") is True
-        and _number(r.get("current_vel")) and abs(r["current_vel"]) < 1e-4
-        and job_binding.same_context({a: r["axes"][a]["commanded"] for a in axes},
-            {a: tail[0]["axes"][a]["commanded"] for a in axes}) for r in tail))
+    ending_ready = _ending_ready(tail, axes)
     settled = (not issues and ending_ready and result.get("settled_position_observed") is True
         and result.get("status") in ("completed_observed", "aborted")
         and all(abs(v["actual"] - v["commanded"]) < .001 and abs(v["following_error"]) < .001
