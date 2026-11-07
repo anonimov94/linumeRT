@@ -28,6 +28,7 @@ export function createJobs(request) {
     $("jobDownload").disabled = !online || busy || !prepared;
     $("jobPreflightFields").disabled = !online || busy || !prepared;
     $("jobCheckDownload").disabled = !checked;
+    $("jobExecutionFields").disabled = !online || busy || checked?.status !== "verified";
   }
   function status(text, error = false) {
     $("jobStatus").textContent = text;
@@ -122,21 +123,25 @@ export function createJobs(request) {
     controls();
     status("Kontrola w interpreterze LinuxCNC…");
     try {
-      const result = await (await response("/api/jobs/" + encodeURIComponent(prepared) + "/preflight",
+      const result = await (await response("/api/jobs/" + encodeURIComponent(prepared) + "/verify",
         { method: "POST", headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ job_id: jobId, start_mm }) })).json();
       if (current !== generation || !online) return;
       checked = result;
-      const summary = { partial: "Kontrola częściowa — pełna weryfikacja oczekuje.",
+      const summary = { verified: "Zadanie zweryfikowane offline.",
+        partial: "Kontrola częściowa — pełna weryfikacja oczekuje.",
         rejected: "Zadanie odrzucone przez kontrolę.", unavailable: "Interpreter LinuxCNC niedostępny.",
         incomplete: "Kontrola przerwana — wynik niepełny." }[result.status] || "Wynik niepełny.";
       $("jobPreflightSummary").textContent = summary;
       const diagnostic = result.material_diagnostic;
+      const executionNote = result.status === "verified"
+        ? "Przed uruchomieniem trzeba powiązać pakiet z aktualną instancją maszyny. "
+        : "Wynik częściowy nie dopuszcza wykonania. ";
       $("jobCheckScope").textContent = diagnostic
         ? "Dokładny tor LinuxCNC; diagnostyka materiału 2.5D i zadeklarowanych brył. " +
           "Usunięty materiał: " + diagnostic.removed_mm3.toFixed(1) + " mm³. " +
           "Czas ruchów od " + diagnostic.time_lower_bound_s.toFixed(1) + " s. " +
-          "Wynik częściowy nie dopuszcza wykonania. Szczegóły i ograniczenia w raporcie JSON."
+          executionNote + "Szczegóły i ograniczenia w raporcie JSON."
         : result.checks.motion_limits === "passed"
           ? "Limity osi sprawdzone na dokładnym torze LinuxCNC. Diagnostyka materiału nieukończona. Wynik częściowy nie dopuszcza wykonania."
           : "Materiał, kolizje i pełna precyzja toru oczekują. Wynik częściowy nie dopuszcza zadania do wykonania.";
@@ -148,13 +153,27 @@ export function createJobs(request) {
         $("jobPreflightMessages").appendChild(item);
       }
       $("jobPreflightResult").hidden = false;
-      status(summary, result.status !== "partial");
+      status(summary, !["partial", "verified"].includes(result.status));
     } catch (error) { status(error.message, true); }
     finally { busy = false; controls(); }
   });
   $("jobCheckDownload").addEventListener("click", () => {
     if (checked) download(new Blob([JSON.stringify(checked, null, 2) + "\n"],
       { type: "application/json" }), prepared + "-preflight.json");
+  });
+  $("jobExecutionDownload").addEventListener("click", async () => {
+    if (!online || busy || !prepared || checked?.status !== "verified") return;
+    busy = true;
+    controls();
+    const target = $("jobExecutionTarget").value;
+    try {
+      const result = await response("/api/jobs/" + encodeURIComponent(prepared) + "/execution-config",
+        { method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ job_id: jobId, verification_id: checked.report_id, target }) });
+      download(await result.blob(), prepared + "-" + target + ".zip");
+      status("Konfiguracja symulacji pobrana. Uruchomienie i powiązanie z maszyną to kolejny krok.");
+    } catch (error) { status(error.message, true); }
+    finally { busy = false; controls(); }
   });
   $("jobDownload").addEventListener("click", async () => {
     if (!prepared || busy || !online) return;

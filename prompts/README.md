@@ -159,5 +159,5 @@ Nie są kolejnym harmonogramem. Ich status dotyczy tylko wskazanego kroku.
 | BETA-WS-GUARD | 028, 029 | Beta bez GUI: kontrola Host/Origin WebSocket | ukończone |
 | VERTICAL-PREPARE | 028, 029, 032, 039, 040, 041, 043, 062 | Zadanie obróbkowe: przygotowanie wspólnego pakietu w WebHMI | ukończone |
 | VERTICAL-VERIFY | 044, 049, 051, 052, 055 | Zadanie obróbkowe: interpreter, limity i diagnostyka obróbki | w toku |
-| VERTICAL-RUN | 028, 029, 049, 053, 061 | Zadanie obróbkowe: wykonanie i telemetria przez WebHMI w sim/Plant | planowane |
+| VERTICAL-RUN | 028, 029, 049, 053, 061 | Zadanie obróbkowe: wykonanie i telemetria przez WebHMI w sim/Plant | w toku |
 | VERTICAL-REPORT | 024, 049, 052, 053, 068 | Zadanie obróbkowe: raport przewidywania i rzeczywistego wykonania | planowane |

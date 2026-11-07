@@ -15,6 +15,56 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · 2026-11-05. **PR #227 — konfiguracja odebrana w GUI:**
+cb8516c →6058529 (brakujący wygenerowany prompts/README) →68c6362 (native YAML liczb
+wykładniczych, publiczny loader Plant). Poprawiony ZIP `execution-fixed-plant.zip`:
+26 zasobów identycznych CLI/GUI, publiczny loader i C Plant --run PASS. Stary pierwszy
+ZIP `execution-ui-plant.zip` ma błędny zapis YAML i nie jest odbiorem. Zrzut z poprawki,
+provenance zapisane. Dodatkowo startup G55 i rzeczywisty rs274 G55 PASS;17 testów eksportu PASS.
+Pełny klon6058529:2126 PASS/1 znany Qt FAIL,15skip,240linuxcnc deselected,184subtesty;
+lint/C/REQ22/22 PASS. Brama8791 zatrzymana; brak kontrolera/lease. Dane do przyszłego
+runtime: `build/vertical-execution/download-fixed/execution-fixed-plant` (poprawiony eksport).
+#225/#226 czekają końcowego LinuxCNC, Python success. #227 baza226; retarget dopiero po scaleniach.
+
+Model-Author: Codex · 2026-11-05. **Pierwsza porcja poziomu3:**
+Własna gałąź `codex/job-execution-config-20261105` nad #226b601654. run-config oraz ZIP
+API/WebHMI wiążą verified z oryginalnym pakietem, odrębną zamrożoną biblioteką napędów,
+narzędziami i układem detalu. Wspólny kontrakt raportu w core (bez importu symulacji).
+37 testów zakresu i65 regresji PASS;2 real rs274 konsumują eksport sim/Plant i odtwarzają
+ten sam tor. Nie uruchomiono kontrolera; configured nie jest zgodą na ruch. GUI/pełna
+regresja/CI pozostają otwarte. Raport VERTICAL_EXECUTION_CONFIG_2026-11-05.md.
+#225821971e i #226b601654: Python CI success, LinuxCNC w toku. Nie restartować ich bez powodu.
+
+Model-Author: Codex · 2026-11-05. **PR #226 verify odebrany w GUI:**
+Runtime ebca978, merge5beb4be dopisuje metadatafix z #225. CLI/API oraz kliknięte GUI8790:
+status verified, wszystkie kontrole passed, execution not_started/autoryzacja false;
+cały CLI/GUI JSON zgodny poza elapsed/id. Zrzut verified-20261105.jpg z provenance.
+Brama8790 zatrzymana. Pełny klon `/tmp/linumert-verified-226-pj6XlY` (ebca) ma sesję32489
+w toku; źródła tego klonu nie obejmują jeszcze poprawki provenance821971e, więc ewentualną
+porażkę testu zasobów odróżnić od runtime i sprawdzić docelowy metadatapatch w czystym klonie.
+#225 nowy head821971e po CI failure brakującego wpisu; nie scalać starego6fa342f.
+#225 i #226 czekają końcowych CI; scalić kolejno, retarget #226 na main po #225.
+
+Model-Author: Codex · 2026-11-05. **Formalny wynik offline:**
+Własna gałąź `codex/job-verified-20261105` nad dowodami #225 (6fa342f; CI w toku).
+Dodano CLI verify/API/WebHMI z nowym raportem verificationv1. Verified wymaga wszystkich
+kontroli passed po świeżym rs274/SDK/materiale; wykonanie not_started i autoryzacja false.
+12 testów bramek, regresje CLI/API,3 real RIP i rzeczywisty CLI/API verified PASS.
+GUI/pełna regresja/CI i scalenie jeszcze wymagane. Mainc0b42c4 nadal ma partial z #224.
+Nie przeskakiwać powiązania live konfiguracji/narzędzi/początku/T0 przed poziomem3.
+
+Model-Author: Codex · 2026-11-05. **#222/#223/#224 scalone do main:**
+main c0b42c4 zawiera C, dokładne limity i materiał zadania po końcowym CI/LinuxCNC success.
+#224 runtime9b8db72:2097 PASS/1 znany Qt FAIL w klonie,19 real RIP PASS,65 regresji PASS,
+wheel rzeczywistym rs274/SDK/materiałem C poza źródłami PASS. GUI kliknięte:2861,832031mm³,
+107,958839s dolnego czasu; JSON identyczny z zapisem/CLI poza elapsed/id. Pełny przepływ
+mediana Python7,2761s/C4,2322s, wszystkie4 pary wyników materiału dokładnie zgodne.
+Nowa własna gałąź `codex/job-material-proof-20261105` dodaje wyłącznie dowody i2 testy
+API/CLI oraz rzeczywistej kieszeni z helisą (5 przypadków materiału PASS), bez zmiany runtime.
+Brama8789 zatrzymana. Następny ograniczony zakres: formalny verified dla kompletnej
+diagnostyki przy jawnych założeniach, potem związanie pakietu/początku/T0 z instancją
+sim/Plant, telemetria i raport. Obecny wynik pozostaje partial; poziomy3–4 nieodebrane.
+
 Model-Author: Codex · 2026-11-05. **Materiał zadania w pełnym projekcie:**
 #222 scalony jako534a5ab po końcowym Python/LinuxCNC/ISO success. #223 baza main,
 headc3a1007;2075 PASS/1 znany Qt FAIL w klonie, wheel poza checkoutem PASS,

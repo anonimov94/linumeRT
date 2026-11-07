@@ -49,12 +49,22 @@ def main(argv: list[str] | None = None) -> int:
     compile_cmd.add_argument("--tools", type=Path, help="baza do kontroli narzędzi (odczyt)")
     compile_cmd.add_argument("--drive-library", type=Path)
     add_arguments(commands.add_parser("prepare", help="kompletny pakiet zadania, bez ruchu"))
-    preflight = commands.add_parser("preflight",
-                                   help="częściowa kontrola pakietu w LinuxCNC, bez ruchu")
-    preflight.add_argument("job", type=Path)
-    preflight.add_argument("--start", type=float, nargs=3, required=True, metavar=("X", "Y", "Z"),
-                           help="założona pozycja nosa wrzeciona [mm], T0 i G92=0")
-    preflight.add_argument("--out", type=Path, required=True, help="nowy plik raportu JSON")
+    for name, help_text in (("preflight", "diagnostyka pakietu w LinuxCNC, bez ruchu"),
+                            ("verify", "pełny werdykt offline w obsługiwanym modelu, bez ruchu")):
+        preflight = commands.add_parser(name, help=help_text)
+        preflight.add_argument("job", type=Path)
+        preflight.add_argument("--start", type=float, nargs=3, required=True,
+                               metavar=("X", "Y", "Z"),
+                               help="założona pozycja nosa wrzeciona [mm], T0 i G92=0")
+        preflight.add_argument("--out", type=Path, required=True, help="nowy plik raportu JSON")
+    execution = commands.add_parser("run-config",
+                                    help="konfiguracja sim/Plant z verified, bez startu")
+    execution.add_argument("job", type=Path)
+    execution.add_argument("--verification", type=Path, required=True)
+    execution.add_argument("--target", choices=("sim", "plant"), required=True)
+    execution.add_argument("--out", type=Path, required=True, help="nowy katalog konfiguracji")
+    execution.add_argument("--plant-port", type=int, default=47700)
+    execution.add_argument("--test-mode", action="store_true", help="jawny bypass HMI w symulacji")
     machine = commands.add_parser("machine", help="walidacja maszyny i skale napędów")
     machine.add_argument("path", type=Path)
     config = commands.add_parser("config", help="eksport konfiguracji LinuxCNC sim/Plant")
@@ -92,8 +102,9 @@ def main(argv: list[str] | None = None) -> int:
                                tools=tools.get if tools is not None else None))
         elif args.command == "prepare":
             return prepare(args)
-        elif args.command == "preflight":
+        elif args.command in ("preflight", "verify"):
             from linumert_sim.job_preflight import check
+            from linumert_sim.job_verify import verify
 
             from .programs.job_check import save
 
@@ -101,11 +112,24 @@ def main(argv: list[str] | None = None) -> int:
                 raise ValueError("Plik raportu już istnieje")
             if args.out.resolve().is_relative_to(args.job.resolve()):
                 raise ValueError("Raport zapisz poza niezmiennym katalogiem pakietu")
-            result = check(args.job, tuple(args.start))
+            result = (verify if args.command == "verify" else check)(args.job, tuple(args.start))
             save(result, args.out)
             print(json.dumps({k: result[k] for k in ("job_id", "report_id", "status", "checks")},
                              ensure_ascii=False, indent=2))
-            return 0 if result["status"] == "partial" else 2
+            return 0 if result["status"] in ("partial", "verified") else 2
+        elif args.command == "run-config":
+            from .programs import job_execution
+
+            if args.out.resolve().is_relative_to(args.job.resolve()):
+                raise ValueError("Konfigurację zapisz poza niezmiennym pakietem zadania")
+            report = json.loads(args.verification.read_text(encoding="utf-8"))
+            files = job_execution.render(args.job, report, args.target,
+                                         test_mode=args.test_mode, port=args.plant_port)
+            job_execution.publish(files, args.out)
+            identity = json.loads(files["execution.json"])
+            keys = ("execution_id", "job_id", "target", "status")
+            print(json.dumps({k: identity[k] for k in keys},
+                             ensure_ascii=False, indent=2))
         elif args.command == "machine":
             from .machine.drives.drive_real import counts_per_unit
             from .machine.drives.machine_drives import load_machine_drives

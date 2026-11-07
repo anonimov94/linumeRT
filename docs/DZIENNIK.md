@@ -1921,3 +1921,55 @@ obwiednie brył/stref. Braki geometrii/napędów, timeout i urwany JSON nie daj�
 19 rzeczywistych testów offline RIP PASS (16 wcześniejszych +3 materiału),65 regresji PASS,
 lint całego drzewa PASS. GUI i końcowy pomiar/testy pozostają w toku; wynik częściowy nie
 uprawnia do wykonania. Szczegóły i granice: raport VERTICAL_MATERIAL_2026-11-05.md.
+
+## 2026-11-05 — odbiór i scalenie diagnostyki zadania
+
+Model-Author: Codex. #223 scalony e794c7b, #224 c0b42c4 po zielonym CI i LinuxCNC.
+Runtime9b8db72:2097 PASS/1 znany Qt FAIL w klonie; Plant/native C i192 Python z C PASS,
+19 rzeczywistych offline RIP i65 regresji PASS; REQ22/22 i wheel PASS. Także zainstalowany
+wheel wykonał pełny rs274/SDK/materiał C/raport poza checkoutem. WebHMI kliknięte, raport
+pobrany i zgodny z zapisem/CLI poza elapsed/id. 2861,832031mm³ i107,958839s dolnego czasu.
+Pomiar całego CLI po rozgrzaniu:3 powtórzenia, mediana Python7,2761s/C4,2322s; kompletne
+wyniki materiału wszystkich4 par dokładnie zgodne poza etykietą backendu. Brama8789 zatrzymana.
+Osobny commit dowodów dodaje zrzut, surowy pomiar i2 testy API/CLI oraz helisy (5 przypadków
+materiału PASS); nie zmienia runtime. Formalne verified, wykonanie i raport pozostają otwarte.
+
+## 2026-11-05 — formalny werdykt offline, checkpoint
+
+Model-Author: Codex. Po mainc0b42c4 i dowodach #225 dodano CLI verify/API/WebHMI.
+Nowy raport verificationv1 wymaga wszystkich kontroli passed po świeżym interpreterze,
+SDK i materiale. Zachowuje założenia i ograniczenia; autoryzacja wykonania false,
+execution not_started. Preflight pozostaje częściową diagnostyką.12 testów bramek i
+regresje CLI/API/static PASS;3 real RIP (verified/incomplete/rejected) i rzeczywisty
+CLI/API verified bez zmiany pakietu/CNC PASS. GUI/pełna regresja/CI nadal w toku.
+
+## 2026-11-05 — kliknięty odbiór verified
+
+Model-Author: Codex. Własna brama fake8790 z rzeczywistym rs274/SDK/materiałem C:
+prepare → verify daje verified, wszystkie kontrole passed, execution not_started i brak
+zgody na wykonanie. Cały wynik CLI/GUI zgodny poza elapsed/id. Zrzut i provenance zapisane,
+brama zatrzymana. Runtimeebca978;5beb4be zawiera poprawkę metadanych821971e z #225.
+Pierwszy CI dowodów wykrył brak provenance materiałowego zrzutu; wymagany wpis dodany,
+test zasobów PASS. Lokalny pełny IP9PASS/1FAIL wyłącznie przez ignorowany binarny ASan
+build-san, nie plik z Git. #225/#226 i pełna regresja natywna nadal w toku; nie omijać bramek.
+
+## 2026-11-05 — konfiguracja wykonawcza zweryfikowanego zadania, checkpoint
+
+Model-Author: Codex. Dodano run-config i ZIP API/WebHMI z raportu verified zapisanego
+przez bramę. Oryginalny pakiet, raport, tabela i program są powiązane z pochodną maszyną
+sim/Plant, układem detalu oraz biblioteką dokładnych snapshotów napędów. Bez odczytu bieżącej
+biblioteki i bez nowych domyślnych wartości. Manifest+regeneracja, atomowy nowy katalog,
+bez nadpisywania. Bypass domyślnie0; API nie przyjmuje test-mode. Brak startu procesów/CNC.
+37 testów zakresu i65 regresji PASS;2 real rs274 eksportu sim/Plant odtwarzają ten sam
+zweryfikowany tor. Lint PASS. GUI/pełna regresja/CI oraz rzeczywiste wykonanie pozostają otwarte.
+
+## 2026-11-05 — odbiór poprawionej konfiguracji CLI/GUI/Plant
+
+Model-Author: Codex.6058529 uzupełnia pominięty wygenerowany indeks roadmapy. Próba publicznym
+loaderem Plant wykryła zapis liczb3e-05 jako tekst YAML1.1;68c6362 zapisuje prawdziwy YAML,
+a test używa publicznego loadera. Poprawiony ZIP execution-fixed-plant.zip pobrany z WebHMI:
+26 identycznych bajtowo zasobów CLI/GUI, publiczny loader i model C Plant --run PASS.
+Zrzut/provenance zapisane; brama8791 zatrzymana. StartupG55 i rzeczywisty rs274G55 PASS,
+17 testów eksportu PASS. Klon6058529:2126 PASS/1 znany Qt FAIL,15skip/240deselected,
+184subtesty;lint/C/REQ22/22 PASS. Nie jest to wykonanie kontrolera ani programu.
+Końcowe CI227 oraz225/226 w toku; następny zakres to prywatna instancja i live binding.
