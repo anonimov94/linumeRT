@@ -294,6 +294,15 @@ def test_home_unknown_axis_sends_nothing():
     assert c.calls == []
 
 
+def test_binding_preserves_raw_joint_ferror_without_consuming_another_nml_poll():
+    b, c = backend()
+    b._reader._stat.linear_units = 1.0
+    b._reader._stat.joint = ({"ferror_current": .00012}, {"ferror_current": -.00034})
+    observed = b.binding_state()
+    assert observed["joint_following_errors"] == {"units": "mm", "values": [.00012, -.00034]}
+    assert c.calls == []
+
+
 def test_wait_timeout_is_reported_to_operator():
     b, _ = backend(wait_result=-1)
     with pytest.raises(CommandError, match="nie potwierdził"):

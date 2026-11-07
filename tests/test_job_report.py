@@ -29,6 +29,7 @@ def recorded(configuration, tmp_path):
     snap = MachineSnapshot(timestamp=0, axes=axes, task_state=TaskState.ON, mode=Mode.AUTO,
                            interp_state=InterpState.READING)
     live = dict(inpos=True, current_vel=0, task_done=True, motion_line=105)
+    live["joint_following_errors"] = {"units": "mm", "values": [.00005, -.00008, .00009]}
     for i in range(4):
         now[0] = (i + 1) * .02
         log.sample(snap if i == 0 else replace(snap, interp_state=InterpState.IDLE), live, [])
@@ -146,6 +147,25 @@ def test_peak_and_alarm_keep_the_original_run_time_and_program_line(recorded):
     assert report["controller_errors"][0]["line"] == 44
     assert report["units"] == {"position": "mm", "time": "s"}
     assert report["verification"]["status"] == "verified"
+
+
+@pytest.mark.parametrize("bad", [False, True])
+def test_raw_joint_following_error_is_independent_of_cartesian_poll_difference(recorded, bad):
+    run, execution = recorded
+    path = run / "samples.jsonl"
+    rows = [json.loads(line) for line in path.read_text().splitlines()]
+    first = next(row for row in rows if "axes" in row)
+    first["joint_following_errors"]["values"][1] = None if bad else .025
+    path.write_text("\n".join(json.dumps(row) for row in rows) + "\n")
+    report = job_report.build(run, execution)
+    raw = report["joint_following_error"]
+    if bad:
+        assert raw["status"] == "incomplete" and report["status"] == "incomplete"
+        assert report["positioning"]["status"] == "unavailable"
+    else:
+        assert raw["status"] == "available" and raw["samples"] == 4
+        assert raw["joints"]["1"]["max_abs_mm"] == .025
+        assert report["axes"]["Y"]["following_error"]["max_abs_mm"] < .001
 
 
 def test_verified_terminal_claim_cannot_hide_an_observed_positioning_failure(recorded):

@@ -15,6 +15,11 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · 2026-11-08. Dziennik zapisuje osobny kanał surowego FERR każdego
+przegubu z tego samego odczytu NML; raport ma jego max/RMS i końcowe3 odczyty.
+91 szybkich regresji PASS; starsze zapisy jawnie bez tego kanału. Kolejny krok:
+4 RIP z API raportu, pełny rzeczywisty program i odbiór GUI offline; przed scaleniem CI.
+
 Model-Author: Codex · 2026-11-08.7 rzeczywistych archiwów: niezależne max/math.fsum RMS
 zgodne; zachowano oryginalne konfiguracje sim/Plant i przenośny raport z hashami.
 30 testów raportu PASS. Różnica osi NML pozostaje jawna; następne surowy joint FERR,

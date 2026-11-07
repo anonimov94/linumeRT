@@ -17,10 +17,24 @@ MAX_BYTES = 512 * 1024 * 1024
 MAX_LINE = 1024 * 1024
 MAX_GAP_S = .1
 MAX_REPORT_BYTES = 32 * 1024 * 1024
+JOINT_ERROR_SOURCE = "linuxcnc.stat.joint.ferror_current"
 
 
 def _number(value):
     return isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(value)
+
+
+def _accumulate(stat, value, row):
+    if stat[2] is None or abs(value) > stat[0]:
+        stat[2] = {"t": row["t"], "line": row.get("line"),
+                   "motion_line": row.get("motion_line"), "value_mm": value}
+    stat[0], stat[1] = max(stat[0], abs(value)), stat[1] + value * value
+
+
+def _metrics(stat, samples):
+    maximum, squares, peak = stat
+    return {"max_abs_mm": maximum if samples else None,
+            "rms_mm": math.sqrt(squares / samples) if samples else None, "peak": peak}
 
 
 def _json(data):
@@ -128,6 +142,15 @@ def load(source):
                        for row in report["ending_samples"] for v in row["axes"].values()))
             need(_number(report["time"]["elapsed_s"]))
         need(report["positioning"]["tolerance_mm"] == .001)
+        joints = report.get("joint_following_error")
+        if joints is not None:
+            need(joints["source"] == JOINT_ERROR_SOURCE and joints["units"] == "mm")
+            need(joints["status"] in ("available", "incomplete", "unavailable"))
+            need(type(joints["samples"]) is int and 0 <= joints["samples"] <= quality["samples"])
+            if joints["status"] == "available":
+                need(joints["samples"] == quality["samples"] and bool(joints["joints"]))
+            for stat in joints["joints"].values():
+                need(_number(stat["max_abs_mm"]) and _number(stat["rms_mm"]))
         last3 = report["positioning"]["last3_max_abs_mm"]
         need(isinstance(last3, dict))
         if len(report["ending_samples"]) == 3:
@@ -188,6 +211,7 @@ def build(run: Path, execution: Path) -> dict:
     previous = None
     last, first_t = None, None
     alarms, controller_errors = {}, {}
+    joint_stats, joint_samples, joint_bad = {}, 0, 0
     with path.open("rb") as stream:
         for line_number, raw in enumerate(iter(lambda: stream.readline(MAX_LINE + 1), b""), 1):
             digest.update(raw)
@@ -234,6 +258,21 @@ def build(run: Path, execution: Path) -> dict:
                 if first_t is None:
                     first_t = last_t
                 samples += 1
+                joints = row.get("joint_following_errors")
+                if joints is not None:
+                    valid = (isinstance(joints, dict) and joints.get("units") == "mm"
+                             and isinstance(joints.get("values"), list)
+                             and 1 <= len(joints["values"]) <= 9
+                             and all(_number(v) for v in joints["values"]))
+                    if valid and (not joint_stats or len(joints["values"]) == len(joint_stats)):
+                        if not joint_stats:
+                            joint_stats = {str(i): [0.0, 0.0, None]
+                                           for i in range(len(joints["values"]))}
+                        joint_samples += 1
+                        for i, value in enumerate(joints["values"]):
+                            _accumulate(joint_stats[str(i)], value, row)
+                    else:
+                        joint_bad += 1
                 for alarm in row.get("alarms", []):
                     alarms.setdefault(alarm["id"], {**alarm, "observed_at_s": row["t"],
                         "line": row.get("line"), "motion_line": row.get("motion_line")})
@@ -245,11 +284,7 @@ def build(run: Path, execution: Path) -> dict:
                 for a, v in values.items():
                     for key, value in (("actual_minus_commanded", v["actual"] - v["commanded"]),
                                        ("following_error", v["following_error"])):
-                        stat = stats[a][key]
-                        if stat[2] is None or abs(value) > stat[0]:
-                            stat[2] = {"t": row["t"], "line": row.get("line"),
-                                "motion_line": row.get("motion_line"), "value_mm": value}
-                        stat[0], stat[1] = max(stat[0], abs(value)), stat[1] + value * value
+                        _accumulate(stats[a][key], value, row)
                 tail.append(row)
                 if (samples - 1) % stride == 0:
                     trajectory.append({"t": row["t"], "motion_line": row.get("motion_line"),
@@ -262,6 +297,11 @@ def build(run: Path, execution: Path) -> dict:
                     raise ValueError("Zbyt wiele uszkodzonych próbek") from None
     if not samples:
         issues.append("Brak poprawnych próbek pozycji")
+    joint_status = ("incomplete" if joint_bad or joint_samples and joint_samples != samples else
+                    "available" if joint_samples else "unavailable")
+    if (joint_status == "incomplete" or joint_status == "unavailable"
+            and manifest.get("joint_error_source") == JOINT_ERROR_SOURCE):
+        issues.append("Brak kompletnego zapisu surowego błędu nadążania przegubów")
     if type(result.get("samples")) is not int or result["samples"] != samples:
         issues.append("Liczba próbek nie odpowiada wynikowi")
     for alarm in result.get("alarms", []):
@@ -277,10 +317,8 @@ def build(run: Path, execution: Path) -> dict:
             path.stat().st_size != before.st_size or path.stat().st_mtime_ns != before.st_mtime_ns):
         raise ValueError("Przebieg zmienił się podczas odczytu")
     for values in stats.values():
-        for key, (maximum, squares, peak) in values.copy().items():
-            values[key] = {"max_abs_mm": maximum if samples else None,
-                           "rms_mm": math.sqrt(squares / samples) if samples else None,
-                           "peak": peak}
+        for key, stat in values.copy().items():
+            values[key] = _metrics(stat, samples)
     ending_ready = _ending_ready(tail, axes)
     settled = (not issues and ending_ready and result.get("settled_position_observed") is True
         and result.get("status") in ("completed_observed", "aborted")
@@ -323,6 +361,12 @@ def build(run: Path, execution: Path) -> dict:
                      excess / predicted * 100 if comparable else None,
                  "prediction_kind": "offline model lower bound, not a completion deadline"},
         "axes": stats, "weighting": "sample weighted; observed maxima only",
+        "joint_following_error": {"status": joint_status, "source": JOINT_ERROR_SOURCE,
+            "units": "mm", "samples": joint_samples,
+            "joints": {i: _metrics(s, joint_samples) for i, s in joint_stats.items()},
+            "last3_max_abs_mm": {i: max(abs(r["joint_following_errors"]["values"][int(i)])
+                for r in tail) for i in joint_stats} if joint_status == "available"
+                and len(tail) == 3 else {}},
         "axis_error_definition": "following_error = commanded minus actual Cartesian position; "
                                  "raw joint ferror_current is not recorded",
         "positioning": {"status": positioning,

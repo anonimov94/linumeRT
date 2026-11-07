@@ -155,6 +155,14 @@ def test_bound_job_pause_resume_and_distinct_interruptions(configuration, tmp_pa
                 assert not result["servo_trace"] and result["source"] == "linuxcnc.stat"
                 assert result["settled_position_observed"] == (outcome == "aborted")
                 assert not state["execution"]["can_resume"]
+                saved = urllib.request.Request("http://127.0.0.1:8795/api/execution/report",
+                    headers={"X-Linumert-Token": record["token"]})
+                with urllib.request.urlopen(saved, timeout=10) as response:
+                    report = json.load(response)
+                assert report["run_id"] == result["run_id"]
+                assert report["execution_status"] == outcome
+                assert report["joint_following_error"]["status"] == "available"
+                assert len(report["joint_following_error"]["joints"]) == 4
             finally:
                 try:
                     if operator:

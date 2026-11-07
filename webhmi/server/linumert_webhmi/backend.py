@@ -341,6 +341,10 @@ class LinuxCNCBackend:
         out["ini"] = getattr(stat, "ini_filename", None)
         out["motion_line"] = getattr(stat, "motion_line", None)
         out["task_done"] = getattr(stat, "state", None) == getattr(self._lc(), "RCS_DONE", object())
+        joints = getattr(stat, "joint", None)
+        out["joint_following_errors"] = None if joints is None else {
+            "units": "mm" if getattr(stat, "linear_units", None) == 1 else None,
+            "values": [joint.get("ferror_current") for joint in joints]}
         table = getattr(stat, "tool_table", None)
         out["tool_table"] = None if table is None else [
             {"id": row.id, "offsets": [getattr(row, a + "offset") for a in "xyzabcuvw"],

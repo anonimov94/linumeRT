@@ -100,6 +100,18 @@ export function createJobs(request) {
           " · końcowe 3 max " + num(result.positioning.last3_max_abs_mm?.[axis]);
         row.append(title, value); $("jobRunMetrics").append(row);
       }
+      const joints = result.joint_following_error;
+      $("jobReportJointStatus").textContent = joints?.status === "available"
+        ? "Błąd nadążania przegubów: surowe ferror_current LinuxCNC [mm]."
+        : "Surowy błąd nadążania przegubów: brak kompletnego kanału w tym zapisie.";
+      for (const [joint, values] of Object.entries(joints?.joints || {})) {
+        const row = document.createElement("div"), title = document.createElement("dt"),
+          value = document.createElement("dd");
+        title.textContent = "Przegub " + joint + " · FERR [mm]";
+        value.textContent = "max " + num(values.max_abs_mm) + " · RMS " + num(values.rms_mm) +
+          " · końcowe 3 max " + num(joints.last3_max_abs_mm?.[joint]);
+        row.append(title, value); $("jobRunMetrics").append(row);
+      }
       showChecks("jobReportChecks", result.verification.checks);
       $("jobReportHash").textContent = "SHA-256 raportu: " + result.report_id +
         ". Sprawdzono spójność pliku; źródłowe archiwa są identyfikowane hashami w JSON.";
@@ -271,6 +283,7 @@ export function createJobs(request) {
       if ((run?.run_id || null) !== runId) {
         runId = run?.run_id || null; runReport = null;
         $("jobRunReportStatus").textContent = ""; $("jobRunMetrics").replaceChildren();
+        plots.clear();
       }
       terminalRun = !!run && ["completed_observed", "aborted", "estop", "fault", "start_timeout",
         "resume_timeout", "settle_timeout", "unavailable", "client_lost"].includes(run.phase);
