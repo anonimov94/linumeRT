@@ -125,7 +125,7 @@ def run(ini, joint_count, output):
         hal.set_p("axis.z.eoffset-scale", "0.000002")
         component["retract-target"] = 0.001
         wait(lambda: hal.get_value("axis.z.eoffset-counts") == 1
-             and abs(hal.get_value("axis.z.eoffset") - 0.000002) < 1e-9)
+             and abs(hal.get_value("axis.z.eoffset-request") - 0.000002) < 1e-9)
         # Counts are deltas multiplied by the scale in each servo cycle.
         # Consume the decrement at zero scale to retain the tiny request.
         hal.set_p("axis.z.eoffset-scale", "0")
