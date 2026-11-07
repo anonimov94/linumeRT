@@ -10,6 +10,9 @@ import math
 from collections import deque
 from pathlib import Path
 
+from linumert.machine.configgen import joint_drives
+from linumert.machine.schema import MachineConfig
+
 from . import job, job_binding, job_execution
 
 FORMAT = "linumert.job.run_report"
@@ -202,7 +205,9 @@ def build(run: Path, execution: Path) -> dict:
     before = path.stat()
     if before.st_size > MAX_BYTES:
         raise ValueError("Zapis przebiegu przekracza limit512MiB")
-    axes = [a["letter"] for a in _json(files["machine.yaml"])["axes"]]
+    machine = MachineConfig.model_validate(_json(files["machine.yaml"]))
+    axes = [a.letter for a in machine.axes]
+    joint_axes = {str(i): axis.letter for i, (axis, _) in enumerate(joint_drives(machine))}
     stats = {a: {k: [0.0, 0.0, None] for k in ("actual_minus_commanded", "following_error")}
              for a in axes}
     digest = hashlib.sha256()
@@ -262,7 +267,7 @@ def build(run: Path, execution: Path) -> dict:
                 if joints is not None:
                     valid = (isinstance(joints, dict) and joints.get("units") == "mm"
                              and isinstance(joints.get("values"), list)
-                             and 1 <= len(joints["values"]) <= 9
+                             and len(joints["values"]) == len(joint_axes)
                              and all(_number(v) for v in joints["values"]))
                     if valid and (not joint_stats or len(joints["values"]) == len(joint_stats)):
                         if not joint_stats:
@@ -362,7 +367,7 @@ def build(run: Path, execution: Path) -> dict:
                  "prediction_kind": "offline model lower bound, not a completion deadline"},
         "axes": stats, "weighting": "sample weighted; observed maxima only",
         "joint_following_error": {"status": joint_status, "source": JOINT_ERROR_SOURCE,
-            "units": "mm", "samples": joint_samples,
+            "units": "mm", "samples": joint_samples, "joint_axes": joint_axes,
             "joints": {i: _metrics(s, joint_samples) for i, s in joint_stats.items()},
             "last3_max_abs_mm": {i: max(abs(r["joint_following_errors"]["values"][int(i)])
                 for r in tail) for i in joint_stats} if joint_status == "available"

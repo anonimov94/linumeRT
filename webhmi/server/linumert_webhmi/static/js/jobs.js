@@ -107,7 +107,8 @@ export function createJobs(request) {
       for (const [joint, values] of Object.entries(joints?.joints || {})) {
         const row = document.createElement("div"), title = document.createElement("dt"),
           value = document.createElement("dd");
-        title.textContent = "Przegub " + joint + " · FERR [mm]";
+        title.textContent = "Przegub " + joint + " (" +
+          (joints.joint_axes?.[joint] || "?") + ") · FERR [mm]";
         value.textContent = "max " + num(values.max_abs_mm) + " · RMS " + num(values.rms_mm) +
           " · końcowe 3 max " + num(joints.last3_max_abs_mm?.[joint]);
         row.append(title, value); $("jobRunMetrics").append(row);

@@ -15,6 +15,13 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · 2026-11-08.3 RIP przerwań z raportem/raw FERR PASS56,43s.
+Pełny verified Plant d96a200:112,616904s, max gap0,027075s, raport observational/pozycja
+passed/raw4 available. Pierwszy112,706333s wykrył lukę0,111433s i pozostaje incomplete.
+Sim Stop zapisany; sterownik odbioru błędnie oczekiwał3 jointów, frozen ma4 — dane do
+niezależnego audytu, bez ponawiania ruchu. Mapowanie raportu używa wspólnego joint_drives;
+34 testy PASS. Własne CNC zakończone, moduły przywrócone, lease wolny. Dalej GUI/CI.
+
 Model-Author: Codex · 2026-11-08. Pierwszy odbiór raw FERR: boot PASS,3 przebiegi
 wykonane, ale raport incomplete — stat.joint zawiera16 slotów. Poprawiony odczyt
 ogranicza je do stat.joints aktywnej konfiguracji; regresja obejmuje14 nieużywanych.
