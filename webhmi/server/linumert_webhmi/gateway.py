@@ -26,6 +26,7 @@ from __future__ import annotations
 import threading
 import time
 from collections.abc import Callable
+from typing import TYPE_CHECKING
 
 from linumert.alarms.manager import AlarmManager
 from linumert.cnc import MachineSnapshot, Mode
@@ -36,6 +37,10 @@ from .schema import Command, snapshot_to_dict
 
 PROBE_FEED_MM_MIN = 100.0  # posuw próby sondy (G94)
 PROBE_RETRACT_MM = 2.0  # odjazd po styku
+
+if TYPE_CHECKING:
+    from .job_instance import Instance
+
 STOP_COMMANDS = frozenset({"estop", "stop", "pause", "jog_stop", "power_off"})
 LOCAL_SESSION = "local"  # polecenia z REST (bez sesji WebSocket)
 POLL_HZ = 50.0
@@ -67,8 +72,9 @@ class RateLimiter:
 class Gateway:
     def __init__(self, backend: MachineBackend, clock: Callable[[], float] = time.monotonic,
                  jog_hold_s: float = JOG_HOLD_S, command_rate: float = 60.0,
-                 hal_pins: HalPins | None = None):
+                 hal_pins: HalPins | None = None, instance: Instance | None = None):
         self.backend = backend
+        self._instance = instance
         self._hal = hal_pins
         self._estop_reset_at: float | None = None
         self._alarm_reset_at: float | None = None
@@ -131,6 +137,8 @@ class Gateway:
             if now - self._programs_at >= PROGRAMS_S:
                 self._programs, self._programs_at = self.backend.programs(), now
             state = snapshot_to_dict(snap)
+            if self._instance is not None:
+                state["execution"] = self._instance.status()
             state["alarms"] = self._alarm_rows()
             state["programs"] = list(self._programs)
             state["heartbeat"] = any(now - seen <= HEARTBEAT_S
@@ -255,6 +263,8 @@ class Gateway:
     def _dispatch(self, c: Command, session: str) -> None:
         b = self.backend
         name = c.cmd
+        if self._instance is not None and name in ("run", "resume"):
+            raise CommandError(self._instance.status()["reason"])
         if name == "estop":
             self._stop_all_jog()
             b.estop()

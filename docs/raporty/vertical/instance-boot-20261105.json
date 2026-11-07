@@ -1,0 +1,95 @@
+{
+  "schema": 1,
+  "task_state": "estop",
+  "mode": "manual",
+  "interp_state": "idle",
+  "axes": [
+    {
+      "name": "X",
+      "position": 0.0,
+      "work_position": -200.0,
+      "following_error": 0.0,
+      "homed": false,
+      "soft_min": 1.0,
+      "soft_max": 599.0,
+      "limit_hit": false
+    },
+    {
+      "name": "Y",
+      "position": 0.0,
+      "work_position": -200.0,
+      "following_error": 0.0,
+      "homed": false,
+      "soft_min": 1.0,
+      "soft_max": 899.0,
+      "limit_hit": false
+    },
+    {
+      "name": "Z",
+      "position": 0.0,
+      "work_position": 80.0,
+      "following_error": 0.0,
+      "homed": false,
+      "soft_min": -119.0,
+      "soft_max": -1.0,
+      "limit_hit": false
+    }
+  ],
+  "all_homed": false,
+  "line": 0,
+  "program": "",
+  "feed_override": 1.0,
+  "rapid_override": 1.0,
+  "spindle_override": 1.0,
+  "spindle_speed": 0.0,
+  "spindle_direction": 0,
+  "tool": 0,
+  "work_offset": "G54",
+  "gcodes": [
+    "G80",
+    "G17",
+    "G40",
+    "G21",
+    "G90",
+    "G94",
+    "G54",
+    "G49",
+    "G99",
+    "G64",
+    "G97",
+    "G91.1",
+    "G8"
+  ],
+  "mcodes": [
+    "M5",
+    "M9",
+    "M48",
+    "M53",
+    "M0"
+  ],
+  "errors": [],
+  "execution": {
+    "execution_id": "a034404861204810262976262f99f451a01316e2520235222a83f8c84c894328",
+    "job_id": "95bf2c0bc88fb59abaa1cdea747ddfdbfc58bc042701d4fe0beed5fbb8a1316e",
+    "target": "plant",
+    "status": "instance_loaded",
+    "can_start": false,
+    "reason": "Kontrola zgodno\u015bci \u017cywej instancji z zadaniem oczekuje. Start zadania zablokowany.",
+    "execution_authorization": false
+  },
+  "alarms": [
+    {
+      "id": 1,
+      "code": "E-1100",
+      "text": "Stan awaryjny (E-stop) jest aktywny.",
+      "count": 1
+    }
+  ],
+  "programs": [
+    "program.ngc"
+  ],
+  "heartbeat": false,
+  "hmi_hal": true,
+  "jog_active": [],
+  "jog_stop_pending": []
+}

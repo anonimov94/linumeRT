@@ -7,7 +7,7 @@ Z machine.yaml (jedno źródło prawdy, CLAUDE.md §5a) bierzemy `collision_bodi
 w Plant, `linumert_plant/collisions.py`: `head`/`spindle` jadą z nosem wrzeciona, reszta stoi
 w G53), zakresy osi oraz napędy: siła graniczna osi = moment szczytowy (ograniczony 6072h) /
 przełożenie [m/rad], suma napędów osi (portal); wrzeciono = krzywa moment–prędkość szablonu.
-Szablony napędów: `plant/library/drives/<template>.yaml` (bez walidacji, tylko potrzebne pola).
+Szablony napędów: `linumert.machine.drives` (bez walidacji, tylko potrzebne pola).
 Wszystkie wartości graniczne są przykładowe — NIEZWERYFIKOWANE NA SPRZĘCIE.
 """
 
@@ -18,8 +18,9 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 import yaml
+from linumert.machine.drives.drive_library import LIBRARY_DIR
 
-DRIVES_DIR = Path(__file__).resolve().parents[2] / "plant" / "library" / "drives"
+DRIVES_DIR = LIBRARY_DIR
 MOVING = ("head", "spindle")
 FIXTURE = ("vise", "fixture")
 DEFAULT_AXIS_FORCE = 1000.0   # [N] gdy brak napędu w modelu

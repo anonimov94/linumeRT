@@ -647,3 +647,90 @@ Licencja: GPL-2.0-or-later. Zakres: dokumentacja odbioru
 - `docs/raporty/G2/WEBHMI_SONDA_2026-11-05/1_panel_sondy.jpg`
 - `docs/raporty/G2/WEBHMI_SONDA_2026-11-05/2_po_sondowaniu_z.jpg`
 - `docs/raporty/G2/WEBHMI_SONDA_2026-11-05/3_chybienie_alarm.jpg`
+
+### Przygotowanie zadania w WebHMI — 2026-11-05
+
+Model-Author: Codex. Autor: Codex; źródło: własny zrzut pełnego linumeRT WebHMI
+w przeglądarce aplikacji, brama testowa `--fake` w WSL Debian 12. Bez retuszu,
+bez zasobów zewnętrznych; GPL-2.0-or-later. Zakres: dokumentacja odbioru przygotowania.
+Plik: `docs/raporty/vertical/prepare-webhmi-20261105.jpg`.
+
+### Backend lite scalony do main — 2026-11-05
+
+Model-Author: Codex (kod lite, 2026-10-28, gałąź `codex/lite-backend`), scalenie: Claude.
+Własny kod GPL-2.0-or-later: CLI `linumert-lite`, `cnc/headless.py`, `machine/lite_config.py`
+z zasobami, `tools/console*`, `tools/terminal3d.py`, `tools/terminal_keys.py`,
+`tools/ConsoleDensity.cs`, `tools/check_wheel.py`, testy lite. Napędy przeniesione z Plant do
+`core/linumert/machine/drives/` bez zmiany autorstwa algorytmów. Bez nowych bibliotek i zasobów
+graficznych. Raster Braille: numeracja punktów wg standardu Unicode U+2800–U+28FF
+(https://www.unicode.org/charts/PDF/U2800.pdf, bez dołączania tabeli). Adapter konsoli HD
+korzysta z Win32 Console API (https://learn.microsoft.com/en-us/windows/console/setcurrentconsolefontex).
+
+### Odbiór połączenia CLI i WebHMI — 2026-11-05
+
+Model-Author: Codex. Autor: Codex; własny zrzut pełnego WebHMI z bramą `--fake`
+w WSL Debian 12 po integracji strumieni; bez retuszu. GPL-2.0-or-later.
+Plik: `docs/raporty/vertical/prepare-integrated-20261105.jpg`. Zakres: dowód odbioru
+przygotowania i eksportu pakietu, bez kwalifikacji sprzętu.
+
+### Częściowa kontrola zadania w WebHMI — 2026-11-05
+
+Model-Author: Codex. Własny kod kontroli i testów oraz własne zrzuty WebHMI
+z bramą `--fake` i rzeczywistym izolowanym rs274 w WSL; bez retuszu i zasobów
+zewnętrznych. GPL-2.0-or-later. Zakres: VERTICAL-VERIFY, dokumentacja wyniku
+częściowego i odrzucenia przekroczenia, bez kwalifikacji materiału ani sprzętu.
+Pliki: `docs/raporty/vertical/preflight-webhmi-20261105.jpg`,
+`docs/raporty/vertical/preflight-limit-20261105.jpg`.
+
+### Natywne obliczenia i pomiar po integracji — 2026-11-05
+
+Model-Author: Claude — własne C11 `core/native/`, ctypes `core/linumert/native.py`,
+referencje Python i narzędzia pomiarowe z gałęzi `claude/natywne-przyspieszenia` 0bd1f04;
+GPL-2.0-or-later. Codex — integracja do pełnego projektu, kontrola eksportów,
+porównanie bajtowe, raport NATIVE_INTEGRATION_2026-11-05.md i własne pomiary
+`docs/raporty/native-integration/bench_{python,native}.json`. Bez nowych zależności.
+
+### Precyzyjny tor i prywatna tabela LinuxCNC — 2026-11-05
+
+Model-Author: Codex. Własny adapter `core/native/linuxcnc_tooldata.cc`, proces
+`core/linumert/programs/_job_trace_worker.py`, orkiestracja job_trace.py i testy;
+GPL-2.0-or-later. Wywołania API na podstawie lokalnego źródła LinuxCNC 2.9:
+src/emc/tooldata/tooldata.hh, tooldata_mmap.cc oraz src/emc/rs274ngc/gcodemodule.cc
+(LinuxCNC, GPL-2.0-or-later); bez kopiowania implementacji interpretera/plenera.
+Łączenie z libtooldata i gcode tej samej budowy RIP, prywatny HOME/cwd. C++17
+dotyczy tylko tego opcjonalnego adaptera SDK; dotychczasowe kernele pozostają C11.
+
+Własny zrzut WebHMI po dokładnej kontroli, bez retuszu: Codex, 2026-11-05,
+GPL-2.0-or-later. `docs/raporty/vertical/precise-limits-20261105.jpg`;
+brama fake, rzeczywiste interpretery offline RIP, bez zasobów zewnętrznych.
+
+### Odbiór materiału zadania — 2026-11-05
+
+Własny zrzut WebHMI bez retuszu: Codex, 2026-11-05, GPL-2.0-or-later.
+`docs/raporty/vertical/material-20261105.jpg`: własna brama fake8789,
+rzeczywisty rs274/SDK i diagnostyka materiału, bez grafiki zewnętrznej.
+Surowe pomiary `docs/raporty/vertical/material-benchmark-20261105.json`:
+własne uruchomienia CLI w WSL2, Codex, ta sama data i licencja.
+
+### Odbiór verified offline — 2026-11-05
+
+Własny zrzut WebHMI bez retuszu: Codex, 2026-11-05, GPL-2.0-or-later.
+`docs/raporty/vertical/verified-20261105.jpg`: własna brama fake8790,
+rzeczywisty rs274/SDK i diagnostyka materiału; dodatni werdykt offline,
+wykonanie nieuruchomione. Bez zasobów graficznych zewnętrznych.
+
+### Odbiór konfiguracji wykonawczej — 2026-11-05
+
+Własny zrzut WebHMI bez retuszu: Codex, 2026-11-05, GPL-2.0-or-later.
+`docs/raporty/vertical/execution-config-20261105.jpg`: własna brama fake8791,
+rzeczywisty interpreter i diagnostyka offline, pobranie pochodnej konfiguracji
+LinuxCNC/Plant. Bez uruchomienia kontrolera i bez grafiki zewnętrznej.
+
+### Odbiór prywatnej instancji — 2026-11-05
+
+Własny zrzut bez retuszu: Codex, 2026-11-05, GPL-2.0-or-later.
+`docs/raporty/vertical/instance-20261105.jpg`: rzeczywisty LinuxCNC RIP + Plant,
+WebHMI8792 z HAL, E-STOP bez automatycznego Reset/ON/bazowania. Widoczne zadanie
+i zamknięty Start przed kontrolą żywego stanu. Bez zasobów graficznych zewnętrznych.
+`docs/raporty/vertical/instance-boot-20261105.json`: własny odczyt NML/WebHMI
+tego samego rozruchu; Codex, ta sama data i licencja; bez tokenu.

@@ -27,13 +27,13 @@ from .validate import validate_machine
 
 
 def build(machine: Path, target: str, out: Path, *, write: bool = False,
-          options: Options | None = None) -> tuple[str, Path | None]:
+          options: Options | None = None, renderer=render) -> tuple[str, Path | None]:
     """Zwraca (diff, katalog kopii zapasowej albo None). Błędy: MachineConfigError/ValueError."""
     cfg = load_machine(machine)
     errors = validate_machine(cfg)
     if errors:
         raise MachineConfigError(errors)
-    files = render(cfg, target, options)
+    files = renderer(cfg, target, options)
     diff = configuration_diff(out, files)
     backup = None
     if write and diff:

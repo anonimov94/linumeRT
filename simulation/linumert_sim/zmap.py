@@ -17,6 +17,7 @@ import math
 from dataclasses import dataclass, field
 
 import numpy as np
+from linumert import native
 
 from .cutter import Cutter
 
@@ -56,6 +57,8 @@ class StockMap:
         self.ys = y0 + (np.arange(self.ny) + 0.5) * cell
         self.h = np.empty((self.ny, self.nx), dtype=np.float32)
         self.version = 0
+        self._native: native.ZmapGrid | None = None   # wskaźniki tablic dla biblioteki C
+        self._native_cutters: dict[tuple, native.CCutter] = {}
         self.reset()
 
     def reset(self) -> None:
@@ -83,7 +86,11 @@ class StockMap:
                         self.z_bottom).astype(np.float32)
 
     def cut(self, cutter: Cutter, p0, p1, extra_parts=()) -> CutResult:
-        """Przejazd wierzchołka p0 → p1; `extra_parts` = dodatkowe walce nietnące (wrzeciono)."""
+        """Przejazd wierzchołka p0 → p1; `extra_parts` = dodatkowe walce nietnące (wrzeciono).
+
+        Z biblioteką natywną (`linumert.native`) pętla próbek liczy się w C z tym samym
+        wynikiem (mapa bitowo, objętość w tolerancji sumy float32); bez niej — w Pythonie.
+        """
         res = CutResult()
         parts = list(cutter.parts()) + list(extra_parts)
         reach = max([cutter.radius] + [p[1] for p in parts])
@@ -91,6 +98,10 @@ class StockMap:
         lo_y, hi_y = min(p0[1], p1[1]) - reach, max(p0[1], p1[1]) + reach
         if hi_x < self.x0 or lo_x > self.x1 or hi_y < self.y0 or lo_y > self.y1:
             return res
+        lib = native.library()
+        if lib is not None and len(parts) <= native.MAX_PARTS and all(
+                math.isfinite(v) for v in (*p0, *p1)):
+            return self._cut_native(lib, cutter, p0, p1, parts, reach)
         if min(p0[2], p1[2]) > self.top + EPS:
             return res
         dist = math.dist(p0, p1)
@@ -100,6 +111,30 @@ class StockMap:
             t = i / n
             p = tuple(a + (b - a) * t for a, b in zip(p0, p1, strict=True))
             res.merge(self._stamp(cutter, p, parts, reach))
+        if res.removed > 0:
+            self.version += 1
+        return res
+
+    def _cut_native(self, lib, cutter: Cutter, p0, p1, parts, reach) -> CutResult:
+        """Ta sama pętla próbek co w `cut` w C (`core/native/zmap.c`).
+
+        Bez sprawdzenia `top` całej mapy: C pomija próbkę, gdy okno leży poniżej ostrza,
+        co daje ten sam wynik przy mniejszym koszcie.
+        """
+        grid = self._native
+        if grid is None or not grid.valid_for(lib, self.h, self.xs, self.ys):
+            grid = self._native = native.ZmapGrid(lib, self.h, self.xs, self.ys)
+        key = (cutter.kind, cutter.radius, cutter.corner, cutter.cone_tan)
+        spec = self._native_cutters.get(key)
+        if spec is None:
+            spec = self._native_cutters[key] = native.cutter_struct(*key)
+        dist = math.dist(p0, p1)
+        step = max(min(self.cell * 0.5, cutter.radius * 0.5), 0.02)
+        n = max(int(math.ceil(dist / step)), 1)
+        removed, mask, contact = native.zmap_cut(
+            grid, self.x0, self.y0, self.cell, self.z_bottom, spec,
+            [(p[1], p[2]) for p in parts], reach, p0, p1, 0 if dist == 0 else 1, n, EPS)
+        res = CutResult(removed, {p[0] for i, p in enumerate(parts) if mask >> i & 1}, contact)
         if res.removed > 0:
             self.version += 1
         return res

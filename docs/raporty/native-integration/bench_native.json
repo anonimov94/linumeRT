@@ -1,0 +1,221 @@
+{
+ "date": "2026-11-05 16:02",
+ "native": "natywna (C)",
+ "source": "subset",
+ "python": "3.11.2",
+ "numpy": "2.4.6",
+ "cpu": 12,
+ "rows": [
+  {
+   "area": "generator CAM (kieszeń+planowanie)",
+   "data": "100×80 mm",
+   "ms": 333.15,
+   "note": ""
+  },
+  {
+   "area": "generator płaskorzeźby plan_relief",
+   "data": "1458 trójkątów, 401×81",
+   "ms": 231.48,
+   "note": ""
+  },
+  {
+   "area": "ścieżka load_path (subset)",
+   "data": "linumert_demo",
+   "ms": 12.71,
+   "note": "116 odcinków"
+  },
+  {
+   "area": "symulacja offline simulate",
+   "data": "linumert_demo",
+   "ms": 135.53,
+   "note": "116 odc., usunięto 17456.0 mm³, 4 zdarzeń",
+   "removed_mm3": 17456.0,
+   "events": 4
+  },
+  {
+   "area": "ścieżka load_path (subset)",
+   "data": "linumert_neon_demo",
+   "ms": 15.08,
+   "note": "337 odcinków"
+  },
+  {
+   "area": "symulacja offline simulate",
+   "data": "linumert_neon_demo",
+   "ms": 105.88,
+   "note": "337 odc., usunięto 34954.0 mm³, 0 zdarzeń",
+   "removed_mm3": 34954.0,
+   "events": 0
+  },
+  {
+   "area": "ścieżka load_path (subset)",
+   "data": "linumert_rowek",
+   "ms": 11.11,
+   "note": "92 odcinków"
+  },
+  {
+   "area": "symulacja offline simulate",
+   "data": "linumert_rowek",
+   "ms": 14.06,
+   "note": "92 odc., usunięto 0.0 mm³, 0 zdarzeń",
+   "removed_mm3": 0.0,
+   "events": 0
+  },
+  {
+   "area": "ścieżka load_path (subset)",
+   "data": "linumert_kwadrat",
+   "ms": 9.82,
+   "note": "8 odcinków"
+  },
+  {
+   "area": "symulacja offline simulate",
+   "data": "linumert_kwadrat",
+   "ms": 25.96,
+   "note": "8 odc., usunięto 2392.0 mm³, 0 zdarzeń",
+   "removed_mm3": 2392.0,
+   "events": 0
+  },
+  {
+   "area": "ścieżka load_path (subset)",
+   "data": "linumert_wiercenie",
+   "ms": 11.63,
+   "note": "181 odcinków"
+  },
+  {
+   "area": "symulacja offline simulate",
+   "data": "linumert_wiercenie",
+   "ms": 65.78,
+   "note": "181 odc., usunięto 3348.0 mm³, 1 zdarzeń",
+   "removed_mm3": 3348.0,
+   "events": 1
+  },
+  {
+   "area": "ścieżka load_path (subset)",
+   "data": "linumert_kolizja",
+   "ms": 9.93,
+   "note": "5 odcinków"
+  },
+  {
+   "area": "symulacja offline simulate",
+   "data": "linumert_kolizja",
+   "ms": 6.37,
+   "note": "5 odc., usunięto 984.0 mm³, 1 zdarzeń",
+   "removed_mm3": 984.0,
+   "events": 1
+  },
+  {
+   "area": "ścieżka load_path (subset)",
+   "data": "linumert_g2_odbior",
+   "ms": 10.21,
+   "note": "8 odcinków"
+  },
+  {
+   "area": "symulacja offline simulate",
+   "data": "linumert_g2_odbior",
+   "ms": 2.02,
+   "note": "8 odc., usunięto 0.0 mm³, 0 zdarzeń",
+   "removed_mm3": 0.0,
+   "events": 0
+  },
+  {
+   "area": "ścieżka load_path (subset)",
+   "data": "gen_kieszen_planowanie",
+   "ms": 8.35,
+   "note": "500 odcinków"
+  },
+  {
+   "area": "ścieżka parse_subset",
+   "data": "gen_kieszen_planowanie",
+   "ms": 8.3,
+   "note": ""
+  },
+  {
+   "area": "symulacja offline simulate",
+   "data": "gen_kieszen_planowanie",
+   "ms": 764.15,
+   "note": "500 odc., usunięto 18629.2 mm³, 0 zdarzeń",
+   "removed_mm3": 18629.2,
+   "events": 0
+  },
+  {
+   "area": "ścieżka load_path (subset)",
+   "data": "gen_plaskorzezba",
+   "ms": 595.74,
+   "note": "32644 odcinków"
+  },
+  {
+   "area": "ścieżka parse_subset",
+   "data": "gen_plaskorzezba",
+   "ms": 583.6,
+   "note": ""
+  },
+  {
+   "area": "symulacja offline simulate",
+   "data": "gen_plaskorzezba",
+   "ms": 2247.82,
+   "note": "32644 odc., usunięto 4988.1 mm³, 0 zdarzeń",
+   "removed_mm3": 4988.1,
+   "events": 0
+  },
+  {
+   "area": "podgląd Toolpath (make_move)",
+   "data": "gen_plaskorzezba",
+   "ms": 614.37,
+   "note": "32644 ruchów"
+  },
+  {
+   "area": "podgląd Toolpath.locate",
+   "data": "ostatnia linia",
+   "ms": 1.34,
+   "note": ""
+  },
+  {
+   "area": "STL read_stl (binarny)",
+   "data": "50880 trójkątów",
+   "ms": 6.8,
+   "note": ""
+  },
+  {
+   "area": "STL read_stl (ASCII)",
+   "data": "12640 trójkątów",
+   "ms": 120.96,
+   "note": ""
+  },
+  {
+   "area": "STL section_xy",
+   "data": "50880 trójkątów",
+   "ms": 21.51,
+   "note": "321 punktów"
+  },
+  {
+   "area": "płaskorzeźba plan_relief",
+   "data": "1458 trójkątów, 32481 pkt",
+   "ms": 112.43,
+   "note": ""
+  },
+  {
+   "area": "płaskorzeźba ball_tip_height ×200",
+   "data": "1458 trójkątów",
+   "ms": 138.89,
+   "note": ""
+  },
+  {
+   "area": "eksport materiału write_stl",
+   "data": "200×160 komórek",
+   "ms": 23.59,
+   "note": "129440 trójkątów"
+  },
+  {
+   "area": "brama WebHMI Gateway.step ×500",
+   "data": "FakeBackend",
+   "ms": 20.24,
+   "note": "40 µs/obieg"
+  },
+  {
+   "area": "Plant ramka LRT-NET ×2000",
+   "data": "mill_servo_table",
+   "ms": 196.06,
+   "note": "98 µs/ramka przy okresie 1000 µs"
+  }
+ ],
+ "profiles": {}
+}

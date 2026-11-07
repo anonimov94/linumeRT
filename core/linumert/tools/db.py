@@ -2,6 +2,7 @@
 
 SPDX-License-Identifier: GPL-2.0-or-later
 Model-Author: Claude · sesja 032
+Model-Author: Codex · 2026-11-05: opcjonalny odczyt bez tworzenia/migracji bazy.
 
 - Schemat w migracjach numerowanych (`PRAGMA user_version`); nowa wersja = nowa migracja na
   końcu listy, stare bazy podnoszą się przy otwarciu.
@@ -200,13 +201,25 @@ def _atomic_write(path: Path, text: str) -> None:
 class ToolDB:
     """Baza narzędzi. `path` = plik SQLite (":memory:" w testach); `clock` = czas historii."""
 
-    def __init__(self, path: Path | str, clock: Callable[[], float] = time.time):
+    def __init__(self, path: Path | str, clock: Callable[[], float] = time.time, *,
+                 readonly: bool = False):
         self.path = str(path)
         self.clock = clock
-        self.db = sqlite3.connect(self.path)
+        source = Path(path).resolve().as_uri() + "?mode=ro" if readonly else self.path
+        self.db = sqlite3.connect(source, uri=readonly)
         self.db.row_factory = sqlite3.Row
         self.db.execute("PRAGMA foreign_keys = ON")
-        self._migrate()
+        try:
+            if readonly:
+                if self.schema_version != len(MIGRATIONS):
+                    raise ToolDBError([ToolIssue("P-5204", {"line": 0, "detail":
+                        "tryb tylko do odczytu wymaga aktualnego schematu bazy; "
+                        "migracja musi być wykonana osobno"})])
+            else:
+                self._migrate()
+        except Exception:
+            self.db.close()
+            raise
 
     def close(self) -> None:
         self.db.close()

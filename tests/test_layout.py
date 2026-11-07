@@ -6,7 +6,8 @@ import pytest
 from conftest import REPO
 
 DIRS = [
-    "core/linumert", "simulation", "screens/linumert", "plant/core", "plant/library/drives",
+    "core/linumert", "simulation", "screens/linumert", "plant/core",
+    "core/linumert/machine/drives/templates",
     "config/machines", "docs/wymagania", "plant/server", "hal", "config/sim", "config/plant",
     "config/examples", "tools", "tools/vm", "tools/ci", "tests", "docs", "docs/prawne",
     "prompts", "community",

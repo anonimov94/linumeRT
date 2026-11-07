@@ -53,6 +53,33 @@ def _flat(number=1, pocket=1, **params) -> Tool:
 # ---- typy ----------------------------------------------------------------------------------
 
 
+def test_readonly_database_preserves_history_and_rejects_writes(tmp_path):
+    path = tmp_path / "tools.db"
+    with ToolDB(path) as source:
+        source.add(_flat())
+        history = source.history()
+    previous = path.read_bytes()
+    with ToolDB(path, readonly=True) as db:
+        assert db.get(1) == _flat() and db.history() == history
+        with pytest.raises(sqlite3.OperationalError, match="readonly"):
+            db.remove(1)
+    assert path.read_bytes() == previous
+
+
+def test_readonly_database_never_creates_or_migrates(tmp_path):
+    missing = tmp_path / "missing.db"
+    with pytest.raises(sqlite3.OperationalError):
+        ToolDB(missing, readonly=True)
+    assert not missing.exists()
+    path = tmp_path / "old.db"
+    with sqlite3.connect(path):
+        pass
+    previous = path.read_bytes()
+    with pytest.raises(ToolDBError, match="migracja"):
+        ToolDB(path, readonly=True)
+    assert path.read_bytes() == previous
+
+
 def test_all_types_from_requirements():
     assert set(TYPES) == {"flat", "ball", "bull", "tslot", "lollipop", "chamfer", "drill_118",
                           "drill_angle", "face_mill", "tap", "special_stl"}

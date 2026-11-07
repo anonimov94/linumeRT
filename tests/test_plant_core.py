@@ -8,6 +8,7 @@ from __future__ import annotations
 import re
 import shutil
 import subprocess
+import sys
 from pathlib import Path
 
 import pytest
@@ -63,7 +64,7 @@ def test_c_unit_tests_pass() -> None:
 @pytest.mark.skipif(not HAS_TOOLCHAIN, reason="brak make i kompilatora C")
 def test_make_test_c_target_runs_core_tests() -> None:
     result = subprocess.run(
-        ["make", "-s", "test-c"],
+        ["make", "-s", f"PYTHON={sys.executable}", "test-c"],
         cwd=ROOT,
         capture_output=True,
         text=True,
