@@ -7,6 +7,7 @@ Model-Author: Codex
 import json
 import os
 import signal
+import socket
 import subprocess
 import sys
 from pathlib import Path
@@ -15,9 +16,24 @@ import pytest
 from linumert.programs import job, job_execution
 from linumert_webhmi import Command, FakeBackend, Gateway, create_app
 from linumert_webhmi.backend import CommandError
-from linumert_webhmi.job_instance import Instance, _signal_owned, prepare
+from linumert_webhmi.job_instance import Instance, _check_port, _signal_owned, prepare
 from starlette.testclient import TestClient
 from test_job_execution import package as package
+
+
+def test_port_probe_rejects_listener_but_allows_restarting_after_own_connection():
+    with socket.socket() as server, socket.socket() as client:
+        server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        server.bind(("127.0.0.1", 0))
+        port = server.getsockname()[1]
+        server.listen(1)
+        with pytest.raises(OSError):
+            _check_port(port, socket.SOCK_STREAM)
+        client.connect(("127.0.0.1", port))
+        connection, _ = server.accept()
+        connection.close()  # the server side enters TIME_WAIT, as with HTTP shutdown
+        client.close()
+    _check_port(port, socket.SOCK_STREAM)
 
 
 @pytest.fixture
@@ -120,7 +136,7 @@ def test_bound_gateway_api_and_websocket_refuse_start_without_machine_side_effec
             while reply.get("id") != 1:
                 reply = ws.receive_json()
             assert reply["type"] == "error" and "zablokowany" in reply["message"]
-    with pytest.raises(CommandError, match="zablokowany"):
+    with pytest.raises(CommandError, match="zablokowan"):
         gateway.execute(Command(cmd="resume"))
     after = backend.machine.snapshot()
     assert after.task_state == before.task_state and after.positions == before.positions

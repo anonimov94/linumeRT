@@ -311,6 +311,30 @@ class LinuxCNCBackend:
         self._linear_units = float(units) if units is not None else None
         return self._last
 
+    def binding_state(self, pins=()) -> dict:
+        """Last NML pose plus subsequent tooldata read; no extra error-channel poll."""
+        stat = self._reader._stat
+        names = ("linear_units", "inpos", "current_vel", "tool_offset", "g5x_index",
+                 "g5x_offset", "g92_offset", "rotation_xy")
+        out = {name: getattr(stat, name, None) for name in names}
+        out["ini"] = getattr(stat, "ini_filename", None)
+        out["motion_line"] = getattr(stat, "motion_line", None)
+        out["task_done"] = getattr(stat, "state", None) == getattr(self._lc(), "RCS_DONE", object())
+        table = getattr(stat, "tool_table", None)
+        out["tool_table"] = None if table is None else [
+            {"id": row.id, "offsets": [getattr(row, a + "offset") for a in "xyzabcuvw"],
+             **{name: getattr(row, name) for name in
+                ("diameter", "frontangle", "backangle", "orientation")}}
+            for row in table if row.id >= 0]
+        if pins:
+            try:
+                import hal
+
+                out["hal"] = {name: hal.get_value(name) for name in pins}
+            except (ImportError, RuntimeError, ValueError):
+                out["hal"] = None
+        return out
+
     def estop(self) -> None:
         self._cmd().state(self._lc().STATE_ESTOP)
 
@@ -356,6 +380,31 @@ class LinuxCNCBackend:
         self._wait(cmd)
         cmd.auto(lc.AUTO_RUN, from_line)
 
+    def confirm_job_state(self, *, paused=False):
+        """Require a newly echoed command serial before using NML as a Start receipt.
+
+        Reassert AUTO while idle, or PAUSE while already paused. Neither enables
+        the machine or resumes motion. Error messages remain for the reader.
+        """
+        lc, cmd, stat = self._lc(), self._cmd(), self._reader._stat
+        if paused:
+            cmd.auto(lc.AUTO_PAUSE)
+        else:
+            cmd.mode(lc.MODE_AUTO)
+        serial = cmd.serial
+        deadline = time.monotonic() + self.WAIT_TIMEOUT_S
+        while time.monotonic() < deadline:
+            stat.poll()
+            wanted = lc.INTERP_PAUSED if paused else lc.INTERP_IDLE
+            if (stat.echo_serial_number == serial and stat.task_state == lc.STATE_ON
+                    and stat.task_mode == lc.MODE_AUTO and stat.interp_state == wanted):
+                return
+            time.sleep(.005)
+        raise CommandError("Sterowanie nie potwierdziło świeżego stanu zadania w 2 s")
+
+    def run_confirmed(self, from_line):
+        self._cmd().auto(self._lc().AUTO_RUN, from_line)
+
     def pause(self) -> None:
         self._cmd().auto(self._lc().AUTO_PAUSE)
 
@@ -390,6 +439,11 @@ class LinuxCNCBackend:
         self._send_jog(joint_mode, self._lc().JOG_CONTINUOUS, number, velocity)
 
     def jog_stop(self, axis: str | None) -> None:
+        snap = self._recent()
+        if snap.mode is Mode.AUTO and snap.interp_state.value in ("reading", "waiting", "paused"):
+            # LinuxCNC cannot jog in active AUTO and rejects JOG_STOP there.
+            # Program Stop is the independent abort(), sent by Gateway.
+            return
         lc, cmd = self._lc(), self._cmd()
         names = self._joint_axes()
         joints = self._reader.joint_map(names)  # stop bez warunków: także przy niepełnej mapie

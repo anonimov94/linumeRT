@@ -61,7 +61,11 @@ export function allowed(state, link) {
   result.resume = !machineOn ? deny(common) : paused ? permit()
     : deny("Program nie jest wstrzymany");
   if (state.execution && state.execution.can_start !== true) {
-    result.run = result.resume = deny(state.execution.reason || "Instancja zadania niegotowa");
+    result.run = deny(state.execution.reason || "Instancja zadania niegotowa");
+  }
+  if (state.execution && state.execution.can_resume !== true) {
+    result.resume = deny(state.execution.resume_reason ||
+      "Zadanie nie ma potwierdzonego stanu do wznowienia");
   }
   result.override = machineOn ? permit() : deny(common);
   const jogging = Array.isArray(state.jog_active) && state.jog_active.length > 0;

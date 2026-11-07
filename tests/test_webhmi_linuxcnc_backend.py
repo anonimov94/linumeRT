@@ -98,6 +98,37 @@ def test_mdi_run_pause_resume_stop():
         ("auto", 11), ("auto", 12), ("abort",)]
 
 
+def test_job_confirmation_requires_new_echo_and_does_not_read_errors():
+    b, c = backend(task_mode=2)
+    stat = b._reader._stat
+    c.serial = 0
+    stat.echo_serial_number = -1
+    def mode(value):
+        c.calls.append(("mode", value))
+        c.serial += 1
+    c.mode = mode
+    def poll():
+        stat.echo_serial_number = c.serial
+    stat.poll = poll
+    b._reader._error_channel.poll = lambda: pytest.fail("confirmation consumed error channel")
+    b.confirm_job_state()
+    assert c.calls == [("mode", 2)]
+    b.run_confirmed(1)
+    assert c.calls == [("mode", 2), ("auto", 10, 1)]
+
+
+def test_unconfirmed_job_state_never_sends_auto_run(monkeypatch):
+    b, c = backend(task_mode=2)
+    c.serial = 1
+    b._reader._stat.echo_serial_number = -1
+    times = iter((0, .1, 3))
+    monkeypatch.setattr("linumert_webhmi.backend.time", SimpleNamespace(
+        monotonic=lambda: next(times), sleep=lambda _: None))
+    with pytest.raises(CommandError, match="nie potwierdziło"):
+        b.confirm_job_state()
+    assert c.calls == [("mode", 2)]
+
+
 @pytest.mark.parametrize("speed", [2.5, -2.5, 0.05])
 @pytest.mark.parametrize("units", [1.0, 1 / 25.4])
 def test_jog_uses_native_units_per_second(speed, units):
@@ -231,6 +262,17 @@ def test_overrides_only_send_given_values():
     b, c = backend()
     b.set_override(feed=0.5, rapid=None, spindle=1.2)
     assert c.calls == [("feedrate", 0.5), ("spindleoverride", 1.2)]
+
+
+@pytest.mark.parametrize("interp", ["INTERP_READING", "INTERP_WAITING", "INTERP_PAUSED"])
+def test_active_auto_stops_program_with_abort_without_illegal_jog_commands(interp):
+    b, c = backend(task_mode=2)
+    b._reader._stat.interp_state = getattr(b._lc(), interp)
+    b.snapshot()
+    b.jog_stop(None)
+    assert c.calls == []
+    b.stop()
+    assert c.calls == [("abort",)]
 
 
 def test_commands_do_not_drain_the_error_channel():

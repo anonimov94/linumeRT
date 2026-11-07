@@ -104,6 +104,13 @@ class Gateway:
             self._thread.join(timeout=2.0)
         with self._lock:
             self._stop_all_jog()
+            if self._instance and self._instance.run and self._instance.run.active:
+                try:
+                    self._instance.fail("unavailable")
+                except OSError:
+                    self._instance.run.unavailable()
+                finally:
+                    self.backend.stop()
 
     def _loop(self) -> None:
         period = 1.0 / POLL_HZ
@@ -113,8 +120,19 @@ class Gateway:
             except Exception as error:  # noqa: BLE001 - wątek nie może zginąć po błędzie odczytu
                 with self._lock:
                     self._stop_all_jog()  # bez wiarygodnego stanu nie ma ciągłego jogu
+                    if (self._instance and self._instance.run
+                            and (self._instance.run.active or self._instance.run.needs_abort)):
+                        if self._instance.run.active:
+                            self._instance.run.unavailable()
+                        try:
+                            self.backend.stop()
+                            self._instance.run.needs_abort = False
+                        except Exception:  # noqa: BLE001 - HAL watchdog remains independent
+                            pass
                     self._version += 1
                     self._state = {**self._state, "gateway_error": str(error)}
+                    if self._instance:
+                        self._state["execution"] = self._instance.status()
 
     def step(self) -> None:
         """Jeden obieg: czas atrapy, wygaśnięcie jogu, nowa migawka."""
@@ -135,6 +153,16 @@ class Gateway:
                 self._programs, self._programs_at = self.backend.programs(), now
             state = snapshot_to_dict(snap)
             if self._instance is not None:
+                observed = (self.backend.binding_state(self._instance.hal_expectations)
+                            if hasattr(self.backend, "binding_state") else None)
+                if observed is not None:
+                    observed["hmi_alive"] = any(now - t <= HEARTBEAT_S
+                                                for t in self._sessions.values())
+                self._instance.observe(snap, observed, hmi=self._hal is not None,
+                                       alarms=self._alarm_rows())
+                if self._instance.run and self._instance.run.needs_abort:
+                    self.backend.stop()  # also cancel a delayed start while NML still says IDLE
+                    self._instance.run.needs_abort = False
                 state["execution"] = self._instance.status()
             state["alarms"] = self._alarm_rows()
             state["programs"] = list(self._programs)
@@ -260,8 +288,31 @@ class Gateway:
     def _dispatch(self, c: Command, session: str) -> None:
         b = self.backend
         name = c.cmd
-        if self._instance is not None and name in ("run", "resume"):
-            raise CommandError(self._instance.status()["reason"])
+        if self._instance is not None:
+            if name in ("run", "resume"):
+                try:
+                    if name == "run" and c.from_line != 1:
+                        raise ValueError("Zadanie wymaga Start od pierwszej linii")
+                    self._instance.validate_files()
+                    self.step()  # fresh NML/HAL after file I/O, including persistent alarms
+                    allowed = (self._instance.can_start() if name == "run"
+                               else self._instance.can_resume())
+                    if not allowed:
+                        detail = self._instance.status()["reason" if name == "run"
+                                                         else "resume_reason"]
+                        raise ValueError("Start lub wznowienie zablokowane: " + detail)
+                    if not hasattr(b, "confirm_job_state"):
+                        raise ValueError("Brak potwierdzenia instancji LinuxCNC")
+                    b.confirm_job_state(paused=name == "resume")
+                    self.step()  # the NML receipt must include that newly echoed serial
+                    if name == "run":
+                        self._instance.begin(c.from_line)
+                    elif not self._instance.can_resume():
+                        raise ValueError("Wznowienie zablokowane: "
+                                         "zmieniony stan lub brak gotowości")
+                except (OSError, ValueError) as error:
+                    raise CommandError(str(error)) from None
+            self._instance.command(name)
         if name == "estop":
             self._stop_all_jog()
             b.estop()
@@ -282,11 +333,24 @@ class Gateway:
                 raise CommandError("MDI: brak tekstu")
             b.mdi(c.text)
         elif name == "run":
-            b.run(c.from_line)
+            try:
+                if self._instance:
+                    b.run_confirmed(c.from_line)
+                else:
+                    b.run(c.from_line)
+            except Exception:
+                if self._instance:
+                    self._instance.fail()
+                raise
         elif name == "pause":
             b.pause()
         elif name == "resume":
-            b.resume()
+            try:
+                b.resume()
+            except Exception:
+                if self._instance:
+                    self._instance.fail()
+                raise
         elif name == "stop":
             self._stop_all_jog()
             b.stop()

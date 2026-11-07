@@ -1989,3 +1989,28 @@ poprawione wraz z kolejnością zamknięcia i własnością daemonów (marker/pi
 E-STOP, brak bazowania, Start409, dowody zachowane i brak pozostawionych procesów przed cleanupem.
 37 testów zakresu,41JS PASS. GUI8792 z faktycznego ZIP227 kliknięte; zrzut i surowy stan/provenance
 zapisane. Instancja zakończona, moduły przywrócone, lease zwolniony. Wykonanie/telemetria i CI otwarte.
+
+## 2026-11-07 — scalenie227/228 i początek wiązania ze stanem NML
+
+Model-Author: Codex. #227→63254c9 i #228→cd8ed66 po końcowych Python/LinuxCNC success;
+kod/dowody225/226 zawarte. Pełny klon211160e:2134 PASS/15skip/242deselected, wheel/REQ22/22 PASS.
+VERTICAL-VERIFY odebrane offline w udokumentowanym zakresie; wykonanie i raport pozostają otwarte.
+Nowa gałąź live-binding porównuje NML/INI/program/RAM narzędzi/jednostki/pozę/T0/G5x/G92,
+pokazuje kontrole w WebHMI;62 testy PASS. Start nadal zamknięty przed brakującymi bramkami i odbiorem.
+
+## VERTICAL-RUN — warunkowy Start i kontekst wznowienia · 2026-11-07
+
+Model-Author: Codex. PR229: integralność plików, HAL/napędy, limity, żywy klient,
+świeży odczyt i nowe potwierdzenie sterowania przed AUTO_RUN; wznowienie porównuje
+ustalony kontekst pauzy. Dziennik zapisuje próbki przed Start i rozróżnia wyniki przerwania.
+110 testów zakresu Python i41JS PASS. Rzeczywisty dodatni przebieg i GUI wymagane;
+PR pozostaje draft. Próbki NML nie są śladem RT; poziomy3–4 nadal otwarte.
+
+## VERTICAL-RUN — rzeczywiste wykonanie i kliknięty odbiór · 2026-11-07
+
+Model-Author: Codex.293af3e:4 regresje RIP PASS (rozruch, Stop, E-STOP, utrata klienta).
+Rzeczywisty program z verified ZIP227 zakończony112,53s/5288próbek; osobny kliknięty
+GUI8796 RUN/PAUSE/RESUME zakończony148,28s/6895próbek wraz z pauzą operatora.
+Oryginalne manifesty/JSONL/wyniki z hashami, zrzut i surowy stan zachowane; własne procesy
+zakończone, moduły przywrócone. Pełna regresja i końcowe CI229 przed scaleniem wymagane.
+Raport porównawczy/luki telemetrii pozostają otwarte; bez twierdzenia o pełnym śladzie RT.

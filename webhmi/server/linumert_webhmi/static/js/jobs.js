@@ -192,6 +192,29 @@ export function createJobs(request) {
     if (instance) {
       $("jobInstanceIdentity").textContent = "Zadanie " + instance.job_id + " · " + instance.target;
       $("jobInstanceStatus").textContent = instance.reason;
+      const run = instance.run;
+      const phases = { starting: "Uruchamianie", running: "Wykonywanie", paused: "Wstrzymano",
+        settling: "Oczekiwanie na ustalenie osi",
+        stopping: "Zatrzymywanie", completed_observed: "Interpreter zakończył program",
+        aborted: "Przerwano przez Stop", estop: "Zatrzymanie E-STOP", fault: "Błąd przebiegu",
+        client_lost: "Utrata klienta i zatrzymanie E-STOP",
+        start_timeout: "Przekroczony czas startu", resume_timeout: "Przekroczony czas wznowienia",
+        settle_timeout: "Przekroczony czas ustalenia osi",
+        unavailable: "Zapis lub odczyt niepełny" };
+      $("jobRunStatus").textContent = run
+        ? (phases[run.phase] || run.phase) + " · " + run.elapsed_s.toFixed(1) +
+          " s · linia " + run.line + " · próbek " + run.samples : "Jeszcze nie uruchomiono zadania.";
+      $("jobInstanceChecks").replaceChildren();
+      for (const check of Object.values(instance.checks || {})) {
+        const row = document.createElement("div");
+        const title = document.createElement("dt");
+        const verdict = document.createElement("dd");
+        title.textContent = check.reason;
+        verdict.textContent = { passed: "Spełnione", failed: "Niespełnione",
+          unavailable: "Brak odczytu" }[check.status] || check.status;
+        row.append(title, verdict);
+        $("jobInstanceChecks").appendChild(row);
+      }
     }
   }, setOnline(value) {
     online = value;

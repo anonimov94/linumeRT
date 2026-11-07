@@ -15,6 +15,56 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · 2026-11-07. Analiza raw po zakończeniu: ostatni błąd Z około
+0,03mm, więc stary completed_observed oznacza tylko koniec interpretera. Dodano settling
+do3 zgodnych odczytów <0,001mm i settle_timeout5s;28 testów PASS. Odbiór RIP/GUI wymagany.
+Pełna regresja7d6238d nadal trwa w klonie; nie zmieniać jego checkoutu przed zakończeniem.
+
+Model-Author: Codex · 2026-11-07. Runtime293af3e:4 rzeczywiste regresje RIP PASS,
+58,34s. GUI8796 RUN/PAUSE/RESUME→completed_observed148,28s/6895próbek; przeglądarka
+jedynym heartbeat HMI. Zrzut/rawstan/archiwum w raporcie; host zamknięty, moduły przywrócone.
+Następne pełna regresja/CI i scalenie229; potem raport porównawczy VERTICAL-REPORT.
+
+Model-Author: Codex · 2026-11-07.49f52d8 nowe RIP4FAIL: zbyt krótki join wobec
+close_timeout klienta testowego pomijał zamknięcie hosta i zaburzał kolejne próby.
+Poprawiono finally/timeout i oczekiwanie na własny świeży rozruch; ponowić serię.
+
+Model-Author: Codex · 2026-11-07. bcd10d5 rzeczywisty Stop, pełne wykonanie112,53s/
+5288próbek i utrata klienta PASS; surowe archiwa i hashe zachowane. E-STOP wymagał
+obsługi przejściowego ESTOP_RESET;26 testów PASS. Dodano trzy regresje RIP, do odpalenia.
+Przed scaleniem nadal GUI i końcowe CI; pełny raport poziomu4 otwarty.
+
+Model-Author: Codex · 2026-11-07.4a29313 rzeczywisty Start/pauza/wznowienie PASS;
+Stop fizycznie zatrzymał program, ale ogólny JOG_STOP w AUTO wywołał fault. Poprawiony
+backend zachowuje abort,90 testów PASS. Own driver zakończony, test Stop do ponowienia.
+
+Model-Author: Codex · 2026-11-07. Dalszy realny odbiór: LinuxCNC PAUSED z kolejką
+utrzymuje inpos=false. Stan pauzy wymaga trzech zgodnych kontekstów, v=0 i błędów osi
+<0,001mm; osobne zdarzenie pause_settled. Start/zakończenie zachowują wymóg inpos.
+
+Model-Author: Codex · 2026-11-07. b3b9692: rzeczywisty Start i pauza PASS;
+wznowienie odrzucone przez stat.file wskazujący zakończony remap M6. Korekta
+zachowuje kontekst pauzy i dopuszcza tylko zamrożone zasoby G-code; obcy plik odrzucony.
+
+Model-Author: Codex · 2026-11-07. Po d4be475: rzeczywisty rozruch1PASS;
+poprawka restartu po HTTP TIME_WAIT i zamykania aktywnego dziennika,48 testów PASS.
+Dodatni test kontynuowany w osobnej instancji; lease linuxcnc Codex vertical-live-start-d4be475.
+
+Model-Author: Codex · 2026-11-07. Checkpoint PR229: bramka Start/wznowienia obejmuje
+integralność plików, HAL/napędy, limity, żywy klient i nowe potwierdzenie polecenia NML;
+dziennik przebiegu zapisuje obserwacje i odrębne wyniki.110 Python i41JS PASS.
+Następne: rzeczywisty dodatni Start/pauza/wznowienie/Stop i GUI; PR nadal draft,
+VERTICAL-RUN/REPORT nieodebrane. Pełny projekt, docelowa gałąź main.
+
+Model-Author: Codex · 2026-11-07. **Main i następny krok VERTICAL-RUN:**
+#227 scalony63254c9 po ci42090379375/LinuxCNC42090379317 success, zawiera225/226.
+#228 scalonycd8ed66 po ci42097349359/LinuxCNC42097349416 success dla211160e.
+Pełny klon211160e:2134 PASS,15skip,242deselected,454,43s; bez porażki Qt; wheel/REQ22/22 PASS.
+Własna gałąź codex/job-live-binding-20261107 od maincd8ed66. Pierwsze kontrole żywego
+NML i RAM narzędzi widoczne w WebHMI;62 testy zakresu PASS. Start nadal zamknięty:
+integralność live/HAL, świeży guard Start, wznowienie, dziennik i telemetria pozostają do wdrożenia.
+Raport VERTICAL_BINDING_2026-11-07.md. Brak własnych procesów/lease; inwentaryzacja Nov7 wolna.
+
 Model-Author: Codex · 2026-11-05. **#228 — prywatny rozruch odebrany:**
 Rzeczywisty test Plant/LinuxCNC/WebHMI/HAL PASS bez Reset/ON/bazowania, StartHTTP409,
 oryginalny .var zachowany, zamknięcie bez pozostawionych procesów przed cleanupem fixture.
