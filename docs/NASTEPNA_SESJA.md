@@ -15,6 +15,13 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · 2026-11-08. **Wznowienie celu, VERTICAL-REPORT w PR231:**
+po zamknięciu RUN pracujemy nad poziomem4 pełnego main. Odczyt7 oryginalnych archiwów
+PASS; raport rozróżnia legacy i3 przyjęte ustalenia. Dodano piki błędu/alarmy z czasem
+i linią, luki na końcach zapisu, jawne jednostki/kontrole i porównanie czasu bez pauz.
+15 testów raportu PASS. Następne: wykres/ponowny odczyt bez kontrolera, odbiór GUI,
+rzeczywiste dane i pełna regresja/CI; PR pozostaje draft. Bez zmian sterowania/Qt/HAL.
+
 Model-Author: Codex · 2026-11-07. **VERTICAL-RUN zamknięty, pełne main:**
 #229 scalony ff0a9f9ca1d3adc80fb9cd1b8e086ed368538aca. Dokładny f936f19 ma success
 ci42417145984 oraz LinuxCNC42417145941:245 RIP i12 Beta PASS; D38 sim/Plant PASS.

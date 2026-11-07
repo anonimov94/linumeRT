@@ -2187,7 +2187,7 @@
         "068"
       ],
       "status": "in_progress",
-      "progress": "Zachowany szkic PR231, zsynchronizowany z main9d58f79 po zamknięciu VERTICAL-RUN w229/230. Bez dalszego rozwoju funkcji w etapie wykonania. Pierwszy checkpoint989a087: wspólny backend offline CLI/API i minimalny widok WebHMI, hashe/max/RMS/czas/pauzy/luki danych.9 testów raportu/CLI/API i46 regresji PASS/4skip dotyczą wcześniejszego checkpointu; kliknięte GUI raportu, rzeczywiste dane, pełna regresja i odbiór poziomu4 pozostają wymagane. Draft, bez deklaracji ukończenia raportu.",
+      "progress": "Kontynuacja poziomu4 po zamknięciu RUN, pełny main. PR231 nad9d58f79: wspólny backend CLI/API i minimalny WebHMI. Wstępny odczyt7 rzeczywistych archiwów działa; legacy nie daje PASS końcowej pozycji. Piki i alarmy otrzymują czas/linię, błędy są uzgadniane z pozycjami NML, luki początku/końca blokują PASS. Jawne mm/s, kontrole frozen i porównanie czasu bez pauz wyłącznie dla ukończonego programu.15 testów raportu PASS. Wykres, ponowny odczyt bez kontrolera, rzeczywisty odbiór porównawczy GUI i pełna regresja/CI wymagane.",
       "remaining": [
         "Zależność: przebieg VERTICAL-RUN z telemetrią i wynikiem zakończenia.",
         "Uzgodnienie jednostek i czasu, tor zadany/rzeczywisty, błąd max/RMS osi, alarmy i czas.",

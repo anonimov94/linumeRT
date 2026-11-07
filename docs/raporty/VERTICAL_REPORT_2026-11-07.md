@@ -21,3 +21,13 @@ porównania CLI/API/GUI na rzeczywistych danych. Pełna regresja, przypadki wymu
 ponowny odczyt raportu w WebHMI bez kontrolera i domknięcie VERTICAL-REPORT pozostają
 otwarte. Właściciel polecił zakończyć bieżący etap wykonania; dalszy rozwój raportu
 zapisano do osobnego draft PR.
+
+## Kontynuacja poziomu4 — 2026-11-08
+
+Model-Author: Codex. Po zamknięciu RUN wznowiono pełny cel. Wstępny odczyt7 oryginalnych
+archiwów i zamrożonych konfiguracji działa; trzy odebrane końcowe ustalenia wyróżnione,
+starsze zakończenia nie otrzymują PASS pozycji. Pełne GUI126,645824s obejmuje14,911371s
+obserwowanej pauzy; dolna granica modelu107,958839s nie jest terminem zakończenia.
+Uzupełniono piki błędu i alarmy o czas/linię, kontrolę zgodności błędu z pozycjami,
+luki początku/końca oraz porównanie czasu wyłącznie dla zakończonego programu.
+15 testów PASS; ponowny odczyt bez kontrolera, wykres i odbiór GUI nadal wymagane.

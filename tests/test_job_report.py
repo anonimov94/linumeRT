@@ -91,6 +91,66 @@ def test_wrong_execution_identity_is_rejected(recorded):
         job_report.build(run, execution)
 
 
+def test_peak_and_alarm_keep_the_original_run_time_and_program_line(recorded):
+    run, execution = recorded
+    path = run / "samples.jsonl"
+    rows = [json.loads(line) for line in path.read_text().splitlines()]
+    sample = next(r for r in rows if "axes" in r)
+    sample.update(line=44, motion_line=17, errors=["test controller fault"])
+    sample["axes"]["X"].update(actual=200.025, following_error=-.025)
+    sample["alarms"] = [{"id": 7, "code": "E-1000", "text": "test alarm", "count": 1}]
+    path.write_text("\n".join(json.dumps(r) for r in rows) + "\n")
+    report = job_report.build(run, execution)
+    assert report["run_id"] == run.name
+    peak = report["axes"]["X"]["following_error"]["peak"]
+    assert peak == {"t": .02, "line": 44, "motion_line": 17, "value_mm": -.025}
+    assert report["alarms"][0]["observed_at_s"] == .02
+    assert report["alarms"][0]["motion_line"] == 17
+    assert report["controller_errors"][0]["line"] == 44
+    assert report["units"] == {"position": "mm", "time": "s"}
+    assert report["verification"]["status"] == "verified"
+
+
+def test_verified_terminal_claim_cannot_hide_an_observed_positioning_failure(recorded):
+    run, execution = recorded
+    path = run / "samples.jsonl"
+    rows = [json.loads(line) for line in path.read_text().splitlines()]
+    for row in rows:
+        if "axes" in row:
+            row["axes"]["Z"].update(actual=-4.999, following_error=-.001)
+    path.write_text("\n".join(json.dumps(r) for r in rows) + "\n")
+    report = job_report.build(run, execution)
+    assert report["positioning"]["status"] == "failed"
+
+
+@pytest.mark.parametrize("damage", ["axis_type", "error_mismatch", "missing_start", "missing_end"])
+def test_invalid_coordinates_and_missing_recording_edges_never_pass(recorded, damage):
+    run, execution = recorded
+    path = run / "samples.jsonl"
+    rows = [json.loads(line) for line in path.read_text().splitlines()]
+    result_path = run / "result.json"
+    result = json.loads(result_path.read_text())
+    if damage == "missing_end":
+        result["elapsed_s"] += .2
+    else:
+        for row in rows:
+            if "axes" not in row:
+                continue
+            if damage == "axis_type":
+                row["axes"]["X"] = []
+            elif damage == "error_mismatch":
+                row["axes"]["X"]["following_error"] = 0
+            else:
+                row["t"] += .2
+        if damage == "missing_start":
+            result["elapsed_s"] += .2
+    path.write_text("\n".join(json.dumps(r) for r in rows) + "\n")
+    result_path.write_text(json.dumps(result))
+    report = job_report.build(run, execution)
+    assert report["status"] == "incomplete"
+    assert report["positioning"]["status"] == "unavailable"
+
+
 def test_cli_and_authenticated_api_share_the_offline_report_without_commands(recorded, tmp_path):
     from linumert.cli import main
 
