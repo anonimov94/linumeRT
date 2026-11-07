@@ -20,7 +20,7 @@ TOKEN = "test-token-for-webhmi-static"
 ROOT = Path(__file__).resolve().parents[1]
 STATIC = ROOT / "webhmi/server/linumert_webhmi/static"
 MODULES = ("connection.js", "interlocks.js", "jog.js", "dro.js", "scene.js", "main.js",
-           "events.js", "log.js", "jobs.js")
+           "events.js", "log.js", "jobs.js", "run_plot.js")
 FILES = ("index.html", "app.js", "style.css", *(f"js/{name}" for name in MODULES),
          "js/package.json")
 

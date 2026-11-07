@@ -178,6 +178,22 @@ Incremental jog: Model-Author: Codex
           </label>
           <p class="job-hint" id="jobRunReportStatus" role="status"></p>
           <dl class="job-checks" id="jobRunMetrics"></dl>
+          <p class="job-hint" id="jobReportTiming"></p>
+          <div id="jobReportPlots" hidden>
+            <label class="job-hint">Oś wykresu <select id="jobReportAxis"><option>X</option><option>Y</option><option>Z</option></select></label>
+            <p class="job-hint" id="jobReportQuality"></p>
+            <div class="report-plots">
+              <figure><figcaption>Pozycja [mm] · <span class="report-commanded">zadana</span> / <span class="report-actual">rzeczywista</span></figcaption>
+                <svg id="jobPositionPlot" viewBox="0 0 800 230" role="img" aria-label="Pozycja zadana i rzeczywista w czasie"></svg></figure>
+              <figure><figcaption>Błąd zadana − rzeczywista [mm]</figcaption>
+                <svg id="jobErrorPlot" viewBox="0 0 800 230" role="img" aria-label="Różnica pozycji NML w czasie"></svg></figure>
+            </div>
+            <p class="job-hint" id="jobReportPeak"></p>
+          </div>
+          <details><summary>Alarmy i komunikaty przebiegu</summary><ol id="jobReportAlarms" class="job-hint"></ol></details>
+          <details><summary>Kontrole zadania i integralność raportu</summary>
+            <dl id="jobReportChecks" class="job-checks"></dl><p id="jobReportHash" class="job-hint"></p>
+          </details>
         </div>
         <p class="job-hint">Planowanie, kieszenie i otwory z programu .lnx. Pakiet zawiera program, narzędzia i ustawienie detalu.</p>
         <p class="job-hint" id="jobContext">Połącz z bramą, aby odczytać konfigurację zadania.</p>

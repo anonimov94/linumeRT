@@ -15,6 +15,10 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · 2026-11-08. Raport ma wykresy pozycji/błędu z zachowanych punktów,
+wybór XYZ, maksimum pełnego zapisu oraz alarmy/czas/kontrole.31 Python PASS/4skip;
+składnia JS PASS (Node Windows). Przed odbiorem: rzeczywiste raporty, GUI i pełne CI.
+
 Model-Author: Codex · 2026-11-08. WebHMI --report otwiera JSON bez kontrolera i atrapy,
 odmawia wszystkich komend; import/eksport zachowują oryginalne liczby i sumę SHA.
 23 Python/42 JS PASS. Widok minimalny dostępny; wykres i kliknięty odbiór jeszcze otwarte.

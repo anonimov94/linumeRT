@@ -4,6 +4,8 @@ Model-Author: Codex
 */
 "use strict";
 
+import { createRunPlots } from "./run_plot.js";
+
 const labels = { machine_model: "Model maszyny", program_and_tools: "Program i narzędzia",
   units_and_setup: "Jednostki i ustawienie detalu", interpreter: "Interpreter LinuxCNC",
   motion_limits: "Limity ruchu", material: "Materiał", collisions: "Bryły i strefy",
@@ -15,6 +17,7 @@ const verdicts = { passed: "Poprawne", pending: "Oczekuje na weryfikację",
 
 export function createJobs(request) {
   const $ = (id) => document.getElementById(id);
+  const plots = createRunPlots();
   let online = false;
   let available = false;
   let busy = false;
@@ -96,6 +99,10 @@ export function createJobs(request) {
           " · RMS " + num(values.following_error.rms_mm);
         row.append(title, value); $("jobRunMetrics").append(row);
       }
+      showChecks("jobReportChecks", result.verification.checks);
+      $("jobReportHash").textContent = "SHA-256 raportu: " + result.report_id +
+        ". Sprawdzono spójność pliku; źródłowe archiwa są identyfikowane hashami w JSON.";
+      plots.show(result);
   }
   $("jobRunReport").addEventListener("click", async () => {
     if (!online || !terminalRun || busy) return;
@@ -112,6 +119,7 @@ export function createJobs(request) {
     const file = event.target.files[0];
     if (!file || !online || busy) return;
     runReport = null; runReportRaw = "";
+    plots.clear(); $("jobReportChecks").replaceChildren();
     $("jobReportIdentity").textContent = "Sprawdzanie raportu „" + file.name + "”…";
     $("jobRunMetrics").replaceChildren();
     busy = true; controls();
