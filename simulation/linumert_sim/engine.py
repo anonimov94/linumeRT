@@ -42,6 +42,19 @@ def kc_for(material: str | None) -> float:
     return KC.get((material or "").strip().lower(), DEFAULT_KC)
 
 
+_CATALOG = None
+
+
+def _catalog():
+    """Katalog alarmów wczytany raz na proces (parsowanie YAML trwało dłużej niż cały krok)."""
+    global _CATALOG
+    if _CATALOG is None:
+        from linumert.alarms.catalog import load_catalog
+
+        _CATALOG = load_catalog()
+    return _CATALOG
+
+
 @dataclass
 class Sample:
     t: float                                   # [s]
@@ -68,15 +81,13 @@ class Event:
 
     def text(self) -> str:
         try:
-            from linumert.alarms.catalog import load_catalog
-
-            return load_catalog().format(self.code, "pl", **self.params)
+            return _catalog().format(self.code, "pl", **self.params)
         except Exception:  # noqa: BLE001 - katalog niedostępny: sam kod i parametry
             return f"{self.code} {self.params}"
 
     def to_dict(self) -> dict:
         return {"code": self.code, "kind": self.kind, "line": self.line, "tool": self.tool,
-                "pos": [round(v, 3) for v in self.pos], "pair": list(self.pair or ()),
+                "pos": [round(v, 4) for v in self.pos], "pair": list(self.pair or ()),
                 "text": self.text(), "stop": self.stop}
 
 
@@ -98,7 +109,11 @@ class SimEngine:
         self.tools: dict[int, Cutter] = {}
         self.load = Load()
         self._prev: Sample | None = None
-        self._window: collections.deque[tuple[float, float, float]] = collections.deque()
+        # okno mocy skrawania: czasy, objętości i kroki w osobnych kolejkach, bo sum()
+        # po kolejce liczb jest szybsze niż po generatorze, a daje tę samą sumę
+        self._window: collections.deque[float] = collections.deque()
+        self._window_v: collections.deque[float] = collections.deque()
+        self._window_d: collections.deque[float] = collections.deque()
         self._active: set[tuple] = set()       # bieżące pary kolizji (zdarzenie na wejściu)
         self._warned: set[tuple] = set()
         self._idle = 0                         # próbki bez kontaktu z materiałem (histereza)
@@ -116,6 +131,8 @@ class SimEngine:
         self.path.clear()
         self._active.clear()
         self._window.clear()
+        self._window_v.clear()
+        self._window_d.clear()
         self._prev = None
         self._idle = 0
         self.load = Load()
@@ -127,6 +144,17 @@ class SimEngine:
     def set_machine(self, machine: Machine) -> None:
         self.machine = machine
         self._active.clear()
+
+    def begin_segment(self, state: Sample) -> None:
+        """Offline boundary state at the existing nose, without a physical sweep.
+
+        RPM, tool and rapid/feed state apply to the incoming segment. Live input
+        remains untouched; it continues to infer boundaries from actual samples.
+        """
+        if self._prev is not None and (
+                math.dist(self._prev.nose, state.nose) > 1e-6 or state.t < self._prev.t - 1e-9):
+            raise ValueError("Początek odcinka diagnostyki zmienił pozycję lub cofnął czas")
+        self._prev = state
 
     # ---- krok ----------------------------------------------------------------------------
     def step(self, s: Sample) -> list[Event]:
@@ -243,11 +271,15 @@ class SimEngine:
     def _loads(self, cutter: Cutter | None, s: Sample, prev: Sample | None, tip, removed: float,
                events: list[Event]) -> None:
         dt = min(max(s.t - prev.t, 0.0), 1.0) if prev is not None else 0.0
-        self._window.append((s.t, removed, dt))
-        while self._window and s.t - self._window[0][0] > LOAD_WINDOW:
+        self._window.append(s.t)
+        self._window_v.append(removed)
+        self._window_d.append(dt)
+        while self._window and s.t - self._window[0] > LOAD_WINDOW:
             self._window.popleft()
-        span = sum(d for _t, _v, d in self._window)
-        mrr = sum(v for _t, v, _d in self._window) / span if span > 1e-3 else 0.0
+            self._window_v.popleft()
+            self._window_d.popleft()
+        span = sum(self._window_d)
+        mrr = sum(self._window_v) / span if span > 1e-3 else 0.0
         load = Load(mrr=mrr)
         if cutter is not None and abs(s.rpm) >= MIN_RPM and mrr > 0:
             omega = abs(s.rpm) * 2 * math.pi / 60

@@ -1,0 +1,27 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+# Model-Author: Codex. Paused Z retract for the virtual configurations only.
+# Keep QtDragon's legacy pause lift (millimetre counts) through a selector.
+loadrt mux2 names=lrt_retract_select
+loadrt mult2 names=lrt_retract_scale
+loadrt conv_s32_float names=lrt_retract_legacy
+loadrt conv_float_s32 names=lrt_retract_counts
+loadrt lut5 names=lrt_retract_clear,lrt_retract_enable
+addf lrt_retract_legacy servo-thread
+addf lrt_retract_select servo-thread
+addf lrt_retract_scale servo-thread
+addf lrt_retract_counts servo-thread
+addf lrt_retract_clear servo-thread
+addf lrt_retract_enable servo-thread
+setp lrt_retract_scale.in1 1000
+setp axis.z.eoffset-scale 0.001
+setp lrt_retract_clear.in-0 1
+# legacy-clear AND NOT own; ignore unused LUT inputs.
+setp lrt_retract_clear.function 0x22222222
+setp lrt_retract_enable.function 0xeeeeeeee
+net linumert.retract.own lrt_retract_select.sel => lrt_retract_clear.in-1 lrt_retract_enable.in-1 motion.feed-inhibit motion.jog-inhibit
+net linumert.retract.legacy-float lrt_retract_legacy.out => lrt_retract_select.in0
+net linumert.retract.selected lrt_retract_select.out => lrt_retract_scale.in0
+net linumert.retract.scaled lrt_retract_scale.out => lrt_retract_counts.in
+net linumert.retract.counts lrt_retract_counts.out => axis.z.eoffset-counts
+net linumert.retract.clear lrt_retract_clear.out => axis.z.eoffset-clear
+net linumert.retract.enable lrt_retract_enable.out => axis.z.eoffset-enable

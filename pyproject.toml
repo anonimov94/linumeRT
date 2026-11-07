@@ -24,7 +24,15 @@ dependencies = [
 linumert-config = "linumert.machine.config_build:main"
 # Brama web-hmi LinuxCNC <-> przegladarka (webhmi/, DECYZJE 2026-10-26)
 linumert-webhmi = "linumert_webhmi.__main__:main"
+linumert-job-instance = "linumert_webhmi.job_instance:main"
 linumert-relief = "linumert.generators.relief:main"
+linumert-job = "linumert.programs.prepare:main"
+
+# Backend bez GUI: CAM 2D, eksport sim/Plant, symulacja (dawna edycja lite, scalona 2026-11-05)
+linumert-lite = "linumert.cli:main"
+linumert = "linumert.cli:main"
+linumert-headless = "linumert.cnc.headless:main"
+linumert-plant = "linumert_plant.__main__:main"
 
 [project.optional-dependencies]
 # Panel web Plant (sesja 022); bez tej grupy Plant działa, a panel zgłasza brak zależności.
@@ -53,6 +61,7 @@ packages = [
     "linumert.programs",
     "linumert.generators",
     "linumert.machine",
+    "linumert.machine.drives",
     "linumert.plugins",
     "linumert.cnc",
     "linumert.diag",
@@ -65,6 +74,8 @@ packages = [
 [tool.setuptools.package-data]
 "linumert.alarms" = ["catalog.yaml"]
 "linumert.programs" = ["lnx_schema.json"]
+"linumert.machine" = ["resources/*.hal", "resources/*.ngc", "resources/*.tbl"]
+"linumert.machine.drives" = ["templates/*.yaml", "templates/*.json"]
 "linumert_webhmi" = ["static/*.html", "static/*.js", "static/*.css",
                      "static/js/*.js", "static/js/*.json"]
 "linumert_plant.panel" = ["static/*.html", "static/*.js", "static/*.css", "static/*.svg",

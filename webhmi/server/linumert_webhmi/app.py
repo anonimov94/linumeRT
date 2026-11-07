@@ -27,10 +27,12 @@ from urllib.parse import urlsplit
 from fastapi import FastAPI, HTTPException, Request, WebSocket, WebSocketDisconnect
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
+from linumert.programs.prepare import JobService
 from pydantic import ValidationError
 
 from .backend import CommandError
 from .gateway import Gateway
+from .jobs import register_jobs
 from .schema import SCHEMA_VERSION, Command
 
 PUSH_HZ = 30.0
@@ -48,7 +50,8 @@ def _host_only(value: str) -> str:
     return value.rsplit(":", 1)[0] if value.count(":") == 1 else value
 
 
-def create_app(gateway: Gateway, token: str, extra_hosts: tuple[str, ...] = ()) -> FastAPI:
+def create_app(gateway: Gateway, token: str, extra_hosts: tuple[str, ...] = (), *,
+               jobs: JobService | None = None) -> FastAPI:
     if len(token) < 16:
         raise ValueError("token bramy: co najmniej 16 znaków")
     allowed_hosts = set(LOOPBACK_HOSTS) | set(extra_hosts)
@@ -94,6 +97,8 @@ def create_app(gateway: Gateway, token: str, extra_hosts: tuple[str, ...] = ()) 
     def need_token(request: Request) -> None:
         if not token_ok(request.headers.get("x-linumert-token")):
             raise HTTPException(401, "brak lub zły token")
+
+    register_jobs(app, jobs, need_token)
 
     @app.get("/api/health")
     def health() -> dict:

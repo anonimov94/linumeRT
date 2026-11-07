@@ -65,3 +65,14 @@ footer{margin:20px 0;justify-content:space-between;flex-wrap:wrap;font-size:10px
 .alarm-strip>strong{font-size:11px;letter-spacing:.18em;color:var(--muted)}.alarm-strip.active{border-color:#b8484b}.alarm-strip.active>strong{color:#ff9c95}
 .alarm-rows{list-style:none;margin:0;padding:0;flex:1 1 360px;font-family:ui-monospace,Consolas,monospace;font-size:12px}.alarm-rows li{padding:3px 0;color:#f7b6a4}.alarm-rows li strong{color:#ff777b;margin-right:6px}.alarm-rows .alarm-none{color:var(--muted)}
 .program-open{flex-wrap:wrap}.program-open select{background:#071620;color:inherit;border:1px solid var(--edge);border-radius:4px;padding:9px;min-height:44px;max-width:100%}
+
+/* Zadanie CAM. Model-Author: Codex. */
+.job-link{color:var(--cyan);font-size:12px;padding:10px;border:1px solid var(--edge);border-radius:4px;text-decoration:none}
+.job-panel{grid-column:1/-1;scroll-margin-top:15px}.job-hint{font-size:12px;color:var(--muted);margin:12px 18px;line-height:1.6;overflow-wrap:anywhere}
+.job-form{padding:0 18px}.job-form fieldset{border:0;margin:0;padding:0}.job-form .job-hint{margin:12px 0}
+.job-inputs{display:grid;grid-template-columns:2fr 2fr 1fr;gap:14px;margin:16px 0}.job-origin{grid-template-columns:repeat(3,1fr);max-width:720px}
+.job-inputs label{display:flex;flex-direction:column;gap:7px;font-size:12px;color:var(--muted)}.job-inputs input,.job-inputs select{width:100%;min-height:44px;background:#071620;color:inherit;border:1px solid #316073;border-radius:4px;padding:10px}
+.job-status{margin:16px 18px;color:#e8bb63;font-size:13px;line-height:1.6;white-space:pre-wrap}.job-status.error{color:#ff9c95}.job-result{margin:18px}.job-result[hidden]{display:none}
+.job-checks{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:8px;margin:12px 0}.job-checks div{border:1px solid var(--edge);padding:10px}.job-checks dt{font-size:12px;color:var(--muted)}.job-checks dd{margin:7px 0 0;font-size:13px}
+.job-result .job-hint{margin:15px 0}.job-result details{margin-top:18px}.job-result summary{cursor:pointer;color:var(--cyan);font-size:13px;padding:8px 0}.job-result pre{max-height:320px;overflow:auto;font-size:12px;background:#071620;padding:14px}
+@media(max-width:730px){.job-inputs{grid-template-columns:1fr}.job-origin{grid-template-columns:repeat(3,minmax(0,1fr))}}

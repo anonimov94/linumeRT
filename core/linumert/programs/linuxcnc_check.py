@@ -29,6 +29,7 @@ from pathlib import Path
 from ._interpreter_process import InterpreterOutputLimit, run_bounded
 
 _CANON = re.compile(r"^\s*\d+ N[.\d]+\s")
+_PROGRAM_END = re.compile(r"^\s*\d+ N[.\d]+\s+PROGRAM_END\(\)\s*$", re.MULTILINE)
 _MENU = ("enter a number:", "1 = ", "2 = ", "3 = ", "4 = ", "5 = ", "enter choice")
 PARSE_TIMEOUT = 60.0        # [s] analiza jednego programu w procesie potomnym
 WORKER_PROGRAM_ERROR = 3    # kod wyjścia procesu potomnego: interpreter odrzucił program
@@ -126,8 +127,11 @@ def run_interpreter(ngc: Path | str, root: Path | str | None = None,
         parameters = private / "analysis.var"
         parameters.touch()  # rs274 links the original before saving its first backup.
         options = []
-        if sim is not None and (sim / "axis.ini").exists():
-            config = (sim / "axis.ini").read_text()
+        sample = sim / "axis.ini" if sim is not None else None
+        base = sample if sample is not None and sample.is_file() else (
+            Path(machine_ini) if machine_ini is not None else None)
+        if base is not None:
+            config = base.read_text()
             # INI loading overrides -v. Enforce private parameters there as well,
             # including samples which name an absolute/shared parameter file.
             config = re.sub(r"(?im)^[ \t]*PARAMETER_FILE[ \t]*=.*(?:\n|$)", "", config)
@@ -144,8 +148,10 @@ def run_interpreter(ngc: Path | str, root: Path | str | None = None,
             ini = private / "analysis.ini"
             ini.write_text(config)
             table = _machine_tool_table(Path(machine_ini)) if machine_ini is not None else None
-            options = ["-i", str(ini), "-t", str((table or sim / "sim.tbl").resolve())]
-            if (sim / "sim.var").exists():
+            options = ["-i", str(ini)]
+            if table is not None or sim is not None:
+                options += ["-t", str((table or sim / "sim.tbl").resolve())]
+            if sim is not None and (sim / "sim.var").exists():
                 shutil.copyfile(sim / "sim.var", parameters)
         if parameters_from is not None and Path(parameters_from).is_file():
             shutil.copyfile(parameters_from, parameters)  # kopia: oryginał nietknięty
@@ -204,6 +210,11 @@ def check_with_linuxcnc(ngc: Path | str, root: Path | str | None = None,
                                  timed_out=True)
     except InterpreterOutputLimit as exc:
         return InterpreterResult([str(exc)], False)
+    return interpreter_result(run)
+
+
+def interpreter_result(run: subprocess.CompletedProcess) -> InterpreterResult:
+    """Classify one captured run, including diagnostics printed after PROGRAM_END."""
     output = run.stdout + run.stderr
     messages = []
     for line in output.splitlines():
@@ -212,4 +223,4 @@ def check_with_linuxcnc(ngc: Path | str, root: Path | str | None = None,
             messages.append(text)
     if run.returncode:
         messages.append(f"interpreter zakończył się kodem {run.returncode}")
-    return InterpreterResult(messages, "PROGRAM_END()" in output)
+    return InterpreterResult(messages, _PROGRAM_END.search(run.stdout) is not None)

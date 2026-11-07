@@ -21,7 +21,7 @@ pytest.importorskip("httpx")
 ROOT = Path(__file__).resolve().parents[1]
 MILL = ROOT / "config" / "machines" / "mill_servo_table.yaml"
 ROUTER = ROOT / "config" / "machines" / "router_gantry_steppers.yaml"
-LIBRARY = ROOT / "plant" / "library" / "drives"
+LIBRARY = ROOT / "core" / "linumert" / "machine" / "drives" / "templates"
 
 
 @pytest.fixture(scope="module")

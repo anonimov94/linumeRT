@@ -53,6 +53,7 @@ class Options:
     tool_table: str = "../../sim/linumert_xyz/tool.tbl"
     postgui: str = "../../sim/linumert_xyz/linumert_postgui.hal"
     subroutine_path: str = "macros"
+    display: str = "qtvcp linumert"  # linumert-headless: backend bez GUI (linumert-lite)
     atc: bool = False     # remap M6 na makro ATC wygenerowane z sekcji toolchanger (rack_linear)
     extra: dict[str, Any] = field(default_factory=dict)
 
@@ -63,14 +64,13 @@ def joint_drives(cfg: MachineConfig) -> list[tuple[Axis, str]]:
 
 
 def plant_scales(cfg: MachineConfig) -> dict[str, float]:
-    """Impulsy na mm/° napędów z modelu Plant (ten sam rachunek co wirtualna obrabiarka)."""
-    # plant/server na PYTHONPATH; rozwiązanie napędów z biblioteki szablonów (REQ-VD-02)
-    from linumert_plant.build_machine import build_model
-    from linumert_plant.drive_library import load_library
-    from linumert_plant.machine_drives import resolve_machine_drives
+    """Impulsy na mm/° napędów osi; ten sam rachunek co Plant, bez importu Plant (REQ-VD-02)."""
+    from .drives.drive_library import load_library
+    from .drives.drive_real import counts_per_unit
+    from .drives.machine_drives import resolve_machine_drives
 
     drives = resolve_machine_drives(cfg, load_library())
-    return dict(build_model(cfg, drives).counts_per_unit)
+    return {name: counts_per_unit(drives[name].params) for _, name in joint_drives(cfg)}
 
 
 def joints(cfg: MachineConfig, scales: dict[str, float]) -> list[Joint]:
@@ -168,7 +168,7 @@ def render_ini(cfg: MachineConfig, js: list[Joint], target: str, opt: Options,
         "",
         "[EMC]", "VERSION = 1.1", f"MACHINE = linumeRT {title} {cfg.machine.name}",
         "DEBUG = 0x00000000", "",
-        "[DISPLAY]", "DISPLAY = qtvcp linumert", f"TITLE = linumeRT {title} {coords}",
+        "[DISPLAY]", f"DISPLAY = {opt.display}", f"TITLE = linumeRT {title} {coords}",
         "PREFERENCE_FILE_PATH = WORKINGFOLDER/linumert.pref",
         "MAX_FEED_OVERRIDE = 1.2", "MIN_SPINDLE_0_OVERRIDE = 0.5", "MAX_SPINDLE_0_OVERRIDE = 1.2",
         f"DEFAULT_SPINDLE_0_SPEED = {_g(round(sp.max_rpm * 0.75))}",

@@ -9,6 +9,8 @@ Baza narzędzi: SQLite jako źródło prawdy (D13), atomowy eksport `tool.tbl` d
 | `db.py` | `ToolDB`: migracje (`PRAGMA user_version`), dodawanie/edycja/usuwanie z historią (stan przed/po, źródło, czas z zegara), unikalne T i P (P-5202/P-5203), eksport/import `tool.tbl` w jednostkach maszyny (atomowo; import zachowuje typ i geometrię), CSV |
 
 Narzędzie bez typu jest dozwolone (import z `tool.tbl`), symulacja użyje walca zastępczego (K-320).
+`ToolDB(path, readonly=True)` otwiera tylko istniejącą bazę przez SQLite `mode=ro`.
+Nie tworzy pliku i nie wykonuje migracji; nieaktualny schemat wymaga osobnej migracji.
 `tool.tbl` jest zawsze w jednostkach maszyny (`LINEAR_UNITS` z INI): `export_tbl(path, units="inch")`.
 Ekran (zakładka narzędzi, dialog typu, przeładowanie tabeli w LinuxCNC) — po kopii ekranu (sesja 005).
 Testy: `tests/test_tools_db.py` (z markerem `linuxcnc`: tabela z bazy w interpreterze rs274, G43).

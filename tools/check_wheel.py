@@ -1,0 +1,103 @@
+"""Exercise the distributable outside the checkout, with no source PYTHONPATH.
+
+SPDX-License-Identifier: GPL-2.0-or-later
+Model-Author: Codex
+"""
+
+import json
+import subprocess
+import sys
+import tempfile
+import zipfile
+from pathlib import Path
+
+
+def main() -> None:
+    wheel = Path(sys.argv[1]).resolve(strict=True)
+    with zipfile.ZipFile(wheel) as archive:
+        names = archive.namelist()
+        for name in ("linumert_webhmi/static/index.html", "linumert_webhmi/static/js/jobs.js",
+                     "linumert_webhmi/job_instance.py",
+                     "linumert_plant/panel/static/index.html"):
+            assert name in names, name
+        assert any(name.endswith("templates/servo_400w.yaml") for name in names)
+        assert "linumert/machine/resources/lrt_m6.ngc" in names
+    with tempfile.TemporaryDirectory(prefix="linumert-wheel-") as directory:
+        work = Path(directory)
+        site = work / "site"
+        subprocess.run([sys.executable, "-m", "pip", "install", "--no-deps", "--target",
+                        str(site), str(wheel)], check=True, capture_output=True, text=True)
+        code = '''
+import json, os, pathlib, sys
+sys.path.insert(0, sys.argv[1])
+import linumert
+assert pathlib.Path(linumert.__file__).is_relative_to(pathlib.Path(sys.argv[1]))
+from linumert.cli import main, registry
+from linumert.machine.drives.drive_library import load_library
+from linumert.machine.schema import parse_machine
+from linumert.machine.lite_config import render_lite
+from importlib.metadata import distribution
+scripts = {'linumert', 'linumert-job', 'linumert-webhmi', 'linumert-job-instance', 'linumert-lite'}
+assert scripts <= {
+    e.name for e in distribution('linumert').entry_points}
+entry = next(e for e in distribution('linumert').entry_points if e.name == 'linumert-job-instance')
+assert entry.load().__module__ == 'linumert_webhmi.job_instance'
+assert len(load_library()) >= 7
+assert registry().get('pocket_rect', 1) and registry().get('pocket_rect', 2)
+machine = json.loads(sys.argv[2])
+files = render_lite(parse_machine(machine), 'sim')
+assert 'macros/lrt_m6.ngc' in files and 'tool.tbl' in files
+pathlib.Path('machine.yaml').write_text(json.dumps(machine))
+from linumert_sim.machine import load_machine
+assert load_machine('machine.yaml').axis_force['X'] > 0
+pathlib.Path('part.lnx').write_text(json.dumps({'name': 'wheel', 'steps': [
+    {'generator': 'drill_holes', 'version': 1, 'params': {'depth': 2}}]}))
+assert main(['compile', 'part.lnx', '--out', 'part.ngc']) == 0
+assert pathlib.Path('part.ngc').read_text().endswith('M2\\n')
+from linumert.tools.db import Tool, ToolDB
+with ToolDB('tools.sqlite') as database:
+    database.add(Tool(1, 1, type='drill_118', offsets={'Z': 40},
+                      params={'d': 3, 'l': 40, 'flute_length': 20}))
+pathlib.Path('job.lnx').write_text(json.dumps({'name': 'wheel job', 'steps': [
+    {'generator': 'header', 'version': 1},
+    {'generator': 'tool_change', 'version': 1, 'params': {'tool': 1, 'rpm': 3000}},
+    {'generator': 'drill_holes', 'version': 1, 'params': {'depth': 2}},
+    {'generator': 'program_end', 'version': 1}]}))
+args = ['job.lnx', '--machine', 'machine.yaml', '--tools', 'tools.sqlite',
+        '--origin', '50', '50', '-80', '--out']
+assert main(['prepare', *args, 'job']) == 0
+from linumert.programs.prepare import main as prepare_alias
+assert prepare_alias([*args, 'job-alias']) == 0
+manifest = json.loads(pathlib.Path('job/manifest.json').read_text())
+assert manifest == json.loads(pathlib.Path('job-alias/manifest.json').read_text())
+assert manifest['format'] == 'linumert.job'
+assert json.loads(pathlib.Path('job/prepare.json').read_text())['checks']['interpreter']=='pending'
+before = {p.name: p.read_bytes() for p in pathlib.Path('job').iterdir()}
+os.environ['LINUXCNC_DIR'] = str(pathlib.Path('missing-rip').resolve())
+assert main(['preflight', 'job', '--start', '50', '50', '-5', '--out', 'preflight.json']) == 2
+report = json.loads(pathlib.Path('preflight.json').read_text())
+assert report['job_id'] == manifest['job_id'] and report['status'] == 'unavailable'
+assert report['checks']['motion_limits'] == report['checks']['material'] == 'pending'
+assert {p.name: p.read_bytes() for p in pathlib.Path('job').iterdir()} == before
+pathlib.Path('cut.ngc').write_text('G21 G90\\nG0 X0 Y0 Z5\\nG1 X10 F600\\nM2\\n')
+assert main(['simulate', 'cut.ngc', '--out', 'report.json']) == 0
+assert json.loads(pathlib.Path('report.json').read_text())['segments'] > 0
+from linumert_plant.__main__ import main as plant
+assert plant(['drive', 'list']) == 0
+if sys.argv[3]:
+    os.environ['LINUMERT_PLANT_LIB'] = sys.argv[3]
+    assert plant(['machine', 'build', 'machine.yaml', '--run']) == 0
+print('Installed wheel: CAM, prepare, partial preflight, WebHMI, templates, config, Plant CLI PASS')
+'''
+        import yaml
+
+        machine = Path(__file__).resolve().parents[1] / "config/machines/mill_servo_table.yaml"
+        data = yaml.safe_load(machine.read_text(encoding="utf-8"))
+        library = machine.parents[2] / "plant/core/build/libplant_core.so"
+        native = str(library) if library.is_file() and sys.platform != "win32" else ""
+        subprocess.run([sys.executable, "-I", "-c", code, str(site), json.dumps(data), native],
+                       cwd=work, check=True)
+
+
+if __name__ == "__main__":
+    main()

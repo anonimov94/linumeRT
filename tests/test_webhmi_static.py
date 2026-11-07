@@ -20,7 +20,7 @@ TOKEN = "test-token-for-webhmi-static"
 ROOT = Path(__file__).resolve().parents[1]
 STATIC = ROOT / "webhmi/server/linumert_webhmi/static"
 MODULES = ("connection.js", "interlocks.js", "jog.js", "dro.js", "scene.js", "main.js",
-           "events.js", "log.js")
+           "events.js", "log.js", "jobs.js")
 FILES = ("index.html", "app.js", "style.css", *(f"js/{name}" for name in MODULES),
          "js/package.json")
 
@@ -43,7 +43,7 @@ def test_static_client_is_local_and_has_license_headers():
         assert "https://" not in content, name
         if name.endswith((".js", ".html", ".css")):
             assert "SPDX-License-Identifier: GPL-2.0-or-later" in content, name
-            assert "Model-Author: ChatGPT" in content, name
+            assert re.search(r"Model-Author: (ChatGPT|Codex)", content), name
 
 
 def test_e2e_selectors_still_exist():

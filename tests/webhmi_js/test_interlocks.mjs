@@ -80,6 +80,15 @@ test("PAUSE while READING or WAITING, RESUME when PAUSED", () => {
   assert.equal(can("resume", state({ interp_state: "paused" })), true);
   assert.equal(can("resume", state({ interp_state: "reading" })), false);
 });
+test("a bound job with pending live checks blocks RUN and RESUME and preserves STOP", () => {
+  const execution = { can_start: false, reason: "Kontrola żywej instancji oczekuje" };
+  const running = state({ mode: "auto", execution });
+  assert.equal(can("run", running), false);
+  assert.equal(can("resume", { ...running, interp_state: "paused" }), false);
+  assert.equal(allowed(running, link).run.reason, execution.reason);
+  assert.equal(can("stop", running), true);
+  assert.equal(can("estop", running), true);
+});
 test("mode switching requires ON, IDLE and homed for AUTO/MDI", () => {
   assert.equal(can("mode:mdi"), true);
   assert.equal(can("mode:auto"), true);

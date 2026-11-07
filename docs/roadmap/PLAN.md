@@ -1,7 +1,7 @@
 <!-- Generowane przez python3 tools/roadmap.py; edytuj docs/roadmap/plan.json. -->
 # Wspólny plan linumeRT
 
-Pierwotny plan: **84 sesje M0–M6**, commit `796c6a2`. Stan na 2026-10-29: planowane: 15; w toku: 0; częściowe: 30; do odbioru: 0; ukończone: 39; zablokowane: 0.
+Pierwotny plan: **84 sesje M0–M6**, commit `796c6a2`. Stan na 2026-11-05: planowane: 15; w toku: 0; częściowe: 30; do odbioru: 0; ukończone: 39; zablokowane: 0.
 
 Zakończenie części implementacji nie oznacza odbioru całej funkcji ani sprzętu.
 
@@ -155,6 +155,10 @@ Nie są kolejnym harmonogramem. Ich status dotyczy tylko wskazanego kroku.
 | WEBHMI-POC | 028, 029, 055 | HTML/WebGL: integracja strony z bramą LinuxCNC | częściowe |
 | CAM-2D-TEXT-STL | 040, 043, 045, 046 | Strategie CAM 2D, napisy i przekroje STL | ukończone |
 | BETA-WS-GUARD | 028, 029 | Beta bez GUI: kontrola Host/Origin WebSocket | ukończone |
+| VERTICAL-PREPARE | 028, 029, 032, 039, 040, 041, 043, 062 | Zadanie obróbkowe: przygotowanie wspólnego pakietu w WebHMI | ukończone |
+| VERTICAL-VERIFY | 044, 049, 051, 052, 055 | Zadanie obróbkowe: interpreter, limity i diagnostyka obróbki | w toku |
+| VERTICAL-RUN | 028, 029, 049, 053, 061 | Zadanie obróbkowe: wykonanie i telemetria przez WebHMI w sim/Plant | w toku |
+| VERTICAL-REPORT | 024, 049, 052, 053, 068 | Zadanie obróbkowe: raport przewidywania i rzeczywistego wykonania | planowane |
 
 ## Postęp, pozostały zakres i dowody
 
@@ -578,7 +582,7 @@ Bramka automatyczna: `open`; odbiór stanowiska osobno.
 
 Pozostaje: Pulpit (MPG, przyciski) i E-STOP rzeczywisty w sekcji hardware. Raport konkursu 03.
 
-Źródła: [plant/server/linumert_plant/drive_real.py](../../plant/server/linumert_plant/drive_real.py), [core/linumert/machine/schema.py](../../core/linumert/machine/schema.py), [plant/library/drives/README.md](../../plant/library/drives/README.md), [tests/test_drive_real.py](../../tests/test_drive_real.py), [docs/DZIENNIK.md](../DZIENNIK.md), [prompts/sesja-061.md](../../prompts/sesja-061.md).
+Źródła: [plant/server/linumert_plant/drive_real.py](../../plant/server/linumert_plant/drive_real.py), [core/linumert/machine/schema.py](../../core/linumert/machine/schema.py), [core/linumert/machine/drives/templates/README.md](../../core/linumert/machine/drives/templates/README.md), [tests/test_drive_real.py](../../tests/test_drive_real.py), [docs/DZIENNIK.md](../DZIENNIK.md), [prompts/sesja-061.md](../../prompts/sesja-061.md).
 
 ### 062 — Generator INI/HAL: sim, Plant, step/dir
 
@@ -1047,4 +1051,34 @@ Pozostaje: Odbiór rzeczywistej przeglądarki: DRO, scena WebGL ≤30 FPS, jog i
 **ukończone**. 2026-10-29 Codex: na jawne polecenie kontynuacji beta odtworzono cztery przypadki obejścia Host/Origin w WebSocket (z tokenem i bez). Handshake sprawdza tę samą politykę co REST przed accept i utworzeniem sesji; odmowa 4403. 30 testów transportów oraz lint i check_no_gui PASS. To zamknięcie poprawki transportu, nie całego PR beta ani odbioru LinuxCNC/Plant. Pełna regresja Debian12/Python3.11: 907 testów PASS; CI beta python i plant-core PASS dla 3b5bf78.
 
 Źródła: [beta/tests/test_transport_ws.py](../../beta/tests/test_transport_ws.py), [beta/src/linumert_headless/transport/rest.py](../../beta/src/linumert_headless/transport/rest.py), [PR](https://github.com/anonimov94/linumeRT/pull/202).
+
+### VERTICAL-PREPARE — Zadanie obróbkowe: przygotowanie wspólnego pakietu w WebHMI
+
+**ukończone**. Pierwsza porcja pełnego projektu scalona do main: #217/#219 (619fe95), dowody #220 (64b3d1b). Jeden backend CLI/API/WebHMI; 24 aktywne przypadki odbioru, 9 identycznych plików CLI/GUI/ZIP, wheel i wymagane CI success (42033344446, 42033344066). Znana porażka starego Qt w lokalnej regresji odtworzona na bazowym main; dowody i ograniczenia w raporcie. Zakres: jedna skonfigurowana maszyna/baza i detal CAM 2D.
+
+Źródła: [docs/WORKFLOW_ZADANIA.md](../WORKFLOW_ZADANIA.md), [core/linumert/tools/db.py](../../core/linumert/tools/db.py), [tests/test_tools_db.py](../../tests/test_tools_db.py), [core/linumert/programs/job.py](../../core/linumert/programs/job.py), [core/linumert/programs/prepare.py](../../core/linumert/programs/prepare.py), [webhmi/server/linumert_webhmi/jobs.py](../../webhmi/server/linumert_webhmi/jobs.py), [tests/test_job_bundle.py](../../tests/test_job_bundle.py), [tests/test_job_prepare.py](../../tests/test_job_prepare.py), [tests/test_prepare_acceptance.py](../../tests/test_prepare_acceptance.py), [tools/check_wheel.py](../../tools/check_wheel.py), [docs/raporty/VERTICAL_PREPARE_2026-11-05.md](../raporty/VERTICAL_PREPARE_2026-11-05.md), [PR](https://github.com/anonimov94/linumeRT/pull/219), [PR](https://github.com/anonimov94/linumeRT/pull/220).
+
+### VERTICAL-VERIFY — Zadanie obróbkowe: interpreter, limity i diagnostyka obróbki
+
+**w toku**. Pełny projekt mainc0b42c4: #221/#222/#223/#224 scalone po końcowym CI/LinuxCNC (C także ISO) success. Dokładny rs274/SDK, limity i diagnostyka materiału/brył/obciążeń z frozen job. #224:2097 PASS/1 znany Qt FAIL w klonie,19 real RIP i65 regresji PASS; rzeczywisty wheel PASS. WebHMI kliknięte, JSON/CLI zgodne;2861,832031mm³ i107,958839s dolnego czasu. Pełny przepływ3 powtórzenia: mediana Python7,2761s/C4,2322s; wyniki materiału identyczne. Osobny commit dowodów dodaje2 testy API/CLI i helisy (5 przypadków materiału PASS), bez zmiany runtime. Status całości nadal partial; brak zgody na wykonanie. Kolejna porcja na codex/job-verified-20261105: formalny verify i WebHMI,12 testów bramek,3 real RIP oraz rzeczywisty CLI/API verified PASS; GUI/pełna regresja/CI w toku. Dowody #225 head6fa342f oczekują końcowego CI. #226 ebca978/5beb4be: kliknięty WebHMI verified, CLI/GUI JSON zgodny poza elapsed/id, wykonanie nieuruchomione; brama8790 zatrzymana. #225 poprawiono do821971e (brak wpisu pochodzenia zrzutu w pierwszym CI); końcowe kontrole obu PR w toku.
+
+Pozostaje: Końcowe CI i scalenie kolejno #225 (head821971e) oraz #226 po pełnej regresji; GUI formalnego verified jest odebrane. Powiązanie pakietu, początku/T0 i zamrożonych zasobów z instancją wykonawczą sim/Plant przed startem. Poziomy3–4: wykonanie/telemetria i porównanie z przewidywaniem; kwalifikacja sprzętu pozostaje osobna.
+
+Źródła: [docs/WORKFLOW_ZADANIA.md](../WORKFLOW_ZADANIA.md), [core/linumert/programs/job_check.py](../../core/linumert/programs/job_check.py), [tests/test_job_check.py](../../tests/test_job_check.py), [tests/test_job_check_linuxcnc.py](../../tests/test_job_check_linuxcnc.py), [docs/raporty/VERTICAL_PREFLIGHT_2026-11-05.md](../raporty/VERTICAL_PREFLIGHT_2026-11-05.md), [PR](https://github.com/anonimov94/linumeRT/pull/221), [docs/raporty/NATIVE_INTEGRATION_2026-11-05.md](../raporty/NATIVE_INTEGRATION_2026-11-05.md), [PR](https://github.com/anonimov94/linumeRT/pull/222), [core/linumert/programs/job_trace.py](../../core/linumert/programs/job_trace.py), [tests/test_job_trace_linuxcnc.py](../../tests/test_job_trace_linuxcnc.py), [docs/raporty/VERTICAL_LIMITS_2026-11-05.md](../raporty/VERTICAL_LIMITS_2026-11-05.md), [PR](https://github.com/anonimov94/linumeRT/pull/223), [docs/raporty/VERTICAL_MATERIAL_2026-11-05.md](../raporty/VERTICAL_MATERIAL_2026-11-05.md), [simulation/linumert_sim/job_material.py](../../simulation/linumert_sim/job_material.py), [simulation/linumert_sim/job_path.py](../../simulation/linumert_sim/job_path.py), [tests/test_job_material_linuxcnc.py](../../tests/test_job_material_linuxcnc.py), [docs/raporty/vertical/material-benchmark-20261105.json](../raporty/vertical/material-benchmark-20261105.json), [PR](https://github.com/anonimov94/linumeRT/pull/224), [simulation/linumert_sim/job_verify.py](../../simulation/linumert_sim/job_verify.py), [tests/test_job_verify.py](../../tests/test_job_verify.py), [docs/raporty/VERTICAL_VERIFIED_2026-11-05.md](../raporty/VERTICAL_VERIFIED_2026-11-05.md), [PR](https://github.com/anonimov94/linumeRT/pull/225), [PR](https://github.com/anonimov94/linumeRT/pull/226).
+
+### VERTICAL-RUN — Zadanie obróbkowe: wykonanie i telemetria przez WebHMI w sim/Plant
+
+**w toku**. Pierwsza porcja na codex/job-execution-config-20261105 nad #226: run-config i ZIP WebHMI/API z verified, ten sam snapshot programu/narzędzi/offsetu i własna biblioteka zamrożonych napędów. Konfiguracja configured, bez zgody na ruch i bez startu procesów.37 testów zakresu i65 regresji PASS;2 rzeczywiste rs274 konsumują eksport sim/Plant i odtwarzają zweryfikowany tor. GUI, pełna regresja i CI tej porcji jeszcze wymagane; nie zalicza wykonania ani G2. #227: kliknięty ZIP poprawiony68c6362 (native YAML),26 zasobów CLI/GUI identycznych bajtowo, publiczny loader i C Plant --run PASS.17 testów eksportu i rzeczywisty G55 PASS. Klon6058529:2126 PASS/1 znany Qt FAIL; lint/C/REQ22/22 PASS. Brama8791 zatrzymana. To konfiguracja, nie wykonanie kontrolera; końcowe CI wymagane. Kolejna porcja codex/job-instance-20261105: prywatne evidence/config/HOME, własne procesy i WebHMI/HAL bez bypassu. Start zamknięty do kontroli live.35 pierwszych testów i41JS PASS; realny rozruch/GUI/CI otwarte. #228: rzeczywisty rozruch Plant/LinuxCNC/WebHMI HAL PASS w E-STOP, Start409 i zamknięcie bez pozostawionych procesów. Poprawione .var/HOME/token i własność daemonów.37 testów zakresu/41JS PASS, GUI8792 odebrane z ZIP227, dowody zapisane. Lease zwolniony; wykonanie nadal otwarte.
+
+Pozostaje: Końcowe CI i scalenie #227 do main (zawiera225/226); prywatna instancja w osobnej porcji, jej rozruch/GUI/CI oraz rzeczywiste wykonanie/telemetria pozostają otwarte. Zależność: pozytywny VERTICAL-VERIFY i niezmieniony manifest pakietu. Powiązanie instancji, programu, konfiguracji i narzędzi; bramki gotowości bez niejawnego zezwolenia na ruch. Start, postęp, pauza/wznowienie, przerwanie, E-STOP i utrata klienta z rozróżnialnymi wynikami. Telemetria rzeczywistego LinuxCNC sim/Plant; jawne źródło i niepełne dane. Odbiór automatyczny i kliknięty przebieg WebHMI; kwalifikacja sprzętu pozostaje osobna.
+
+Źródła: [docs/WORKFLOW_ZADANIA.md](../WORKFLOW_ZADANIA.md), [core/linumert/programs/job_execution.py](../../core/linumert/programs/job_execution.py), [core/linumert/programs/job_verification.py](../../core/linumert/programs/job_verification.py), [tests/test_job_execution.py](../../tests/test_job_execution.py), [tests/test_job_execution_linuxcnc.py](../../tests/test_job_execution_linuxcnc.py), [docs/raporty/VERTICAL_EXECUTION_CONFIG_2026-11-05.md](../raporty/VERTICAL_EXECUTION_CONFIG_2026-11-05.md), [PR](https://github.com/anonimov94/linumeRT/pull/227), [webhmi/server/linumert_webhmi/job_instance.py](../../webhmi/server/linumert_webhmi/job_instance.py), [tests/test_job_instance.py](../../tests/test_job_instance.py), [docs/raporty/VERTICAL_INSTANCE_2026-11-05.md](../raporty/VERTICAL_INSTANCE_2026-11-05.md), [tests/test_job_instance_linuxcnc.py](../../tests/test_job_instance_linuxcnc.py), [PR](https://github.com/anonimov94/linumeRT/pull/228).
+
+### VERTICAL-REPORT — Zadanie obróbkowe: raport przewidywania i rzeczywistego wykonania
+
+**planowane**. Czwarty poziom zleconego przepływu. Specyfikacja wymaga raportu powiązanego z manifestem, kontrolami i przebiegiem; brak danych nie może dawać PASS.
+
+Pozostaje: Zależność: przebieg VERTICAL-RUN z telemetrią i wynikiem zakończenia. Uzgodnienie jednostek i czasu, tor zadany/rzeczywisty, błąd max/RMS osi, alarmy i czas. Rozróżnienie zakończenia, przerwania, awarii i niepełnych danych; raport JSON i widok WebHMI. Wykrycie znanych wymuszeń i zachowanie kontraktu precyzji projektu. Detal przechodzący poziomy 1–4 i odczyt pakietu/raportu bez aktywnej maszyny.
+
+Źródła: [docs/WORKFLOW_ZADANIA.md](../WORKFLOW_ZADANIA.md).
 

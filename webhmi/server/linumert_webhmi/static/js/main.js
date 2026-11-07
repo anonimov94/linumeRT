@@ -11,6 +11,7 @@ import { createDRO } from "./dro.js";
 import { initScene } from "./scene.js";
 import { diffState } from "./events.js";
 import { createLog } from "./log.js";
+import { createJobs } from "./jobs.js";
 
 const $ = (id) => document.getElementById(id);
 const FRESH_MS = 500;
@@ -23,6 +24,7 @@ let version = -1;
 let haveConnected = false;
 let jog;
 let dro;
+let jobs;
 const journal = createLog();
 let stateReceipts = [];
 let lastReset = 0;
@@ -148,6 +150,7 @@ function execute(command) {
 }
 const connection = createConnection({
   onStatus(text, online) {
+    jobs?.setOnline(online);
     $("connectionStatus").textContent = text;
     $("connectionStatus").className = "status-tag " + (online ? "online" : "offline");
     if (text !== previousLinkStatus) {
@@ -166,6 +169,7 @@ const connection = createConnection({
     telemetryWasFresh = true;
     version = nextVersion;
     dro.render(state, version);
+    jobs?.update(state);
     renderAlarms(state.alarms);
     $("alarmResetHint").textContent = state.hmi_hal === true
       ? "Reset raz: alarmy, których przyczyna ustała. Dwa razy szybko: potwierdzenie E-STOP " +
@@ -215,6 +219,7 @@ const connection = createConnection({
     result(message, "error"); banner(message);
   },
 });
+jobs = createJobs((path, options) => connection.request(path, options));
 jog = createJog({
   send,
   ready: () => connection.ready(),
