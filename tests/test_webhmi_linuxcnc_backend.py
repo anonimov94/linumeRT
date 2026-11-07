@@ -297,7 +297,9 @@ def test_home_unknown_axis_sends_nothing():
 def test_binding_preserves_raw_joint_ferror_without_consuming_another_nml_poll():
     b, c = backend()
     b._reader._stat.linear_units = 1.0
-    b._reader._stat.joint = ({"ferror_current": .00012}, {"ferror_current": -.00034})
+    b._reader._stat.joints = 2
+    b._reader._stat.joint = ({"ferror_current": .00012}, {"ferror_current": -.00034},
+                            *({"ferror_current": 99} for _ in range(14)))
     observed = b.binding_state()
     assert observed["joint_following_errors"] == {"units": "mm", "values": [.00012, -.00034]}
     assert c.calls == []

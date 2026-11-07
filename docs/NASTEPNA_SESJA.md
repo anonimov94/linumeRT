@@ -15,6 +15,11 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · 2026-11-08. Pierwszy odbiór raw FERR: boot PASS,3 przebiegi
+wykonane, ale raport incomplete — stat.joint zawiera16 slotów. Poprawiony odczyt
+ogranicza je do stat.joints aktywnej konfiguracji; regresja obejmuje14 nieużywanych.
+RIP do ponowienia; nie zaliczamy pierwszej próby jako odbioru raportu.
+
 Model-Author: Codex · 2026-11-08. Dziennik zapisuje osobny kanał surowego FERR każdego
 przegubu z tego samego odczytu NML; raport ma jego max/RMS i końcowe3 odczyty.
 91 szybkich regresji PASS; starsze zapisy jawnie bez tego kanału. Kolejny krok:

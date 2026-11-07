@@ -342,9 +342,12 @@ class LinuxCNCBackend:
         out["motion_line"] = getattr(stat, "motion_line", None)
         out["task_done"] = getattr(stat, "state", None) == getattr(self._lc(), "RCS_DONE", object())
         joints = getattr(stat, "joint", None)
-        out["joint_following_errors"] = None if joints is None else {
+        count = getattr(stat, "joints", 0)
+        # stat.joint exposes all sixteen slots, including unconfigured joints.
+        active = joints is not None and type(count) is int and 1 <= count <= len(joints)
+        out["joint_following_errors"] = None if not active else {
             "units": "mm" if getattr(stat, "linear_units", None) == 1 else None,
-            "values": [joint.get("ferror_current") for joint in joints]}
+            "values": [joint.get("ferror_current") for joint in joints[:count]]}
         table = getattr(stat, "tool_table", None)
         out["tool_table"] = None if table is None else [
             {"id": row.id, "offsets": [getattr(row, a + "offset") for a in "xyzabcuvw"],
