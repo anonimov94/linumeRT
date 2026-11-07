@@ -15,6 +15,10 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · 2026-11-08. WebHMI --report otwiera JSON bez kontrolera i atrapy,
+odmawia wszystkich komend; import/eksport zachowują oryginalne liczby i sumę SHA.
+23 Python/42 JS PASS. Widok minimalny dostępny; wykres i kliknięty odbiór jeszcze otwarte.
+
 Model-Author: Codex · 2026-11-08. Checkpoint raportu: przenośny JSON sprawdza własną
 sumę SHA i dowody końcowej pozycji; można go odczytać po usunięciu testowych źródeł.
 21 testów PASS, limity metadanych i zakaz zapisu do źródeł. Integracja GUI nadal w toku.

@@ -212,3 +212,44 @@ def test_cli_and_authenticated_api_share_the_offline_report_without_commands(rec
         assert client.get("/api/execution/report", headers={"X-Linumert-Token": token}
                           ).status_code == 409
     assert gateway.backend.snapshot() == before
+
+
+def test_report_only_gateway_preserves_raw_json_and_refuses_every_control_command(recorded):
+    from linumert_webhmi.backend import ReportBackend
+
+    run, execution = recorded
+    report = job_report.build(run, execution)
+    gateway = Gateway(ReportBackend(report))
+    headers = {"X-Linumert-Token": "offline-report-test-token"}
+    with TestClient(create_app(gateway, headers["X-Linumert-Token"]),
+                    base_url="http://127.0.0.1:8765") as client:
+        state = client.get("/api/state", headers=headers).json()["state"]
+        assert state["read_only"] and not state["axes"] and not state["alarms"]
+        for command in ("run", "resume", "home", "reset", "estop", "stop", "power_on", "mdi"):
+            denied = client.post("/api/command", headers=headers, json={"cmd": command})
+            assert denied.status_code == 409 and "offline" in denied.json()["detail"]
+        raw = client.get("/api/execution/report", headers=headers)
+        assert job_report.load(raw.content) == report
+        assert client.post("/api/reports/open", content=raw.content).status_code == 401
+        reopened = client.post("/api/reports/open", content=raw.content, headers=headers)
+        assert reopened.status_code == 200 and job_report.load(reopened.content) == report
+        assert client.post("/api/reports/open", content=b"{}", headers=headers).status_code == 422
+
+
+def test_report_viewer_cli_never_constructs_a_controller(recorded, tmp_path, monkeypatch):
+    import uvicorn
+    from linumert.programs.job import json_text
+    from linumert_webhmi import __main__ as entry
+
+    run, execution = recorded
+    path = tmp_path / "report.json"
+    path.write_text(json_text(job_report.build(run, execution)))
+    def refused(*args, **kwargs):
+        pytest.fail("offline viewer constructed a controller")
+    seen = []
+    monkeypatch.setattr(entry, "LinuxCNCBackend", refused)
+    monkeypatch.setattr(entry, "_demo_machine", refused)
+    monkeypatch.setattr(uvicorn, "run", lambda app, **kwargs:
+                        seen.append(app.state.gateway.snapshot()[1]["read_only"]))
+    assert entry.main(["--report", str(path)]) == 0 and seen == [True]
+    assert entry.main(["--report", str(path), "--hal"]) == 2

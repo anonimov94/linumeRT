@@ -22,10 +22,12 @@ export function createJobs(request) {
   let jobId = null;
   let checked = null;
   let generation = 0;
-  let runId = null, terminalRun = false, runReport = null;
+  let runId = null, terminalRun = false, runReport = null, runReportRaw = "";
+  let viewer = false, viewerLoaded = false;
 
   function controls() {
     $("jobRunReport").disabled = !online || !terminalRun || busy;
+    $("jobReportFile").disabled = !online || busy;
     $("jobRunReportDownload").disabled = !runReport;
     $("jobFields").disabled = !online || !available || busy;
     $("jobDownload").disabled = !online || busy || !prepared;
@@ -65,23 +67,26 @@ export function createJobs(request) {
     link.click();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
-  $("jobRunReport").addEventListener("click", async () => {
-    if (!online || !terminalRun || busy) return;
-    busy = true; controls();
-    try {
-      const result = await (await response("/api/execution/report")).json();
-      if (result.run_id !== runId) return;
+  function showReport(result, raw) {
       runReport = result;
+      runReportRaw = raw;
+      $("jobReportIdentity").textContent = "Przebieg " + result.run_id + " · " + result.target +
+        " · zadanie " + result.job_id;
       const num = (v, digits = 4) => Number.isFinite(v) ? v.toFixed(digits) : "brak danych";
-      $("jobRunReportStatus").textContent =
-        "Zapis " + (result.status === "incomplete" ? "niepełny" : "obserwacyjny") +
+      const outcome = { completed_observed: "Program zakończony", aborted: "Przerwano przez Stop",
+        estop: "Zatrzymanie E-STOP", client_lost: "Utrata klienta i E-STOP", fault: "Błąd przebiegu",
+        start_timeout: "Timeout Start", resume_timeout: "Timeout wznowienia",
+        settle_timeout: "Timeout ustalenia osi", unavailable: "Wynik niedostępny" };
+      $("jobRunReportStatus").textContent = (outcome[result.execution_status] || "Wynik nieznany") +
+        " · zapis " + (result.status === "incomplete" ? "niepełny" : "obserwacyjny") +
         " · czas " + num(result.time.elapsed_s, 2) + " s · pauza " +
-        num(result.time.paused_observed_s, 2) + " s · dolna granica modelu " +
+        num(result.time.paused_observed_s, 2) + " s · bez pauz " +
+        num(result.time.unpaused_elapsed_s, 2) + " s · dolna granica modelu " +
         num(result.time.predicted_lower_bound_s, 2) + " s. " +
         "Końcowe ustalenie < 0,001 mm: " +
-        (result.positioning.status === "passed" ? "potwierdzone w próbkach" : "brak potwierdzenia") +
-        ". Maksima dotyczą odczytanych próbek; nie jest to kwalifikacja sprzętu. " +
-        result.quality.issues.join("; ");
+        ({passed: "potwierdzone w trzech próbkach", failed: "próg przekroczony",
+          unavailable: "brak potwierdzenia"}[result.positioning.status]) + ". " +
+        "Maksima dotyczą całego zapisu NML. " + result.quality.issues.join("; ");
       $("jobRunMetrics").replaceChildren();
       for (const [axis, values] of Object.entries(result.axes)) {
         const row = document.createElement("div"), title = document.createElement("dt"),
@@ -91,11 +96,35 @@ export function createJobs(request) {
           " · RMS " + num(values.following_error.rms_mm);
         row.append(title, value); $("jobRunMetrics").append(row);
       }
+  }
+  $("jobRunReport").addEventListener("click", async () => {
+    if (!online || !terminalRun || busy) return;
+    busy = true; controls();
+    try {
+      const raw = await (await response("/api/execution/report")).text();
+      const result = JSON.parse(raw);
+      if (!viewer && result.run_id !== runId) return;
+      showReport(result, raw);
     } catch (error) { $("jobRunReportStatus").textContent = error.message; }
     finally { busy = false; controls(); }
   });
+  $("jobReportFile").addEventListener("change", async (event) => {
+    const file = event.target.files[0];
+    if (!file || !online || busy) return;
+    runReport = null; runReportRaw = "";
+    $("jobReportIdentity").textContent = "Sprawdzanie raportu „" + file.name + "”…";
+    $("jobRunMetrics").replaceChildren();
+    busy = true; controls();
+    try {
+      if (file.size > 32 * 1024 * 1024) throw new Error("Raport przekracza limit 32 MiB.");
+      const raw = await (await response("/api/reports/open", {method: "POST",
+        headers: {"Content-Type": "application/json"}, body: await file.text()})).text();
+      showReport(JSON.parse(raw), raw);
+    } catch (error) { $("jobRunReportStatus").textContent = error.message; }
+    finally { busy = false; controls(); event.target.value = ""; }
+  });
   $("jobRunReportDownload").addEventListener("click", () => {
-    if (runReport) download(new Blob([JSON.stringify(runReport, null, 2) + "\n"],
+    if (runReport) download(new Blob([runReportRaw],
       {type: "application/json"}), "run-report-" + runReport.run_id + ".json");
   });
   async function refresh() {
@@ -223,6 +252,7 @@ export function createJobs(request) {
   });
   controls();
   return { update(state) {
+    viewer = state?.read_only === true;
     const instance = state?.execution;
     $("jobInstance").hidden = !instance;
     if (instance) {
@@ -259,6 +289,14 @@ export function createJobs(request) {
         $("jobInstanceChecks").appendChild(row);
       }
     }
+    if (viewer) {
+      terminalRun = true;
+      if (online && !viewerLoaded) {
+        viewerLoaded = true;
+        controls(); $("jobRunReport").click();
+      }
+    } else if (!instance) terminalRun = false;
+    controls();
   }, setOnline(value) {
     online = value;
     controls();

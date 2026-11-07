@@ -148,10 +148,12 @@ class Gateway:
             if self._alarm_reset_at is not None and now >= self._alarm_reset_at:
                 self._alarm_reset_at = None
                 self._alarms.reset()  # przed zgłoszeniem: trwający E-STOP wraca w tym obiegu
-            self._raise_alarms(snap)
+            if not getattr(self.backend, "read_only", False):
+                self._raise_alarms(snap)
             if now - self._programs_at >= PROGRAMS_S:
                 self._programs, self._programs_at = self.backend.programs(), now
             state = snapshot_to_dict(snap)
+            state["read_only"] = bool(getattr(self.backend, "read_only", False))
             if self._instance is not None:
                 observed = (self.backend.binding_state(self._instance.hal_expectations)
                             if hasattr(self.backend, "binding_state") else None)
@@ -228,6 +230,8 @@ class Gateway:
         from linumert.programs import job_report
 
         with self._lock:
+            if getattr(self.backend, "read_only", False):
+                return self.backend.report
             if not self._instance or not self._instance.run:
                 raise CommandError("Brak zapisanego przebiegu zadania")
             if self._instance.run.active:
@@ -287,6 +291,8 @@ class Gateway:
     def execute(self, command: Command, session: str = LOCAL_SESSION) -> None:
         """Wykonuje polecenie; ``CommandError`` z komunikatem dla operatora przy odmowie."""
         with self._lock:
+            if getattr(self.backend, "read_only", False):
+                raise CommandError("Przeglądanie raportów offline; sterowanie niedostępne")
             stop = command.cmd in STOP_COMMANDS or (command.cmd == "jog" and command.speed == 0.0)
             if not stop and not self._limiter.allow():
                 raise CommandError("zbyt wiele poleceń na sekundę")

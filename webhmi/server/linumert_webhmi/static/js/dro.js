@@ -90,6 +90,10 @@ export function createDRO(jog, onAxesChange) {
     const byName = Object.fromEntries(axes.map((axis) => [axis.name, axis]));
     $("toolCoordinates").textContent = ["X", "Y", "Z"]
       .map((axis) => axis + " " + fmt(byName[axis]?.work_position)).join("  ·  ");
+    if (state.read_only === true) {
+      for (const id of ["homingStatus", "modeState", "taskState", "interpState", "spindleState",
+                        "toolState", "programState"]) $(id).textContent = "RAPORT OFFLINE";
+    }
     errors(state.errors, state.gateway_error);
   }
   function freshness(age, connected) {

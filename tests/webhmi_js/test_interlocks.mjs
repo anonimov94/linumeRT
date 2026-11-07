@@ -95,3 +95,9 @@ test("every denial has an actionable textual reason", () => {
   }
   assert.equal(allowed(state(), link).jog.reason, "");
 });
+test("report-only gateway never offers controller actions, including Stop and E-STOP", () => {
+  for (const [name, rule] of Object.entries(allowed(state({read_only: true}), link))) {
+    assert.equal(rule.ok, false, name);
+    assert.match(rule.reason, /offline/);
+  }
+});

@@ -118,6 +118,27 @@ class MachineBackend(Protocol):
     def tick(self) -> None: ...
 
 
+class ReportBackend:
+    """Offline observations only: no controller module, command transport or virtual motion."""
+
+    read_only = True
+
+    def __init__(self, report):
+        self.report = report
+
+    def snapshot(self):
+        return MachineSnapshot(timestamp=time.monotonic())
+
+    def tick(self):
+        pass
+
+    def programs(self):
+        return ()
+
+    def jog_stop(self, axis=None):
+        pass  # no command transport exists in this backend
+
+
 class FakeBackend:
     """Atrapa napędzana zegarem ściennym; ``tick`` przesuwa czas o rzeczywiste ``dt``."""
 

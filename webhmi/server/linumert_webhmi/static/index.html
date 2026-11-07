@@ -165,12 +165,19 @@ Incremental jog: Model-Author: Codex
           <p class="job-hint" id="jobInstanceIdentity"></p>
           <p class="job-status" id="jobInstanceStatus" role="status"></p>
           <p class="job-hint" id="jobRunStatus"></p>
-          <button id="jobRunReport" type="button" disabled>Raport przebiegu</button>
-          <button id="jobRunReportDownload" type="button" disabled>Pobierz raport JSON</button>
-          <p class="job-hint" id="jobRunReportStatus" role="status"></p>
-          <dl class="job-checks" id="jobRunMetrics"></dl>
           <p class="job-hint">Warunki nowego Start zadania:</p>
           <dl class="job-checks" id="jobInstanceChecks"></dl>
+        </div>
+        <div class="job-result" id="jobReportView">
+          <h3>Raport wykonania</h3>
+          <p class="job-hint" id="jobReportIdentity">Wybierz zapisany raport JSON lub zakończ przebieg zadania.</p>
+          <button id="jobRunReport" type="button" disabled>Raport bieżącego przebiegu</button>
+          <button id="jobRunReportDownload" type="button" disabled>Pobierz raport JSON</button>
+          <label class="job-hint">Otwórz zapisany raport JSON
+            <input id="jobReportFile" type="file" accept=".json,application/json" disabled>
+          </label>
+          <p class="job-hint" id="jobRunReportStatus" role="status"></p>
+          <dl class="job-checks" id="jobRunMetrics"></dl>
         </div>
         <p class="job-hint">Planowanie, kieszenie i otwory z programu .lnx. Pakiet zawiera program, narzędzia i ustawienie detalu.</p>
         <p class="job-hint" id="jobContext">Połącz z bramą, aby odczytać konfigurację zadania.</p>
