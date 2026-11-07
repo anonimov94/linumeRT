@@ -22,8 +22,11 @@ export function createJobs(request) {
   let jobId = null;
   let checked = null;
   let generation = 0;
+  let runId = null, terminalRun = false, runReport = null;
 
   function controls() {
+    $("jobRunReport").disabled = !online || !terminalRun || busy;
+    $("jobRunReportDownload").disabled = !runReport;
     $("jobFields").disabled = !online || !available || busy;
     $("jobDownload").disabled = !online || busy || !prepared;
     $("jobPreflightFields").disabled = !online || busy || !prepared;
@@ -62,6 +65,39 @@ export function createJobs(request) {
     link.click();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
+  $("jobRunReport").addEventListener("click", async () => {
+    if (!online || !terminalRun || busy) return;
+    busy = true; controls();
+    try {
+      const result = await (await response("/api/execution/report")).json();
+      if (result.run_id !== runId) return;
+      runReport = result;
+      const num = (v, digits = 4) => Number.isFinite(v) ? v.toFixed(digits) : "brak danych";
+      $("jobRunReportStatus").textContent =
+        "Zapis " + (result.status === "incomplete" ? "niepełny" : "obserwacyjny") +
+        " · czas " + num(result.time.elapsed_s, 2) + " s · pauza " +
+        num(result.time.paused_observed_s, 2) + " s · dolna granica modelu " +
+        num(result.time.predicted_lower_bound_s, 2) + " s. " +
+        "Końcowe ustalenie < 0,001 mm: " +
+        (result.positioning.status === "passed" ? "potwierdzone w próbkach" : "brak potwierdzenia") +
+        ". Maksima dotyczą odczytanych próbek; nie jest to kwalifikacja sprzętu. " +
+        result.quality.issues.join("; ");
+      $("jobRunMetrics").replaceChildren();
+      for (const [axis, values] of Object.entries(result.axes)) {
+        const row = document.createElement("div"), title = document.createElement("dt"),
+          value = document.createElement("dd");
+        title.textContent = "Oś " + axis + " · błąd zadana − rzeczywista [mm]";
+        value.textContent = "max " + num(values.following_error.max_abs_mm) +
+          " · RMS " + num(values.following_error.rms_mm);
+        row.append(title, value); $("jobRunMetrics").append(row);
+      }
+    } catch (error) { $("jobRunReportStatus").textContent = error.message; }
+    finally { busy = false; controls(); }
+  });
+  $("jobRunReportDownload").addEventListener("click", () => {
+    if (runReport) download(new Blob([JSON.stringify(runReport, null, 2) + "\n"],
+      {type: "application/json"}), "run-report-" + runReport.run_id + ".json");
+  });
   async function refresh() {
     const current = ++generation;
     try {
@@ -193,6 +229,13 @@ export function createJobs(request) {
       $("jobInstanceIdentity").textContent = "Zadanie " + instance.job_id + " · " + instance.target;
       $("jobInstanceStatus").textContent = instance.reason;
       const run = instance.run;
+      if ((run?.run_id || null) !== runId) {
+        runId = run?.run_id || null; runReport = null;
+        $("jobRunReportStatus").textContent = ""; $("jobRunMetrics").replaceChildren();
+      }
+      terminalRun = !!run && ["completed_observed", "aborted", "estop", "fault", "start_timeout",
+        "resume_timeout", "settle_timeout", "unavailable", "client_lost"].includes(run.phase);
+      controls();
       const phases = { starting: "Uruchamianie", running: "Wykonywanie", paused: "Wstrzymano",
         settling: "Oczekiwanie na ustalenie osi",
         stopping: "Zatrzymywanie", completed_observed: "Interpreter zakończył program",

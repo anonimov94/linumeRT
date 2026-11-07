@@ -224,6 +224,17 @@ class Gateway:
         with self._lock:
             return self._version, dict(self._state)
 
+    def run_report(self):
+        from linumert.programs import job_report
+
+        with self._lock:
+            if not self._instance or not self._instance.run:
+                raise CommandError("Brak zapisanego przebiegu zadania")
+            if self._instance.run.active:
+                raise CommandError("Raport dostępny po zakończeniu lub przerwaniu zadania")
+            run, execution = self._instance.run.path, self._instance.root / "evidence"
+        return job_report.build(run, execution)  # file I/O outside the HMI poll lock
+
     # ---- potwierdzenie E-STOP (podwójny Reset, D37) ------------------------------
     def _acknowledge_estop(self) -> None:
         if self._hal is None:
