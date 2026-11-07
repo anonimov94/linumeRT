@@ -169,6 +169,7 @@ const connection = createConnection({
     telemetryWasFresh = true;
     version = nextVersion;
     dro.render(state, version);
+    jobs?.update(state);
     renderAlarms(state.alarms);
     $("alarmResetHint").textContent = state.hmi_hal === true
       ? "Reset raz: alarmy, których przyczyna ustała. Dwa razy szybko: potwierdzenie E-STOP " +

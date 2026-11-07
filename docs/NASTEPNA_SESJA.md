@@ -15,6 +15,23 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · 2026-11-05. **#228 — prywatny rozruch odebrany:**
+Rzeczywisty test Plant/LinuxCNC/WebHMI/HAL PASS bez Reset/ON/bazowania, StartHTTP409,
+oryginalny .var zachowany, zamknięcie bez pozostawionych procesów przed cleanupem fixture.
+Poprawione: roboczy .var, długi HOME/AF_UNIX, token od --, własność daemonów przy zamknięciu.
+37 testów zakresu i41JS PASS. Kliknięte GUI8792 z faktycznie odebranego ZIP227, job95bf2c0;
+zrzut/provenance/rawboot w raporcie VERTICAL_INSTANCE. Własne procesy zakończone,
+moduły przywrócone, lease zwolniony. Start/live binding/telemetria nadal otwarte; CI wymagane.
+
+Model-Author: Codex · 2026-11-05. **Prywatna instancja, checkpoint:**
+Gałąź codex/job-instance-20261105 nad #227edcacf3. CLI linumert-job-instance oddziela
+evidence/config/HOME i uruchamia tylko własne procesy, WebHMI/HAL bez bypassu. Karta zadania
+pokazuje instancję; Start/wznowienie zablokowane do kontroli live.35 pierwszych testów i41JS PASS;
+realny rozruch/GUI/CI jeszcze wymagane. Wspólny lease LinuxCNC Codex: vertical-main-ci-debug-227.
+#225/#226 LinuxCNC failure (G2 Reset między komunikatami, dodatkowo traceferr226).
+Oba scenariusze lokalnie na edcacf3 PASS bez zmian progów. #227 retargetmain, CI nadal trwa;
+zawiera225/226, można zamknąć jako zawarte dopiero po rzeczywistym scaleniu całej porcji.
+
 Model-Author: Codex · 2026-11-05. **PR #227 — konfiguracja odebrana w GUI:**
 cb8516c →6058529 (brakujący wygenerowany prompts/README) →68c6362 (native YAML liczb
 wykładniczych, publiczny loader Plant). Poprawiony ZIP `execution-fixed-plant.zip`:

@@ -54,10 +54,24 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--job-tools", type=Path, help="istniejąca baza narzędzi SQLite")
     parser.add_argument("--jobs-dir", type=Path, help="katalog nowych pakietów zadań")
     parser.add_argument("--drive-library", type=Path, help="biblioteka szablonów napędów")
+    parser.add_argument("--instance", type=Path, help="prywatna instancja zadania sim/Plant")
+    parser.add_argument("-ini", type=Path, help=argparse.SUPPRESS)
     parser.add_argument("--postgui", type=Path, default=None,
                         help="plik HAL wykonany po utworzeniu pinów (np. "
                              "config/hal/linumert_webhmi_postgui.hal); wymaga --hal")
     args = parser.parse_args(argv)
+    instance = None
+    if args.instance:
+        if args.fake or not args.hal or args.ini is None:
+            print("Odmowa: instancja wymaga LinuxCNC, --hal i -ini.", file=sys.stderr)
+            return 2
+        from .job_instance import Instance
+
+        try:
+            instance = Instance(args.instance, args.ini)
+        except (OSError, ValueError) as error:
+            print(f"Odmowa instancji: {error}", file=sys.stderr)
+            return 2
     options = (args.job_sources, args.job_machine, args.job_tools, args.jobs_dir)
     if (any(options) and not all(options)) or (args.drive_library and not all(options)):
         print("Odmowa: podaj razem --job-sources, --job-machine, --job-tools i --jobs-dir.",
@@ -99,7 +113,7 @@ def main(argv: list[str] | None = None) -> int:
                 print(f"Odmowa: halcmd -f {args.postgui} zakończył się kodem "
                       f"{done.returncode}", file=sys.stderr)
                 return 2
-    gateway = Gateway(backend, hal_pins=pins)
+    gateway = Gateway(backend, hal_pins=pins, instance=instance)
     gateway.start()
     extra = (args.host,) if args.allow_remote else ()
     app = create_app(gateway, token, extra_hosts=extra, jobs=jobs)

@@ -17,6 +17,7 @@ def main() -> None:
     with zipfile.ZipFile(wheel) as archive:
         names = archive.namelist()
         for name in ("linumert_webhmi/static/index.html", "linumert_webhmi/static/js/jobs.js",
+                     "linumert_webhmi/job_instance.py",
                      "linumert_plant/panel/static/index.html"):
             assert name in names, name
         assert any(name.endswith("templates/servo_400w.yaml") for name in names)
@@ -36,8 +37,11 @@ from linumert.machine.drives.drive_library import load_library
 from linumert.machine.schema import parse_machine
 from linumert.machine.lite_config import render_lite
 from importlib.metadata import distribution
-assert {'linumert', 'linumert-job', 'linumert-webhmi', 'linumert-lite'} <= {
+scripts = {'linumert', 'linumert-job', 'linumert-webhmi', 'linumert-job-instance', 'linumert-lite'}
+assert scripts <= {
     e.name for e in distribution('linumert').entry_points}
+entry = next(e for e in distribution('linumert').entry_points if e.name == 'linumert-job-instance')
+assert entry.load().__module__ == 'linumert_webhmi.job_instance'
 assert len(load_library()) >= 7
 assert registry().get('pocket_rect', 1) and registry().get('pocket_rect', 2)
 machine = json.loads(sys.argv[2])
