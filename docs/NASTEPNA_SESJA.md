@@ -15,6 +15,10 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · 2026-11-07.49f52d8 nowe RIP4FAIL: zbyt krótki join wobec
+close_timeout klienta testowego pomijał zamknięcie hosta i zaburzał kolejne próby.
+Poprawiono finally/timeout i oczekiwanie na własny świeży rozruch; ponowić serię.
+
 Model-Author: Codex · 2026-11-07. bcd10d5 rzeczywisty Stop, pełne wykonanie112,53s/
 5288próbek i utrata klienta PASS; surowe archiwa i hashe zachowane. E-STOP wymagał
 obsługi przejściowego ESTOP_RESET;26 testów PASS. Dodano trzy regresje RIP, do odpalenia.

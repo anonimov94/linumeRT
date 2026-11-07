@@ -73,3 +73,10 @@ fault zachowano w lokalnym śladzie, bez deklarowania zaliczenia E-STOP. Poprawk
 przerywa ruch po utracie ON i czeka do1s na potwierdzenie przyczyny; brak potwierdzenia
 lub powrót ON kończy się fault, bez wznowienia.26 testów dziennika/bramki PASS.
 Dodano trzy rzeczywiste testy regresji w test_job_run_linuxcnc.py; wymagają uruchomienia.
+
+Pierwsza seria nowych regresji zakończyła się4FAIL: pierwszy przebieg miał poprawny
+wynik, ale sterownik testowy czekał5s przy domyślnym10s close_timeout WebSocket;
+wyjątek zamknięcia pomijał host.terminate i zaburzał następne próby. Zawężono timeout
+testowego klienta do1s i zagwarantowano zamknięcie hosta również po błędzie klienta.
+Rozruch czeka na stan własnej instancji zamiast pierwszej dostępnej odpowiedzi NML.
+Nie jest to zielona regresja; ponowny przebieg wymagany.

@@ -43,7 +43,10 @@ def test_private_instance_boots_estop_and_stops_only_its_processes(configuration
                             headers={"X-Linumert-Token": record["token"]})
                         with urllib.request.urlopen(req, timeout=1) as response:
                             state = json.load(response)["state"]
-                        break
+                        if (state["task_state"] == "estop" and not state["all_homed"]
+                                and state["execution"]["checks"]["controller"]["status"]
+                                == "passed"):
+                            break
                     except (OSError, ValueError):
                         time.sleep(.1)
                 else:

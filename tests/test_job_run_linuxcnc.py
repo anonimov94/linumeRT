@@ -40,7 +40,7 @@ class Operator:
 
     def browser(self):
         try:
-            with connect(f"ws://127.0.0.1:{self.port}/ws", open_timeout=3) as ws:
+            with connect(f"ws://127.0.0.1:{self.port}/ws", open_timeout=3, close_timeout=1) as ws:
                 ws.send(json.dumps({"auth": self.token}))
                 assert json.loads(ws.recv(timeout=3))["type"] == "state"
                 self.opened.set()
@@ -78,6 +78,9 @@ class Operator:
         pytest.fail(f"Condition not observed: {state}")
 
     def ready(self):
+        self.wait(lambda s: s["task_state"] == "estop" and not s["all_homed"]
+                  and s["execution"]["checks"]["controller"]["status"] == "passed"
+                  and s["heartbeat"])
         self.command("reset", double=True)
         self.wait(lambda s: s["task_state"] in ("off", "estop_reset"))
         self.command("power_on")
@@ -152,8 +155,10 @@ def test_bound_job_pause_resume_and_distinct_interruptions(configuration, tmp_pa
                 assert not result["servo_trace"] and result["source"] == "linuxcnc.stat"
                 assert not state["execution"]["can_resume"]
             finally:
-                if operator:
-                    operator.close()
-                host.terminate()
-                host.wait(timeout=45)
+                try:
+                    if operator:
+                        operator.close()
+                finally:
+                    host.terminate()
+                    host.wait(timeout=45)
         assert not rip.leftovers(), rip.leftovers()
