@@ -637,6 +637,17 @@ bez retuszu. Licencja: GPL-2.0-or-later. Zakres: dokumentacja odbioru
 - `docs/raporty/G2/WEBHMI_WATCHDOG_2026-11-04/2_podwojny_reset_on.jpg`
 - `docs/raporty/G2/WEBHMI_WATCHDOG_2026-11-04/3_cicha_karta_estop.jpg`
 
+### G2: sonda w WebHMI — 2026-11-05
+
+Model-Author: Claude. Autor: Claude; źródło: własne zrzuty klienta linumeRT WebHMI
+w przeglądarce aplikacji Claude na Windows, LinuxCNC 2.9 i Plant w WSL, bez retuszu.
+Licencja: GPL-2.0-or-later. Zakres: dokumentacja odbioru
+(`docs/raporty/G2/WEBHMI_SONDA_2026-11-05.md`); bez zasobów zewnętrznych.
+
+- `docs/raporty/G2/WEBHMI_SONDA_2026-11-05/1_panel_sondy.jpg`
+- `docs/raporty/G2/WEBHMI_SONDA_2026-11-05/2_po_sondowaniu_z.jpg`
+- `docs/raporty/G2/WEBHMI_SONDA_2026-11-05/3_chybienie_alarm.jpg`
+
 ### Przygotowanie zadania w WebHMI — 2026-11-05
 
 Model-Author: Codex. Autor: Codex; źródło: własny zrzut pełnego linumeRT WebHMI

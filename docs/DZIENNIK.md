@@ -1823,6 +1823,11 @@ Pełny RIP musi ponownie potwierdzić wynik; nie scalać na czerwonym CI.
 
 - Codex, poprawka #210 w tym samym domknięciu: nowe E-STOP, Zasilanie OFF lub STOP anulują stary timer resetu, impuls ack i zaplanowane ponowne uzbrojenie watchdoga. Świeże potwierdzenie nadal działa; regresje zegara obejmują trzy polecenia.
 
+## G2 — sonda w WebHMI · 2026-11-05 · Claude
+- Model-Author: Claude. Panel SONDA w WebHMI: polecenie `probe` → `o<lrt_probe>` (#204) jednym MDI w aktywnym układzie (F100, odjazd 2 mm); blokady jak zero detalu, bez wymogu MANUAL.
+- Kliknięte w przeglądarce na LinuxCNC 2.9 + Plant: Z robocze 6,9936 po styku na 5 + odjazd 2; chybienie (droga 1 mm) = E-1000 z komunikatem LinuxCNC, offset bez zmian. Zrzuty: `docs/raporty/G2/WEBHMI_SONDA_2026-11-05.md`.
+- Testy: `test_webhmi_probe_linuxcnc` PASS (offset −35,012 przy −35 ± 0,02), unit 130 PASS, JS 41 PASS. Otwarte: X/Y kliknięte tylko testem logiki, kalibracja sondy w GUI. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
 ## Cel pionowy pełnego linumeRT — 2026-11-05 · Codex
 
 - Model-Author: Codex. Polecenie właściciela: prepare → verify → run → report w pełnym projekcie, ukończone porcje do main.

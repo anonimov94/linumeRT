@@ -74,6 +74,12 @@ Ekran nie jest funkcją bezpieczeństwa; E-STOP to obwód sprzętowy.
 - Odbiór: `docs/raporty/G2/WEBHMI_WATCHDOG_2026-11-04.md`. Ukryta karta i uruchomienie
   bramy z `[DISPLAY]` jeszcze otwarte. NIEZWERYFIKOWANE NA SPRZĘCIE.
 
+**Sonda (G2):** panel SONDA wysyła `{"cmd":"probe","axis","direction","probe_distance","probe_value"}`;
+brama woła `o<lrt_probe>` (#204) jednym MDI w aktywnym układzie, F100 mm/min, odjazd 2 mm.
+Wymaga ON, bazowania, bezczynności, braku jogu i trybu innego niż AUTO; chybienie = alarm
+E-1000 z komunikatem LinuxCNC. Atrapa (`--fake`) odmawia: nie ma wejścia sondy.
+Odbiór: `docs/raporty/G2/WEBHMI_SONDA_2026-11-05.md`. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
 ## Testy
 ```bash
 python -m pytest tests/test_webhmi_gateway.py tests/test_webhmi_app.py tests/test_webhmi_linuxcnc_backend.py tests/test_webhmi_hal_link.py

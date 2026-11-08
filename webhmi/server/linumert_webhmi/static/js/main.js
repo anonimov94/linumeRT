@@ -75,6 +75,11 @@ function updateControls() {
   $("programSelect").disabled = !open.ok;
   setButton($("programOpen"), open.ok && !$("programSelect").value
     ? { ok: false, reason: "Wybierz plik programu" } : open);
+  const probe = rules.probe;
+  for (const id of ["probeAxis", "probeDirection", "probeDistance", "probeValue"]) {
+    $(id).disabled = !probe.ok;
+  }
+  setButton($("probeRun"), probe);
   const jogRule = rules.jog;
   const needsHoming = $("jogIncrement").value !== "continuous" && state?.all_homed !== true;
   const jogOK = jogRule.ok && !needsHoming && (jog.canStart() || jog.isActive());
@@ -271,6 +276,16 @@ for (const button of controls) {
   });
 }
 $("programSelect").addEventListener("change", updateControls);
+$("probeRun").addEventListener("click", () => {
+  const distance = Number($("probeDistance").value);
+  const value = Number($("probeValue").value);
+  if (!(distance > 0 && distance <= 100) || !Number.isFinite(value)) {
+    result("Sonda: droga 1–100 mm i skończona współrzędna styku.", "error");
+    return;
+  }
+  execute({ cmd: "probe", axis: $("probeAxis").value, direction: Number($("probeDirection").value),
+    probe_distance: distance, probe_value: value });
+});
 $("programOpen").addEventListener("click", () => {
   const name = $("programSelect").value;
   if (!name) {
