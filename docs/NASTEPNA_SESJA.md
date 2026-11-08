@@ -15,6 +15,13 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · 2026-11-08. Polecenie właściciela: badania i domknięcie
+#211/#212/#213/#231. Osobny checkout linumeRT-pr-closeout-20261108, gałąź
+codex/pr-closeout-research-20261108; istniejące checkouty i ich zmiany zachowane.
+Badania: docs/prawne/BADANIA_INTEGRACJI_2026-11-08.md. Poprawiono opis FERR i
+walidację statystyk/mapowania offline:37 testów raportu/archiwów PASS, ruff/roadmap PASS.
+Dalej odbiór GUI raportu, integracja istniejących gałęzi sync i pełne CI; nie zaliczono bramek.
+
 Model-Author: Codex · 2026-11-08.3 RIP przerwań z raportem/raw FERR PASS56,43s.
 Pełny verified Plant d96a200:112,616904s, max gap0,027075s, raport observational/pozycja
 passed/raw4 available. Pierwszy112,706333s wykrył lukę0,111433s i pozostaje incomplete.

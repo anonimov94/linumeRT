@@ -151,9 +151,18 @@ def load(source):
             need(joints["status"] in ("available", "incomplete", "unavailable"))
             need(type(joints["samples"]) is int and 0 <= joints["samples"] <= quality["samples"])
             if joints["status"] == "available":
-                need(joints["samples"] == quality["samples"] and bool(joints["joints"]))
+                need(0 < joints["samples"] == quality["samples"] and bool(joints["joints"]))
             for stat in joints["joints"].values():
                 need(_number(stat["max_abs_mm"]) and _number(stat["rms_mm"]))
+                need(0 <= stat["rms_mm"] <= stat["max_abs_mm"] + 1e-12)
+            if "joint_axes" in joints:
+                mapping = joints["joint_axes"]
+                need(isinstance(mapping, dict) and bool(mapping))
+                need(set(mapping) == {str(i) for i in range(len(mapping))})
+                need(all(axis in axes for axis in mapping.values()))
+                need(set(joints["joints"]) <= set(mapping))
+                if joints["status"] == "available":
+                    need(set(joints["joints"]) == set(mapping))
         last3 = report["positioning"]["last3_max_abs_mm"]
         need(isinstance(last3, dict))
         if len(report["ending_samples"]) == 3:
@@ -373,7 +382,8 @@ def build(run: Path, execution: Path) -> dict:
                 for r in tail) for i in joint_stats} if joint_status == "available"
                 and len(tail) == 3 else {}},
         "axis_error_definition": "following_error = commanded minus actual Cartesian position; "
-                                 "raw joint ferror_current is not recorded",
+                                 "raw joint ferror_current is reported separately in "
+                                 "joint_following_error when available",
         "positioning": {"status": positioning,
                         "scope": "last3 settled NML observations only", "tolerance_mm": .001,
                         "last3_max_abs_mm": {a: max(abs(r["axes"][a]["actual"]

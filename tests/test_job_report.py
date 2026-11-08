@@ -129,6 +129,26 @@ def test_wrong_execution_identity_is_rejected(recorded):
         job_report.build(run, execution)
 
 
+@pytest.mark.parametrize("damage", ["negative", "rms", "missing_joint", "wrong_axis"])
+def test_portable_joint_statistics_and_mapping_remain_consistent(recorded, damage):
+    from linumert.programs.job import digest, json_text
+
+    report = job_report.build(*recorded)
+    raw = report["joint_following_error"]
+    if damage == "negative":
+        raw["joints"]["0"]["rms_mm"] = -.001
+    elif damage == "rms":
+        raw["joints"]["0"]["rms_mm"] = 1
+    elif damage == "missing_joint":
+        del raw["joints"]["2"]
+    else:
+        raw["joint_axes"]["2"] = "A"
+    report["report_id"] = digest(json_text({k: v for k, v in report.items()
+                                          if k != "report_id"}).encode())
+    with pytest.raises(ValueError, match="niespójny"):
+        job_report.load(json_text(report).encode())
+
+
 def test_peak_and_alarm_keep_the_original_run_time_and_program_line(recorded):
     run, execution = recorded
     path = run / "samples.jsonl"
@@ -248,6 +268,7 @@ def test_report_only_gateway_preserves_raw_json_and_refuses_every_control_comman
                     base_url="http://127.0.0.1:8765") as client:
         state = client.get("/api/state", headers=headers).json()["state"]
         assert state["read_only"] and not state["axes"] and not state["alarms"]
+        assert "task_state" not in state and "mode" not in state
         for command in ("run", "resume", "home", "reset", "estop", "stop", "power_on", "mdi"):
             denied = client.post("/api/command", headers=headers, json={"cmd": command})
             assert denied.status_code == 409 and "offline" in denied.json()["detail"]

@@ -161,13 +161,20 @@ const connection = createConnection({
     updateControls();
   },
   onState(next, nextVersion) {
-    journal.appendAll(diffState(state, next));
+    if (!next.read_only) journal.appendAll(diffState(state, next));
     state = next;
     receivedAt = Date.now();
     stateReceipts.push(receivedAt);
-    if (!telemetryWasFresh) journal.add("info", "TELEMETRIA", "Dane aktualne");
+    if (!telemetryWasFresh && !state.read_only) journal.add("info", "TELEMETRIA", "Dane aktualne");
     telemetryWasFresh = true;
     version = nextVersion;
+    document.body.classList.toggle("report-viewer", state.read_only === true);
+    if (state.read_only === true) {
+      jobs?.update(state);
+      updateControls();
+      banner("Przeglądanie raportów offline. Sterowanie maszyną jest niedostępne.");
+      return;
+    }
     dro.render(state, version);
     jobs?.update(state);
     renderAlarms(state.alarms);

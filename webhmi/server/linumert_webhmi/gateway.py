@@ -33,7 +33,7 @@ from linumert.cnc import MachineSnapshot, Mode
 
 from .backend import CommandError, MachineBackend
 from .hal_link import HalPins
-from .schema import Command, snapshot_to_dict
+from .schema import SCHEMA_VERSION, Command, snapshot_to_dict
 
 if TYPE_CHECKING:
     from .job_instance import Instance
@@ -154,6 +154,8 @@ class Gateway:
                 self._programs, self._programs_at = self.backend.programs(), now
             state = snapshot_to_dict(snap)
             state["read_only"] = bool(getattr(self.backend, "read_only", False))
+            if state["read_only"]:
+                state = {"schema": SCHEMA_VERSION, "read_only": True, "axes": []}
             if self._instance is not None:
                 observed = (self.backend.binding_state(self._instance.hal_expectations)
                             if hasattr(self.backend, "binding_state") else None)

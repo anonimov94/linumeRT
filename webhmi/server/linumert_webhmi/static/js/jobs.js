@@ -275,6 +275,9 @@ export function createJobs(request) {
   controls();
   return { update(state) {
     viewer = state?.read_only === true;
+    $("jobTitle").textContent = viewer ? "Raport zapisanego zadania" : "Przygotowanie zadania";
+    $("jobPanelScope").textContent = viewer ? "ODCZYT BEZ KONTROLERA"
+      : "PRZYGOTOWANIE / WERYFIKACJA OFFLINE";
     const instance = state?.execution;
     $("jobInstance").hidden = !instance;
     if (instance) {
