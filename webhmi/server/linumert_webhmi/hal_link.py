@@ -63,6 +63,12 @@ class HalPins:
         self._arm_at = None
         self._release_at = now + PULSE_S
 
+    def cancel_acknowledge(self) -> None:
+        """Nowe zatrzymanie unieważnia stary impuls ack i zaplanowane uzbrojenie."""
+        self._arm_at = self._release_at = None
+        self._write(PINS["ack"], False)
+        self._write(PINS["wd"], False)
+
 
 def open_hal(now: float) -> tuple[HalPins, object]:
     """Komponent HAL ``linumert`` z pinami HMI (wymaga ``hal`` z LinuxCNC i działającego HAL)."""

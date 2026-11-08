@@ -152,6 +152,25 @@ def test_linuxcnc_work_zero_uses_g10_l20_and_returns_to_manual():
     assert ("mdi", "G10 L20 P0 Y0") in c.calls
 
 
+@pytest.mark.parametrize("command", [Command(cmd="work_zero", axis="X"),
+                                     Command(cmd="open", name="kwadrat.ngc")])
+def test_setup_refused_until_failed_jog_stop_is_confirmed(tmp_path, command):
+    gateway, _, _ = make(tmp_path)
+    gateway.execute(Command(cmd="jog", axis="X", speed=1))
+    original_stop = gateway.backend.jog_stop
+    def failed_stop(axis):
+        raise CommandError("STOP niepotwierdzony")
+    gateway.backend.jog_stop = failed_stop
+    with pytest.raises(CommandError, match="niepotwierdzone"):
+        gateway.execute(Command(cmd="jog_stop", axis="X"))
+    assert not gateway._jog and gateway._jog_retry
+    with pytest.raises(CommandError, match="niepotwierdzone"):
+        gateway.execute(command)
+    gateway.backend.jog_stop = original_stop
+    gateway.execute(Command(cmd="jog_stop"))
+    gateway.execute(command)
+
+
 def test_linuxcnc_work_zero_refuses_outside_manual():
     b, c = lc_backend(task_mode=80)
     b.snapshot()

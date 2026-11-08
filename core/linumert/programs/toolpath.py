@@ -319,9 +319,59 @@ class PreviewCanon:
 
 TOOL_MMAP = ".tool.mmap"
 _COMMENT = re.compile(r"\([^)]*\)|;.*$")
-_TOOL_WORDS = re.compile(
-    r"(?<![A-Za-z0-9.])(?:[Tt]\s*(?:\d+|#<[^>]*>|#\d+|\[[^\]]*\])|[Mm]\s*0*6(?!\d))")
+_PREVIEW_NUMBER = re.compile(r"[-+]?(?:\d+\.?\d*|\.\d+)")
+_PREVIEW_OWORD = re.compile(r"^/?(?:N\d+)?O(?:<[^>]+>|\d+)[A-Z]+", re.IGNORECASE)
 TOOL_SKIPPED_NOTE = "Zmiany narzędzi (T, M6) pominięte w podglądzie: LinuxCNC nie działa."
+
+
+def preview_words(code: str) -> tuple[str, list[tuple[str, str, int, int]]]:
+    """Słowa i zakresy w kodzie bez komentarzy; odstępy nie oddzielają słów RS274.
+
+    Parametry nazwane, etykiety O i zagnieżdżone wyrażenia są niepodzielne: T/M w ich
+    nazwach nie są poleceniami. To odczyt słów, nie zastępczy interpreter wyrażeń.
+    """
+    code = "".join(code.split())
+    if _PREVIEW_OWORD.match(code):
+        return code, []  # np. końcowe T w REPEAT[3] nie jest słowem wyboru narzędzia
+    words = []
+
+    def end_value(at: int) -> int:
+        if at >= len(code):
+            return at
+        if code[at] == "[":
+            depth, end = 1, at + 1
+            while end < len(code) and depth:
+                depth += (code[end] == "[") - (code[end] == "]")
+                end += 1
+            return end
+        if code[at] == "#":
+            if code[at:at + 2] == "#<":
+                end = code.find(">", at + 2)
+                return len(code) if end < 0 else end + 1
+            return end_value(at + 1)
+        if code[at] in "+-":
+            return end_value(at + 1)
+        function = re.match(r"[A-Za-z]+(?=\[)", code[at:])
+        if function:
+            return end_value(at + len(function.group()))
+        number = _PREVIEW_NUMBER.match(code, at)
+        return number.end() if number else at
+
+    at = 0
+    while at < len(code):
+        if code[at] in "#[":
+            at = max(at + 1, end_value(at))
+            continue
+        letter = code[at].upper()
+        if letter == "O" and code[at + 1:at + 2] == "<":
+            end = code.find(">", at + 2)
+            at = len(code) if end < 0 else end + 1
+            continue
+        end = end_value(at + 1) if letter.isalpha() else at + 1
+        if end > at + 1:
+            words.append((letter, code[at + 1:end], at, end))
+        at = max(at + 1, end)
+    return code, words
 
 
 def tool_data_available() -> bool:
@@ -342,18 +392,25 @@ def tool_data_available() -> bool:
     return True
 
 
-def strip_tool_words(text: str) -> tuple[str, bool]:
-    """Wycina słowa T i M6 poza komentarzami; liczba i numeracja linii bez zmian."""
+def strip_tool_words(text: str, *, include_m61: bool = False) -> tuple[str, bool]:
+    """Wycina T/M6 (opcjonalnie M61 Q) poza komentarzami, zachowując numerację linii."""
     changed = False
     out = []
     for line in text.splitlines(keepends=True):
-        parts, last = [], 0
+        positions, last = [], 0
         for m in _COMMENT.finditer(line):
-            parts.append(_TOOL_WORDS.sub("", line[last:m.start()]))
-            parts.append(m.group(0))
+            positions.extend(i for i in range(last, m.start()) if not line[i].isspace())
             last = m.end()
-        parts.append(_TOOL_WORDS.sub("", line[last:]))
-        new = "".join(parts)
+        positions.extend(i for i in range(last, len(line)) if not line[i].isspace())
+        _, words = preview_words("".join(line[i] for i in positions))
+        has_m61 = include_m61 and any(letter == "M" and _PREVIEW_NUMBER.fullmatch(value)
+                                      and float(value) == 61 for letter, value, _, _ in words)
+        cuts = [(start, end) for letter, value, start, end in words
+                if letter == "T" or (has_m61 and letter == "Q")
+                or (letter == "M" and _PREVIEW_NUMBER.fullmatch(value)
+                    and (float(value) == 6 or (has_m61 and float(value) == 61)))]
+        removed = {positions[i] for start, end in cuts for i in range(start, end)}
+        new = "".join(char for i, char in enumerate(line) if i not in removed)
         changed = changed or new != line
         out.append(new)
     return "".join(out), changed

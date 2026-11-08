@@ -73,14 +73,17 @@ export function allowed(state, link) {
   }
   result.override = machineOn ? permit() : deny(common);
   const jogging = Array.isArray(state.jog_active) && state.jog_active.length > 0;
+  const pendingStop = Array.isArray(state.jog_stop_pending) && state.jog_stop_pending.length > 0;
   result.work_zero = !machineOn ? deny(common) : mode !== "manual"
     ? deny(modeReason("manual")) : !idle ? deny(needsIdle)
       : !homed ? deny("Wymagane bazowanie wszystkich osi")
-        : jogging ? deny("Najpierw zatrzymaj JOG") : permit();
+        : pendingStop ? deny("Niepotwierdzone zatrzymanie JOG")
+          : jogging ? deny("Najpierw zatrzymaj JOG") : permit();
   const programs = Array.isArray(state.programs) ? state.programs : [];
   result.open = !machineOn ? deny(common) : !idle ? deny(needsIdle)
     : !homed ? deny("Wymagane bazowanie wszystkich osi")
-      : !programs.length ? deny("Brak plików w katalogu programów") : permit();
+      : pendingStop ? deny("Niepotwierdzone zatrzymanie JOG")
+        : !programs.length ? deny("Brak plików w katalogu programów") : permit();
   const alarms = Array.isArray(state.alarms) ? state.alarms : [];
   result.reset = alarms.length ? permit() : deny("Brak aktywnych alarmów");
 

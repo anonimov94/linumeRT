@@ -263,6 +263,12 @@ class Gateway:
             return
         self._alarm_reset_at = now + ALARM_RESET_DELAY_S
 
+    def _cancel_estop_reset(self) -> None:
+        pending = self._estop_reset_at is not None
+        self._estop_reset_at = self._alarm_reset_at = None
+        if pending and self._hal is not None:
+            self._hal.cancel_acknowledge()
+
     # ---- polecenia ------------------------------------------------------------
     def _stop_axis(self, axis: str) -> None:
         """Zdejmuje jog osi; przy błędzie backendu zostaje do ponowienia w kolejnym obiegu."""
@@ -334,12 +340,18 @@ class Gateway:
             self._instance.command(name)
         if name == "estop":
             self._stop_all_jog()
-            b.estop()
+            try:
+                b.estop()
+            finally:  # błąd zapisu pinów HAL nie może zablokować wysłania zatrzymania
+                self._cancel_estop_reset()
         elif name == "power_on":
             b.power_on()
         elif name == "power_off":
             self._stop_all_jog()
-            b.power_off()
+            try:
+                b.power_off()
+            finally:
+                self._cancel_estop_reset()
         elif name == "mode":
             if c.mode is None:
                 raise CommandError("tryb: brak parametru mode")
@@ -372,7 +384,10 @@ class Gateway:
                 raise
         elif name == "stop":
             self._stop_all_jog()
-            b.stop()
+            try:
+                b.stop()
+            finally:
+                self._cancel_estop_reset()
         elif name == "override":
             if c.feed is None and c.rapid is None and c.spindle is None:
                 raise CommandError("override: podaj feed, rapid lub spindle")
@@ -420,6 +435,8 @@ class Gateway:
             else:
                 self._stop_axis(c.axis)
         elif name == "work_zero":
+            if self._jog_retry:
+                raise CommandError("zero detalu: niepotwierdzone zatrzymanie JOG")
             if self._jog:
                 raise CommandError("zero detalu: najpierw zatrzymaj JOG")
             b.work_zero(c.axis)
@@ -427,6 +444,8 @@ class Gateway:
             if c.name is None:
                 raise CommandError("program: brak nazwy pliku")
             self._stop_all_jog()
+            if self._jog_retry:
+                raise CommandError("program: niepotwierdzone zatrzymanie JOG")
             b.open_program(c.name)
         elif name == "reset":
             if c.double:
