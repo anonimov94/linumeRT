@@ -104,10 +104,23 @@ class BadOutput(BaseMacroGenerator):
                  "G0 X1 ( M2 w komentarzu ) M20 ; M99 po srednik"][v["variant"]]]
 
 
+class OWordBlock(BaseMacroGenerator):
+    """Generator z własnym blokiem O (numer z pola) — test unikalności numerów O."""
+
+    name = "test_oword"
+    version = 1
+    title = "Blok O (test)"
+    fields = (Field("number", "int", "Numer O", minimum=1, maximum=99999),)
+
+    def generate(self, v):
+        n = v["number"]
+        return [f"o{n} repeat [2]", "G91 G0 X1", f"o{n} endrepeat", "G90"]
+
+
 @pytest.fixture
 def registry():
     reg = GeneratorRegistry()
-    for cls in (DrillPoint, DrillPointV2, Coolant, BadOutput):
+    for cls in (DrillPoint, DrillPointV2, Coolant, BadOutput, OWordBlock):
         reg.register(cls)
     return reg
 
@@ -309,6 +322,76 @@ def test_generator_output_is_checked(registry, variant, word):
         compile_program(program, registry)
     assert info.value.issues[0].code == "P-5013"
     assert info.value.issues[0].params["word"] == word
+
+
+def _ops(text: str) -> list[tuple[int, int]]:
+    """Pary (numer O, linia) otwarć bloków operacji `oN if [1]`."""
+    return [(int(line[1:].split()[0]), i) for i, line in enumerate(text.splitlines(), 1)
+            if line.endswith(" if [1]")]
+
+
+def test_each_operation_has_own_o_number_and_info(registry):
+    """Polecenie właściciela 2026-11-05: każda operacja inny numer O + komentarz z danymi."""
+    text = compile_program(_program(), registry)
+    lines = text.splitlines()
+    assert [n for n, _ in _ops(text)] == [100, 200, 300, 500]  # krok 4 wyłączony: bez bloku
+    for n, at in _ops(text):
+        assert lines.count(f"o{n} endif") == 1 and lines.index(f"o{n} endif") > at
+        assert lines[at - 2].startswith(f"( OP {n // 100} [o{n}]: ")
+        assert lines[at - 3].startswith(f"( krok {n // 100}: ")
+    assert "( OP 2 [o200]: Wiercenie punktu [test] | F100 | Z -8..2 mm )" in lines
+
+
+def _real_registry() -> GeneratorRegistry:
+    from linumert.generators import basic, drilling
+
+    reg = GeneratorRegistry()
+    basic.register(reg)
+    drilling.register(reg)
+    return reg
+
+
+def test_operation_info_with_tool_from_tool_change():
+    from linumert.programs.lnx import parse_lnx as parse
+
+    program = parse({"name": "plyta", "steps": [
+        {"generator": "tool_change", "version": 1,
+         "params": {"tool": 3, "rpm": 8000, "direction": "M3"}},
+        {"generator": "face_mill", "version": 1,
+         "params": {"x1": 50, "y1": 30, "depth": 1, "tool_d": 10, "feed": 1200,
+                    "plunge": 300}},
+    ]})
+    lines = compile_program(program, _real_registry()).splitlines()
+    assert "( OP 1 [o100]: Wymiana narzędzia | T3 S8000 M3 | Z 10..10 mm )" in lines
+    assert "( OP 2 [o200]: Planowanie | T3 D10 S8000 M3 | F1200 FZ300 | Z -1..5 mm )" in lines
+
+
+def test_tool_diameter_from_tool_database():
+    from types import SimpleNamespace
+
+    from linumert.programs.lnx import parse_lnx as parse
+
+    program = parse({"name": "w", "units": "inch", "steps": [
+        {"generator": "tool_change", "version": 1, "params": {"tool": 7}},
+        {"generator": "drill_holes", "version": 1, "params": {"depth": 0.5}},
+    ]})
+    tool = SimpleNamespace(number=7, type=None, params={}, tool_diameter=lambda: 6.35)
+    lines = compile_program(program, _real_registry(), tools=lambda n: tool).splitlines()
+    assert any(line.startswith("( OP 2 [o200]: ") and "| T7 D0.25 |" in line for line in lines)
+
+
+@pytest.mark.parametrize("numbers,bad_step", [((100,), 1), ((250, 250), 2), ((201, 199), None)])
+def test_generator_o_numbers_must_not_collide(registry, numbers, bad_step):
+    program = _program(steps=[{"generator": "test_oword", "version": 1,
+                               "params": {"number": n}} for n in numbers])
+    if bad_step is None:
+        assert "o201 repeat [2]" in compile_program(program, registry)
+        return
+    with pytest.raises(CompileError) as info:
+        compile_program(program, registry)
+    issue = info.value.issues[0]
+    assert (issue.code, issue.params["step"]) == ("P-5013", bad_step)
+    assert "powtórzony numer O" in issue.params["word"]
 
 
 def test_codes_in_comments_and_m20_are_allowed(registry):

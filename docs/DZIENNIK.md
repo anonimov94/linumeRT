@@ -1828,6 +1828,11 @@ Pełny RIP musi ponownie potwierdzić wynik; nie scalać na czerwonym CI.
 - Kliknięte w przeglądarce na LinuxCNC 2.9 + Plant: Z robocze 6,9936 po styku na 5 + odjazd 2; chybienie (droga 1 mm) = E-1000 z komunikatem LinuxCNC, offset bez zmian. Zrzuty: `docs/raporty/G2/WEBHMI_SONDA_2026-11-05.md`.
 - Testy: `test_webhmi_probe_linuxcnc` PASS (offset −35,012 przy −35 ± 0,02), unit 130 PASS, JS 41 PASS. Otwarte: X/Y kliknięte tylko testem logiki, kalibracja sondy w GUI. NIEZWERYFIKOWANE NA SPRZĘCIE.
 
+## Program dialogowy: numer O i komentarz każdej operacji · 2026-11-05 · Claude
+- Model-Author: Claude. Polecenie właściciela: każda operacja z `.lnx` ma własny blok `oN if [1]` … `oN endif` (N = krok × 100) i komentarz `( OP N [oN]: rodzaj | T D S | F FZ | Z )`. Powtórzone numery O w generatorach odrzuca P-5013. PROPOZYCJA w DECYZJE.
+- Złote kopie: różnią się tylko dodanymi liniami (sprawdzone). LinuxCNC 2.9 + Plant: `tests/test_op_blocks_linuxcnc.py` (cały program w AUTO i start od linii wewnątrz `o300`: wierci tylko otwór operacji 3, bez błędów); akceptacja Plant z `test_gcode_isolation_linuxcnc` (M6 w bloku O) PASS.
+- Otwarte: numer operacji w WebHMI, notatka narzędzia dla `o<lrt_*> call` po #212. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
 ## Cel pionowy pełnego linumeRT — 2026-11-05 · Codex
 
 - Model-Author: Codex. Polecenie właściciela: prepare → verify → run → report w pełnym projekcie, ukończone porcje do main.

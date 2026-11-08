@@ -2,6 +2,8 @@
 ( zrodlo: legacy.ngc, schemat .lnx 1 )
 G21
 ( krok 1: pocket_circle v1 )
+( OP 1 [o100]: Kieszeń okrągła [prototyp] | D8 | F400 FZ100 | Z -1..5 mm )
+o100 if [1]
 ( Kieszen okragla: wejscie pionowe, symulacja wymagana )
 G17 G90 G91.1 G94 G40 G80
 G0 Z5
@@ -10,4 +12,5 @@ G1 Z-1 F100
 G1 X2 Y0 F400
 G3 X2 Y0 I-2 J0 F400
 G0 Z5
+o100 endif
 M2

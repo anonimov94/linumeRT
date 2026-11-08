@@ -2,6 +2,8 @@
 ( zrodlo: stud_rect.ngc, schemat .lnx 1 )
 G21
 ( krok 1: stud_rect v1 )
+( OP 1 [o100]: Czop prostokątny | D6 | F400 FZ100 | Z -2..5 mm )
+o100 if [1]
 ( Czop prostokatny: tor srodka narzedzia, symulacja wymagana )
 G17 G90 G91.1 G94 G40 G80
 G0 Z5
@@ -64,4 +66,5 @@ G2 X38 Y10 I-7 J0 F400
 G1 X22 Y10 F400
 G1 X22 Y5 F400
 G0 Z5
+o100 endif
 M2
