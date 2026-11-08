@@ -2070,3 +2070,13 @@ Lokalne4 regresje f936f19 PASS58,09s, dokumentacja lint/31PASS/REQ22/22; raw7 ar
 Plan RUN done; dowody końcowego ustalenia i zrzut w #230. REPORT zachowany jako draft #231.
 Autokontrola, bez niezależnego przeglądu. Własne procesy zakończone, lease zwolniony.
 Nie zamyka sesji nadrzędnych/bramek ani kwalifikacji sprzętu.
+
+## Integracja otwartych PR i zgodność archiwów · 2026-11-08
+
+Model-Author: Codex. Polecenie właściciela: badania i domknięcie211/212/213/231.
+Osobny checkout/PR232 zawiera wszystkie cztery historie; konflikt sondy zachowuje
+blokady pending STOP. Badania i źródła w docs/prawne/BADANIA_INTEGRACJI_2026-11-08.md.
+Zmiana kompilatora ujawniła7 regresji archiwów: raport ponownie generował dawny program.
+Odczyt dowodów sprawdza hashe/powiązania bez dzisiejszej kompilacji; wykonanie nadal
+wymaga pełnego read/regeneracji.216 testów PASS,44JS PASS; dodatkowo10 archiwów PASS,
+w tym raw FERR i luka zachowana jako incomplete. Ruff PASS; GUI/pełne CI wymagane.

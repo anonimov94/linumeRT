@@ -15,6 +15,7 @@ from linumert.programs import job_report
 
 PROOF = Path(__file__).resolve().parents[1] / "docs/raporty/vertical"
 INDEX = json.loads((PROOF / "runs-20261107.json").read_text())
+RAW_INDEX = json.loads((PROOF / "report-ferr-acceptance-20261108.json").read_text())
 
 
 def unpack(archive, output, *, flat=False):
@@ -67,3 +68,34 @@ def test_report_matches_original_hashes_and_independent_statistics(entry, execut
         alarm = report["alarms"][0]
         assert alarm["code"] == "E-1100" and alarm["observed_at_s"] > 8
         assert isinstance(alarm["motion_line"], int) and isinstance(alarm["line"], int)
+
+
+@pytest.mark.parametrize("entry", RAW_INDEX, ids=[e["case"] for e in RAW_INDEX])
+def test_raw_joint_archives_preserve_gaps_and_independent_statistics(entry, executions, tmp_path):
+    archive = PROOF / entry["archive"]
+    assert hashlib.sha256(archive.read_bytes()).hexdigest() == entry["archive_sha256"]
+    unpack(archive, tmp_path, flat=True)
+    for name, digest in entry["files"].items():
+        assert hashlib.sha256((tmp_path / name).read_bytes()).hexdigest() == digest
+    report = job_report.build(tmp_path, executions / entry["target"])
+    samples = [json.loads(row) for row in (tmp_path / "samples.jsonl").read_text().splitlines()]
+    samples = [row for row in samples if "axes" in row]
+    raw = report["joint_following_error"]
+    assert raw["joint_axes"] == {"0": "X", "1": "Y", "2": "Y", "3": "Z"}
+    assert raw["status"] == "available" and raw["samples"] == len(samples)
+    for joint, stat in raw["joints"].items():
+        values = [row["joint_following_errors"]["values"][int(joint)] for row in samples]
+        assert stat["max_abs_mm"] == max(map(abs, values))
+        assert stat["rms_mm"] == pytest.approx(math.sqrt(
+            math.fsum(value * value for value in values) / len(values)), abs=1e-12)
+    assert report["quality"] == entry["quality"]
+    assert report["positioning"] == entry["positioning"]
+    assert report["time"] == entry["time"]
+    assert report["execution_status"] == entry["execution_status"]
+    if entry["case"] == "gapped":
+        assert report["status"] == "incomplete"
+        assert not report["time"]["comparison_available"]
+        assert report["positioning"]["status"] == "unavailable"
+    from linumert.programs.job import json_text
+
+    assert job_report.load(json_text(report).encode()) == report

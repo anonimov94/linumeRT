@@ -64,6 +64,24 @@ def test_offline_report_reopens_after_original_data_are_unavailable(recorded, tm
     assert job_report.load(path) == report
 
 
+def test_historical_report_does_not_recompile_but_runtime_still_does(recorded, monkeypatch):
+    def changed_generator(*args, **kwargs):
+        raise ValueError("generator changed since recording")
+
+    monkeypatch.setattr(job_execution, "render", changed_generator)
+    report = job_report.build(*recorded)
+    assert report["status"] == "observational"
+    with pytest.raises(ValueError, match="generator changed"):
+        job_execution.read(recorded[1])
+
+
+def test_historical_report_still_rejects_changed_execution_bytes(recorded):
+    run, execution = recorded
+    (execution / "nc_files/program.ngc").write_text("G0 X999\nM2\n")
+    with pytest.raises(ValueError, match="Zmieniony zasób"):
+        job_report.build(run, execution)
+
+
 @pytest.mark.parametrize("damage", ["checksum", "units", "ending", "missing", "nan"])
 def test_saved_report_rejects_damage_and_unsubstantiated_pass(recorded, damage):
     from linumert.programs.job import digest, json_text

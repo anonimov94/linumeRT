@@ -178,7 +178,7 @@ def load(source):
 def build(run: Path, execution: Path) -> dict:
     """Bind immutable inputs and the exact consumed bytes; report gaps without inventing data."""
     run, execution = Path(run), Path(execution)
-    frozen, files = job_execution.read(execution)
+    frozen, files = job_execution.read_evidence(execution)
     manifest_bytes = _read(run / "manifest.json", MAX_LINE)
     manifest = _json(manifest_bytes)
     if (not isinstance(manifest, dict) or manifest.get("format") != "linumert.job.run"
