@@ -2080,3 +2080,13 @@ Zmiana kompilatora ujawniła7 regresji archiwów: raport ponownie generował daw
 Odczyt dowodów sprawdza hashe/powiązania bez dzisiejszej kompilacji; wykonanie nadal
 wymaga pełnego read/regeneracji.216 testów PASS,44JS PASS; dodatkowo10 archiwów PASS,
 w tym raw FERR i luka zachowana jako incomplete. Ruff PASS; GUI/pełne CI wymagane.
+
+## Odbiór integracji i diagnoza CI · 2026-11-09
+
+Model-Author: Codex. CI759ef64:2257 Python/192 native PASS; RIP256PASS/3FAIL.
+Dwie asercje mapowania wskazują teraz instrukcję źródłową, nie numer sprzed etykiet.
+Trzeci błąd: timeout Cyberdeck; dodano trwały log LinuxCNC -r, bez wydłużania limitu.
+Lokalnie osobny venv z systemowym NumPy1.x usuwa konflikt ABI OpenCV;15 RIP PASS142,13s,
+w tym classic/shell/Cyberdeck i12 testów precyzyjnego śladu. Przyczyna CI nadal badana.
+Kliknięty raport offline: XYZ, alarmy, eksport/import JSON PASS; doprecyzowano kontrole
+sprzed Start. Dowody report-offline-z/reimport-y-20261109.jpg; final CI/scalenie oczekują.

@@ -61,7 +61,9 @@ def test_prepared_job_preserves_tools_motion_lines_and_live_mapping(runtime, tmp
     assert trace["completed"] and len(trace["motions"]) == 82
     assert trace["motions"][0]["line"] == 0  # initialization, not a job motion
     feeds = [m for m in trace["motions"] if m["name"] == "STRAIGHT_FEED"]
-    assert feeds[0]["line"] == 19 and feeds[0]["tool"] == 1
+    # Operation labels add source lines without changing the executed motion.
+    plunge_line = files["program.ngc"].splitlines().index("G1 Z-1 F200") + 1
+    assert feeds[0]["line"] == plunge_line and feeds[0]["tool"] == 1
     assert feeds[0]["rpm"] == 6000
     assert feeds[-1]["tool"] == 2 and feeds[-1]["rpm"] == 3000
     offsets = [c["args"][2] for c in trace["calls"] if c["name"] == "USE_TOOL_LENGTH_OFFSET"]
@@ -147,7 +149,8 @@ def test_preflight_uses_unrounded_limits_including_near_boundary(runtime, tmp_pa
     assert job_check.ROUNDING_NOTE not in result["limitations"]
     if failed:
         violation = next(v for v in result["violations"] if v["axis"] == "X")
-        assert violation["line"] == 20
+        source = before["program.ngc"].decode("utf-8").splitlines()
+        assert violation["line"] == source.index("G1 X60 F800") + 1
         assert violation["value"] == pytest.approx(599.00004, abs=1e-9)
     assert {p.name: p.read_bytes() for p in package.iterdir()} == before
 

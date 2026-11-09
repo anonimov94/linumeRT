@@ -62,8 +62,9 @@ wykresu oraz brakujących danych. Nie wynika z niego gwarancja śladu RT w NML.
 
 [Forum Siemens Industry: pomiar G120C](https://support.industry.siemens.com/forum/WW/en/post/1009473/)
 zawiera praktyczną uwagę o porównaniu odczytu z pomiarem w konkretnej instalacji.
-Strona przekierowuje do aplikacji SiePortal wymagającej JavaScript; tekst dostępny
-w indeksie nie stanowi kwalifikacji naszej maszyny ani dokładności napędów.
+Pełny wątek odczytano w przeglądarce SiePortal: dotyczy wygładzanego pomiaru prądu
+G120C i porównania w stanie ustalonym z niezależnym miernikiem w konkretnej instalacji.
+Nie stanowi kwalifikacji naszej maszyny ani deklaracji dokładności napędów.
 
 Wnioski do #231: podawać max/RMS próbek, lukę czasową, jednostki, mapowanie przegubów,
 oddzielać końcowe ustalenie od błędów w ruchu. Wyświetlać ograniczenia również po
