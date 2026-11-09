@@ -65,6 +65,10 @@ def main(argv: list[str] | None = None) -> int:
     execution.add_argument("--out", type=Path, required=True, help="nowy katalog konfiguracji")
     execution.add_argument("--plant-port", type=int, default=47700)
     execution.add_argument("--test-mode", action="store_true", help="jawny bypass HMI w symulacji")
+    report = commands.add_parser("run-report", help="raport zapisanego przebiegu bez maszyny")
+    report.add_argument("run", type=Path, help="katalog manifest.json/samples.jsonl/result.json")
+    report.add_argument("--execution", type=Path, required=True, help="zamrożona konfiguracja")
+    report.add_argument("--out", type=Path, required=True, help="nowy plik raportu JSON")
     machine = commands.add_parser("machine", help="walidacja maszyny i skale napędów")
     machine.add_argument("path", type=Path)
     config = commands.add_parser("config", help="eksport konfiguracji LinuxCNC sim/Plant")
@@ -130,6 +134,20 @@ def main(argv: list[str] | None = None) -> int:
             keys = ("execution_id", "job_id", "target", "status")
             print(json.dumps({k: identity[k] for k in keys},
                              ensure_ascii=False, indent=2))
+        elif args.command == "run-report":
+            from .programs import job_report
+            from .programs.job_check import save
+
+            if args.out.resolve().is_relative_to(args.execution.resolve()):
+                raise ValueError("Raport zapisz poza niezmienną konfiguracją")
+            if args.out.resolve().is_relative_to(args.run.resolve()):
+                raise ValueError("Raport zapisz poza źródłowym zapisem przebiegu")
+            result = job_report.build(args.run, args.execution)
+            save(result, args.out)
+            print(json.dumps({k: result[k] for k in
+                ("job_id", "run_id", "report_id", "status", "execution_status", "positioning")},
+                ensure_ascii=False, indent=2))
+            return 2 if result["status"] == "incomplete" else 0
         elif args.command == "machine":
             from .machine.drives.drive_real import counts_per_unit
             from .machine.drives.machine_drives import load_machine_drives

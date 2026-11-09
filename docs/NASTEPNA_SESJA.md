@@ -15,6 +15,95 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · 2026-11-10. Właściciel polecił scalić do main. Badanie masy/PI
+opublikowane jako PR233/aed6403, dołączone do domknięcia232 bez zmian produkcyjnych.
+CI594526e: Python/C/wheel success42711421106; LinuxCNC42711421110 257PASS/2FAIL,
+first_motion PASS. G2: Reset po pierwszym błędzie MDI wyprzedzał dalsze komunikaty;
+JOG: snapshot przed pierwszym odczytem aktywnego ruchu dawał pozorne zatrzymanie.
+Kierowcy czekają teraz na pełny zestaw diagnostyki odrzuconego MDI i na aktywny JOG
+z ruchem>0,05mm przed oczekiwaniem na Stop; oryginalne progi pozostają.
+96 testów bramy/backendu/G2 PASS. Nowy celowany etap CI poprzedza pełną serię,
+bez usunięcia żadnego sprawdzenia. Wymagane końcowe CI przed scaleniem232 do main.
+
+Model-Author: Codex · 2026-11-09. Właściciel pyta o masę/PID dla X0,8301mm.
+Badanie na osobnej gałęzi codex/diagnose-x-20261109, bez zmiany integracji594526e.
+Istniejący P+PI/FF/anti-windup; X80kg i10mm/obr.11 prób modelu: baseline enkoder
+0,050274mm, obserwacja starsza4ms0,842164mm; to zgodność skali, nie dowód CI.
+Zmiana masy wymaga dopasowania J/PI; mocniejszy PI pogarsza stronę obciążenia.
+Raport/protokół: docs/raporty/prototypy/X_MASS_PI_2026-11-09.md + gzip + skrypt.
+Dwa wykonania identyczne bajtowo, hashe/statystyki PASS. Dalej rzeczywisty PEAK/link/
+sampler z first_motion: age/missed/drive-ferror/torque, z wyrównaniem faz HAL.
+CI Python/C/wheel dla594526e success42711421106; LinuxCNC42711421110 w toku.
+
+Model-Author: Codex · 2026-11-09. Walidacja lokalna tej kontynuacji: pełny pytest
+2100PASS/5FAIL/135skip/259deselected,184podtesty,492,53s. Dwa FAIL panelu:
+brak socksio dla skonfigurowanego proxy; po instalacji lokalnej2PASS2,11s.
+Pozostałe: /proc/<pid>/environ PermissionError13 (potwierdzone na własnym dziecku)
+oraz2 testy VM-link — watchdog po przerwach64/135ms przy limicie50ms.
+Bez luzowania limitów i bez deklaracji pełnego PASS. Celowane71+22PASS,
+REQ22/22, lint/roadmap/YAML PASS. Oddzielny sampler w tym samym starym CI miał
+X0,164563mm; nie wyjaśnia to X0,8301mm w nieutrwalonej próbie.
+Push został odrzucony przez automatyczną kontrolę zgody; zmiany są tylko lokalne.
+Wysłanie gałęzi i nowe CI wymagają wyraźnej zgody właściciela w czacie.
+
+Model-Author: Codex · 2026-11-09. Wznowienie PR232/head44c72f7: ci42626321124
+FAIL wyłącznie brak provenance2 JPG; RIP42626321032:258PASS/1FAIL first_motion,
+X0,8301mm>0,2mm, Cyberdeck PASS. Artefakt13683020512 odczytany: zachowuje
+osobne próby readiness/samplera, ale nie katalog nieudanego first_motion
+(TemporaryDirectory bez diagnostyki). Uzupełniono provenance i włączono istniejącą
+LINUMERT_SCENARIO_DIAGNOSTICS w CI z uploadem state/scenario-diagnostics.
+71 testów raportów/IP/diagnostyki PASS; ruff/roadmap PASS. Przyczyna X nieustalona,
+progi/ruch/model bez zmian. Dalej końcowe CI, diagnoza X na zachowanych danych;
+PR232 pozostaje draft, bez scalenia i bez zaliczenia nadrzędnych bramek.
+
+Model-Author: Codex · 2026-11-08. Polecenie właściciela: badania i domknięcie
+#211/#212/#213/#231. Osobny checkout linumeRT-pr-closeout-20261108, gałąź
+codex/pr-closeout-research-20261108; istniejące checkouty i ich zmiany zachowane.
+Badania: docs/prawne/BADANIA_INTEGRACJI_2026-11-08.md. Poprawiono opis FERR i
+walidację statystyk/mapowania offline:37 testów raportu/archiwów PASS, ruff/roadmap PASS.
+Dalej odbiór GUI raportu, integracja istniejących gałęzi sync i pełne CI; nie zaliczono bramek.
+
+Model-Author: Codex · 2026-11-08.3 RIP przerwań z raportem/raw FERR PASS56,43s.
+Pełny verified Plant d96a200:112,616904s, max gap0,027075s, raport observational/pozycja
+passed/raw4 available. Pierwszy112,706333s wykrył lukę0,111433s i pozostaje incomplete.
+Sim Stop zapisany; sterownik odbioru błędnie oczekiwał3 jointów, frozen ma4 — dane do
+niezależnego audytu, bez ponawiania ruchu. Mapowanie raportu używa wspólnego joint_drives;
+34 testy PASS. Własne CNC zakończone, moduły przywrócone, lease wolny. Dalej GUI/CI.
+
+Model-Author: Codex · 2026-11-08. Pierwszy odbiór raw FERR: boot PASS,3 przebiegi
+wykonane, ale raport incomplete — stat.joint zawiera16 slotów. Poprawiony odczyt
+ogranicza je do stat.joints aktywnej konfiguracji; regresja obejmuje14 nieużywanych.
+RIP do ponowienia; nie zaliczamy pierwszej próby jako odbioru raportu.
+
+Model-Author: Codex · 2026-11-08. Dziennik zapisuje osobny kanał surowego FERR każdego
+przegubu z tego samego odczytu NML; raport ma jego max/RMS i końcowe3 odczyty.
+91 szybkich regresji PASS; starsze zapisy jawnie bez tego kanału. Kolejny krok:
+4 RIP z API raportu, pełny rzeczywisty program i odbiór GUI offline; przed scaleniem CI.
+
+Model-Author: Codex · 2026-11-08.7 rzeczywistych archiwów: niezależne max/math.fsum RMS
+zgodne; zachowano oryginalne konfiguracje sim/Plant i przenośny raport z hashami.
+30 testów raportu PASS. Różnica osi NML pozostaje jawna; następne surowy joint FERR,
+rzeczywisty zapis tego kanału i kliknięty odbiór raportu. Bez duplikacji planera/RT.
+
+Model-Author: Codex · 2026-11-08. Raport ma wykresy pozycji/błędu z zachowanych punktów,
+wybór XYZ, maksimum pełnego zapisu oraz alarmy/czas/kontrole.31 Python PASS/4skip;
+składnia JS PASS (Node Windows). Przed odbiorem: rzeczywiste raporty, GUI i pełne CI.
+
+Model-Author: Codex · 2026-11-08. WebHMI --report otwiera JSON bez kontrolera i atrapy,
+odmawia wszystkich komend; import/eksport zachowują oryginalne liczby i sumę SHA.
+23 Python/42 JS PASS. Widok minimalny dostępny; wykres i kliknięty odbiór jeszcze otwarte.
+
+Model-Author: Codex · 2026-11-08. Checkpoint raportu: przenośny JSON sprawdza własną
+sumę SHA i dowody końcowej pozycji; można go odczytać po usunięciu testowych źródeł.
+21 testów PASS, limity metadanych i zakaz zapisu do źródeł. Integracja GUI nadal w toku.
+
+Model-Author: Codex · 2026-11-08. **Wznowienie celu, VERTICAL-REPORT w PR231:**
+po zamknięciu RUN pracujemy nad poziomem4 pełnego main. Odczyt7 oryginalnych archiwów
+PASS; raport rozróżnia legacy i3 przyjęte ustalenia. Dodano piki błędu/alarmy z czasem
+i linią, luki na końcach zapisu, jawne jednostki/kontrole i porównanie czasu bez pauz.
+15 testów raportu PASS. Następne: wykres/ponowny odczyt bez kontrolera, odbiór GUI,
+rzeczywiste dane i pełna regresja/CI; PR pozostaje draft. Bez zmian sterowania/Qt/HAL.
+
 Model-Author: Codex · 2026-11-07. **VERTICAL-RUN zamknięty, pełne main:**
 #229 scalony ff0a9f9ca1d3adc80fb9cd1b8e086ed368538aca. Dokładny f936f19 ma success
 ci42417145984 oraz LinuxCNC42417145941:245 RIP i12 Beta PASS; D38 sim/Plant PASS.
@@ -45,6 +134,11 @@ wznowienie/Stop PASS8,16s, archiwum zachowane, brak procesów/lease. CI90LinuxCN
 244PASS/1FAIL stary D38sim, lokalne odtworzenie PASS67,06s bez zmian. Próba2 job128518681208
 w toku, nadal nie scalać229. IPf02610PASS/REQ22/22; dokumentacyjne CI230 success.
 Raport zapisany osobno jako draft231, nie rozwijać go podczas domykania tego etapu.
+
+Model-Author: Codex · 2026-11-07. Osobny checkpoint raportu, gałąź
+codex/job-run-report-20261107 nad dowodami wykonania: wspólny backend CLI/API i minimalny
+widok WebHMI,9 testów raportu/CLI/API PASS oraz46 regresji/4skip. Nieodebrane GUI/realne
+dane/pełna regresja; draft do dalszego etapu. Wykonanie zamknięte w229/230; szkic zachowany nad main9d58f79, bez nowego rozwoju.
 
 Model-Author: Codex · 2026-11-07. Domknięcie wykonania90e8100:4 RIP PASS59,77s;
 Stop i kliknięte GUI kończą po3 próbkach <0,001mm (max0,000608/0,000656mm), surowe

@@ -1,0 +1,765 @@
+{
+  "cli_api": "shared backend; portable reopen and authenticated API equality",
+  "inputs": {
+    "plant": {
+      "archive": "execution-plant-20261108.tar.gz",
+      "execution_id": "a034404861204810262976262f99f451a01316e2520235222a83f8c84c894328",
+      "sha256": "094395c211ebeb622a3d2a5063fe50d489edd23bbc64c69320de01acde51cb4e"
+    },
+    "sim": {
+      "archive": "execution-sim-20261108.tar.gz",
+      "execution_id": "ae0ba5bdfd4aa2c6b76be8b4fd66d6a3a5ed74e6528cfa306eeb4178c222dd3f",
+      "sha256": "a756a8aec0cc16b4ddeba53c6746bdc114913b267586039a008cb9b6983fb990"
+    }
+  },
+  "oracle": "independent max and math.fsum RMS; exact original SHA256",
+  "records": [
+    {
+      "alarms": [],
+      "axes": {
+        "X": {
+          "actual_minus_commanded": {
+            "max_abs_mm": 0.10999060685438167,
+            "peak": {
+              "line": 87,
+              "motion_line": 20,
+              "t": 3.4891977319999796,
+              "value_mm": -0.10999060685438167
+            },
+            "rms_mm": 0.036962963244064465
+          },
+          "following_error": {
+            "max_abs_mm": 0.10999060685438167,
+            "peak": {
+              "line": 87,
+              "motion_line": 20,
+              "t": 3.4891977319999796,
+              "value_mm": 0.10999060685438167
+            },
+            "rms_mm": 0.036962963244064465
+          }
+        },
+        "Y": {
+          "actual_minus_commanded": {
+            "max_abs_mm": 0.4399842855166298,
+            "peak": {
+              "line": 87,
+              "motion_line": 18,
+              "t": 1.6160962079999308,
+              "value_mm": -0.4399842855166298
+            },
+            "rms_mm": 0.0316670768179179
+          },
+          "following_error": {
+            "max_abs_mm": 0.4399842855166298,
+            "peak": {
+              "line": 87,
+              "motion_line": 18,
+              "t": 1.6160962079999308,
+              "value_mm": 0.4399842855166298
+            },
+            "rms_mm": 0.0316670768179179
+          }
+        },
+        "Z": {
+          "actual_minus_commanded": {
+            "max_abs_mm": 0.3018034990659437,
+            "peak": {
+              "line": 87,
+              "motion_line": 14,
+              "t": 1.0847058929999776,
+              "value_mm": 0.3018034990659437
+            },
+            "rms_mm": 0.06984605839718108
+          },
+          "following_error": {
+            "max_abs_mm": 0.3018034990659437,
+            "peak": {
+              "line": 87,
+              "motion_line": 14,
+              "t": 1.0847058929999776,
+              "value_mm": -0.3018034990659437
+            },
+            "rms_mm": 0.06984605839718108
+          }
+        }
+      },
+      "execution_status": "aborted",
+      "positioning": {
+        "last3_max_abs_mm": {
+          "X": 0.01855031598583423,
+          "Y": 3.368443742601812e-05,
+          "Z": 3.129399465251481e-05
+        },
+        "scope": "last3 settled NML observations only",
+        "status": "unavailable",
+        "tolerance_mm": 0.001
+      },
+      "quality": {
+        "first_sample_s": 0.0013202640000145038,
+        "issues": [],
+        "last_sample_s": 8.144846379,
+        "max_gap_s": 0.06946211400008906,
+        "samples": 381,
+        "servo_trace": false
+      },
+      "report_id": "574afd574b51505fd5f537d938734900edf86407698d1850a993f6de82e08b0e",
+      "run_id": "c3341f6367834c2fb5490da7ea6baf5d",
+      "source_archive": "run-aborted-20261107.tar.gz",
+      "target": "plant",
+      "time": {
+        "basis": "monotonic elapsed seconds",
+        "comparison_available": false,
+        "elapsed_s": 8.144927167999981,
+        "excess_over_lower_bound_percent": null,
+        "excess_over_lower_bound_s": null,
+        "paused_observed_s": 0.9881834420000359,
+        "predicted_lower_bound_s": 107.958839,
+        "prediction_kind": "offline model lower bound, not a completion deadline",
+        "unpaused_elapsed_s": 7.156743725999945
+      }
+    },
+    {
+      "alarms": [],
+      "axes": {
+        "X": {
+          "actual_minus_commanded": {
+            "max_abs_mm": 0.7612633281300987,
+            "peak": {
+              "line": 87,
+              "motion_line": 42,
+              "t": 47.576299636000044,
+              "value_mm": 0.7612633281300987
+            },
+            "rms_mm": 0.05269948051299591
+          },
+          "following_error": {
+            "max_abs_mm": 0.7612633281300987,
+            "peak": {
+              "line": 87,
+              "motion_line": 42,
+              "t": 47.576299636000044,
+              "value_mm": -0.7612633281300987
+            },
+            "rms_mm": 0.05269948051299591
+          }
+        },
+        "Y": {
+          "actual_minus_commanded": {
+            "max_abs_mm": 0.46731210156639236,
+            "peak": {
+              "line": 100,
+              "motion_line": 100,
+              "t": 106.97348765100003,
+              "value_mm": -0.46731210156639236
+            },
+            "rms_mm": 0.029134404383769564
+          },
+          "following_error": {
+            "max_abs_mm": 0.46731210156639236,
+            "peak": {
+              "line": 100,
+              "motion_line": 100,
+              "t": 106.97348765100003,
+              "value_mm": 0.46731210156639236
+            },
+            "rms_mm": 0.029134404383769564
+          }
+        },
+        "Z": {
+          "actual_minus_commanded": {
+            "max_abs_mm": 0.3212348888773988,
+            "peak": {
+              "line": 100,
+              "motion_line": 99,
+              "t": 106.80407028000002,
+              "value_mm": -0.3212348888773988
+            },
+            "rms_mm": 0.04301517186738797
+          },
+          "following_error": {
+            "max_abs_mm": 0.3212348888773988,
+            "peak": {
+              "line": 100,
+              "motion_line": 99,
+              "t": 106.80407028000002,
+              "value_mm": 0.3212348888773988
+            },
+            "rms_mm": 0.04301517186738797
+          }
+        }
+      },
+      "execution_status": "completed_observed",
+      "positioning": {
+        "last3_max_abs_mm": {
+          "X": 1.9380843440330864e-05,
+          "Y": 2.47446911885163e-05,
+          "Z": 0.040252521145902165
+        },
+        "scope": "last3 settled NML observations only",
+        "status": "unavailable",
+        "tolerance_mm": 0.001
+      },
+      "quality": {
+        "first_sample_s": 0.0013595230000191805,
+        "issues": [],
+        "last_sample_s": 112.53155089500001,
+        "max_gap_s": 0.04112331199996788,
+        "samples": 5288,
+        "servo_trace": false
+      },
+      "report_id": "5e7b55cdba7a93d4ff41ef126531ad6292a17e773128e7ad1397ae0989f27dde",
+      "run_id": "65e9262ea8a34a4eaf93fd636dae2d9c",
+      "source_archive": "run-completed_observed-20261107.tar.gz",
+      "target": "plant",
+      "time": {
+        "basis": "monotonic elapsed seconds",
+        "comparison_available": true,
+        "elapsed_s": 112.53162457400003,
+        "excess_over_lower_bound_percent": 3.2896456602316597,
+        "excess_over_lower_bound_s": 3.5514632619999844,
+        "paused_observed_s": 1.021322312000052,
+        "predicted_lower_bound_s": 107.958839,
+        "prediction_kind": "offline model lower bound, not a completion deadline",
+        "unpaused_elapsed_s": 111.51030226199998
+      }
+    },
+    {
+      "alarms": [
+        {
+          "code": "E-1100",
+          "count": 1,
+          "id": 3,
+          "line": 87,
+          "motion_line": 20,
+          "observed_at_s": 8.204140753000047,
+          "text": "Stan awaryjny (E-stop) jest aktywny."
+        }
+      ],
+      "axes": {
+        "X": {
+          "actual_minus_commanded": {
+            "max_abs_mm": 0.11126949251777773,
+            "peak": {
+              "line": 87,
+              "motion_line": 20,
+              "t": 3.479067225000108,
+              "value_mm": -0.11126949251777773
+            },
+            "rms_mm": 0.037726370348451936
+          },
+          "following_error": {
+            "max_abs_mm": 0.11126949251777773,
+            "peak": {
+              "line": 87,
+              "motion_line": 20,
+              "t": 3.479067225000108,
+              "value_mm": 0.11126949251777773
+            },
+            "rms_mm": 0.037726370348451936
+          }
+        },
+        "Y": {
+          "actual_minus_commanded": {
+            "max_abs_mm": 0.4402894614070192,
+            "peak": {
+              "line": 87,
+              "motion_line": 18,
+              "t": 1.6051157399999738,
+              "value_mm": -0.4402894614070192
+            },
+            "rms_mm": 0.031524375851779
+          },
+          "following_error": {
+            "max_abs_mm": 0.4402894614070192,
+            "peak": {
+              "line": 87,
+              "motion_line": 18,
+              "t": 1.6051157399999738,
+              "value_mm": 0.4402894614070192
+            },
+            "rms_mm": 0.031524375851779
+          }
+        },
+        "Z": {
+          "actual_minus_commanded": {
+            "max_abs_mm": 0.3018034990659437,
+            "peak": {
+              "line": 87,
+              "motion_line": 14,
+              "t": 1.0669653290001406,
+              "value_mm": 0.3018034990659437
+            },
+            "rms_mm": 0.06980975790618599
+          },
+          "following_error": {
+            "max_abs_mm": 0.3018034990659437,
+            "peak": {
+              "line": 87,
+              "motion_line": 14,
+              "t": 1.0669653290001406,
+              "value_mm": -0.3018034990659437
+            },
+            "rms_mm": 0.06980975790618599
+          }
+        }
+      },
+      "execution_status": "client_lost",
+      "positioning": {
+        "last3_max_abs_mm": {
+          "X": 0.05332622488731431,
+          "Y": 3.368443742601812e-05,
+          "Z": 3.129399465251481e-05
+        },
+        "scope": "last3 settled NML observations only",
+        "status": "unavailable",
+        "tolerance_mm": 0.001
+      },
+      "quality": {
+        "first_sample_s": 0.0015035530000204744,
+        "issues": [],
+        "last_sample_s": 8.204140753000047,
+        "max_gap_s": 0.051972649999925125,
+        "samples": 384,
+        "servo_trace": false
+      },
+      "report_id": "e0c2c25572bf073519c779751affa8d392caaecc08d62e83ff781fef62bf3234",
+      "run_id": "4a121d5fbf1d4a5e8cc864e9e4fd7eae",
+      "source_archive": "run-client_lost-20261107.tar.gz",
+      "target": "plant",
+      "time": {
+        "basis": "monotonic elapsed seconds",
+        "comparison_available": false,
+        "elapsed_s": 8.204209292000087,
+        "excess_over_lower_bound_percent": null,
+        "excess_over_lower_bound_s": null,
+        "paused_observed_s": 0.9886663180000141,
+        "predicted_lower_bound_s": 107.958839,
+        "prediction_kind": "offline model lower bound, not a completion deadline",
+        "unpaused_elapsed_s": 7.215542974000073
+      }
+    },
+    {
+      "alarms": [],
+      "axes": {
+        "X": {
+          "actual_minus_commanded": {
+            "max_abs_mm": 0.7591794633360678,
+            "peak": {
+              "line": 87,
+              "motion_line": 42,
+              "t": 83.37471360200016,
+              "value_mm": 0.7591794633360678
+            },
+            "rms_mm": 0.04557398918231092
+          },
+          "following_error": {
+            "max_abs_mm": 0.7591794633360678,
+            "peak": {
+              "line": 87,
+              "motion_line": 42,
+              "t": 83.37471360200016,
+              "value_mm": -0.7591794633360678
+            },
+            "rms_mm": 0.04557398918231092
+          }
+        },
+        "Y": {
+          "actual_minus_commanded": {
+            "max_abs_mm": 0.46776126230923865,
+            "peak": {
+              "line": 100,
+              "motion_line": 100,
+              "t": 142.73051687800012,
+              "value_mm": -0.46776126230923865
+            },
+            "rms_mm": 0.02503295333176684
+          },
+          "following_error": {
+            "max_abs_mm": 0.46776126230923865,
+            "peak": {
+              "line": 100,
+              "motion_line": 100,
+              "t": 142.73051687800012,
+              "value_mm": 0.46776126230923865
+            },
+            "rms_mm": 0.02503295333176684
+          }
+        },
+        "Z": {
+          "actual_minus_commanded": {
+            "max_abs_mm": 0.3212348888773988,
+            "peak": {
+              "line": 100,
+              "motion_line": 99,
+              "t": 142.55933940400018,
+              "value_mm": -0.3212348888773988
+            },
+            "rms_mm": 0.03756495793398787
+          },
+          "following_error": {
+            "max_abs_mm": 0.3212348888773988,
+            "peak": {
+              "line": 100,
+              "motion_line": 99,
+              "t": 142.55933940400018,
+              "value_mm": 0.3212348888773988
+            },
+            "rms_mm": 0.03756495793398787
+          }
+        }
+      },
+      "execution_status": "completed_observed",
+      "positioning": {
+        "last3_max_abs_mm": {
+          "X": 9.567481600925021e-05,
+          "Y": 5.1549281408824754e-05,
+          "Z": 0.040252521145902165
+        },
+        "scope": "last3 settled NML observations only",
+        "status": "unavailable",
+        "tolerance_mm": 0.001
+      },
+      "quality": {
+        "first_sample_s": 0.0016565020000598452,
+        "issues": [],
+        "last_sample_s": 148.27985658700004,
+        "max_gap_s": 0.038809325000102035,
+        "samples": 6895,
+        "servo_trace": false
+      },
+      "report_id": "54dee52ae5033bafe5dea1e250fd85e01935cd01a42b577abb845783c2ac9163",
+      "run_id": "43b2143406cc477aa155ad12f236b6a8",
+      "source_archive": "run-gui-completed-20261107.tar.gz",
+      "target": "plant",
+      "time": {
+        "basis": "monotonic elapsed seconds",
+        "comparison_available": true,
+        "elapsed_s": 148.2799294160002,
+        "excess_over_lower_bound_percent": 3.2227782636678706,
+        "excess_over_lower_bound_s": 3.479273997000192,
+        "paused_observed_s": 36.841816419,
+        "predicted_lower_bound_s": 107.958839,
+        "prediction_kind": "offline model lower bound, not a completion deadline",
+        "unpaused_elapsed_s": 111.43811299700019
+      }
+    },
+    {
+      "alarms": [],
+      "axes": {
+        "X": {
+          "actual_minus_commanded": {
+            "max_abs_mm": 0.7591794633360678,
+            "peak": {
+              "line": 87,
+              "motion_line": 42,
+              "t": 61.526349886999924,
+              "value_mm": 0.7591794633360678
+            },
+            "rms_mm": 0.04951879112319484
+          },
+          "following_error": {
+            "max_abs_mm": 0.7591794633360678,
+            "peak": {
+              "line": 87,
+              "motion_line": 42,
+              "t": 61.526349886999924,
+              "value_mm": -0.7591794633360678
+            },
+            "rms_mm": 0.04951879112319484
+          }
+        },
+        "Y": {
+          "actual_minus_commanded": {
+            "max_abs_mm": 0.47410973435805204,
+            "peak": {
+              "line": 100,
+              "motion_line": 100,
+              "t": 120.856568273,
+              "value_mm": -0.47410973435805204
+            },
+            "rms_mm": 0.027294165744537288
+          },
+          "following_error": {
+            "max_abs_mm": 0.47410973435805204,
+            "peak": {
+              "line": 100,
+              "motion_line": 100,
+              "t": 120.856568273,
+              "value_mm": 0.47410973435805204
+            },
+            "rms_mm": 0.027294165744537288
+          }
+        },
+        "Z": {
+          "actual_minus_commanded": {
+            "max_abs_mm": 0.3221636356415516,
+            "peak": {
+              "line": 100,
+              "motion_line": 100,
+              "t": 125.29364054500002,
+              "value_mm": -0.3221636356415516
+            },
+            "rms_mm": 0.04040594680189409
+          },
+          "following_error": {
+            "max_abs_mm": 0.3221636356415516,
+            "peak": {
+              "line": 100,
+              "motion_line": 100,
+              "t": 125.29364054500002,
+              "value_mm": 0.3221636356415516
+            },
+            "rms_mm": 0.04040594680189409
+          }
+        }
+      },
+      "execution_status": "completed_observed",
+      "portable_report": "run-report-completed-20261108.json",
+      "portable_report_sha256": "ea7af2f5fb47ec9bafc3ca3b029704cd0edbfe4199329fada21d871b4f7051d8",
+      "positioning": {
+        "last3_max_abs_mm": {
+          "X": 1.9380843440330864e-05,
+          "Y": 2.47446911885163e-05,
+          "Z": 0.0006559493693885088
+        },
+        "scope": "last3 settled NML observations only",
+        "status": "passed",
+        "tolerance_mm": 0.001
+      },
+      "quality": {
+        "first_sample_s": 0.0015451819999725558,
+        "issues": [],
+        "last_sample_s": 126.6457293819999,
+        "max_gap_s": 0.0412581309997222,
+        "samples": 5898,
+        "servo_trace": false
+      },
+      "report_id": "6615a94d2dd2f05f30bb5e22baeff0ee60b63d9effbba26c760517e33c31a4b6",
+      "run_id": "42ff26e6a8a7415fa345b8c3622f08f5",
+      "source_archive": "run-gui-settled-20261107.tar.gz",
+      "target": "plant",
+      "time": {
+        "basis": "monotonic elapsed seconds",
+        "comparison_available": true,
+        "elapsed_s": 126.64582353099968,
+        "excess_over_lower_bound_percent": 3.497270929339682,
+        "excess_over_lower_bound_s": 3.775613091999631,
+        "paused_observed_s": 14.91137143900005,
+        "predicted_lower_bound_s": 107.958839,
+        "prediction_kind": "offline model lower bound, not a completion deadline",
+        "unpaused_elapsed_s": 111.73445209199963
+      }
+    },
+    {
+      "alarms": [],
+      "axes": {
+        "X": {
+          "actual_minus_commanded": {
+            "max_abs_mm": 0.11446342047568692,
+            "peak": {
+              "line": 87,
+              "motion_line": 20,
+              "t": 3.5400338700001157,
+              "value_mm": -0.11446342047568692
+            },
+            "rms_mm": 0.0349884087217738
+          },
+          "following_error": {
+            "max_abs_mm": 0.11446342047568692,
+            "peak": {
+              "line": 87,
+              "motion_line": 20,
+              "t": 3.5400338700001157,
+              "value_mm": 0.11446342047568692
+            },
+            "rms_mm": 0.0349884087217738
+          }
+        },
+        "Y": {
+          "actual_minus_commanded": {
+            "max_abs_mm": 0.4180536472259746,
+            "peak": {
+              "line": 87,
+              "motion_line": 18,
+              "t": 1.6636100929999884,
+              "value_mm": -0.4180536472259746
+            },
+            "rms_mm": 0.03009280202085944
+          },
+          "following_error": {
+            "max_abs_mm": 0.4180536472259746,
+            "peak": {
+              "line": 87,
+              "motion_line": 18,
+              "t": 1.6636100929999884,
+              "value_mm": 0.4180536472259746
+            },
+            "rms_mm": 0.03009280202085944
+          }
+        },
+        "Z": {
+          "actual_minus_commanded": {
+            "max_abs_mm": 0.3007158903615901,
+            "peak": {
+              "line": 87,
+              "motion_line": 14,
+              "t": 1.1307841240000016,
+              "value_mm": 0.3007158903615901
+            },
+            "rms_mm": 0.06688626253943679
+          },
+          "following_error": {
+            "max_abs_mm": 0.3007158903615901,
+            "peak": {
+              "line": 87,
+              "motion_line": 14,
+              "t": 1.1307841240000016,
+              "value_mm": -0.3007158903615901
+            },
+            "rms_mm": 0.06688626253943679
+          }
+        }
+      },
+      "execution_status": "aborted",
+      "positioning": {
+        "last3_max_abs_mm": {
+          "X": 0.0006076488695043736,
+          "Y": 3.368443742601812e-05,
+          "Z": 3.129399465251481e-05
+        },
+        "scope": "last3 settled NML observations only",
+        "status": "passed",
+        "tolerance_mm": 0.001
+      },
+      "quality": {
+        "first_sample_s": 0.001382443000238709,
+        "issues": [],
+        "last_sample_s": 9.0171652490003,
+        "max_gap_s": 0.06903328699991107,
+        "samples": 421,
+        "servo_trace": false
+      },
+      "report_id": "776cee02475a7329f88b97cd6162d5abebb5b6e80d7f3049e24916809d1b1572",
+      "run_id": "0142302330a84e2faffb740ed96af4cb",
+      "source_archive": "run-stop-settled-20261107.tar.gz",
+      "target": "plant",
+      "time": {
+        "basis": "monotonic elapsed seconds",
+        "comparison_available": false,
+        "elapsed_s": 9.017242059000182,
+        "excess_over_lower_bound_percent": null,
+        "excess_over_lower_bound_s": null,
+        "paused_observed_s": 1.0222976770000969,
+        "predicted_lower_bound_s": 107.958839,
+        "prediction_kind": "offline model lower bound, not a completion deadline",
+        "unpaused_elapsed_s": 7.994944382000085
+      }
+    },
+    {
+      "alarms": [],
+      "axes": {
+        "X": {
+          "actual_minus_commanded": {
+            "max_abs_mm": 0.04000000000007731,
+            "peak": {
+              "line": 87,
+              "motion_line": 20,
+              "t": 7.866769159,
+              "value_mm": -0.04000000000007731
+            },
+            "rms_mm": 0.02960116739671958
+          },
+          "following_error": {
+            "max_abs_mm": 0.04000000000007731,
+            "peak": {
+              "line": 87,
+              "motion_line": 20,
+              "t": 7.866769159,
+              "value_mm": 0.04000000000007731
+            },
+            "rms_mm": 0.02960116739671958
+          }
+        },
+        "Y": {
+          "actual_minus_commanded": {
+            "max_abs_mm": 0.26615283055622285,
+            "peak": {
+              "line": 87,
+              "motion_line": 18,
+              "t": 1.6437258070000027,
+              "value_mm": -0.26615283055622285
+            },
+            "rms_mm": 0.019427218495418595
+          },
+          "following_error": {
+            "max_abs_mm": 0.26615283055622285,
+            "peak": {
+              "line": 87,
+              "motion_line": 18,
+              "t": 1.6437258070000027,
+              "value_mm": 0.26615283055622285
+            },
+            "rms_mm": 0.019427218495418595
+          }
+        },
+        "Z": {
+          "actual_minus_commanded": {
+            "max_abs_mm": 0.19200000000000372,
+            "peak": {
+              "line": 87,
+              "motion_line": 14,
+              "t": 1.4324651700000004,
+              "value_mm": 0.19200000000000372
+            },
+            "rms_mm": 0.05097058463226503
+          },
+          "following_error": {
+            "max_abs_mm": 0.19200000000000372,
+            "peak": {
+              "line": 87,
+              "motion_line": 14,
+              "t": 1.4324651700000004,
+              "value_mm": -0.19200000000000372
+            },
+            "rms_mm": 0.05097058463226503
+          }
+        }
+      },
+      "execution_status": "aborted",
+      "positioning": {
+        "last3_max_abs_mm": {
+          "X": 0.0,
+          "Y": 0.0,
+          "Z": 0.0
+        },
+        "scope": "last3 settled NML observations only",
+        "status": "passed",
+        "tolerance_mm": 0.001
+      },
+      "quality": {
+        "first_sample_s": 0.0014027920000003746,
+        "issues": [],
+        "last_sample_s": 8.155624596000003,
+        "max_gap_s": 0.05625190499999633,
+        "samples": 384,
+        "servo_trace": false
+      },
+      "report_id": "1e4a54731fa3c10f84b3aa7a26c8592b32b78a9ce97a9dd0088f029709146940",
+      "run_id": "fe7aee5d0bb94c4bb576c9004cf8b500",
+      "source_archive": "run-sim-stop-settled-20261107.tar.gz",
+      "target": "sim",
+      "time": {
+        "basis": "monotonic elapsed seconds",
+        "comparison_available": false,
+        "elapsed_s": 8.155675006000003,
+        "excess_over_lower_bound_percent": null,
+        "excess_over_lower_bound_s": null,
+        "paused_observed_s": 0.09490690699999504,
+        "predicted_lower_bound_s": 107.958839,
+        "prediction_kind": "offline model lower bound, not a completion deadline",
+        "unpaused_elapsed_s": 8.060768099000008
+      }
+    }
+  ]
+}

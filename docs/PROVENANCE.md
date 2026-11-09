@@ -637,6 +637,17 @@ bez retuszu. Licencja: GPL-2.0-or-later. Zakres: dokumentacja odbioru
 - `docs/raporty/G2/WEBHMI_WATCHDOG_2026-11-04/2_podwojny_reset_on.jpg`
 - `docs/raporty/G2/WEBHMI_WATCHDOG_2026-11-04/3_cicha_karta_estop.jpg`
 
+### G2: sonda w WebHMI — 2026-11-05
+
+Model-Author: Claude. Autor: Claude; źródło: własne zrzuty klienta linumeRT WebHMI
+w przeglądarce aplikacji Claude na Windows, LinuxCNC 2.9 i Plant w WSL, bez retuszu.
+Licencja: GPL-2.0-or-later. Zakres: dokumentacja odbioru
+(`docs/raporty/G2/WEBHMI_SONDA_2026-11-05.md`); bez zasobów zewnętrznych.
+
+- `docs/raporty/G2/WEBHMI_SONDA_2026-11-05/1_panel_sondy.jpg`
+- `docs/raporty/G2/WEBHMI_SONDA_2026-11-05/2_po_sondowaniu_z.jpg`
+- `docs/raporty/G2/WEBHMI_SONDA_2026-11-05/3_chybienie_alarm.jpg`
+
 ### Przygotowanie zadania w WebHMI — 2026-11-05
 
 Model-Author: Codex. Autor: Codex; źródło: własny zrzut pełnego linumeRT WebHMI
@@ -746,3 +757,24 @@ pomiary po poprawce ustalenia osi90e8100, ta sama data i licencja; bez tokenów.
 `docs/raporty/vertical/run-sim-stop-settled-20261107.tar.gz`: własny LinuxCNC sim
 bez procesu Plant, WebHMI/HAL bez bypassu, ten sam verified job; Codex, 2026-11-07,
 GPL-2.0-or-later. Manifest/próbki/wynik bez tokenu, powiązane hashami w runs-20261107.json.
+
+### Odtwarzalny raport wykonania — 2026-11-08
+
+Codex, własne konfiguracje i obliczenia z powyższych pomiarów, GPL-2.0-or-later.
+`docs/raporty/vertical/execution-plant-20261108.tar.gz` i
+`docs/raporty/vertical/execution-sim-20261108.tar.gz`: dokładne niezmienne wejścia
+wcześniej odebranego zadania (program, narzędzia, napędy, konfiguracja i weryfikacja),
+bez danych uruchomionej instancji i tokenów. Hashe w `report-acceptance-20261108.json`.
+`docs/raporty/vertical/run-report-completed-20261108.json`: przenośny raport z oryginalnego
+przebiegu GUI; ta sama licencja i data. `docs/raporty/vertical/report-acceptance-20261108.json`:
+niezależna kontrola statystyk, powiązań i końcowych błędów7 oryginalnych przebiegów.
+Wykresy `webhmi/server/linumert_webhmi/static/js/run_plot.js` są własnym SVG generowanym
+z zapisanych wartości; bez bibliotek, obrazów ani zasobów zewnętrznych.
+
+### Odbiór raportu offline — 2026-11-09
+
+`docs/raporty/vertical/report-offline-z-20261109.jpg` oraz
+`docs/raporty/vertical/report-reimport-y-20261109.jpg`: własne zrzuty WebHMI linumeRT,
+Codex, 2026-11-09, GPL-2.0-or-later. Dokumentują odczyt raportu bez kontrolera,
+wybór osi Z oraz ponowny import raportu i wybór osi Y. Źródło: własny ekran projektu;
+zakres użycia: dowody odbioru VERTICAL-REPORT, bez zasobów zewnętrznych.

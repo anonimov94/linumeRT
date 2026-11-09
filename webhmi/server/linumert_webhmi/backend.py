@@ -26,6 +26,7 @@ from typing import Any, Protocol
 from linumert.cnc import FakeMachine, MachineSnapshot, Mode
 from linumert.cnc.linuxcnc_reader import LinuxCNCReader
 from linumert.cnc.model import AXIS_LETTERS
+from linumert.programs.probe_macro import WORK_OFFSETS, probe_call
 
 from .schema import PROGRAM_NAME
 
@@ -62,6 +63,13 @@ def _ready_for_setup(snap: MachineSnapshot, what: str) -> None:
         raise CommandError(f"{what}: wymagany brak ruchu (interpreter IDLE)")
     if not snap.all_homed:
         raise CommandError(f"{what}: wymagane bazowanie wszystkich osi")
+
+
+def _probe_offset(snap: MachineSnapshot) -> str:
+    """Aktywny układ detalu dla G10 L20 P w makrze sondy (G54..G59.3)."""
+    if snap.work_offset_name not in WORK_OFFSETS:
+        raise CommandError(f"sonda: nieobsługiwany układ {snap.work_offset_name!r}")
+    return snap.work_offset_name
 
 
 def _zero_axes(snap: MachineSnapshot, axis: str | None) -> tuple[str, ...]:
@@ -113,9 +121,32 @@ class MachineBackend(Protocol):
     def jog_increment(self, axis: str, speed: float, distance: float) -> None: ...
     def jog_stop(self, axis: str | None) -> None: ...
     def work_zero(self, axis: str | None) -> None: ...
+    def probe(self, axis: str, direction: int, distance: float, feed: float, value: float,
+              retract: float) -> None: ...
     def programs(self) -> tuple[str, ...]: ...
     def open_program(self, name: str) -> None: ...
     def tick(self) -> None: ...
+
+
+class ReportBackend:
+    """Offline observations only: no controller module, command transport or virtual motion."""
+
+    read_only = True
+
+    def __init__(self, report):
+        self.report = report
+
+    def snapshot(self):
+        return MachineSnapshot(timestamp=time.monotonic())
+
+    def tick(self):
+        pass
+
+    def programs(self):
+        return ()
+
+    def jog_stop(self, axis=None):
+        pass  # no command transport exists in this backend
 
 
 class FakeBackend:
@@ -219,6 +250,13 @@ class FakeBackend:
         self.machine.set_work_offset(snap.work_offset_name, **{
             name: positions[name] for name in _zero_axes(snap, axis)})
 
+    def probe(self, axis: str, direction: int, distance: float, feed: float, value: float,
+              retract: float) -> None:
+        snap = self.machine.snapshot()
+        _ready_for_setup(snap, "sonda")
+        _probe_offset(snap)
+        raise CommandError("sonda: atrapa nie ma wejścia sondy (tylko LinuxCNC)")
+
     def programs(self) -> tuple[str, ...]:
         return list_programs(self.programs_dir)
 
@@ -320,6 +358,13 @@ class LinuxCNCBackend:
         out["ini"] = getattr(stat, "ini_filename", None)
         out["motion_line"] = getattr(stat, "motion_line", None)
         out["task_done"] = getattr(stat, "state", None) == getattr(self._lc(), "RCS_DONE", object())
+        joints = getattr(stat, "joint", None)
+        count = getattr(stat, "joints", 0)
+        # stat.joint exposes all sixteen slots, including unconfigured joints.
+        active = joints is not None and type(count) is int and 1 <= count <= len(joints)
+        out["joint_following_errors"] = None if not active else {
+            "units": "mm" if getattr(stat, "linear_units", None) == 1 else None,
+            "values": [joint.get("ferror_current") for joint in joints[:count]]}
         table = getattr(stat, "tool_table", None)
         out["tool_table"] = None if table is None else [
             {"id": row.id, "offsets": [getattr(row, a + "offset") for a in "xyzabcuvw"],
@@ -510,6 +555,12 @@ class LinuxCNCBackend:
             self._programs_dir = base if base.is_absolute() else (
                 Path(ini_file).parent / base).resolve()
         return self._programs_dir
+
+    def probe(self, axis: str, direction: int, distance: float, feed: float, value: float,
+              retract: float) -> None:
+        snap = self._recent()
+        _ready_for_setup(snap, "sonda")
+        self.mdi(probe_call(axis, direction, distance, feed, _probe_offset(snap), value, retract))
 
     def programs(self) -> tuple[str, ...]:
         return list_programs(self._program_dir())

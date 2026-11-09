@@ -4,16 +4,28 @@
 ;@STOCK BOX X120 Y80 Z30 ORIGIN=TOP_FRONT_LEFT OFFSET=G54 TOP=1 MAT="aluminium"
 G21
 ( krok 1: test_coolant v1 )
+( OP 1 [o100]: Chłodzenie [test] )
+o100 if [1]
 M8
+o100 endif
 ( krok 2: test_drill v1 - otwór A )
+( OP 2 [o200]: Wiercenie punktu [test] | F100 | Z -8..2 mm )
+o200 if [1]
 G0 Z2
 G98 G81 X10 Y12.5 Z-8 R2 F100
 G80
+o200 endif
 ( krok 3: test_drill v2 )
+( OP 3 [o300]: Wiercenie punktu [test] | F80 | Z -20.25..2 mm )
+o300 if [1]
 G0 Z2
 G98 G73 X0 Y40 Z-20.25 R2 Q2.5 F80
 G80
+o300 endif
 ( krok 4 pominiety: test_drill v1 )
 ( krok 5: test_coolant v1 )
+( OP 5 [o500]: Chłodzenie [test] )
+o500 if [1]
 M9
+o500 endif
 M2

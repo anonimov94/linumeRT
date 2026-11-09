@@ -75,6 +75,11 @@ function updateControls() {
   $("programSelect").disabled = !open.ok;
   setButton($("programOpen"), open.ok && !$("programSelect").value
     ? { ok: false, reason: "Wybierz plik programu" } : open);
+  const probe = rules.probe;
+  for (const id of ["probeAxis", "probeDirection", "probeDistance", "probeValue"]) {
+    $(id).disabled = !probe.ok;
+  }
+  setButton($("probeRun"), probe);
   const jogRule = rules.jog;
   const needsHoming = $("jogIncrement").value !== "continuous" && state?.all_homed !== true;
   const jogOK = jogRule.ok && !needsHoming && (jog.canStart() || jog.isActive());
@@ -161,13 +166,20 @@ const connection = createConnection({
     updateControls();
   },
   onState(next, nextVersion) {
-    journal.appendAll(diffState(state, next));
+    if (!next.read_only) journal.appendAll(diffState(state, next));
     state = next;
     receivedAt = Date.now();
     stateReceipts.push(receivedAt);
-    if (!telemetryWasFresh) journal.add("info", "TELEMETRIA", "Dane aktualne");
+    if (!telemetryWasFresh && !state.read_only) journal.add("info", "TELEMETRIA", "Dane aktualne");
     telemetryWasFresh = true;
     version = nextVersion;
+    document.body.classList.toggle("report-viewer", state.read_only === true);
+    if (state.read_only === true) {
+      jobs?.update(state);
+      updateControls();
+      banner("Przeglądanie raportów offline. Sterowanie maszyną jest niedostępne.");
+      return;
+    }
     dro.render(state, version);
     jobs?.update(state);
     renderAlarms(state.alarms);
@@ -179,7 +191,9 @@ const connection = createConnection({
     renderPrograms(state.programs);
     jog.onState(state);
     updateControls();
-    if (Array.isArray(state.jog_stop_pending) && state.jog_stop_pending.length) {
+    if (state.read_only === true) {
+      banner("Przeglądanie raportów offline. Sterowanie maszyną jest niedostępne.");
+    } else if (Array.isArray(state.jog_stop_pending) && state.jog_stop_pending.length) {
       banner("UWAGA: brama zgłasza zatrzymanie JOG oczekujące na potwierdzenie.");
     } else if (state.gateway_error) {
       banner("Błąd odczytu bramy. Sterowanie ruchem zablokowane.");
@@ -262,6 +276,16 @@ for (const button of controls) {
   });
 }
 $("programSelect").addEventListener("change", updateControls);
+$("probeRun").addEventListener("click", () => {
+  const distance = Number($("probeDistance").value);
+  const value = Number($("probeValue").value);
+  if (!(distance > 0 && distance <= 100) || !Number.isFinite(value)) {
+    result("Sonda: droga 1–100 mm i skończona współrzędna styku.", "error");
+    return;
+  }
+  execute({ cmd: "probe", axis: $("probeAxis").value, direction: Number($("probeDirection").value),
+    probe_distance: distance, probe_value: value });
+});
 $("programOpen").addEventListener("click", () => {
   const name = $("programSelect").value;
   if (!name) {

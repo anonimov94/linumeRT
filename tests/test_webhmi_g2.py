@@ -152,6 +152,25 @@ def test_linuxcnc_work_zero_uses_g10_l20_and_returns_to_manual():
     assert ("mdi", "G10 L20 P0 Y0") in c.calls
 
 
+@pytest.mark.parametrize("command", [Command(cmd="work_zero", axis="X"),
+                                     Command(cmd="open", name="kwadrat.ngc")])
+def test_setup_refused_until_failed_jog_stop_is_confirmed(tmp_path, command):
+    gateway, _, _ = make(tmp_path)
+    gateway.execute(Command(cmd="jog", axis="X", speed=1))
+    original_stop = gateway.backend.jog_stop
+    def failed_stop(axis):
+        raise CommandError("STOP niepotwierdzony")
+    gateway.backend.jog_stop = failed_stop
+    with pytest.raises(CommandError, match="niepotwierdzone"):
+        gateway.execute(Command(cmd="jog_stop", axis="X"))
+    assert not gateway._jog and gateway._jog_retry
+    with pytest.raises(CommandError, match="niepotwierdzone"):
+        gateway.execute(command)
+    gateway.backend.jog_stop = original_stop
+    gateway.execute(Command(cmd="jog_stop"))
+    gateway.execute(command)
+
+
 def test_linuxcnc_work_zero_refuses_outside_manual():
     b, c = lc_backend(task_mode=80)
     b.snapshot()
@@ -172,3 +191,42 @@ def test_linuxcnc_open_program_in_auto_from_program_dir(tmp_path):
                        ("wait_complete", 2.0)]
     with pytest.raises(CommandError, match="brak pliku"):
         b.open_program("inny.ngc")
+
+
+def test_probe_calls_lrt_probe_macro_in_active_offset():  # REQ-QA-03
+    """Sonda w WebHMI = jedno MDI ``o<lrt_probe> call`` w aktywnym układzie (makro z #204)."""
+    b, c = lc_backend()
+    gateway = Gateway(b)
+    c.calls.clear()
+    gateway.execute(Command(cmd="probe", axis="Z", direction=-1, probe_distance=20,
+                            probe_value=0))
+    assert c.calls[-1] == ("mdi", "o<lrt_probe> call [2] [-1] [20] [100] [1] [0] [2]")
+    assert ("mode", 80) in c.calls  # MODE_MDI atrapy
+
+
+def test_probe_refused_while_jogging_unhomed_or_with_bad_fields(tmp_path):  # REQ-QA-03
+    gateway, machine, clock = make(tmp_path, homed=False)
+    with pytest.raises(CommandError, match="bazowanie"):
+        gateway.execute(Command(cmd="probe", axis="Z", direction=-1, probe_distance=20,
+                                probe_value=0))
+    gateway, machine, clock = make(tmp_path)
+    gateway.execute(Command(cmd="jog", axis="X", speed=1.0))
+    with pytest.raises(CommandError, match="JOG"):
+        gateway.execute(Command(cmd="probe", axis="Z", direction=-1, probe_distance=20,
+                                probe_value=0))
+    gateway.execute(Command(cmd="jog_stop"))
+    gateway._jog_retry.add("X")  # stop niepotwierdzony (#212): sonda czeka na potwierdzenie
+    with pytest.raises(CommandError, match="niepotwierdzone"):
+        gateway.execute(Command(cmd="probe", axis="Z", direction=-1, probe_distance=20,
+                                probe_value=0))
+    gateway._jog_retry.clear()
+    with pytest.raises(CommandError, match="direction"):
+        gateway.execute(Command(cmd="probe", axis="Z", probe_distance=20, probe_value=0))
+    with pytest.raises(CommandError, match="atrapa"):  # atrapa uczciwie: brak wejścia sondy
+        gateway.execute(Command(cmd="probe", axis="Z", direction=-1, probe_distance=20,
+                                probe_value=0))
+    for bad in ({"direction": 2}, {"probe_distance": 0}, {"probe_distance": 101},
+                {"probe_value": float("nan")}):
+        with pytest.raises(ValidationError):
+            Command(**{"cmd": "probe", "axis": "Z", "direction": -1, "probe_distance": 20,
+                       "probe_value": 0, **bad})

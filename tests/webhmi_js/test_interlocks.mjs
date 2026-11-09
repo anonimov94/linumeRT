@@ -14,6 +14,15 @@ const state = (changes = {}) => ({
 const link = { connected: true, fresh: true };
 const can = (key, s = state(), l = link) => allowed(s, l)[key].ok;
 
+test("zero and open wait for jog stop confirmation", () => {
+  const pending = state({ programs: ["part.ngc"], jog_active: [], jog_stop_pending: ["X"] });
+  for (const key of ["work_zero", "open"]) {
+    assert.equal(can(key, pending), false);
+    assert.match(allowed(pending, link)[key].reason, /Niepotwierdzone/);
+    assert.equal(can(key, { ...pending, jog_stop_pending: [] }), true);
+  }
+});
+
 test("STOP / ESTOP remain available with stale telemetry but not with lost link", () => {
   for (const key of ["stop", "estop", "jog_stop"]) {
     assert.equal(can(key, null, { connected: true, fresh: false }), true);
@@ -39,6 +48,16 @@ test("power on hint in ESTOP depends on HAL pins of the gateway", () => {
   assert.match(reason(state({ task_state: "estop", hmi_hal: true })), /podwójny Reset/);
   assert.match(reason(state({ task_state: "estop", hmi_hal: false })), /poza bramą/);
   assert.match(reason(state({ task_state: "estop" })), /poza bramą/);
+});
+test("probe needs ON, homed, idle, no jog and not AUTO", () => {
+  assert.equal(can("probe"), true);
+  assert.equal(can("probe", state({ mode: "mdi" })), true);
+  assert.equal(can("probe", state({ mode: "auto" })), false);
+  assert.equal(can("probe", state({ all_homed: false })), false);
+  assert.equal(can("probe", state({ interp_state: "reading" })), false);
+  assert.equal(can("probe", state({ jog_active: ["X"] })), false);
+  assert.equal(can("probe", state({ jog_active: [], jog_stop_pending: ["X"] })), false);
+  assert.equal(can("probe", state({ task_state: "off" })), false);
 });
 test("MANUAL and idle required for home and jog", () => {
   assert.equal(can("home"), true);
@@ -94,4 +113,10 @@ test("every denial has an actionable textual reason", () => {
     assert.ok(rule.reason.length > 5, key);
   }
   assert.equal(allowed(state(), link).jog.reason, "");
+});
+test("report-only gateway never offers controller actions, including Stop and E-STOP", () => {
+  for (const [name, rule] of Object.entries(allowed(state({read_only: true}), link))) {
+    assert.equal(rule.ok, false, name);
+    assert.match(rule.reason, /offline/);
+  }
 });

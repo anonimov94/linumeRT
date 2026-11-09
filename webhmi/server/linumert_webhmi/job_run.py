@@ -47,6 +47,7 @@ class RunLog:
         self.identity = {"format": "linumert.job.run", "version": 1, "run_id": self.run_id,
             **{k: identity[k] for k in ("job_id", "execution_id", "verification_id", "target")},
             "started_at": datetime.now(UTC).isoformat(), "source": "linuxcnc.stat",
+            "joint_error_source": "linuxcnc.stat.joint.ferror_current",
             "sampling": "NML poll; tooldata/HAL reads sequential, not an atomic servo trace"}
         (self.path / "manifest.json").write_text(json_text(self.identity), encoding="utf-8")
         self.stream = (self.path / "samples.jsonl").open("x", encoding="utf-8", buffering=1)
@@ -98,7 +99,8 @@ class RunLog:
                "overrides": [snap.feed_override, snap.rapid_override, snap.spindle_override],
                "alarms": alarms, "errors": list(snap.errors)}
         row.update({k: live.get(k) for k in
-                    ("inpos", "current_vel", "task_done", "hal", "hmi_alive")})
+                    ("inpos", "current_vel", "task_done", "hal", "hmi_alive",
+                     "joint_following_errors")})
         self.stream.write(json.dumps(row, ensure_ascii=False, allow_nan=False) + "\n")
         interp = snap.interp_state.value
         if snap.task_state.value == "estop":
