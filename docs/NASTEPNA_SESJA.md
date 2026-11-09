@@ -15,6 +15,16 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · 2026-11-09. Właściciel pyta o masę/PID dla X0,8301mm.
+Badanie na osobnej gałęzi codex/diagnose-x-20261109, bez zmiany integracji594526e.
+Istniejący P+PI/FF/anti-windup; X80kg i10mm/obr.11 prób modelu: baseline enkoder
+0,050274mm, obserwacja starsza4ms0,842164mm; to zgodność skali, nie dowód CI.
+Zmiana masy wymaga dopasowania J/PI; mocniejszy PI pogarsza stronę obciążenia.
+Raport/protokół: docs/raporty/prototypy/X_MASS_PI_2026-11-09.md + gzip + skrypt.
+Dwa wykonania identyczne bajtowo, hashe/statystyki PASS. Dalej rzeczywisty PEAK/link/
+sampler z first_motion: age/missed/drive-ferror/torque, z wyrównaniem faz HAL.
+CI Python/C/wheel dla594526e success42711421106; LinuxCNC42711421110 w toku.
+
 Model-Author: Codex · 2026-11-09. Walidacja lokalna tej kontynuacji: pełny pytest
 2100PASS/5FAIL/135skip/259deselected,184podtesty,492,53s. Dwa FAIL panelu:
 brak socksio dla skonfigurowanego proxy; po instalacji lokalnej2PASS2,11s.

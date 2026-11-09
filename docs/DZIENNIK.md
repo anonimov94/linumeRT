@@ -2108,3 +2108,12 @@ Pozostałe FAIL: odmowa /proc/<pid>/environ (errno13, potwierdzona na własnym p
 i2 VM-link (watchdog, przerwy64/135ms przy50ms). Nie zmieniono progów ani safety.
 Celowane71+22PASS, REQ22/22, lint/roadmap/YAML PASS. Automatyczna kontrola odrzuciła
 push ze względu na brak wyraźnej zgody na publikację; zmiany pozostają lokalnie.
+
+## X: masa, PI i wiek sprzężenia · 2026-11-09
+
+Model-Author: Codex. Na żądanie właściciela11 kontrolowanych prób istniejącego C Plant.
+X80kg/obecny PI: max enkoder0,050274mm; tylko odczyt starszy4ms:0,842164mm.
+Masy200/400kg ze starym PI dają0x8611; dopasowanie PI/J usuwa awarię w tym modelu.
+Pasmo300rad/s poprawia enkoder, pogarsza stronę obciążenia. Istnieją P+PI/FF/anti-windup.
+Drugie wykonanie identyczne bajtowo; statystyki/hashe zweryfikowane. Raport X_MASS_PI,
+próbki gzip i narzędzie zapisane. Bez zmian produkcyjnych/PID, bez dowodu przyczyny CI.
