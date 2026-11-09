@@ -2117,3 +2117,12 @@ Masy200/400kg ze starym PI dają0x8611; dopasowanie PI/J usuwa awarię w tym mod
 Pasmo300rad/s poprawia enkoder, pogarsza stronę obciążenia. Istnieją P+PI/FF/anti-windup.
 Drugie wykonanie identyczne bajtowo; statystyki/hashe zweryfikowane. Raport X_MASS_PI,
 próbki gzip i narzędzie zapisane. Bez zmian produkcyjnych/PID, bez dowodu przyczyny CI.
+
+## Domknięcie main: synchronizacja dwóch kierowców odbiorowych · 2026-11-10
+
+Model-Author: Codex. Właściciel: „pchaj do main”. Badanie X opublikowane jako PR233.
+CI594526e: Python/C/wheel PASS; LinuxCNC257PASS/2FAIL, first_motion PASS.
+G2 Reset czeka na diagnostykę całego odrzuconego MDI; JOG obserwuje aktywny ruch
+przed oczekiwaniem na wygaśnięcie lease.96 szybkich testów PASS; progi/safety bez zmian.
+Dodano celowane2 RIP przed niezmienioną pełną serią. Badanie dołączono do232,
+końcowy LinuxCNC/CI wymagany, bez deklaracji naprawy dawnego X0,8301mm.

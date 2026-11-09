@@ -15,6 +15,16 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · 2026-11-10. Właściciel polecił scalić do main. Badanie masy/PI
+opublikowane jako PR233/aed6403, dołączone do domknięcia232 bez zmian produkcyjnych.
+CI594526e: Python/C/wheel success42711421106; LinuxCNC42711421110 257PASS/2FAIL,
+first_motion PASS. G2: Reset po pierwszym błędzie MDI wyprzedzał dalsze komunikaty;
+JOG: snapshot przed pierwszym odczytem aktywnego ruchu dawał pozorne zatrzymanie.
+Kierowcy czekają teraz na pełny zestaw diagnostyki odrzuconego MDI i na aktywny JOG
+z ruchem>0,05mm przed oczekiwaniem na Stop; oryginalne progi pozostają.
+96 testów bramy/backendu/G2 PASS. Nowy celowany etap CI poprzedza pełną serię,
+bez usunięcia żadnego sprawdzenia. Wymagane końcowe CI przed scaleniem232 do main.
+
 Model-Author: Codex · 2026-11-09. Właściciel pyta o masę/PID dla X0,8301mm.
 Badanie na osobnej gałęzi codex/diagnose-x-20261109, bez zmiany integracji594526e.
 Istniejący P+PI/FF/anti-windup; X80kg i10mm/obr.11 prób modelu: baseline enkoder
