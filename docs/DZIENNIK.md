@@ -2099,3 +2099,12 @@ Brak provenance odtworzony lokalnie i naprawiony.71 testów IP/raportów/archiw�
 diagnostyki PASS; ruff/roadmap PASS. Artefakt13683020512 nie zawiera katalogu
 nieudanego scenariusza; CI teraz zachowuje istniejące logi NML/HAL/Plant i telemetry.
 Brak podstaw do zmiany modelu lub progu; przyczyna X i exact-head CI otwarte.
+
+## Wynik lokalnej walidacji kontynuacji · 2026-11-09
+
+Model-Author: Codex. Pełny pytest2100PASS/5FAIL/135skip/259deselected,184podtesty,
+492,53s.2 testy panelu po instalacji brakującego socksio:2PASS2,11s.
+Pozostałe FAIL: odmowa /proc/<pid>/environ (errno13, potwierdzona na własnym procesie)
+i2 VM-link (watchdog, przerwy64/135ms przy50ms). Nie zmieniono progów ani safety.
+Celowane71+22PASS, REQ22/22, lint/roadmap/YAML PASS. Automatyczna kontrola odrzuciła
+push ze względu na brak wyraźnej zgody na publikację; zmiany pozostają lokalnie.

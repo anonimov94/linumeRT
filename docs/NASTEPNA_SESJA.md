@@ -15,6 +15,17 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · 2026-11-09. Walidacja lokalna tej kontynuacji: pełny pytest
+2100PASS/5FAIL/135skip/259deselected,184podtesty,492,53s. Dwa FAIL panelu:
+brak socksio dla skonfigurowanego proxy; po instalacji lokalnej2PASS2,11s.
+Pozostałe: /proc/<pid>/environ PermissionError13 (potwierdzone na własnym dziecku)
+oraz2 testy VM-link — watchdog po przerwach64/135ms przy limicie50ms.
+Bez luzowania limitów i bez deklaracji pełnego PASS. Celowane71+22PASS,
+REQ22/22, lint/roadmap/YAML PASS. Oddzielny sampler w tym samym starym CI miał
+X0,164563mm; nie wyjaśnia to X0,8301mm w nieutrwalonej próbie.
+Push został odrzucony przez automatyczną kontrolę zgody; zmiany są tylko lokalne.
+Wysłanie gałęzi i nowe CI wymagają wyraźnej zgody właściciela w czacie.
+
 Model-Author: Codex · 2026-11-09. Wznowienie PR232/head44c72f7: ci42626321124
 FAIL wyłącznie brak provenance2 JPG; RIP42626321032:258PASS/1FAIL first_motion,
 X0,8301mm>0,2mm, Cyberdeck PASS. Artefakt13683020512 odczytany: zachowuje
