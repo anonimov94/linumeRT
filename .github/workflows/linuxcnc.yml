@@ -87,6 +87,7 @@ jobs:
       - name: Shared runner with real LinuxCNC
         env:
           LINUXCNC_SCREENSHOT: ${{ github.workspace }}/state/spike_qtdragon.png
+          LINUMERT_SCENARIO_DIAGNOSTICS: ${{ github.workspace }}/state/scenario-diagnostics
         run: runuser -u codex -- env HOME=/home/codex .venv/bin/python tools/agent_tests/run.py --model Codex --linuxcnc
       # beta ma własny rdzeń `linumert`, więc osobne venv i uruchomienie z katalogu beta/.
       - name: Beta API on LinuxCNC + Plant
@@ -107,5 +108,6 @@ jobs:
             build/skin-preview/
             build/skin-monitor/
             state/test-runs/
+            state/scenario-diagnostics/
             state/spike_qtdragon.png
             /tmp/pytest-of-codex/

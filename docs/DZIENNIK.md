@@ -2090,3 +2090,12 @@ Lokalnie osobny venv z systemowym NumPy1.x usuwa konflikt ABI OpenCV;15 RIP PASS
 w tym classic/shell/Cyberdeck i12 testów precyzyjnego śladu. Przyczyna CI nadal badana.
 Kliknięty raport offline: XYZ, alarmy, eksport/import JSON PASS; doprecyzowano kontrole
 sprzed Start. Dowody report-offline-z/reimport-y-20261109.jpg; final CI/scalenie oczekują.
+
+## Kontynuacja integracji: provenance i dowody awarii CI · 2026-11-09
+
+Model-Author: Codex. Head44c72f7: Python2112PASS/1FAIL (brak provenance2 JPG),
+RIP258PASS/1FAIL (first_motion X0,8301mm przy progu0,2mm); Cyberdeck PASS.
+Brak provenance odtworzony lokalnie i naprawiony.71 testów IP/raportów/archiwów/
+diagnostyki PASS; ruff/roadmap PASS. Artefakt13683020512 nie zawiera katalogu
+nieudanego scenariusza; CI teraz zachowuje istniejące logi NML/HAL/Plant i telemetry.
+Brak podstaw do zmiany modelu lub progu; przyczyna X i exact-head CI otwarte.

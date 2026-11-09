@@ -770,3 +770,11 @@ przebiegu GUI; ta sama licencja i data. `docs/raporty/vertical/report-acceptance
 niezależna kontrola statystyk, powiązań i końcowych błędów7 oryginalnych przebiegów.
 Wykresy `webhmi/server/linumert_webhmi/static/js/run_plot.js` są własnym SVG generowanym
 z zapisanych wartości; bez bibliotek, obrazów ani zasobów zewnętrznych.
+
+### Odbiór raportu offline — 2026-11-09
+
+`docs/raporty/vertical/report-offline-z-20261109.jpg` oraz
+`docs/raporty/vertical/report-reimport-y-20261109.jpg`: własne zrzuty WebHMI linumeRT,
+Codex, 2026-11-09, GPL-2.0-or-later. Dokumentują odczyt raportu bez kontrolera,
+wybór osi Z oraz ponowny import raportu i wybór osi Y. Źródło: własny ekran projektu;
+zakres użycia: dowody odbioru VERTICAL-REPORT, bez zasobów zewnętrznych.

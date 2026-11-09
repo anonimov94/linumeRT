@@ -15,6 +15,16 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · 2026-11-09. Wznowienie PR232/head44c72f7: ci42626321124
+FAIL wyłącznie brak provenance2 JPG; RIP42626321032:258PASS/1FAIL first_motion,
+X0,8301mm>0,2mm, Cyberdeck PASS. Artefakt13683020512 odczytany: zachowuje
+osobne próby readiness/samplera, ale nie katalog nieudanego first_motion
+(TemporaryDirectory bez diagnostyki). Uzupełniono provenance i włączono istniejącą
+LINUMERT_SCENARIO_DIAGNOSTICS w CI z uploadem state/scenario-diagnostics.
+71 testów raportów/IP/diagnostyki PASS; ruff/roadmap PASS. Przyczyna X nieustalona,
+progi/ruch/model bez zmian. Dalej końcowe CI, diagnoza X na zachowanych danych;
+PR232 pozostaje draft, bez scalenia i bez zaliczenia nadrzędnych bramek.
+
 Model-Author: Codex · 2026-11-08. Polecenie właściciela: badania i domknięcie
 #211/#212/#213/#231. Osobny checkout linumeRT-pr-closeout-20261108, gałąź
 codex/pr-closeout-research-20261108; istniejące checkouty i ich zmiany zachowane.
