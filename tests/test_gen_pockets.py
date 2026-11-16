@@ -5,6 +5,7 @@ Model-Author: Codex · 2026-10-20
 """
 
 import math
+import os
 import re
 from pathlib import Path
 
@@ -217,6 +218,8 @@ def test_entry_golden(cls, dims, entry):
     program = cls().generate_ngc({"tool_d": 8, "depth": 1, "entry": entry,
                                   "entry_angle": 5, **dims}, "pocket.ngc")
     golden = Path(__file__).parent / "golden" / f"pocket_{entry}.ngc"
+    if os.environ.get("LINUMERT_UPDATE_GOLDEN"):
+        golden.write_text(program, encoding="utf-8", newline="\n")
     assert program == golden.read_text()
 
 
@@ -314,4 +317,7 @@ def test_saved_version_one_keeps_original_gcode(name, dims):
     program = LnxProgram(name="legacy.ngc", steps=[Step(generator=name, version=1,
                                                      params={"tool_d": 8, "depth": 1, **dims})])
     golden = Path(__file__).parent / "golden" / f"{name}_v1.ngc"
-    assert compile_program(program, registry, source="legacy.ngc") == golden.read_text()
+    text = compile_program(program, registry, source="legacy.ngc")
+    if os.environ.get("LINUMERT_UPDATE_GOLDEN"):
+        golden.write_text(text, encoding="utf-8", newline="\n")
+    assert text == golden.read_text()

@@ -18,7 +18,7 @@ from linumert.programs.compiler import compile_program
 from linumert.programs.limits import safe_z_from_ini
 from linumert.programs.linuxcnc_check import _machine_tool_table, _without_sample_tool_change
 from linumert.programs.lnx import LnxProgram, Step
-from linumert_sim.path import TOOL_UNKNOWN_NOTE, PathCanon, tool_changes
+from linumert_sim.path import PathCanon, tool_changes
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -102,10 +102,33 @@ def test_komentarze_i_nazwy_nie_sa_slowem_t():
     assert tool_changes(text) == ([], [])
 
 
-def test_wyrazenie_t_i_podprogram_daja_notatke():
-    assert tool_changes("T#1 M6\n")[1] == [TOOL_UNKNOWN_NOTE]
-    assert tool_changes("T[1+1]\n")[1] == [TOOL_UNKNOWN_NOTE]
-    assert tool_changes("o<zmiana> call [1]\n")[1] == [TOOL_UNKNOWN_NOTE]
+@pytest.mark.parametrize("text", ["T#1 M6\n", "T[1+1]\n", "TABS[-1] M6\n",
+    "T+#1 M6\n"])
+def test_nieznane_wykonanie_nie_dostaje_zgadywanego_t(text):
+    with pytest.raises(ValueError, match="wyrażenia|O-word"):
+        tool_changes(text)
+
+
+@pytest.mark.parametrize("code, expected", [
+    ("T1M6", 1), ("N10T1 M6", 1), ("N10 T1M6", 1), ("T+1 M6", 1),
+    ("T1 2 M6", 12), ("N10M61Q4", 4), ("Q4M61", 4), ("T1M6M3", 1),
+])
+def test_zwarte_slowa_i_odstepy_nie_zmieniaja_t(code, expected):
+    assert tool_changes(code) == ([(1, expected)], [])
+
+
+def test_nazwy_parametrow_i_etykiet_nie_sa_t_m():
+    assert tool_changes("#<_T12M6>=1\nG83Q#<_T12M6>\n") == ([], [])
+    assert tool_changes("O100WHILE[0]\n; call w komentarzu\nO100ENDWHILE\n") == ([], [])
+    assert tool_changes("O100REPEAT[3]\nO100ENDREPEAT\n") == ([], [])
+
+
+def test_petla_bez_zmian_t_i_zewnetrzny_call_nie_sa_odrzucane():
+    assert tool_changes("G21\no<lrt_face_mill> call [0]\nM2\n") == ([], [])
+    changes, notes = tool_changes("G21\nT1 M6\no<lrt_face_mill> call [0]\nM2\n")
+    assert changes == [(2, 1)] and notes
+    assert tool_changes("T1 M6\no100 while [0]\nG1 X1 F100\no100 endwhile\n") == (
+        [(1, 1)], [])
 
 
 def test_ruch_dostaje_narzedzie_z_numeru_linii():

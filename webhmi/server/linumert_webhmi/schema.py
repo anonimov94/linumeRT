@@ -20,6 +20,7 @@ from pydantic import BaseModel, Field, field_validator
 SCHEMA_VERSION = 1
 MAX_MDI_CHARS = 200
 MAX_JOG_SPEED_MM_S = 50.0  # górna granica jogu z przeglądarki (3000 mm/min)
+MAX_PROBE_DISTANCE_MM = 100.0  # jedna próba sondy; dłuższa droga to błąd ustawienia
 AXIS = Literal["X", "Y", "Z", "A", "B", "C", "U", "V", "W"]
 # Nazwa pliku programu z katalogu [DISPLAY]PROGRAM_PREFIX: bez ścieżki, bez pliku ukrytego.
 PROGRAM_NAME = re.compile(r"[A-Za-z0-9_][A-Za-z0-9_ .-]{0,99}\.(ngc|nc|tap)", re.IGNORECASE)
@@ -69,7 +70,7 @@ class Command(BaseModel):
 
     cmd: Literal["estop", "power_on", "power_off", "mode", "home", "mdi", "run", "pause",
                  "resume", "stop", "override", "jog", "jog_stop", "jog_increment",
-                 "jog_keepalive", "work_zero", "open", "reset"]
+                 "jog_keepalive", "work_zero", "open", "reset", "probe"]
     mode: Literal["manual", "mdi", "auto"] | None = None
     axis: AXIS | None = None
     text: str | None = Field(default=None, max_length=MAX_MDI_CHARS)
@@ -81,6 +82,11 @@ class Command(BaseModel):
     distance: float | None = Field(default=None, gt=0, le=1, allow_inf_nan=False)
     name: str | None = Field(default=None, max_length=104)  # plik programu (open)
     double: bool = False  # reset: podwójny Reset = potwierdzenie E-STOP (D37), tylko z --hal
+    # probe: o<lrt_probe> w aktywnym układzie; kierunek ruchu sondy, droga i współrzędna styku
+    direction: Literal[-1, 1] | None = None
+    probe_distance: float | None = Field(default=None, gt=0, le=MAX_PROBE_DISTANCE_MM,
+                                         allow_inf_nan=False)
+    probe_value: float | None = Field(default=None, ge=-10_000, le=10_000, allow_inf_nan=False)
 
     @field_validator("name")
     @classmethod

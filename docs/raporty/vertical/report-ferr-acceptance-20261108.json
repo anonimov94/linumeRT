@@ -1,0 +1,333 @@
+[
+  {
+    "acceptance": "independent raw-joint max/math.fsum RMS, CLI/API equality and portable load",
+    "archive": "run-raw-ferr-gapped-20261108.tar.gz",
+    "archive_sha256": "b23f253034bf8d28629658978dc7dd48cdf07ff72e6f16788dfbebe2774847b9",
+    "capture_code_head": "d96a200",
+    "case": "gapped",
+    "driver_check": "original driver outcome retained",
+    "execution_id": "a034404861204810262976262f99f451a01316e2520235222a83f8c84c894328",
+    "execution_status": "completed_observed",
+    "files": {
+      "manifest.json": "c1423fb8098970d2b7a8d66eb464ec1bbce5a0d16e95674f7417a487227682e7",
+      "result.json": "7e29e9ec38456e7c5cac96ce5c36af8dc6541a6d29458cf28666966e2b3d3859",
+      "samples.jsonl": "e6d0ead5da39fc4bb24a42888928d1fe0f2237921f74cacbfc1f72a4f76dd8ea"
+    },
+    "job_id": "95bf2c0bc88fb59abaa1cdea747ddfdbfc58bc042701d4fe0beed5fbb8a1316e",
+    "joint_following_error": {
+      "joint_axes": {
+        "0": "X",
+        "1": "Y",
+        "2": "Y",
+        "3": "Z"
+      },
+      "joints": {
+        "0": {
+          "max_abs_mm": 0.21340533367074954,
+          "peak": {
+            "line": 87,
+            "motion_line": 42,
+            "t": 47.59257145999999,
+            "value_mm": -0.21340533367074954
+          },
+          "rms_mm": 0.01537797222157991
+        },
+        "1": {
+          "max_abs_mm": 0.15963574259461666,
+          "peak": {
+            "line": 87,
+            "motion_line": 18,
+            "t": 1.698254846999987,
+            "value_mm": 0.15963574259461666
+          },
+          "rms_mm": 0.00979035464917639
+        },
+        "2": {
+          "max_abs_mm": 0.15963574259461666,
+          "peak": {
+            "line": 87,
+            "motion_line": 18,
+            "t": 1.698254846999987,
+            "value_mm": 0.15963574259461666
+          },
+          "rms_mm": 0.00979035464917639
+        },
+        "3": {
+          "max_abs_mm": 0.13194147595014272,
+          "peak": {
+            "line": 100,
+            "motion_line": 100,
+            "t": 111.350688881,
+            "value_mm": 0.13194147595014272
+          },
+          "rms_mm": 0.013462223468946929
+        }
+      },
+      "last3_max_abs_mm": {
+        "0": 5.691312915701019e-05,
+        "1": 2.47446911885163e-05,
+        "2": 2.47446911885163e-05,
+        "3": 0.0006559493693885088
+      },
+      "samples": 5304,
+      "source": "linuxcnc.stat.joint.ferror_current",
+      "status": "available",
+      "units": "mm"
+    },
+    "positioning": {
+      "last3_max_abs_mm": {
+        "X": 5.691312915701019e-05,
+        "Y": 2.47446911885163e-05,
+        "Z": 0.0006559493693885088
+      },
+      "scope": "last3 settled NML observations only",
+      "status": "unavailable",
+      "tolerance_mm": 0.001
+    },
+    "quality": {
+      "first_sample_s": 0.0013363539999886598,
+      "issues": [
+        "Przerwa pomiędzy próbkami przekracza0,1s"
+      ],
+      "last_sample_s": 112.706270835,
+      "max_gap_s": 0.11143281400001115,
+      "samples": 5304,
+      "servo_trace": false
+    },
+    "reader_code_head": "8db22ec3418ab01e59d684805332003c83e79b88",
+    "report_id": "c3ec4fb47cec99082dbcec519d22d193fc3ccc2fcbafb611e040f1d4742395cf",
+    "run_id": "07aff6872b9b4e0096411b08b0350149",
+    "target": "plant",
+    "time": {
+      "basis": "monotonic elapsed seconds",
+      "comparison_available": false,
+      "elapsed_s": 112.70633256399998,
+      "excess_over_lower_bound_percent": null,
+      "excess_over_lower_bound_s": null,
+      "paused_observed_s": 0.9907577509999896,
+      "predicted_lower_bound_s": 107.958839,
+      "prediction_kind": "offline model lower bound, not a completion deadline",
+      "unpaused_elapsed_s": 111.71557481299999
+    }
+  },
+  {
+    "acceptance": "independent raw-joint max/math.fsum RMS, CLI/API equality and portable load",
+    "archive": "run-raw-ferr-sim-stop-20261108.tar.gz",
+    "archive_sha256": "582c56db45cc0650f06323dd31f1ec8477c63f722af3220baea90dcbe9573be5",
+    "capture_code_head": "d96a200",
+    "case": "sim-stop",
+    "driver_check": "expected3 instead of frozen4; original data audited without rerun",
+    "execution_id": "ae0ba5bdfd4aa2c6b76be8b4fd66d6a3a5ed74e6528cfa306eeb4178c222dd3f",
+    "execution_status": "aborted",
+    "files": {
+      "manifest.json": "659ed321fc1a2b8f2fc6d13b8a48b8f0daa37c3c22be50eb36e541494315ddc9",
+      "result.json": "0f251758b0537bebb17c02d69d5296871a9aa41efe79967ce38ffad4d90c1069",
+      "samples.jsonl": "efd98b98d59ec69438313a1b17b4e83fab74d3bcb5912e30af204bdd554893c2"
+    },
+    "job_id": "95bf2c0bc88fb59abaa1cdea747ddfdbfc58bc042701d4fe0beed5fbb8a1316e",
+    "joint_following_error": {
+      "joint_axes": {
+        "0": "X",
+        "1": "Y",
+        "2": "Y",
+        "3": "Z"
+      },
+      "joints": {
+        "0": {
+          "max_abs_mm": 0.0,
+          "peak": {
+            "line": 0,
+            "motion_line": 0,
+            "t": 0.0015677420000006492,
+            "value_mm": 0.0
+          },
+          "rms_mm": 0.0
+        },
+        "1": {
+          "max_abs_mm": 0.0,
+          "peak": {
+            "line": 0,
+            "motion_line": 0,
+            "t": 0.0015677420000006492,
+            "value_mm": 0.0
+          },
+          "rms_mm": 0.0
+        },
+        "2": {
+          "max_abs_mm": 0.0,
+          "peak": {
+            "line": 0,
+            "motion_line": 0,
+            "t": 0.0015677420000006492,
+            "value_mm": 0.0
+          },
+          "rms_mm": 0.0
+        },
+        "3": {
+          "max_abs_mm": 2.220446049250313e-16,
+          "peak": {
+            "line": 7,
+            "motion_line": 7,
+            "t": 0.130007612,
+            "value_mm": 2.220446049250313e-16
+          },
+          "rms_mm": 1.962615573354719e-17
+        }
+      },
+      "last3_max_abs_mm": {
+        "0": 0.0,
+        "1": 0.0,
+        "2": 0.0,
+        "3": 0.0
+      },
+      "samples": 384,
+      "source": "linuxcnc.stat.joint.ferror_current",
+      "status": "available",
+      "units": "mm"
+    },
+    "positioning": {
+      "last3_max_abs_mm": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      },
+      "scope": "last3 settled NML observations only",
+      "status": "passed",
+      "tolerance_mm": 0.001
+    },
+    "quality": {
+      "first_sample_s": 0.0015677420000006492,
+      "issues": [],
+      "last_sample_s": 8.218652234000002,
+      "max_gap_s": 0.08053120399999969,
+      "samples": 384,
+      "servo_trace": false
+    },
+    "reader_code_head": "8db22ec3418ab01e59d684805332003c83e79b88",
+    "report_id": "9094622216021354f785bd245570f64a75f72f9c4a6babe4ce90f2a3173e0fe1",
+    "run_id": "54e2de870ce34d169f08f1d1164fd222",
+    "target": "sim",
+    "time": {
+      "basis": "monotonic elapsed seconds",
+      "comparison_available": false,
+      "elapsed_s": 8.218703574000001,
+      "excess_over_lower_bound_percent": null,
+      "excess_over_lower_bound_s": null,
+      "paused_observed_s": 0.0934954329999993,
+      "predicted_lower_bound_s": 107.958839,
+      "prediction_kind": "offline model lower bound, not a completion deadline",
+      "unpaused_elapsed_s": 8.125208141000002
+    }
+  },
+  {
+    "acceptance": "independent raw-joint max/math.fsum RMS, CLI/API equality and portable load",
+    "archive": "run-raw-ferr-completed-20261108.tar.gz",
+    "archive_sha256": "54e06eebec2f1adc5a0c2d230f5757a24c0e01bd4bafcde6f7a95054e0b4c4c6",
+    "capture_code_head": "d96a200",
+    "case": "completed",
+    "driver_check": "original driver outcome retained",
+    "execution_id": "a034404861204810262976262f99f451a01316e2520235222a83f8c84c894328",
+    "execution_status": "completed_observed",
+    "files": {
+      "manifest.json": "ece35ae9fc266c34586b9e8d25c99b68508a88c4f014df8c894e673f84040cb5",
+      "result.json": "baa9b652320f314f80642d0c41a0fc919ce3b6d40956518e17ce674f121b9e40",
+      "samples.jsonl": "f0cbb40bb2563abf48ff32ac08f2590ff3edcbba9e89970f9d485ee4770ee3d8"
+    },
+    "job_id": "95bf2c0bc88fb59abaa1cdea747ddfdbfc58bc042701d4fe0beed5fbb8a1316e",
+    "joint_following_error": {
+      "joint_axes": {
+        "0": "X",
+        "1": "Y",
+        "2": "Y",
+        "3": "Z"
+      },
+      "joints": {
+        "0": {
+          "max_abs_mm": 0.22051557791471055,
+          "peak": {
+            "line": 87,
+            "motion_line": 42,
+            "t": 47.49465491399998,
+            "value_mm": -0.22051557791471055
+          },
+          "rms_mm": 0.015281293915996565
+        },
+        "1": {
+          "max_abs_mm": 0.15228228653271003,
+          "peak": {
+            "line": 87,
+            "motion_line": 18,
+            "t": 1.6172988379999964,
+            "value_mm": 0.15228228653271003
+          },
+          "rms_mm": 0.00976206007026159
+        },
+        "2": {
+          "max_abs_mm": 0.15228228653271003,
+          "peak": {
+            "line": 87,
+            "motion_line": 18,
+            "t": 1.6172988379999964,
+            "value_mm": 0.15228228653271003
+          },
+          "rms_mm": 0.00976206007026159
+        },
+        "3": {
+          "max_abs_mm": 0.13200712691600103,
+          "peak": {
+            "line": 100,
+            "motion_line": 100,
+            "t": 111.27330755199999,
+            "value_mm": 0.13200712691600103
+          },
+          "rms_mm": 0.013420128317518053
+        }
+      },
+      "last3_max_abs_mm": {
+        "0": 5.691312915701019e-05,
+        "1": 2.47446911885163e-05,
+        "2": 2.47446911885163e-05,
+        "3": 0.0006559493693885088
+      },
+      "samples": 5304,
+      "source": "linuxcnc.stat.joint.ferror_current",
+      "status": "available",
+      "units": "mm"
+    },
+    "portable_report": "run-report-full-raw-ferr-20261108.json",
+    "portable_report_sha256": "fef28fae419626275949d47457ea65f57d3812f7c1f9c0f2734e6aa26b71f542",
+    "positioning": {
+      "last3_max_abs_mm": {
+        "X": 5.691312915701019e-05,
+        "Y": 2.47446911885163e-05,
+        "Z": 0.0006559493693885088
+      },
+      "scope": "last3 settled NML observations only",
+      "status": "passed",
+      "tolerance_mm": 0.001
+    },
+    "quality": {
+      "first_sample_s": 0.0014422929999966527,
+      "issues": [],
+      "last_sample_s": 112.616813174,
+      "max_gap_s": 0.02707515700001295,
+      "samples": 5304,
+      "servo_trace": false
+    },
+    "reader_code_head": "8db22ec3418ab01e59d684805332003c83e79b88",
+    "report_id": "518e3afd82a44ee1e30c6beef445dfc09aa843a597dae322b15d7d91be997434",
+    "run_id": "5b1151b27a984d1fbcd260792cd190c2",
+    "target": "plant",
+    "time": {
+      "basis": "monotonic elapsed seconds",
+      "comparison_available": true,
+      "elapsed_s": 112.616904163,
+      "excess_over_lower_bound_percent": 3.4029322304957454,
+      "excess_over_lower_bound_s": 3.673766128000011,
+      "paused_observed_s": 0.9842990349999923,
+      "predicted_lower_bound_s": 107.958839,
+      "prediction_kind": "offline model lower bound, not a completion deadline",
+      "unpaused_elapsed_s": 111.63260512800001
+    }
+  }
+]

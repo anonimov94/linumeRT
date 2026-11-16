@@ -1807,11 +1807,31 @@ Pełny RIP musi ponownie potwierdzić wynik; nie scalać na czerwonym CI.
 - Testy: `make lint test` 1920 PASS; linuxcnc 174 PASS, 7 porażek identycznych na `main` (środowisko), kalibracja sondy osobno PASS.
 - Otwarte: przegląd podobieństwa ekranów (G2 w plan.json nieoznaczone), watchdog HAL klienta web, sonda w GUI. NIEZWERYFIKOWANE NA SPRZĘCIE.
 
+## Poprawki po przeglądzie #206 i #209 — 2026-11-05 · Codex
+- Model-Author: Codex. Domknięcie zgłoszonych usterek, bez zmiany statusu całej bramki G2.
+- Brama i klient blokują zero detalu oraz wczytanie programu, dopóki zatrzymanie JOG nie zostanie potwierdzone; testy obejmują błąd STOP i ponowne odblokowanie.
+- Odczyt narzędzi rozpoznaje zwarte słowa, numery linii, znak plus i odstępy wewnątrz liczby; T/M6 oraz M61 Q są usuwane tylko poza komentarzami i nazwami parametrów.
+- Analiza ścieżki jawnie odmawia przy obliczanych numerach narzędzi i przepływie O-word ze zmianami narzędzi: nie przypisuje narzędzia z niewykonanej gałęzi i nie przechodzi cicho na parser podzbioru. Obsługa takich programów wymaga śledzenia rzeczywiście wykonanych zmian; pozostaje ograniczeniem funkcji.
+- Testy regresji obejmują rzeczywisty gcode.parse bez maszyny (prywatny HOME) oraz blokady backendu i klienta. Wyniki pełnej regresji i SHA w PR. Autokontrola, bez niezależnego przeglądu. NIEZWERYFIKOWANE NA SPRZĘCIE.
+- Uzupełnienie po niezależnym przeglądzie Claude: odmowa całego przepływu O-word wycofana przed scaleniem. Kopia dla interpretera dostaje neutralne komentarze przy słowach T/M6/M61; PathCanon zmienia narzędzie tylko po markerze linii rzeczywiście wykonanej. Pominięte if nie zmienia T, zaś while/repeat i lokalne podprogramy mogą wykonywać zmiany narzędzi. Zewnętrzny call z nieznaną treścią daje notatkę o niepewnym T, bez odmowy samego call.
+
 ## G2 — watchdog HAL i podwójny Reset w WebHMI · 2026-11-04 · Claude
 - Model-Author: Claude. Brama `--hal`: piny `linumert.hmi-*` jak Qt, `hmi-heartbeat` tylko przy żywej karcie (`{"alive":1}` co 250 ms) i działającym obiegu; podwójny Reset = `hmi-ack` + uzbrojenie + `ESTOP_RESET`; bez `--hal` odmowa (PROPOZYCJA w DECYZJE).
 - Kliknięte w przeglądarce na LinuxCNC 2.9 + Plant z łańcuchem HMI bez obejścia: E-STOP → podwójny Reset → ON; zawieszona karta → E-STOP po 3,1 s. Zrzuty: `docs/raporty/G2/WEBHMI_WATCHDOG_2026-11-04.md`.
 - Odbiór w GUI wykrył 3 błędy niewidoczne w testach logiki (brak sygnału życia w kliencie, stary JS z pamięci podręcznej, E-1100 po resecie); poprawione, test na LinuxCNC idzie przez WebSocket.
 - Testy: `test_webhmi_watchdog_linuxcnc` PASS (~20 s), `test_webhmi_hal_link` i `test_webhmi_app`. Otwarte: ukryta karta, start bramy z `[DISPLAY]`. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+- Codex, poprawka #210 w tym samym domknięciu: nowe E-STOP, Zasilanie OFF lub STOP anulują stary timer resetu, impuls ack i zaplanowane ponowne uzbrojenie watchdoga. Świeże potwierdzenie nadal działa; regresje zegara obejmują trzy polecenia.
+
+## G2 — sonda w WebHMI · 2026-11-05 · Claude
+- Model-Author: Claude. Panel SONDA w WebHMI: polecenie `probe` → `o<lrt_probe>` (#204) jednym MDI w aktywnym układzie (F100, odjazd 2 mm); blokady jak zero detalu, bez wymogu MANUAL.
+- Kliknięte w przeglądarce na LinuxCNC 2.9 + Plant: Z robocze 6,9936 po styku na 5 + odjazd 2; chybienie (droga 1 mm) = E-1000 z komunikatem LinuxCNC, offset bez zmian. Zrzuty: `docs/raporty/G2/WEBHMI_SONDA_2026-11-05.md`.
+- Testy: `test_webhmi_probe_linuxcnc` PASS (offset −35,012 przy −35 ± 0,02), unit 130 PASS, JS 41 PASS. Otwarte: X/Y kliknięte tylko testem logiki, kalibracja sondy w GUI. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## Program dialogowy: numer O i komentarz każdej operacji · 2026-11-05 · Claude
+- Model-Author: Claude. Polecenie właściciela: każda operacja z `.lnx` ma własny blok `oN if [1]` … `oN endif` (N = krok × 100) i komentarz `( OP N [oN]: rodzaj | T D S | F FZ | Z )`. Powtórzone numery O w generatorach odrzuca P-5013. PROPOZYCJA w DECYZJE.
+- Złote kopie: różnią się tylko dodanymi liniami (sprawdzone). LinuxCNC 2.9 + Plant: `tests/test_op_blocks_linuxcnc.py` (cały program w AUTO i start od linii wewnątrz `o300`: wierci tylko otwór operacji 3, bez błędów); akceptacja Plant z `test_gcode_isolation_linuxcnc` (M6 w bloku O) PASS.
+- Otwarte: numer operacji w WebHMI, notatka narzędzia dla `o<lrt_*> call` po #212. NIEZWERYFIKOWANE NA SPRZĘCIE.
 
 ## Cel pionowy pełnego linumeRT — 2026-11-05 · Codex
 
@@ -2050,3 +2070,59 @@ Lokalne4 regresje f936f19 PASS58,09s, dokumentacja lint/31PASS/REQ22/22; raw7 ar
 Plan RUN done; dowody końcowego ustalenia i zrzut w #230. REPORT zachowany jako draft #231.
 Autokontrola, bez niezależnego przeglądu. Własne procesy zakończone, lease zwolniony.
 Nie zamyka sesji nadrzędnych/bramek ani kwalifikacji sprzętu.
+
+## Integracja otwartych PR i zgodność archiwów · 2026-11-08
+
+Model-Author: Codex. Polecenie właściciela: badania i domknięcie211/212/213/231.
+Osobny checkout/PR232 zawiera wszystkie cztery historie; konflikt sondy zachowuje
+blokady pending STOP. Badania i źródła w docs/prawne/BADANIA_INTEGRACJI_2026-11-08.md.
+Zmiana kompilatora ujawniła7 regresji archiwów: raport ponownie generował dawny program.
+Odczyt dowodów sprawdza hashe/powiązania bez dzisiejszej kompilacji; wykonanie nadal
+wymaga pełnego read/regeneracji.216 testów PASS,44JS PASS; dodatkowo10 archiwów PASS,
+w tym raw FERR i luka zachowana jako incomplete. Ruff PASS; GUI/pełne CI wymagane.
+
+## Odbiór integracji i diagnoza CI · 2026-11-09
+
+Model-Author: Codex. CI759ef64:2257 Python/192 native PASS; RIP256PASS/3FAIL.
+Dwie asercje mapowania wskazują teraz instrukcję źródłową, nie numer sprzed etykiet.
+Trzeci błąd: timeout Cyberdeck; dodano trwały log LinuxCNC -r, bez wydłużania limitu.
+Lokalnie osobny venv z systemowym NumPy1.x usuwa konflikt ABI OpenCV;15 RIP PASS142,13s,
+w tym classic/shell/Cyberdeck i12 testów precyzyjnego śladu. Przyczyna CI nadal badana.
+Kliknięty raport offline: XYZ, alarmy, eksport/import JSON PASS; doprecyzowano kontrole
+sprzed Start. Dowody report-offline-z/reimport-y-20261109.jpg; final CI/scalenie oczekują.
+
+## Kontynuacja integracji: provenance i dowody awarii CI · 2026-11-09
+
+Model-Author: Codex. Head44c72f7: Python2112PASS/1FAIL (brak provenance2 JPG),
+RIP258PASS/1FAIL (first_motion X0,8301mm przy progu0,2mm); Cyberdeck PASS.
+Brak provenance odtworzony lokalnie i naprawiony.71 testów IP/raportów/archiwów/
+diagnostyki PASS; ruff/roadmap PASS. Artefakt13683020512 nie zawiera katalogu
+nieudanego scenariusza; CI teraz zachowuje istniejące logi NML/HAL/Plant i telemetry.
+Brak podstaw do zmiany modelu lub progu; przyczyna X i exact-head CI otwarte.
+
+## Wynik lokalnej walidacji kontynuacji · 2026-11-09
+
+Model-Author: Codex. Pełny pytest2100PASS/5FAIL/135skip/259deselected,184podtesty,
+492,53s.2 testy panelu po instalacji brakującego socksio:2PASS2,11s.
+Pozostałe FAIL: odmowa /proc/<pid>/environ (errno13, potwierdzona na własnym procesie)
+i2 VM-link (watchdog, przerwy64/135ms przy50ms). Nie zmieniono progów ani safety.
+Celowane71+22PASS, REQ22/22, lint/roadmap/YAML PASS. Automatyczna kontrola odrzuciła
+push ze względu na brak wyraźnej zgody na publikację; zmiany pozostają lokalnie.
+
+## X: masa, PI i wiek sprzężenia · 2026-11-09
+
+Model-Author: Codex. Na żądanie właściciela11 kontrolowanych prób istniejącego C Plant.
+X80kg/obecny PI: max enkoder0,050274mm; tylko odczyt starszy4ms:0,842164mm.
+Masy200/400kg ze starym PI dają0x8611; dopasowanie PI/J usuwa awarię w tym modelu.
+Pasmo300rad/s poprawia enkoder, pogarsza stronę obciążenia. Istnieją P+PI/FF/anti-windup.
+Drugie wykonanie identyczne bajtowo; statystyki/hashe zweryfikowane. Raport X_MASS_PI,
+próbki gzip i narzędzie zapisane. Bez zmian produkcyjnych/PID, bez dowodu przyczyny CI.
+
+## Domknięcie main: synchronizacja dwóch kierowców odbiorowych · 2026-11-10
+
+Model-Author: Codex. Właściciel: „pchaj do main”. Badanie X opublikowane jako PR233.
+CI594526e: Python/C/wheel PASS; LinuxCNC257PASS/2FAIL, first_motion PASS.
+G2 Reset czeka na diagnostykę całego odrzuconego MDI; JOG obserwuje aktywny ruch
+przed oczekiwaniem na wygaśnięcie lease.96 szybkich testów PASS; progi/safety bez zmian.
+Dodano celowane2 RIP przed niezmienioną pełną serią. Badanie dołączono do232,
+końcowy LinuxCNC/CI wymagany, bez deklaracji naprawy dawnego X0,8301mm.

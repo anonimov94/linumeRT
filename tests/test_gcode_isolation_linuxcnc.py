@@ -48,7 +48,7 @@ def program(tmp_path, monkeypatch):
 @pytest.mark.parametrize("word", ["T1", "T1 M6", *CRASHING])
 def test_parse_rs274_przezywa_awarie_interpretera(program, word):
     file = program(f"G21\n{word}\nG1 X5 F100\nG40\nM2\n")
-    if word in CRASHING:
+    if word in CRASHING and word != "M61 Q1":
         with pytest.raises(InterpreterUnavailable, match="kodem -11"):
             parse_rs274(file)
         assert load_path(file).source == "subset"
@@ -73,6 +73,41 @@ def test_numer_t_ze_zrodla_bez_dzialajacego_linuxcnc(program):
     moves = parse_rs274(program("G21\nT1 M6\nG1 X1 F100\nT7\nG1 X2\nM6\nG1 X3\nM2\n"))
     assert moves.source == "rs274" and moves.notes == ()
     assert [int(t) for t in moves.tool] == [1, 1, 7]
+
+
+@pytest.mark.parametrize("word, tool", [("T1M6", 1), ("N10T1 M6", 1),
+    ("T+1 M6", 1), ("T1 2 M6", 12), ("N10M61Q4", 4),
+    ("T(keep)1M6", 1), ("M61(keep)Q4", 4)])
+def test_zwarte_zmiany_t_w_rzeczywistym_interpreterze(program, word, tool):
+    path = program(f"G21\nG0 X0\n{word}\nG1 X1 F100\nM2\n")
+    assert int(parse_rs274(path).tool[-1]) == tool
+
+
+def test_pominieta_galaz_nie_daje_falszywego_t_ani_fallbacku(program):
+    path = program("G21\nG0 X0\nT1 M6\no100 if [0]\nT7 M6\no100 endif\nG1 X1 F100\nM2\n")
+    for load in (parse_rs274, load_path):
+        moves = load(path)
+        assert moves.source == "rs274" and int(moves.tool[-1]) == 1
+
+
+def test_petla_wykonuje_tylko_rzeczywiste_zmiany_t(program):
+    path = program("G21\nG0 X0\nT1 M6\n#1=0\no100 while [#1 LT 3]\n"
+                   "o101 if [#1 EQ 1]\nT7 M6\no101 endif\n"
+                   "G1 X[#1+1] F100\n#1=[#1+1]\no100 endwhile\nM2\n")
+    assert list(parse_rs274(path).tool) == [0, 1, 7, 7]
+
+
+def test_repeat_z_narzedziem_nie_jest_falszywym_wyrazeniem_t(program):
+    path = program("G21 G91\nG0 X0\nT1 M6\no100 repeat [2]\nG1 X1 F100\n"
+                   "o100 endrepeat\nM2\n")
+    assert list(parse_rs274(path).tool) == [0, 1, 1]
+
+
+def test_lokalny_podprogram_zmienia_t_dopiero_po_call(program):
+    path = program("o<swap> sub\nT7 M6\no<swap> endsub\nG21\nG0 X0\n"
+                   "T1 M6\nG1 X1 F100\no<swap> call\nG1 X2\nM2\n")
+    moves = parse_rs274(path)
+    assert list(moves.tool) == [0, 1, 7] and moves.notes == ()
 
 
 @pytest.mark.parametrize("load", [parse_rs274, load_ngc])

@@ -138,6 +138,52 @@ def test_double_reset_without_hal_is_refused():  # REQ-QA-03
     assert gateway.snapshot()[1]["hmi_hal"] is False
 
 
+@pytest.mark.parametrize("command", ["estop", "power_off", "stop"])
+def test_new_stop_cancels_old_reset_and_allows_fresh_ack(command):  # REQ-QA-03
+    gateway, clock, pins = make()
+    gateway.execute(Command(cmd="reset", double=True))
+    clock.t += PULSE_S + 0.02
+    if command == "power_off":
+        # Atrapa odmawia wyłączenia już wyłączonej maszyny; stary reset i tak musi wygasnąć.
+        with pytest.raises(CommandError):
+            gateway.execute(Command(cmd=command))
+    else:
+        gateway.execute(Command(cmd=command))
+    gateway.step()
+    expected = gateway.snapshot()[1]["task_state"]
+    run(gateway, clock, 1.0)
+    assert gateway.snapshot()[1]["task_state"] == expected
+    assert gateway._estop_reset_at is None and gateway._alarm_reset_at is None
+    assert pins.value[PINS["ack"]] is False and pins.value[PINS["wd"]] is False
+    gateway.execute(Command(cmd="estop"))
+    gateway.step()
+    gateway.execute(Command(cmd="reset", double=True))
+    run(gateway, clock, ESTOP_RESET_DELAY_S + 0.1)
+    assert gateway.snapshot()[1]["task_state"] == "estop_reset"
+
+
+def test_stop_without_pending_reset_does_not_disarm_watchdog():  # REQ-QA-03
+    gateway, clock, pins = make()
+    run(gateway, clock, ARM_DELAY_S + 0.1)
+    gateway.execute(Command(cmd="stop"))
+    assert pins.value[PINS["wd"]] is True
+
+
+@pytest.mark.parametrize("command", ["estop", "power_off", "stop"])
+def test_failed_hal_write_does_not_block_stop_delivery(command):  # REQ-QA-03
+    gateway, clock, pins = make()
+    gateway.execute(Command(cmd="reset", double=True))
+    calls = []
+    setattr(gateway.backend, command, lambda: calls.append(command))
+    def broken_write(name, value):
+        raise RuntimeError("HAL write failed")
+    gateway._hal._write = broken_write
+    with pytest.raises(RuntimeError, match="HAL write failed"):
+        gateway.execute(Command(cmd=command))
+    assert calls == [command]
+    assert gateway._estop_reset_at is None
+
+
 def test_refused_estop_reset_becomes_alarm():  # REQ-QA-03
     class Refusing(FakeBackend):
         def estop_reset(self) -> None:

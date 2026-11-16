@@ -11,9 +11,18 @@ i te same wersje generatorów dają identyczny plik (test golden). Struktura:
     ;@STOCK ...                              (gdy program ma przygotówkę)
     G21                                      (jednostki programu: G21 mm / G20 cale)
     ( krok 1: <generator> v<wersja> - <komentarz> )
+    ( OP 1 [o100]: <rodzaj> | T3 D10 S8000 M3 | F1200 FZ300 | Z -5..2 mm )
+    o100 if [1]                              (blok operacji: wykonywany zawsze raz)
     ...linie generatora...
+    o100 endif
     ( krok 2 pominiety: ... )                (krok wyłączony)
     M2
+
+Każda operacja (włączony krok) ma własny numer O = numer kroku × 100 i komentarz z danymi
+(polecenie właściciela 2026-11-05, PROPOZYCJA w DECYZJE): narzędzie z ostatniego kroku
+`tool_change`, średnica (pole `tool_d` albo baza narzędzi), obroty, posuwy i zakres Z z linii
+generatora. Numery N+1…N+99 są wolne dla bloków O generatora tej operacji; powtórzony numer O
+w dwóch krokach albo równy numerowi operacji to P-5013.
 
 Błąd walidacji dowolnego kroku blokuje cały wynik (`CompileError` z listą Issue) — nic nie
 jest zapisywane. Kompilator sprawdza też wynik generatora: linia bez znaku nowej linii,
@@ -36,6 +45,9 @@ from .stock import format_stock_line
 
 _FORBIDDEN = re.compile(r"(?<![A-Z0-9.#])M0*(98|99|2|30)(?![0-9.])", re.IGNORECASE)
 _COMMENT = re.compile(r"\([^()]*\)")
+_OWORD_NUMBER = re.compile(r"^\s*/?\s*(?:N\d+\s*)?O\s*(\d+)(?=\s*[A-Z])", re.IGNORECASE)
+_Z_WORD = re.compile(r"(?<![A-Z#<_])Z\s*([-+]?(?:\d+\.?\d*|\.\d+))", re.IGNORECASE)
+OP_NUMBER_STEP = 100  # numer O operacji = numer kroku × 100
 
 
 class CompileError(ValueError):
@@ -68,6 +80,58 @@ def _check_output(lines: list[str], step: int) -> list[Issue]:
     return issues
 
 
+def _o_numbers(lines: list[str]) -> set[int]:
+    """Numery bloków O (oN if/while/sub…) w liniach generatora, poza komentarzami."""
+    out = set()
+    for line in lines:
+        match = _OWORD_NUMBER.match(_COMMENT.sub("", line.split(";", 1)[0]))
+        if match:
+            out.add(int(match.group(1)))
+    return out
+
+
+def _z_range(lines: list[str]) -> tuple[float, float] | None:
+    """Zakres Z z liczbowych słów Z (bez G53 i komentarzy) — informacja, nie analiza ścieżki."""
+    values = []
+    for line in lines:
+        code = _COMMENT.sub("", line.split(";", 1)[0])
+        if re.search(r"G0*53(?![0-9.])", code, re.IGNORECASE):
+            continue
+        values += [float(v) for v in _Z_WORD.findall(code)]
+    return (min(values), max(values)) if values else None
+
+
+def _op_info(number: int, title: str, values: dict, tool: dict, lines: list[str],
+             tools: ToolLookup | None, inch: bool) -> str:
+    """Komentarz operacji: rodzaj, narzędzie, obroty, posuwy, zakres Z (jednostki programu)."""
+    parts = [f"OP {number} [o{number * OP_NUMBER_STEP}]: {title}"]
+    t = values.get("tool", tool.get("tool"))
+    words = [f"T{t}"] if t else []
+    diameter = values.get("tool_d")
+    if diameter is None and t and tools is not None:
+        found = tools(t)
+        mm = found.tool_diameter() if found is not None else None
+        diameter = None if mm is None else (mm / 25.4 if inch else mm)
+    if diameter is not None:
+        words.append(f"D{fmt(diameter)}")
+    rpm = values.get("rpm", tool.get("rpm"))
+    spin = values.get("direction")
+    spin = spin if spin in ("M3", "M4") else tool.get("direction", "M3")
+    if t and rpm:
+        words.append(f"S{round(rpm)} {spin}")
+    if words:
+        parts.append(" ".join(words))
+    feeds = [f"F{fmt(values['feed'])}"] if values.get("feed") else []
+    if values.get("plunge"):
+        feeds.append(f"FZ{fmt(values['plunge'])}")
+    if feeds:
+        parts.append(" ".join(feeds))
+    z = _z_range(lines)
+    if z is not None:
+        parts.append(f"Z {fmt(z[0])}..{fmt(z[1])} {'in' if inch else 'mm'}")
+    return " | ".join(parts)
+
+
 def _safe_z_line(safe_z: float, inch: bool) -> str:
     """Wycofanie G53 w jednostkach programu, zaokrąglone w dół: nigdy ponad limit maszyny."""
     value = safe_z / 25.4 if inch else safe_z
@@ -88,6 +152,9 @@ def compile_program(program: LnxProgram, registry: GeneratorRegistry | None = No
     body: list[str] = []
     checked: list[tuple[int, str, dict]] = []
     inch = program.units == "inch"
+    tool: dict = {}  # ostatni krok tool_change: numer, obroty, kierunek
+    op_numbers = {n * OP_NUMBER_STEP for n in range(1, len(program.steps) + 1)}
+    used_o: dict[int, int] = {}  # numer O generatora -> krok
     for number, step in enumerate(program.steps, start=1):
         label = f"krok {number}: {step.generator} v{step.version}"
         if step.comment:
@@ -113,11 +180,24 @@ def compile_program(program: LnxProgram, registry: GeneratorRegistry | None = No
         if safe_z is not None:
             lines = [_safe_z_line(safe_z, inch) if line == SAFE_Z_MOVE else line for line in lines]
         problems = _check_output(lines, number)
+        for o in sorted(_o_numbers(lines)):
+            if o in op_numbers or used_o.get(o, number) != number:
+                problems.append(Issue("P-5013", {"step": number,
+                                                 "word": f"o{o} (powtórzony numer O)"}))
+            used_o[o] = number
         if problems:
             issues += problems
             continue
+        o = number * OP_NUMBER_STEP
         body.append(_comment(label))
+        body.append(_comment(_op_info(number, generator.title, values, tool, lines, tools,
+                                      inch)))
+        body.append(f"o{o} if [1]")
         body += lines
+        body.append(f"o{o} endif")
+        if step.generator == "tool_change":
+            tool = {"tool": values["tool"], "rpm": values["rpm"],
+                    "direction": values["direction"]}
     if tools is not None:
         issues += check_steps(checked, tools, program.units)
     if issues:

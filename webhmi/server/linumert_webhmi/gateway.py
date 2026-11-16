@@ -33,7 +33,10 @@ from linumert.cnc import MachineSnapshot, Mode
 
 from .backend import CommandError, MachineBackend
 from .hal_link import HalPins
-from .schema import Command, snapshot_to_dict
+from .schema import SCHEMA_VERSION, Command, snapshot_to_dict
+
+PROBE_FEED_MM_MIN = 100.0  # posuw próby sondy (G94)
+PROBE_RETRACT_MM = 2.0  # odjazd po styku
 
 if TYPE_CHECKING:
     from .job_instance import Instance
@@ -148,10 +151,14 @@ class Gateway:
             if self._alarm_reset_at is not None and now >= self._alarm_reset_at:
                 self._alarm_reset_at = None
                 self._alarms.reset()  # przed zgłoszeniem: trwający E-STOP wraca w tym obiegu
-            self._raise_alarms(snap)
+            if not getattr(self.backend, "read_only", False):
+                self._raise_alarms(snap)
             if now - self._programs_at >= PROGRAMS_S:
                 self._programs, self._programs_at = self.backend.programs(), now
             state = snapshot_to_dict(snap)
+            state["read_only"] = bool(getattr(self.backend, "read_only", False))
+            if state["read_only"]:
+                state = {"schema": SCHEMA_VERSION, "read_only": True, "axes": []}
             if self._instance is not None:
                 observed = (self.backend.binding_state(self._instance.hal_expectations)
                             if hasattr(self.backend, "binding_state") else None)
@@ -224,6 +231,19 @@ class Gateway:
         with self._lock:
             return self._version, dict(self._state)
 
+    def run_report(self):
+        from linumert.programs import job_report
+
+        with self._lock:
+            if getattr(self.backend, "read_only", False):
+                return self.backend.report
+            if not self._instance or not self._instance.run:
+                raise CommandError("Brak zapisanego przebiegu zadania")
+            if self._instance.run.active:
+                raise CommandError("Raport dostępny po zakończeniu lub przerwaniu zadania")
+            run, execution = self._instance.run.path, self._instance.root / "evidence"
+        return job_report.build(run, execution)  # file I/O outside the HMI poll lock
+
     # ---- potwierdzenie E-STOP (podwójny Reset, D37) ------------------------------
     def _acknowledge_estop(self) -> None:
         if self._hal is None:
@@ -245,6 +265,12 @@ class Gateway:
             self._alarms.raise_alarm("E-1000", message=f"potwierdzenie E-STOP: {error}")
             return
         self._alarm_reset_at = now + ALARM_RESET_DELAY_S
+
+    def _cancel_estop_reset(self) -> None:
+        pending = self._estop_reset_at is not None
+        self._estop_reset_at = self._alarm_reset_at = None
+        if pending and self._hal is not None:
+            self._hal.cancel_acknowledge()
 
     # ---- polecenia ------------------------------------------------------------
     def _stop_axis(self, axis: str) -> None:
@@ -276,6 +302,8 @@ class Gateway:
     def execute(self, command: Command, session: str = LOCAL_SESSION) -> None:
         """Wykonuje polecenie; ``CommandError`` z komunikatem dla operatora przy odmowie."""
         with self._lock:
+            if getattr(self.backend, "read_only", False):
+                raise CommandError("Przeglądanie raportów offline; sterowanie niedostępne")
             stop = command.cmd in STOP_COMMANDS or (command.cmd == "jog" and command.speed == 0.0)
             if not stop and not self._limiter.allow():
                 raise CommandError("zbyt wiele poleceń na sekundę")
@@ -315,12 +343,18 @@ class Gateway:
             self._instance.command(name)
         if name == "estop":
             self._stop_all_jog()
-            b.estop()
+            try:
+                b.estop()
+            finally:  # błąd zapisu pinów HAL nie może zablokować wysłania zatrzymania
+                self._cancel_estop_reset()
         elif name == "power_on":
             b.power_on()
         elif name == "power_off":
             self._stop_all_jog()
-            b.power_off()
+            try:
+                b.power_off()
+            finally:
+                self._cancel_estop_reset()
         elif name == "mode":
             if c.mode is None:
                 raise CommandError("tryb: brak parametru mode")
@@ -353,7 +387,10 @@ class Gateway:
                 raise
         elif name == "stop":
             self._stop_all_jog()
-            b.stop()
+            try:
+                b.stop()
+            finally:
+                self._cancel_estop_reset()
         elif name == "override":
             if c.feed is None and c.rapid is None and c.spindle is None:
                 raise CommandError("override: podaj feed, rapid lub spindle")
@@ -401,6 +438,8 @@ class Gateway:
             else:
                 self._stop_axis(c.axis)
         elif name == "work_zero":
+            if self._jog_retry:
+                raise CommandError("zero detalu: niepotwierdzone zatrzymanie JOG")
             if self._jog:
                 raise CommandError("zero detalu: najpierw zatrzymaj JOG")
             b.work_zero(c.axis)
@@ -408,7 +447,20 @@ class Gateway:
             if c.name is None:
                 raise CommandError("program: brak nazwy pliku")
             self._stop_all_jog()
+            if self._jog_retry:
+                raise CommandError("program: niepotwierdzone zatrzymanie JOG")
             b.open_program(c.name)
+        elif name == "probe":
+            if c.axis not in ("X", "Y", "Z") or c.direction is None:
+                raise CommandError("sonda: wymagane axis X/Y/Z i direction ±1")
+            if c.probe_distance is None or c.probe_value is None:
+                raise CommandError("sonda: wymagane probe_distance i probe_value")
+            if self._jog_retry:
+                raise CommandError("sonda: niepotwierdzone zatrzymanie JOG")
+            if self._jog:
+                raise CommandError("sonda: najpierw zatrzymaj JOG")
+            b.probe(c.axis, c.direction, c.probe_distance, PROBE_FEED_MM_MIN, c.probe_value,
+                    PROBE_RETRACT_MM)
         elif name == "reset":
             if c.double:
                 self._acknowledge_estop()

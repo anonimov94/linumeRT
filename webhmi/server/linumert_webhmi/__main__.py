@@ -19,7 +19,7 @@ from linumert.machine.schema import MachineConfigError
 from linumert.programs.prepare import JobService
 
 from .app import create_app
-from .backend import FakeBackend, LinuxCNCBackend
+from .backend import FakeBackend, LinuxCNCBackend, ReportBackend
 from .gateway import Gateway
 
 DEFAULT_PORT = 8765
@@ -40,6 +40,7 @@ def main(argv: list[str] | None = None) -> int:
     source = parser.add_mutually_exclusive_group(required=True)
     source.add_argument("--fake", action="store_true", help="atrapa maszyny (bez LinuxCNC)")
     source.add_argument("--linuxcnc", action="store_true", help="działający LinuxCNC (RIP)")
+    source.add_argument("--report", type=Path, help="przeglądaj zapisany raport bez kontrolera")
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", type=int, default=DEFAULT_PORT)
     parser.add_argument("--token", default=os.environ.get("LINUMERT_WEBHMI_TOKEN"))
@@ -60,6 +61,20 @@ def main(argv: list[str] | None = None) -> int:
                         help="plik HAL wykonany po utworzeniu pinów (np. "
                              "config/hal/linumert_webhmi_postgui.hal); wymaga --hal")
     args = parser.parse_args(argv)
+    saved_report = None
+    if args.report:
+        if any((args.hal, args.postgui, args.instance, args.ini, args.programs,
+                args.job_sources, args.job_machine, args.job_tools, args.jobs_dir,
+                args.drive_library)):
+            print("Odmowa: przegląd raportu nie przyjmuje opcji sterowania.", file=sys.stderr)
+            return 2
+        from linumert.programs import job_report
+
+        try:
+            saved_report = job_report.load(args.report)
+        except (OSError, ValueError) as error:
+            print(f"Odmowa raportu: {error}", file=sys.stderr)
+            return 2
     instance = None
     if args.instance:
         if args.fake or not args.hal or args.ini is None:
@@ -100,7 +115,8 @@ def main(argv: list[str] | None = None) -> int:
         print("Brak uvicorn: pip install 'linumert[panel]'", file=sys.stderr)
         return 2
     token = args.token or secrets.token_urlsafe(24)
-    backend = (FakeBackend(_demo_machine(), programs_dir=args.programs) if args.fake
+    backend = (ReportBackend(saved_report) if saved_report is not None else
+               FakeBackend(_demo_machine(), programs_dir=args.programs) if args.fake
                else LinuxCNCBackend(programs_dir=args.programs))
     pins = None
     if args.hal:

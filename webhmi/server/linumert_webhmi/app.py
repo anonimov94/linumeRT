@@ -120,6 +120,29 @@ def create_app(gateway: Gateway, token: str, extra_hosts: tuple[str, ...] = (), 
             raise HTTPException(409, str(error)) from None
         return {"ok": True}
 
+    @app.get("/api/execution/report")
+    def execution_report(request: Request) -> dict:
+        need_token(request)
+        try:
+            return gateway.run_report()
+        except (CommandError, ValueError, OSError) as error:
+            raise HTTPException(409, str(error)) from None
+
+    @app.post("/api/reports/open")
+    async def open_report(request: Request) -> dict:
+        from linumert.programs import job_report
+
+        need_token(request)
+        data = bytearray()
+        async for chunk in request.stream():
+            data.extend(chunk)
+            if len(data) > job_report.MAX_REPORT_BYTES:
+                raise HTTPException(413, "Raport przekracza limit32MiB")
+        try:
+            return await asyncio.to_thread(job_report.load, bytes(data))
+        except ValueError as error:
+            raise HTTPException(422, str(error)) from None
+
     @app.websocket("/ws")
     async def ws(socket: WebSocket) -> None:
         if not host_ok(socket.headers.get("host")) or not origin_ok(

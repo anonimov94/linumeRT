@@ -92,6 +92,10 @@ def run(output):
                 start = x()
                 command(ws, {"cmd": "jog_increment", "axis": "X", "speed": 0.5,
                              "distance": 1})
+                # ACK accepts the request; snapshot() may still describe the previous
+                # poll. Observe the active lease and actual motion before its expiry.
+                wait(lambda: "X" in gateway.snapshot()[1]["jog_active"])
+                wait(lambda: x() > start + 0.05)
                 # No jog_keepalive: a 2 s increment must stop after the 0.4 s lease.
                 wait(lambda: not gateway.snapshot()[1]["jog_active"])
                 wait(lambda: bool(status.joint[0]["inpos"]))

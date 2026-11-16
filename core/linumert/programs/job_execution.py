@@ -139,8 +139,11 @@ def render(path, verification: dict, target: str, *, test_mode=False, port=47700
     return files
 
 
-def read(path):
-    """Check bytes AND regeneration, including HAL, tools and frozen templates."""
+def read_evidence(path):
+    """Read historical evidence without invoking today's generators.
+
+    Hash consistency is not authorization to run. Runtime callers must use read().
+    """
     path = Path(path)
     if (path / "execution.json").is_symlink():
         raise ValueError("Manifest konfiguracji nie może być dowiązaniem")
@@ -161,6 +164,26 @@ def read(path):
         if description != {"sha256": job.digest(data), "bytes": len(data)}:
             raise ValueError(f"Zmieniony zasób konfiguracji: {name}")
         files[name] = data.decode()
+    verification = json.loads(files["verification.json"])
+    source_manifest, source = job.read(path / "job")
+    if (source_manifest["job_id"] != manifest["job_id"]
+            or verification["report_id"] != manifest["verification_id"]
+            or manifest.get("target") not in ("sim", "plant")
+            or manifest.get("status") != "configured"
+            or manifest.get("execution_authorization") is not False
+            or files[manifest["program"]] != source["program.ngc"]
+            or files["tool.tbl"] != source["tool.tbl"]):
+        raise ValueError("Dowody konfiguracji nie odpowiadają zapisanemu zadaniu")
+    validate_verification(verification, manifest["job_id"], json.loads(source["setup.json"]))
+    if manifest["assumptions"] != verification["assumptions"]:
+        raise ValueError("Założenia konfiguracji nie odpowiadają weryfikacji")
+    return manifest, files
+
+
+def read(path):
+    """Check bytes AND regeneration, including HAL, tools and frozen templates."""
+    path = Path(path)
+    manifest, files = read_evidence(path)
     verification = json.loads(files["verification.json"])
     launch = manifest["launch"]["plant"]
     port = int(launch[-1]) if launch else 47700

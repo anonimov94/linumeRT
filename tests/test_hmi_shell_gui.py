@@ -52,17 +52,24 @@ def _run_selftest(tmp_path: Path, out: Path, extra_env: dict[str, str] | None = 
         "HALFILE = ../../hal/", f"HALFILE = {ROOT / 'config' / 'hal'}/"), encoding="utf-8")
     shutil.rmtree(out, ignore_errors=True)
     env = {**cnc_environment(), "LINUMERT_SHELL_SELFTEST": str(out), **(extra_env or {})}
-    proc = subprocess.Popen(["linuxcnc", str(ini)], cwd=work, env=env, stdout=subprocess.PIPE,
-                            stderr=subprocess.STDOUT, text=True, start_new_session=True)
+    # -r keeps LinuxCNC diagnostics here instead of temporary redirected files.
+    # A file also avoids blocking QtVCP on an undrained stdout pipe.
+    log_path = tmp_path / "linuxcnc-selftest.log"
     result = out / "wynik.json"
-    try:
-        deadline = time.monotonic() + 300
-        while not result.exists() and time.monotonic() < deadline:
-            assert proc.poll() is None, proc.stdout.read()
-            time.sleep(1)
-        assert result.exists(), "samotest nie zakończył się w 300 s"
-    finally:
-        stop_linuxcnc(proc, cwd=work)
+    with log_path.open("w", encoding="utf-8") as log:
+        proc = subprocess.Popen(["linuxcnc", "-r", str(ini)], cwd=work, env=env, stdout=log,
+                                stderr=subprocess.STDOUT, text=True, start_new_session=True)
+        try:
+            deadline = time.monotonic() + 300
+            while not result.exists() and time.monotonic() < deadline:
+                assert proc.poll() is None, log_path.read_text(encoding="utf-8", errors="replace")
+                time.sleep(1)
+            assert result.exists(), (
+                "samotest nie zakończył się w 300 s\n"
+                + log_path.read_text(encoding="utf-8", errors="replace")[-16000:]
+            )
+        finally:
+            stop_linuxcnc(proc, cwd=work)
     return json.loads(result.read_text(encoding="utf-8"))
 
 

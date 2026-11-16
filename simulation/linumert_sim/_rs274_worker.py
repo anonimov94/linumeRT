@@ -3,13 +3,15 @@
 SPDX-License-Identifier: GPL-2.0-or-later
 Model-Author: Claude · 2026-11-01
 
-Słowa T/M6 są zawsze wycinane, bo numer narzędzia pochodzi z tekstu (`tool_changes`).
+Słowa T/M6 i M61 Q są wycinane, bo numer narzędzia pochodzi z tekstu (`tool_changes`).
+Komentarz w kopii interpretera oznacza wykonaną linię zmiany narzędzia (także w O-word).
 Wynik: plik `.npz`; kod `WORKER_PROGRAM_ERROR` = błąd programu (`run_parse_worker`).
 NIEZWERYFIKOWANE NA SPRZĘCIE.
 """
 
 from __future__ import annotations
 
+import re
 import sys
 import tempfile
 from pathlib import Path
@@ -18,7 +20,7 @@ import numpy as np
 from linumert.programs.linuxcnc_check import WORKER_PROGRAM_ERROR, limit_worker_lifetime
 from linumert.programs.toolpath import strip_tool_words, tool_data_available
 
-from linumert_sim.path import PathCanon, tool_changes
+from linumert_sim.path import TOOL_EVENT_MARKER, PathCanon, preview_tool_events, tool_changes
 
 
 def main(argv: list[str]) -> int:
@@ -28,10 +30,23 @@ def main(argv: list[str]) -> int:
 
     path = Path(source)
     text = path.read_text(encoding="utf-8", errors="replace")
-    changes, notes = tool_changes(text)
-    stripped, _ = strip_tool_words(text)
+    try:
+        _, notes = tool_changes(text)
+    except ValueError as exc:
+        print(exc, file=sys.stderr)
+        return WORKER_PROGRAM_ERROR
+    stripped, _ = strip_tool_words(text, include_m61=True)
+    events = preview_tool_events(text)
+    lines = stripped.splitlines(keepends=True)
+    for line in events:
+        body = lines[line - 1].rstrip("\r\n")
+        # Przed komentarzem średnikowym, by marker nie został przez niego połknięty.
+        semi = next((m.start() for m in re.finditer(r"\([^)]*\)|;.*$", body)
+                     if m.group().startswith(";")), len(body))
+        lines[line - 1] = f"{body[:semi]} ({TOOL_EVENT_MARKER}){body[semi:]}\n"
+    stripped = "".join(lines)
     tool_data_available()  # mapuje tablicę dla G43 Hn i G41 Dn, gdy LinuxCNC działa
-    canon = PathCanon(tool_changes=changes)
+    canon = PathCanon(tool_events=events)
     for note in notes:
         canon.out.note(note)
     # Zapisy parametrów interpretera zostają w analizie, z dala od stanu operatora

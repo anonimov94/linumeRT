@@ -189,9 +189,14 @@ try:
             # 7. Alarm i Reset: błąd LinuxCNC (limit programowy), potem E-STOP.
             send(ws, cmd="mode", mode="mdi")
             send(ws, cmd="mdi", text="G53 G0 X9999")
-            st = wait(lambda st: any(a["code"] == "E-1000" for a in st["alarms"]), 10,
-                      "alarm limitu")
-            limit_alarm = st["alarms"][0]["text"]
+            # This rejected move emits both the limit diagnostic and the invalid
+            # linear-command diagnostic. Reset after the complete observed batch,
+            # rather than racing a later message from the same MDI request.
+            st = wait(lambda st: settled(st) and all(
+                any(a["code"] == "E-1000" and text in a["text"] for a in st["alarms"])
+                for text in ("positive limit", "invalid params in linear command")), 10,
+                "komplet alarmów odrzuconego MDI")
+            limit_alarm = next(a["text"] for a in st["alarms"] if "positive limit" in a["text"])
             assert st["task_state"] == "on", st["task_state"]
             send(ws, cmd="reset")
             st = wait(lambda st: not st["alarms"], 5, "Reset kasuje alarm")

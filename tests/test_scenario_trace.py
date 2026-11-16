@@ -86,7 +86,24 @@ def test_servo_trace_with_real_sampler(monkeypatch, tmp_path):
     monkeypatch.setenv("LINUMERT_SCENARIO_DIAGNOSTICS", str(evidence))
     monkeypatch.setenv("LINUMERT_SCENARIO_SERVO_TRACE", "1")
     result = run_linuxcnc(load_scenario(ROOT / "plant/scenarios/first_motion.yaml"), port=47826)
-    meta = json.loads(next(evidence.glob("*/servo_trace.json")).read_text())
+    trace_dir = next(evidence.glob("*/servo_trace.json")).parent
+    meta = json.loads((trace_dir / "servo_trace.json").read_text())
     assert meta["valid"], meta
     assert meta["samples"] > 100 and "j3.sw" in meta["columns"]
-    assert result.passed, (result.criteria, result.log)
+    if not result.passed:
+        columns = meta["columns"]
+        x_error = columns.index("j0.f-error")
+        with (trace_dir / "servo_trace.txt").open() as trace:
+            worst = max((row.split() for row in trace), key=lambda row: abs(float(row[x_error])))
+        x_peaks = [
+            json.loads(line.removeprefix("PEAK "))
+            for line in (trace_dir / "driver.log").read_text().splitlines()
+            if line.startswith("PEAK ")
+        ]
+        x_peak = next((peak for peak in reversed(x_peaks) if peak["joint"] == 0), None)
+        pytest.fail(
+            f"{result.criteria}\n{result.log}\n"
+            f"X HAL-cycle peak: {dict(zip(columns, worst, strict=True))}\n"
+            f"X NML peak and live HAL readback: {x_peak}",
+            pytrace=False,
+        )

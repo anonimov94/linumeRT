@@ -607,6 +607,32 @@ Ukryta karta jest dławiona przez przeglądarkę i może dać E-STOP — przyję
 właściciel może wybrać inaczej (np. dłuższy limit albo ostrzeżenie zamiast E-STOP).
 Odbiór: `docs/raporty/G2/WEBHMI_WATCHDOG_2026-11-04.md`. NIEZWERYFIKOWANE NA SPRZĘCIE.
 
+## PROPOZYCJA: każda operacja programu dialogowego z własnym numerem O — 2026-11-05
+
+Model-Author: Claude. Polecenie właściciela (czat, 2026-11-05): „dajcie poprostu numery, każda
+kolejna operacja inny numer o, a w komentarzu komentarz i więcej info”.
+
+- Kompilator `.lnx` owija każdy włączony krok blokiem `oN if [1]` … `oN endif`, gdzie
+  N = numer kroku × 100 (krok 2 → `o200`). Numer jest stały względem `.lnx` (krok wyłączony
+  nie przesuwa numerów kolejnych). Numery N+1…N+99 są do dyspozycji generatora tej operacji.
+- Kompilator odrzuca (P-5013) numer O z linii generatora równy numerowi operacji albo użyty
+  już w innym kroku: dwie operacje nigdy nie dzielą numeru bloku O.
+- Pod istniejącą etykietą `( krok N: … )` dochodzi komentarz
+  `( OP N [oN00]: <rodzaj> | T D S M3/M4 | F FZ | Z min..max <jednostki> )`. Narzędzie pochodzi
+  z ostatniego kroku `tool_change`, średnica z pola `tool_d` albo z bazy narzędzi, a zakres Z
+  ze słów Z generatora (bez G53). To informacja dla operatora i narzędzi, nie analiza ścieżki.
+- Dlaczego `if [1]`: LinuxCNC nie ma etykiety O bez słowa sterującego. `if [1]` wykonuje się
+  dokładnie raz, nie zmienia stanu modalnego, a task LinuxCNC wykonuje taki program w AUTO
+  i od linii wewnątrz bloku (`tests/test_op_blocks_linuxcnc.py`, LinuxCNC 2.9 + Plant).
+  Parser zapasowy (bez LinuxCNC) wykonuje treść i notuje pominięte linie O.
+- Skutek: `.ngc` istniejących programów `.lnx` po ponownej kompilacji ma dodatkowe linie
+  (komentarz OP, `oN if [1]` / `oN endif`). Linie ruchu są identyczne (złote kopie
+  porównane bez dodanych linii). `beta/` bez zmian.
+- Dalej (osobno): numer operacji w WebHMI (bieżąca operacja, start od operacji zamiast od
+  linii), wyłączenie notatki o nieznanym narzędziu dla `o<lrt_*> call` po scaleniu #212.
+
+NIEZWERYFIKOWANE NA SPRZĘCIE.
+
 ## DECYZJA właściciela: jeden projekt, wszystko w main — 2026-11-05
 
 Model-Author: Claude. Polecenie właściciela: „to ma być jeden projekt, chcę wszystko poscalać do main”.
