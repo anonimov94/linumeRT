@@ -136,7 +136,7 @@ W ekranie: **Start → potwierdzenie E-STOP → Włącz → Bazuj wszystkie**. D
 
 Stan rejestru: **2026-11-18 · 39/84 ukończonych sesji**.
 
-Dodatkowo ukończono **24/47 rozszerzeń**. Wśród sesji: 30 częściowych i 14 planowanych. Rozszerzenia liczymy osobno, bez zwiększania licznika 84 sesji.
+Dodatkowo ukończono **24/47 rozszerzeń**. Wśród sesji: 31 częściowych i 14 planowanych. Rozszerzenia liczymy osobno, bez zwiększania licznika 84 sesji.
 
 | Kamień | Zakres | Sesje ukończone | Rozszerzenia ukończone | Rekordy z otwartymi kryteriami |
 |---|---|---:|---:|---:|

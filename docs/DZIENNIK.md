@@ -2136,3 +2136,13 @@ otwarty: MPG, dialog narzędzia, alarm napędu w WebHMI, kryteria028–037 i prz
 Windows: WSL odmawia dostępu, LinuxCNC/Plant weryfikowane przez CI.
 Zaktualizowano fakt scalenia232/70999cd po259 RIP i12 Beta PASS.
 Autokontrola, bez niezależnego przeglądu. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## 038 — zestaw automatyczny G2 odebrany · 2026-11-18 · Codex
+
+dfac257/PR235: dziewięć prób suite_operator PASS wraz z kontrolą kompletności JUnit
+w CI44382988114. CI44382987902:2121 Python PASS/127skip/259deselected,
+190 native PASS/2skip/6 podtestów, Plant matrix i wheel PASS;8 testów walidatora PASS.
+Pełna regresja i Beta zachowane w kontrolach PR235. G2 partial: MPG, dialog narzędzia,
+alarm napędu w WebHMI, pulpit i kryteria028–037 oraz niezależny przegląd nadal otwarte.
+Pusty argument w pierwszym selektorze został usunięty; nowa regresja pilnuje tego pliku.
+Autokontrola, bez niezależnego przeglądu. NIEZWERYFIKOWANE NA SPRZĘCIE.

@@ -1,7 +1,7 @@
 <!-- Generowane przez python3 tools/roadmap.py; edytuj docs/roadmap/plan.json. -->
 # Wspólny plan linumeRT
 
-Pierwotny plan: **84 sesje M0–M6**, commit `796c6a2`. Stan na 2026-11-18: planowane: 14; w toku: 1; częściowe: 30; do odbioru: 0; ukończone: 39; zablokowane: 0.
+Pierwotny plan: **84 sesje M0–M6**, commit `796c6a2`. Stan na 2026-11-18: planowane: 14; w toku: 0; częściowe: 31; do odbioru: 0; ukończone: 39; zablokowane: 0.
 
 Zakończenie części implementacji nie oznacza odbioru całej funkcji ani sprzętu.
 
@@ -58,7 +58,7 @@ Zakończenie części implementacji nie oznacza odbioru całej funkcji ani sprz�
 | 035 | M2 | [Alarmy na ekranie](../../prompts/sesja-035.md) | częściowe |
 | 036 | M2 | [Poziomy dostępu](../../prompts/sesja-036.md) | ukończone |
 | 037 | M2 | [Język polski i angielski](../../prompts/sesja-037.md) | częściowe |
-| 038 | M2 | [Bufor i bramka G2 (prototyp v0.1)](../../prompts/sesja-038.md) | w toku |
+| 038 | M2 | [Bufor i bramka G2 (prototyp v0.1)](../../prompts/sesja-038.md) | częściowe |
 | 039 | M3 | [Format .lnx i BaseMacroGenerator](../../prompts/sesja-039.md) | ukończone |
 | 040 | M3 | [Generatory: nagłówek, koniec, narzędzie, planowanie](../../prompts/sesja-040.md) | ukończone |
 | 041 | M3 | [Generatory: kieszenie](../../prompts/sesja-041.md) | ukończone |
@@ -408,13 +408,13 @@ Pozostaje: Pełne tłumaczenie produkcyjnego HMI .ts/.qm, przełącznik i format
 
 ### 038 — Bufor i bramka G2 (prototyp v0.1)
 
-**w toku**. 2026-11-18 | Rozpoczęto odbiór G2 WebHMI. suite_operator wybiera 9 istniejących prób RIP/Plant/interpretera: bazowanie/JOG/MDI/AUTO, pauza/wznowienie i trzy przerwania, watchdog HAL, sonda Z, awaria napędu oraz M6/G43. Walidator JUnit wymaga każdego przypadku dokładnie raz i bez SKIP. Raport G2 i formularz niezależnego przeglądu przygotowane. Wynik nowej porcji w CI wymagany; pełna bramka pozostaje otwarta.
+**częściowe**. 2026-11-18 | Rozpoczęto odbiór G2 WebHMI. suite_operator wybiera 9 istniejących prób RIP/Plant/interpretera: bazowanie/JOG/MDI/AUTO, pauza/wznowienie i trzy przerwania, watchdog HAL, sonda Z, awaria napędu oraz M6/G43. Walidator JUnit wymaga każdego przypadku dokładnie raz i bez SKIP. Raport G2 i formularz niezależnego przeglądu przygotowane. Wynik nowej porcji w CI wymagany; pełna bramka pozostaje otwarta. Odbiór dfac257: CI44382988114 zaliczyło wszystkie9 przypadków suite_operator wraz z kontrolą kompletności JUnit. CI44382987902:2121 Python PASS/127skip/259deselected,190 native PASS/2skip/6podtestów, Plant matrix i wheel PASS. Kontrole PR235 zachowują pełną regresję i Beta. Pełna bramka pozostaje otwarta.
 
 Bramka automatyczna: `open`; odbiór stanowiska osobno.
 
-Pozostaje: Wykonać suite_operator na LinuxCNC + Plant i zachować XML z kompletem 9 PASS. Odebrać MPG od impulsów pulpitu Plant do ruchu właściwej osi LinuxCNC. Odebrać dialog ręcznej zmiany narzędzia oraz alarm napędu i odzyskiwanie w WebHMI. Ponowić pełny przejazd w przeglądarce i rozliczyć pozostałe kryteria sesji 028–037. Uzyskać przegląd podobieństwa aktualnych ekranów od osoby nieuczestniczącej w projekcie.
+Pozostaje: Odebrać MPG od impulsów pulpitu Plant do ruchu właściwej osi LinuxCNC. Odebrać dialog ręcznej zmiany narzędzia oraz alarm napędu i odzyskiwanie w WebHMI. Ponowić pełny przejazd w przeglądarce i rozliczyć pozostałe kryteria sesji 028–037. Uzyskać przegląd podobieństwa aktualnych ekranów od osoby nieuczestniczącej w projekcie.
 
-Źródła: [tests/suite_operator.txt](../../tests/suite_operator.txt), [tools/ci/check_operator.py](../../tools/ci/check_operator.py), [docs/raporty/G2.md](../raporty/G2.md), [docs/prawne/PRZEGLAD_PODOBIENSTWA_v0.1.md](../prawne/PRZEGLAD_PODOBIENSTWA_v0.1.md), [prompts/sesja-038.md](../../prompts/sesja-038.md).
+Źródła: [tests/suite_operator.txt](../../tests/suite_operator.txt), [tools/ci/check_operator.py](../../tools/ci/check_operator.py), [docs/raporty/G2.md](../raporty/G2.md), [docs/prawne/PRZEGLAD_PODOBIENSTWA_v0.1.md](../prawne/PRZEGLAD_PODOBIENSTWA_v0.1.md), [PR](https://github.com/anonimov94/linumeRT/pull/235), [PR](https://github.com/anonimov94/linumeRT/actions/runs/44382988114), [PR](https://github.com/anonimov94/linumeRT/actions/runs/44382987902), [prompts/sesja-038.md](../../prompts/sesja-038.md).
 
 ### 039 — Format .lnx i BaseMacroGenerator
 
