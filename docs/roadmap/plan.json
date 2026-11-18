@@ -611,10 +611,9 @@
       "milestone": "M2",
       "title": "Bufor i bramka G2 (prototyp v0.1)",
       "prompt": "prompts/sesja-038.md",
-      "status": "in_progress",
-      "progress": "2026-11-18 | Rozpoczęto odbiór G2 WebHMI. suite_operator wybiera 9 istniejących prób RIP/Plant/interpretera: bazowanie/JOG/MDI/AUTO, pauza/wznowienie i trzy przerwania, watchdog HAL, sonda Z, awaria napędu oraz M6/G43. Walidator JUnit wymaga każdego przypadku dokładnie raz i bez SKIP. Raport G2 i formularz niezależnego przeglądu przygotowane. Wynik nowej porcji w CI wymagany; pełna bramka pozostaje otwarta.",
+      "status": "partial",
+      "progress": "2026-11-18 | Rozpoczęto odbiór G2 WebHMI. suite_operator wybiera 9 istniejących prób RIP/Plant/interpretera: bazowanie/JOG/MDI/AUTO, pauza/wznowienie i trzy przerwania, watchdog HAL, sonda Z, awaria napędu oraz M6/G43. Walidator JUnit wymaga każdego przypadku dokładnie raz i bez SKIP. Raport G2 i formularz niezależnego przeglądu przygotowane. Wynik nowej porcji w CI wymagany; pełna bramka pozostaje otwarta. Odbiór dfac257: CI44382988114 zaliczyło wszystkie9 przypadków suite_operator wraz z kontrolą kompletności JUnit. CI44382987902:2121 Python PASS/127skip/259deselected,190 native PASS/2skip/6podtestów, Plant matrix i wheel PASS. Kontrole PR235 zachowują pełną regresję i Beta. Pełna bramka pozostaje otwarta.",
       "remaining": [
-        "Wykonać suite_operator na LinuxCNC + Plant i zachować XML z kompletem 9 PASS.",
         "Odebrać MPG od impulsów pulpitu Plant do ruchu właściwej osi LinuxCNC.",
         "Odebrać dialog ręcznej zmiany narzędzia oraz alarm napędu i odzyskiwanie w WebHMI.",
         "Ponowić pełny przejazd w przeglądarce i rozliczyć pozostałe kryteria sesji 028–037.",
@@ -624,7 +623,10 @@
         "tests/suite_operator.txt",
         "tools/ci/check_operator.py",
         "docs/raporty/G2.md",
-        "docs/prawne/PRZEGLAD_PODOBIENSTWA_v0.1.md"
+        "docs/prawne/PRZEGLAD_PODOBIENSTWA_v0.1.md",
+        "https://github.com/anonimov94/linumeRT/pull/235",
+        "https://github.com/anonimov94/linumeRT/actions/runs/44382988114",
+        "https://github.com/anonimov94/linumeRT/actions/runs/44382987902"
       ],
       "gate": "open"
     },
