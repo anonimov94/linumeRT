@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated": "2026-11-10",
+  "updated": "2026-11-18",
   "model_author": "Codex",
   "original_count": 84,
   "origin_commit": "796c6a2",
@@ -611,10 +611,21 @@
       "milestone": "M2",
       "title": "Bufor i bramka G2 (prototyp v0.1)",
       "prompt": "prompts/sesja-038.md",
-      "status": "planned",
-      "progress": "Brak potwierdzonego zakończenia zakresu.",
-      "remaining": [],
-      "evidence": [],
+      "status": "in_progress",
+      "progress": "2026-11-18 | Rozpoczęto odbiór G2 WebHMI. suite_operator wybiera 9 istniejących prób RIP/Plant/interpretera: bazowanie/JOG/MDI/AUTO, pauza/wznowienie i trzy przerwania, watchdog HAL, sonda Z, awaria napędu oraz M6/G43. Walidator JUnit wymaga każdego przypadku dokładnie raz i bez SKIP. Raport G2 i formularz niezależnego przeglądu przygotowane. Wynik nowej porcji w CI wymagany; pełna bramka pozostaje otwarta.",
+      "remaining": [
+        "Wykonać suite_operator na LinuxCNC + Plant i zachować XML z kompletem 9 PASS.",
+        "Odebrać MPG od impulsów pulpitu Plant do ruchu właściwej osi LinuxCNC.",
+        "Odebrać dialog ręcznej zmiany narzędzia oraz alarm napędu i odzyskiwanie w WebHMI.",
+        "Ponowić pełny przejazd w przeglądarce i rozliczyć pozostałe kryteria sesji 028–037.",
+        "Uzyskać przegląd podobieństwa aktualnych ekranów od osoby nieuczestniczącej w projekcie."
+      ],
+      "evidence": [
+        "tests/suite_operator.txt",
+        "tools/ci/check_operator.py",
+        "docs/raporty/G2.md",
+        "docs/prawne/PRZEGLAD_PODOBIENSTWA_v0.1.md"
+      ],
       "gate": "open"
     },
     {
@@ -2190,11 +2201,10 @@
         "068"
       ],
       "status": "in_progress",
-      "progress": "Poziom4 pełnego main nad zamkniętym RUN. PR231: wspólny raport CLI/API, przenośny JSON z kontrolą SHA i dowodami pozycji, WebHMI --report bez kontrolera/atrapy i z odmową komend. Wykresy XYZ bez interpolacji, maksima/RMS z pełnego zapisu, piki i alarmy z czasem/linią, pauzy i porównanie z dolną granicą modelu.7 archiwów rzeczywistych: niezależne max/math.fsum RMS zgodne, zachowane dokładne konfiguracje i portable JSON. Osobny kanał surowego joint.ferror_current i statystyki przegubów; różnica osi NML pozostaje odrębna, legacy bez raw FERR oznaczone unavailable.91 szybkich regresji PASS,42 JS PASS. Rzeczywisty dodatni zapis raw FERR, kliknięty odbiór GUI, pełna regresja/CI i scalenie nadal wymagane. 2026-11-09: integracja #211/#212/#213/#231 w draft #232. Zapisane wcześniej3 archiwa raw FERR (pełny Plant, sim Stop, luka) i7 starszych archiwów przechodzą ponowną kontrolę hashów/statystyk. Kliknięty odbiór offline XYZ/importu/eksportu zapisany w2 JPG; uzupełniono brakujące provenance wykryte przez CI. Ostatni head44c72f7: RIP258PASS/1FAIL first_motion X0,8301mm>0,2mm; Python2112PASS/1FAIL provenance.71 lokalnych testów IP/raportów/diagnostyki PASS. CI otrzymuje trwały katalog diagnostyki scenariuszy; przyczyna X pozostaje nieustalona. Lokalna pełna regresja tej kontynuacji:2100PASS/5FAIL,135skip,184podtesty;2 panel FAIL usunięte instalacją socksio (2PASS). Pozostałe: odmowa /proc i2 watchdog VM-link64/135ms przy50ms. REQ22/22 i22 testy planu PASS. Push odrzucony automatyczną kontrolą zgody; zmiany tylko lokalnie, bez nowego CI. 2026-11-10: właściciel polecił main; badanie masy/PI opublikowane jako233 i dołączone do232. CI594526e Python/C/wheel success42711421106, RIP42711421110:257PASS/2FAIL; first_motion PASS. Poprawiono synchronizację kierowców G2 Reset (komplet diagnostyki odrzuconego MDI) i JOG (obserwacja aktywnego ruchu przed Stop).96 szybkich testów PASS; progi/kod sterowania bez zmian. Celowane2 RIP poprzedzają pełną serię, końcowe CI nadal wymagane.",
+      "progress": "Poziom4 pełnego main nad zamkniętym RUN. PR231: wspólny raport CLI/API, przenośny JSON z kontrolą SHA i dowodami pozycji, WebHMI --report bez kontrolera/atrapy i z odmową komend. Wykresy XYZ bez interpolacji, maksima/RMS z pełnego zapisu, piki i alarmy z czasem/linią, pauzy i porównanie z dolną granicą modelu.7 archiwów rzeczywistych: niezależne max/math.fsum RMS zgodne, zachowane dokładne konfiguracje i portable JSON. Osobny kanał surowego joint.ferror_current i statystyki przegubów; różnica osi NML pozostaje odrębna, legacy bez raw FERR oznaczone unavailable.91 szybkich regresji PASS,42 JS PASS. Rzeczywisty dodatni zapis raw FERR, kliknięty odbiór GUI, pełna regresja/CI i scalenie nadal wymagane. 2026-11-09: integracja #211/#212/#213/#231 w draft #232. Zapisane wcześniej3 archiwa raw FERR (pełny Plant, sim Stop, luka) i7 starszych archiwów przechodzą ponowną kontrolę hashów/statystyk. Kliknięty odbiór offline XYZ/importu/eksportu zapisany w2 JPG; uzupełniono brakujące provenance wykryte przez CI. Ostatni head44c72f7: RIP258PASS/1FAIL first_motion X0,8301mm>0,2mm; Python2112PASS/1FAIL provenance.71 lokalnych testów IP/raportów/diagnostyki PASS. CI otrzymuje trwały katalog diagnostyki scenariuszy; przyczyna X pozostaje nieustalona. Lokalna pełna regresja tej kontynuacji:2100PASS/5FAIL,135skip,184podtesty;2 panel FAIL usunięte instalacją socksio (2PASS). Pozostałe: odmowa /proc i2 watchdog VM-link64/135ms przy50ms. REQ22/22 i22 testy planu PASS. Push odrzucony automatyczną kontrolą zgody; zmiany tylko lokalnie, bez nowego CI. 2026-11-10: właściciel polecił main; badanie masy/PI opublikowane jako233 i dołączone do232. CI594526e Python/C/wheel success42711421106, RIP42711421110:257PASS/2FAIL; first_motion PASS. Poprawiono synchronizację kierowców G2 Reset (komplet diagnostyki odrzuconego MDI) i JOG (obserwacja aktywnego ruchu przed Stop).96 szybkich testów PASS; progi/kod sterowania bez zmian. Celowane2 RIP poprzedzają pełną serię, końcowe CI nadal wymagane. 2026-11-16: PR232 scalony do main70999cd po CI43955083313:259 RIP i12 Beta PASS oraz ci43955083522 success dla e026f74. Końcowy audyt przepływu i diagnoza wcześniejszych pików X pozostają otwarte.",
       "remaining": [
         "Końcowy audyt całego przepływu1–4 i integracji #211/#212/#213/#231, z zachowaniem ograniczeń wcześniejszych dowodów.",
-        "Diagnoza first_motion X0,8301mm na zachowanych logach NML/HAL/Plant; bez luzowania progu0,2mm i bez uznania powtórzenia PASS za wyjaśnienie.",
-        "Pełna regresja, exact-head CI i scalenie kodu/dowodów PR232 do main."
+        "Diagnoza first_motion X0,8301mm na zachowanych logach NML/HAL/Plant; bez luzowania progu0,2mm i bez uznania powtórzenia PASS za wyjaśnienie."
       ],
       "evidence": [
         "docs/WORKFLOW_ZADANIA.md",
@@ -2205,7 +2215,9 @@
         "https://github.com/anonimov94/linumeRT/pull/232",
         "docs/raporty/vertical/report-ferr-acceptance-20261108.json",
         "docs/raporty/vertical/report-offline-z-20261109.jpg",
-        "docs/raporty/vertical/report-reimport-y-20261109.jpg"
+        "docs/raporty/vertical/report-reimport-y-20261109.jpg",
+        "https://github.com/anonimov94/linumeRT/actions/runs/43955083313",
+        "https://github.com/anonimov94/linumeRT/commit/70999cdff31fd35d8cfe5b7819f5b16ab95c9b72"
       ]
     }
   ]

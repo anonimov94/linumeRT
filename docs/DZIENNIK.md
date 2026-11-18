@@ -2126,3 +2126,13 @@ G2 Reset czeka na diagnostykę całego odrzuconego MDI; JOG obserwuje aktywny ru
 przed oczekiwaniem na wygaśnięcie lease.96 szybkich testów PASS; progi/safety bez zmian.
 Dodano celowane2 RIP przed niezmienioną pełną serią. Badanie dołączono do232,
 końcowy LinuxCNC/CI wymagany, bez deklaracji naprawy dawnego X0,8301mm.
+
+## 038 — odbiór G2 WebHMI · 2026-11-18 · Codex
+
+Zestaw suite_operator zbiera9 istniejących prób integracyjnych. Walidator wymaga
+każdej dokładnie raz, bez SKIP/FAIL/ERROR; siedem lokalnych prób walidatora PASS.
+Raport G2 i formularz przeglądu podobieństwa przygotowane. Pełny odbiór pozostaje
+otwarty: MPG, dialog narzędzia, alarm napędu w WebHMI, kryteria028–037 i przegląd.
+Windows: WSL odmawia dostępu, LinuxCNC/Plant weryfikowane przez CI.
+Zaktualizowano fakt scalenia232/70999cd po259 RIP i12 Beta PASS.
+Autokontrola, bez niezależnego przeglądu. NIEZWERYFIKOWANE NA SPRZĘCIE.
