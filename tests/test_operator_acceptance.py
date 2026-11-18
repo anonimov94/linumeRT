@@ -15,6 +15,11 @@ module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(module)
 
 
+def test_operator_selection_has_no_empty_collection_arguments():
+    lines = module.SUITE.read_text(encoding="utf-8").splitlines()
+    assert lines and all(line.strip() == line and line for line in lines)
+
+
 @pytest.mark.parametrize("contents", [
     '<testcase classname="tests.test_example" name="test_operator"/>',
     '<testcase classname="tests.test_example" name="test_operator"><skipped/></testcase>',
