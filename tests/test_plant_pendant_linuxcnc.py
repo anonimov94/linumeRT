@@ -46,6 +46,8 @@ def counts():
 
 
 subprocess.run(["halcmd", "-f", HAL_SETUP], check=True)
+reader = hal.component("lrt-test-mpg-reader")
+reader.ready()
 
 with httpx.Client(base_url=f"http://127.0.0.1:{PANEL_PORT}", trust_env=False, timeout=3) as client:
     def post(path, body):
@@ -64,11 +66,17 @@ with httpx.Client(base_url=f"http://127.0.0.1:{PANEL_PORT}", trust_env=False, ti
     assert counts() == desk_state()["mpg_edges"] == 0
     observed = []
     for detents, expected in ((100, 400), (-100, 0)):
+        missed_before = hal.get_value("lrt-net.0.missed")
         post("mpg", {"detents": detents})
         wait(lambda: desk_state()["mpg_pending"], 0)
         assert desk_state()["mpg_edges"] == expected
         wait(lambda: pins(20, 21), (False, False))
-        observed.append(wait(counts, expected))
+        # Allow for the final Plant frame to reach LinuxCNC before sampling counts.
+        try:
+            observed.append(wait(counts, expected, timeout=2))
+        except AssertionError as error:
+            missed = hal.get_value("lrt-net.0.missed") - missed_before
+            raise AssertionError(f"{error}; detents={detents}; missed cycles={missed}") from error
 
     assert hal.get_value("lrt-net.0.connected")
     print("RESULT " + json.dumps({"selected": selected, "counts": observed}))
