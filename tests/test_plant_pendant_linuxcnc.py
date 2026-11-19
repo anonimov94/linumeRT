@@ -53,7 +53,18 @@ if JOG:
     assert on and homed, "Cannot test wheel jog without power and homing"
     s.poll()
     assert s.motion_mode == linuxcnc.TRAJ_MODE_TELEOP
-    origin = tuple(s.actual_position[:3])
+    def coordinates():
+        s.poll()
+        return tuple(s.actual_position[:3]), tuple(s.position[:3])
+
+    def settled_at_home():
+        actual, commanded = coordinates()
+        return abs(s.current_vel) < 1e-4 and all(
+            abs(a - c) < 0.001 for a, c in zip(actual, commanded, strict=True)
+        )
+
+    wait(settled_at_home, True, timeout=10)
+    _, origin = coordinates()
 
     def at_displacement(y_mm):
         s.poll()
@@ -92,7 +103,18 @@ with httpx.Client(base_url=f"http://127.0.0.1:{PANEL_PORT}", trust_env=False, ti
             raise AssertionError(f"{error}; detents={detents}; missed cycles={missed}") from error
 
         if JOG:
-            wait(lambda: at_displacement(y_mm), True, timeout=30)
+            try:
+                wait(lambda: at_displacement(y_mm), True, timeout=10)
+            except AssertionError as error:
+                actual, commanded = coordinates()
+                pins_y = {name: hal.get_value("axis.y." + name) for name in (
+                    "jog-enable", "jog-scale", "jog-counts", "wheel-jog-active",
+                )}
+                raise AssertionError(
+                    f"Y delta={y_mm}, origin={origin}, actual={actual}, "
+                    f"commanded={commanded}, task_state={s.task_state}, "
+                    f"motion_mode={s.motion_mode}, HAL={pins_y}"
+                ) from error
             travel.append(s.actual_position[1] - origin[1])
 
     assert hal.get_value("lrt-net.0.connected")
