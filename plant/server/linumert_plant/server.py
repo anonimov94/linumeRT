@@ -278,7 +278,9 @@ class PlantServer:
         self.telemetry = Telemetry(self.drives, period_s=self.cfg.telemetry_ms / 1000.0)
         self.desk = None
         if self.cfg.desk is not None:
-            problems = self.cfg.desk.problems(getattr(getattr(mcfg, "io", None), "inputs", None))
+            io = getattr(mcfg, "io", None)
+            problems = self.cfg.desk.problems(getattr(io, "inputs", None),
+                                               getattr(io, "outputs", None))
             if problems:
                 raise PlantConfigError("; ".join(problems))
             self.desk = Desk(self.cfg.desk)
@@ -495,7 +497,8 @@ class PlantServer:
                                        f"(ramka {v.seq})")
                     self._step_discrete(dt_ns / 1e9, cmd.digital_out)
                     if self.desk is not None:
-                        self.desk.step(dt_ns / 1e9)
+                        self.desk.step(dt_ns / 1e9, None if self.watchdog_tripped
+                                       else cmd.digital_out)
                     self._sample()
                 except Exception as exc:  # noqa: BLE001 - REQ-QA-03: proces nie może upaść
                     self.safe_state(f"{type(exc).__name__}: {exc}")

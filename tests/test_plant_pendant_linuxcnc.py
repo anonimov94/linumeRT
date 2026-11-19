@@ -103,7 +103,8 @@ with httpx.Client(base_url=f"http://127.0.0.1:{PANEL_PORT}", trust_env=False, ti
 def run_pendant(tmp_path, *, jog):
     example = yaml.safe_load((ROOT / "config/plant/plant.example.yaml").read_text(encoding="utf-8"))
     plant = tmp_path / "plant.yaml"
-    plant.write_text(json.dumps({"machine": str(MILL), "desk": example["desk"]}), encoding="utf-8")
+    desk = {**example["desk"], "mpg_ack": [20, 21]}
+    plant.write_text(json.dumps({"machine": str(MILL), "desk": desk}), encoding="utf-8")
 
     # Private generated Plant configuration for the integration test.
     hal_setup = tmp_path / "mpg_test.hal"
@@ -112,8 +113,8 @@ def run_pendant(tmp_path, *, jog):
         "addf encoder.update-counters servo-thread\n"
         "addf encoder.capture-position servo-thread\n"
         "setp lrt-test-mpg.x4-mode true\n"
-        "net lrt-test-mpg-a lrt-net.0.din-20 => lrt-test-mpg.phase-A\n"
-        "net lrt-test-mpg-b lrt-net.0.din-21 => lrt-test-mpg.phase-B\n"
+        "net lrt-test-mpg-a lrt-net.0.din-20 => lrt-test-mpg.phase-A lrt-net.0.dout-20\n"
+        "net lrt-test-mpg-b lrt-net.0.din-21 => lrt-test-mpg.phase-B lrt-net.0.dout-21\n"
     )
     if jog:
         # Step 10 = 0.010 mm per detent, with four encoder counts per detent.
