@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
-"""Test the virtual pendant input path before binding it to axis jog.
+"""Test Plant pendant inputs and wheel jogging on a simulated axis.
 
 Model-Author: Codex
 """
@@ -11,7 +11,7 @@ from pathlib import Path
 
 import pytest
 import yaml
-from plant_session import run_generated_plant
+from plant_session import DRIVER_PRELUDE, run_generated_plant
 
 ROOT = Path(__file__).resolve().parents[1]
 MILL = ROOT / "config/machines/mill_servo_table.yaml"
@@ -49,6 +49,19 @@ subprocess.run(["halcmd", "-f", HAL_SETUP], check=True)
 reader = hal.component("lrt-test-mpg-reader")
 reader.ready()
 
+if JOG:
+    assert on and homed, "Cannot test wheel jog without power and homing"
+    s.poll()
+    assert s.motion_mode == linuxcnc.TRAJ_MODE_TELEOP
+    origin = tuple(s.actual_position[:3])
+
+    def at_displacement(y_mm):
+        s.poll()
+        expected = (origin[0], origin[1] + y_mm, origin[2])
+        return all(abs(actual - target) < 0.001
+                   for actual, target in zip(s.actual_position[:3], expected, strict=True))
+
+
 with httpx.Client(base_url=f"http://127.0.0.1:{PANEL_PORT}", trust_env=False, timeout=3) as client:
     def post(path, body):
         return client.post("/api/desk/" + path, json=body).raise_for_status().json()
@@ -64,8 +77,8 @@ with httpx.Client(base_url=f"http://127.0.0.1:{PANEL_PORT}", trust_env=False, ti
                     (False, True, False, False, True, False))
 
     assert counts() == desk_state()["mpg_edges"] == 0
-    observed = []
-    for detents, expected in ((100, 400), (-100, 0)):
+    observed, travel = [], []
+    for detents, expected, y_mm in ((100, 400, 1.0), (-100, 0, 0.0)):
         missed_before = hal.get_value("lrt-net.0.missed")
         post("mpg", {"detents": detents})
         wait(lambda: desk_state()["mpg_pending"], 0)
@@ -78,34 +91,55 @@ with httpx.Client(base_url=f"http://127.0.0.1:{PANEL_PORT}", trust_env=False, ti
             missed = hal.get_value("lrt-net.0.missed") - missed_before
             raise AssertionError(f"{error}; detents={detents}; missed cycles={missed}") from error
 
+        if JOG:
+            wait(lambda: at_displacement(y_mm), True, timeout=30)
+            travel.append(s.actual_position[1] - origin[1])
+
     assert hal.get_value("lrt-net.0.connected")
-    print("RESULT " + json.dumps({"selected": selected, "counts": observed}))
+    print("RESULT " + json.dumps({"selected": selected, "counts": observed, "travel": travel}))
 """
 
 
-@pytest.mark.linuxcnc
-def test_plant_pendant_inputs_reach_linuxcnc(tmp_path):
+def run_pendant(tmp_path, *, jog):
     example = yaml.safe_load((ROOT / "config/plant/plant.example.yaml").read_text(encoding="utf-8"))
     plant = tmp_path / "plant.yaml"
     plant.write_text(json.dumps({"machine": str(MILL), "desk": example["desk"]}), encoding="utf-8")
 
-    # Install only the decoder for this test. There is no connection to motion pins.
+    # Private generated Plant configuration for the integration test.
     hal_setup = tmp_path / "mpg_test.hal"
-    hal_setup.write_text(
+    wiring = (
         "loadrt encoder names=lrt-test-mpg\n"
         "addf encoder.update-counters servo-thread\n"
         "addf encoder.capture-position servo-thread\n"
         "setp lrt-test-mpg.x4-mode true\n"
         "net lrt-test-mpg-a lrt-net.0.din-20 => lrt-test-mpg.phase-A\n"
-        "net lrt-test-mpg-b lrt-net.0.din-21 => lrt-test-mpg.phase-B\n",
-        encoding="utf-8",
+        "net lrt-test-mpg-b lrt-net.0.din-21 => lrt-test-mpg.phase-B\n"
     )
-    prelude = f"HAL_SETUP = {str(hal_setup)!r}\nPANEL_PORT = {PORT}\n"
+    if jog:
+        # Step 10 = 0.010 mm per detent, with four encoder counts per detent.
+        wiring += (
+            "net lrt-test-mpg-counts lrt-test-mpg.counts => axis.y.jog-counts\n"
+            "net lrt-test-mpg-y lrt-net.0.din-23 => axis.y.jog-enable\n"
+            "setp axis.y.jog-scale 0.0025\n"
+        )
+    hal_setup.write_text(wiring, encoding="utf-8")
+    prelude = DRIVER_PRELUDE if jog else ""
+    prelude += f"HAL_SETUP = {str(hal_setup)!r}\nPANEL_PORT = {PORT}\nJOG = {jog!r}\n"
     result, _, _ = run_generated_plant(
-        tmp_path, MILL, DRIVER, port=PORT, timeout=60, prelude=prelude, hmi_bypass=False,
+        tmp_path, MILL, DRIVER, port=PORT, timeout=360 if jog else 60,
+        prelude=prelude, hmi_bypass=jog,
         plant_config=plant, plant_args=("--panel", str(PORT), "--state-dir", str(tmp_path)),
     )
-    assert result == {
-        "selected": [False, True, False, False, True, False],
-        "counts": [400, 0],
-    }
+    assert result["selected"] == [False, True, False, False, True, False]
+    assert result["counts"] == [400, 0]
+    return result["travel"]
+
+
+@pytest.mark.linuxcnc
+def test_plant_pendant_inputs_reach_linuxcnc(tmp_path):
+    assert run_pendant(tmp_path, jog=False) == []
+
+
+@pytest.mark.linuxcnc
+def test_plant_pendant_jogs_simulated_axis_y(tmp_path):
+    assert run_pendant(tmp_path, jog=True) == pytest.approx([1.0, 0.0], abs=0.001)
