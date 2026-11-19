@@ -141,7 +141,9 @@ def run_generated_plant(tmp_path: Path, machine: Path, driver_body: str, *, port
     with contextlib.ExitStack() as stack:
         stack.enter_context(rip.installed_modules(root, tmp_path,
                                                   ("lrt_net", "lrt_cia402", "lrt_estop2")))
-        plant = stack.enter_context(rip.plant_server(plant_config or machine, port, "--seed", "5", *plant_args))
+        plant = stack.enter_context(
+            rip.plant_server(plant_config or machine, port, "--seed", "5", *plant_args)
+        )
         cnc = rip.start_linuxcnc(root, ini, env)
         try:
             for _ in range(120):
