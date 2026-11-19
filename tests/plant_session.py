@@ -86,7 +86,8 @@ c.teleop_enable(1); c.wait_complete()
 def run_generated_plant(tmp_path: Path, machine: Path, driver_body: str, *, port: int,
                         timeout: float = 300, copy_macros: bool = True,
                         prelude: str = DRIVER_PRELUDE,
-                        hmi_bypass: bool = True) -> tuple[dict, str, Path]:
+                        hmi_bypass: bool = True, plant_config: Path | None = None,
+                        plant_args: tuple[str, ...] = ()) -> tuple[dict, str, Path]:
     """Zwraca (wynik kierowcy, log LinuxCNC, katalog konfiguracji). Pomija test, gdy zajęte.
 
     ``prelude=""`` oddaje włączenie i bazowanie kierowcy (odbiór G2 robi je przez WebHMI).
@@ -140,7 +141,7 @@ def run_generated_plant(tmp_path: Path, machine: Path, driver_body: str, *, port
     with contextlib.ExitStack() as stack:
         stack.enter_context(rip.installed_modules(root, tmp_path,
                                                   ("lrt_net", "lrt_cia402", "lrt_estop2")))
-        plant = stack.enter_context(rip.plant_server(machine, port, "--seed", "5"))
+        plant = stack.enter_context(rip.plant_server(plant_config or machine, port, "--seed", "5", *plant_args))
         cnc = rip.start_linuxcnc(root, ini, env)
         try:
             for _ in range(120):
