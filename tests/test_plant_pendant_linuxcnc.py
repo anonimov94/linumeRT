@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
-"""Test Plant pendant inputs and wheel jogging on the simulated XYZ axes.
+"""Test Plant MPG transport, mode interlocks and Stop on the simulated XYZ axes.
 
 Model-Author: Codex
 """
@@ -28,10 +28,12 @@ import hal
 import httpx
 
 
-def wait(read, expected, timeout=10):
+def wait(read, expected, timeout=10, *, observe=None):
     deadline = time.monotonic() + timeout
     while True:
         observed = read()
+        if observe is not None:
+            observe()
         if observed == expected:
             return observed
         if time.monotonic() >= deadline:
@@ -66,14 +68,76 @@ if JOG:
             abs(a - c) < 0.001 for a, c in zip(actual, commanded, strict=True)
         )
 
-    def at_target(target):
+    def wheel_active(axis):
+        return hal.get_value(f"axis.{axis.lower()}.wheel-jog-active")
+
+    def at_target(target, mode=linuxcnc.MODE_MANUAL):
         actual, commanded = coordinates()
         return (s.task_state == linuxcnc.STATE_ON
-                and s.motion_mode == linuxcnc.TRAJ_MODE_TELEOP
+                and s.task_mode == mode
+                and abs(s.current_vel) < 1e-4
+                and not any(wheel_active(axis) for axis in AXES)
                 # The planner settles within its finite position resolution.
                 # Keep the command tolerance smaller than one count at the finest scale.
                 and all(abs(a - t) < 0.001 and abs(c - t) < 0.0001
                         for a, c, t in zip(actual, commanded, target, strict=True)))
+
+
+    def set_mode(task_mode, motion_mode):
+        c.mode(task_mode)
+        c.wait_complete()
+
+        def mode():
+            s.poll()
+            return s.task_mode, s.motion_mode
+
+        wait(mode, (task_mode, motion_mode))
+        wait(settled, True)
+
+    def stationary_at(target, mode):
+        assert at_target(target, mode), (
+            f"Unexpected MPG motion: mode={s.task_mode}, target={target}, "
+            f"actual={s.actual_position[:3]}, commanded={s.position[:3]}, "
+            f"velocity={s.current_vel}"
+        )
+
+    def observe_rest(target, mode=linuxcnc.MODE_MANUAL):
+        # Give the servo thread time to consume the final count in the new mode.
+        deadline = time.monotonic() + 0.3
+        while time.monotonic() < deadline:
+            stationary_at(target, mode)
+            time.sleep(0.02)
+
+    def web_stop(start_motion):
+        from linumert_webhmi import Gateway, create_app
+        from linumert_webhmi.backend import LinuxCNCBackend
+        from starlette.testclient import TestClient
+
+        token = "g2-plant-mpg-stop"
+        gateway = Gateway(LinuxCNCBackend(module=linuxcnc))
+        gateway.start()
+        try:
+            with TestClient(create_app(gateway, token), base_url="http://127.0.0.1:8765") as web:
+                with web.websocket_connect("/ws", headers={"host": "127.0.0.1:8765"}) as ws:
+                    ws.send_json({"auth": token})
+                    assert ws.receive_json()["type"] == "state"
+                    start_motion()
+                    # Check active motion immediately before sending the actual WebHMI command.
+                    s.poll()
+                    assert wheel_active("X") and s.current_vel > 1e-4
+                    ws.send_json({"id": 1, "cmd": "stop"})
+                    while True:
+                        reply = ws.receive_json()
+                        if reply.get("id") == 1:
+                            assert reply["type"] == "ack", reply
+                            break
+                    # Verify Stop while the client remains connected.
+                    wait(lambda: settled() and not wheel_active("X"), True)
+                    _, stopped = coordinates()
+                    observe_rest(stopped)
+                    return stopped
+        finally:
+            gateway.stop()
 
 
 with httpx.Client(base_url=f"http://127.0.0.1:{PANEL_PORT}", trust_env=False, timeout=3) as client:
@@ -92,14 +156,14 @@ with httpx.Client(base_url=f"http://127.0.0.1:{PANEL_PORT}", trust_env=False, ti
                     tuple(axis == candidate for candidate in AXES)
                     + tuple(step == candidate for candidate in STEPS_UM))
 
-    def turn(detents, expected):
+    def turn(detents, expected, *, observe=None):
         missed_before = hal.get_value("lrt-net.0.missed")
         post("mpg", {"detents": detents})
-        wait(lambda: desk_state()["mpg_pending"], 0)
+        wait(lambda: desk_state()["mpg_pending"], 0, observe=observe)
         assert desk_state()["mpg_edges"] == expected
         wait(lambda: pins(20, 21), (False, False))
         try:
-            return wait(counts, expected, timeout=2)
+            return wait(counts, expected, timeout=2, observe=observe)
         except AssertionError as error:
             missed = hal.get_value("lrt-net.0.missed") - missed_before
             raise AssertionError(f"{error}; detents={detents}; missed cycles={missed}") from error
@@ -107,6 +171,7 @@ with httpx.Client(base_url=f"http://127.0.0.1:{PANEL_PORT}", trust_env=False, ti
     assert counts() == desk_state()["mpg_edges"] == 0
     if JOG:
         travel = []
+        baseline = 0
         for axis_index, axis in enumerate(AXES):
             for step in STEPS_UM:
                 select(axis, step)
@@ -115,12 +180,22 @@ with httpx.Client(base_url=f"http://127.0.0.1:{PANEL_PORT}", trust_env=False, ti
                 wait(settled, True)
                 _, origin = coordinates()
                 detents = -100 if axis == "Z" else 100
+                blocked = detents // 5
+                for mode in (linuxcnc.MODE_MDI, linuxcnc.MODE_AUTO):
+                    set_mode(mode, linuxcnc.TRAJ_MODE_COORD)
+                    baseline += 4 * blocked
+                    turn(blocked, baseline, observe=lambda: stationary_at(origin, mode))
+                    observe_rest(origin, mode)
+                set_mode(linuxcnc.MODE_MANUAL, linuxcnc.TRAJ_MODE_TELEOP)
+                observe_rest(origin)
+
                 distance = detents * step / 1000
                 moved = list(origin)
                 moved[axis_index] += distance
                 samples = []
-                for requested, expected, target in ((detents, 4 * detents, moved),
-                                                     (-detents, 0, origin)):
+                for requested, expected, target in (
+                    (detents, baseline + 4 * detents, moved), (-detents, baseline, origin),
+                ):
                     turn(requested, expected)
                     try:
                         wait(lambda: at_target(target), True)
@@ -137,7 +212,17 @@ with httpx.Client(base_url=f"http://127.0.0.1:{PANEL_PORT}", trust_env=False, ti
                     samples.append([a - b for a, b in zip(s.actual_position[:3], origin,
                                                          strict=True)])
                 travel.append({"axis": axis, "step": step, "samples": samples})
-        result = {"travel": travel}
+        # Slow only the test wheel's acceleration so that Stop is sent mid-move,
+        # after the last edge has reached LinuxCNC and before the 10 mm target.
+        select("X", 100)
+        wait(lambda: hal.get_value("axis.x.jog-scale"), 0.025)
+        subprocess.run(["halcmd", "setp", "axis.x.jog-accel-fraction", "0.005"], check=True)
+        wait(settled, True)
+        _, origin = coordinates()
+        stopped = web_stop(lambda: turn(100, baseline + 400))
+        assert 0.01 < stopped[0] - origin[0] < 9.0, (origin, stopped)
+        assert all(abs(a - b) < 0.0001 for a, b in zip(stopped[1:], origin[1:], strict=True))
+        result = {"travel": travel, "stopped_x_mm": stopped[0] - origin[0]}
     else:
         result = {"selected": select("Y", 10), "counts": [turn(100, 400), turn(-100, 0)]}
 
@@ -202,7 +287,9 @@ def test_plant_pendant_inputs_reach_linuxcnc(tmp_path):
 
 @pytest.mark.linuxcnc
 def test_plant_pendant_jogs_simulated_xyz_at_each_scale(tmp_path):
-    travel = run_pendant(tmp_path, jog=True)["travel"]
+    result = run_pendant(tmp_path, jog=True)
+    assert 0.01 < result["stopped_x_mm"] < 9.0
+    travel = result["travel"]
     assert [(entry["axis"], entry["step"]) for entry in travel] == [
         (axis, step) for axis in AXES for step in STEPS_UM
     ]
