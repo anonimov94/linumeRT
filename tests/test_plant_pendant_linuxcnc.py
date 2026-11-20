@@ -161,7 +161,7 @@ with httpx.Client(base_url=f"http://127.0.0.1:{PANEL_PORT}", trust_env=False, ti
         post("mpg", {"detents": detents})
         wait(lambda: desk_state()["mpg_pending"], 0, observe=observe)
         assert desk_state()["mpg_edges"] == expected
-        wait(lambda: pins(20, 21), (False, False))
+        wait(lambda: pins(20, 21), (False, False), observe=observe)
         try:
             return wait(counts, expected, timeout=2, observe=observe)
         except AssertionError as error:
@@ -186,8 +186,8 @@ with httpx.Client(base_url=f"http://127.0.0.1:{PANEL_PORT}", trust_env=False, ti
                     baseline += 4 * blocked
                     turn(blocked, baseline, observe=lambda: stationary_at(origin, mode))
                     observe_rest(origin, mode)
-                set_mode(linuxcnc.MODE_MANUAL, linuxcnc.TRAJ_MODE_TELEOP)
-                observe_rest(origin)
+                    set_mode(linuxcnc.MODE_MANUAL, linuxcnc.TRAJ_MODE_TELEOP)
+                    observe_rest(origin)
 
                 distance = detents * step / 1000
                 moved = list(origin)
@@ -274,6 +274,7 @@ def run_pendant(tmp_path, *, jog):
         prelude=prelude, hmi_bypass=jog,
         plant_config=plant, plant_args=("--panel", str(PORT), "--state-dir", str(tmp_path)),
     )
+    (tmp_path / "mpg-result.json").write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
     return result
 
 
