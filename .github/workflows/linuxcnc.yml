@@ -11,6 +11,7 @@ on:
       - 'config/**'
       - 'simulation/**'
       - 'plant/**'
+      - 'webhmi/**'
       - 'pyproject.toml'
       - 'screens/**'
       - 'Makefile'
@@ -63,11 +64,15 @@ jobs:
         run: |
           runuser -u codex -- python3 -m venv --system-site-packages .venv
           runuser -u codex -- .venv/bin/python -m pip install -e '.[dev]'
-      - name: Plant pendant input through LinuxCNC HAL
-        run: >-
-          runuser -u codex -- env HOME=/home/codex PYTHON=.venv/bin/python
-          xvfb-run -a bash tools/ci/test-linuxcnc.sh
-          tests/test_plant_pendant_linuxcnc.py -x
+      - name: G2 operator automation before the full suite
+        run: |
+          mkdir -p state
+          chown codex:codex state
+          runuser -u codex -- env HOME=/home/codex PYTHON=.venv/bin/python \
+            xvfb-run -a -s '-screen 0 1440x1100x24' \
+            bash tools/ci/test-linuxcnc.sh @tests/suite_operator.txt \
+            --junitxml=state/operator.xml
+          .venv/bin/python tools/ci/check_operator.py state/operator.xml
       - name: SKIN-01 renderer on Debian Mesa
         run: >-
           runuser -u codex -- env HOME=/home/codex LIBGL_ALWAYS_SOFTWARE=1
@@ -89,15 +94,6 @@ jobs:
           xvfb-run -a -s '-screen 0 1440x1100x24'
           bash tools/ci/test-linuxcnc.sh
           tests/test_hmi_shell_gui.py::test_shell_selftest_in_gui -x
-      - name: G2 operator automation before the full suite
-        run: |
-          mkdir -p state
-          chown codex:codex state
-          runuser -u codex -- env HOME=/home/codex PYTHON=.venv/bin/python \
-            xvfb-run -a -s '-screen 0 1440x1100x24' \
-            bash tools/ci/test-linuxcnc.sh @tests/suite_operator.txt \
-            --junitxml=state/operator.xml
-          .venv/bin/python tools/ci/check_operator.py state/operator.xml
       - name: Shared runner with real LinuxCNC
         env:
           LINUXCNC_SCREENSHOT: ${{ github.workspace }}/state/spike_qtdragon.png
