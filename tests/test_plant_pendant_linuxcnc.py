@@ -70,7 +70,9 @@ if JOG:
         actual, commanded = coordinates()
         return (s.task_state == linuxcnc.STATE_ON
                 and s.motion_mode == linuxcnc.TRAJ_MODE_TELEOP
-                and all(abs(a - t) < 0.001 and abs(c - t) < 1e-6
+                # The planner settles within its finite position resolution.
+                # Keep the command tolerance smaller than one count at the finest scale.
+                and all(abs(a - t) < 0.001 and abs(c - t) < 0.0001
                         for a, c, t in zip(actual, commanded, target, strict=True)))
 
 
