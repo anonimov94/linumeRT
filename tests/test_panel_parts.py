@@ -99,6 +99,33 @@ def test_desk_mpg_quadrature_direction_and_limit() -> None:
     assert desk.mpg(-1) == -4  # przeciwny kierunek zmniejsza zaległość
 
 
+def test_desk_mpg_holds_phase_until_master_acknowledges() -> None:
+    desk = Desk(DeskConfig.from_dict({**DESK, "mpg_ack": [28, 29]}))
+
+    def ack(phase):
+        a, b = QUADRATURE[phase]
+        desk.step(0.001, (a << 28) | (b << 29))
+
+    for direction in (1, -1):
+        assert desk.mpg(direction) == 4 * direction
+        for i in range(4):
+            previous = (i * direction) % 4
+            current = ((i + 1) * direction) % 4
+            ack(previous)
+            for _ in range(3):
+                ack(previous)  # the master still sees the preceding phase
+                desk.step(0.001)
+                assert _bits(desk.inputs()[1], 16, 17) == QUADRATURE[current]
+                assert desk.pending == (3 - i) * direction
+    assert desk.edges == 0
+
+
+def test_desk_mpg_ack_requires_free_distinct_outputs() -> None:
+    assert DeskConfig(mpg_a=16, mpg_b=17, mpg_ack=(28, 28)).problems()
+    assert DeskConfig(mpg_ack=(28, 29)).problems()
+    assert DeskConfig(mpg_a=16, mpg_b=17, mpg_ack=(28, 29)).problems(outputs={"spindle": 28})
+
+
 def test_desk_selectors_buttons_key() -> None:
     desk = Desk(DeskConfig.from_dict(DESK))
     mask, value = desk.inputs()
