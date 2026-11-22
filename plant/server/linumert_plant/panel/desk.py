@@ -11,6 +11,7 @@ Stan elektryczny: 1 = styk zamknięty (przycisk wciśnięty, wybrana pozycja prz
   ząbkowana pozycja = `edges_per_detent` zboczy (domyślnie 4, cały cykl kwadratury); Plant
   wystawia najwyżej jedno zbocze na ramkę, więc koło nie gubi impulsów przy 1 kHz
   (do 250 pozycji/s). Po stronie LinuxCNC dekoduje je komponent `encoder` (counter-mode 0).
+  Opcjonalne `mpg_ack` utrzymuje fazę do jej odesłania przez mastera w `digital_out`.
 - Oś i krok: przełączniki jedno-z-N (dokładnie jeden bit z grupy = 1).
 - Start i Stop posuwu: impulsy o długości `pulse_ms` czasu modelu (przyciski chwilowe).
 - Kluczyk: stan stały (0/1).
@@ -40,6 +41,7 @@ class DeskConfig:
     key: int | None = None
     edges_per_detent: int = 4
     pulse_ms: float = 100.0
+    mpg_ack: tuple[int, int] | None = None
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> DeskConfig:
@@ -49,8 +51,11 @@ class DeskConfig:
         axis, step = data.get("axis") or {}, data.get("step") or {}
         if not isinstance(axis, dict) or not isinstance(step, dict):
             raise ValueError("desk.axis i desk.step: oczekiwano mapy pozycja: bit")
+        ack = data.get("mpg_ack")
+        if ack is not None and (not isinstance(ack, (list, tuple)) or len(ack) != 2):
+            raise ValueError("desk.mpg_ack: oczekiwano pary bitów wyjściowych A/B")
         known = {"mpg_a", "mpg_b", "axis", "step", "cycle_start", "feed_hold", "key",
-                 "edges_per_detent", "pulse_ms"}
+                 "edges_per_detent", "pulse_ms", "mpg_ack"}
         extra = sorted(set(data) - known)
         if extra:
             raise ValueError(f"desk: nieznane pola {', '.join(extra)}")
@@ -60,7 +65,8 @@ class DeskConfig:
                    cycle_start=bit(data.get("cycle_start")), feed_hold=bit(data.get("feed_hold")),
                    key=bit(data.get("key")),
                    edges_per_detent=int(data.get("edges_per_detent", 4)),
-                   pulse_ms=float(data.get("pulse_ms", 100.0)))
+                   pulse_ms=float(data.get("pulse_ms", 100.0)),
+                   mpg_ack=None if ack is None else (int(ack[0]), int(ack[1])))
 
     def bits(self) -> dict[str, int]:
         """Nazwa sygnału → bit (np. mpg_a, axis.X, step.10, key)."""
@@ -70,7 +76,8 @@ class DeskConfig:
         out.update({f"step.{k}": v for k, v in self.step.items()})
         return out
 
-    def problems(self, used: dict[str, int] | None = None) -> list[str]:
+    def problems(self, used: dict[str, int] | None = None,
+                 outputs: dict[str, int] | None = None) -> list[str]:
         """Błędy mapowania; `used` = wejścia maszyny (io.inputs), bez kolizji bitów."""
         errors = []
         bits = self.bits()
@@ -88,6 +95,15 @@ class DeskConfig:
                               "(machine.yaml io.inputs)")
         if (self.mpg_a is None) != (self.mpg_b is None):
             errors.append("desk: MPG wymaga obu bitów mpg_a i mpg_b")
+        if self.mpg_ack is not None:
+            a, b = self.mpg_ack
+            if a == b or not all(0 <= pin <= 31 for pin in (a, b)):
+                errors.append("desk.mpg_ack: wymagane dwa różne bity wyjściowe 0-31")
+            if self.mpg_a is None or self.mpg_b is None:
+                errors.append("desk.mpg_ack wymaga skonfigurowanych wejść mpg_a i mpg_b")
+            for name, pin in (outputs or {}).items():
+                if pin in self.mpg_ack:
+                    errors.append(f"desk.mpg_ack: bit {pin} zajęty przez wyjście maszyny {name}")
         if self.edges_per_detent not in (1, 2, 4):
             errors.append(f"desk.edges_per_detent: {self.edges_per_detent} — dozwolone 1, 2, 4")
         if not 1 <= self.pulse_ms <= 5000:
@@ -153,10 +169,10 @@ class Desk:
             self.key = bool(on)
 
     # ---- pętla ramek -----------------------------------------------------------------
-    def step(self, dt: float) -> None:
+    def step(self, dt: float, digital_out: int | None = None) -> None:
         """Jedna ramka: najwyżej jedno zbocze MPG, odliczanie impulsów przycisków."""
         with self._lock:
-            if self.pending:
+            if self.pending and self._phase_acknowledged(digital_out):
                 d = 1 if self.pending > 0 else -1
                 self.phase = (self.phase + d) % 4
                 self.pending -= d
@@ -164,6 +180,14 @@ class Desk:
             for name, left in self._pulses.items():
                 if left > 0:
                     self._pulses[name] = max(0.0, left - dt)
+
+    def _phase_acknowledged(self, digital_out: int | None) -> bool:
+        if self.cfg.mpg_ack is None:
+            return True
+        if digital_out is None:
+            return False
+        a, b = self.cfg.mpg_ack
+        return (digital_out >> a & 1, digital_out >> b & 1) == QUADRATURE[self.phase]
 
     def inputs(self) -> tuple[int, int]:
         """(maska, wartość) bitów pulpitu w `digital_in`."""
