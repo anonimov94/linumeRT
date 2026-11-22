@@ -2146,3 +2146,11 @@ Pełna regresja i Beta zachowane w kontrolach PR235. G2 partial: MPG, dialog nar
 alarm napędu w WebHMI, pulpit i kryteria028–037 oraz niezależny przegląd nadal otwarte.
 Pusty argument w pierwszym selektorze został usunięty; nowa regresja pilnuje tego pliku.
 Autokontrola, bez niezależnego przeglądu. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## 038 — odbiór MPG na Plant · 2026-11-22 · Codex
+
+Model-Author: Codex. PR237 scalony jako `5fca117` po zaliczeniu LinuxCNC RIP, Beta i CI Python/C.
+Zestaw G2 dla `bafb630`: 11/11, w tym 9 par XYZ i skali 1/10/100 µm, blokady MDI/AUTO,
+powrót do JOG bez zaległych impulsów i Stop przez WebHMI podczas ruchu. Dowody w G2.md.
+Plan G2–G6 scalony w PR238. Następna próba G2: obsługa ręcznego M6 w WebHMI.
+NIEZWERYFIKOWANE NA SPRZĘCIE.
