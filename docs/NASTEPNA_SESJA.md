@@ -15,6 +15,8 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · 2026-11-22. PR237 i PR238 scalone do main. MPG na Plant zaliczony w 11/11 prób zestawu G2. Następny krok sesji 034/038: rzeczywisty handshake M6 w WebHMI z potwierdzeniem i anulowaniem. Prywatny generator symulacji używa obecnie automatycznego potwierdzenia `sim_toolchange`; do odbioru dialogu potrzebna konfiguracja z potwierdzeniem operatora. WSL na tym hoście: E_ACCESSDENIED.
+
 Model-Author: Codex · 2026-11-18. Właściciel zlecił G2. Zestaw suite_operator i kontrola kompletności JUnit w CI; raport docs/raporty/G2.md i formularz przeglądu podobieństwa przygotowane. Lokalny Windows: WSL/E_ACCESSDENIED. Automatyka dfac257:9/9 PASS i kontrola XML w CI44382988114. Python/C44382987902 success. Pełna regresja i Beta w kontrolach PR235. Pozostały zakres G2 w rejestrze038, bez zaliczenia pełnej bramki. PR232 jest już scalony jako70999cd po259 RIP/12 Beta PASS.
 
 Model-Author: Codex · 2026-11-10. Właściciel polecił scalić do main. Badanie masy/PI
