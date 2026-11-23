@@ -349,6 +349,24 @@ class LinuxCNCBackend:
         self._linear_units = float(units) if units is not None else None
         return self._last
 
+    def drive_fault_axes(self) -> tuple[str, ...]:
+        """Osie z aktywną awarią napędu w HAL dla ostatniej mapy jointów."""
+        import hal  # noqa: PLC0415 - tylko z aktywnym HAL bramy
+
+        names = self._recent().axis_names
+        joint_map = self._reader.joint_map(names)
+
+        def fault(joint: int) -> bool:
+            try:
+                # CiA 402: nie zanika przy zdjęciu enable po awarii.
+                return bool(hal.get_value(f"lrt-cia402.{joint}.drive-fault"))
+            except (AttributeError, RuntimeError, ValueError):
+                return bool(hal.get_value(f"joint.{joint}.amp-fault-in"))
+
+        joints = {joint for axis in names for joint in joint_map[axis]}
+        faulted = {joint for joint in joints if fault(joint)}
+        return tuple(axis for axis in names if faulted.intersection(joint_map[axis]))
+
     def binding_state(self, pins=()) -> dict:
         """Last NML pose plus subsequent tooldata read; no extra error-channel poll."""
         stat = self._reader._stat

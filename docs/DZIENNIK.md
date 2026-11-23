@@ -2168,3 +2168,10 @@ Model-Author: Codex. Opcja `--manual-toolchange` podpina WebHMI do żądania M6 
 Ekran pokazuje numer T i udostępnia potwierdzenie oraz anulowanie z W-2130.
 Rozszerzono próbę G2 przez WebSocket, bez zaliczenia odbioru przeglądarki.
 NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## 038 — alarm napędu w WebHMI · 2026-11-23 · Codex
+
+Model-Author: Codex. Odczyt aktywnej awarii CiA 402 przypisuje alarm E-4200 do osi.
+Brama i klient blokują Start/Wznów. Dodano próbę Plant: błąd w ruchu, odmowa,
+Reset przy aktywnej przyczynie, jawne odzyskanie i osobny start. Odbiór w CI oczekuje.
+NIEZWERYFIKOWANE NA SPRZĘCIE.

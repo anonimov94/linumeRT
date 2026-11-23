@@ -258,3 +258,11 @@ Przy żądaniu M6 panel pokazuje numer T. Potwierdzenie wysyła sygnał do bież
 żądania. Anulowanie wysyła Stop i zgłasza W-2130. Nowe żądanie wymaga ponownej
 decyzji operatora. Dane ToolDB i odjazd Z pozostają otwarte w sesji 034.
 NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+### Awaria napędu w AUTO
+
+WebHMI uruchomione z `--hal` pokazuje oś z aktywną awarią napędu (E-4200).
+Na Plant przyczynę odczytuje z CiA 402 także po wyłączeniu napędów przez
+LinuxCNC. Aktywna przyczyna blokuje Start i Wznów. Po jej usunięciu
+operator może przywrócić gotowość maszyny, potwierdzić alarm przyciskiem
+Reset i jawnie uruchomić program ponownie.

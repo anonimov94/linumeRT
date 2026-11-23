@@ -67,8 +67,9 @@ function updateControls() {
     const prompt = "Załóż narzędzie T" + pending.tool + " i potwierdź wymianę.";
     if ($("manualToolPrompt").textContent !== prompt) $("manualToolPrompt").textContent = prompt;
   }
-  $("manualToolConfirm").disabled = $("manualToolCancel").disabled =
-    $("manualToolChange").hidden || sentToolRequest === pending?.id;
+  const requested = $("manualToolChange").hidden || sentToolRequest === pending?.id;
+  $("manualToolCancel").disabled = requested;
+  $("manualToolConfirm").disabled = requested || Boolean(state?.drive_fault_axes?.length);
   const rules = rights();
   for (const button of controls) {
     const key = button.dataset.mode ? "mode:" + button.dataset.mode : button.dataset.cmd;

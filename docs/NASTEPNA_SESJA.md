@@ -15,6 +15,9 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · 2026-11-23. Próba awarii napędu w G2 obejmuje alarm w WebSocket,
+blokadę Start/Wznów i osobny start po odzyskaniu gotowości. Sprawdzić RIP i odbiór w GUI.
+
 Model-Author: Codex · 2026-11-23. Podłączono ręczne M6 do panelu WebHMI i rozszerzono
 próbę Plant o WebSocket, W-2130 i odrzucenie starego żądania. Odbiór integracyjny pozostaje w CI.
 
