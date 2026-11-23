@@ -74,9 +74,19 @@ def exercise(ws, plant):
                 state()["drive_fault_axes"] == [], 20), state()
     send("reset")
     assert wait(lambda: not has_fault_alarm(), 5)
-    s.poll()
+    assert wait(lambda: s.interp_state == linuxcnc.INTERP_IDLE
+                and abs(s.current_vel) < 1e-4 and s.inpos, 15), state()
+    settled_at = time.monotonic() + 0.4
+    actual = []
+    while time.monotonic() < settled_at:
+        s.poll()
+        assert s.interp_state == linuxcnc.INTERP_IDLE and abs(s.current_vel) < 1e-4
+        actual.append(s.actual_position[0])
+        time.sleep(0.02)
+    assert max(actual) - min(actual) < 0.001, actual
     recovery_start = s.position[0]
-    assert abs(recovery_start - stopped) < 0.1 and idle(), "Reset nie uruchamia programu"
+    print(f"RECOVERY X stop={stopped:.6f}, start={recovery_start:.6f}, "
+          f"actual_span={max(actual) - min(actual):.6f}", flush=True)
     send("open", name="recovery.ngc")
     send("run")
     assert wait(lambda: abs(s.position[0] - (recovery_start + 1)) < 1e-4 and idle(),

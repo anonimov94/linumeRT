@@ -64,7 +64,8 @@ function updateControls() {
   const pending = state?.manual_m6;
   $("manualToolChange").hidden = !pending || !fresh() || Boolean(state?.gateway_error);
   if (pending) {
-    const prompt = "Załóż narzędzie T" + pending.tool + " i potwierdź wymianę.";
+    const prompt = pending.tool === 0 ? "Wyjmij narzędzie i potwierdź opróżnienie wrzeciona."
+      : "Załóż narzędzie T" + pending.tool + " i potwierdź wymianę.";
     if ($("manualToolPrompt").textContent !== prompt) $("manualToolPrompt").textContent = prompt;
   }
   const requested = $("manualToolChange").hidden || sentToolRequest === pending?.id;

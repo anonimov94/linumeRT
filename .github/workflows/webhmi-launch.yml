@@ -4,6 +4,7 @@ on:
     paths:
       - '.github/workflows/webhmi-launch.yml'
       - 'tools/linumert-start.sh'
+      - 'tools/ci/test-webhmi-browser.mjs'
 concurrency:
   group: webhmi-launch-${{ github.event.pull_request.number }}
   cancel-in-progress: true
@@ -17,6 +18,11 @@ jobs:
         shell: bash
         run: |
           bash -n tools/linumert-start.sh
+          browser_test="$RUNNER_TEMP/webhmi-browser"
+          npm install --no-audit --no-fund --prefix "$browser_test" playwright@1.56.1
+          cp tools/ci/test-webhmi-browser.mjs "$browser_test/"
+          printf 'T1 M6\nG43 H1\nT2 M6\nG43 H2\nM2\n' \
+            > config/sim/nc_files/webhmi-ci-m6.ngc
           log=$(mktemp)
           cleanup() {
             podman stop -t 5 linumert-hmi >/dev/null 2>&1 || true
@@ -31,8 +37,19 @@ jobs:
             if curl -fsS http://127.0.0.1:8765/api/health >/dev/null 2>&1; then
               curl -fsS http://127.0.0.1:8765/ | grep -F 'id="manualToolChange"'
               curl -fsS http://127.0.0.1:8080/api/state >/dev/null
+              g2_token=$(sed -n 's/^web-hmi: .*  token: //p' "$log" | tail -1)
+              test -n "$g2_token"
+              echo "::add-mask::$g2_token"
+              LINUMERT_WEBHMI_TEST_TOKEN="$g2_token" node \
+                "$browser_test/test-webhmi-browser.mjs" "$RUNNER_TEMP/webhmi-evidence"
               exit 0
             fi
             sleep 5
           done
           exit 1
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: webhmi-browser-evidence
+          path: ${{ runner.temp }}/webhmi-evidence/
+          if-no-files-found: ignore
