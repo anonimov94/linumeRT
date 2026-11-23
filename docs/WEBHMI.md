@@ -4,6 +4,21 @@ Model-Author: Claude · 2026-10-26. Wynik decyzji „Ekran operatora w HTML/WebG
 (`docs/DECYZJE.md`). Backend i strona operatora WebGL są rozwijane w istniejącym `WEBHMI-POC`.
 
 ## Uruchomienie
+
+Na EndeavourOS i innych dystrybucjach obsługiwanych przez starter:
+
+```bash
+bash tools/linumert-start.sh --webhmi
+```
+
+Otwórz `http://127.0.0.1:8765/` i wpisz token z terminala. Panel Plant działa
+pod `http://127.0.0.1:8080/`. Oba porty są udostępnione na adresie lokalnym.
+Starter uruchamia symulację w kontenerze Debian 12. Bieżący profil i tabela
+narzędzi trafiają do katalogu tymczasowego na czas sesji. Pierwsze uruchomienie
+buduje obraz, kolejne korzystają z gotowego obrazu. Zamknij sesję przez Ctrl+C
+w terminalu uruchamiającym starter.
+
+Na już przygotowanym Debianie, bez startera:
 ```bash
 pip install -e '.[dev]'
 python -m linumert_webhmi --fake          # atrapa maszyny, bez LinuxCNC

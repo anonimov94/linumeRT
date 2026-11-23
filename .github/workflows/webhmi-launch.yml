@@ -1,0 +1,38 @@
+name: WebHMI launcher smoke
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/webhmi-launch.yml'
+      - 'tools/linumert-start.sh'
+concurrency:
+  group: webhmi-launch-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+jobs:
+  launch:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check syntax and start WebHMI with LinuxCNC and Plant
+        shell: bash
+        run: |
+          bash -n tools/linumert-start.sh
+          log=$(mktemp)
+          cleanup() {
+            podman stop -t 5 linumert-hmi >/dev/null 2>&1 || true
+            sed -E 's/(token: ).*/\1<redacted>/' "$log" | tail -80
+            rm -f "$log"
+          }
+          trap cleanup EXIT
+          bash tools/linumert-start.sh --webhmi --no-update >"$log" 2>&1 &
+          launcher=$!
+          for attempt in {1..120}; do
+            kill -0 "$launcher" || exit 1
+            if curl -fsS http://127.0.0.1:8765/api/health >/dev/null 2>&1; then
+              curl -fsS http://127.0.0.1:8765/ | grep -F 'id="manualToolChange"'
+              curl -fsS http://127.0.0.1:8080/api/state >/dev/null
+              exit 0
+            fi
+            sleep 5
+          done
+          exit 1
