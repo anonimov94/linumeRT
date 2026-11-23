@@ -378,7 +378,7 @@ Pozostaje: Scenariusz dla sondy płytkowej (probe.type plate) na LinuxCNC: konfi
 
 ### 034 — Ręczna zmiana narzędzia
 
-**częściowe**. M6 i integracja sim_toolchange z Plant dostępne.
+**częściowe**. M6 i integracja sim_toolchange z Plant dostępne. Dodano próbę RIP/Plant ręcznego M6 w AUTO (potwierdzenie, anulowanie i ponowienie); wynik w CI oczekuje.
 
 Pozostaje: Rozliczyć dialog ToolDB, anulowanie W-2130 i opcjonalne wycofanie Z.
 

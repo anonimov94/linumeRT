@@ -2154,3 +2154,10 @@ Zestaw G2 dla `bafb630`: 11/11, w tym 9 par XYZ i skali 1/10/100 µm, blokady MD
 powrót do JOG bez zaległych impulsów i Stop przez WebHMI podczas ruchu. Dowody w G2.md.
 Plan G2–G6 scalony w PR238. Następna próba G2: obsługa ręcznego M6 w WebHMI.
 NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## 034/038 — ręczne M6 na wygenerowanej konfiguracji Plant · 2026-11-23 · Codex
+
+Model-Author: Codex. Dodano próbę RIP potwierdzenia, anulowania i ponowienia M6 w AUTO.
+Test obserwuje żądanie HAL, narzędzie we wrzecionie i korekcję G43. Włączono go
+do suite_operator. Wynik RIP/Plant i odbiór dialogu WebHMI pozostają otwarte.
+NIEZWERYFIKOWANE NA SPRZĘCIE.
