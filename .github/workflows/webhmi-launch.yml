@@ -26,20 +26,20 @@ jobs:
           log=$(mktemp)
           cleanup() {
             podman stop -t 5 linumert-hmi >/dev/null 2>&1 || true
-            sed -E 's/(token: ).*/\1<redacted>/' "$log" | tail -80
+            sed -E 's/([Tt]oken( WebHMI)?: ).*/\1<redacted>/' "$log" | tail -80
             rm -f "$log"
           }
           trap cleanup EXIT
-          bash tools/linumert-start.sh --webhmi --no-update >"$log" 2>&1 &
+          g2_token=$(openssl rand -hex 24)
+          echo "::add-mask::$g2_token"
+          LINUMERT_WEBHMI_TOKEN="$g2_token" \
+            bash tools/linumert-start.sh --webhmi --no-update >"$log" 2>&1 &
           launcher=$!
           for attempt in {1..120}; do
             kill -0 "$launcher" || exit 1
             if curl -fsS http://127.0.0.1:8765/api/health >/dev/null 2>&1; then
               curl -fsS http://127.0.0.1:8765/ | grep -F 'id="manualToolChange"'
               curl -fsS http://127.0.0.1:8080/api/state >/dev/null
-              g2_token=$(sed -n 's/^web-hmi: .*  token: //p' "$log" | tail -1)
-              test -n "$g2_token"
-              echo "::add-mask::$g2_token"
               LINUMERT_WEBHMI_TEST_TOKEN="$g2_token" node \
                 "$browser_test/test-webhmi-browser.mjs" "$RUNNER_TEMP/webhmi-evidence"
               exit 0

@@ -212,8 +212,14 @@ fi
 cfg=config/plant/linumert_plant_xyz ini=linumert_plant_xyz.ini yaml=plant.yaml
 if [ "$vfd" = 1 ]; then ini=linumert_plant_xyz_vfd.ini yaml=plant_vfd.yaml; fi
 if [ "$webhmi" = 1 ]; then
-    RUN+=(-p "127.0.0.1:$WEB_PORT:$WEB_PORT")
-    say "WebHMI: http://127.0.0.1:$WEB_PORT/ — token pojawi się po starcie"
+    if [ -z "${LINUMERT_WEBHMI_TOKEN:-}" ]; then
+        LINUMERT_WEBHMI_TOKEN=$(od -An -N24 -tx1 /dev/urandom | tr -d ' \n')
+        say "Token WebHMI: $LINUMERT_WEBHMI_TOKEN"
+    fi
+    [ "${#LINUMERT_WEBHMI_TOKEN}" -ge 16 ] || die "token WebHMI musi mieć co najmniej 16 znaków"
+    export LINUMERT_WEBHMI_TOKEN
+    RUN+=(-p "127.0.0.1:$WEB_PORT:$WEB_PORT" -e LINUMERT_WEBHMI_TOKEN)
+    say "WebHMI: http://127.0.0.1:$WEB_PORT/"
     say "Panel Plant: http://127.0.0.1:$PANEL_PORT/ — Ctrl+C kończy sesję"
 else
     say "start: Plant (LRT-NET) + LinuxCNC z ekranem linumeRT; panel Plant: http://127.0.0.1:$PANEL_PORT/"
