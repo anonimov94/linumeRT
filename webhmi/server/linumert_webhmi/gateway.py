@@ -76,7 +76,7 @@ class Gateway:
         self.backend = backend
         self._instance = instance
         self._hal = hal_pins
-        self._toolchange = hal_pins.manual_toolchange if hal_pins else None
+        self._toolchange = getattr(hal_pins, "manual_toolchange", None)
         self._estop_reset_at: float | None = None
         self._alarm_reset_at: float | None = None
         self._clock = clock

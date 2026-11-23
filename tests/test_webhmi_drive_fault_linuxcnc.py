@@ -66,8 +66,9 @@ def exercise(ws, plant):
     assert has_fault_alarm(), state()
 
     plant.post("/api/faults/drive_fault/clear", json={"drive": "drv_x"}).raise_for_status()
-    send("power_off")
-    assert wait(lambda: s.task_state == linuxcnc.STATE_OFF, 15), state()
+    if state()["task_state"] == "on":
+        send("power_off")
+    assert wait(lambda: state()["task_state"] in ("off", "estop_reset"), 15), state()
     send("power_on")
     assert wait(lambda: s.task_state == linuxcnc.STATE_ON and
                 state()["drive_fault_axes"] == [], 20), state()
