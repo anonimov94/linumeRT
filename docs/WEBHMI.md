@@ -243,3 +243,18 @@ podtrzymania i potwierdzenia STOP są wspólne z obsługą wskaźnika.
 To skróty wyłącznie przycisków JOG. Pisanie w polach tokenu i MDI nie uruchamia
 JOG; nie dodano globalnych klawiszy ruchu. Kombinacje z Ctrl/Alt/Meta/Shift nie
 rozpoczynają JOG. [Odbiór przeglądarki z atrapą i ograniczenia](raporty/G2/WEBHMI_KEYBOARD_2026-10-27.md).
+
+### Ręczna zmiana M6 na Plant
+
+W konfiguracji Plant z WebHMI dodaj `--manual-toolchange` do uruchomienia
+`linumert-webhmi --linuxcnc --hal --postgui config/hal/linumert_webhmi_postgui.hal`.
+Plik postgui jest przeznaczony dla WebHMI. Piny `iocontrol.0.tool-change`,
+`iocontrol.0.tool-prep-number` i `iocontrol.0.tool-changed` muszą pozostać
+wolne dla bramy, więc w tym wariancie nie uruchamiaj połączeń
+`sim_toolchange`, `hal_manualtoolchange` ani ATC. Rozpoznany konflikt sieci HAL
+przerywa start bramy.
+
+Przy żądaniu M6 panel pokazuje numer T. Potwierdzenie wysyła sygnał do bieżącego
+żądania. Anulowanie wysyła Stop i zgłasza W-2130. Nowe żądanie wymaga ponownej
+decyzji operatora. Dane ToolDB i odjazd Z pozostają otwarte w sesji 034.
+NIEZWERYFIKOWANE NA SPRZĘCIE.

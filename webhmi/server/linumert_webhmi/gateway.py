@@ -41,7 +41,7 @@ PROBE_RETRACT_MM = 2.0  # odjazd po styku
 if TYPE_CHECKING:
     from .job_instance import Instance
 
-STOP_COMMANDS = frozenset({"estop", "stop", "pause", "jog_stop", "power_off"})
+STOP_COMMANDS = frozenset({"estop", "stop", "pause", "jog_stop", "power_off", "tool_cancel"})
 LOCAL_SESSION = "local"  # polecenia z REST (bez sesji WebSocket)
 POLL_HZ = 50.0
 JOG_HOLD_S = 0.4  # klient odświeża jog co ~100-150 ms
@@ -76,6 +76,7 @@ class Gateway:
         self.backend = backend
         self._instance = instance
         self._hal = hal_pins
+        self._toolchange = hal_pins.manual_toolchange if hal_pins else None
         self._estop_reset_at: float | None = None
         self._alarm_reset_at: float | None = None
         self._clock = clock
@@ -107,6 +108,8 @@ class Gateway:
             self._thread.join(timeout=2.0)
         with self._lock:
             self._stop_all_jog()
+            if self._toolchange:
+                self._toolchange.revoke()
             if self._instance and self._instance.run and self._instance.run.active:
                 try:
                     self._instance.fail("unavailable")
@@ -132,8 +135,13 @@ class Gateway:
                             self._instance.run.needs_abort = False
                         except Exception:  # noqa: BLE001 - HAL watchdog remains independent
                             pass
+                    if self._toolchange:
+                        try:
+                            self._toolchange.revoke()
+                        except Exception:  # noqa: BLE001 - ostaje watchdog HAL
+                            pass
                     self._version += 1
-                    self._state = {**self._state, "gateway_error": str(error)}
+                    self._state = {**self._state, "gateway_error": str(error), "manual_m6": None}
                     if self._instance:
                         self._state["execution"] = self._instance.status()
 
@@ -179,6 +187,9 @@ class Gateway:
             if self._hal is not None:
                 # Po odczycie stanu: zawieszony odczyt maszyny też gasi sygnał życia.
                 self._hal.tick(now, state["heartbeat"])
+            if self._toolchange:
+                state["manual_m6"] = self._toolchange.observe(
+                    now, state["heartbeat"] and snap.task_state.value == "on")
             state["jog_active"] = sorted(self._jog)
             state["jog_stop_pending"] = sorted(self._jog_retry)
             state.pop("gateway_error", None)
@@ -313,9 +324,30 @@ class Gateway:
                 raise CommandError("zatrzymanie jogu niepotwierdzone przez LinuxCNC; "
                                    "brama ponawia je automatycznie")
 
+    def _resolve_toolchange(self, command: Command, session: str) -> None:
+        confirm = command.cmd == "tool_confirm"
+        if (not self._toolchange or self._state.get("gateway_error")
+                or not self._state.get("heartbeat")
+                or self.backend.snapshot().task_state.value != "on"):
+            raise CommandError("Ręczna zmiana narzędzia jest niedostępna")
+        tool = self._toolchange.resolve(command.tool_request_id, self._clock(), confirm=confirm)
+        if tool is None:
+            raise CommandError("Żądanie ręcznej zmiany narzędzia wygasło")
+        if not confirm:
+            self._dispatch(Command(cmd="stop"), session)
+            self._alarms.raise_alarm("W-2130", tool=tool)
+
     def _dispatch(self, c: Command, session: str) -> None:
         b = self.backend
         name = c.cmd
+        if name in ("tool_confirm", "tool_cancel"):
+            self._resolve_toolchange(c, session)
+            return
+        if name in ("estop", "stop", "power_off") and self._toolchange:
+            try:
+                self._toolchange.revoke()
+            except Exception:  # noqa: BLE001 - polecenie zatrzymania nadal musi dotrzeć
+                pass
         if self._instance is not None:
             if name in ("run", "resume"):
                 try:

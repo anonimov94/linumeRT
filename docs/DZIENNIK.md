@@ -2161,3 +2161,10 @@ Model-Author: Codex. Dodano próbę RIP potwierdzenia, anulowania i ponowienia M
 Test obserwuje żądanie HAL, narzędzie we wrzecionie i korekcję G43. Włączono go
 do suite_operator. Wynik RIP/Plant i odbiór dialogu WebHMI pozostają otwarte.
 NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## 034/038 — ręczna zmiana narzędzia w WebHMI · 2026-11-23 · Codex
+
+Model-Author: Codex. Opcja `--manual-toolchange` podpina WebHMI do żądania M6 w HAL.
+Ekran pokazuje numer T i udostępnia potwierdzenie oraz anulowanie z W-2130.
+Rozszerzono próbę G2 przez WebSocket, bez zaliczenia odbioru przeglądarki.
+NIEZWERYFIKOWANE NA SPRZĘCIE.

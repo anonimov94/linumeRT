@@ -44,6 +44,13 @@ Incremental jog: Model-Author: Codex
       <span class="hint" id="alarmResetHint">Reset kasuje alarmy, których przyczyna ustała. E-STOP potwierdza się zatrzaskiem w HAL, nie z tego ekranu.</span>
     </section>
 
+    <section class="panel" id="manualToolChange" aria-labelledby="manualToolTitle" hidden>
+      <h2 id="manualToolTitle">Ręczna zmiana narzędzia</h2>
+      <p id="manualToolPrompt" role="status"></p>
+      <button type="button" id="manualToolConfirm">Potwierdź wymianę</button>
+      <button type="button" id="manualToolCancel">Anuluj i zatrzymaj program</button>
+    </section>
+
     <main class="layout">
       <section class="panel readout" aria-labelledby="droTitle">
         <div class="panel-heading">

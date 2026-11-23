@@ -15,6 +15,9 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · 2026-11-23. Podłączono ręczne M6 do panelu WebHMI i rozszerzono
+próbę Plant o WebSocket, W-2130 i odrzucenie starego żądania. Odbiór integracyjny pozostaje w CI.
+
 Model-Author: Codex · 2026-11-23. Dodano bazową próbę ręcznego M6 w RIP/Plant bez ekranu.
 Sprawdzić wynik LinuxCNC CI, potem podłączyć dialog WebHMI do potwierdzonego toru HAL.
 
