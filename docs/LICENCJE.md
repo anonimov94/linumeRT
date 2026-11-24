@@ -77,3 +77,7 @@ Model-Author: Claude. `tools/i18n.sh` wywołuje narzędzia deweloperskie `pylupd
 `pyqt5-dev-tools`, GPL-3.0, jak PyQt5) i opcjonalnie `lrelease` (`qttools5-dev-tools`, Qt — LGPL-3.0/GPL).
 Służą tylko do aktualizacji `.ts` i kompilacji `.qm`; nie są zależnością uruchomieniową (ekran czyta `.ts`
 własnym `TsTranslator`). Pliki `screens/linumert/i18n/*.ts` to własne teksty, GPL-2.0-or-later.
+
+## Testy WebHMI w przeglądarce
+
+Model-Author: Codex · sesja 038. CI instaluje [Playwright 1.56.1](https://github.com/microsoft/playwright/blob/v1.56.1/LICENSE) (Apache-2.0) w katalogu tymczasowym i używa Chrome z obrazu runnera GitHub Actions. Playwright i Chrome są narzędziami testowymi uruchamianymi poza dystrybucją linumeRT.

@@ -23,6 +23,8 @@ jobs:
           cp tools/ci/test-webhmi-browser.mjs "$browser_test/"
           printf 'T1 M6\nG43 H1\nT2 M6\nG43 H2\nM2\n' \
             > config/sim/nc_files/webhmi-ci-m6.ngc
+          printf 'G21 G91 G1 X80 F300\nM2\n' > config/sim/nc_files/webhmi-ci-drive-fault.ngc
+          printf 'G21 G91 G1 X1 F120\nM2\n' > config/sim/nc_files/webhmi-ci-recovery.ngc
           log=$(mktemp)
           cleanup() {
             podman stop -t 5 linumert-hmi >/dev/null 2>&1 || true
