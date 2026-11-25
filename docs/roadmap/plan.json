@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated": "2026-11-22",
+  "updated": "2026-11-25",
   "model_author": "Codex",
   "original_count": 84,
   "origin_commit": "796c6a2",
@@ -557,12 +557,16 @@
       "title": "Ręczna zmiana narzędzia",
       "prompt": "prompts/sesja-034.md",
       "status": "partial",
-      "progress": "M6 i integracja sim_toolchange z Plant dostępne. Dodano próbę RIP/Plant ręcznego M6 w AUTO (potwierdzenie, anulowanie i ponowienie); wynik w CI oczekuje.",
+      "progress": "Ręczne M6 w WebHMI na Plant: Enter potwierdza T1, anulowanie T2 zachowuje T1 i zgłasza W-2130. Próba RIP sprawdza G43 i ponowienie ze świeżym żądaniem. Chrome przy 1280×768 i 1920×1080 zaliczony dla 0e2360a.",
       "remaining": [
-        "Rozliczyć dialog ToolDB, anulowanie W-2130 i opcjonalne wycofanie Z."
+        "Pokazać typ, D, L i opis z ToolDB w dialogu oraz rozliczyć opcjonalne wycofanie Z."
       ],
       "evidence": [
-        "docs/DZIENNIK.md"
+        "docs/DZIENNIK.md",
+        "https://github.com/anonimov94/linumeRT/pull/242",
+        "https://github.com/anonimov94/linumeRT/actions/runs/45475756528",
+        "https://github.com/anonimov94/linumeRT/actions/runs/45475756363",
+        "https://github.com/anonimov94/linumeRT/actions/runs/45475756363/artifacts/14959272696"
       ]
     },
     {
@@ -614,9 +618,8 @@
       "title": "Bufor i bramka G2 (prototyp v0.1)",
       "prompt": "prompts/sesja-038.md",
       "status": "partial",
-      "progress": "2026-11-18 | Rozpoczęto odbiór G2 WebHMI. suite_operator wybiera 9 istniejących prób RIP/Plant/interpretera: bazowanie/JOG/MDI/AUTO, pauza/wznowienie i trzy przerwania, watchdog HAL, sonda Z, awaria napędu oraz M6/G43. Walidator JUnit wymaga każdego przypadku dokładnie raz i bez SKIP. Raport G2 i formularz niezależnego przeglądu przygotowane. Wynik nowej porcji w CI wymagany; pełna bramka pozostaje otwarta. Odbiór dfac257: CI44382988114 zaliczyło wszystkie9 przypadków suite_operator wraz z kontrolą kompletności JUnit. CI44382987902:2121 Python PASS/127skip/259deselected,190 native PASS/2skip/6podtestów, Plant matrix i wheel PASS. Kontrole PR235 zachowują pełną regresję i Beta. Pełna bramka pozostaje otwarta. 2026-11-22 Codex: rozwiązanie MPG scalone w PR237. Bafb630: 11/11 prób G2 z walidacją JUnit, pełna regresja RIP i Beta oraz CI Python/C, macierz Plant i wheel zakończone powodzeniem.",
+      "progress": "2026-11-18 | Rozpoczęto odbiór G2 WebHMI. suite_operator wybiera 9 istniejących prób RIP/Plant/interpretera: bazowanie/JOG/MDI/AUTO, pauza/wznowienie i trzy przerwania, watchdog HAL, sonda Z, awaria napędu oraz M6/G43. Walidator JUnit wymaga każdego przypadku dokładnie raz i bez SKIP. Raport G2 i formularz niezależnego przeglądu przygotowane. Wynik nowej porcji w CI wymagany; pełna bramka pozostaje otwarta. Odbiór dfac257: CI44382988114 zaliczyło wszystkie9 przypadków suite_operator wraz z kontrolą kompletności JUnit. CI44382987902:2121 Python PASS/127skip/259deselected,190 native PASS/2skip/6podtestów, Plant matrix i wheel PASS. Kontrole PR235 zachowują pełną regresję i Beta. Pełna bramka pozostaje otwarta. 2026-11-22 Codex: rozwiązanie MPG scalone w PR237. Bafb630: 11/11 prób G2 z walidacją JUnit, pełna regresja RIP i Beta oraz CI Python/C, macierz Plant i wheel zakończone powodzeniem. 2026-11-25 Codex: PR242 i PR244 scalone. 0e2360a: 13/13 G2 z walidacją JUnit, 263 RIP i 12 Beta. Chrome potwierdził M6 oraz E-4200 na osi X, blokadę RUN/RESUME i oddzielny przejazd o 1 mm po odzyskaniu.",
       "remaining": [
-        "Odebrać dialog ręcznej zmiany narzędzia oraz alarm napędu i odzyskiwanie w WebHMI.",
         "Ponowić pełny przejazd w przeglądarce i rozliczyć pozostałe kryteria sesji 028–037.",
         "Uzyskać przegląd podobieństwa aktualnych ekranów od osoby nieuczestniczącej w projekcie."
       ],
@@ -631,7 +634,13 @@
         "https://github.com/anonimov94/linumeRT/pull/237",
         "https://github.com/anonimov94/linumeRT/actions/runs/44827503217",
         "https://github.com/anonimov94/linumeRT/actions/runs/44827503167",
-        "docs/raporty/G2/PLAN_ODBIORU.md"
+        "docs/raporty/G2/PLAN_ODBIORU.md",
+        "https://github.com/anonimov94/linumeRT/pull/242",
+        "https://github.com/anonimov94/linumeRT/pull/244",
+        "https://github.com/anonimov94/linumeRT/actions/runs/45475756528",
+        "https://github.com/anonimov94/linumeRT/actions/runs/45475756363",
+        "https://github.com/anonimov94/linumeRT/actions/runs/45475756422",
+        "https://github.com/anonimov94/linumeRT/actions/runs/45475756363/artifacts/14959272696"
       ],
       "gate": "open"
     },

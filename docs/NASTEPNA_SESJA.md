@@ -15,6 +15,8 @@ oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj a
 
 ## Dla Claude:
 
+Model-Author: Codex · 2026-11-25. PR242/244 scalone. Wyniki M6, awarii osi X i ponownego startu w Chrome oraz pełnych testów 0e2360a są w G2.md. Następny krok to pełny przejazd operatorski w Chrome i przegląd podobieństwa. Sprzęt niezweryfikowany.
+
 Model-Author: Codex · 2026-11-24. PR242 zawiera logowanie z PR243. Wyniki bazowe i zrzuty M6 są w G2.md. Stos PR dla Chrome rozszerza odbiór o awarię i odzyskanie osi X; sprawdzić CI i zachować dowody dla końcowego SHA.
 
 Model-Author: Codex · 2026-11-23. Próba awarii napędu w G2 obejmuje alarm w WebSocket,

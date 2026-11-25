@@ -2182,3 +2182,11 @@ Model-Author: Codex. PR242 obejmuje poprawkę logowania z PR243. Odbiór bazowy:
 e94ea80 — 13/13 operator, 263 RIP i 12 Beta. b3309e2 — Chrome M6 1280/1920.
 Do startera testowego dodano próbę awarii i odzyskania w Chrome oraz zrzuty obu stanów.
 Potwierdzenie nowej próby oczekuje w CI. NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## 038 — M6 i odzyskanie osi X odebrane na Plant · 2026-11-25 · Codex
+
+Model-Author: Codex. PR242 i PR244 scalone do main jako 8807b8e i 818d1d5.
+0e2360a: 13/13 operator z walidacją JUnit, 263 RIP, 12 Beta, Python/C i macierz Plant PASS.
+Chrome potwierdził M6 i W-2130 oraz E-4200, blokady AUTO i osobny przejazd po odzyskaniu.
+Cztery zrzuty i odsyłacze w G2.md. Dalej pełny przejazd w Chrome i niezależny przegląd.
+NIEZWERYFIKOWANE NA SPRZĘCIE.
