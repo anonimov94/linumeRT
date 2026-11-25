@@ -2154,3 +2154,24 @@ Zestaw G2 dla `bafb630`: 11/11, w tym 9 par XYZ i skali 1/10/100 µm, blokady MD
 powrót do JOG bez zaległych impulsów i Stop przez WebHMI podczas ruchu. Dowody w G2.md.
 Plan G2–G6 scalony w PR238. Następna próba G2: obsługa ręcznego M6 w WebHMI.
 NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## 034/038 — ręczne M6 na wygenerowanej konfiguracji Plant · 2026-11-23 · Codex
+
+Model-Author: Codex. Dodano próbę RIP potwierdzenia, anulowania i ponowienia M6 w AUTO.
+Test obserwuje żądanie HAL, narzędzie we wrzecionie i korekcję G43. Włączono go
+do suite_operator. Wynik RIP/Plant i odbiór dialogu WebHMI pozostają otwarte.
+NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## 034/038 — ręczna zmiana narzędzia w WebHMI · 2026-11-23 · Codex
+
+Model-Author: Codex. Opcja `--manual-toolchange` podpina WebHMI do żądania M6 w HAL.
+Ekran pokazuje numer T i udostępnia potwierdzenie oraz anulowanie z W-2130.
+Rozszerzono próbę G2 przez WebSocket, bez zaliczenia odbioru przeglądarki.
+NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## 038 — alarm napędu w WebHMI · 2026-11-23 · Codex
+
+Model-Author: Codex. Odczyt aktywnej awarii CiA 402 przypisuje alarm E-4200 do osi.
+Brama i klient blokują Start/Wznów. Dodano próbę Plant: błąd w ruchu, odmowa,
+Reset przy aktywnej przyczynie, jawne odzyskanie i osobny start. Odbiór w CI oczekuje.
+NIEZWERYFIKOWANE NA SPRZĘCIE.

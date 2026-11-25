@@ -8,6 +8,7 @@
 #
 #   bash <(curl -fsSL https://raw.githubusercontent.com/anonimov94/linumeRT/main/tools/linumert-start.sh)
 #   ~/linumeRT/tools/linumert-start.sh            # symulator LinuxCNC + ekran linumeRT
+#   ~/linumeRT/tools/linumert-start.sh --webhmi   # WebHMI + LinuxCNC + Plant w przeglądarce
 #   ~/linumeRT/tools/linumert-start.sh --plant    # + wirtualna obrabiarka Plant (LRT-NET) i jej panel w przeglądarce
 #   ~/linumeRT/tools/linumert-start.sh --plant --vfd   # wrzeciono przez falownik (hy_vfd)
 #   ~/linumeRT/tools/linumert-start.sh --desktop  # skróty „linumeRT” w menu aplikacji, bez uruchamiania
@@ -27,14 +28,16 @@ REPO_URL=https://github.com/anonimov94/linumeRT.git
 IMG_REV=2  # zmień przy każdej zmianie Containerfile niżej (wymusza przebudowę obrazu)
 IMG=linumert-app:bookworm-$IMG_REV
 PANEL_PORT=8080
+WEB_PORT=8765
 
 say() { printf '\033[1;36m[linumeRT]\033[0m %s\n' "$*"; }
 die() { printf '\033[1;31m[linumeRT] BŁĄD:\033[0m %s\n' "$*" >&2; exit 1; }
 
-mode=sim vfd=0 update=1 rebuild=0 shell=0 desktop=0 classic=0 dir=""
+mode=sim webhmi=0 vfd=0 update=1 rebuild=0 shell=0 desktop=0 classic=0 dir=""
 while [ $# -gt 0 ]; do
     case $1 in
         --plant) mode=plant ;;
+        --webhmi) webhmi=1 ;;
         --vfd) vfd=1 ;;
         --no-update) update=0 ;;
         --rebuild) rebuild=1 ;;
@@ -42,11 +45,15 @@ while [ $# -gt 0 ]; do
         --desktop) desktop=1 ;;
         --classic) classic=1 ;;
         --dir) dir=${2:?--dir wymaga katalogu}; shift ;;
-        -h|--help) sed -n '5,16p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+        -h|--help) sed -n '5,17p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
         *) die "nieznana opcja: $1 (--help)" ;;
     esac
     shift
 done
+if [ "$webhmi" = 1 ]; then
+    [ "$vfd" = 0 ] && [ "$classic" = 0 ] || die "--webhmi działa z konfiguracją Plant bez --vfd i --classic"
+    mode=plant
+fi
 [ "$vfd" = 1 ] && [ "$mode" != plant ] && die "--vfd działa z --plant"
 
 # ---- 1. zależności gospodarza -------------------------------------------------------------------
@@ -170,13 +177,16 @@ if ! awk '$1 ~ /^522[123]$/ && $2+0 != 0 {found=1} END {exit !found}' "$simcfg/l
 fi
 
 # ---- 5. okno na pulpicie (X11 / Xwayland) ----------------------------------------------------------
-[ -n "${DISPLAY:-}" ] || die "brak DISPLAY: uruchom z sesji graficznej (X11 albo Wayland z Xwayland)"
-if command -v xhost >/dev/null; then xhost "+SI:localuser:$(id -un)" >/dev/null 2>&1 || true; fi
-X=(-e DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix:ro -e QT_X11_NO_MITSHM=1)
-if [ -n "${XAUTHORITY:-}" ] && [ -f "$XAUTHORITY" ]; then
-    X+=(-e XAUTHORITY=/tmp/.Xauthority -v "$XAUTHORITY:/tmp/.Xauthority:ro")
+X=()
+if [ "$webhmi" = 0 ]; then
+    [ -n "${DISPLAY:-}" ] || die "brak DISPLAY: uruchom z sesji graficznej (X11 albo Wayland z Xwayland)"
+    if command -v xhost >/dev/null; then xhost "+SI:localuser:$(id -un)" >/dev/null 2>&1 || true; fi
+    X=(-e DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix:ro -e QT_X11_NO_MITSHM=1)
+    if [ -n "${XAUTHORITY:-}" ] && [ -f "$XAUTHORITY" ]; then
+        X+=(-e XAUTHORITY=/tmp/.Xauthority -v "$XAUTHORITY:/tmp/.Xauthority:ro")
+    fi
+    [ -e /dev/dri ] && X+=(--device /dev/dri)
 fi
-[ -e /dev/dri ] && X+=(--device /dev/dri)
 HOME_DIR=${XDG_DATA_HOME:-$HOME/.local/share}/linumert/home  # ustawienia ekranu między uruchomieniami
 mkdir -p "$HOME_DIR"
 TTY=()
@@ -201,12 +211,24 @@ fi
 
 cfg=config/plant/linumert_plant_xyz ini=linumert_plant_xyz.ini yaml=plant.yaml
 if [ "$vfd" = 1 ]; then ini=linumert_plant_xyz_vfd.ini yaml=plant_vfd.yaml; fi
-say "start: Plant (LRT-NET) + LinuxCNC z ekranem linumeRT; panel Plant: http://127.0.0.1:$PANEL_PORT/"
-( sleep 25; command -v xdg-open >/dev/null && xdg-open "http://127.0.0.1:$PANEL_PORT/" >/dev/null 2>&1 ) &
-# shellcheck disable=SC2016 # skrypt wykonuje bash w kontenerze; argumenty przez $1…$4
+if [ "$webhmi" = 1 ]; then
+    if [ -z "${LINUMERT_WEBHMI_TOKEN:-}" ]; then
+        LINUMERT_WEBHMI_TOKEN=$(od -An -N24 -tx1 /dev/urandom | tr -d ' \n')
+        say "Token WebHMI: $LINUMERT_WEBHMI_TOKEN"
+    fi
+    [ "${#LINUMERT_WEBHMI_TOKEN}" -ge 16 ] || die "token WebHMI musi mieć co najmniej 16 znaków"
+    export LINUMERT_WEBHMI_TOKEN
+    RUN+=(-p "127.0.0.1:$WEB_PORT:$WEB_PORT" -e LINUMERT_WEBHMI_TOKEN)
+    say "WebHMI: http://127.0.0.1:$WEB_PORT/"
+    say "Panel Plant: http://127.0.0.1:$PANEL_PORT/ — Ctrl+C kończy sesję"
+else
+    say "start: Plant (LRT-NET) + LinuxCNC z ekranem linumeRT; panel Plant: http://127.0.0.1:$PANEL_PORT/"
+    ( sleep 25; command -v xdg-open >/dev/null && xdg-open "http://127.0.0.1:$PANEL_PORT/" >/dev/null 2>&1 ) &
+fi
+# shellcheck disable=SC2016 # skrypt wykonuje bash w kontenerze; argumenty przez $1…$6
 exec "${RUN[@]}" -p "127.0.0.1:$PANEL_PORT:$PANEL_PORT" "$IMG" bash -c '
 set -e
-cfg=$1 ini=$2 yaml=$3 port=$4
+cfg=$1 ini=$2 yaml=$3 port=$4 webhmi=$5 webport=$6
 make -s -C plant/core shared >/dev/null
 T=$(mktemp -d)
 cp hal/lrt_net.comp hal/lrt_net_proto.h hal/lrt_cia402.comp hal/lrt_hardstop_home.comp hal/lrt_estop2.comp "$T"/
@@ -218,4 +240,26 @@ plant=$!
 trap "kill $plant 2>/dev/null; wait $plant 2>/dev/null; tail -3 /home/lcnc/plant.log" EXIT
 sleep 3
 kill -0 $plant 2>/dev/null || { cat /home/lcnc/plant.log; exit 1; }
-PYTHONPATH=/work/core /opt/linumert/bin/python -m linumert.machine.launch --expect-profile plant "/work/$cfg/$ini"' _ "$cfg" "$ini" "$yaml" "$PANEL_PORT"
+ini_path="/work/$cfg/$ini"
+if [ "$webhmi" = 1 ]; then
+    mkdir -p "$T/config/plant"
+    ln -s /work/config/hal "$T/config/hal"
+    ln -s /work/config/sim "$T/config/sim"
+    session="$T/$cfg"
+    cp -a "/work/$cfg" "$session"
+    cp /work/config/sim/linumert_xyz/tool.tbl "$session/tool.tbl"
+    cp /work/config/sim/linumert_xyz/linumert.var.default "$session/linumert.var"
+    sed -i -e "s|^DISPLAY = .*|DISPLAY = linumert-webhmi-display|" \
+           -e "/^POSTGUI_HALFILE = /d" -e "s|^TOOL_TABLE = .*|TOOL_TABLE = tool.tbl|" "$session/$ini"
+    cat > "$T/linumert-webhmi-display" <<EOF
+#!/bin/sh
+exec /opt/linumert/bin/python -u -m linumert_webhmi --linuxcnc --hal --manual-toolchange \\
+    --allow-remote --host 0.0.0.0 --port $webport --postgui /work/config/hal/linumert_webhmi_postgui.hal
+EOF
+    chmod 755 "$T/linumert-webhmi-display"
+    export PATH="$T:$PATH"
+    ini_path="$session/$ini"
+fi
+PYTHONPATH=/work/core:/work/simulation:/work/webhmi/server /opt/linumert/bin/python \
+    -m linumert.machine.launch --expect-profile plant "$ini_path"' \
+    _ "$cfg" "$ini" "$yaml" "$PANEL_PORT" "$webhmi" "$WEB_PORT"

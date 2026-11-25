@@ -70,7 +70,9 @@ class Command(BaseModel):
 
     cmd: Literal["estop", "power_on", "power_off", "mode", "home", "mdi", "run", "pause",
                  "resume", "stop", "override", "jog", "jog_stop", "jog_increment",
-                 "jog_keepalive", "work_zero", "open", "reset", "probe"]
+                 "jog_keepalive", "work_zero", "open", "reset", "probe",
+                 "tool_confirm", "tool_cancel"]
+    tool_request_id: str | None = Field(default=None, pattern=r"^[0-9a-f]{32}$")
     mode: Literal["manual", "mdi", "auto"] | None = None
     axis: AXIS | None = None
     text: str | None = Field(default=None, max_length=MAX_MDI_CHARS)

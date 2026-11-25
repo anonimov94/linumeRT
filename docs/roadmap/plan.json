@@ -557,7 +557,7 @@
       "title": "Ręczna zmiana narzędzia",
       "prompt": "prompts/sesja-034.md",
       "status": "partial",
-      "progress": "M6 i integracja sim_toolchange z Plant dostępne.",
+      "progress": "M6 i integracja sim_toolchange z Plant dostępne. Dodano próbę RIP/Plant ręcznego M6 w AUTO (potwierdzenie, anulowanie i ponowienie); wynik w CI oczekuje.",
       "remaining": [
         "Rozliczyć dialog ToolDB, anulowanie W-2130 i opcjonalne wycofanie Z."
       ],

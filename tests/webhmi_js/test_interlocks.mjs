@@ -120,3 +120,15 @@ test("report-only gateway never offers controller actions, including Stop and E-
     assert.match(rule.reason, /offline/);
   }
 });
+
+test("active drive fault blocks AUTO Start and Resume but preserves Stop and Reset", () => {
+  const fault = { mode: "auto", drive_fault_axes: ["X"], alarms: [{ code: "E-4200" }] };
+  for (const [cmd, interp_state] of [["run", "idle"], ["resume", "paused"]]) {
+    const current = state({ ...fault, interp_state });
+    assert.equal(can(cmd, current), false);
+    assert.match(allowed(current, link)[cmd].reason, /awaria napędu: X/);
+    assert.equal(can("stop", current), true);
+    assert.equal(can("reset", current), true);
+    assert.equal(can(cmd, { ...current, drive_fault_axes: [] }), true);
+  }
+});

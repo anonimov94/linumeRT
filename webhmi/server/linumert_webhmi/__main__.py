@@ -50,6 +50,8 @@ def main(argv: list[str] | None = None) -> int:
                         help="katalog programów (domyślnie [DISPLAY]PROGRAM_PREFIX z INI)")
     parser.add_argument("--hal", action="store_true",
                         help="piny HAL linumert.hmi-* (grzyb, sygnał życia, potwierdzenie E-STOP)")
+    parser.add_argument("--manual-toolchange", action="store_true",
+                        help="obsłuż ręczne M6 z pinów iocontrol (wymaga --hal)")
     parser.add_argument("--job-sources", type=Path, help="katalog źródeł .lnx do przygotowania")
     parser.add_argument("--job-machine", type=Path, help="aktywne machine.yaml do przygotowania")
     parser.add_argument("--job-tools", type=Path, help="istniejąca baza narzędzi SQLite")
@@ -63,8 +65,8 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     saved_report = None
     if args.report:
-        if any((args.hal, args.postgui, args.instance, args.ini, args.programs,
-                args.job_sources, args.job_machine, args.job_tools, args.jobs_dir,
+        if any((args.hal, args.postgui, args.manual_toolchange, args.instance, args.ini,
+                args.programs, args.job_sources, args.job_machine, args.job_tools, args.jobs_dir,
                 args.drive_library)):
             print("Odmowa: przegląd raportu nie przyjmuje opcji sterowania.", file=sys.stderr)
             return 2
@@ -100,6 +102,10 @@ def main(argv: list[str] | None = None) -> int:
         except (OSError, ValueError, MachineConfigError) as error:
             print(f"Odmowa konfiguracji zadań: {error}", file=sys.stderr)
             return 2
+    if args.manual_toolchange and (not args.hal or args.instance):
+        print("Odmowa: --manual-toolchange wymaga --hal i osobnej konfiguracji.",
+              file=sys.stderr)
+        return 2
     if args.postgui and not args.hal:
         print("Odmowa: --postgui wymaga --hal.", file=sys.stderr)
         return 2
@@ -120,9 +126,15 @@ def main(argv: list[str] | None = None) -> int:
                else LinuxCNCBackend(programs_dir=args.programs))
     pins = None
     if args.hal:
-        from .hal_link import open_hal
+        from .hal_link import open_hal, wire_manual_toolchange
 
-        pins, _component = open_hal(time.monotonic())  # komponent żyje do końca procesu
+        pins, _component = open_hal(time.monotonic(), manual_toolchange=args.manual_toolchange)
+        if args.manual_toolchange:
+            try:
+                wire_manual_toolchange()
+            except (OSError, subprocess.CalledProcessError) as error:
+                print(f"Odmowa: połączenie ręcznego M6 nie powiodło się: {error}", file=sys.stderr)
+                return 2
         if args.postgui:
             done = subprocess.run(["halcmd", "-f", str(args.postgui)], check=False)
             if done.returncode:

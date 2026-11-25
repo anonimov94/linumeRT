@@ -31,6 +31,7 @@ let lastReset = 0;
 let lastAckMs = null;
 let telemetryWasFresh = false;
 let previousLinkStatus = "";
+let sentToolRequest = null;
 
 function refreshDiagnostics() {
   const now = Date.now();
@@ -60,6 +61,16 @@ function setButton(button, rule) {
 }
 function updateControls() {
   const connected = connection.ready();
+  const pending = state?.manual_m6;
+  $("manualToolChange").hidden = !pending || !fresh() || Boolean(state?.gateway_error);
+  if (pending) {
+    const prompt = pending.tool === 0 ? "Wyjmij narzędzie i potwierdź opróżnienie wrzeciona."
+      : "Załóż narzędzie T" + pending.tool + " i potwierdź wymianę.";
+    if ($("manualToolPrompt").textContent !== prompt) $("manualToolPrompt").textContent = prompt;
+  }
+  const requested = $("manualToolChange").hidden || sentToolRequest === pending?.id;
+  $("manualToolCancel").disabled = requested;
+  $("manualToolConfirm").disabled = requested || Boolean(state?.drive_fault_axes?.length);
   const rules = rights();
   for (const button of controls) {
     const key = button.dataset.mode ? "mode:" + button.dataset.mode : button.dataset.cmd;
@@ -223,6 +234,7 @@ const connection = createConnection({
     journal.add("warn", "ŁĄCZE", "Rozłączono: " + message);
     telemetryWasFresh = false;
     receivedAt = 0;
+    sentToolRequest = null;
     jog.onLost();
     result(message + " — sprawdź fizyczny stan maszyny.", "error");
     banner("BRAK POŁĄCZENIA. DRO NIEAKTUALNE. Nie potwierdzono stanu ruchu.");
@@ -233,6 +245,20 @@ const connection = createConnection({
     result(message, "error"); banner(message);
   },
 });
+for (const [element, cmd] of [
+  ["manualToolConfirm", "tool_confirm"], ["manualToolCancel", "tool_cancel"],
+]) {
+  $(element).addEventListener("click", () => {
+    const pending = state?.manual_m6;
+    if (!pending || $(element).disabled || !fresh()) return;
+    sentToolRequest = pending.id;
+    if (send({ cmd, tool_request_id: pending.id }, (reply) => {
+      if (reply.type === "error" && sentToolRequest === pending.id) sentToolRequest = null;
+      updateControls();
+    }) === null) sentToolRequest = null;
+    updateControls();
+  });
+}
 jobs = createJobs((path, options) => connection.request(path, options));
 jog = createJog({
   send,

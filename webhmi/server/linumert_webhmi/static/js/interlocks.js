@@ -71,6 +71,9 @@ export function allowed(state, link) {
     result.resume = deny(state.execution.resume_reason ||
       "Zadanie nie ma potwierdzonego stanu do wznowienia");
   }
+  if (Array.isArray(state.drive_fault_axes) && state.drive_fault_axes.length) {
+    result.run = result.resume = deny("Aktywna awaria napędu: " + state.drive_fault_axes.join(", "));
+  }
   result.override = machineOn ? permit() : deny(common);
   const jogging = Array.isArray(state.jog_active) && state.jog_active.length > 0;
   const pendingStop = Array.isArray(state.jog_stop_pending) && state.jog_stop_pending.length > 0;

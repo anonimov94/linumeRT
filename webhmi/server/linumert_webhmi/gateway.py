@@ -41,7 +41,7 @@ PROBE_RETRACT_MM = 2.0  # odjazd po styku
 if TYPE_CHECKING:
     from .job_instance import Instance
 
-STOP_COMMANDS = frozenset({"estop", "stop", "pause", "jog_stop", "power_off"})
+STOP_COMMANDS = frozenset({"estop", "stop", "pause", "jog_stop", "power_off", "tool_cancel"})
 LOCAL_SESSION = "local"  # polecenia z REST (bez sesji WebSocket)
 POLL_HZ = 50.0
 JOG_HOLD_S = 0.4  # klient odświeża jog co ~100-150 ms
@@ -76,6 +76,7 @@ class Gateway:
         self.backend = backend
         self._instance = instance
         self._hal = hal_pins
+        self._toolchange = getattr(hal_pins, "manual_toolchange", None)
         self._estop_reset_at: float | None = None
         self._alarm_reset_at: float | None = None
         self._clock = clock
@@ -107,6 +108,8 @@ class Gateway:
             self._thread.join(timeout=2.0)
         with self._lock:
             self._stop_all_jog()
+            if self._toolchange:
+                self._toolchange.revoke()
             if self._instance and self._instance.run and self._instance.run.active:
                 try:
                     self._instance.fail("unavailable")
@@ -132,8 +135,13 @@ class Gateway:
                             self._instance.run.needs_abort = False
                         except Exception:  # noqa: BLE001 - HAL watchdog remains independent
                             pass
+                    if self._toolchange:
+                        try:
+                            self._toolchange.revoke()
+                        except Exception:  # noqa: BLE001 - ostaje watchdog HAL
+                            pass
                     self._version += 1
-                    self._state = {**self._state, "gateway_error": str(error)}
+                    self._state = {**self._state, "gateway_error": str(error), "manual_m6": None}
                     if self._instance:
                         self._state["execution"] = self._instance.status()
 
@@ -151,8 +159,9 @@ class Gateway:
             if self._alarm_reset_at is not None and now >= self._alarm_reset_at:
                 self._alarm_reset_at = None
                 self._alarms.reset()  # przed zgłoszeniem: trwający E-STOP wraca w tym obiegu
+            drive_fault_axes = self._drive_fault_axes()
             if not getattr(self.backend, "read_only", False):
-                self._raise_alarms(snap)
+                self._raise_alarms(snap, drive_fault_axes)
             if now - self._programs_at >= PROGRAMS_S:
                 self._programs, self._programs_at = self.backend.programs(), now
             state = snapshot_to_dict(snap)
@@ -176,9 +185,13 @@ class Gateway:
             state["heartbeat"] = any(now - seen <= HEARTBEAT_S
                                      for seen in self._sessions.values())
             state["hmi_hal"] = self._hal is not None
+            state["drive_fault_axes"] = list(drive_fault_axes)
             if self._hal is not None:
                 # Po odczycie stanu: zawieszony odczyt maszyny też gasi sygnał życia.
                 self._hal.tick(now, state["heartbeat"])
+            if self._toolchange:
+                state["manual_m6"] = self._toolchange.observe(
+                    now, state["heartbeat"] and snap.task_state.value == "on")
             state["jog_active"] = sorted(self._jog)
             state["jog_stop_pending"] = sorted(self._jog_retry)
             state.pop("gateway_error", None)
@@ -187,7 +200,11 @@ class Gateway:
                 self._state = state
 
     # ---- alarmy (katalog core/linumert/alarms/catalog.yaml) --------------------
-    def _raise_alarms(self, snap: MachineSnapshot) -> None:
+    def _drive_fault_axes(self) -> tuple[str, ...]:
+        reader = getattr(self.backend, "drive_fault_axes", None)
+        return reader() if self._hal is not None and reader is not None else ()
+
+    def _raise_alarms(self, snap: MachineSnapshot, drive_fault_axes: tuple[str, ...]) -> None:
         """Komunikaty LinuxCNC i trwające przyczyny (E-STOP, krańcówka) jako alarmy z katalogu."""
         for message in snap.errors:
             self._alarms.raise_alarm("E-1000", message=message)
@@ -196,6 +213,7 @@ class Gateway:
         # celowo, więc alarm krańcówki liczymy dopiero po bazowaniu wszystkich osi.
         causes += [("E-1200", {"axis": a.name})
                    for a in (snap.axes if snap.all_homed else ()) if a.limit_hit]
+        causes += [("E-4200", {"axis": axis, "error_code": "—"}) for axis in drive_fault_axes]
         # Trwająca przyczyna to jedno zgłoszenie, nie jedno na obieg (licznik = wystąpienia).
         active = [(a.code, a.params) for a in self._alarms.active()]
         for code, params in causes:
@@ -313,9 +331,36 @@ class Gateway:
                 raise CommandError("zatrzymanie jogu niepotwierdzone przez LinuxCNC; "
                                    "brama ponawia je automatycznie")
 
+    def _resolve_toolchange(self, command: Command, session: str) -> None:
+        confirm = command.cmd == "tool_confirm"
+        if not self._toolchange:
+            raise CommandError("Ręczna zmiana narzędzia jest niedostępna")
+        self.step()
+        if (not self._state.get("heartbeat") or self._state.get("task_state") != "on"
+                or (confirm and self._state.get("drive_fault_axes"))):
+            raise CommandError("Ręczna zmiana narzędzia jest niedostępna")
+        tool = self._toolchange.resolve(command.tool_request_id, self._clock(), confirm=confirm)
+        if tool is None:
+            raise CommandError("Żądanie ręcznej zmiany narzędzia wygasło")
+        if not confirm:
+            self._dispatch(Command(cmd="stop"), session)
+            self._alarms.raise_alarm("W-2130", tool=tool)
+
     def _dispatch(self, c: Command, session: str) -> None:
         b = self.backend
         name = c.cmd
+        if name in ("tool_confirm", "tool_cancel"):
+            self._resolve_toolchange(c, session)
+            return
+        if name in ("estop", "stop", "power_off") and self._toolchange:
+            try:
+                self._toolchange.revoke()
+            except Exception:  # noqa: BLE001 - polecenie zatrzymania nadal musi dotrzeć
+                pass
+        if name in ("run", "resume"):
+            faults = self._drive_fault_axes()
+            if faults:
+                raise CommandError("Aktywna awaria napędu: " + ", ".join(faults))
         if self._instance is not None:
             if name in ("run", "resume"):
                 try:
@@ -464,5 +509,8 @@ class Gateway:
         elif name == "reset":
             if c.double:
                 self._acknowledge_estop()
+            for alarm in self._alarms.active():
+                if alarm.code == "W-2130":
+                    self._alarms.acknowledge(alarm.id)
             self._alarms.reset()
             self.step()  # trwające przyczyny wracają od razu, nie po kolejnym obiegu

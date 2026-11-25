@@ -4,6 +4,21 @@ Model-Author: Claude · 2026-10-26. Wynik decyzji „Ekran operatora w HTML/WebG
 (`docs/DECYZJE.md`). Backend i strona operatora WebGL są rozwijane w istniejącym `WEBHMI-POC`.
 
 ## Uruchomienie
+
+Na EndeavourOS i innych dystrybucjach obsługiwanych przez starter:
+
+```bash
+bash tools/linumert-start.sh --webhmi
+```
+
+Otwórz `http://127.0.0.1:8765/` i wpisz token z terminala. Panel Plant działa
+pod `http://127.0.0.1:8080/`. Oba porty są udostępnione na adresie lokalnym.
+Starter uruchamia symulację w kontenerze Debian 12. Bieżący profil i tabela
+narzędzi trafiają do katalogu tymczasowego na czas sesji. Pierwsze uruchomienie
+buduje obraz, kolejne korzystają z gotowego obrazu. Zamknij sesję przez Ctrl+C
+w terminalu uruchamiającym starter.
+
+Na już przygotowanym Debianie, bez startera:
 ```bash
 pip install -e '.[dev]'
 python -m linumert_webhmi --fake          # atrapa maszyny, bez LinuxCNC
@@ -243,3 +258,26 @@ podtrzymania i potwierdzenia STOP są wspólne z obsługą wskaźnika.
 To skróty wyłącznie przycisków JOG. Pisanie w polach tokenu i MDI nie uruchamia
 JOG; nie dodano globalnych klawiszy ruchu. Kombinacje z Ctrl/Alt/Meta/Shift nie
 rozpoczynają JOG. [Odbiór przeglądarki z atrapą i ograniczenia](raporty/G2/WEBHMI_KEYBOARD_2026-10-27.md).
+
+### Ręczna zmiana M6 na Plant
+
+W konfiguracji Plant z WebHMI dodaj `--manual-toolchange` do uruchomienia
+`linumert-webhmi --linuxcnc --hal --postgui config/hal/linumert_webhmi_postgui.hal`.
+Plik postgui jest przeznaczony dla WebHMI. Piny `iocontrol.0.tool-change`,
+`iocontrol.0.tool-prep-number` i `iocontrol.0.tool-changed` muszą pozostać
+wolne dla bramy, więc w tym wariancie nie uruchamiaj połączeń
+`sim_toolchange`, `hal_manualtoolchange` ani ATC. Rozpoznany konflikt sieci HAL
+przerywa start bramy.
+
+Przy żądaniu M6 panel pokazuje numer T. Potwierdzenie wysyła sygnał do bieżącego
+żądania. Anulowanie wysyła Stop i zgłasza W-2130. Nowe żądanie wymaga ponownej
+decyzji operatora. Dane ToolDB i odjazd Z pozostają otwarte w sesji 034.
+NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+### Awaria napędu w AUTO
+
+WebHMI uruchomione z `--hal` pokazuje oś z aktywną awarią napędu (E-4200).
+Na Plant przyczynę odczytuje z CiA 402 także po wyłączeniu napędów przez
+LinuxCNC. Aktywna przyczyna blokuje Start i Wznów. Po jej usunięciu
+operator może przywrócić gotowość maszyny, potwierdzić alarm przyciskiem
+Reset i jawnie uruchomić program ponownie.
