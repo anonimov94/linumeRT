@@ -1,7 +1,7 @@
 <!-- Generowane przez python3 tools/roadmap.py; edytuj docs/roadmap/plan.json. -->
 # Wspólny plan linumeRT
 
-Pierwotny plan: **84 sesje M0–M6**, commit `796c6a2`. Stan na 2026-11-22: planowane: 14; w toku: 0; częściowe: 31; do odbioru: 0; ukończone: 39; zablokowane: 0.
+Pierwotny plan: **84 sesje M0–M6**, commit `796c6a2`. Stan na 2026-11-25: planowane: 14; w toku: 0; częściowe: 31; do odbioru: 0; ukończone: 39; zablokowane: 0.
 
 Zakończenie części implementacji nie oznacza odbioru całej funkcji ani sprzętu.
 
@@ -378,11 +378,11 @@ Pozostaje: Scenariusz dla sondy płytkowej (probe.type plate) na LinuxCNC: konfi
 
 ### 034 — Ręczna zmiana narzędzia
 
-**częściowe**. M6 i integracja sim_toolchange z Plant dostępne. Dodano próbę RIP/Plant ręcznego M6 w AUTO (potwierdzenie, anulowanie i ponowienie); wynik w CI oczekuje.
+**częściowe**. Ręczne M6 w WebHMI na Plant: Enter potwierdza T1, anulowanie T2 zachowuje T1 i zgłasza W-2130. Próba RIP sprawdza G43 i ponowienie ze świeżym żądaniem. Chrome przy 1280×768 i 1920×1080 zaliczony dla 0e2360a.
 
-Pozostaje: Rozliczyć dialog ToolDB, anulowanie W-2130 i opcjonalne wycofanie Z.
+Pozostaje: Pokazać typ, D, L i opis z ToolDB w dialogu oraz rozliczyć opcjonalne wycofanie Z.
 
-Źródła: [docs/DZIENNIK.md](../DZIENNIK.md), [prompts/sesja-034.md](../../prompts/sesja-034.md).
+Źródła: [docs/DZIENNIK.md](../DZIENNIK.md), [PR](https://github.com/anonimov94/linumeRT/pull/242), [PR](https://github.com/anonimov94/linumeRT/actions/runs/45475756528), [PR](https://github.com/anonimov94/linumeRT/actions/runs/45475756363), [PR](https://github.com/anonimov94/linumeRT/actions/runs/45475756363/artifacts/14959272696), [prompts/sesja-034.md](../../prompts/sesja-034.md).
 
 ### 035 — Alarmy na ekranie
 
@@ -408,13 +408,13 @@ Pozostaje: Pełne tłumaczenie produkcyjnego HMI .ts/.qm, przełącznik i format
 
 ### 038 — Bufor i bramka G2 (prototyp v0.1)
 
-**częściowe**. 2026-11-18 | Rozpoczęto odbiór G2 WebHMI. suite_operator wybiera 9 istniejących prób RIP/Plant/interpretera: bazowanie/JOG/MDI/AUTO, pauza/wznowienie i trzy przerwania, watchdog HAL, sonda Z, awaria napędu oraz M6/G43. Walidator JUnit wymaga każdego przypadku dokładnie raz i bez SKIP. Raport G2 i formularz niezależnego przeglądu przygotowane. Wynik nowej porcji w CI wymagany; pełna bramka pozostaje otwarta. Odbiór dfac257: CI44382988114 zaliczyło wszystkie9 przypadków suite_operator wraz z kontrolą kompletności JUnit. CI44382987902:2121 Python PASS/127skip/259deselected,190 native PASS/2skip/6podtestów, Plant matrix i wheel PASS. Kontrole PR235 zachowują pełną regresję i Beta. Pełna bramka pozostaje otwarta. 2026-11-22 Codex: rozwiązanie MPG scalone w PR237. Bafb630: 11/11 prób G2 z walidacją JUnit, pełna regresja RIP i Beta oraz CI Python/C, macierz Plant i wheel zakończone powodzeniem.
+**częściowe**. 2026-11-18 | Rozpoczęto odbiór G2 WebHMI. suite_operator wybiera 9 istniejących prób RIP/Plant/interpretera: bazowanie/JOG/MDI/AUTO, pauza/wznowienie i trzy przerwania, watchdog HAL, sonda Z, awaria napędu oraz M6/G43. Walidator JUnit wymaga każdego przypadku dokładnie raz i bez SKIP. Raport G2 i formularz niezależnego przeglądu przygotowane. Wynik nowej porcji w CI wymagany; pełna bramka pozostaje otwarta. Odbiór dfac257: CI44382988114 zaliczyło wszystkie9 przypadków suite_operator wraz z kontrolą kompletności JUnit. CI44382987902:2121 Python PASS/127skip/259deselected,190 native PASS/2skip/6podtestów, Plant matrix i wheel PASS. Kontrole PR235 zachowują pełną regresję i Beta. Pełna bramka pozostaje otwarta. 2026-11-22 Codex: rozwiązanie MPG scalone w PR237. Bafb630: 11/11 prób G2 z walidacją JUnit, pełna regresja RIP i Beta oraz CI Python/C, macierz Plant i wheel zakończone powodzeniem. 2026-11-25 Codex: PR242 i PR244 scalone. 0e2360a: 13/13 G2 z walidacją JUnit, 263 RIP i 12 Beta. Chrome potwierdził M6 oraz E-4200 na osi X, blokadę RUN/RESUME i oddzielny przejazd o 1 mm po odzyskaniu.
 
 Bramka automatyczna: `open`; odbiór stanowiska osobno.
 
-Pozostaje: Odebrać dialog ręcznej zmiany narzędzia oraz alarm napędu i odzyskiwanie w WebHMI. Ponowić pełny przejazd w przeglądarce i rozliczyć pozostałe kryteria sesji 028–037. Uzyskać przegląd podobieństwa aktualnych ekranów od osoby nieuczestniczącej w projekcie.
+Pozostaje: Ponowić pełny przejazd w przeglądarce i rozliczyć pozostałe kryteria sesji 028–037. Uzyskać przegląd podobieństwa aktualnych ekranów od osoby nieuczestniczącej w projekcie.
 
-Źródła: [tests/suite_operator.txt](../../tests/suite_operator.txt), [tools/ci/check_operator.py](../../tools/ci/check_operator.py), [docs/raporty/G2.md](../raporty/G2.md), [docs/prawne/PRZEGLAD_PODOBIENSTWA_v0.1.md](../prawne/PRZEGLAD_PODOBIENSTWA_v0.1.md), [PR](https://github.com/anonimov94/linumeRT/pull/235), [PR](https://github.com/anonimov94/linumeRT/actions/runs/44382988114), [PR](https://github.com/anonimov94/linumeRT/actions/runs/44382987902), [PR](https://github.com/anonimov94/linumeRT/pull/237), [PR](https://github.com/anonimov94/linumeRT/actions/runs/44827503217), [PR](https://github.com/anonimov94/linumeRT/actions/runs/44827503167), [docs/raporty/G2/PLAN_ODBIORU.md](../raporty/G2/PLAN_ODBIORU.md), [prompts/sesja-038.md](../../prompts/sesja-038.md).
+Źródła: [tests/suite_operator.txt](../../tests/suite_operator.txt), [tools/ci/check_operator.py](../../tools/ci/check_operator.py), [docs/raporty/G2.md](../raporty/G2.md), [docs/prawne/PRZEGLAD_PODOBIENSTWA_v0.1.md](../prawne/PRZEGLAD_PODOBIENSTWA_v0.1.md), [PR](https://github.com/anonimov94/linumeRT/pull/235), [PR](https://github.com/anonimov94/linumeRT/actions/runs/44382988114), [PR](https://github.com/anonimov94/linumeRT/actions/runs/44382987902), [PR](https://github.com/anonimov94/linumeRT/pull/237), [PR](https://github.com/anonimov94/linumeRT/actions/runs/44827503217), [PR](https://github.com/anonimov94/linumeRT/actions/runs/44827503167), [docs/raporty/G2/PLAN_ODBIORU.md](../raporty/G2/PLAN_ODBIORU.md), [PR](https://github.com/anonimov94/linumeRT/pull/242), [PR](https://github.com/anonimov94/linumeRT/pull/244), [PR](https://github.com/anonimov94/linumeRT/actions/runs/45475756528), [PR](https://github.com/anonimov94/linumeRT/actions/runs/45475756363), [PR](https://github.com/anonimov94/linumeRT/actions/runs/45475756422), [PR](https://github.com/anonimov94/linumeRT/actions/runs/45475756363/artifacts/14959272696), [prompts/sesja-038.md](../../prompts/sesja-038.md).
 
 ### 039 — Format .lnx i BaseMacroGenerator
 
