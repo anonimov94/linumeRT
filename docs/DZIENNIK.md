@@ -2175,3 +2175,10 @@ Model-Author: Codex. Odczyt aktywnej awarii CiA 402 przypisuje alarm E-4200 do o
 Brama i klient blokują Start/Wznów. Dodano próbę Plant: błąd w ruchu, odmowa,
 Reset przy aktywnej przyczynie, jawne odzyskanie i osobny start. Odbiór w CI oczekuje.
 NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## 038 — przeglądarkowa próba awarii osi X · 2026-11-24 · Codex
+
+Model-Author: Codex. PR242 obejmuje poprawkę logowania z PR243. Odbiór bazowy:
+e94ea80 — 13/13 operator, 263 RIP i 12 Beta. b3309e2 — Chrome M6 1280/1920.
+Do startera testowego dodano próbę awarii i odzyskania w Chrome oraz zrzuty obu stanów.
+Potwierdzenie nowej próby oczekuje w CI. NIEZWERYFIKOWANE NA SPRZĘCIE.
