@@ -10,6 +10,8 @@ Wynik: oczekuje na ocenę.
 oraz [panel sondy](../raporty/G2/WEBHMI_SONDA_2026-11-05.md).
 Przed oceną dołączyć zrzuty aktualnego WebHMI z numerem SHA i datą,
 obejmujące JOG/MDI, AUTO, narzędzia, sondę, alarmy i raport.
+Pakiet aktualnych ekranów z 2026-11-27: [Chrome w PR246, scalony SHA CI da65a44](https://github.com/anonimov94/linumeRT/actions/runs/46053435355/artifacts/15225851995). Wskaż SHA przy każdym materiale użytym w ocenie. Pozycje pokazywane na zrzutach pochodzą z Plant.
+
 Materiał przechowywany w repozytorium obejmuje wyłącznie nasze ekrany.
 
 ## Ocena
