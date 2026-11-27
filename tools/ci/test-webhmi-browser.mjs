@@ -232,7 +232,7 @@ try {
 
   await mdi("G53 G0 X9999");
   for (const message of [/positive limit/i, /invalid params in linear command/i]) {
-    await page.locator("#alarmRows").getByText(message).waitFor();
+    await page.locator("#alarmRows li").filter({ hasText: message }).first().waitFor();
   }
   await record("09-limit");
   await reset.click();
