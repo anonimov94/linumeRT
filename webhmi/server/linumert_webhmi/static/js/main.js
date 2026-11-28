@@ -66,9 +66,13 @@ function updateControls() {
   const pending = state?.manual_m6;
   $("manualToolChange").hidden = !pending || !fresh() || Boolean(state?.gateway_error);
   if (pending) {
-    const prompt = pending.tool === 0 ? "Wyjmij narzędzie i potwierdź opróżnienie wrzeciona."
-      : "Załóż narzędzie T" + pending.tool + " i potwierdź wymianę.";
-    if ($("manualToolPrompt").textContent !== prompt) $("manualToolPrompt").textContent = prompt;
+    if (pending.tool === 0) {
+      language.render($("manualToolPrompt"), "Wyjmij narzędzie i potwierdź opróżnienie wrzeciona.",
+        "Remove the tool and confirm that the spindle is empty.");
+    } else {
+      language.render($("manualToolPrompt"), "Załóż narzędzie T" + pending.tool + " i potwierdź wymianę.",
+        "Install tool T" + pending.tool + " and confirm the change.");
+    }
   }
   const requested = $("manualToolChange").hidden || sentToolRequest === pending?.id;
   $("manualToolCancel").disabled = requested;
@@ -103,7 +107,20 @@ function updateControls() {
   $("disconnect").disabled = !connection.isOpening();
   $("connect").firstChild.data = haveConnected && connection.hasToken()
     ? language.text("Połącz ponownie", "Reconnect") : language.text("Połącz", "Connect");
+  if (state?.hmi_hal === true) {
+    language.render($("alarmResetHint"),
+      "Reset raz: alarmy, których przyczyna ustała. Dwa razy szybko: potwierdzenie E-STOP " +
+      "w zatrzasku HAL — otwarty obwód safety nadal blokuje maszynę.",
+      "Press Reset once to clear alarms whose cause is gone. Press twice quickly to acknowledge " +
+      "E-STOP through the HAL latch. An open safety circuit keeps the machine inhibited.");
+  } else {
+    language.render($("alarmResetHint"),
+      "Reset kasuje alarmy, których przyczyna ustała. E-STOP potwierdza się zatrzaskiem w HAL, nie z tego ekranu.",
+      "Reset clears alarms whose cause is gone. Acknowledge E-STOP through the HAL latch outside this screen.");
+  }
   dro.freshness(age(), connected);
+  const emptyAlarm = $("alarmRows").querySelector(".alarm-none");
+  if (emptyAlarm) language.render(emptyAlarm, "Brak aktywnych alarmów.", "No active alarms.");
   refreshDiagnostics();
 }
 function renderAlarms(items) {
@@ -113,7 +130,7 @@ function renderAlarms(items) {
   if (!alarms.length) {
     const li = document.createElement("li");
     li.className = "alarm-none";
-    li.textContent = "Brak aktywnych alarmów.";
+    language.render(li, "Brak aktywnych alarmów.", "No active alarms.");
     list.appendChild(li);
   }
   for (const alarm of alarms) {
@@ -197,11 +214,6 @@ const connection = createConnection({
     dro.render(state, version);
     jobs?.update(state);
     renderAlarms(state.alarms);
-    $("alarmResetHint").textContent = state.hmi_hal === true
-      ? "Reset raz: alarmy, których przyczyna ustała. Dwa razy szybko: potwierdzenie E-STOP " +
-        "w zatrzasku HAL — otwarty obwód safety nadal blokuje maszynę."
-      : "Reset kasuje alarmy, których przyczyna ustała. E-STOP potwierdza się zatrzaskiem w " +
-        "HAL, nie z tego ekranu.";
     renderPrograms(state.programs);
     jog.onState(state);
     updateControls();

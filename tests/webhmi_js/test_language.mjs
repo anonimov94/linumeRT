@@ -45,3 +45,14 @@ test("disabled storage still allows switching in the active page", () => {
   ui.choose("unsupported");
   assert.equal(ui.selector.value, "pl");
 });
+
+test("live messages refresh their text and language for the current choice", () => {
+  const ui = interfaceWith({ getItem: () => "pl", setItem: () => {} });
+  const message = { textContent: "", lang: "" };
+  const render = () => ui.language.render(message, "Załóż narzędzie T1.", "Install tool T1.");
+  render();
+  assert.deepEqual(message, { textContent: "Załóż narzędzie T1.", lang: "pl" });
+  ui.choose("en");
+  render();
+  assert.deepEqual(message, { textContent: "Install tool T1.", lang: "en" });
+});

@@ -34,5 +34,11 @@ export function bindLanguage(doc) {
       // The active page still switches with storage disabled.
     }
   });
-  return { text: (pl, en) => language === "en" ? en : pl };
+  const text = (pl, en) => language === "en" ? en : pl;
+  function render(element, pl, en) {
+    const value = text(pl, en);
+    if (element.textContent !== value) element.textContent = value;
+    if (element.lang !== language) element.lang = language;
+  }
+  return { text, render };
 }
