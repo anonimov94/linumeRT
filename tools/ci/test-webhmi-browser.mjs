@@ -150,8 +150,12 @@ try {
   await page.locator("#manualToolChange").getByText(/narzędzie T1 i potwierdź/).waitFor();
   await page.locator("#manualToolChange").scrollIntoViewIfNeeded();
   await page.screenshot({ path: output + "/webhmi-m6-1280.png" });
-  await page.locator("#manualToolConfirm").focus();
-  await page.locator("#manualToolConfirm").press("Enter");
+  await language.selectOption("en");
+  await page.locator("#manualToolPrompt").getByText("Install tool T1 and confirm the change.").waitFor();
+  await page.locator("#alarmResetHint").getByText(/acknowledge E-STOP through the HAL latch/).waitFor();
+  await record("02-m6-en");
+  await page.getByRole("button", { name: "Confirm tool change", exact: true }).press("Enter");
+  await language.selectOption("pl");
 
   await page.setViewportSize({ width: 1920, height: 1080 });
   await page.locator("#manualToolChange").getByText(/narzędzie T2 i potwierdź/).waitFor();
