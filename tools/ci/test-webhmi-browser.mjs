@@ -265,7 +265,7 @@ try {
   await reset.dblclick();
   await button("power_on").click();
   await task.getByText("ON", { exact: true }).waitFor();
-  await reset.click();
+  // The bridge clears E-1100 after the double Reset and then disables Reset.
   await alarm("E-1100").waitFor({ state: "hidden" });
   await record("11-reset");
 } catch (error) {
