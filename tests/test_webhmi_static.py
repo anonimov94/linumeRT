@@ -20,7 +20,7 @@ TOKEN = "test-token-for-webhmi-static"
 ROOT = Path(__file__).resolve().parents[1]
 STATIC = ROOT / "webhmi/server/linumert_webhmi/static"
 MODULES = ("connection.js", "interlocks.js", "jog.js", "dro.js", "scene.js", "main.js",
-           "events.js", "log.js", "jobs.js", "run_plot.js")
+           "events.js", "log.js", "jobs.js", "run_plot.js", "language.js")
 FILES = ("index.html", "app.js", "style.css", *(f"js/{name}" for name in MODULES),
          "js/package.json")
 
@@ -64,9 +64,10 @@ def test_e2e_selectors_still_exist():
 
 
 @pytest.mark.skipif(shutil.which("node") is None, reason="Node.js nie jest zainstalowany")
-def test_node_interlocks():
+@pytest.mark.parametrize("script", ["test_interlocks.mjs", "test_language.mjs"])
+def test_node_interlocks(script):
     subprocess.run(
-        ["node", "--test", str(ROOT / "tests/webhmi_js/test_interlocks.mjs")],
+        ["node", "--test", str(ROOT / "tests/webhmi_js" / script)],
         cwd=ROOT, check=True, timeout=40,
     )
 

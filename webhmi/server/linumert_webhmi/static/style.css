@@ -7,7 +7,8 @@ Model-Author: ChatGPT
 .shell{max-width:1650px;margin:auto;padding:20px}.topbar,.connection,.identity,.panel-heading,.command-group,.jog-controls,.mdi-entry,footer{display:flex;align-items:center;gap:12px}.topbar{justify-content:space-between;flex-wrap:wrap;border-bottom:1px solid var(--edge);padding-bottom:18px}.identity{gap:16px}
 .brand-mark{font-size:26px;font-weight:900;border:1px solid var(--cyan);padding:10px;color:var(--cyan);box-shadow:0 0 20px #4be5e522}.brand-mark span{color:#e8bb63}
 .eyebrow{font-size:10px;letter-spacing:.22em;color:var(--cyan);font-weight:700}h1{font-size:23px;letter-spacing:.15em;margin:4px 0}h1 span{font-size:12px;color:var(--muted)}h2{font-size:17px;margin:5px 0;font-weight:600}
-.connection{flex-wrap:wrap}.connection label,.mdi-form label,.group-title{font-size:11px;color:var(--muted);letter-spacing:.12em}
+.connection{flex-wrap:wrap}
+#operatorLanguage{background:#071620;color:inherit;border:1px solid var(--edge);border-radius:4px;padding:9px;min-height:44px}.connection label,.mdi-form label,.group-title{font-size:11px;color:var(--muted);letter-spacing:.12em}
 input{font:inherit;color:#eefaf6;background:#071620;border:1px solid #316073;border-radius:4px;padding:10px;min-width:0}input:focus,button:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
 #token{width:195px}.status-tag,.small-tag{border:1px solid var(--edge);padding:7px 9px;color:var(--muted);font-size:11px;letter-spacing:.08em}.status-tag.online{color:#61f2b0;border-color:#248c6e}.status-tag.offline{color:#ff9c9c}
 button{font:inherit;background:#163240;color:#bff3ee;border:1px solid #376476;border-radius:4px;padding:10px 13px;cursor:pointer;font-size:12px;font-weight:750;letter-spacing:.04em}

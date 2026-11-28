@@ -92,6 +92,16 @@ try {
   }
 
   await page.goto(base + "/");
+  const language = page.locator("#operatorLanguage");
+  await language.selectOption("en");
+  const englishControls = page.getByRole("heading", { name: "Controls", exact: true });
+  await englishControls.waitFor();
+  await page.reload();
+  await englishControls.waitFor();
+  assert.equal(await language.inputValue(), "en");
+  await record("00-language-en");
+  await language.selectOption("pl");
+  await page.getByRole("heading", { name: "Sterowanie", exact: true }).waitFor();
   await page.locator("#token").fill(token);
   await page.locator("#token").press("Enter");
   await page.locator("#connectionStatus.online").waitFor();
