@@ -137,8 +137,11 @@ function renderAlarms(items) {
     const li = document.createElement("li");
     const code = document.createElement("strong");
     code.textContent = String(alarm.code ?? "?");
-    li.append(code, " " + String(alarm.text ?? "") +
-      (alarm.count > 1 ? " (×" + alarm.count + ")" : ""));
+    const message = document.createElement("span");
+    const original = String(alarm.text ?? "");
+    if (typeof alarm.text_en === "string") language.render(message, original, alarm.text_en);
+    else message.textContent = original;
+    li.append(code, " ", message, alarm.count > 1 ? " (×" + alarm.count + ")" : "");
     list.appendChild(li);
   }
   document.querySelector(".alarm-strip").classList.toggle("active", alarms.length > 0);
@@ -391,6 +394,9 @@ window.addEventListener("pagehide", () => {
   clearInterval(watch);
   jog.stop("Zamknięcie karty");
   connection.close("Zamknięcie karty");
+});
+$("operatorLanguage").addEventListener("change", () => {
+  if (!state?.read_only) renderAlarms(state?.alarms);
 });
 initScene(() => state);
 updateControls();

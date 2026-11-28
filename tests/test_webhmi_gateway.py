@@ -103,6 +103,19 @@ def test_estop_and_stop_cancel_jog_and_estop_leaves_machine_off():
     assert gateway.snapshot()[1]["task_state"] == "estop"
 
 
+def test_alarm_snapshot_contains_both_languages_and_preserves_cnc_message():
+    gateway, machine, clock = make()
+    gateway.execute(Command(cmd="estop"))
+    assert not machine.power_on()
+    run(gateway, clock, 0.02)
+    alarms = {a["code"]: a for a in gateway.snapshot()[1]["alarms"]}
+    assert alarms["E-1100"]["text"] == "Stan awaryjny (E-stop) jest aktywny."
+    assert alarms["E-1100"]["text_en"] == "Emergency stop (E-stop) is active."
+    raw = "zasilanie: wymagany reset E-stop"
+    assert alarms["E-1000"]["text"] == f"Komunikat LinuxCNC: {raw}"
+    assert alarms["E-1000"]["text_en"] == f"LinuxCNC message: {raw}"
+
+
 def test_gateway_has_no_estop_reset_command():
     with pytest.raises(ValidationError):
         Command(cmd="estop_reset")
