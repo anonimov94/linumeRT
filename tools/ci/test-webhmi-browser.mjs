@@ -80,8 +80,35 @@ try {
 
   async function mdi(text) {
     const field = page.locator("#mdiText");
-    await field.fill(text);
+    await field.fill("");
+    await field.pressSequentially(text);
+    assert.equal(await field.inputValue(), text);
     await field.press("Enter");
+  }
+
+  async function jogY(direction, key, yBefore, { blur = false } = {}) {
+    const target = yBefore + (direction === "plus" ? 1 : -1);
+    await page.locator("#jogIncrement").selectOption("1");
+    const jog = page.getByRole("button", { name: `Jog Y ${direction}`, exact: true });
+    const stopped = () => waitState("Zatrzymanie JOG Y", (state) => !state.jog_active.length
+      && !state.jog_stop_pending.length && near(commanded(state, "Y"), target)
+      && near(axis(state, "Y").position, target, 0.02));
+
+    await jog.focus();
+    await page.keyboard.down(key);
+    try {
+      await waitState("Przyrost JOG Y", (state) => state.jog_active.includes("Y")
+        && near(commanded(state, "Y"), target));
+      if (blur) {
+        await page.keyboard.press("Tab");
+        assert.equal(await jog.evaluate((node) => node === document.activeElement), false);
+        await stopped();
+      }
+    } finally {
+      await page.keyboard.up(key);
+    }
+    const state = await stopped();
+    return { key, blur, yBefore, yAfter: commanded(state, "Y"), axis: axis(state, "Y") };
   }
 
   async function driveFault(action = "") {
@@ -168,28 +195,18 @@ try {
   const positioned = await waitState("MDI XY", (state) => idle(state)
     && near(commanded(state, "X"), 150) && near(commanded(state, "Y"), 599), 60000);
   await mode("manual");
-  const yBefore = commanded(positioned, "Y");
-  const targetY = yBefore + 1;
-  await page.locator("#jogIncrement").selectOption("1");
-  const jog = page.getByRole("button", { name: "Jog Y plus", exact: true });
-  await jog.focus();
-  await page.keyboard.down("Space");
-  try {
-    await waitState("Przyrost JOG Y", (state) => near(commanded(state, "Y"), targetY));
-  } finally {
-    await page.keyboard.up("Space");
-  }
-  const jogEnd = await waitState("Zwolnienie JOG Y", (state) => !state.jog_active.length
-    && !state.jog_stop_pending.length && near(commanded(state, "Y"), targetY)
-    && near(axis(state, "Y").position, targetY, 0.02));
-  await record("03-jog", { yBefore, yAfter: commanded(jogEnd, "Y"), axis: axis(jogEnd, "Y") });
+  const jogOut = await jogY("plus", "Space", commanded(positioned, "Y"));
+  await record("03-jog", jogOut);
+
+  await page.setViewportSize({ width: 1920, height: 1080 });
+  const jogBack = await jogY("minus", "Enter", jogOut.yAfter, { blur: true });
+  await record("03-jog-blur", jogBack);
 
   await button("work_zero").filter({ hasText: "XYZ = 0" }).click();
   const zero = await waitState("Zero detalu G54", (state) => idle(state) && state.mode === "manual"
     && [..."XYZ"].every((name) => near(commanded(state, name, "work_position"), 0)));
   await record("04-work-zero", { workOffset: zero.work_offset, axes: zero.axes });
 
-  await page.setViewportSize({ width: 1920, height: 1080 });
   const program = "linumert_g2_odbior.ngc";
   await openProgram(program);
   await page.locator("#programState").getByText(/linumert_g2_odbior\.ngc/).waitFor();
