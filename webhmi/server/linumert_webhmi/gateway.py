@@ -180,7 +180,7 @@ class Gateway:
                     self.backend.stop()  # also cancel a delayed start while NML still says IDLE
                     self._instance.run.needs_abort = False
                 state["execution"] = self._instance.status()
-            state["alarms"] = self._alarm_rows()
+            state["alarms"] = self._alarm_rows(include_english=True)
             state["programs"] = list(self._programs)
             state["heartbeat"] = any(now - seen <= HEARTBEAT_S
                                      for seen in self._sessions.values())
@@ -220,10 +220,13 @@ class Gateway:
             if (code, params) not in active:
                 self._alarms.raise_alarm(code, **params)
 
-    def _alarm_rows(self) -> list[dict]:
+    def _alarm_rows(self, *, include_english: bool = False) -> list[dict]:
         rows = sorted(self._alarms.active(), key=lambda a: a.id, reverse=True)[:MAX_ALARMS]
-        return [{"id": a.id, "code": a.code, "text": self._alarms.message(a),
-                 "count": a.count} for a in rows]
+        return [
+            {"id": a.id, "code": a.code, "text": self._alarms.message(a), "count": a.count,
+             **({"text_en": self._alarms.message(a, lang="en")} if include_english else {})}
+            for a in rows
+        ]
 
     # ---- klienci ------------------------------------------------------------
     def client_connected(self, session: str = LOCAL_SESSION) -> None:

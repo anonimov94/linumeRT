@@ -108,6 +108,13 @@ try {
   const reset = page.locator("#alarmReset");
   const task = page.locator("#taskState");
   await alarm("E-1100").waitFor();
+  const estopRow = page.locator("#alarmRows li").filter({ has: page.getByText("E-1100", { exact: true }) });
+  await estopRow.getByText("Stan awaryjny (E-stop) jest aktywny.", { exact: true }).waitFor();
+  await language.selectOption("en");
+  await estopRow.getByText("Emergency stop (E-stop) is active.", { exact: true }).waitFor();
+  await record("00-alarm-estop-en");
+  await language.selectOption("pl");
+  await estopRow.getByText("Stan awaryjny (E-stop) jest aktywny.", { exact: true }).waitFor();
   assert.equal(await button("power_on").isDisabled(), true);
   await reset.dblclick();
   await button("power_on").click();
@@ -146,6 +153,13 @@ try {
   await driveFault();
   try {
     await alarm("E-4200").waitFor();
+    const faultRow = page.locator("#alarmRows li").filter({ has: page.getByText("E-4200", { exact: true }) });
+    await faultRow.getByText(/Napęd osi X zgłosił błąd/).waitFor();
+    await language.selectOption("en");
+    await faultRow.getByText(/The drive of axis X reported a fault/).waitFor();
+    await record("02-alarm-drive-en");
+    await language.selectOption("pl");
+    await faultRow.getByText(/Napęd osi X zgłosił błąd/).waitFor();
     for (const cmd of ["run", "resume"]) {
       await page.locator(`button[data-cmd="${cmd}"][disabled][title="Aktywna awaria napędu: X"]`).waitFor();
     }
