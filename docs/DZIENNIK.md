@@ -2190,3 +2190,10 @@ Model-Author: Codex. PR242 i PR244 scalone do main jako 8807b8e i 818d1d5.
 Chrome potwierdził M6 i W-2130 oraz E-4200, blokady AUTO i osobny przejazd po odzyskaniu.
 Cztery zrzuty i odsyłacze w G2.md. Dalej pełny przejazd w Chrome i niezależny przegląd.
 NIEZWERYFIKOWANE NA SPRZĘCIE.
+
+## 038 — Przejazd operatorski w Chrome na main · 2026-11-28 · Codex
+
+Model-Author: Codex. PR246 scalony jako e9f3533; PR247 zawiera raport i materiał przeglądu ekranów.
+Chrome/Plant dla da65a44 PASS. Powtórka RIP dla 8c0ad7d: 13/13 operator, 263 RIP, 12 Beta.
+Pierwsza próba wejść MPG zatrzymała się na połączeniu z Plant. Przyczyna pozostaje nieustalona.
+Dalej rozliczenie kryteriów 028–037 i niezależny przegląd ekranów. NIEZWERYFIKOWANE NA SPRZĘCIE.

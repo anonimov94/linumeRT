@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated": "2026-11-25",
+  "updated": "2026-11-28",
   "model_author": "Codex",
   "original_count": 84,
   "origin_commit": "796c6a2",
@@ -618,9 +618,9 @@
       "title": "Bufor i bramka G2 (prototyp v0.1)",
       "prompt": "prompts/sesja-038.md",
       "status": "partial",
-      "progress": "2026-11-18 | Rozpoczęto odbiór G2 WebHMI. suite_operator wybiera 9 istniejących prób RIP/Plant/interpretera: bazowanie/JOG/MDI/AUTO, pauza/wznowienie i trzy przerwania, watchdog HAL, sonda Z, awaria napędu oraz M6/G43. Walidator JUnit wymaga każdego przypadku dokładnie raz i bez SKIP. Raport G2 i formularz niezależnego przeglądu przygotowane. Wynik nowej porcji w CI wymagany; pełna bramka pozostaje otwarta. Odbiór dfac257: CI44382988114 zaliczyło wszystkie9 przypadków suite_operator wraz z kontrolą kompletności JUnit. CI44382987902:2121 Python PASS/127skip/259deselected,190 native PASS/2skip/6podtestów, Plant matrix i wheel PASS. Kontrole PR235 zachowują pełną regresję i Beta. Pełna bramka pozostaje otwarta. 2026-11-22 Codex: rozwiązanie MPG scalone w PR237. Bafb630: 11/11 prób G2 z walidacją JUnit, pełna regresja RIP i Beta oraz CI Python/C, macierz Plant i wheel zakończone powodzeniem. 2026-11-25 Codex: PR242 i PR244 scalone. 0e2360a: 13/13 G2 z walidacją JUnit, 263 RIP i 12 Beta. Chrome potwierdził M6 oraz E-4200 na osi X, blokadę RUN/RESUME i oddzielny przejazd o 1 mm po odzyskaniu.",
+      "progress": "2026-11-18 | Rozpoczęto odbiór G2 WebHMI. suite_operator wybiera 9 istniejących prób RIP/Plant/interpretera: bazowanie/JOG/MDI/AUTO, pauza/wznowienie i trzy przerwania, watchdog HAL, sonda Z, awaria napędu oraz M6/G43. Walidator JUnit wymaga każdego przypadku dokładnie raz i bez SKIP. Raport G2 i formularz niezależnego przeglądu przygotowane. Wynik nowej porcji w CI wymagany; pełna bramka pozostaje otwarta. Odbiór dfac257: CI44382988114 zaliczyło wszystkie9 przypadków suite_operator wraz z kontrolą kompletności JUnit. CI44382987902:2121 Python PASS/127skip/259deselected,190 native PASS/2skip/6podtestów, Plant matrix i wheel PASS. Kontrole PR235 zachowują pełną regresję i Beta. Pełna bramka pozostaje otwarta. 2026-11-22 Codex: rozwiązanie MPG scalone w PR237. Bafb630: 11/11 prób G2 z walidacją JUnit, pełna regresja RIP i Beta oraz CI Python/C, macierz Plant i wheel zakończone powodzeniem. 2026-11-25 Codex: PR242 i PR244 scalone. 0e2360a: 13/13 G2 z walidacją JUnit, 263 RIP i 12 Beta. Chrome potwierdził M6 oraz E-4200 na osi X, blokadę RUN/RESUME i oddzielny przejazd o 1 mm po odzyskaniu. 2026-11-28: PR246 i PR247 scalone. Chrome na da65a44 potwierdził przejazd operatorski. RIP dla 8c0ad7d: próba 1 zatrzymała się na połączeniu Plant w teście wejść MPG; próba 2 zaliczyła 13/13 prób G2, 263 RIP i 12 Beta. Przyczyna pierwszego braku połączenia pozostaje nieustalona.",
       "remaining": [
-        "Ponowić pełny przejazd w przeglądarce i rozliczyć pozostałe kryteria sesji 028–037.",
+        "Rozliczyć kryteria sesji 028–037 dla WebHMI, w tym klawiaturę na docelowym pulpicie, PL/EN i wznowienie od linii.",
         "Uzyskać przegląd podobieństwa aktualnych ekranów od osoby nieuczestniczącej w projekcie."
       ],
       "evidence": [
@@ -640,7 +640,11 @@
         "https://github.com/anonimov94/linumeRT/actions/runs/45475756528",
         "https://github.com/anonimov94/linumeRT/actions/runs/45475756363",
         "https://github.com/anonimov94/linumeRT/actions/runs/45475756422",
-        "https://github.com/anonimov94/linumeRT/actions/runs/45475756363/artifacts/14959272696"
+        "https://github.com/anonimov94/linumeRT/actions/runs/45475756363/artifacts/14959272696",
+        "https://github.com/anonimov94/linumeRT/pull/246",
+        "https://github.com/anonimov94/linumeRT/pull/247",
+        "https://github.com/anonimov94/linumeRT/actions/runs/46053435353/attempts/2",
+        "https://github.com/anonimov94/linumeRT/actions/runs/46053435355/artifacts/15225851995"
       ],
       "gate": "open"
     },
