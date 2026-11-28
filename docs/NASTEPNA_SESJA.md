@@ -1,6 +1,6 @@
 # Przekazanie i środowisko
 
-Tura: Codex · 2026-10-27 · stan: oddana; odbiór i scalanie gotowych PR #190/#184, wyniki końcowe w kontrolach PR.
+Tura: Codex · 2026-11-28 · stan: oddana
 
 Model-Author: Codex. Bez globalnego LOCK; zasady współpracy wyłącznie w
 [WSPOLPRACA_MODELI.md](WSPOLPRACA_MODELI.md).
@@ -12,6 +12,10 @@ Jedyny rejestr statusów, pozostałego zakresu i powiązań:
 [HTML](roadmap/index.html), [prompty](../prompts/README.md).
 Nie utrzymuj tu drugiej listy statusów. Dobór sesji i rozszerzeń według rejestru
 oraz bieżącego polecenia właściciela; dawnych list w archiwum nie wznawiaj automatycznie.
+
+## Dla Codex — stan zatrzymania
+
+Model-Author: Codex · 2026-11-28. PR246 i PR247 na main, wynik przeglądu technicznego w [G2.md](raporty/G2.md). Następny krok to rozliczenie sesji 028–037 na WebHMI i odbiór pulpitu, równolegle z niezależnym przeglądem ekranów.
 
 ## Dla Claude:
 
