@@ -112,6 +112,8 @@ try {
   await estopRow.getByText("Stan awaryjny (E-stop) jest aktywny.", { exact: true }).waitFor();
   await language.selectOption("en");
   await estopRow.getByText("Emergency stop (E-stop) is active.", { exact: true }).waitFor();
+  await page.locator('button[data-cmd="power_on"][disabled][title="Press Reset twice to acknowledge E-STOP first"]')
+    .waitFor();
   await record("00-alarm-estop-en");
   await language.selectOption("pl");
   await estopRow.getByText("Stan awaryjny (E-stop) jest aktywny.", { exact: true }).waitFor();
@@ -282,6 +284,19 @@ try {
   // The bridge clears E-1100 after the double Reset and then disables Reset.
   await alarm("E-1100").waitFor({ state: "hidden" });
   await record("11-reset");
+
+  await language.selectOption("en");
+  await page.locator("#disconnect").click();
+  const status = page.locator("#connectionStatus");
+  await status.getByText("DISCONNECTED", { exact: true }).waitFor();
+  await page.locator("#banner").getByText(/DRO IS STALE/).waitFor();
+  await page.locator('button[data-cmd="run"][disabled][title="No connection to the gateway"]').waitFor();
+  await record("12-disconnected-en");
+  await page.getByRole("button", { name: "Reconnect", exact: true }).click();
+  await page.locator("#connectionStatus.online").waitFor();
+  await waitState("Powrót telemetrii bez wznawiania ruchu", (state) => idle(state) && !state.jog_active.length);
+  await page.locator("#banner").getByText(/Gateway online/).waitFor();
+  await record("13-reconnected-en");
 } catch (error) {
   for (const page of browser.contexts()[0]?.pages() ?? []) {
     await page.screenshot({ path: output + "/webhmi-g2-failure.png", fullPage: true }).catch(() => {});

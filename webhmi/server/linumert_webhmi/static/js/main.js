@@ -33,6 +33,9 @@ let lastReset = 0;
 let lastAckMs = null;
 let telemetryWasFresh = false;
 let previousLinkStatus = "";
+let linkText = ["ROZŁĄCZONO", "DISCONNECTED"];
+let bannerText = [$("banner").textContent.trim(),
+  "Connect to the gateway in simulation mode. The panel is not a safety system."];
 let sentToolRequest = null;
 
 function refreshDiagnostics() {
@@ -46,14 +49,17 @@ function result(message, kind = "") {
   $("commandResult").textContent = message;
   $("commandResult").className = "command-result " + kind;
 }
-function banner(message) { $("banner").textContent = message; }
+function banner(pl, en = pl) {
+  bannerText = [pl, en];
+  language.render($("banner"), ...bannerText);
+}
 function age() { return receivedAt ? Math.max(0, Date.now() - receivedAt) : Infinity; }
 function fresh() { return connection.ready() && age() <= FRESH_MS; }
 function rights() {
-  return allowed(state, { connected: connection.ready(), fresh: fresh() });
+  return allowed(state, { connected: connection.ready(), fresh: fresh() }, language.text);
 }
 function access(key) {
-  return rights()[key] ?? { ok: false, reason: "Polecenie nieobsługiwane" };
+  return rights()[key] ?? { ok: false, reason: language.text("Polecenie nieobsługiwane", "Unsupported command") };
 }
 function setButton(button, rule) {
   button.disabled = !rule.ok;
@@ -91,7 +97,7 @@ function updateControls() {
   const open = rules.open;
   $("programSelect").disabled = !open.ok;
   setButton($("programOpen"), open.ok && !$("programSelect").value
-    ? { ok: false, reason: "Wybierz plik programu" } : open);
+    ? { ok: false, reason: language.text("Wybierz plik programu", "Select a program file") } : open);
   const probe = rules.probe;
   for (const id of ["probeAxis", "probeDirection", "probeDistance", "probeValue"]) {
     $(id).disabled = !probe.ok;
@@ -100,7 +106,12 @@ function updateControls() {
   const jogRule = rules.jog;
   const needsHoming = $("jogIncrement").value !== "continuous" && state?.all_homed !== true;
   const jogOK = jogRule.ok && !needsHoming && (jog.canStart() || jog.isActive());
-  const jogReason = jogRule.ok && needsHoming ? "Przyrost JOG wymaga bazowania wszystkich osi" : jogRule.ok ? (jog.canStart() || jog.isActive() ? "" : "Oczekiwanie na potwierdzenie JOG STOP") : jogRule.reason;
+  let jogReason = jogRule.reason;
+  if (jogRule.ok && needsHoming) {
+    jogReason = language.text("Przyrost JOG wymaga bazowania wszystkich osi", "Home all axes before incremental JOG");
+  } else if (jogRule.ok && !jogOK) {
+    jogReason = language.text("Oczekiwanie na potwierdzenie JOG STOP", "Waiting for JOG stop confirmation");
+  }
   dro.jogButtons(jogOK, jogReason);
   $("jogLockReason").textContent = jogReason;
   $("connect").disabled = connection.isOpening();
@@ -188,9 +199,10 @@ function execute(command) {
   }
 }
 const connection = createConnection({
-  onStatus(text, online) {
+  onStatus(text, online, english) {
     jobs?.setOnline(online);
-    $("connectionStatus").textContent = text;
+    linkText = [text, english];
+    language.render($("connectionStatus"), ...linkText);
     $("connectionStatus").className = "status-tag " + (online ? "online" : "offline");
     if (text !== previousLinkStatus) {
       if (online) journal.add("info", "ŁĄCZE", "Połączono i uwierzytelniono WebSocket");
@@ -211,7 +223,8 @@ const connection = createConnection({
     if (state.read_only === true) {
       jobs?.update(state);
       updateControls();
-      banner("Przeglądanie raportów offline. Sterowanie maszyną jest niedostępne.");
+      banner("Przeglądanie raportów offline. Sterowanie maszyną jest niedostępne.",
+        "Offline report viewer. Machine controls are unavailable.");
       return;
     }
     dro.render(state, version);
@@ -220,14 +233,15 @@ const connection = createConnection({
     renderPrograms(state.programs);
     jog.onState(state);
     updateControls();
-    if (state.read_only === true) {
-      banner("Przeglądanie raportów offline. Sterowanie maszyną jest niedostępne.");
-    } else if (Array.isArray(state.jog_stop_pending) && state.jog_stop_pending.length) {
-      banner("UWAGA: brama zgłasza zatrzymanie JOG oczekujące na potwierdzenie.");
+    if (Array.isArray(state.jog_stop_pending) && state.jog_stop_pending.length) {
+      banner("UWAGA: brama zgłasza zatrzymanie JOG oczekujące na potwierdzenie.",
+        "Warning: the gateway is still waiting for JOG stop confirmation.");
     } else if (state.gateway_error) {
-      banner("Błąd odczytu bramy. Sterowanie ruchem zablokowane.");
+      banner("Błąd odczytu bramy. Sterowanie ruchem zablokowane.",
+        "Cannot read the gateway state. Motion controls are blocked.");
     } else {
-      banner("Brama online. Panel WebHMI nie zastępuje sprzętowego E-STOP i watchdog HAL.");
+      banner("Brama online. Panel WebHMI nie zastępuje sprzętowego E-STOP i watchdog HAL.",
+        "Gateway online. WebHMI does not replace the hardware E-STOP or HAL watchdog.");
     }
   },
   onReply(reply, command, latencyMs) {
@@ -255,7 +269,8 @@ const connection = createConnection({
     sentToolRequest = null;
     jog.onLost();
     result(message + " — sprawdź fizyczny stan maszyny.", "error");
-    banner("BRAK POŁĄCZENIA. DRO NIEAKTUALNE. Nie potwierdzono stanu ruchu.");
+    banner("BRAK POŁĄCZENIA. DRO NIEAKTUALNE. Nie potwierdzono stanu ruchu.",
+      "DISCONNECTED. DRO IS STALE. Motion state is unconfirmed.");
     updateControls();
   },
   onError(message) {
@@ -378,7 +393,9 @@ const watch = setInterval(() => {
     }
     if (currentAge > FRESH_MS) {
       jog.stop("Telemetria starsza niż 500 ms");
-      banner("NIEAKTUALNA TELEMETRIA (" + Math.round(currentAge) + " ms). JOG ZABLOKOWANY.");
+      const ageMs = Math.round(currentAge);
+      banner("NIEAKTUALNA TELEMETRIA (" + ageMs + " ms). JOG ZABLOKOWANY.",
+        "STALE TELEMETRY (" + ageMs + " ms). JOG IS BLOCKED.");
     }
     if (currentAge > LOST_MS) {
       jog.stop("Brak stanu dłużej niż 2 sekundy");
@@ -397,6 +414,11 @@ window.addEventListener("pagehide", () => {
 });
 $("operatorLanguage").addEventListener("change", () => {
   if (!state?.read_only) renderAlarms(state?.alarms);
+  language.render($("connectionStatus"), ...linkText);
+  language.render($("banner"), ...bannerText);
+  updateControls();
 });
 initScene(() => state);
+language.render($("connectionStatus"), ...linkText);
+language.render($("banner"), ...bannerText);
 updateControls();

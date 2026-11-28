@@ -30,8 +30,8 @@ export function createConnection(handlers) {
 
   const ready = () => authenticated && ws !== null && ws.readyState === WebSocket.OPEN;
   const isOpening = () => ws !== null && ws.readyState < WebSocket.CLOSING;
-  function publish(text, online = false) {
-    handlers.onStatus(text, online);
+  function publish(pl, en, online = false) {
+    handlers.onStatus(pl, online, en);
   }
   function notifyDisconnect(message) {
     pending.clear();
@@ -56,7 +56,7 @@ export function createConnection(handlers) {
     authenticated = false;
     stopAlive();
     if (old && old.readyState < WebSocket.CLOSING) old.close(1000, "client disconnect");
-    publish("ROZŁĄCZONO");
+    publish("ROZŁĄCZONO", "DISCONNECTED");
     notifyDisconnect(reason);
   }
   function connect(value = "") {
@@ -77,7 +77,7 @@ export function createConnection(handlers) {
     ws = next;
     authenticated = false;
     openedAt = Date.now();
-    publish("ŁĄCZENIE");
+    publish("ŁĄCZENIE", "CONNECTING");
     next.addEventListener("open", () => {
       if (ws !== next) return;
       next.send(JSON.stringify({ auth: token }));
@@ -96,7 +96,7 @@ export function createConnection(handlers) {
         if (!authenticated) {
           authenticated = true;
           startAlive(next);
-          publish("ONLINE", true);
+          publish("ONLINE", "ONLINE", true);
         }
         handlers.onState(data.state, data.version);
         return;
@@ -114,7 +114,7 @@ export function createConnection(handlers) {
       ws = null;
       authenticated = false;
       stopAlive();
-      publish("ROZŁĄCZONO (" + event.code + ")");
+      publish("ROZŁĄCZONO (" + event.code + ")", "DISCONNECTED (" + event.code + ")");
       notifyDisconnect("Utrata WebSocket (" + event.code + ")");
     });
     next.addEventListener("error", () => {
