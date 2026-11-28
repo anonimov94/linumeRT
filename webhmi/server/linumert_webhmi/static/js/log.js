@@ -15,7 +15,7 @@ const timeText = (date) => {
 const clean = (value) => String(value ?? "").replace(/[\r\n\t]+/g, " ").slice(0, 600);
 const pad = (n) => String(n).padStart(2, "0");
 
-export function createLog() {
+export function createLog(text = (pl) => pl) {
   // Pamięć ograniczona: najstarsze zdarzenie jest nadpisywane po 500 wpisach.
   const buffer = new Array(CAPACITY);
   let first = 0;
@@ -45,7 +45,8 @@ export function createLog() {
       const timestamp = document.createElement("time");
       timestamp.textContent = entry.time;
       const level = document.createElement("strong");
-      level.textContent = { info: "INFO", warn: "UWAGA", alarm: "ALARM" }[entry.level];
+      level.textContent = entry.level === "warn" ? text("UWAGA", "WARNING")
+        : entry.level.toUpperCase();
       const message = document.createElement("span");
       message.textContent = entry.source + " · " + entry.text;
       row.append(timestamp, level, message);
@@ -79,9 +80,9 @@ export function createLog() {
     const clock = pad(stamp.getHours()) + pad(stamp.getMinutes()) + pad(stamp.getSeconds());
     const name = "linumert-webhmi-" + day + "-" + clock + ".txt";
     // Eksport zawiera wszystkie zdarzenia z bufora, niezależnie od filtra.
-    const lines = ["linumeRT WebHMI — dziennik operatora",
-      "Eksport: " + stamp.toLocaleString("pl-PL"),
-      "Wpisy: " + length, ""];
+    const lines = [text("linumeRT WebHMI — dziennik operatora", "linumeRT WebHMI — operator log"),
+      text("Eksport: ", "Export: ") + stamp.toLocaleString(text("pl-PL", "en-GB")),
+      text("Wpisy: ", "Entries: ") + length, ""];
     for (let i = 0; i < length; i++) {
       const entry = buffer[(first + i) % CAPACITY];
       lines.push("[" + entry.time + "] [" + entry.level.toUpperCase() + "] [" +
@@ -115,31 +116,31 @@ export function createLog() {
     const errs = Array.isArray(state?.errors) ? state.errors : [];
     const stale = !connected || !fresh || !state;
     const lamp = (name, level, text) => ({ name, level, text });
-    const unknown = (name) => lamp(name, "warn", "NIEAKTUALNE");
+    const unknown = (name) => lamp(name, "warn", text("NIEAKTUALNE", "STALE"));
     const items = [
-      lamp("ŁĄCZE", !connected ? "alarm" : fresh ? "info" : "warn",
-        !connected ? "OFFLINE" : fresh ? "ONLINE" : "NIEAKTUALNE"),
+      lamp(text("ŁĄCZE", "LINK"), !connected ? "alarm" : fresh ? "info" : "warn",
+        !connected ? "OFFLINE" : fresh ? "ONLINE" : text("NIEAKTUALNE", "STALE")),
       stale ? unknown("E-STOP") : lamp("E-STOP", state.task_state === "estop" ? "alarm" :
         state.task_state === "estop_reset" ? "warn" : "info",
-        state.task_state === "estop" ? "AKTYWNY" :
-          state.task_state === "estop_reset" ? "RESET" : "ZWOLNIONY"),
-      stale ? unknown("ZASILANIE") : lamp("ZASILANIE", state.task_state === "on" ? "info" : "warn",
+        state.task_state === "estop" ? text("AKTYWNY", "ACTIVE") :
+          state.task_state === "estop_reset" ? "RESET" : text("ZWOLNIONY", "RELEASED")),
+      stale ? unknown(text("ZASILANIE", "POWER")) : lamp(text("ZASILANIE", "POWER"), state.task_state === "on" ? "info" : "warn",
         state.task_state === "on" ? "ON" : state.task_state === "off" ? "OFF" :
           String(state.task_state).toUpperCase()),
-      stale ? unknown("BAZOWANIE") : lamp("BAZOWANIE", state.all_homed ? "info" : "warn",
-        state.all_homed ? "WSZYSTKIE OK" : "WYMAGANE"),
-      stale ? unknown("KRAŃCÓWKI") : lamp("KRAŃCÓWKI", axes.some(a => a.limit_hit) ? "alarm" : "info",
-        axes.some(a => a.limit_hit) ? "AKTYWNE: " +
-          axes.filter(a => a.limit_hit).map(a => a.name).join(", ") : "BRAK AKTYWNYCH"),
+      stale ? unknown(text("BAZOWANIE", "HOMING")) : lamp(text("BAZOWANIE", "HOMING"), state.all_homed ? "info" : "warn",
+        state.all_homed ? text("WSZYSTKIE OK", "ALL AXES HOMED") : text("WYMAGANE", "REQUIRED")),
+      stale ? unknown(text("KRAŃCÓWKI", "LIMIT SWITCHES")) : lamp(text("KRAŃCÓWKI", "LIMIT SWITCHES"), axes.some(a => a.limit_hit) ? "alarm" : "info",
+        axes.some(a => a.limit_hit) ? text("AKTYWNE: ", "ACTIVE: ") +
+          axes.filter(a => a.limit_hit).map(a => a.name).join(", ") : text("BRAK AKTYWNYCH", "NONE ACTIVE")),
       stale ? unknown("JOG") : lamp("JOG",
         pending.length || String(jogStatus).includes("NIEPOTWIERDZONY") ? "alarm" :
           moving.length || String(jogStatus).includes("ZATRZYMYWANIE") ? "warn" : "info",
-        pending.length ? "STOP OCZEKUJE: " + pending.join(", ") :
-          moving.length ? "RUCH: " + moving.join(", ") : String(jogStatus).includes("ZATRZYMYWANIE") ?
-            "ZATRZYMYWANIE" : "BEZ RUCHU"),
-      stale ? unknown("BŁĘDY") : lamp("BŁĘDY",
+        pending.length ? text("STOP OCZEKUJE: ", "STOP PENDING: ") + pending.join(", ") :
+          moving.length ? text("RUCH: ", "MOVING: ") + moving.join(", ") : String(jogStatus).includes("ZATRZYMYWANIE") ?
+            text("ZATRZYMYWANIE", "STOPPING") : text("BEZ RUCHU", "STATIONARY")),
+      stale ? unknown(text("BŁĘDY", "ERRORS")) : lamp(text("BŁĘDY", "ERRORS"),
         errs.length || state.gateway_error ? "alarm" : "info",
-        state.gateway_error ? "BŁĄD BRAMY" : errs.length ? "AKTYWNE: " + errs.length : "BRAK"),
+        state.gateway_error ? text("BŁĄD BRAMY", "GATEWAY ERROR") : errs.length ? text("AKTYWNE: ", "ACTIVE: ") + errs.length : text("BRAK", "NONE")),
     ];
     const fragment = document.createDocumentFragment();
     for (const item of items) {
@@ -158,10 +159,10 @@ export function createLog() {
     $("lamps").replaceChildren(fragment);
   }
   function metrics(statesPerSecond, age, ackMs) {
-    $("stateRate").textContent = statesPerSecond.toFixed(1) + " stanów/s";
-    $("stateAge").textContent = Number.isFinite(age) ? Math.round(age) + " ms" : "BRAK";
+    $("stateRate").textContent = statesPerSecond.toFixed(1) + text(" stanów/s", " states/s");
+    $("stateAge").textContent = Number.isFinite(age) ? Math.round(age) + " ms" : text("BRAK", "NONE");
     $("ackLatency").textContent = Number.isFinite(ackMs) ? Math.round(ackMs) + " ms" : "—";
   }
   redraw();
-  return { add, appendAll, lamps, metrics };
+  return { add, appendAll, lamps, metrics, refreshLanguage: redraw };
 }

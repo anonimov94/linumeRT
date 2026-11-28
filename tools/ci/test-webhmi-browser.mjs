@@ -314,6 +314,21 @@ try {
   await waitState("Powrót telemetrii bez wznawiania ruchu", (state) => idle(state) && !state.jog_active.length);
   await page.locator("#banner").getByText(/Gateway online/).waitFor();
   await record("13-reconnected-en");
+
+  const lamps = page.locator("#lamps");
+  const logFilter = page.locator("#logFilter");
+  await lamps.getByText("LINK", { exact: true }).waitFor();
+  await logFilter.selectOption("warn");
+  assert.equal(await logFilter.locator('option[value="warn"]').textContent(), "Warnings and alarms");
+  const offlineWarning = page.locator("#eventLog").getByText(/Rozłączono: Operator rozłączył panel/);
+  await offlineWarning.waitFor();
+  await page.locator("#eventLog").getByText("WARNING", { exact: true }).first().waitFor();
+  await record("14-diagnostics-en");
+  await language.selectOption("pl");
+  await lamps.getByText("ŁĄCZE", { exact: true }).waitFor();
+  assert.equal(await logFilter.locator('option[value="warn"]').textContent(), "Ostrzeżenia i alarmy");
+  assert.equal(await logFilter.inputValue(), "warn");
+  await offlineWarning.waitFor();
 } catch (error) {
   for (const page of browser.contexts()[0]?.pages() ?? []) {
     await page.screenshot({ path: output + "/webhmi-g2-failure.png", fullPage: true }).catch(() => {});

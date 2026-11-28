@@ -27,7 +27,7 @@ let haveConnected = false;
 let jog;
 let dro;
 let jobs;
-const journal = createLog();
+const journal = createLog(language.text);
 let stateReceipts = [];
 let lastReset = 0;
 let lastAckMs = null;
@@ -414,6 +414,7 @@ window.addEventListener("pagehide", () => {
 });
 $("operatorLanguage").addEventListener("change", () => {
   if (!state?.read_only) renderAlarms(state?.alarms);
+  journal.refreshLanguage();
   language.render($("connectionStatus"), ...linkText);
   language.render($("banner"), ...bannerText);
   updateControls();
