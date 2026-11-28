@@ -12,8 +12,10 @@ import { initScene } from "./scene.js";
 import { diffState } from "./events.js";
 import { createLog } from "./log.js";
 import { createJobs } from "./jobs.js";
+import { bindLanguage } from "./language.js";
 
 const $ = (id) => document.getElementById(id);
+const language = bindLanguage(document);
 const FRESH_MS = 500;
 const LOST_MS = 2000;
 const DOUBLE_RESET_MS = 600;
@@ -99,7 +101,8 @@ function updateControls() {
   $("jogLockReason").textContent = jogReason;
   $("connect").disabled = connection.isOpening();
   $("disconnect").disabled = !connection.isOpening();
-  $("connect").textContent = haveConnected && connection.hasToken() ? "Połącz ponownie" : "Połącz";
+  $("connect").firstChild.data = haveConnected && connection.hasToken()
+    ? language.text("Połącz ponownie", "Reconnect") : language.text("Połącz", "Connect");
   dro.freshness(age(), connected);
   refreshDiagnostics();
 }

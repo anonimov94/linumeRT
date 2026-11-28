@@ -24,12 +24,17 @@ Incremental jog: Model-Author: Codex
         </div>
       </div>
       <div class="connection">
-        <a class="job-link" href="#jobPanel">Zadanie CAM</a>
+        <label for="operatorLanguage">Język / Language</label>
+        <select id="operatorLanguage">
+          <option value="pl" lang="pl">Polski</option>
+          <option value="en" lang="en">English (main controls)</option>
+        </select>
+        <a class="job-link" href="#jobPanel" data-en="CAM job">Zadanie CAM</a>
         <span id="connectionStatus" class="status-tag offline" role="status">ROZŁĄCZONO</span>
-        <label for="token">TOKEN BRAMY</label>
+        <label for="token" data-en="GATEWAY TOKEN">TOKEN BRAMY</label>
         <input id="token" type="password" autocomplete="off" spellcheck="false" placeholder="Token sesji" aria-label="Token dostępu WebHMI">
-        <button id="connect" class="primary">Połącz</button>
-        <button id="disconnect" disabled>Rozłącz</button>
+        <button id="connect" class="primary" data-en="Connect">Połącz</button>
+        <button id="disconnect" disabled data-en="Disconnect">Rozłącz</button>
       </div>
     </header>
 
@@ -38,23 +43,23 @@ Incremental jog: Model-Author: Codex
     </div>
 
     <section class="alarm-strip" aria-labelledby="alarmTitle">
-      <strong id="alarmTitle">ALARMY</strong>
+      <strong id="alarmTitle" data-en="ALARMS">ALARMY</strong>
       <ol id="alarmRows" class="alarm-rows"><li class="alarm-none">Brak aktywnych alarmów.</li></ol>
       <button data-cmd="reset" id="alarmReset" disabled>Reset</button>
       <span class="hint" id="alarmResetHint">Reset kasuje alarmy, których przyczyna ustała. E-STOP potwierdza się zatrzaskiem w HAL, nie z tego ekranu.</span>
     </section>
 
     <section class="panel" id="manualToolChange" aria-labelledby="manualToolTitle" hidden>
-      <h2 id="manualToolTitle">Ręczna zmiana narzędzia</h2>
+      <h2 id="manualToolTitle" data-en="Manual tool change">Ręczna zmiana narzędzia</h2>
       <p id="manualToolPrompt" role="status"></p>
-      <button type="button" id="manualToolConfirm">Potwierdź wymianę</button>
-      <button type="button" id="manualToolCancel">Anuluj i zatrzymaj program</button>
+      <button type="button" id="manualToolConfirm" data-en="Confirm tool change">Potwierdź wymianę</button>
+      <button type="button" id="manualToolCancel" data-en="Cancel and stop program">Anuluj i zatrzymaj program</button>
     </section>
 
     <main class="layout">
       <section class="panel readout" aria-labelledby="droTitle">
         <div class="panel-heading">
-          <div><div class="eyebrow">01 / UKŁAD WSPÓŁRZĘDNYCH</div><h2 id="droTitle">Pozycje osi <span id="workOffset">—</span></h2></div>
+          <div><div class="eyebrow" data-en="01 / COORDINATE SYSTEM">01 / UKŁAD WSPÓŁRZĘDNYCH</div><h2 id="droTitle" data-en="Axis positions ">Pozycje osi <span id="workOffset">—</span></h2></div>
           <span class="small-tag" id="homingStatus">BAZOWANIE: —</span>
           <span class="small-tag stale-label" id="freshnessStatus" role="status">NIEAKTUALNE — BRAK POŁĄCZENIA</span>
         </div>
@@ -89,7 +94,7 @@ Incremental jog: Model-Author: Codex
 
       <section class="panel simulation" aria-labelledby="viewTitle">
         <div class="panel-heading">
-          <div><div class="eyebrow">02 / PODGLĄD RUCHU</div><h2 id="viewTitle">Scena WebGL</h2></div>
+          <div><div class="eyebrow" data-en="02 / MOTION PREVIEW">02 / PODGLĄD RUCHU</div><h2 id="viewTitle" data-en="WebGL scene">Scena WebGL</h2></div>
           <span class="small-tag">LIMIT 30 FPS</span>
         </div>
         <div class="view-container">
@@ -102,7 +107,7 @@ Incremental jog: Model-Author: Codex
 
       <section class="panel machine" aria-labelledby="machineTitle">
         <div class="panel-heading">
-          <div><div class="eyebrow">03 / STATUS MASZYNY</div><h2 id="machineTitle">Telemetria</h2></div>
+          <div><div class="eyebrow" data-en="03 / MACHINE STATUS">03 / STATUS MASZYNY</div><h2 id="machineTitle" data-en="Telemetry">Telemetria</h2></div>
           <span class="small-tag" id="schemaLabel">SCHEMA —</span>
         </div>
         <dl class="telemetry">
@@ -121,19 +126,19 @@ Incremental jog: Model-Author: Codex
 
       <section class="panel commands" aria-labelledby="commandsTitle">
         <div class="panel-heading">
-          <div><div class="eyebrow">04 / KOMENDY OPERATORA</div><h2 id="commandsTitle">Sterowanie</h2></div>
+          <div><div class="eyebrow" data-en="04 / OPERATOR COMMANDS">04 / KOMENDY OPERATORA</div><h2 id="commandsTitle" data-en="Controls">Sterowanie</h2></div>
         </div>
         <div class="command-group">
-          <button class="danger estop" data-cmd="estop" disabled>AWARYJNE STOP <small>TYLKO KOMENDA PROGRAMOWA</small></button>
-          <button data-cmd="power_on" disabled>Zasilanie ON</button>
-          <button data-cmd="power_off" disabled>Zasilanie OFF</button>
+          <button class="danger estop" data-cmd="estop" disabled data-en="EMERGENCY STOP ">AWARYJNE STOP <small data-en="SOFTWARE COMMAND ONLY">TYLKO KOMENDA PROGRAMOWA</small></button>
+          <button data-cmd="power_on" disabled data-en="Power on">Zasilanie ON</button>
+          <button data-cmd="power_off" disabled data-en="Power off">Zasilanie OFF</button>
         </div>
         <div class="command-group">
           <span class="group-title">TRYB</span>
           <button data-mode="manual" disabled>MANUAL</button>
           <button data-mode="mdi" disabled>MDI</button>
           <button data-mode="auto" disabled>AUTO</button>
-          <button data-cmd="home" disabled>Bazowanie ALL</button>
+          <button data-cmd="home" disabled data-en="Home all axes">Bazowanie ALL</button>
         </div>
         <div class="command-group">
           <span class="group-title">ZERO DETALU (G10 L20, AKTYWNY UKŁAD)</span>
@@ -152,18 +157,18 @@ Incremental jog: Model-Author: Codex
           </select>
           <label>Droga [mm] <input id="probeDistance" type="number" min="1" max="100" step="1" value="20" disabled></label>
           <label>Styk = [mm] <input id="probeValue" type="number" min="-10000" max="10000" step="0.001" value="0" disabled></label>
-          <button type="button" id="probeRun" disabled>Sonduj</button>
+          <button type="button" id="probeRun" disabled data-en="Probe">Sonduj</button>
         </div>
         <div class="command-group program-open">
           <label for="programSelect" class="group-title">PROGRAM (KATALOG PROGRAM_PREFIX)</label>
           <select id="programSelect" aria-label="Plik programu" disabled><option value="">— brak plików —</option></select>
-          <button type="button" id="programOpen" disabled>Wczytaj</button>
+          <button type="button" id="programOpen" disabled data-en="Load">Wczytaj</button>
         </div>
         <form id="mdiForm" class="mdi-form">
-          <label for="mdiText">POLECENIE MDI (MAKS. 200 ZNAKÓW)</label>
+          <label for="mdiText" data-en="MDI COMMAND (MAX. 200 CHARACTERS)">POLECENIE MDI (MAKS. 200 ZNAKÓW)</label>
           <div class="mdi-entry">
             <input id="mdiText" maxlength="200" autocomplete="off" spellcheck="false" placeholder="np. G0 X10" disabled>
-            <button type="submit" id="mdiSend" class="primary" disabled>Wyślij MDI</button>
+            <button type="submit" id="mdiSend" class="primary" disabled data-en="Send MDI">Wyślij MDI</button>
           </div>
         </form>
         <div class="command-group program-controls">
@@ -176,7 +181,7 @@ Incremental jog: Model-Author: Codex
 
       <section class="panel job-panel" id="jobPanel" aria-labelledby="jobTitle">
         <div class="panel-heading">
-          <div><div class="eyebrow">06 / ZADANIE CAM</div><h2 id="jobTitle">Przygotowanie zadania</h2></div>
+          <div><div class="eyebrow" data-en="06 / CAM JOB">06 / ZADANIE CAM</div><h2 id="jobTitle" data-en="Job preparation">Przygotowanie zadania</h2></div>
           <span class="small-tag" id="jobPanelScope">PRZYGOTOWANIE / WERYFIKACJA OFFLINE</span>
         </div>
         <div class="job-result" id="jobInstance" hidden>
@@ -274,7 +279,7 @@ Incremental jog: Model-Author: Codex
 
       <section class="panel alarms" aria-labelledby="errorsTitle">
         <div class="panel-heading">
-          <div><div class="eyebrow">05 / DIAGNOSTYKA</div><h2 id="errorsTitle">Komunikaty i błędy</h2></div>
+          <div><div class="eyebrow" data-en="05 / DIAGNOSTICS">05 / DIAGNOSTYKA</div><h2 id="errorsTitle" data-en="Messages and errors">Komunikaty i błędy</h2></div>
         </div>
         <div id="commandResult" class="command-result" role="status" aria-live="polite">Brak wysłanych poleceń.</div>
         <div class="diagnostic-metrics" aria-label="Metryki komunikacji">
