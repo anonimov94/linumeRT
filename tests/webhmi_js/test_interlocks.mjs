@@ -132,3 +132,18 @@ test("active drive fault blocks AUTO Start and Resume but preserves Stop and Res
     assert.equal(can(cmd, { ...current, drive_fault_axes: [] }), true);
   }
 });
+
+test("the selected language changes reasons and preserves interlock decisions", () => {
+  const english = (_, en) => en;
+  const stale = { connected: true, fresh: false };
+  assert.equal(allowed(state(), stale, english).jog.reason, "Telemetry is stale (> 500 ms)");
+  assert.equal(allowed(state(), stale, english).stop.ok, true);
+  const fault = state({ drive_fault_axes: ["X", "Z"] });
+  const pl = allowed(fault, link);
+  const en = allowed(fault, link, english);
+  assert.deepEqual(Object.values(en).map((rule) => rule.ok), Object.values(pl).map((rule) => rule.ok));
+  assert.equal(en.run.reason, "Active drive fault: X, Z");
+  const raw = "Komunikat z bramy";
+  assert.equal(allowed(state({ execution: { can_start: false, reason: raw } }), link, english)
+    .run.reason, raw);
+});
